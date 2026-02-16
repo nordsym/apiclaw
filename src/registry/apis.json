@@ -1,0 +1,191 @@
+{
+  "apis": [
+    {
+      "id": "46elks",
+      "name": "46elks",
+      "description": "Swedish SMS and voice API. Simple, reliable, great for Nordic markets.",
+      "category": "communication",
+      "capabilities": ["sms.send", "sms.receive", "voice.call", "voice.ivr", "mms.send"],
+      "keywords": ["sms", "text", "message", "sweden", "nordic", "voice", "call", "phone"],
+      "pricing": {
+        "model": "per_unit",
+        "sms_outbound_sek": 0.35,
+        "sms_outbound_usd": 0.033,
+        "voice_per_minute_sek": 0.40,
+        "minimum_purchase": null,
+        "free_tier": false
+      },
+      "auth_type": "basic",
+      "docs_url": "https://46elks.com/docs",
+      "base_url": "https://api.46elks.com/a1",
+      "endpoints": [
+        {
+          "name": "Send SMS",
+          "method": "POST",
+          "path": "/sms",
+          "params": ["from", "to", "message"]
+        },
+        {
+          "name": "Make Call",
+          "method": "POST", 
+          "path": "/calls",
+          "params": ["from", "to", "voice_start"]
+        }
+      ],
+      "features": ["delivery_receipts", "sender_id", "unicode", "flash_sms"],
+      "compliance": ["GDPR"],
+      "regions": ["EU", "SE", "NO", "DK", "FI"],
+      "agent_success_rate": 0.97,
+      "avg_latency_ms": 200
+    },
+    {
+      "id": "resend",
+      "name": "Resend",
+      "description": "Modern email API for developers. Beautiful DX, React Email support.",
+      "category": "communication",
+      "capabilities": ["email.send", "email.batch", "email.templates", "email.tracking"],
+      "keywords": ["email", "mail", "send", "transactional", "newsletter", "react"],
+      "pricing": {
+        "model": "per_unit",
+        "emails_per_month_free": 3000,
+        "price_per_1000_usd": 1.00,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "api_key",
+      "docs_url": "https://resend.com/docs",
+      "base_url": "https://api.resend.com",
+      "endpoints": [
+        {
+          "name": "Send Email",
+          "method": "POST",
+          "path": "/emails",
+          "params": ["from", "to", "subject", "html", "text"]
+        },
+        {
+          "name": "Batch Send",
+          "method": "POST",
+          "path": "/emails/batch",
+          "params": ["emails"]
+        }
+      ],
+      "features": ["attachments", "tracking", "react_email", "webhooks", "templates"],
+      "compliance": ["GDPR", "SOC2"],
+      "regions": ["global"],
+      "agent_success_rate": 0.99,
+      "avg_latency_ms": 150
+    },
+    {
+      "id": "brave_search",
+      "name": "Brave Search API",
+      "description": "Privacy-focused search API. Independent index, no tracking.",
+      "category": "search",
+      "capabilities": ["web.search", "news.search", "image.search", "video.search"],
+      "keywords": ["search", "web", "google alternative", "privacy", "news", "images"],
+      "pricing": {
+        "model": "per_query",
+        "queries_per_month_free": 2000,
+        "price_per_1000_usd": 5.00,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "api_key",
+      "docs_url": "https://api.search.brave.com/app/documentation",
+      "base_url": "https://api.search.brave.com/res/v1",
+      "endpoints": [
+        {
+          "name": "Web Search",
+          "method": "GET",
+          "path": "/web/search",
+          "params": ["q", "count", "country", "lang"]
+        },
+        {
+          "name": "News Search",
+          "method": "GET",
+          "path": "/news/search",
+          "params": ["q", "count", "freshness"]
+        }
+      ],
+      "features": ["instant_answers", "discussions", "videos", "news", "images"],
+      "compliance": ["GDPR", "privacy_focused"],
+      "regions": ["global"],
+      "agent_success_rate": 0.98,
+      "avg_latency_ms": 300
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "description": "Unified API gateway to 100+ LLM models. One API, all models.",
+      "category": "ai",
+      "capabilities": ["llm.chat", "llm.completion", "llm.embedding", "llm.vision"],
+      "keywords": ["ai", "llm", "gpt", "claude", "gemini", "mistral", "chat", "completion", "models"],
+      "pricing": {
+        "model": "per_token",
+        "varies_by_model": true,
+        "claude_sonnet_per_1m_input": 3.00,
+        "gpt4_per_1m_input": 10.00,
+        "free_tier": false,
+        "minimum_purchase": 5.00
+      },
+      "auth_type": "api_key",
+      "docs_url": "https://openrouter.ai/docs",
+      "base_url": "https://openrouter.ai/api/v1",
+      "endpoints": [
+        {
+          "name": "Chat Completion",
+          "method": "POST",
+          "path": "/chat/completions",
+          "params": ["model", "messages", "temperature", "max_tokens"]
+        },
+        {
+          "name": "List Models",
+          "method": "GET",
+          "path": "/models",
+          "params": []
+        }
+      ],
+      "features": ["100+_models", "fallback", "load_balancing", "usage_tracking", "openai_compatible"],
+      "compliance": ["SOC2"],
+      "regions": ["global"],
+      "agent_success_rate": 0.96,
+      "avg_latency_ms": 500
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "description": "AI voice synthesis. Natural-sounding TTS with voice cloning.",
+      "category": "ai",
+      "capabilities": ["tts.generate", "voice.clone", "voice.design", "speech.to_speech"],
+      "keywords": ["voice", "tts", "text to speech", "audio", "synthesis", "clone", "ai voice"],
+      "pricing": {
+        "model": "per_character",
+        "characters_per_month_free": 10000,
+        "price_per_1000_chars_usd": 0.30,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "api_key",
+      "docs_url": "https://elevenlabs.io/docs",
+      "base_url": "https://api.elevenlabs.io/v1",
+      "endpoints": [
+        {
+          "name": "Text to Speech",
+          "method": "POST",
+          "path": "/text-to-speech/{voice_id}",
+          "params": ["text", "model_id", "voice_settings"]
+        },
+        {
+          "name": "List Voices",
+          "method": "GET",
+          "path": "/voices",
+          "params": []
+        }
+      ],
+      "features": ["29_languages", "voice_cloning", "streaming", "ssml", "emotions"],
+      "compliance": ["GDPR"],
+      "regions": ["global"],
+      "agent_success_rate": 0.95,
+      "avg_latency_ms": 400
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "apivault",
+  "version": "0.1.0",
+  "description": "Agent-native API discovery and purchasing via MCP",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && cp -r src/registry dist/",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts"
+  },
+  "keywords": ["mcp", "api", "agent", "discovery", "marketplace"],
+  "author": "NordSym",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
