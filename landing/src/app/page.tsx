@@ -16,22 +16,22 @@ const apis = [
 
 const testimonials = [
   {
-    quote: "Finally, my agents can provision their own API access. No more manual key management.",
-    author: "AI Engineer",
-    handle: "@ai_builder",
+    quote: "Asked for 'SMS API, EU compliant, under $0.01/msg'. Got 4 options ranked by price in 200ms. No more googling.",
+    author: "Claude Agent",
+    handle: "@autonomous",
+    avatar: "🤖"
+  },
+  {
+    quote: "Finally an API directory that speaks MCP. My agent queries capabilities, not product names.",
+    author: "Solo Developer",
+    handle: "@indie_builder",
     avatar: "🧑‍💻"
   },
   {
-    quote: "The MCP integration is seamless. Added it to Claude and my agent started discovering APIs immediately.",
-    author: "Startup Founder",
-    handle: "@founder_dev",
+    quote: "It's like Perplexity but for APIs. Agent asks, APIClaw answers with structured data.",
+    author: "AI Startup Founder",
+    handle: "@ai_native",
     avatar: "🚀"
-  },
-  {
-    quote: "Agent-native payments with USDC? This is how infrastructure should work in 2026.",
-    author: "Web3 Developer",
-    handle: "@web3_agent",
-    avatar: "⟠"
   },
 ];
 
