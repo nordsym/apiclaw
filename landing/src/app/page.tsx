@@ -169,9 +169,25 @@ export default function Home() {
             </button>
           </div>
 
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-text-muted mb-8">
             Apps are dead. API-first. Agent-native.
           </p>
+
+          {/* Stats */}
+          <div className="flex items-center justify-center gap-8 text-sm">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">1,400+</div>
+              <div className="text-text-muted">APIs</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">52</div>
+              <div className="text-text-muted">Categories</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">Live</div>
+              <div className="text-text-muted">Registry</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -331,7 +347,7 @@ export default function Home() {
           <div className="text-center mb-16">
             <span className="section-label">API CATALOG</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight">Supported APIs</h2>
-            <p className="text-text-secondary text-lg mt-4">10 APIs across 6 categories. Growing weekly.</p>
+            <p className="text-text-secondary text-lg mt-4">1,400+ APIs across 52 categories. Live registry.</p>
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -354,7 +370,7 @@ export default function Home() {
           </div>
 
           <p className="text-center text-text-muted mt-8">
-            + Adding more weekly. Request an API on GitHub.
+            + 1,400 more in the registry. Sourced from public-apis and curated providers.
           </p>
         </div>
       </section>
