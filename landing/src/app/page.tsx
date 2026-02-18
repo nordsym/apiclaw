@@ -1,9 +1,9 @@
 "use client";
 
 import { 
-  MessageSquare, Mail, Search, Cpu, Volume2, 
+  MessageSquare, Mail, Search, Cpu, Volume2, TrendingUp, Coins, DollarSign,
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
-  Github, Check, Twitter, Quote, Sparkles, Code2, Wallet
+  Github, Check, Twitter, Quote, Sparkles, Code2, Wallet, Link
 } from "lucide-react";
 
 const apis = [
@@ -12,6 +12,10 @@ const apis = [
   { name: "Brave Search", category: "Search", icon: Search, color: "text-orange-400" },
   { name: "OpenRouter", category: "LLM", icon: Cpu, color: "text-cyan-400" },
   { name: "ElevenLabs", category: "TTS", icon: Volume2, color: "text-pink-400" },
+  { name: "Binance", category: "Crypto", icon: Coins, color: "text-yellow-400" },
+  { name: "CoinGecko", category: "Market Data", icon: TrendingUp, color: "text-green-400" },
+  { name: "TradingView", category: "Screener", icon: TrendingUp, color: "text-blue-300" },
+  { name: "ExchangeRate", category: "Forex", icon: DollarSign, color: "text-emerald-400" },
 ];
 
 const testimonials = [
@@ -47,9 +51,9 @@ const features = [
     description: "Pricing, rate limits, regions, compliance—all in structured, agent-readable format."
   },
   {
-    icon: Wallet,
-    title: "Purchase",
-    description: "Instant credential provisioning via USDC on Base. No signups. No dashboards."
+    icon: Link,
+    title: "Connection",
+    description: "Direct links to signup. Streamlined provisioning for select partners coming soon."
   },
   {
     icon: Zap,
@@ -81,22 +85,21 @@ const steps = [
   },
   {
     step: "3",
-    title: "Agent purchases",
-    description: "Instant credentials via USDC",
-    code: `agent.purchase({
-  api: "46elks",
-  payment: "usdc-base",
-  amount: 100
+    title: "Agent picks",
+    description: "Best match for the task",
+    code: `agent.call("apiclaw", {
+  action: "get_details",
+  api: "46elks"
 })`,
   },
   {
     step: "4",
-    title: "Done",
-    description: "API ready to use",
+    title: "Full specs returned",
+    description: "Endpoints, auth, everything",
     code: `{
-  "status": "active",
-  "credentials": { ... },
-  "ready": true
+  "docs": "https://46elks.com/docs",
+  "auth": "basic",
+  "endpoints": [...]
 }`,
   },
 ];
@@ -144,10 +147,10 @@ export default function Home() {
           </h1>
           
           <p className="text-xl md:text-2xl text-text-secondary mb-4 max-w-2xl mx-auto leading-relaxed">
-            Agents discover, evaluate, and purchase API access directly.
+            Agents discover and evaluate APIs via MCP.
           </p>
           <p className="text-lg text-text-muted mb-12">
-            No dashboards. No signups. Just APIs.
+            Structured data. Ranked results. No more googling.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -176,8 +179,8 @@ export default function Home() {
       <section className="pb-20 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <span className="text-text-muted text-sm">Integrates with:</span>
-            {['46elks', 'Resend', 'Brave', 'OpenRouter', 'ElevenLabs'].map((name, i) => (
+            <span className="text-text-muted text-sm">Includes:</span>
+            {['46elks', 'Resend', 'Brave', 'OpenRouter', 'Binance', 'CoinGecko', 'TradingView'].map((name, i) => (
               <span key={i} className="integration-badge">{name}</span>
             ))}
             <span className="integration-badge">+ more</span>
@@ -328,10 +331,10 @@ export default function Home() {
           <div className="text-center mb-16">
             <span className="section-label">API CATALOG</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight">Supported APIs</h2>
-            <p className="text-text-secondary text-lg mt-4">First five. Many more coming.</p>
+            <p className="text-text-secondary text-lg mt-4">10 APIs across 6 categories. Growing weekly.</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {apis.map((api, i) => (
               <div
                 key={i}
@@ -351,7 +354,7 @@ export default function Home() {
           </div>
 
           <p className="text-center text-text-muted mt-8">
-            + Stripe, Twilio, SendGrid, Anthropic, OpenAI, and more...
+            + Adding more weekly. Request an API on GitHub.
           </p>
         </div>
       </section>
@@ -367,73 +370,80 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Free tier */}
-            <div className="rounded-2xl bg-surface-elevated border border-border p-8">
-              <h3 className="text-xl font-semibold mb-2">Free</h3>
-              <p className="text-text-secondary mb-6">For exploration and testing</p>
-              <div className="text-4xl font-bold mb-6">
-                $0<span className="text-lg text-text-muted font-normal">/mo</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  API discovery
-                </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  5% transaction fee
-                </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Community support
-                </li>
-              </ul>
-              <button className="btn-secondary w-full justify-center">
-                Get started
-              </button>
-            </div>
-
-            {/* Pro tier */}
             <div className="rounded-2xl bg-surface-elevated border border-accent/50 p-8 relative glow">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-background text-xs font-bold tracking-wide rounded-full uppercase">
-                Popular
+                Now
               </div>
-              <h3 className="text-xl font-semibold mb-2">Pro</h3>
-              <p className="text-text-secondary mb-6">For production agents</p>
+              <h3 className="text-xl font-semibold mb-2">Discovery</h3>
+              <p className="text-text-secondary mb-6">API discovery and evaluation</p>
               <div className="text-4xl font-bold mb-6">
-                $99<span className="text-lg text-text-muted font-normal">/mo</span>
+                Free<span className="text-lg text-text-muted font-normal"> forever</span>
               </div>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Everything in Free
+                  Search by capability
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Only 2% transaction fee
+                  Compare pricing & features
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Priority support
+                  Structured JSON responses
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Custom API integrations
+                  MCP integration
                 </li>
               </ul>
-              <button className="btn-primary w-full justify-center">
+              <a href="https://github.com/nordsym/apiclaw" className="btn-primary w-full justify-center">
+                Get started
+              </a>
+            </div>
+
+            {/* Coming soon tier */}
+            <div className="rounded-2xl bg-surface-elevated border border-border p-8 relative opacity-80">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-surface border border-border text-text-muted text-xs font-bold tracking-wide rounded-full uppercase">
+                Coming Soon
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Provisioning</h3>
+              <p className="text-text-secondary mb-6">Seamless credential access</p>
+              <div className="text-4xl font-bold mb-6">
+                TBD
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3 text-text-muted">
+                  <Check className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  OAuth broker for major APIs
+                </li>
+                <li className="flex items-center gap-3 text-text-muted">
+                  <Check className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  Instant credentials (select partners)
+                </li>
+                <li className="flex items-center gap-3 text-text-muted">
+                  <Check className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  Usage tracking
+                </li>
+                <li className="flex items-center gap-3 text-text-muted">
+                  <Check className="w-5 h-5 text-text-muted flex-shrink-0" />
+                  Agent-native payments
+                </li>
+              </ul>
+              <button className="btn-secondary w-full justify-center" disabled>
                 Join waitlist
               </button>
             </div>
           </div>
 
-          {/* USDC Badge */}
+          {/* Roadmap note */}
           <div className="flex items-center justify-center gap-4 mt-12 px-6 py-4 rounded-xl bg-surface-elevated border border-border max-w-md mx-auto">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-xl">⟠</span>
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">🗺️</span>
             </div>
             <div>
-              <p className="font-medium">Agents pay with USDC on Base</p>
-              <p className="text-sm text-text-muted">Coinbase Agent Wallet compatible</p>
+              <p className="font-medium">Building in public</p>
+              <p className="text-sm text-text-muted">Follow progress on GitHub and X</p>
             </div>
           </div>
         </div>

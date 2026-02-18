@@ -186,6 +186,176 @@
       "regions": ["global"],
       "agent_success_rate": 0.95,
       "avg_latency_ms": 400
+    },
+    {
+      "id": "binance_public",
+      "name": "Binance Public API",
+      "description": "Free cryptocurrency market data. OHLC, orderbook, trades, ticker. No auth required.",
+      "category": "market_data",
+      "capabilities": ["market.ticker", "market.ohlc", "market.orderbook", "market.trades", "market.symbols"],
+      "keywords": ["crypto", "bitcoin", "trading", "market", "price", "btc", "eth", "ohlc", "candlestick", "orderbook"],
+      "pricing": {
+        "model": "free",
+        "rate_limit_per_minute": 1200,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "none",
+      "docs_url": "https://binance-docs.github.io/apidocs/spot/en/",
+      "base_url": "https://api.binance.com/api/v3",
+      "endpoints": [
+        {
+          "name": "Klines (OHLC)",
+          "method": "GET",
+          "path": "/klines",
+          "params": ["symbol", "interval", "limit"]
+        },
+        {
+          "name": "Ticker Price",
+          "method": "GET",
+          "path": "/ticker/price",
+          "params": ["symbol"]
+        },
+        {
+          "name": "Order Book",
+          "method": "GET",
+          "path": "/depth",
+          "params": ["symbol", "limit"]
+        },
+        {
+          "name": "24h Ticker",
+          "method": "GET",
+          "path": "/ticker/24hr",
+          "params": ["symbol"]
+        }
+      ],
+      "features": ["realtime", "historical", "websocket", "all_pairs", "no_auth"],
+      "compliance": [],
+      "regions": ["global"],
+      "agent_success_rate": 0.99,
+      "avg_latency_ms": 50
+    },
+    {
+      "id": "coingecko",
+      "name": "CoinGecko API",
+      "description": "Comprehensive crypto data. Prices, market cap, volume, historical data for 10,000+ coins.",
+      "category": "market_data",
+      "capabilities": ["market.price", "market.history", "market.trending", "market.exchanges", "market.nft"],
+      "keywords": ["crypto", "price", "market cap", "volume", "coins", "defi", "nft", "trending"],
+      "pricing": {
+        "model": "freemium",
+        "calls_per_minute_free": 30,
+        "price_per_month_pro": 129,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "api_key_optional",
+      "docs_url": "https://docs.coingecko.com/",
+      "base_url": "https://api.coingecko.com/api/v3",
+      "endpoints": [
+        {
+          "name": "Simple Price",
+          "method": "GET",
+          "path": "/simple/price",
+          "params": ["ids", "vs_currencies"]
+        },
+        {
+          "name": "Coin Markets",
+          "method": "GET",
+          "path": "/coins/markets",
+          "params": ["vs_currency", "order", "per_page"]
+        },
+        {
+          "name": "Trending",
+          "method": "GET",
+          "path": "/search/trending",
+          "params": []
+        }
+      ],
+      "features": ["10000+_coins", "historical", "trending", "exchanges", "nft_data"],
+      "compliance": [],
+      "regions": ["global"],
+      "agent_success_rate": 0.97,
+      "avg_latency_ms": 200
+    },
+    {
+      "id": "tradingview_screener",
+      "name": "TradingView Screener",
+      "description": "Market scanner for crypto, stocks, forex. RSI, MACD, volume, technical ratings. No API key needed.",
+      "category": "market_data",
+      "capabilities": ["screener.crypto", "screener.stocks", "screener.forex", "indicators.rsi", "indicators.macd"],
+      "keywords": ["trading", "screener", "scanner", "stocks", "crypto", "forex", "rsi", "macd", "technical analysis"],
+      "pricing": {
+        "model": "free",
+        "rate_limit": "reasonable",
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "none",
+      "docs_url": "https://pypi.org/project/tvscreener/",
+      "base_url": "python:tvscreener",
+      "endpoints": [
+        {
+          "name": "Crypto Screener",
+          "method": "PYTHON",
+          "path": "tvscreener.crypto()",
+          "params": ["limit", "filters"]
+        },
+        {
+          "name": "Stock Screener",
+          "method": "PYTHON",
+          "path": "tvscreener.stock()",
+          "params": ["limit", "filters"]
+        },
+        {
+          "name": "Forex Screener",
+          "method": "PYTHON",
+          "path": "tvscreener.forex()",
+          "params": ["limit", "filters"]
+        }
+      ],
+      "features": ["50+_indicators", "custom_filters", "realtime", "all_markets", "no_auth"],
+      "compliance": [],
+      "regions": ["global"],
+      "agent_success_rate": 0.95,
+      "avg_latency_ms": 500
+    },
+    {
+      "id": "exchangerate_api",
+      "name": "ExchangeRate API",
+      "description": "Currency exchange rates. 161 currencies, daily updates, historical data.",
+      "category": "market_data",
+      "capabilities": ["forex.rates", "forex.convert", "forex.history"],
+      "keywords": ["currency", "forex", "exchange rate", "usd", "eur", "sek", "convert"],
+      "pricing": {
+        "model": "freemium",
+        "requests_per_month_free": 1500,
+        "price_per_month_pro": 9.99,
+        "minimum_purchase": null,
+        "free_tier": true
+      },
+      "auth_type": "api_key",
+      "docs_url": "https://www.exchangerate-api.com/docs",
+      "base_url": "https://v6.exchangerate-api.com/v6",
+      "endpoints": [
+        {
+          "name": "Latest Rates",
+          "method": "GET",
+          "path": "/{api_key}/latest/{base}",
+          "params": ["base"]
+        },
+        {
+          "name": "Pair Conversion",
+          "method": "GET",
+          "path": "/{api_key}/pair/{from}/{to}/{amount}",
+          "params": ["from", "to", "amount"]
+        }
+      ],
+      "features": ["161_currencies", "daily_updates", "historical", "no_tracking"],
+      "compliance": ["GDPR"],
+      "regions": ["global"],
+      "agent_success_rate": 0.99,
+      "avg_latency_ms": 100
     }
   ]
 }
