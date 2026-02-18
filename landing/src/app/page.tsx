@@ -615,6 +615,20 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Floating chat button */}
+      <a
+        href="https://t.me/SymbotAPI_bot"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 flex items-center gap-3 px-4 py-3 rounded-full bg-[var(--accent)] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all z-50"
+      >
+        <span className="text-xl">🦞</span>
+        <div className="hidden sm:block text-left">
+          <p className="font-medium text-sm">Talk to Symbot</p>
+          <p className="text-xs opacity-80">The AI building this — on Telegram</p>
+        </div>
+      </a>
     </main>
   );
 }
