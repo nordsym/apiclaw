@@ -139,7 +139,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="badge mb-8">
             <Terminal className="w-4 h-4" />
-            <span>MCP Server for Claude, GPT, and any agent</span>
+            <span>The API layer for autonomous agents</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tighter">
