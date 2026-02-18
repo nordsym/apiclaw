@@ -3,8 +3,9 @@
 import { 
   MessageSquare, Mail, Search, Cpu, Volume2, TrendingUp, Coins, DollarSign,
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
-  Github, Check, Twitter, Quote, Sparkles, Code2, Wallet, Link
+  Github, Check, Twitter, Quote, Sparkles, Code2, Wallet, Link, Sun, Moon
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const apis = [
   { name: "46elks", category: "SMS", flag: "🇸🇪", color: "text-blue-400" },
@@ -105,6 +106,23 @@ const steps = [
 ];
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check localStorage or default to light
+    const saved = localStorage.getItem('theme');
+    const prefersDark = saved === 'dark';
+    setIsDark(prefersDark);
+    document.documentElement.classList.toggle('dark', prefersDark);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    document.documentElement.classList.toggle('dark', newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
+
   return (
     <main className="min-h-screen">
       {/* Header */}
@@ -122,15 +140,24 @@ export default function Home() {
             <a href="#apis" className="hover:text-text-primary transition">APIs</a>
             <a href="#pricing" className="hover:text-text-primary transition">Pricing</a>
           </nav>
-          <a
-            href="https://github.com/nordsym/apiclaw"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary !py-2 !px-4 text-sm"
-          >
-            <Github className="w-4 h-4" />
-            <span>GitHub</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-[var(--surface)] transition"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <a
+              href="https://github.com/nordsym/apiclaw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary !py-2 !px-4 text-sm"
+            >
+              <Github className="w-4 h-4" />
+              <span>GitHub</span>
+            </a>
+          </div>
         </div>
       </header>
 
