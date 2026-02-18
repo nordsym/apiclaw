@@ -626,7 +626,7 @@ export default function Home() {
         <span className="text-xl">🦞</span>
         <div className="hidden sm:block text-left">
           <p className="font-medium text-sm">Talk to Symbot</p>
-          <p className="text-xs opacity-80">The AI building this — on Telegram</p>
+          <p className="text-xs opacity-80">The architect building this — on Telegram</p>
         </div>
       </a>
     </main>
