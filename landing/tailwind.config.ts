@@ -4,20 +4,21 @@ const config: Config = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        background: "#0d0d0d",
-        surface: "#141414",
-        "surface-elevated": "#1a1a1a",
-        border: "#2a2a2a",
-        "border-subtle": "#222222",
-        "text-primary": "#ffffff",
-        "text-secondary": "#a3a3a3",
-        "text-muted": "#737373",
-        accent: "#22c55e",
-        "accent-hover": "#16a34a",
-        "accent-dim": "rgba(34, 197, 94, 0.15)",
+        background: "var(--background)",
+        surface: "var(--surface)",
+        "surface-elevated": "var(--surface-elevated)",
+        border: "var(--border)",
+        "border-subtle": "var(--border)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted": "var(--text-muted)",
+        accent: "var(--accent)",
+        "accent-hover": "#dc2626",
+        "accent-dim": "rgba(239, 68, 68, 0.15)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
