@@ -111,8 +111,8 @@ export default function Home() {
       <header className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-xl border-b border-border-subtle">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-accent" />
+            <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center text-xl">
+              🦞
             </div>
             <span className="font-bold text-lg tracking-tight">APIClaw</span>
           </div>
@@ -510,13 +510,13 @@ export default function Home() {
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-accent" />
+                <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center text-xl">
+                  🦞
                 </div>
                 <span className="font-bold text-lg tracking-tight">APIClaw</span>
               </div>
               <p className="text-text-muted mb-6 max-w-sm">
-                The API marketplace built for autonomous agents. Discover, evaluate, and purchase—all without human intervention.
+                The API discovery layer for autonomous agents. Find the right API in milliseconds.
               </p>
               <div className="flex items-center gap-4">
                 <a
