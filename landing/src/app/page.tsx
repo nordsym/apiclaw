@@ -202,10 +202,8 @@ export default function Home() {
               <span>GitHub</span>
             </a>
             <a
-              href="https://github.com/nordsym/apiclaw#installation"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary !py-2.5 !px-5 text-sm"
+              href="#how-it-works"
+              className="btn-primary !py-2 !px-4 text-sm hidden sm:flex"
             >
               Get Started
             </a>
@@ -242,16 +240,17 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
-                <a
-                  href="https://github.com/nordsym/apiclaw"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText('npx @nordsym/apiclaw');
+                    alert('Copied: npx @nordsym/apiclaw');
+                  }}
                   className="btn-primary glow-pulse"
                 >
                   <Terminal className="w-5 h-5" />
-                  Quick Start
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+                  <code className="font-mono">npx @nordsym/apiclaw</code>
+                  <span className="text-xs opacity-70">copy</span>
+                </button>
                 <a
                   href="https://github.com/nordsym/apiclaw"
                   target="_blank"
@@ -500,9 +499,14 @@ const spec = await mcp.call("apiclaw", {
                     <p className="font-semibold">Free Listing</p>
                     <p className="text-text-muted text-sm">For all API providers</p>
                   </div>
-                  <a href="#contact" className="btn-primary !py-2.5 !px-5 text-sm">
-                    List Your API
-                  </a>
+                  <div className="flex gap-2">
+                    <a href="/providers/dashboard" className="btn-ghost !py-2.5 !px-4 text-sm">
+                      Dashboard
+                    </a>
+                    <a href="/providers" className="btn-primary !py-2.5 !px-5 text-sm">
+                      List Your API
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -714,6 +718,7 @@ const spec = await mcp.call("apiclaw", {
                 <li><a href="#how-it-works" className="hover:text-text-primary transition">How It Works</a></li>
                 <li><a href="#for-agents" className="hover:text-text-primary transition">For Agents</a></li>
                 <li><a href="#for-providers" className="hover:text-text-primary transition">For Providers</a></li>
+                <li><a href="/providers/dashboard" className="hover:text-text-primary transition">Provider Dashboard</a></li>
                 <li><a href="#pricing" className="hover:text-text-primary transition">Pricing</a></li>
                 <li><a href="https://github.com/nordsym/apiclaw#installation" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Documentation</a></li>
               </ul>
