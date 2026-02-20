@@ -9,8 +9,8 @@ import {
 import { useState, useEffect, useRef } from "react";
 
 const stats = [
-  { number: "5,000+", label: "APIs Indexed" },
-  { number: "52", label: "Categories" },
+  { number: "4,500+", label: "APIs Indexed" },
+  { number: "90+", label: "Categories" },
   { number: "<200ms", label: "Response Time" },
   { number: "24/7", label: "Live Registry" },
 ];
@@ -40,7 +40,7 @@ mcp.call("apiclaw", {
   {
     step: "2",
     title: "APIClaw Matches",
-    description: "We search 5,000+ APIs and return ranked options with full metadata.",
+    description: "We search 4,500+ APIs and return ranked options with full metadata.",
     icon: Database,
     code: `// Structured response
 {
@@ -117,7 +117,7 @@ const terminalLines = [
   { type: "output", text: "🦞 APIClaw v1.0.0", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
-  { type: "success", text: "✓ 5,247 APIs loaded", delay: 200 },
+  { type: "success", text: "✓ 4,518 APIs loaded", delay: 200 },
   { type: "success", text: "✓ MCP server ready", delay: 200 },
   { type: "output", text: "", delay: 100 },
   { type: "accent", text: "→ Listening on stdio for agent requests", delay: 300 },
@@ -203,9 +203,9 @@ export default function Home() {
             </a>
             <a
               href="#how-it-works"
-              className="btn-primary !py-2 !px-4 text-sm hidden sm:flex"
+              className="btn-primary !py-2 !px-3 text-xs hidden md:flex"
             >
-              Get Started
+              Start
             </a>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function Home() {
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
               <div className="badge badge-live mb-6 inline-flex">
-                <span>Live • 5,000+ APIs</span>
+                <span>Live • 4,500+ APIs</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
@@ -478,7 +478,7 @@ const spec = await mcp.call("apiclaw", {
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-text-secondary">
                     <Check className="w-5 h-5 text-accent" />
-                    <span>Discovered by 5,000+ autonomous agents</span>
+                    <span>Discovered by 4,500+ autonomous agents</span>
                   </div>
                   <div className="flex items-center gap-3 text-text-secondary">
                     <Check className="w-5 h-5 text-accent" />
@@ -573,7 +573,7 @@ const spec = await mcp.call("apiclaw", {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Search 5,000+ APIs by capability
+                  Search 4,500+ APIs by capability
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
