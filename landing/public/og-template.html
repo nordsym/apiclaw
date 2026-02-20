@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      width: 1200px;
+      height: 630px;
+      background: linear-gradient(135deg, #0a0a0a 0%, #171717 100%);
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Background pattern */
+    .pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.1) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    
+    /* Grid lines */
+    .grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    
+    .brand {
+      font-size: 48px;
+      font-weight: 800;
+      color: #fafafa;
+      letter-spacing: -0.02em;
+    }
+    
+    .tagline {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      margin-bottom: 32px;
+    }
+    
+    .tagline .gradient {
+      background: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #fca5a5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .tagline .white {
+      color: #fafafa;
+    }
+    
+    .subtitle {
+      font-size: 24px;
+      color: #a3a3a3;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+    
+    .footer {
+      position: absolute;
+      bottom: 60px;
+      left: 80px;
+      right: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 48px;
+    }
+    
+    .stat {
+      text-align: left;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ef4444;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #737373;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .url {
+      font-size: 20px;
+      color: #525252;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="pattern"></div>
+  <div class="grid"></div>
+  
+  <div class="content">
+    <div class="logo-row">
+      <div class="logo">🦞</div>
+      <div class="brand">APIClaw</div>
+    </div>
+    
+    <h1 class="tagline">
+      <span class="gradient">The API layer</span><br>
+      <span class="white">for AI agents</span>
+    </h1>
+    
+    <p class="subtitle">
+      Agents discover and evaluate APIs via MCP. Structured data. Ranked results. No more googling.
+    </p>
+  </div>
+  
+  <div class="footer">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">1,400+</div>
+        <div class="stat-label">APIs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">52</div>
+        <div class="stat-label">Categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">MCP</div>
+        <div class="stat-label">Native</div>
+      </div>
+    </div>
+    <div class="url">apiclaw.com</div>
+  </div>
+</body>
+</html>

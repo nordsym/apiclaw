@@ -1,4 +1,4 @@
-# APIvault
+# APIClaw
 
 **Agent-native API discovery and purchasing via MCP.**
 
@@ -6,31 +6,63 @@
 
 ## What is this?
 
-APIvault is an MCP server that lets AI agents:
+APIClaw is an MCP server that lets AI agents:
 1. **Discover** APIs based on capabilities ("I need to send SMS")
 2. **Evaluate** pricing, features, and success rates
-3. **Purchase** access and receive credentials instantly
+3. **Purchase** access and receive **real credentials** instantly
 4. **Track** usage and balance
+
+## 🚀 Connected Tier (v0.2.0)
+
+The Connected tier provides **production-ready** infrastructure:
+
+### ✅ Real Credentials
+- **46elks** — Swedish SMS/Voice provider (real API keys)
+- **Twilio** — Global SMS/Voice (real Account SID + Auth Token)
+
+### ✅ Persistent Credits (Convex)
+- Credits stored in Convex database
+- Survives restarts
+- Multi-agent support
+
+### ✅ Stripe Integration
+- Three credit packages:
+  - **Starter:** $10 → 100 credits
+  - **Growth:** $50 → 550 credits (10% bonus)
+  - **Scale:** $100 → 1,200 credits (20% bonus)
+- Webhook endpoint for automatic credit grants
 
 ## Quick Start
 
 ### 1. Install dependencies
 
 ```bash
-cd ~/clawd/products/api-discovery
-pnpm install
+cd ~/Projects/apiclaw
+npm install
 ```
 
-### 2. Build
+### 2. Configure credentials
+
+Copy your API credentials:
 
 ```bash
-pnpm build
+# Create .env.local with:
+STRIPE_SECRET_KEY=sk_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+ELKS_API_USER=xxx
+ELKS_API_PASSWORD=xxx
+TWILIO_ACCOUNT_SID=ACxxx
+TWILIO_AUTH_TOKEN=xxx
 ```
+
+Or use credentials from `~/.secrets/`:
+- `~/.secrets/46elks.env`
+- `~/.secrets/twilio.env`
 
 ### 3. Run tests
 
 ```bash
-pnpm test
+npm test
 ```
 
 ### 4. Add to Claude Desktop
@@ -40,18 +72,18 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "apivault": {
+    "apiclaw": {
       "command": "node",
-      "args": ["/Users/gustavhemmingsson/clawd/products/api-discovery/dist/index.js"]
+      "args": ["/Users/gustavhemmingsson/Projects/apiclaw/dist/index.js"]
     }
   }
 }
 ```
 
-### 5. Run manually (stdio)
+### 5. Start webhook server (for Stripe)
 
 ```bash
-node dist/index.js
+npm run webhook
 ```
 
 ## MCP Tools
@@ -60,90 +92,79 @@ node dist/index.js
 
 Search for APIs by describing what you need.
 
-```
-Input:
-  query: "send SMS to Swedish numbers"
-  category?: "communication" | "search" | "ai"
-  max_results?: 5
-  region?: "SE" | "EU" | "global"
-
-Output:
-  - Ranked list of matching APIs
-  - Relevance scores
-  - Pricing info
-  - Success rates
-```
-
-### `get_api_details`
-
-Get full information about a specific API.
-
-```
-Input:
-  api_id: "46elks"
-
-Output:
-  - Full API specification
-  - All endpoints
-  - Pricing details
-  - Features and compliance
+```json
+{
+  "query": "send SMS to Swedish numbers",
+  "category": "communication",
+  "max_results": 5,
+  "region": "SE"
+}
 ```
 
 ### `purchase_access`
 
-Purchase API access using credits.
+Purchase API access using credits. **Returns real credentials for 46elks and Twilio!**
 
+```json
+{
+  "api_id": "46elks",
+  "amount_usd": 10
+}
 ```
-Input:
-  api_id: "46elks"
-  amount_usd: 10
 
-Output:
-  - Purchase confirmation
-  - API credentials (key, username/password)
-  - Credits received
-  - Access URLs
-```
+Response includes:
+- `credentials.username` — Real 46elks API user
+- `credentials.password` — Real 46elks API password
+- `real_credentials: true` — Confirms these are production credentials
 
 ### `check_balance`
 
-Check your credit balance and active purchases.
+Check your credit balance and see which providers have real credentials.
 
+```json
+{
+  "agent_id": "my_agent"
+}
 ```
-Input:
-  agent_id?: "your_agent_id"
 
-Output:
-  - Current balance in USD
-  - List of active purchases
-  - Total spent
-```
+Response includes:
+- `real_credential_providers: ["46elks", "twilio"]`
+- `active_purchases` with `real_credentials` flag per purchase
 
 ### `add_credits`
 
-Add credits to your account (for testing).
+Add credits (for testing/development).
 
-```
-Input:
-  amount_usd: 50
-
-Output:
-  - New balance
+```json
+{
+  "amount_usd": 50
+}
 ```
 
 ### `list_categories`
 
-List all available API categories.
+List available API categories.
 
-## Available APIs (MVP)
+## Credit Packages
 
-| Provider | Category | Capabilities |
-|----------|----------|--------------|
-| **46elks** | communication | SMS, Voice, MMS |
-| **Resend** | communication | Email, Templates |
-| **Brave Search** | search | Web, News, Images |
-| **OpenRouter** | ai | LLM Chat, Completions |
-| **ElevenLabs** | ai | TTS, Voice Cloning |
+| Package | Price | Credits | Bonus |
+|---------|-------|---------|-------|
+| Starter | $10 | 100 | — |
+| Growth | $50 | 550 | 10% |
+| Scale | $100 | 1,200 | 20% |
+
+Purchase via Stripe Checkout or Payment Intent.
+
+## API Providers
+
+| Provider | Category | Real Credentials | Credits/$ |
+|----------|----------|-----------------|-----------|
+| **46elks** | SMS/Voice | ✅ Yes | 30 |
+| **Twilio** | SMS/Voice | ✅ Yes | 25 |
+| **Resend** | Email | Mock | 1000 |
+| **Brave Search** | Search | Mock | 200 |
+| **OpenRouter** | AI/LLM | Mock | 100 |
+| **ElevenLabs** | TTS | Mock | 3333 |
 
 ## Architecture
 
@@ -153,73 +174,107 @@ List all available API categories.
 └─────────────────────┬───────────────────────────────┘
                       │ MCP Protocol
 ┌─────────────────────▼───────────────────────────────┐
-│              APIvault MCP Server                     │
+│              APIClaw MCP Server                      │
 ├──────────────┬──────────────┬───────────────────────┤
-│  Discovery   │   Credits    │   Purchase            │
-│  Engine      │   System     │   Handler             │
+│  Discovery   │   Credits    │   Credentials         │
+│  Engine      │   (Convex)   │   (Real + Mock)       │
 └──────────────┴──────────────┴───────────────────────┘
+         │              │               │
+         ▼              ▼               ▼
+┌──────────────┐ ┌────────────┐ ┌─────────────────────┐
+│ API Registry │ │   Convex   │ │ ~/.secrets/         │
+│   (JSON)     │ │  Database  │ │ 46elks.env          │
+│              │ │            │ │ twilio.env          │
+└──────────────┘ └────────────┘ └─────────────────────┘
                       │
-┌─────────────────────▼───────────────────────────────┐
-│              API Registry (JSON)                     │
-│  • 5 APIs with full metadata                        │
-│  • Pricing, endpoints, features                     │
-└─────────────────────────────────────────────────────┘
+                      ▼
+              ┌────────────┐
+              │   Stripe   │
+              │  Payments  │
+              └────────────┘
 ```
-
-## MVP Status
-
-### ✅ Working
-- [x] MCP server with 6 tools
-- [x] API discovery with keyword matching
-- [x] API registry with 5 providers
-- [x] In-memory credit system
-- [x] Mock credential generation
-- [x] Purchase flow
-
-### 🚧 Stub/Mock
-- [ ] Real API key provisioning (mock credentials)
-- [ ] Supabase persistence (in-memory)
-- [ ] Semantic search (keyword matching)
-- [ ] Real-time usage tracking
-- [ ] Webhook notifications
-
-### 🔮 Future
-- [ ] Stripe Agent Toolkit integration
-- [ ] Supabase for persistence
-- [ ] Embeddings for semantic search
-- [ ] More API providers
-- [ ] Usage webhooks
 
 ## File Structure
 
 ```
-api-discovery/
+apiclaw/
 ├── README.md
 ├── package.json
-├── tsconfig.json
-├── CONCEPT.md           # Original research
+├── convex.json
+├── .env.local            # Local credentials
+├── convex/
+│   ├── schema.ts         # Database schema
+│   ├── credits.ts        # Credit mutations/queries
+│   └── purchases.ts      # Purchase mutations/queries
 └── src/
-    ├── index.ts         # MCP server entry
-    ├── types.ts         # TypeScript types
-    ├── discovery.ts     # Search engine
-    ├── credits.ts       # Credit system
-    ├── test.ts          # Test script
+    ├── index.ts          # MCP server
+    ├── types.ts          # TypeScript types
+    ├── discovery.ts      # Search engine
+    ├── credits.ts        # Credit system (in-memory + Convex)
+    ├── credentials.ts    # Real credential providers
+    ├── stripe.ts         # Stripe integration
+    ├── webhook.ts        # Webhook server
+    ├── test.ts           # E2E tests
     └── registry/
-        └── apis.json    # API definitions
+        └── apis.json     # API definitions
 ```
 
 ## Development
 
 ```bash
+# Run tests
+npm test
+
+# Start MCP server (stdio)
+npm start
+
 # Watch mode
-pnpm dev
+npm run dev
 
-# Build
-pnpm build
+# Start webhook server
+npm run webhook
 
-# Test
-pnpm test
+# Deploy Convex
+npm run convex:deploy
 ```
+
+## Convex Deployment
+
+```bash
+# First time setup
+npx convex dev --once --configure=new
+
+# Deploy to production
+npx convex deploy --yes
+```
+
+## Test Results
+
+```
+✅ Real credentials available for: 46elks, twilio
+✅ Agent can add credits
+✅ Agent can purchase API access
+✅ Real 46elks/Twilio credentials returned when available
+✅ Insufficient balance check works
+✅ Stripe integration working
+```
+
+## Status
+
+### ✅ Connected Tier (v0.2.0)
+- [x] Real credentials for 46elks
+- [x] Real credentials for Twilio
+- [x] Convex schema for persistence
+- [x] Stripe credit packages
+- [x] Stripe webhook handler
+- [x] E2E tests passing
+
+### 🚧 TODO
+- [ ] Deploy Convex to production
+- [ ] Convex backend integration (currently in-memory)
+- [ ] More real credential providers
+- [ ] Usage tracking via Convex
+- [ ] Webhook notifications
 
 ## License
 

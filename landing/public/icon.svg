@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- APIClaw App Icon - with background -->
+  <defs>
+    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#171717"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with subtle gradient -->
+  <rect width="512" height="512" rx="96" fill="url(#bg-gradient)"/>
+  
+  <!-- Claw centered and scaled -->
+  <g transform="translate(56, 56) scale(0.78)">
+    <g fill="url(#icon-gradient)">
+      <path d="M144 320 
+               C104 264 104 192 144 136
+               C184 80 256 56 328 80
+               C352 88 376 104 392 128
+               L344 176
+               C332 160 316 148 296 144
+               C248 132 200 152 176 192
+               C152 232 160 280 192 312
+               Z"/>
+      <path d="M192 312
+               C224 344 272 360 320 352
+               C368 344 408 312 424 264
+               L368 240
+               C360 268 336 292 304 300
+               C272 308 240 300 216 280
+               L192 312
+               Z"/>
+      <path d="M392 128
+               L424 184
+               C440 216 440 256 424 264
+               L368 240
+               C376 216 368 192 352 176
+               L344 176
+               Z"/>
+    </g>
+  </g>
+</svg>

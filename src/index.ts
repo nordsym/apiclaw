@@ -24,8 +24,10 @@ import {
   addCredits, 
   purchaseAPIAccess, 
   getBalanceSummary,
-  getAgentPurchases 
+  getAgentPurchases,
+  getProvidersWithRealCredentials 
 } from './credits.js';
+import { hasRealCredentials } from './credentials.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -277,7 +279,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   provider: apiId,
                   amount_paid_usd: amountUsd,
                   credits_received: result.purchase!.credits_purchased,
-                  status: result.purchase!.status
+                  status: result.purchase!.status,
+                  real_credentials: hasRealCredentials(apiId)
                 },
                 credentials: result.purchase!.credentials,
                 access: {
@@ -305,11 +308,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 balance_usd: summary.credits.balance_usd,
                 currency: summary.credits.currency,
                 total_spent_usd: summary.total_spent_usd,
+                real_credential_providers: summary.real_credentials_available,
                 active_purchases: summary.active_purchases.map(p => ({
                   id: p.id,
                   provider: p.provider_id,
-                  credits_remaining: p.credits_purchased, // Would track actual usage in production
-                  status: p.status
+                  credits_remaining: p.credits_purchased,
+                  status: p.status,
+                  real_credentials: hasRealCredentials(p.provider_id)
                 }))
               }, null, 2)
             }

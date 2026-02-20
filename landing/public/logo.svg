@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- APIClaw Lobster Claw Logo - Minimalist -->
+  <!-- Works on both light and dark backgrounds via currentColor -->
+  
+  <defs>
+    <linearGradient id="claw-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    
+    <linearGradient id="claw-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+  </defs>
+  
+  <g id="claw">
+    <!-- Main claw body - curved organic shape -->
+    <path 
+      d="M128 384 
+         C96 352 80 288 96 224 
+         C112 160 160 112 224 96 
+         C256 88 288 96 320 112
+         L280 168
+         C256 156 232 156 208 168
+         C168 188 144 232 152 280
+         C156 312 176 344 200 360
+         Z"
+      fill="url(#claw-gradient)"
+    />
+    
+    <!-- Upper pincer -->
+    <path 
+      d="M320 112
+         C368 136 400 176 416 232
+         C432 288 424 352 392 400
+         L336 360
+         C356 328 364 288 352 248
+         C340 208 312 176 280 168
+         Z"
+      fill="url(#claw-gradient)"
+    />
+    
+    <!-- Lower pincer - pointing down and in -->
+    <path 
+      d="M200 360
+         C232 384 272 392 312 384
+         C352 376 384 352 392 400
+         L384 416
+         C344 440 296 448 248 432
+         C200 416 160 384 128 384
+         Z"
+      fill="url(#claw-gradient)"
+    />
+    
+    <!-- Inner claw detail - the gap between pincers -->
+    <path 
+      d="M280 200
+         C304 216 320 248 316 280
+         C312 312 292 340 264 352
+         L248 320
+         C264 312 276 292 276 272
+         C276 252 264 232 248 224
+         Z"
+      fill="#0a0a0a"
+      fill-opacity="0.3"
+    />
+    
+    <!-- Highlight on upper curve -->
+    <path 
+      d="M160 200
+         C176 152 216 120 264 112
+         C248 128 224 152 208 184
+         C192 216 184 248 176 264
+         C168 240 160 216 160 200
+         Z"
+      fill="white"
+      fill-opacity="0.2"
+    />
+  </g>
+</svg>

@@ -1,22 +1,36 @@
 {
-  "name": "apivault",
-  "version": "0.1.0",
-  "description": "Agent-native API discovery and purchasing via MCP",
+  "name": "apiclaw",
+  "version": "0.2.0",
+  "description": "Agent-native API discovery and purchasing via MCP - Connected tier",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc && cp -r src/registry dist/",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "test": "tsx src/test.ts"
+    "test": "tsx src/test.ts",
+    "test:e2e": "tsx src/test.ts",
+    "webhook": "tsx src/webhook.ts",
+    "convex:dev": "npx convex dev",
+    "convex:deploy": "npx convex deploy --yes"
   },
-  "keywords": ["mcp", "api", "agent", "discovery", "marketplace"],
+  "keywords": [
+    "mcp",
+    "api",
+    "agent",
+    "discovery",
+    "marketplace"
+  ],
   "author": "NordSym",
   "license": "MIT",
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@supabase/supabase-js": "^2.39.0",
-    "hono": "^4.0.0"
+    "convex": "^1.32.0",
+    "dotenv": "^17.3.1",
+    "hono": "^4.0.0",
+    "stripe": "^20.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
