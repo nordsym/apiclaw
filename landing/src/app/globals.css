@@ -592,6 +592,6 @@ input[type="email"]::placeholder {
   }
   
   .stat-number {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 }
