@@ -177,4 +177,29 @@ export default defineSchema({
   })
     .index("by_token", ["token"])
     .index("by_providerId", ["providerId"]),
+
+  // Rate limiting
+  rateLimits: defineTable({
+    key: v.string(),
+    identifier: v.string(),
+    action: v.string(),
+    count: v.number(),
+    hourBucket: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_identifier", ["identifier"]),
+
+  // Usage analytics
+  analytics: defineTable({
+    event: v.string(),  // "discovery", "instant", "search_query"
+    provider: v.optional(v.string()),
+    query: v.optional(v.string()),
+    identifier: v.string(),
+    metadata: v.optional(v.any()),
+    timestamp: v.number(),
+  })
+    .index("by_event", ["event"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_provider", ["provider"]),
 });

@@ -442,7 +442,7 @@ http.route({
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_monolingual_v1",
+          model_id: "eleven_turbo_v2",
         }),
       });
 
@@ -485,6 +485,94 @@ http.route({
 
 http.route({
   path: "/proxy/elevenlabs",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// 46elks SMS proxy
+http.route({
+  path: "/proxy/46elks",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const ELKS_USER = process.env.ELKS_API_USER;
+    const ELKS_PASS = process.env.ELKS_API_PASSWORD;
+    if (!ELKS_USER || !ELKS_PASS) {
+      return jsonResponse({ error: "46elks not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+      const { to, message, from = "APIClaw" } = body;
+
+      const auth = btoa(`${ELKS_USER}:${ELKS_PASS}`);
+
+      const response = await fetch("https://api.46elks.com/a1/sms", {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${auth}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ from, to, message }),
+      });
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+// Twilio SMS proxy
+http.route({
+  path: "/proxy/twilio",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
+    const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+    if (!TWILIO_SID || !TWILIO_TOKEN) {
+      return jsonResponse({ error: "Twilio not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+      const { to, message, from } = body;
+
+      if (!from) {
+        return jsonResponse({ error: "Twilio requires 'from' number" }, 400);
+      }
+
+      const auth = btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`);
+
+      const response = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Basic ${auth}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ To: to, From: from, Body: message }),
+        }
+      );
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+// CORS for new endpoints
+http.route({
+  path: "/proxy/46elks",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/proxy/twilio",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });

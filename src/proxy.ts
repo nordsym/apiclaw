@@ -21,4 +21,4 @@ export async function callProxy(provider: string, params: any): Promise<any> {
   return response.json();
 }
 
-export const PROXY_PROVIDERS = ["openrouter", "brave_search", "resend", "elevenlabs"];
+export const PROXY_PROVIDERS = ["openrouter", "brave_search", "resend", "elevenlabs", "46elks", "twilio"];
