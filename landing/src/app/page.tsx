@@ -4,15 +4,16 @@ import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
-  Play, ChevronRight, Star, Users, Cpu
+  Play, ChevronRight, Star, Users, Cpu, Activity
 } from "lucide-react";
+import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
 
 const stats = [
-  { number: "4,500+", label: "APIs Indexed" },
-  { number: "90+", label: "Categories" },
-  { number: "<200ms", label: "Response Time" },
-  { number: "24/7", label: "Live Registry" },
+  { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
+  { number: statsData.categoryCount.toString(), label: "Categories", live: true },
+  { number: "<200ms", label: "Response Time", live: false },
+  { number: "24/7", label: "Live Registry", live: false },
 ];
 
 const trustedBy = [
@@ -117,7 +118,7 @@ const terminalLines = [
   { type: "output", text: "🦞 APIClaw v1.0.0", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
-  { type: "success", text: "✓ 4,518 APIs loaded", delay: 200 },
+  { type: "success", text: `✓ ${statsData.apiCount.toLocaleString()} APIs loaded`, delay: 200 },
   { type: "success", text: "✓ MCP server ready", delay: 200 },
   { type: "output", text: "", delay: 100 },
   { type: "accent", text: "→ Listening on stdio for agent requests", delay: 300 },
@@ -220,7 +221,7 @@ export default function Home() {
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
               <div className="badge badge-live mb-6 inline-flex">
-                <span>Live • 4,500+ APIs</span>
+                <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
@@ -328,7 +329,13 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
-              <div key={i} className="stat-card">
+              <div key={i} className="stat-card relative">
+                {stat.live && (
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-[10px] text-green-500 font-medium">LIVE</span>
+                  </div>
+                )}
                 <div className="stat-number">{stat.number}</div>
                 <div className="stat-label">{stat.label}</div>
               </div>
