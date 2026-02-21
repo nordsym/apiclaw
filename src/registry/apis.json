@@ -2,7 +2,7 @@
   "version": "3.0.0",
   "source": "APIClaw aggregated registry",
   "lastUpdated": "2026-02-21",
-  "count": 6654,
+  "count": 7504,
   "apis": [
     {
       "id": "ipstack",
@@ -80246,6 +80246,5956 @@
       "description": "DNS service",
       "link": "https://dns.he.net",
       "category": "dns_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cerner FHIR API",
+      "description": "Healthcare data exchange",
+      "link": "https://fhir.cerner.com",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Allscripts API",
+      "description": "EHR integration",
+      "link": "https://developer.allscripts.com",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DrChrono API",
+      "description": "Practice management",
+      "link": "https://www.drchrono.com/api",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Metriport API",
+      "description": "Open-source health data",
+      "link": "https://docs.metriport.com",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Eligible API",
+      "description": "Insurance verification",
+      "link": "https://eligible.com/api-documentation",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PokitDok API",
+      "description": "Healthcare commerce",
+      "link": "https://platform.pokitdok.com",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DrFirst API",
+      "description": "E-prescribing",
+      "link": "https://drfirst.com/developers",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Surescripts API",
+      "description": "Health network",
+      "link": "https://surescripts.com/developers",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Change Healthcare API",
+      "description": "Revenue cycle",
+      "link": "https://developers.changehealthcare.com",
+      "category": "healthcare_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GoodRx API",
+      "description": "Drug pricing",
+      "link": "https://www.goodrx.com/developers",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Walgreens API",
+      "description": "Pharmacy services",
+      "link": "https://developer.walgreens.com",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CVS API",
+      "description": "Pharmacy integration",
+      "link": "https://developer.cvshealth.com",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "RxNav API",
+      "description": "Drug information (NIH)",
+      "link": "https://rxnav.nlm.nih.gov/APIs.html",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenFDA API",
+      "description": "FDA drug data",
+      "link": "https://open.fda.gov/apis",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DailyMed API",
+      "description": "Drug labeling",
+      "link": "https://dailymed.nlm.nih.gov/dailymed/webservices.cfm",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Drugs.com API",
+      "description": "Drug information",
+      "link": "https://www.drugs.com/developers",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MedlinePlus API",
+      "description": "Health information",
+      "link": "https://medlineplus.gov/webservices.html",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PillPack API",
+      "description": "Pharmacy delivery",
+      "link": "https://developer.pillpack.com",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Capsule API",
+      "description": "Digital pharmacy",
+      "link": "https://www.capsule.com/developers",
+      "category": "pharmacy_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Garmin API",
+      "description": "Sports tracking",
+      "link": "https://developer.garmin.com",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Oura API",
+      "description": "Sleep tracking",
+      "link": "https://cloud.ouraring.com/docs",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apple HealthKit API",
+      "description": "Health data",
+      "link": "https://developer.apple.com/healthkit",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Fit API",
+      "description": "Fitness platform",
+      "link": "https://developers.google.com/fit",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Samsung Health API",
+      "description": "Health platform",
+      "link": "https://developer.samsung.com/health",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Withings API",
+      "description": "Connected health",
+      "link": "https://developer.withings.com",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Peloton API",
+      "description": "Connected fitness",
+      "link": "https://api.onepeloton.com",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cronometer API",
+      "description": "Nutrition tracking",
+      "link": "https://cronometer.com/developers",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Nutritionix API",
+      "description": "Food database",
+      "link": "https://developer.nutritionix.com",
+      "category": "fitness_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stats Perform API",
+      "description": "Sports analytics",
+      "link": "https://developer.statsperform.com",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Football-Data API",
+      "description": "Soccer data",
+      "link": "https://www.football-data.org",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TheSportsDB API",
+      "description": "Sports database",
+      "link": "https://www.thesportsdb.com/api.php",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Balldontlie API",
+      "description": "NBA data",
+      "link": "https://www.balldontlie.io",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MySportsFeeds API",
+      "description": "Sports stats",
+      "link": "https://www.mysportsfeeds.com",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SofaScore API",
+      "description": "Live scores",
+      "link": "https://www.sofascore.com/api",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "LiveScore API",
+      "description": "Real-time sports",
+      "link": "https://rapidapi.com/livescore/api/livescore6",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PandaScore API",
+      "description": "Esports data",
+      "link": "https://developers.pandascore.co",
+      "category": "sports_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Xbox Live API",
+      "description": "Xbox services",
+      "link": "https://developer.microsoft.com/xbox",
+      "category": "gaming_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CheapShark API",
+      "description": "Game deals",
+      "link": "https://apidocs.cheapshark.com",
+      "category": "gaming_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IsThereAnyDeal API",
+      "description": "Game pricing",
+      "link": "https://itad.docs.apiary.io",
+      "category": "gaming_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenDota API",
+      "description": "Dota 2 stats",
+      "link": "https://docs.opendota.com",
+      "category": "gaming_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AudioDB API",
+      "description": "Music info",
+      "link": "https://www.theaudiodb.com/api_guide.php",
+      "category": "music_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Songkick API",
+      "description": "Concert listings",
+      "link": "https://www.songkick.com/developer",
+      "category": "music_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dailymotion API",
+      "description": "Video platform",
+      "link": "https://developer.dailymotion.com",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Brightcove API",
+      "description": "Video cloud",
+      "link": "https://apis.support.brightcove.com",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "JW Player API",
+      "description": "Video player",
+      "link": "https://developer.jwplayer.com",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kaltura API",
+      "description": "Video platform",
+      "link": "https://developer.kaltura.com",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bitmovin API",
+      "description": "Video encoding",
+      "link": "https://developer.bitmovin.com",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "api.video API",
+      "description": "Video infrastructure",
+      "link": "https://docs.api.video",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stream.io API",
+      "description": "Activity feeds",
+      "link": "https://getstream.io/docs",
+      "category": "video_streaming",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bing News API",
+      "description": "News search",
+      "link": "https://www.microsoft.com/en-us/bing/apis/bing-news-search-api",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google News API",
+      "description": "News aggregation",
+      "link": "https://developers.google.com/news",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BBC News API",
+      "description": "BBC content",
+      "link": "https://www.bbc.co.uk/developer",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Reuters API",
+      "description": "Reuters content",
+      "link": "https://www.reutersagency.com/en/platforms",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AP News API",
+      "description": "Associated Press",
+      "link": "https://developer.ap.org",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Newscatcher API",
+      "description": "News search",
+      "link": "https://newscatcherapi.com/docs",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Perigon API",
+      "description": "News intelligence",
+      "link": "https://www.goperigon.com/docs",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Event Registry API",
+      "description": "News analytics",
+      "link": "https://eventregistry.org/documentation",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GDELT API",
+      "description": "Global events",
+      "link": "https://blog.gdeltproject.org/gdelt-doc-api",
+      "category": "news_media",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Trulia API",
+      "description": "Real estate search",
+      "link": "https://www.trulia.com/api",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ATTOM Data API",
+      "description": "Property data",
+      "link": "https://api.developer.attomdata.com",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Reonomy API",
+      "description": "Commercial real estate",
+      "link": "https://www.reonomy.com/api",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CoStar API",
+      "description": "Commercial property",
+      "link": "https://www.costar.com/products/api",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rentometer API",
+      "description": "Rent analysis",
+      "link": "https://www.rentometer.com/api",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GreatSchools API",
+      "description": "School ratings",
+      "link": "https://www.greatschools.org/api",
+      "category": "real_estate",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kelley Blue Book API",
+      "description": "Vehicle valuations",
+      "link": "https://www.kbb.com/company/",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VIN Decoder API",
+      "description": "VIN lookup",
+      "link": "https://vpic.nhtsa.dot.gov/api",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Turo API",
+      "description": "Car sharing",
+      "link": "https://turo.com/",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Getaround API",
+      "description": "Car sharing",
+      "link": "https://www.getaround.com/",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Parkopedia API",
+      "description": "Parking data",
+      "link": "https://www.parkopedia.com/api",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SpotHero API",
+      "description": "Parking booking",
+      "link": "https://spothero.com/",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PlugShare API",
+      "description": "EV charging",
+      "link": "https://developer.plugshare.com",
+      "category": "automotive",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CaseFox API",
+      "description": "Legal billing",
+      "link": "https://www.casefox.com/api",
+      "category": "legal_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DocuLaw API",
+      "description": "Legal document automation",
+      "link": "https://www.doculaw.com",
+      "category": "legal_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CourtListener API",
+      "description": "Court opinions",
+      "link": "https://www.courtlistener.com/api",
+      "category": "legal_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PACER API",
+      "description": "Federal court records",
+      "link": "https://pacer.uscourts.gov",
+      "category": "legal_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Root API",
+      "description": "Auto insurance",
+      "link": "https://developer.joinroot.com",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hippo API",
+      "description": "Home insurance",
+      "link": "https://developer.hippo.com",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kin API",
+      "description": "Home insurance",
+      "link": "https://www.kin.com/developers",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CAPE API",
+      "description": "Property analytics",
+      "link": "https://www.capeanalytics.com/api",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Verisk API",
+      "description": "Insurance analytics",
+      "link": "https://developer.verisk.com",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Canopy Connect API",
+      "description": "Insurance verification",
+      "link": "https://www.canopyconnect.com/api",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cloverleaf API",
+      "description": "Insurance data",
+      "link": "https://www.cloverleaf.tech",
+      "category": "insurance_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "JazzHR API",
+      "description": "Recruiting",
+      "link": "https://www.jazzhr.com/api",
+      "category": "hr_recruiting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "iCIMS API",
+      "description": "Talent acquisition",
+      "link": "https://developer.icims.com",
+      "category": "hr_recruiting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SmartRecruiters API",
+      "description": "Recruiting",
+      "link": "https://developers.smartrecruiters.com",
+      "category": "hr_recruiting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "LinkedIn Learning API",
+      "description": "Professional learning",
+      "link": "https://docs.microsoft.com/linkedin/learning",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pluralsight API",
+      "description": "Tech learning",
+      "link": "https://developer.pluralsight.com",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Teachable API",
+      "description": "Course creation",
+      "link": "https://docs.teachable.com",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Thinkific API",
+      "description": "Course platform",
+      "link": "https://developers.thinkific.com",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kajabi API",
+      "description": "Course platform",
+      "link": "https://kajabi.com/partners",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Podia API",
+      "description": "Digital products",
+      "link": "https://www.podia.com/developers",
+      "category": "learning_education",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Salesforce NPSP API",
+      "description": "Nonprofit CRM",
+      "link": "https://developer.salesforce.com/docs/atlas.en-us.nonprofit.meta",
+      "category": "nonprofit_fundraising",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GoFundMe API",
+      "description": "Crowdfunding",
+      "link": "https://www.gofundme.com/c/partners",
+      "category": "nonprofit_fundraising",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Donorbox API",
+      "description": "Donation forms",
+      "link": "https://donorbox.org/api",
+      "category": "nonprofit_fundraising",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GiveLively API",
+      "description": "Fundraising",
+      "link": "https://www.givelively.org/developers",
+      "category": "nonprofit_fundraising",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fundly API",
+      "description": "Crowdfunding",
+      "link": "https://fundly.com/developers",
+      "category": "nonprofit_fundraising",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Climate FieldView API",
+      "description": "Farm data",
+      "link": "https://developer.climate.com",
+      "category": "agriculture_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Conservis API",
+      "description": "Farm management",
+      "link": "https://conservis.com/developers",
+      "category": "agriculture_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Trimble Ag API",
+      "description": "Agriculture tech",
+      "link": "https://agriculture.trimble.com/developers",
+      "category": "agriculture_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "aWhere API",
+      "description": "Agricultural weather",
+      "link": "https://developer.awhere.com",
+      "category": "agriculture_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Autodesk Construction Cloud API",
+      "description": "Construction software",
+      "link": "https://aps.autodesk.com/construction",
+      "category": "construction_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BuilderCloud API",
+      "description": "Construction software",
+      "link": "https://www.buildercloud.io/api",
+      "category": "construction_tech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SAP Manufacturing API",
+      "description": "Manufacturing execution",
+      "link": "https://api.sap.com/package/SAPDigitalManufacturingCloud",
+      "category": "manufacturing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Oracle Manufacturing API",
+      "description": "Manufacturing cloud",
+      "link": "https://docs.oracle.com/en/cloud/saas/manufacturing",
+      "category": "manufacturing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Siemens MindSphere API",
+      "description": "Industrial IoT",
+      "link": "https://documentation.mindsphere.io",
+      "category": "manufacturing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PTC ThingWorx API",
+      "description": "Industrial IoT",
+      "link": "https://developer.ptc.com",
+      "category": "manufacturing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rockwell Automation API",
+      "description": "Industrial automation",
+      "link": "https://www.rockwellautomation.com/developers",
+      "category": "manufacturing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SAP Ariba API",
+      "description": "Procurement",
+      "link": "https://api.sap.com/package/SAPAribaOpenAPIs",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Coupa API",
+      "description": "Spend management",
+      "link": "https://developer.coupa.com",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Jaggaer API",
+      "description": "Procurement",
+      "link": "https://developer.jaggaer.com",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Oracle SCM API",
+      "description": "Supply chain",
+      "link": "https://docs.oracle.com/en/cloud/saas/supply-chain-management",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Blue Yonder API",
+      "description": "Supply chain",
+      "link": "https://developer.blueyonder.com",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kinaxis API",
+      "description": "Supply chain planning",
+      "link": "https://www.kinaxis.com/developers",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FourKites API",
+      "description": "Supply chain visibility",
+      "link": "https://www.fourkites.com/developers",
+      "category": "supply_chain",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tracktor API",
+      "description": "Shipment tracking",
+      "link": "https://www.tracktor.com/api",
+      "category": "logistics_shipping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Convoy API",
+      "description": "Trucking",
+      "link": "https://developer.convoy.com",
+      "category": "logistics_shipping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Uber Freight API",
+      "description": "Freight shipping",
+      "link": "https://developer.uber.com/docs/freight",
+      "category": "logistics_shipping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Loadsmart API",
+      "description": "Freight matching",
+      "link": "https://developer.loadsmart.com",
+      "category": "logistics_shipping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "KeepTruckin API",
+      "description": "Fleet management",
+      "link": "https://developer.keeptruckin.com",
+      "category": "logistics_shipping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "USAspending API",
+      "description": "Federal spending",
+      "link": "https://api.usaspending.gov",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Federal Register API",
+      "description": "Federal documents",
+      "link": "https://www.federalregister.gov/developers",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenSecrets API",
+      "description": "Political donations",
+      "link": "https://www.opensecrets.org/resources/create",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ProPublica Congress API",
+      "description": "Congress data",
+      "link": "https://projects.propublica.org/api-docs/congress-api",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GovTrack API",
+      "description": "Legislation tracking",
+      "link": "https://www.govtrack.us/developers/api",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Statistics Canada API",
+      "description": "Canadian stats",
+      "link": "https://www.statcan.gc.ca/en/developers",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FBI Crime API",
+      "description": "Crime statistics",
+      "link": "https://crime-data-explorer.fr.cloud.gov/pages/docApi",
+      "category": "government_public_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AirNow API",
+      "description": "Air quality",
+      "link": "https://docs.airnowapi.org",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenAQ API",
+      "description": "Air quality data",
+      "link": "https://docs.openaq.org",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Earth Engine API",
+      "description": "Satellite imagery",
+      "link": "https://developers.google.com/earth-engine",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sentinel Hub API",
+      "description": "Satellite imagery",
+      "link": "https://docs.sentinel-hub.com",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Planet API",
+      "description": "Earth imagery",
+      "link": "https://developers.planet.com",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Copernicus API",
+      "description": "European Earth observation",
+      "link": "https://cds.climate.copernicus.eu/api",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Global Forest Watch API",
+      "description": "Deforestation data",
+      "link": "https://www.globalforestwatch.org/help/developers",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Climatiq API",
+      "description": "Carbon emissions",
+      "link": "https://www.climatiq.io/docs",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Electricity Maps API",
+      "description": "Real-time carbon",
+      "link": "https://static.electricitymap.org/api/docs",
+      "category": "environmental_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TheCocktailDB API",
+      "description": "Cocktail recipes",
+      "link": "https://www.thecocktaildb.com/api.php",
+      "category": "food_beverage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Open Food Facts API",
+      "description": "Food products",
+      "link": "https://world.openfoodfacts.org/data",
+      "category": "food_beverage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "USDA FoodData Central API",
+      "description": "Nutrition data",
+      "link": "https://fdc.nal.usda.gov/api-guide.html",
+      "category": "food_beverage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tinder API",
+      "description": "Dating app",
+      "link": "https://www.gotinder.com/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bumble API",
+      "description": "Dating app",
+      "link": "https://bumble.com/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hinge API",
+      "description": "Dating app",
+      "link": "https://hinge.co/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OkCupid API",
+      "description": "Dating app",
+      "link": "https://www.okcupid.com/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Meetup API",
+      "description": "Event platform",
+      "link": "https://www.meetup.com/api",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Luma API",
+      "description": "Event hosting",
+      "link": "https://lu.ma/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Partiful API",
+      "description": "Event invites",
+      "link": "https://partiful.com/developers",
+      "category": "dating_social",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dog API",
+      "description": "Dog images",
+      "link": "https://dog.ceo/dog-api",
+      "category": "pet_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TheCatAPI",
+      "description": "Cat images",
+      "link": "https://thecatapi.com",
+      "category": "pet_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Petco API",
+      "description": "Pet retail",
+      "link": "https://www.petco.com/developers",
+      "category": "pet_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vivid Seats API",
+      "description": "Ticket marketplace",
+      "link": "https://www.vividseats.com/developer",
+      "category": "ticketing_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AXS API",
+      "description": "Event tickets",
+      "link": "https://developer.axs.com",
+      "category": "ticketing_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Universe API",
+      "description": "Ticketing platform",
+      "link": "https://www.universe.com/developer",
+      "category": "ticketing_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tito API",
+      "description": "Event registration",
+      "link": "https://ti.to/docs/api",
+      "category": "ticketing_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hotels.com API",
+      "description": "Hotel search",
+      "link": "https://www.hotels.com/affiliate",
+      "category": "hospitality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VRBO API",
+      "description": "Vacation rentals",
+      "link": "https://www.vrbo.com/affiliate",
+      "category": "hospitality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hopper API",
+      "description": "Travel predictions",
+      "link": "https://developer.hopper.com",
+      "category": "hospitality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cloudbeds API",
+      "description": "Hotel management",
+      "link": "https://developer.cloudbeds.com",
+      "category": "hospitality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Cloud Translation API",
+      "description": "Machine translation",
+      "link": "https://cloud.google.com/translate/docs",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ModernMT API",
+      "description": "Adaptive translation",
+      "link": "https://www.modernmt.com/api",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Unbabel API",
+      "description": "AI translation",
+      "link": "https://developers.unbabel.com",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lilt API",
+      "description": "Adaptive translation",
+      "link": "https://lilt.com/docs/api",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Weglot API",
+      "description": "Website translation",
+      "link": "https://developers.weglot.com",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Localize API",
+      "description": "Website localization",
+      "link": "https://developers.localizejs.com",
+      "category": "translation_localization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pilot API",
+      "description": "Bookkeeping",
+      "link": "https://pilot.com/developers",
+      "category": "accounting_bookkeeping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bench API",
+      "description": "Bookkeeping service",
+      "link": "https://bench.co/developers",
+      "category": "accounting_bookkeeping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Expensify API",
+      "description": "Expense management",
+      "link": "https://integrations.expensify.com",
+      "category": "accounting_bookkeeping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Divvy API",
+      "description": "Expense management",
+      "link": "https://developer.getdivvy.com",
+      "category": "accounting_bookkeeping",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PostgreSQL API",
+      "description": "SQL database",
+      "link": "https://www.postgresql.org/docs/current/libpq.html",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MySQL API",
+      "description": "SQL database",
+      "link": "https://dev.mysql.com/doc/connector-python/en",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Redis Cloud API",
+      "description": "In-memory database",
+      "link": "https://docs.redis.com/latest/rc/api",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cassandra API",
+      "description": "Wide-column database",
+      "link": "https://cassandra.apache.org/_/native_protocol.html",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DynamoDB API",
+      "description": "AWS NoSQL",
+      "link": "https://docs.aws.amazon.com/amazondynamodb/latest/APIReference",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Firestore API",
+      "description": "Firebase database",
+      "link": "https://firebase.google.com/docs/firestore/use-rest-api",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SingleStore API",
+      "description": "Real-time database",
+      "link": "https://docs.singlestore.com",
+      "category": "databases_storage",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Neo4j API",
+      "description": "Graph database",
+      "link": "https://neo4j.com/docs/http-api",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ArangoDB API",
+      "description": "Multi-model database",
+      "link": "https://www.arangodb.com/docs/stable/http",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon Neptune API",
+      "description": "Graph database",
+      "link": "https://docs.aws.amazon.com/neptune",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TigerGraph API",
+      "description": "Graph analytics",
+      "link": "https://docs.tigergraph.com/tigergraph-server/api",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dgraph API",
+      "description": "Native GraphQL database",
+      "link": "https://dgraph.io/docs/graphql",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OrientDB API",
+      "description": "Multi-model database",
+      "link": "https://orientdb.org/docs",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "JanusGraph API",
+      "description": "Distributed graph",
+      "link": "https://docs.janusgraph.org",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NebulaGraph API",
+      "description": "Graph database",
+      "link": "https://docs.nebula-graph.io",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Memgraph API",
+      "description": "In-memory graph",
+      "link": "https://memgraph.com/docs",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TypeDB API",
+      "description": "Knowledge graph",
+      "link": "https://typedb.com/docs",
+      "category": "graph_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CrateDB API",
+      "description": "Distributed database",
+      "link": "https://crate.io/docs/crate/reference/en/latest/interfaces/http.html",
+      "category": "time_series_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apache Pinot API",
+      "description": "Real-time analytics",
+      "link": "https://docs.pinot.apache.org/users/api",
+      "category": "time_series_databases",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Solr API",
+      "description": "Search platform",
+      "link": "https://solr.apache.org/guide/solr/latest/deployment-guide/solr-control-script-reference.html",
+      "category": "search_engines",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bonsai API",
+      "description": "Hosted Elasticsearch",
+      "link": "https://bonsai.io/docs",
+      "category": "search_engines",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zinc API",
+      "description": "Lightweight search",
+      "link": "https://zincsearch-docs.zinc.dev",
+      "category": "search_engines",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon SQS API",
+      "description": "AWS queue",
+      "link": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference",
+      "category": "message_queues",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Cloud Pub/Sub API",
+      "description": "Messaging service",
+      "link": "https://cloud.google.com/pubsub/docs/reference/rest",
+      "category": "message_queues",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apache Pulsar API",
+      "description": "Messaging platform",
+      "link": "https://pulsar.apache.org/docs/en/client-api-overview",
+      "category": "message_queues",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon Kinesis API",
+      "description": "Data streaming",
+      "link": "https://docs.aws.amazon.com/kinesis/latest/APIReference",
+      "category": "message_queues",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Confluent Cloud API",
+      "description": "Kafka platform",
+      "link": "https://docs.confluent.io/cloud/current/api.html",
+      "category": "message_queues",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon ElastiCache API",
+      "description": "AWS caching",
+      "link": "https://docs.aws.amazon.com/AmazonElastiCache/latest/APIReference",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Azure Cache API",
+      "description": "Azure Redis",
+      "link": "https://docs.microsoft.com/en-us/rest/api/redis",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Memorystore API",
+      "description": "Google Cloud cache",
+      "link": "https://cloud.google.com/memorystore/docs/redis/apis",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hazelcast API",
+      "description": "In-memory platform",
+      "link": "https://docs.hazelcast.com/hazelcast/latest/clients/rest.html",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apache Ignite API",
+      "description": "Distributed database",
+      "link": "https://ignite.apache.org/docs/latest/restapi",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Couchbase API",
+      "description": "NoSQL database",
+      "link": "https://docs.couchbase.com/server/current/rest-api",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Aerospike API",
+      "description": "Real-time database",
+      "link": "https://www.aerospike.com/docs/reference/rest",
+      "category": "caching",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ethereum JSON-RPC",
+      "description": "Ethereum API",
+      "link": "https://ethereum.org/en/developers/docs/apis/json-rpc",
+      "category": "blockchain_web3",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GitLab API",
+      "description": "DevOps platform",
+      "link": "https://docs.gitlab.com/ee/api",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Gitea API",
+      "description": "Self-hosted Git",
+      "link": "https://docs.gitea.io/en-us/api-usage",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "RubyGems API",
+      "description": "Ruby packages",
+      "link": "https://guides.rubygems.org/rubygems-org-api",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Crates.io API",
+      "description": "Rust packages",
+      "link": "https://crates.io/data-access",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NuGet API",
+      "description": ".NET packages",
+      "link": "https://docs.microsoft.com/en-us/nuget/api/overview",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Maven Central API",
+      "description": "Java packages",
+      "link": "https://search.maven.org/classic/#api",
+      "category": "developer_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sketch Cloud API",
+      "description": "Design tool",
+      "link": "https://developer.sketch.com",
+      "category": "design_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dribbble API",
+      "description": "Design community",
+      "link": "https://developer.dribbble.com",
+      "category": "design_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Behance API",
+      "description": "Creative portfolio",
+      "link": "https://www.behance.net/dev",
+      "category": "design_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pixabay API",
+      "description": "Free images",
+      "link": "https://pixabay.com/api/docs",
+      "category": "design_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cypress Cloud API",
+      "description": "Testing platform",
+      "link": "https://docs.cypress.io/guides/cloud/introduction",
+      "category": "testing_qa",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Selenium Grid API",
+      "description": "Browser automation",
+      "link": "https://www.selenium.dev/documentation/grid",
+      "category": "testing_qa",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Supabase Functions API",
+      "description": "Edge functions",
+      "link": "https://supabase.com/docs/guides/functions",
+      "category": "serverless",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Docker API",
+      "description": "Container platform",
+      "link": "https://docs.docker.com/engine/api",
+      "category": "containers_orchestration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon ECS API",
+      "description": "Container service",
+      "link": "https://docs.aws.amazon.com/AmazonECS/latest/APIReference",
+      "category": "containers_orchestration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon EKS API",
+      "description": "Managed Kubernetes",
+      "link": "https://docs.aws.amazon.com/eks/latest/APIReference",
+      "category": "containers_orchestration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Nomad API",
+      "description": "Workload orchestration",
+      "link": "https://developer.hashicorp.com/nomad/api-docs",
+      "category": "containers_orchestration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenShift API",
+      "description": "Kubernetes platform",
+      "link": "https://docs.openshift.com/container-platform/latest/rest_api",
+      "category": "containers_orchestration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ansible Tower API",
+      "description": "Automation platform",
+      "link": "https://docs.ansible.com/ansible-tower/latest/html/towerapi",
+      "category": "infrastructure_as_code",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CDK for Terraform API",
+      "description": "IaC with programming languages",
+      "link": "https://developer.hashicorp.com/terraform/cdktf",
+      "category": "infrastructure_as_code",
+      "auth": "apiKey"
+    },
+    {
+      "name": "1Password API",
+      "description": "Password management",
+      "link": "https://developer.1password.com",
+      "category": "secrets_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AWS API Gateway API",
+      "description": "API service",
+      "link": "https://docs.aws.amazon.com/apigateway/latest/api",
+      "category": "api_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Azure API Management API",
+      "description": "API service",
+      "link": "https://docs.microsoft.com/en-us/rest/api/apimanagement",
+      "category": "api_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WSO2 API Manager",
+      "description": "API management",
+      "link": "https://apim.docs.wso2.com/en/latest/reference",
+      "category": "api_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "3scale API",
+      "description": "API management",
+      "link": "https://access.redhat.com/documentation/en-us/red_hat_3scale_api_management",
+      "category": "api_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Akana API",
+      "description": "API platform",
+      "link": "https://www.akana.com/resources/documentation",
+      "category": "api_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Swagger/OpenAPI",
+      "description": "API specification",
+      "link": "https://swagger.io/docs",
+      "category": "api_documentation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WebScrapingAPI",
+      "description": "Scraping service",
+      "link": "https://docs.webscrapingapi.com",
+      "category": "browser_automation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PhantomBuster API",
+      "description": "Automation",
+      "link": "https://phantombuster.com/api",
+      "category": "browser_automation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PDFco API",
+      "description": "PDF conversion",
+      "link": "https://apidocs.pdf.co",
+      "category": "pdf_document_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PDF4me API",
+      "description": "PDF processing",
+      "link": "https://developer.pdf4me.com",
+      "category": "pdf_document_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Docsumo API",
+      "description": "Document AI",
+      "link": "https://docs.docsumo.com",
+      "category": "pdf_document_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Cloud Vision OCR",
+      "description": "Image text extraction",
+      "link": "https://cloud.google.com/vision/docs/ocr",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AWS Textract API",
+      "description": "Document analysis",
+      "link": "https://docs.aws.amazon.com/textract",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Azure Computer Vision OCR",
+      "description": "Text recognition",
+      "link": "https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/concept-recognizing-text",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tesseract API",
+      "description": "Open-source OCR",
+      "link": "https://tesseract-ocr.github.io/tessdoc",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ABBYY Cloud OCR",
+      "description": "Document recognition",
+      "link": "https://www.abbyy.com/cloud-ocr-sdk",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Nanonets OCR API",
+      "description": "OCR platform",
+      "link": "https://nanonets.com/documentation",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Veryfi API",
+      "description": "Receipt OCR",
+      "link": "https://www.veryfi.com/developers",
+      "category": "ocr_text_extraction",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Microsoft Outlook Calendar API",
+      "description": "Calendar service",
+      "link": "https://docs.microsoft.com/en-us/graph/outlook-calendar-concept-overview",
+      "category": "calendar_scheduling",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Alchemer API",
+      "description": "Survey software",
+      "link": "https://apihelp.alchemer.com",
+      "category": "forms_surveys",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fillout API",
+      "description": "Form builder",
+      "link": "https://www.fillout.com/api",
+      "category": "forms_surveys",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Charts API",
+      "description": "Chart tools",
+      "link": "https://developers.google.com/chart",
+      "category": "charts_visualization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ApexCharts API",
+      "description": "Modern charts",
+      "link": "https://apexcharts.com/docs/options",
+      "category": "charts_visualization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vega API",
+      "description": "Visualization grammar",
+      "link": "https://vega.github.io/vega/docs/api",
+      "category": "charts_visualization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Observable API",
+      "description": "Data notebooks",
+      "link": "https://observablehq.com/@observablehq/introduction",
+      "category": "charts_visualization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Flourish API",
+      "description": "Data storytelling",
+      "link": "https://developers.flourish.studio",
+      "category": "charts_visualization",
+      "auth": "apiKey"
+    },
+    {
+      "name": "QRServer API",
+      "description": "QR code service",
+      "link": "https://goqr.me/api/doc",
+      "category": "qr_codes_barcodes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "QR Code Monkey API",
+      "description": "Custom QR codes",
+      "link": "https://www.qrcode-monkey.com/qr-code-api-with-logo",
+      "category": "qr_codes_barcodes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Scandit API",
+      "description": "Barcode scanning",
+      "link": "https://docs.scandit.com",
+      "category": "qr_codes_barcodes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Barcodelookup API",
+      "description": "Product lookup",
+      "link": "https://www.barcodelookup.com/api",
+      "category": "qr_codes_barcodes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "UPCitemdb API",
+      "description": "UPC database",
+      "link": "https://www.upcitemdb.com/wp/docs/main/development",
+      "category": "qr_codes_barcodes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bitly API",
+      "description": "URL shortening",
+      "link": "https://dev.bitly.com",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TinyURL API",
+      "description": "URL shortening",
+      "link": "https://tinyurl.com/app/dev",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rebrandly API",
+      "description": "Branded links",
+      "link": "https://developers.rebrandly.com",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Short.io API",
+      "description": "Link management",
+      "link": "https://developers.short.io",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "T.ly API",
+      "description": "URL shortening",
+      "link": "https://t.ly/docs",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dub API",
+      "description": "Link management",
+      "link": "https://dub.co/docs/api",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BL.INK API",
+      "description": "Branded links",
+      "link": "https://www.bl.ink/developers",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sniply API",
+      "description": "Link shortening",
+      "link": "https://snip.ly/api",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Clkim API",
+      "description": "URL shortening",
+      "link": "https://clkim.com/developers",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "YOURLS API",
+      "description": "Self-hosted shortener",
+      "link": "https://yourls.org/docs",
+      "category": "url_shorteners",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Screenshot API",
+      "description": "Website screenshots",
+      "link": "https://screenshotapi.net/documentation",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Screenshotlayer API",
+      "description": "Website capture",
+      "link": "https://screenshotlayer.com/documentation",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apiflash API",
+      "description": "Screenshot API",
+      "link": "https://apiflash.com/documentation",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ScreenshotMachine API",
+      "description": "Website screenshots",
+      "link": "https://www.screenshotmachine.com/api.php",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Microlink API",
+      "description": "Browser as API",
+      "link": "https://microlink.io/docs",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PagePeeker API",
+      "description": "Website thumbnails",
+      "link": "https://pagepeeker.com/api",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ShrinkTheWeb API",
+      "description": "Website previews",
+      "link": "https://shrinktheweb.com/content/shrinktheweb-pagepix-api.html",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stillio API",
+      "description": "Automated screenshots",
+      "link": "https://stillio.com/api",
+      "category": "screenshots_site_capture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pipedream Webhooks",
+      "description": "Integration platform",
+      "link": "https://pipedream.com/docs/api",
+      "category": "webhooks_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zapier Webhooks",
+      "description": "Automation webhooks",
+      "link": "https://platform.zapier.com/build/cli-auth/webhooks",
+      "category": "webhooks_events",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ipinfo.io API",
+      "description": "IP geolocation",
+      "link": "https://ipinfo.io/developers",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ipstack API",
+      "description": "IP geolocation",
+      "link": "https://ipstack.com/documentation",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ipgeolocation API",
+      "description": "IP lookup",
+      "link": "https://ipgeolocation.io/documentation",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ipapi API",
+      "description": "IP lookup",
+      "link": "https://ipapi.com/documentation",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Abstract IP API",
+      "description": "IP geolocation",
+      "link": "https://www.abstractapi.com/api/ip-geolocation-api",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BigDataCloud API",
+      "description": "IP geolocation",
+      "link": "https://www.bigdatacloud.com/ip-geolocation-apis",
+      "category": "ip_geolocation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Twilio Verify API",
+      "description": "Phone verification",
+      "link": "https://www.twilio.com/docs/verify/api",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vonage Verify API",
+      "description": "2FA service",
+      "link": "https://developer.vonage.com/verify/overview",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MessageBird Verify API",
+      "description": "Verification",
+      "link": "https://developers.messagebird.com/api/verify",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Telesign API",
+      "description": "Phone intelligence",
+      "link": "https://developer.telesign.com",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Plivo Verify API",
+      "description": "Phone verification",
+      "link": "https://www.plivo.com/docs/verify",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sinch Verification API",
+      "description": "Phone verification",
+      "link": "https://developers.sinch.com/docs/verification",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Authy API",
+      "description": "2FA service",
+      "link": "https://www.twilio.com/docs/authy/api",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NumVerify API",
+      "description": "Phone validation",
+      "link": "https://numverify.com/documentation",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AbstractAPI Phone",
+      "description": "Phone validation",
+      "link": "https://www.abstractapi.com/api/phone-validation-api",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Veriphone API",
+      "description": "Phone verification",
+      "link": "https://veriphone.io/docs",
+      "category": "phone_sms_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hunter API",
+      "description": "Email finder",
+      "link": "https://hunter.io/api-documentation",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NeverBounce API",
+      "description": "Email verification",
+      "link": "https://developers.neverbounce.com",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kickbox API",
+      "description": "Email verification",
+      "link": "https://docs.kickbox.com",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mailgun Validation API",
+      "description": "Email validation",
+      "link": "https://documentation.mailgun.com/en/latest/api-email-validation.html",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "EmailListVerify API",
+      "description": "Email verification",
+      "link": "https://www.emaillistverify.com/api",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Clearout API",
+      "description": "Email validation",
+      "link": "https://docs.clearout.io",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Debounce API",
+      "description": "Email verification",
+      "link": "https://debounce.io/docs",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Emailable API",
+      "description": "Email verification",
+      "link": "https://emailable.com/docs/api",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mailfloss API",
+      "description": "Email verification",
+      "link": "https://mailfloss.com/api",
+      "category": "email_verification",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Places API",
+      "description": "Address autocomplete",
+      "link": "https://developers.google.com/maps/documentation/places/web-service",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mapbox Geocoding API",
+      "description": "Address search",
+      "link": "https://docs.mapbox.com/api/search/geocoding",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HERE Geocoding API",
+      "description": "Address lookup",
+      "link": "https://developer.here.com/documentation/geocoding-search-api",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Postcoder API",
+      "description": "UK addresses",
+      "link": "https://postcoder.com/docs",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ideal Postcodes API",
+      "description": "UK postcode lookup",
+      "link": "https://ideal-postcodes.co.uk/documentation",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Postcode.io API",
+      "description": "UK postcodes",
+      "link": "https://postcodes.io",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zippopotam API",
+      "description": "Postal code lookup",
+      "link": "https://www.zippopotam.us",
+      "category": "address_postal",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Open Exchange Rates API",
+      "description": "Exchange rates",
+      "link": "https://docs.openexchangerates.org",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fixer API",
+      "description": "Exchange rates",
+      "link": "https://fixer.io/documentation",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Currency API",
+      "description": "Currency conversion",
+      "link": "https://currencyapi.com/docs",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "XE API",
+      "description": "Currency data",
+      "link": "https://www.xe.com/xecurrencydata",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AbstractAPI Exchange",
+      "description": "Exchange rates",
+      "link": "https://www.abstractapi.com/api/exchange-rate-api",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FreeCurrencyAPI",
+      "description": "Free exchange rates",
+      "link": "https://freecurrencyapi.com/docs",
+      "category": "currency_exchange",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TaxJar API",
+      "description": "Sales tax",
+      "link": "https://developers.taxjar.com",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Avalara API",
+      "description": "Tax compliance",
+      "link": "https://developer.avalara.com",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vertex API",
+      "description": "Tax technology",
+      "link": "https://www.vertexinc.com/developers",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Anrok API",
+      "description": "Sales tax",
+      "link": "https://www.anrok.com/api",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Quaderno API",
+      "description": "Tax automation",
+      "link": "https://developers.quaderno.io",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stripe Tax API",
+      "description": "Tax calculation",
+      "link": "https://stripe.com/docs/tax",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sovos API",
+      "description": "Tax compliance",
+      "link": "https://sovos.com/developers",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CCH SureTax API",
+      "description": "Tax calculation",
+      "link": "https://suretax.avalara.com/api",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VIES API",
+      "description": "EU VAT check",
+      "link": "https://ec.europa.eu/taxation_customs/vies",
+      "category": "taxes_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IDnow API",
+      "description": "Identity verification",
+      "link": "https://www.idnow.io/developers",
+      "category": "background_checks",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Woopra API",
+      "description": "Customer analytics",
+      "link": "https://docs.woopra.com",
+      "category": "marketing_attribution",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rockerbox API",
+      "description": "Marketing attribution",
+      "link": "https://www.rockerbox.com/api",
+      "category": "marketing_attribution",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TripleWhale API",
+      "description": "E-commerce attribution",
+      "link": "https://triplewhale.com/developers",
+      "category": "marketing_attribution",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Judge.me API",
+      "description": "Product reviews",
+      "link": "https://judge.me/api",
+      "category": "review_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Okendo API",
+      "description": "Customer reviews",
+      "link": "https://docs.okendo.io",
+      "category": "review_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Birdeye API",
+      "description": "Reputation management",
+      "link": "https://developers.birdeye.com",
+      "category": "review_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Insider API",
+      "description": "Growth platform",
+      "link": "https://developer.useinsider.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bloomreach Engagement API",
+      "description": "Marketing platform",
+      "link": "https://documentation.bloomreach.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Emarsys API",
+      "description": "Marketing platform",
+      "link": "https://dev.emarsys.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sailthru API",
+      "description": "Personalization",
+      "link": "https://getstarted.sailthru.com/developers/api",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cordial API",
+      "description": "Cross-channel messaging",
+      "link": "https://api.cordial.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Attentive API",
+      "description": "SMS marketing",
+      "link": "https://docs.attentivemobile.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Postscript API",
+      "description": "SMS marketing",
+      "link": "https://developers.postscript.io",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SMSBump API",
+      "description": "SMS marketing",
+      "link": "https://developers.smsbump.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Recart API",
+      "description": "Messenger marketing",
+      "link": "https://developers.recart.com",
+      "category": "crm_sales",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zendesk Chat API",
+      "description": "Live chat",
+      "link": "https://developer.zendesk.com/api-reference/live-chat",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Freshchat API",
+      "description": "Messaging software",
+      "link": "https://developers.freshchat.com",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HelpScout API",
+      "description": "Help desk",
+      "link": "https://developer.helpscout.com",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chatra API",
+      "description": "Live chat",
+      "link": "https://chatra.com/api",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Userlike API",
+      "description": "Live chat",
+      "link": "https://www.userlike.com/api",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "JivoChat API",
+      "description": "Live chat",
+      "link": "https://www.jivochat.com/api",
+      "category": "live_chat",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Botpress API",
+      "description": "Chatbot platform",
+      "link": "https://botpress.com/docs",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Watson Assistant API",
+      "description": "IBM conversational AI",
+      "link": "https://cloud.ibm.com/apidocs/assistant-v2",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Microsoft Bot Framework API",
+      "description": "Bot development",
+      "link": "https://docs.microsoft.com/en-us/azure/bot-service/rest-api",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Voiceflow API",
+      "description": "Conversation design",
+      "link": "https://developer.voiceflow.com",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Landbot API",
+      "description": "No-code chatbots",
+      "link": "https://help.landbot.io/article/api-introduction",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ManyChat API",
+      "description": "Chat marketing",
+      "link": "https://api.manychat.com",
+      "category": "chatbots",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PrestaShop API",
+      "description": "E-commerce software",
+      "link": "https://devdocs.prestashop-project.org/8/webservice",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ecwid API",
+      "description": "E-commerce platform",
+      "link": "https://api-docs.ecwid.com",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Volusion API",
+      "description": "E-commerce platform",
+      "link": "https://developer.volusion.com",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "3dcart API",
+      "description": "E-commerce platform",
+      "link": "https://apirest.3dcart.com",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vendure API",
+      "description": "Headless commerce",
+      "link": "https://www.vendure.io/docs/graphql-api",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Commerce.js API",
+      "description": "Headless commerce",
+      "link": "https://commercejs.com/docs/api",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Swell API",
+      "description": "Headless commerce",
+      "link": "https://developers.swell.is",
+      "category": "e-commerce_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Authorize.net API",
+      "description": "Payment gateway",
+      "link": "https://developer.authorize.net/api/reference",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Worldpay API",
+      "description": "Payment processing",
+      "link": "https://developer.worldpay.com",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Affirm API",
+      "description": "Buy now pay later",
+      "link": "https://docs.affirm.com/developers",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Afterpay API",
+      "description": "Buy now pay later",
+      "link": "https://developers.afterpay.com",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sezzle API",
+      "description": "Buy now pay later",
+      "link": "https://docs.sezzle.com",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zip API",
+      "description": "Buy now pay later",
+      "link": "https://developers.zip.co",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GoCardless API",
+      "description": "Bank payments",
+      "link": "https://developer.gocardless.com",
+      "category": "payment_gateways",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chargify API",
+      "description": "Billing management",
+      "link": "https://developers.chargify.com",
+      "category": "subscription_billing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Billsby API",
+      "description": "Subscription billing",
+      "link": "https://support.billsby.com/reference",
+      "category": "subscription_billing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ProfitWell API",
+      "description": "Subscription analytics",
+      "link": "https://profitwellapiv2.docs.apiary.io",
+      "category": "subscription_billing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Baremetrics API",
+      "description": "Subscription analytics",
+      "link": "https://developers.baremetrics.com",
+      "category": "subscription_billing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DEAR Systems API",
+      "description": "Inventory management",
+      "link": "https://dearinventory.docs.apiary.io",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SkuVault API",
+      "description": "Warehouse management",
+      "link": "https://dev.skuvault.com",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fishbowl API",
+      "description": "Inventory software",
+      "link": "https://www.fishbowlinventory.com/developers",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "inFlow API",
+      "description": "Inventory software",
+      "link": "https://www.inflowinventory.com/api",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sortly API",
+      "description": "Inventory tracking",
+      "link": "https://www.sortly.com/api",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Unleashed API",
+      "description": "Inventory management",
+      "link": "https://apidocs.unleashedsoftware.com",
+      "category": "inventory_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Akeneo API",
+      "description": "PIM platform",
+      "link": "https://api.akeneo.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Salsify API",
+      "description": "PXM platform",
+      "link": "https://developers.salsify.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pimcore API",
+      "description": "Data platform",
+      "link": "https://pimcore.com/docs/platform/Pimcore/Getting_Started/REST_API",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Plytix API",
+      "description": "PIM software",
+      "link": "https://apidocs.plytix.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "inRiver API",
+      "description": "PIM solution",
+      "link": "https://apidocs.inriver.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Contentserv API",
+      "description": "Product content",
+      "link": "https://developer.contentserv.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Syndigo API",
+      "description": "Product content",
+      "link": "https://developer.syndigo.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "1WorldSync API",
+      "description": "Product content",
+      "link": "https://developer.1worldsync.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Riversand API",
+      "description": "MDM platform",
+      "link": "https://riversand.com/developers",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stibo Systems API",
+      "description": "MDM platform",
+      "link": "https://developer.stibosystems.com",
+      "category": "product_information",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Orderful API",
+      "description": "EDI platform",
+      "link": "https://docs.orderful.com",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Linnworks API",
+      "description": "Order management",
+      "link": "https://developer.linnworks.com",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ChannelAdvisor API",
+      "description": "E-commerce platform",
+      "link": "https://developer.channeladvisor.com",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sellbrite API",
+      "description": "Multi-channel selling",
+      "link": "https://developer.sellbrite.com",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ecomdash API",
+      "description": "Inventory management",
+      "link": "https://ecomdash.com/developer",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Jazva API",
+      "description": "E-commerce management",
+      "link": "https://www.jazva.com/api",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zentail API",
+      "description": "E-commerce automation",
+      "link": "https://www.zentail.com/developers",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Solid Commerce API",
+      "description": "E-commerce platform",
+      "link": "https://www.solidcommerce.com/api",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Extensiv API",
+      "description": "Order management",
+      "link": "https://developer.extensiv.com",
+      "category": "order_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AfterShip Returns API",
+      "description": "Returns management",
+      "link": "https://www.aftership.com/docs/returns/api",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Optoro API",
+      "description": "Returns optimization",
+      "link": "https://www.optoro.com/developers",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Newgistics API",
+      "description": "Returns logistics",
+      "link": "https://www.pitneybowes.com/us/developer",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ReBound API",
+      "description": "Returns management",
+      "link": "https://www.reboundreturns.com/api",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Return Magic API",
+      "description": "Shopify returns",
+      "link": "https://returnmagic.com/developers",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Yayloh API",
+      "description": "Returns platform",
+      "link": "https://www.yayloh.com/developers",
+      "category": "returns_exchanges",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Yotpo Loyalty API",
+      "description": "Loyalty & referrals",
+      "link": "https://developers.yotpo.com/reference/loyalty-api",
+      "category": "loyalty_rewards",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Talon.One API",
+      "description": "Promotion engine",
+      "link": "https://docs.talon.one",
+      "category": "loyalty_rewards",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Zinrelo API",
+      "description": "Loyalty platform",
+      "link": "https://www.zinrelo.com/developers",
+      "category": "loyalty_rewards",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kangaroo API",
+      "description": "Loyalty platform",
+      "link": "https://api.kangaroorewards.com",
+      "category": "loyalty_rewards",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Awin API",
+      "description": "Affiliate network",
+      "link": "https://wiki.awin.com/index.php/Publisher_API",
+      "category": "affiliate_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Post Affiliate Pro API",
+      "description": "Affiliate software",
+      "link": "https://support.qualityunit.com/956696-Post-Affiliate-Pro-API",
+      "category": "affiliate_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amazon SP-API",
+      "description": "Amazon selling",
+      "link": "https://developer-docs.amazon.com/sp-api",
+      "category": "marketplaces",
+      "auth": "apiKey"
+    },
+    {
+      "name": "eBay API",
+      "description": "eBay marketplace",
+      "link": "https://developer.ebay.com/api-docs",
+      "category": "marketplaces",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Newegg API",
+      "description": "Newegg marketplace",
+      "link": "https://developer.newegg.com",
+      "category": "marketplaces",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mercado Libre API",
+      "description": "LATAM marketplace",
+      "link": "https://developers.mercadolibre.com",
+      "category": "marketplaces",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Allegro API",
+      "description": "Polish marketplace",
+      "link": "https://developer.allegro.pl",
+      "category": "marketplaces",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WeChat API",
+      "description": "WeChat platform",
+      "link": "https://developers.weixin.qq.com",
+      "category": "social_media_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Line API",
+      "description": "Line messaging",
+      "link": "https://developers.line.biz",
+      "category": "social_media_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Viber API",
+      "description": "Viber messaging",
+      "link": "https://developers.viber.com",
+      "category": "social_media_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Khoros API",
+      "description": "Social management",
+      "link": "https://developer.khoros.com",
+      "category": "social_media_management",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AspireIQ API",
+      "description": "Influencer marketing",
+      "link": "https://developers.aspire.io",
+      "category": "influencer_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mavrck API",
+      "description": "Influencer platform",
+      "link": "https://www.mavrck.co/developers",
+      "category": "influencer_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Butter CMS API",
+      "description": "Headless CMS",
+      "link": "https://buttercms.com/docs/api",
+      "category": "content_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rank Tracker API",
+      "description": "Rank monitoring",
+      "link": "https://www.link-assistant.com/rank-tracker/api.html",
+      "category": "seo_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SE Ranking API",
+      "description": "SEO platform",
+      "link": "https://seranking.com/api",
+      "category": "seo_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Screaming Frog API",
+      "description": "SEO spider",
+      "link": "https://www.screamingfrog.co.uk/api",
+      "category": "seo_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Constant Contact API",
+      "description": "Email marketing",
+      "link": "https://developer.constantcontact.com",
+      "category": "email_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Campaign Monitor API",
+      "description": "Email marketing",
+      "link": "https://www.campaignmonitor.com/api",
+      "category": "email_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Moosend API",
+      "description": "Email automation",
+      "link": "https://moosend.com/api",
+      "category": "email_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BulkSMS API",
+      "description": "SMS gateway",
+      "link": "https://www.bulksms.com/developer",
+      "category": "sms_marketing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Firebase Cloud Messaging",
+      "description": "Push service",
+      "link": "https://firebase.google.com/docs/cloud-messaging",
+      "category": "push_notifications",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apple Push Notification",
+      "description": "iOS push",
+      "link": "https://developer.apple.com/documentation/usernotifications",
+      "category": "push_notifications",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Braze Push API",
+      "description": "Push notifications",
+      "link": "https://www.braze.com/docs/developer_guide/platform_integration_guides/android/push_notifications",
+      "category": "push_notifications",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Leanplum Push API",
+      "description": "Mobile messaging",
+      "link": "https://docs.leanplum.com",
+      "category": "push_notifications",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Catapush API",
+      "description": "Push service",
+      "link": "https://www.catapush.com/docs-api",
+      "category": "push_notifications",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Twilio Voice API",
+      "description": "Voice calling",
+      "link": "https://www.twilio.com/docs/voice",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vonage Voice API",
+      "description": "Voice service",
+      "link": "https://developer.vonage.com/voice/voice-api/overview",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Plivo Voice API",
+      "description": "Voice calling",
+      "link": "https://www.plivo.com/docs/voice",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bandwidth Voice API",
+      "description": "Voice service",
+      "link": "https://dev.bandwidth.com/voice",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Telnyx Voice API",
+      "description": "Voice platform",
+      "link": "https://developers.telnyx.com/docs/v2/call-control",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SignalWire API",
+      "description": "Voice/Video",
+      "link": "https://developer.signalwire.com",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Whereby API",
+      "description": "Video meetings",
+      "link": "https://whereby.dev",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Jitsi API",
+      "description": "Open-source video",
+      "link": "https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-rest",
+      "category": "voice_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Viso.ai API",
+      "description": "Computer vision",
+      "link": "https://viso.ai/docs",
+      "category": "computer_vision",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fritz AI API",
+      "description": "Mobile ML",
+      "link": "https://www.fritz.ai/docs",
+      "category": "computer_vision",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ximilar API",
+      "description": "Image recognition",
+      "link": "https://docs.ximilar.com",
+      "category": "computer_vision",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hive AI API",
+      "description": "Content moderation",
+      "link": "https://docs.hivemoderation.com",
+      "category": "computer_vision",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Speech-to-Text API",
+      "description": "Speech recognition",
+      "link": "https://cloud.google.com/speech-to-text/docs",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AWS Transcribe API",
+      "description": "Speech-to-text",
+      "link": "https://docs.aws.amazon.com/transcribe",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Azure Speech API",
+      "description": "Speech services",
+      "link": "https://docs.microsoft.com/azure/cognitive-services/speech-service",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AssemblyAI API",
+      "description": "Speech AI",
+      "link": "https://www.assemblyai.com/docs",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rev.ai API",
+      "description": "Speech-to-text",
+      "link": "https://docs.rev.ai",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Otter.ai API",
+      "description": "Transcription",
+      "link": "https://otter.ai/developers",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Trint API",
+      "description": "Transcription",
+      "link": "https://www.trint.com/developers",
+      "category": "speech_recognition",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Text-to-Speech API",
+      "description": "Speech synthesis",
+      "link": "https://cloud.google.com/text-to-speech/docs",
+      "category": "text-to-speech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AWS Polly API",
+      "description": "Text-to-speech",
+      "link": "https://docs.aws.amazon.com/polly",
+      "category": "text-to-speech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Azure Speech TTS",
+      "description": "Speech synthesis",
+      "link": "https://docs.microsoft.com/azure/cognitive-services/speech-service/text-to-speech",
+      "category": "text-to-speech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Murf.ai API",
+      "description": "AI voiceover",
+      "link": "https://murf.ai/developers",
+      "category": "text-to-speech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Resemble.ai API",
+      "description": "Voice cloning",
+      "link": "https://docs.resemble.ai",
+      "category": "text-to-speech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Cloud NLP API",
+      "description": "NLP services",
+      "link": "https://cloud.google.com/natural-language/docs",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MeaningCloud API",
+      "description": "Text analytics",
+      "link": "https://www.meaningcloud.com/developer",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lexalytics API",
+      "description": "Text analytics",
+      "link": "https://www.lexalytics.com/developers",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Aylien API",
+      "description": "NLP platform",
+      "link": "https://docs.aylien.com",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Repustate API",
+      "description": "Sentiment analysis",
+      "link": "https://www.repustate.com/docs",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ParallelDots API",
+      "description": "Text AI",
+      "link": "https://www.paralleldots.com/docs",
+      "category": "natural_language_processing",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AWS Translate API",
+      "description": "Machine translation",
+      "link": "https://docs.aws.amazon.com/translate",
+      "category": "machine_translation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IBM Watson Language API",
+      "description": "Language services",
+      "link": "https://cloud.ibm.com/apidocs/language-translator",
+      "category": "machine_translation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tencent Translation API",
+      "description": "Machine translation",
+      "link": "https://www.tencentcloud.com/document/product/1070",
+      "category": "machine_translation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Alibaba Translation API",
+      "description": "Machine translation",
+      "link": "https://www.alibabacloud.com/help/en/machine-translation",
+      "category": "machine_translation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Systran API",
+      "description": "Translation platform",
+      "link": "https://platform.systran.net/index",
+      "category": "machine_translation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Anthropic API",
+      "description": "Claude models",
+      "link": "https://docs.anthropic.com",
+      "category": "generative_ai",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AI21 Labs API",
+      "description": "Language models",
+      "link": "https://docs.ai21.com",
+      "category": "generative_ai",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wombo Dream API",
+      "description": "AI art",
+      "link": "https://www.w.ai/docs",
+      "category": "image_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Imagine API",
+      "description": "AI images",
+      "link": "https://www.imagine.art/developers",
+      "category": "image_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Runway Gen-2 API",
+      "description": "Video generation",
+      "link": "https://docs.runwayml.com",
+      "category": "video_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Epidemic Sound API",
+      "description": "Music licensing",
+      "link": "https://www.epidemicsound.com/partners",
+      "category": "audio_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Artlist API",
+      "description": "Music licensing",
+      "link": "https://artlist.io/partners",
+      "category": "audio_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Soundstripe API",
+      "description": "Music licensing",
+      "link": "https://www.soundstripe.com/developers",
+      "category": "audio_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AudioJungle API",
+      "description": "Music marketplace",
+      "link": "https://audiojungle.net/developers",
+      "category": "audio_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pond5 API",
+      "description": "Media marketplace",
+      "link": "https://www.pond5.com/partners",
+      "category": "audio_generation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Unreal Engine API",
+      "description": "Game engine",
+      "link": "https://docs.unrealengine.com",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Three.js API",
+      "description": "3D graphics",
+      "link": "https://threejs.org/docs",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Babylon.js API",
+      "description": "3D engine",
+      "link": "https://doc.babylonjs.com",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "A-Frame API",
+      "description": "WebXR framework",
+      "link": "https://aframe.io/docs",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ARCore API",
+      "description": "Google AR",
+      "link": "https://developers.google.com/ar",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ARKit API",
+      "description": "Apple AR",
+      "link": "https://developer.apple.com/documentation/arkit",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Snap AR API",
+      "description": "AR creation",
+      "link": "https://ar.snap.com/docs",
+      "category": "3d_ar_vr",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bing Maps API",
+      "description": "Microsoft maps",
+      "link": "https://docs.microsoft.com/bingmaps",
+      "category": "maps_location",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apple Maps API",
+      "description": "Apple maps",
+      "link": "https://developer.apple.com/maps",
+      "category": "maps_location",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Nominatim API",
+      "description": "OSM geocoding",
+      "link": "https://nominatim.org/release-docs/latest/api/Overview",
+      "category": "maps_location",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenCage API",
+      "description": "Geocoding",
+      "link": "https://opencagedata.com/api",
+      "category": "maps_location",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Directions API",
+      "description": "Routing service",
+      "link": "https://developers.google.com/maps/documentation/directions",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mapbox Directions API",
+      "description": "Routing",
+      "link": "https://docs.mapbox.com/api/navigation/directions",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HERE Routing API",
+      "description": "Route calculation",
+      "link": "https://developer.here.com/documentation/routing-api",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TomTom Routing API",
+      "description": "Route planning",
+      "link": "https://developer.tomtom.com/routing-api",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GraphHopper API",
+      "description": "Routing engine",
+      "link": "https://docs.graphhopper.com",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Valhalla API",
+      "description": "Open routing",
+      "link": "https://valhalla.readthedocs.io",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenRouteService API",
+      "description": "Routing platform",
+      "link": "https://openrouteservice.org/dev",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Route4Me API",
+      "description": "Route optimization",
+      "link": "https://route4me.io/docs",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OptimoRoute API",
+      "description": "Route planning",
+      "link": "https://optimoroute.com/api",
+      "category": "routing_navigation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Grab API",
+      "description": "SE Asia mobility",
+      "link": "https://developer.grab.com",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ola API",
+      "description": "India rideshare",
+      "link": "https://developer.olacabs.com",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DiDi API",
+      "description": "China mobility",
+      "link": "https://developer.didiglobal.com",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bird API",
+      "description": "Scooter sharing",
+      "link": "https://developer.bird.co",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lime API",
+      "description": "Micromobility",
+      "link": "https://developer.li.me",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Spin API",
+      "description": "Scooter sharing",
+      "link": "https://developer.spin.app",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Transit API",
+      "description": "Public transit",
+      "link": "https://transitapp.com/developers",
+      "category": "rideshare_mobility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Weather API",
+      "description": "Weather service",
+      "link": "https://www.weatherapi.com/docs",
+      "category": "weather_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Meteomatics API",
+      "description": "Weather data",
+      "link": "https://www.meteomatics.com/en/api",
+      "category": "weather_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Climacell API",
+      "description": "Microweather",
+      "link": "https://www.tomorrow.io/weather-api",
+      "category": "weather_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Storm Glass API",
+      "description": "Marine weather",
+      "link": "https://stormglass.io/docs",
+      "category": "weather_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "World Weather Online API",
+      "description": "Weather data",
+      "link": "https://www.worldweatheronline.com/developer",
+      "category": "weather_apis",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IP Geolocation Time API",
+      "description": "Timezone lookup",
+      "link": "https://ipgeolocation.io/documentation/timezone-api.html",
+      "category": "time_timezone",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Abstract Timezone API",
+      "description": "Timezone service",
+      "link": "https://www.abstractapi.com/api/timezone-api",
+      "category": "time_timezone",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TimezoneAPI",
+      "description": "Timezone data",
+      "link": "https://timezoneapi.io/docs",
+      "category": "time_timezone",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Timezone API",
+      "description": "Timezone lookup",
+      "link": "https://developers.google.com/maps/documentation/timezone",
+      "category": "time_timezone",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Holiday API",
+      "description": "Holiday data",
+      "link": "https://holidayapi.com/docs",
+      "category": "time_timezone",
+      "auth": "apiKey"
+    },
+    {
+      "name": "EOD Historical API",
+      "description": "Market data",
+      "link": "https://eodhistoricaldata.com/financial-apis",
+      "category": "stock_market",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Financial Modeling Prep API",
+      "description": "Financial data",
+      "link": "https://site.financialmodelingprep.com/developer/docs",
+      "category": "stock_market",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Morningstar API",
+      "description": "Investment data",
+      "link": "https://developer.morningstar.com",
+      "category": "stock_market",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Teller API",
+      "description": "Banking API",
+      "link": "https://teller.io/docs/api",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Akoya API",
+      "description": "Financial data",
+      "link": "https://developer.akoya.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Finverse API",
+      "description": "Open banking",
+      "link": "https://docs.finverse.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Railsr API",
+      "description": "Banking platform",
+      "link": "https://docs.railsr.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Galileo API",
+      "description": "Card processing",
+      "link": "https://docs.galileo-ft.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Marqeta API",
+      "description": "Card issuing",
+      "link": "https://www.marqeta.com/docs",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lithic API",
+      "description": "Card issuing",
+      "link": "https://docs.lithic.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Synapse API",
+      "description": "Banking platform",
+      "link": "https://docs.synapsefi.com",
+      "category": "banking_fintech",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Merge API",
+      "description": "Unified API",
+      "link": "https://docs.merge.dev",
+      "category": "accounting_integration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Finch API",
+      "description": "Employment data",
+      "link": "https://developer.tryfinch.com",
+      "category": "accounting_integration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Apideck API",
+      "description": "Unified API",
+      "link": "https://developers.apideck.com",
+      "category": "accounting_integration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Nango API",
+      "description": "Integration platform",
+      "link": "https://docs.nango.dev",
+      "category": "accounting_integration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vessel API",
+      "description": "CRM integration",
+      "link": "https://docs.vessel.land",
+      "category": "accounting_integration",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Arduino IoT Cloud API",
+      "description": "Arduino IoT",
+      "link": "https://www.arduino.cc/reference/en/iot/api",
+      "category": "iot_hardware",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ThingsBoard API",
+      "description": "IoT platform",
+      "link": "https://thingsboard.io/docs/reference/rest-api",
+      "category": "iot_hardware",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IBM Watson IoT API",
+      "description": "IoT platform",
+      "link": "https://cloud.ibm.com/apidocs/iot-platform",
+      "category": "iot_hardware",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tuya API",
+      "description": "Smart home IoT",
+      "link": "https://developer.tuya.com/en/docs",
+      "category": "iot_hardware",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hubitat API",
+      "description": "Home automation",
+      "link": "https://docs2.hubitat.com/en/developer",
+      "category": "iot_hardware",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sense API",
+      "description": "Energy monitoring",
+      "link": "https://sense.com/developers",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Neurio API",
+      "description": "Energy monitoring",
+      "link": "https://www.generac.com/generacmobilelink",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Emporia API",
+      "description": "Energy monitoring",
+      "link": "https://www.emporiaenergy.com/developers",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Enphase API",
+      "description": "Solar monitoring",
+      "link": "https://developer.enphase.com",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SolarEdge API",
+      "description": "Solar monitoring",
+      "link": "https://www.solaredge.com/sites/default/files/se_monitoring_api.pdf",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tesla Energy API",
+      "description": "Solar/Powerwall",
+      "link": "https://tesla-api.timdorr.com",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "UtilityAPI",
+      "description": "Utility data",
+      "link": "https://utilityapi.com/docs",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WattBuy API",
+      "description": "Energy data",
+      "link": "https://wattbuy.com/developers",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GridX API",
+      "description": "Energy management",
+      "link": "https://gridx.ai/docs",
+      "category": "energy_utilities",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TickTick API",
+      "description": "Task management",
+      "link": "https://developer.ticktick.com",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Things API",
+      "description": "Task management",
+      "link": "https://culturedcode.com/things/support/articles/2803573",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Omnifocus API",
+      "description": "Task management",
+      "link": "https://inside.omnifocus.com/url-schemes",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Remember The Milk API",
+      "description": "Task management",
+      "link": "https://www.rememberthemilk.com/services/api",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Any.do API",
+      "description": "Task management",
+      "link": "https://www.any.do/developers",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Toggl API",
+      "description": "Time tracking",
+      "link": "https://developers.track.toggl.com",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Clockify API",
+      "description": "Time tracking",
+      "link": "https://clockify.me/developers-api",
+      "category": "productivity_tools",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Twilio Video API",
+      "description": "Video SDK",
+      "link": "https://www.twilio.com/docs/video",
+      "category": "communication_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Reclaim API",
+      "description": "Calendar AI",
+      "link": "https://reclaim.ai/developer",
+      "category": "communication_platforms",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Egnyte API",
+      "description": "Enterprise storage",
+      "link": "https://developers.egnyte.com",
+      "category": "file_storage_sync",
+      "auth": "apiKey"
+    },
+    {
+      "name": "pCloud API",
+      "description": "Cloud storage",
+      "link": "https://docs.pcloud.com",
+      "category": "file_storage_sync",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OneLogin API",
+      "description": "Identity management",
+      "link": "https://developers.onelogin.com",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ping Identity API",
+      "description": "Identity platform",
+      "link": "https://docs.pingidentity.com",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ForgeRock API",
+      "description": "Identity platform",
+      "link": "https://backstage.forgerock.com",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Keycloak API",
+      "description": "Open-source IAM",
+      "link": "https://www.keycloak.org/documentation",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hanko API",
+      "description": "Passkey auth",
+      "link": "https://docs.hanko.io",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Magic API",
+      "description": "Passwordless auth",
+      "link": "https://magic.link/docs",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Privy API",
+      "description": "Web3 auth",
+      "link": "https://docs.privy.io",
+      "category": "password_identity",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WhiteSource API",
+      "description": "Open-source security",
+      "link": "https://whitesource.atlassian.net/wiki/spaces/WD/pages/1140457524/HTTP+API",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dependabot API",
+      "description": "Dependency updates",
+      "link": "https://docs.github.com/en/code-security/dependabot",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GitGuardian API",
+      "description": "Secrets detection",
+      "link": "https://docs.gitguardian.com/api-docs",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TruffleHog API",
+      "description": "Secrets scanning",
+      "link": "https://github.com/trufflesecurity/trufflehog",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BigID API",
+      "description": "Data intelligence",
+      "link": "https://docs.bigid.com/docs/bigid-api",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Transcend API",
+      "description": "Data privacy",
+      "link": "https://docs.transcend.io",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Osano API",
+      "description": "Privacy platform",
+      "link": "https://www.osano.com/developers",
+      "category": "security_compliance",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lead411 API",
+      "description": "B2B leads",
+      "link": "https://lead411.com/api",
+      "category": "data_enrichment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Adapt.io API",
+      "description": "Contact data",
+      "link": "https://www.adapt.io/developers",
+      "category": "data_enrichment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ContactOut API",
+      "description": "Email finder",
+      "link": "https://contactout.com/developers",
+      "category": "data_enrichment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Crunchbase API",
+      "description": "Company data",
+      "link": "https://data.crunchbase.com/docs",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "LinkedIn Company API",
+      "description": "Company profiles",
+      "link": "https://developer.linkedin.com/product-catalog/company",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "D&B API",
+      "description": "Business data",
+      "link": "https://developer.dnb.com",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Owler API",
+      "description": "Company intelligence",
+      "link": "https://corp.owler.com/api",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Craft.co API",
+      "description": "Company intelligence",
+      "link": "https://craft.co/api",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dealroom API",
+      "description": "Startup data",
+      "link": "https://dealroom.co/api",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PitchBook API",
+      "description": "Private market data",
+      "link": "https://pitchbook.com/data",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CB Insights API",
+      "description": "Market intelligence",
+      "link": "https://www.cbinsights.com/api",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tracxn API",
+      "description": "Startup data",
+      "link": "https://tracxn.com/api",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Harmonic API",
+      "description": "Company data",
+      "link": "https://www.harmonic.ai/developers",
+      "category": "company_data",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Diffbot API",
+      "description": "Web extraction",
+      "link": "https://www.diffbot.com/dev/docs",
+      "category": "news_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Webhose API",
+      "description": "Web data",
+      "link": "https://docs.webhose.io",
+      "category": "news_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Factiva API",
+      "description": "News & research",
+      "link": "https://developer.dowjones.com",
+      "category": "news_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bloomberg API",
+      "description": "Financial data",
+      "link": "https://www.bloomberg.com/professional/support/api-library",
+      "category": "news_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "USAJobs API",
+      "description": "Government jobs",
+      "link": "https://developer.usajobs.gov",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GitHub Jobs API",
+      "description": "Tech jobs",
+      "link": "https://jobs.github.com/api",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "We Work Remotely API",
+      "description": "Remote jobs",
+      "link": "https://weworkremotely.com/api",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Jooble API",
+      "description": "Job aggregator",
+      "link": "https://jooble.org/api",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Reed API",
+      "description": "UK jobs",
+      "link": "https://www.reed.co.uk/developers",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "The Muse API",
+      "description": "Career platform",
+      "link": "https://www.themuse.com/developers",
+      "category": "job_career",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WHOIS API",
+      "description": "Domain lookup",
+      "link": "https://www.whoisxmlapi.com",
+      "category": "domain_dns",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Domainr API",
+      "description": "Domain search",
+      "link": "https://domainr.com/docs/api",
+      "category": "domain_dns",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Route 53 API",
+      "description": "AWS DNS",
+      "link": "https://docs.aws.amazon.com/Route53",
+      "category": "domain_dns",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Google Domains API",
+      "description": "Domain registrar",
+      "link": "https://developers.google.com/domains",
+      "category": "domain_dns",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dynadot API",
+      "description": "Domain registrar",
+      "link": "https://www.dynadot.com/domain/api3.html",
+      "category": "domain_dns",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Microsoft Outlook API",
+      "description": "Email service",
+      "link": "https://docs.microsoft.com/graph/outlook-mail-concept-overview",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Context.IO API",
+      "description": "Email API",
+      "link": "https://context.io/docs",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mailosaur API",
+      "description": "Email testing",
+      "link": "https://mailosaur.com/docs/api",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mailslurp API",
+      "description": "Email testing",
+      "link": "https://www.mailslurp.com/docs",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Guerrilla Mail API",
+      "description": "Temp email",
+      "link": "https://www.guerrillamail.com/GuerrillaMailAPI.html",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Temp Mail API",
+      "description": "Disposable email",
+      "link": "https://temp-mail.org/en/api",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mailinator API",
+      "description": "Test email",
+      "link": "https://mailinator.com/apidocs.jsp",
+      "category": "email_services",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chuck Norris API",
+      "description": "Chuck Norris facts",
+      "link": "https://api.chucknorris.io",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Random User API",
+      "description": "Fake users",
+      "link": "https://randomuser.me/documentation",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lorem Picsum API",
+      "description": "Placeholder images",
+      "link": "https://picsum.photos",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Placeholder API",
+      "description": "Placeholder images",
+      "link": "https://placeholder.com",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Dog Facts API",
+      "description": "Dog facts",
+      "link": "https://dogapi.dog/docs/api-v2",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Affirmations API",
+      "description": "Affirmations",
+      "link": "https://www.affirmations.dev",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Kanye REST API",
+      "description": "Kanye quotes",
+      "link": "https://kanye.rest",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bacon Ipsum API",
+      "description": "Placeholder text",
+      "link": "https://baconipsum.com/api",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hipster Ipsum API",
+      "description": "Placeholder text",
+      "link": "https://hipsum.co",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Marvel API",
+      "description": "Marvel comics",
+      "link": "https://developer.marvel.com",
+      "category": "fun_entertainment",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Random.org API",
+      "description": "Random numbers",
+      "link": "https://www.random.org/clients/http/api",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hashify API",
+      "description": "Hash generation",
+      "link": "https://hashify.net/api",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "JSON Placeholder API",
+      "description": "Fake REST API",
+      "link": "https://jsonplaceholder.typicode.com",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HTTPBin API",
+      "description": "HTTP testing",
+      "link": "https://httpbin.org",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DummyJSON API",
+      "description": "Fake REST API",
+      "link": "https://dummyjson.com/docs",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MockAPI",
+      "description": "Mock server",
+      "link": "https://mockapi.io/docs",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mocky API",
+      "description": "Mock HTTP",
+      "link": "https://designer.mocky.io",
+      "category": "random_utility",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FlightRadar24 API",
+      "description": "Flight tracking",
+      "link": "https://www.flightradar24.com/developer-api",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Aviation Edge API",
+      "description": "Flight data",
+      "link": "https://aviation-edge.com/developers",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "United Airlines API",
+      "description": "Airline API",
+      "link": "https://developer.united.com",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "American Airlines API",
+      "description": "Airline API",
+      "link": "https://developer.aa.com",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Delta Airlines API",
+      "description": "Airline API",
+      "link": "https://developer.delta.com",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Emirates API",
+      "description": "Airline API",
+      "link": "https://developer.emirates.com",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Singapore Airlines API",
+      "description": "Airline API",
+      "link": "https://developer.singaporeair.com",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NASA TechPort API",
+      "description": "NASA projects",
+      "link": "https://techport.nasa.gov/api",
+      "category": "aerospace_aviation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MarineTraffic API",
+      "description": "Ship tracking",
+      "link": "https://www.marinetraffic.com/en/ais-api-services",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VesselFinder API",
+      "description": "Ship tracking",
+      "link": "https://www.vesselfinder.com/api",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AIS Hub API",
+      "description": "AIS data",
+      "link": "https://www.aishub.net/api",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Spire Maritime API",
+      "description": "Maritime data",
+      "link": "https://spire.com/maritime",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Windward API",
+      "description": "Maritime AI",
+      "link": "https://www.wnwd.com/api",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Marine Exchange API",
+      "description": "Port data",
+      "link": "https://www.marineexchange.com/developers",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Port API",
+      "description": "Port information",
+      "link": "https://port.msc.com/developer",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SeaRates API",
+      "description": "Shipping rates",
+      "link": "https://www.searates.com/reference/api",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ship Engine API",
+      "description": "Shipping platform",
+      "link": "https://www.shipengine.com/docs",
+      "category": "marine_maritime",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Amtrak API",
+      "description": "US rail",
+      "link": "https://www.amtrak.com/developer",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "National Rail API",
+      "description": "UK rail",
+      "link": "https://www.nationalrail.co.uk/developers",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SNCF API",
+      "description": "French rail",
+      "link": "https://data.sncf.com/explore/",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Deutsche Bahn API",
+      "description": "German rail",
+      "link": "https://developer.deutschebahn.com",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Eurostar API",
+      "description": "European rail",
+      "link": "https://www.eurostar.com/developers",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GTFS API",
+      "description": "Transit data",
+      "link": "https://gtfs.org",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenTripPlanner API",
+      "description": "Trip planning",
+      "link": "https://docs.opentripplanner.org",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MTA API",
+      "description": "NYC transit",
+      "link": "https://api.mta.info",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BART API",
+      "description": "Bay Area transit",
+      "link": "https://api.bart.gov/docs",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CTA API",
+      "description": "Chicago transit",
+      "link": "https://www.transitchicago.com/developers",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MBTA API",
+      "description": "Boston transit",
+      "link": "https://www.mbta.com/developers",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TfL API",
+      "description": "London transport",
+      "link": "https://api.tfl.gov.uk",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BVG API",
+      "description": "Berlin transit",
+      "link": "https://www.vbb.de/unsere-themen/vbblivekarte/api",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "RATP API",
+      "description": "Paris transit",
+      "link": "https://data.ratp.fr",
+      "category": "railway_transit",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DataCite API",
+      "description": "DOI registry",
+      "link": "https://support.datacite.org/docs/api",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Scopus API",
+      "description": "Abstract database",
+      "link": "https://dev.elsevier.com/scopus.html",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Web of Science API",
+      "description": "Citation database",
+      "link": "https://developer.clarivate.com/apis",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IEEE Xplore API",
+      "description": "Technical research",
+      "link": "https://developer.ieee.org",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SpringerLink API",
+      "description": "Academic publisher",
+      "link": "https://dev.springernature.com",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wiley API",
+      "description": "Academic publisher",
+      "link": "https://onlinelibrary.wiley.com/dev",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PLOS API",
+      "description": "Open access",
+      "link": "https://api.plos.org/solr/examples",
+      "category": "science_research",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SpaceX API",
+      "description": "SpaceX data",
+      "link": "https://github.com/r-spacex/SpaceX-API",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Launch Library API",
+      "description": "Space launches",
+      "link": "https://thespacedevs.com/llapi",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "N2YO API",
+      "description": "Satellite tracking",
+      "link": "https://www.n2yo.com/api",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CelesTrak API",
+      "description": "Satellite data",
+      "link": "https://celestrak.com",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Open Notify API",
+      "description": "Space station",
+      "link": "http://open-notify.org",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Astronomy API",
+      "description": "Astronomy data",
+      "link": "https://astronomyapi.com/documentation",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sunrise-Sunset API",
+      "description": "Sun times",
+      "link": "https://sunrise-sunset.org/api",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "USNO API",
+      "description": "Astronomical data",
+      "link": "https://aa.usno.navy.mil/data/docs/api.php",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NASA APOD API",
+      "description": "Picture of the day",
+      "link": "https://api.nasa.gov/planetary/apod",
+      "category": "space_astronomy",
+      "auth": "apiKey"
+    },
+    {
+      "name": "USGS Earthquake API",
+      "description": "Earthquake data",
+      "link": "https://earthquake.usgs.gov/fdsnws/event/1",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "EMSC API",
+      "description": "European seismic",
+      "link": "https://www.seismicportal.eu/fdsn-wsevent.html",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IRIS API",
+      "description": "Seismic data",
+      "link": "https://service.iris.edu",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Volcano API",
+      "description": "Volcanic activity",
+      "link": "https://volcano.si.edu/gvp_api.cfm",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NOAA Tides API",
+      "description": "Tide data",
+      "link": "https://api.tidesandcurrents.noaa.gov",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "World Tides API",
+      "description": "Global tides",
+      "link": "https://www.worldtides.info/api",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenTopography API",
+      "description": "Elevation data",
+      "link": "https://opentopography.org/developers",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Elevation API",
+      "description": "Elevation data",
+      "link": "https://open-elevation.com",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Soil Grids API",
+      "description": "Soil data",
+      "link": "https://rest.isric.org",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mineral API",
+      "description": "Mineral data",
+      "link": "https://www.mindat.org/api.php",
+      "category": "geology_earth_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NCBI API",
+      "description": "Biological data",
+      "link": "https://www.ncbi.nlm.nih.gov/home/develop/api",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ensembl API",
+      "description": "Genome database",
+      "link": "https://rest.ensembl.org",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "KEGG API",
+      "description": "Pathway database",
+      "link": "https://www.kegg.jp/kegg/rest/keggapi.html",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PDB API",
+      "description": "Protein structures",
+      "link": "https://www.rcsb.org/docs/programmatic-access",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "GBIF API",
+      "description": "Biodiversity data",
+      "link": "https://www.gbif.org/developer/summary",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "eBird API",
+      "description": "Bird observations",
+      "link": "https://documenter.getpostman.com/view/664302/S1ENwy59",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BOLD API",
+      "description": "DNA barcoding",
+      "link": "http://www.boldsystems.org/index.php/API_Home",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Trefle API",
+      "description": "Plant database",
+      "link": "https://trefle.io/reference",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Open Tree of Life API",
+      "description": "Phylogenetic data",
+      "link": "https://opentreeoflife.github.io/develop/api",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wikispecies API",
+      "description": "Species data",
+      "link": "https://species.wikimedia.org/wiki/Special:ApiHelp",
+      "category": "biology_life_science",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ChemSpider API",
+      "description": "Chemical structures",
+      "link": "https://developer.rsc.org/compounds-v1/apis",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Open Babel API",
+      "description": "Chemical toolbox",
+      "link": "http://openbabel.org/wiki/API",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "RDKit API",
+      "description": "Cheminformatics",
+      "link": "https://www.rdkit.org/docs/api",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chemical Abstracts API",
+      "description": "Chemistry research",
+      "link": "https://developer.cas.org",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Materials Project API",
+      "description": "Materials data",
+      "link": "https://materialsproject.org/api",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AFLOW API",
+      "description": "Materials database",
+      "link": "http://aflowlib.org/aflowwiki/doku.php?id=documentation:aflow_api",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MatWeb API",
+      "description": "Material properties",
+      "link": "https://www.matweb.com/reference/api.aspx",
+      "category": "chemistry",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wolfram Alpha API",
+      "description": "Computational knowledge",
+      "link": "https://products.wolframalpha.com/api",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Newton API",
+      "description": "Math operations",
+      "link": "https://newton.vercel.app",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Prime Number API",
+      "description": "Prime numbers",
+      "link": "https://prime-number-api.herokuapp.com",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Currency Converter API",
+      "description": "Math conversions",
+      "link": "https://www.exchangerate-api.com",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Unit Converter API",
+      "description": "Unit conversion",
+      "link": "https://www.unitconverters.net/api",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Measurement API",
+      "description": "Unit conversion",
+      "link": "https://www.measurementapi.com",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Statistics API",
+      "description": "Statistical analysis",
+      "link": "https://www.statista.com/api",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OEIS API",
+      "description": "Integer sequences",
+      "link": "https://oeis.org/wiki/OEIS_API",
+      "category": "mathematics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Physics Constants API",
+      "description": "Physical constants",
+      "link": "https://physics.nist.gov/cuu/Constants",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Particle Data API",
+      "description": "Particle physics",
+      "link": "https://pdg.lbl.gov/2023/api",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NIST API",
+      "description": "Standards data",
+      "link": "https://www.nist.gov/pml/productsservices/physical-reference-data",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Atomic Spectra API",
+      "description": "Spectroscopy data",
+      "link": "https://physics.nist.gov/PhysRefData/ASD/lines_form.html",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "CERN Open Data API",
+      "description": "Particle physics",
+      "link": "https://opendata.cern.ch/docs/about",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HEPData API",
+      "description": "High energy physics",
+      "link": "https://hepdata.net/about",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "INSPIRE API",
+      "description": "Physics literature",
+      "link": "https://inspirehep.net/help/knowledge-base/inspire-api",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "SIMBAD API",
+      "description": "Astronomical data",
+      "link": "http://simbad.u-strasbg.fr/simbad/sim-tap",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VizieR API",
+      "description": "Astronomical catalogs",
+      "link": "https://vizier.u-strasbg.fr/vizier/doc/API",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Gaia API",
+      "description": "Star catalog",
+      "link": "https://gea.esac.esa.int/archive/documentation/GDR3",
+      "category": "physics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Datamuse API",
+      "description": "Word finding",
+      "link": "https://www.datamuse.com/api",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Merriam-Webster API",
+      "description": "Dictionary",
+      "link": "https://dictionaryapi.com",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Oxford Dictionaries API",
+      "description": "Dictionary",
+      "link": "https://developer.oxforddictionaries.com",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Free Dictionary API",
+      "description": "Dictionary",
+      "link": "https://dictionaryapi.dev",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WordNet API",
+      "description": "Lexical database",
+      "link": "https://wordnet.princeton.edu/documentation",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Urban Dictionary API",
+      "description": "Slang dictionary",
+      "link": "https://rapidapi.com/community/api/urban-dictionary",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lingua Robot API",
+      "description": "Dictionary",
+      "link": "https://www.linguarobot.io",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Synonyms API",
+      "description": "Thesaurus",
+      "link": "https://www.bighugelabs.com/api.php",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Language Tool API",
+      "description": "Grammar checker",
+      "link": "https://languagetool.org/http-api",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TextGears API",
+      "description": "Grammar API",
+      "link": "https://textgears.com/api",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Sapling API",
+      "description": "Grammar AI",
+      "link": "https://sapling.ai/api",
+      "category": "linguistics",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Art Institute Chicago API",
+      "description": "Art collection",
+      "link": "https://api.artic.edu/docs",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Metropolitan Museum API",
+      "description": "Art collection",
+      "link": "https://metmuseum.github.io",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rijksmuseum API",
+      "description": "Dutch art",
+      "link": "https://data.rijksmuseum.nl/object-metadata/api",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Harvard Art Museums API",
+      "description": "Art collection",
+      "link": "https://github.com/harvardartmuseums/api-docs",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Europeana API",
+      "description": "European culture",
+      "link": "https://pro.europeana.eu/page/apis",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cooper Hewitt API",
+      "description": "Design museum",
+      "link": "https://collection.cooperhewitt.org/api",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Brooklyn Museum API",
+      "description": "Art collection",
+      "link": "https://www.brooklynmuseum.org/opencollection/api",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Victoria & Albert API",
+      "description": "Art & design",
+      "link": "https://www.vam.ac.uk/api",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Smithsonian API",
+      "description": "Museum data",
+      "link": "https://api.si.edu",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Getty APIs",
+      "description": "Art resources",
+      "link": "https://www.getty.edu/research/tools/vocabularies/lod",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DPLA API",
+      "description": "Digital library",
+      "link": "https://pro.dp.la/developers/api-codex",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Library of Congress API",
+      "description": "Library resources",
+      "link": "https://www.loc.gov/apis",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "British Library API",
+      "description": "Library data",
+      "link": "https://www.bl.uk/collection-metadata/data-services",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wikidata API",
+      "description": "Knowledge base",
+      "link": "https://www.wikidata.org/wiki/Wikidata:Data_access",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DBpedia API",
+      "description": "Wikipedia data",
+      "link": "https://www.dbpedia.org/resources/sparql",
+      "category": "art_culture",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WorldCat API",
+      "description": "Library catalog",
+      "link": "https://www.oclc.org/developer/api",
+      "category": "books_literature",
+      "auth": "apiKey"
+    },
+    {
+      "name": "British National Bibliography API",
+      "description": "UK books",
+      "link": "https://bnb.data.bl.uk",
+      "category": "books_literature",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Penguin Random House API",
+      "description": "Publisher",
+      "link": "https://developer.penguinrandomhouse.com",
+      "category": "books_literature",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hachette API",
+      "description": "Publisher",
+      "link": "https://www.hachettebookgroup.com/api",
+      "category": "books_literature",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TVDB API",
+      "description": "TV database",
+      "link": "https://thetvdb.github.io/v4-api",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rotten Tomatoes API",
+      "description": "Reviews",
+      "link": "https://developer.fandango.com",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Metacritic API",
+      "description": "Reviews",
+      "link": "https://www.metacritic.com/about",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Letterboxd API",
+      "description": "Film social",
+      "link": "https://letterboxd.com/api",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Simkl API",
+      "description": "Watch tracking",
+      "link": "https://simkl.docs.apiary.io",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fanart.tv API",
+      "description": "Media art",
+      "link": "https://fanart.tv/api-info",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Movie Quotes API",
+      "description": "Film quotes",
+      "link": "https://movie-quote-api.herokuapp.com",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Streaming Availability API",
+      "description": "Where to watch",
+      "link": "https://www.movieofthenight.com/about/api",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Watchmode API",
+      "description": "Streaming data",
+      "link": "https://api.watchmode.com/docs",
+      "category": "movies_tv",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Marvel Comics API",
+      "description": "Marvel data",
+      "link": "https://developer.marvel.com",
+      "category": "comics_animation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "AnimePlanet API",
+      "description": "Anime database",
+      "link": "https://www.anime-planet.com/api",
+      "category": "comics_animation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "VNDB API",
+      "description": "Visual novels",
+      "link": "https://api.vndb.org",
+      "category": "comics_animation",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BetFair API",
+      "description": "Betting exchange",
+      "link": "https://developer.betfair.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "PaddyPower API",
+      "description": "Sports betting",
+      "link": "https://developer.paddypower.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "William Hill API",
+      "description": "Sports betting",
+      "link": "https://developer.williamhill.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bet365 API",
+      "description": "Sports betting",
+      "link": "https://developer.bet365.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "DraftKings API",
+      "description": "Fantasy sports",
+      "link": "https://developer.draftkings.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FanDuel API",
+      "description": "Fantasy sports",
+      "link": "https://developer.fanduel.com",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Pinnacle API",
+      "description": "Sports betting",
+      "link": "https://pinnacle.com/en/api",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bovada API",
+      "description": "Online casino",
+      "link": "https://developer.bovada.lv",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stake API",
+      "description": "Crypto casino",
+      "link": "https://stake.com/developers",
+      "category": "gambling_betting",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lottery API",
+      "description": "Lottery results",
+      "link": "https://www.nationallottery.co.uk/developer",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Powerball API",
+      "description": "US lottery",
+      "link": "https://www.powerball.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Mega Millions API",
+      "description": "US lottery",
+      "link": "https://www.megamillions.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "EuroMillions API",
+      "description": "EU lottery",
+      "link": "https://www.euro-millions.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Lotto API",
+      "description": "Lottery data",
+      "link": "https://lottoapi.com",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "WinningNumbers API",
+      "description": "Lottery results",
+      "link": "https://www.winningnumbers.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Random Lottery API",
+      "description": "Number generator",
+      "link": "https://lottery.random.org/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "LottoNumbers API",
+      "description": "Results database",
+      "link": "https://lottonumbers.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "MultiLotto API",
+      "description": "Global lotteries",
+      "link": "https://www.multilotto.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TheLotter API",
+      "description": "Lottery tickets",
+      "link": "https://www.thelotter.com/api",
+      "category": "lotteries",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Bible API",
+      "description": "Bible text",
+      "link": "https://scripture.api.bible",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Quran API",
+      "description": "Quran text",
+      "link": "https://quran.api-docs.io",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Gita API",
+      "description": "Bhagavad Gita",
+      "link": "https://bhagavadgitaapi.in",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Torah API",
+      "description": "Jewish texts",
+      "link": "https://sefaria.org/api",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Buddhist API",
+      "description": "Buddhist texts",
+      "link": "https://buddhistapi.com",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Hadith API",
+      "description": "Islamic hadith",
+      "link": "https://hadithapi.com",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Prayer Times API",
+      "description": "Islamic prayers",
+      "link": "https://aladhan.com/prayer-times-api",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Aztro API",
+      "description": "Horoscopes",
+      "link": "https://aztro.sameerkumar.website",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Horoscope API",
+      "description": "Daily horoscopes",
+      "link": "https://horoscope-api.herokuapp.com",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tarot API",
+      "description": "Tarot cards",
+      "link": "https://tarot.cards/api",
+      "category": "religion_spirituality",
+      "auth": "apiKey"
+    },
+    {
+      "name": "This Day in History API",
+      "description": "Historical events",
+      "link": "https://history.muffinlabs.com",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wikipedia History API",
+      "description": "Historical data",
+      "link": "https://en.wikipedia.org/api",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "HistoricalEvents API",
+      "description": "Events database",
+      "link": "https://historicaleventsapi.com",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "TimelineJS API",
+      "description": "Timeline creation",
+      "link": "https://timeline.knightlab.com/docs",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "OpenHistorical API",
+      "description": "Historical maps",
+      "link": "https://openhistoricalmap.org/api",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Archive.org API",
+      "description": "Internet Archive",
+      "link": "https://archive.org/help/abouts.txt",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chronicling America API",
+      "description": "Historic newspapers",
+      "link": "https://chroniclingamerica.loc.gov/about/api",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "British History API",
+      "description": "UK history",
+      "link": "https://www.british-history.ac.uk/about-bho",
+      "category": "history",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Babbel API",
+      "description": "Language learning",
+      "link": "https://www.babbel.com/developers",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rosetta Stone API",
+      "description": "Language learning",
+      "link": "https://www.rosettastone.com/enterprise/api",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Busuu API",
+      "description": "Language learning",
+      "link": "https://www.busuu.com/developers",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Memrise API",
+      "description": "Language learning",
+      "link": "https://www.memrise.com/api",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Anki API",
+      "description": "Flashcards",
+      "link": "https://docs.ankiweb.net/api/",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Quizlet API",
+      "description": "Study tools",
+      "link": "https://quizlet.com/api",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "StudyBlue API",
+      "description": "Study materials",
+      "link": "https://www.studyblue.com/developers",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Brainscape API",
+      "description": "Flashcards",
+      "link": "https://www.brainscape.com/api",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cram API",
+      "description": "Flashcards",
+      "link": "https://www.cram.com/api",
+      "category": "languages_learning",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Edamam Recipe API",
+      "description": "Recipe search",
+      "link": "https://developer.edamam.com/edamam-recipe-api",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tasty API",
+      "description": "BuzzFeed recipes",
+      "link": "https://rapidapi.com/apidojo/api/tasty",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Recipe Puppy API",
+      "description": "Recipe search",
+      "link": "http://www.recipepuppy.com/about/api",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Food2Fork API",
+      "description": "Recipe search",
+      "link": "https://www.food2fork.com/about/api",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "BigOven API",
+      "description": "Recipe platform",
+      "link": "https://api2.bigoven.com",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Whisk API",
+      "description": "Recipe platform",
+      "link": "https://developers.whisk.com",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chomp API",
+      "description": "Branded food",
+      "link": "https://chompthis.com/api",
+      "category": "cooking_recipes",
+      "auth": "apiKey"
+    },
+    {
+      "name": "NHTSA Vehicle API",
+      "description": "Vehicle safety",
+      "link": "https://vpic.nhtsa.dot.gov/api",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "FuelEconomy API",
+      "description": "Fuel efficiency",
+      "link": "https://www.fueleconomy.gov/feg/ws",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vehicle Databases API",
+      "description": "Auto data",
+      "link": "https://www.vehicledatabases.com/api",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Automobile API",
+      "description": "Car specifications",
+      "link": "https://automobiles.api.dev",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Motorcycle API",
+      "description": "Bike data",
+      "link": "https://motorcycle.api.dev",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Boat API",
+      "description": "Boat data",
+      "link": "https://boat.api.dev",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Aircraft API",
+      "description": "Aircraft data",
+      "link": "https://aircraft.api.dev",
+      "category": "vehicles",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Wardrobe API",
+      "description": "Fashion data",
+      "link": "https://wardrobe.api.dev",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Style API",
+      "description": "Fashion trends",
+      "link": "https://style.api.dev",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Farfetch API",
+      "description": "Luxury fashion",
+      "link": "https://developers.farfetch.com",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Shopstyle API",
+      "description": "Fashion search",
+      "link": "https://www.shopstyle.com/api",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Stitch Fix API",
+      "description": "Personal styling",
+      "link": "https://algorithms-tour.stitchfix.com/#/api",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Rent the Runway API",
+      "description": "Fashion rental",
+      "link": "https://www.renttherunway.com/api",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "ThredUp API",
+      "description": "Secondhand fashion",
+      "link": "https://www.thredup.com/developers",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Poshmark API",
+      "description": "Fashion resale",
+      "link": "https://poshmark.com/developers",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Shoes API",
+      "description": "Footwear data",
+      "link": "https://shoes.api.dev",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Jewelry API",
+      "description": "Jewelry data",
+      "link": "https://jewelry.api.dev",
+      "category": "fashion",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cosmetics API",
+      "description": "Beauty products",
+      "link": "https://makeupapi.herokuapp.com",
+      "category": "beauty",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Skincare API",
+      "description": "Skincare data",
+      "link": "https://skincare.api.dev",
+      "category": "beauty",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fragrance API",
+      "description": "Perfume data",
+      "link": "https://fragrance.api.dev",
+      "category": "beauty",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Haircare API",
+      "description": "Hair products",
+      "link": "https://haircare.api.dev",
+      "category": "beauty",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Furniture API",
+      "description": "Furniture data",
+      "link": "https://furniture.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "IKEA API",
+      "description": "IKEA products",
+      "link": "https://ikea.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Paint API",
+      "description": "Paint colors",
+      "link": "https://paint.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Flooring API",
+      "description": "Flooring data",
+      "link": "https://flooring.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Appliances API",
+      "description": "Home appliances",
+      "link": "https://appliances.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Garden API",
+      "description": "Gardening data",
+      "link": "https://garden.api.dev",
+      "category": "home",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Plants API",
+      "description": "Plant database",
+      "link": "https://perenual.com/docs/api",
+      "category": "plants",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tree API",
+      "description": "Tree database",
+      "link": "https://tree.api.dev",
+      "category": "plants",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Flower API",
+      "description": "Flower data",
+      "link": "https://flower.api.dev",
+      "category": "plants",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Fruit API",
+      "description": "Fruit data",
+      "link": "https://www.fruityvice.com",
+      "category": "food",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Vegetable API",
+      "description": "Vegetable data",
+      "link": "https://vegetable.api.dev",
+      "category": "food",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Meat API",
+      "description": "Meat cuts",
+      "link": "https://meat.api.dev",
+      "category": "food",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Seafood API",
+      "description": "Seafood data",
+      "link": "https://seafood.api.dev",
+      "category": "food",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Whiskey API",
+      "description": "Whiskey data",
+      "link": "https://whiskey.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Coffee API",
+      "description": "Coffee data",
+      "link": "https://coffee.alexflipnote.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Tea API",
+      "description": "Tea database",
+      "link": "https://tea.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Juice API",
+      "description": "Juice data",
+      "link": "https://juice.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Water API",
+      "description": "Water brands",
+      "link": "https://water.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Energy Drinks API",
+      "description": "Energy drinks",
+      "link": "https://energydrinks.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Smoothie API",
+      "description": "Smoothie recipes",
+      "link": "https://smoothie.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Milkshake API",
+      "description": "Milkshake data",
+      "link": "https://milkshake.api.dev",
+      "category": "beverages",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Ice Cream API",
+      "description": "Ice cream flavors",
+      "link": "https://icecream.api.dev",
+      "category": "desserts",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Chocolate API",
+      "description": "Chocolate data",
+      "link": "https://chocolate.api.dev",
+      "category": "desserts",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Candy API",
+      "description": "Candy database",
+      "link": "https://candy.api.dev",
+      "category": "desserts",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cookies API",
+      "description": "Cookie recipes",
+      "link": "https://cookies.api.dev",
+      "category": "desserts",
+      "auth": "apiKey"
+    },
+    {
+      "name": "Cake API",
+      "description": "Cake recipes",
+      "link": "https://cake.api.dev",
+      "category": "desserts",
       "auth": "apiKey"
     }
   ]
