@@ -323,3 +323,168 @@ function generateCredentials(providerId: string): object {
 }
 
 export default http;
+
+// ==============================================
+// INSTANT CONNECT PROXY ENDPOINTS
+// ==============================================
+
+// OpenRouter proxy
+http.route({
+  path: "/proxy/openrouter",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+    if (!OPENROUTER_KEY) {
+      return jsonResponse({ error: "OpenRouter not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+      
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://apiclaw.nordsym.com",
+          "X-Title": "APIClaw",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+// Brave Search proxy
+http.route({
+  path: "/proxy/brave_search",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const BRAVE_KEY = process.env.BRAVE_API_KEY;
+    if (!BRAVE_KEY) {
+      return jsonResponse({ error: "Brave Search not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+      const { query, count = 10 } = body;
+
+      const url = new URL("https://api.search.brave.com/res/v1/web/search");
+      url.searchParams.set("q", query);
+      url.searchParams.set("count", String(count));
+
+      const response = await fetch(url.toString(), {
+        headers: { "X-Subscription-Token": BRAVE_KEY },
+      });
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+// Resend email proxy
+http.route({
+  path: "/proxy/resend",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const RESEND_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_KEY) {
+      return jsonResponse({ error: "Resend not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${RESEND_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+// ElevenLabs TTS proxy
+http.route({
+  path: "/proxy/elevenlabs",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const ELEVENLABS_KEY = process.env.ELEVENLABS_API_KEY;
+    if (!ELEVENLABS_KEY) {
+      return jsonResponse({ error: "ElevenLabs not configured" }, 500);
+    }
+
+    try {
+      const body = await request.json();
+      const { text, voice_id = "21m00Tcm4TlvDq8ikWAM" } = body;
+
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`, {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          model_id: "eleven_monolingual_v1",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        return jsonResponse({ error }, response.status);
+      }
+
+      // Return audio as base64
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      
+      return jsonResponse({
+        audio_base64: base64,
+        content_type: "audio/mpeg",
+      });
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/openrouter",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/proxy/brave_search",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/proxy/resend",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/proxy/elevenlabs",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});

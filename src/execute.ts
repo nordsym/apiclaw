@@ -3,6 +3,7 @@
  */
 
 import { getCredentials } from './credentials.js';
+import { callProxy, PROXY_PROVIDERS } from './proxy.js';
 
 interface ExecuteResult {
   success: boolean;
@@ -305,9 +306,28 @@ export async function executeAPICall(
     };
   }
 
-  // Get credentials
+  // Get credentials - fallback to proxy if not available locally
   const creds = getCredentials(providerId);
   if (!creds) {
+    // Try proxy for supported providers
+    if (PROXY_PROVIDERS.includes(providerId)) {
+      try {
+        const proxyResult = await callProxy(providerId, { action, ...params });
+        return {
+          success: true,
+          provider: providerId,
+          action,
+          data: proxyResult,
+        };
+      } catch (e: any) {
+        return {
+          success: false,
+          provider: providerId,
+          action,
+          error: e.message || 'Proxy call failed',
+        };
+      }
+    }
     return {
       success: false,
       provider: providerId,
