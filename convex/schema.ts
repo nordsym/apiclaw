@@ -202,4 +202,19 @@ export default defineSchema({
     .index("by_event", ["event"])
     .index("by_timestamp", ["timestamp"])
     .index("by_provider", ["provider"]),
+
+  // MCP Server telemetry (anonymous usage tracking)
+  telemetry: defineTable({
+    type: v.string(),  // "startup", "search", "execute", "discovery"
+    query: v.optional(v.string()),
+    apiId: v.optional(v.string()),
+    resultCount: v.optional(v.number()),
+    responseTimeMs: v.optional(v.number()),
+    version: v.string(),
+    platform: v.string(),
+    nodeVersion: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_type", ["type"])
+    .index("by_timestamp", ["timestamp"]),
 });

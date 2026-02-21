@@ -14,6 +14,7 @@ import type * as http from "../http.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
+import type * as telemetry from "../telemetry.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   providers: typeof providers;
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;
+  telemetry: typeof telemetry;
 }>;
 
 /**

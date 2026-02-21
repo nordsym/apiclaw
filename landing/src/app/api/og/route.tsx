@@ -37,17 +37,17 @@ export async function GET() {
             maxWidth: 800,
           }}
         >
-          APIs for Agents
+          The API Layer for AI Agents
         </div>
         <div
           style={{
             fontSize: 24,
-            color: '#737373',
-            marginTop: 20,
+            color: '#a3a3a3',
+            marginTop: 16,
             textAlign: 'center',
           }}
         >
-          The API discovery layer for autonomous agents
+          Find, evaluate, and integrate APIs in milliseconds.
         </div>
         <div
           style={{
@@ -63,6 +63,16 @@ export async function GET() {
           <span>{statsData.categoryCount}+ Categories</span>
           <span>•</span>
           <span>MCP Native</span>
+        </div>
+        <div
+          style={{
+            fontSize: 20,
+            color: '#737373',
+            marginTop: 24,
+            fontStyle: 'italic',
+          }}
+        >
+          Built for the agentic era
         </div>
       </div>
     ),

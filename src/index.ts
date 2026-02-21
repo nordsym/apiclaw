@@ -19,6 +19,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { discoverAPIs, getAPIDetails, getCategories, getAllAPIs } from './discovery.js';
+import { trackStartup, trackSearch, trackExecute, trackDiscovery } from './telemetry.js';
 import { 
   getAgentCredits, 
   addCredits, 
@@ -35,6 +36,15 @@ const DEFAULT_AGENT_ID = 'agent_default';
 
 // Tool definitions
 const tools: Tool[] = [
+  {
+    name: 'apiclaw_help',
+    description: 'Get help and see available commands. Start here if you are new to APIClaw.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
   {
     name: 'discover_apis',
     description: 'Search for APIs based on what you need to do. Describe your use case naturally.',
@@ -194,13 +204,51 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
+      case 'apiclaw_help': {
+        const helpText = `
+🦞 APIClaw — The API Layer for AI Agents
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DISCOVER APIs:
+  discover_apis({ query: "send SMS to Sweden" })
+  discover_apis({ query: "search the web", max_results: 10 })
+  discover_apis({ query: "text to speech", category: "ai" })
+
+GET DETAILS:
+  get_api_details({ api_id: "46elks" })
+
+INSTANT CONNECT (6 APIs, no key needed):
+  get_connected_providers()
+  call_api({ provider: "brave_search", endpoint: "search", params: { q: "AI agents" } })
+
+Available instant-connect providers:
+  • brave_search — Web search
+  • 46elks — SMS (Sweden)
+  • twilio — SMS (Global)
+  • resend — Email
+  • openrouter — LLM routing
+  • elevenlabs — Text-to-speech
+
+BROWSE:
+  list_categories()
+  list_all_apis({ category: "communication", limit: 20 })
+
+Docs: https://apiclaw.nordsym.com
+`;
+        return {
+          content: [{ type: 'text', text: helpText }]
+        };
+      }
+
       case 'discover_apis': {
         const query = args?.query as string;
         const category = args?.category as string | undefined;
         const maxResults = (args?.max_results as number) || 5;
         const region = args?.region as string | undefined;
 
+        const startTime = Date.now();
         const results = discoverAPIs(query, { category, maxResults, region });
+        trackSearch(query, results.length, Date.now() - startTime);
 
         if (results.length === 0) {
           return {
@@ -472,7 +520,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('APIvault MCP server running on stdio');
+  trackStartup();
+  
+  // Welcome message with onboarding
+  console.error(`
+🦞 APIClaw v1.1.1 — The API Layer for AI Agents
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ 10,001 APIs indexed
+✓ 446 categories  
+✓ 6 instant-connect providers ready
+
+Quick Start:
+  discover_apis("send SMS to Sweden")
+  discover_apis("search the web")
+  discover_apis("generate speech from text")
+
+Instant Connect (no API key needed):
+  get_connected_providers()
+  call_api({ provider: "brave_search", ... })
+
+Docs: https://apiclaw.nordsym.com
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`);
 }
 
 main().catch(console.error);
