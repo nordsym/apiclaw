@@ -11,8 +11,8 @@
 | **npm** | ✅ Live | `@nordsym/apiclaw@1.0.0` (publicerad 16 feb) |
 | **Landing** | ✅ Live | https://apiclaw.nordsym.com |
 | **Convex** | ✅ Deployat | `brilliant-puffin-712` |
-| **API Registry** | ✅ 7,692 | Version 3.0.0, uppdaterad 21 feb |
-| **Kategorier** | ✅ 485 | Auto-extraherade |
+| **API Registry** | ✅ 10,001 | Version 3.0.0, uppdaterad 21 feb |
+| **Kategorier** | ✅ 572 | Auto-extraherade |
 
 ---
 
@@ -87,8 +87,8 @@ npx convex deploy
 | | |
 |-|-|
 | **Fil** | `src/registry/apis.json` |
-| **Antal API:er** | 7,692 |
-| **Kategorier** | 485 |
+| **Antal API:er** | 10,001 |
+| **Kategorier** | 572 |
 | **Version** | 3.0.0 |
 | **Senast uppdaterad** | 2026-02-21 |
 
