@@ -12,7 +12,7 @@ import { useState, useEffect, useRef } from "react";
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.categoryCount.toString(), label: "Categories", live: true },
-  { number: "<200ms", label: "Response Time", live: false },
+  { number: "<200 ms", label: "Response Time", live: false },
   { number: "24/7", label: "Live Registry", live: false },
 ];
 
