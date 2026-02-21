@@ -481,6 +481,30 @@ export const getEarnings = query({
   },
 });
 
+// ============================================
+// ADMIN QUERIES
+// ============================================
+
+// Get all providers (admin only)
+export const getAllProviders = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("providers")
+      .order("desc")
+      .collect();
+  },
+});
+
+// Get all APIs (admin only)
+export const getAllAPIs = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("providerAPIs")
+      .order("desc")
+      .collect();
+  },
+});
+
 // Helper function
 function generateToken(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

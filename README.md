@@ -21,8 +21,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/APIs-4,500+-ef4444" alt="APIs" />
-  <img src="https://img.shields.io/badge/Categories-90+-171717" alt="Categories" />
+  <img src="https://img.shields.io/badge/APIs-6,500+-ef4444" alt="APIs" />
+  <img src="https://img.shields.io/badge/Categories-330+-171717" alt="Categories" />
+  <img src="https://img.shields.io/badge/Instant_Connect-6_APIs-00d4ff" alt="Instant Connect" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
 </p>
@@ -106,14 +107,63 @@ mcp.call("purchase_access", {
 // → Real API keys, ready to use
 ```
 
+### ⚡ Instant Connect (NEW!)
+
+**No API keys needed.** Execute API calls directly through APIClaw.
+
+```javascript
+// List available connected APIs
+mcp.call("list_connected")
+// → 46elks, twilio, brave_search, resend, openrouter, elevenlabs
+
+// Send SMS without any API key
+mcp.call("call_api", {
+  provider: "46elks",
+  action: "send_sms",
+  params: {
+    to: "+46701234567",
+    message: "Hello from APIClaw!"
+  }
+})
+
+// Search the web
+mcp.call("call_api", {
+  provider: "brave_search",
+  action: "search",
+  params: { query: "best restaurants in Stockholm" }
+})
+
+// Generate AI response
+mcp.call("call_api", {
+  provider: "openrouter",
+  action: "chat",
+  params: {
+    messages: [{ role: "user", content: "Hello!" }],
+    model: "anthropic/claude-3-haiku"
+  }
+})
+```
+
+**Available Instant Connect APIs:**
+
+| Provider | Actions | Description |
+|----------|---------|-------------|
+| `46elks` | `send_sms` | Swedish SMS/Voice |
+| `twilio` | `send_sms` | Global SMS/Voice |
+| `brave_search` | `search` | Web search |
+| `resend` | `send_email` | Transactional email |
+| `openrouter` | `chat` | 100+ AI models |
+| `elevenlabs` | `text_to_speech` | Voice synthesis |
+
 ---
 
 ## The Numbers
 
 | Metric | Value |
 |--------|-------|
-| **APIs Indexed** | 4,500+ |
-| **Categories** | 90+ |
+| **APIs Indexed** | 6,500+ |
+| **Categories** | 330+ |
+| **Instant Connect** | 6 APIs |
 | **Response Time** | <200ms |
 | **Uptime** | 24/7 |
 

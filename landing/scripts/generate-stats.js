@@ -2,7 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const registryPath = path.join(__dirname, '../../src/registry/apis.json');
+// Try local copy first (for Vercel), then parent directory (for local dev)
+const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
+const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
+const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
 const outputPath = path.join(__dirname, '../src/lib/stats.json');
 
 try {

@@ -28,6 +28,7 @@ import {
   getProvidersWithRealCredentials 
 } from './credits.js';
 import { hasRealCredentials } from './credentials.js';
+import { executeAPICall, getConnectedProviders } from './execute.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -132,6 +133,36 @@ const tools: Tool[] = [
   {
     name: 'list_categories',
     description: 'List all available API categories.',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  {
+    name: 'call_api',
+    description: 'Execute an API call through APIClaw Instant Connect. No API keys needed - we handle authentication.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        provider: {
+          type: 'string',
+          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio")'
+        },
+        action: {
+          type: 'string',
+          description: 'Action to perform (e.g., "send_sms", "search", "send_email", "chat", "text_to_speech")'
+        },
+        params: {
+          type: 'object',
+          description: 'Parameters for the action. Varies by provider/action.'
+        }
+      },
+      required: ['provider', 'action', 'params']
+    }
+  },
+  {
+    name: 'list_connected',
+    description: 'List all APIs available for Instant Connect (no API key needed).',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -359,6 +390,48 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 status: 'success',
                 categories: apisByCategory
+              }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'call_api': {
+        const provider = args?.provider as string;
+        const action = args?.action as string;
+        const params = (args?.params as Record<string, any>) || {};
+
+        const result = await executeAPICall(provider, action, params);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                status: result.success ? 'success' : 'error',
+                provider: result.provider,
+                action: result.action,
+                ...(result.success ? { data: result.data } : { error: result.error }),
+                ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
+              }, null, 2)
+            }
+          ],
+          isError: !result.success
+        };
+      }
+
+      case 'list_connected': {
+        const connected = getConnectedProviders();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                status: 'success',
+                message: 'These APIs are available for Instant Connect - no API key needed!',
+                connected_providers: connected,
+                usage: 'Use call_api with provider, action, and params to execute calls.'
               }, null, 2)
             }
           ]

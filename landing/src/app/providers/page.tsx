@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import statsData from "@/lib/stats.json";
 
 const benefits = [
   {
@@ -52,8 +53,8 @@ const steps = [
 ];
 
 const stats = [
-  { value: "1,400+", label: "APIs listed" },
-  { value: "52", label: "Categories" },
+  { value: `${statsData.apiCount.toLocaleString()}+`, label: "APIs listed" },
+  { value: statsData.categoryCount.toString(), label: "Categories" },
   { value: "10K+", label: "Daily queries" },
   { value: "Free", label: "To list" },
 ];
@@ -321,7 +322,7 @@ export default function ProvidersPage() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">Ready to reach AI agents?</h2>
           <p className="text-text-secondary text-lg mb-8">
-            Join 1,400+ APIs already listed on APIClaw.
+            Join {statsData.apiCount.toLocaleString()}+ APIs already listed on APIClaw.
           </p>
           <Link href="/providers/register" className="btn-primary glow inline-flex">
             <Zap className="w-5 h-5" />

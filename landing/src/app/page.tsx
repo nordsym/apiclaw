@@ -31,38 +31,50 @@ const howItWorks = [
     title: "Agent Asks",
     description: "Your agent queries APIClaw for a capability—not a product name.",
     icon: Search,
-    code: `// Agent needs to send SMS
-mcp.call("apiclaw", {
-  capability: "sms",
-  region: "EU",
-  maxPrice: "$0.10"
-})`,
+    codeJsx: (
+      <>
+        <span className="text-gray-500">{"// Agent needs to send transactional email"}</span>{"\n"}
+        <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
+        {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"email"</span>,{"\n"}
+        {"  "}<span className="text-red-400">type</span>: <span className="text-green-400">"transactional"</span>,{"\n"}
+        {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"$0.001/email"</span>{"\n"}
+        {"}"})
+      </>
+    ),
   },
   {
     step: "2",
     title: "APIClaw Matches",
-    description: "We search 4,500+ APIs and return ranked options with full metadata.",
+    description: `We search ${statsData.apiCount.toLocaleString()}+ APIs and return ranked options with full metadata.`,
     icon: Database,
-    code: `// Structured response
-{
-  "matches": [
-    { "name": "46elks", "price": "$0.07", "region": "EU" },
-    { "name": "Twilio", "price": "$0.09", "region": "Global" }
-  ],
-  "bestMatch": "46elks"
-}`,
+    codeJsx: (
+      <>
+        <span className="text-gray-500">{"// Structured response"}</span>{"\n"}
+        {"{"}{"\n"}
+        {"  "}<span className="text-red-400">"matches"</span>: [{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"Resend"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"$0.0005"</span>{" },"}{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"SendGrid"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"$0.001"</span>{" }"}{"\n"}
+        {"  "}],{"\n"}
+        {"  "}<span className="text-red-400">"bestMatch"</span>: <span className="text-green-400">"Resend"</span>{"\n"}
+        {"}"}
+      </>
+    ),
   },
   {
     step: "3",
     title: "Agent Integrates",
     description: "Full specs, auth details, endpoints—everything to start building.",
     icon: Rocket,
-    code: `// Get full API spec
-const spec = await mcp.call("apiclaw", {
-  action: "get_spec",
-  api: "46elks"
-})
-// → docs, auth, endpoints, examples`,
+    codeJsx: (
+      <>
+        <span className="text-gray-500">{"// Get full API spec"}</span>{"\n"}
+        <span className="text-purple-400">const</span> <span className="text-blue-400">spec</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
+        {"  "}<span className="text-red-400">action</span>: <span className="text-green-400">"get_spec"</span>,{"\n"}
+        {"  "}<span className="text-red-400">api</span>: <span className="text-green-400">"Resend"</span>{"\n"}
+        {"}"}){"\n"}
+        <span className="text-gray-500">{"// → docs, auth, endpoints, examples"}</span>
+      </>
+    ),
   },
 ];
 
@@ -70,7 +82,7 @@ const agentBenefits = [
   {
     icon: Search,
     title: "Semantic Search",
-    description: "Query by capability, not keywords. 'I need EU-compliant SMS' returns perfect matches.",
+    description: "Query by capability, not keywords. 'I need GDPR-compliant email' returns perfect matches.",
   },
   {
     icon: Zap,
@@ -130,7 +142,38 @@ export default function Home() {
   const [terminalOutput, setTerminalOutput] = useState<typeof terminalLines>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [activeSection, setActiveSection] = useState<string>("");
   const terminalRef = useRef<HTMLDivElement>(null);
+
+  // Scroll-based active section detection using Intersection Observer
+  useEffect(() => {
+    const sections = ["how-it-works", "for-agents", "for-providers", "pricing"];
+    
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -60% 0px", // Trigger when section is in upper portion of viewport
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
@@ -139,11 +182,17 @@ export default function Home() {
     document.documentElement.classList.toggle('dark', prefersDark);
   }, []);
 
-  // Terminal animation
+  // Terminal animation with auto-loop
   useEffect(() => {
     if (currentLineIndex >= terminalLines.length) {
       setIsTyping(false);
-      return;
+      // Auto-restart after 3 seconds
+      const restartTimeout = setTimeout(() => {
+        setTerminalOutput([]);
+        setCurrentLineIndex(0);
+        setIsTyping(true);
+      }, 3000);
+      return () => clearTimeout(restartTimeout);
     }
 
     const line = terminalLines[currentLineIndex];
@@ -180,10 +229,30 @@ export default function Home() {
             <span className="font-bold text-xl tracking-tight">APIClaw</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-text-muted">
-            <a href="#how-it-works" className="hover:text-text-primary transition">How It Works</a>
-            <a href="#for-agents" className="hover:text-text-primary transition">For Agents</a>
-            <a href="/providers" className="text-accent font-medium hover:text-accent/80 transition">For Providers</a>
-            <a href="#pricing" className="hover:text-text-primary transition">Pricing</a>
+            <a 
+              href="#how-it-works" 
+              className={`transition ${activeSection === "how-it-works" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+            >
+              How It Works
+            </a>
+            <a 
+              href="#for-agents" 
+              className={`transition ${activeSection === "for-agents" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+            >
+              For Agents
+            </a>
+            <a 
+              href="#for-providers" 
+              className={`transition ${activeSection === "for-providers" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+            >
+              For Providers
+            </a>
+            <a 
+              href="#pricing" 
+              className={`transition ${activeSection === "pricing" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+            >
+              Pricing
+            </a>
           </nav>
           <div className="flex items-center gap-3">
             <button
@@ -227,12 +296,11 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
                 <span className="gradient-text">The API Layer</span>
                 <br />
-                <span className="text-text-primary">for Agents</span>
+                <span className="text-text-primary">for Autonomous Agents</span>
               </h1>
               
               <p className="text-xl md:text-2xl text-text-secondary mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Agents discover, evaluate, and integrate APIs via MCP.
-                No more googling.
+                Find, evaluate, and integrate APIs in milliseconds.
               </p>
               
               <p className="text-text-muted mb-8 max-w-lg mx-auto lg:mx-0">
@@ -309,16 +377,7 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Replay button */}
-              {!isTyping && (
-                <button 
-                  onClick={restartTerminal}
-                  className="absolute -bottom-4 left-1/2 -translate-x-1/2 btn-ghost text-sm"
-                >
-                  <Play className="w-3 h-3" />
-                  Replay
-                </button>
-              )}
+{/* Auto-loops - no replay button needed */}
             </div>
           </div>
         </div>
@@ -377,7 +436,7 @@ export default function Home() {
                     example.ts
                   </div>
                   <div className="code-preview-body">
-                    <pre className="text-sm whitespace-pre-wrap">{step.code}</pre>
+                    <pre className="text-sm whitespace-pre-wrap">{step.codeJsx}</pre>
                   </div>
                 </div>
               </div>
@@ -437,29 +496,31 @@ export default function Home() {
                 agent.ts — Claude Agent Example
               </div>
               <div className="code-preview-body">
-                <pre className="text-sm">{`// Your agent needs to send a notification
-const result = await mcp.call("apiclaw", {
-  capability: "push_notification",
-  platforms: ["ios", "android"],
-  maxPrice: "$0.001/msg"
-});
-
-// APIClaw returns ranked matches
-console.log(result.matches);
-// [
-//   { name: "OneSignal", price: "$0.0005", platforms: ["ios", "android", "web"] },
-//   { name: "Firebase", price: "free", platforms: ["ios", "android"] },
-//   { name: "Pusher", price: "$0.001", platforms: ["ios", "android", "web"] }
-// ]
-
-// Get full spec for the best match
-const spec = await mcp.call("apiclaw", {
-  action: "get_spec",
-  api: result.bestMatch
-});
-
-// spec includes: auth, endpoints, examples, rate limits
-// Your agent can now integrate dynamically! 🚀`}</pre>
+                <pre className="text-sm">
+                  <span className="text-gray-500">{"// Your agent needs to send a notification"}</span>{"\n"}
+                  <span className="text-purple-400">const</span> <span className="text-blue-400">result</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
+                  {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"push_notification"</span>,{"\n"}
+                  {"  "}<span className="text-red-400">platforms</span>: [<span className="text-green-400">"ios"</span>, <span className="text-green-400">"android"</span>],{"\n"}
+                  {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"$0.001/msg"</span>{"\n"}
+                  {"}"});{"\n"}
+                  {"\n"}
+                  <span className="text-gray-500">{"// APIClaw returns ranked matches"}</span>{"\n"}
+                  <span className="text-blue-400">console</span>.<span className="text-yellow-400">log</span>(<span className="text-blue-400">result</span>.<span className="text-red-400">matches</span>);{"\n"}
+                  <span className="text-gray-500">{"// ["}</span>{"\n"}
+                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"OneSignal"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"$0.0005"</span>{" }"}</span>{"\n"}
+                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"Firebase"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"free"</span>{" }"}</span>{"\n"}
+                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"Pusher"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"$0.001"</span>{" }"}</span>{"\n"}
+                  <span className="text-gray-500">{"// ]"}</span>{"\n"}
+                  {"\n"}
+                  <span className="text-gray-500">{"// Get full spec for the best match"}</span>{"\n"}
+                  <span className="text-purple-400">const</span> <span className="text-blue-400">spec</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
+                  {"  "}<span className="text-red-400">action</span>: <span className="text-green-400">"get_spec"</span>,{"\n"}
+                  {"  "}<span className="text-red-400">api</span>: <span className="text-blue-400">result</span>.<span className="text-red-400">bestMatch</span>{"\n"}
+                  {"}"});{"\n"}
+                  {"\n"}
+                  <span className="text-gray-500">{"// spec includes: auth, endpoints, examples, rate limits"}</span>{"\n"}
+                  <span className="text-gray-500">{"// Your agent can now integrate dynamically! 🚀"}</span>
+                </pre>
               </div>
             </div>
           </div>
@@ -485,7 +546,7 @@ const spec = await mcp.call("apiclaw", {
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-text-secondary">
                     <Check className="w-5 h-5 text-accent" />
-                    <span>Discovered by 4,500+ autonomous agents</span>
+                    <span>{statsData.apiCount.toLocaleString()}+ APIs indexed and growing</span>
                   </div>
                   <div className="flex items-center gap-3 text-text-secondary">
                     <Check className="w-5 h-5 text-accent" />
@@ -580,7 +641,7 @@ const spec = await mcp.call("apiclaw", {
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Search 4,500+ APIs by capability
+                  Search {statsData.apiCount.toLocaleString()}+ APIs by capability
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
@@ -757,6 +818,24 @@ const spec = await mcp.call("apiclaw", {
           </div>
         </div>
       </footer>
+
+      {/* Telegram Chat Bubble */}
+      <a
+        href="https://t.me/SymbotAPI_bot"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 group"
+      >
+        <div className="flex items-center gap-2 bg-[#0088cc] hover:bg-[#0077b5] text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+          <span className="text-xl">🦞</span>
+          <span className="font-medium text-sm hidden sm:inline">Chat with the bot</span>
+        </div>
+        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs text-text-muted whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+          Talk to the AI that builds APIClaw
+          <br />
+          <span className="text-text-primary">Opens in Telegram</span>
+        </div>
+      </a>
     </main>
   );
 }

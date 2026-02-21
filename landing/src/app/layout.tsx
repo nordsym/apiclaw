@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import statsData from "@/lib/stats.json";
 
 export const metadata: Metadata = {
   title: "APIClaw | The API Layer for AI Agents",
-  description: "Agents discover and evaluate APIs via MCP. Structured data. Ranked results. 1,400+ APIs across 52 categories.",
-  metadataBase: new URL("https://apiclaw.com"),
+  description: `Agents discover and evaluate APIs via MCP. Structured data. Ranked results. ${statsData.apiCount.toLocaleString()}+ APIs across ${statsData.categoryCount}+ categories.`,
+  metadataBase: new URL("https://apiclaw.nordsym.com"),
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "APIClaw - The API layer for AI agents",
@@ -32,8 +33,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "APIClaw | The API Layer for AI Agents",
-    description: "Agents discover and evaluate APIs via MCP. 1,400+ APIs. MCP native.",
-    images: ["/og-image.png"],
+    description: `Agents discover and evaluate APIs via MCP. ${statsData.apiCount.toLocaleString()}+ APIs. MCP native.`,
+    images: ["/api/og"],
     creator: "@nordsym",
   },
   keywords: ["API", "AI agents", "MCP", "Claude", "GPT", "autonomous agents", "API discovery", "developer tools"],

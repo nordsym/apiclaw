@@ -1,7 +1,7 @@
 {
   "name": "apiclaw",
-  "version": "0.2.0",
-  "description": "Agent-native API discovery and purchasing via MCP - Connected tier",
+  "version": "0.3.0",
+  "description": "Agent-native API discovery and Instant Connect execution via MCP",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

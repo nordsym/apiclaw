@@ -71,61 +71,52 @@ const providers: Record<string, ProviderCredential> = {
     },
   },
 
-  // Mock providers (for demo/testing)
+  // Real credential providers
   resend: {
     type: 'api_key',
     get(): APICredentials | null {
-      const key = process.env.RESEND_API_KEY;
+      const env = loadEnvFile('resend.env');
+      const key = env.RESEND_API_KEY || process.env.RESEND_API_KEY;
       if (key) {
         return { type: 'api_key', api_key: key };
       }
-      // Return demo key structure
-      return {
-        type: 'api_key',
-        api_key: `re_demo_${Date.now()}`,
-      };
+      return null;
     },
   },
 
   brave_search: {
     type: 'api_key',
     get(): APICredentials | null {
-      const key = process.env.BRAVE_API_KEY;
+      const env = loadEnvFile('brave.env');
+      const key = env.BRAVE_API_KEY || process.env.BRAVE_API_KEY;
       if (key) {
         return { type: 'api_key', api_key: key };
       }
-      return {
-        type: 'api_key',
-        api_key: `BSA_demo_${Date.now()}`,
-      };
+      return null;
     },
   },
 
   openrouter: {
     type: 'bearer',
     get(): APICredentials | null {
-      const key = process.env.OPENROUTER_API_KEY;
+      const env = loadEnvFile('openrouter.env');
+      const key = env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
       if (key) {
         return { type: 'bearer', api_key: key };
       }
-      return {
-        type: 'bearer',
-        api_key: `sk-or-demo-${Date.now()}`,
-      };
+      return null;
     },
   },
 
   elevenlabs: {
     type: 'api_key',
     get(): APICredentials | null {
-      const key = process.env.ELEVENLABS_API_KEY;
+      const env = loadEnvFile('elevenlabs.env');
+      const key = env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY;
       if (key) {
         return { type: 'api_key', api_key: key };
       }
-      return {
-        type: 'api_key',
-        api_key: `el_demo_${Date.now()}`,
-      };
+      return null;
     },
   },
 };
@@ -151,6 +142,22 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'twilio') {
     const env = loadEnvFile('twilio.env');
     return !!(env.TWILIO_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID);
+  }
+  if (providerId === 'resend') {
+    const env = loadEnvFile('resend.env');
+    return !!(env.RESEND_API_KEY || process.env.RESEND_API_KEY);
+  }
+  if (providerId === 'brave_search') {
+    const env = loadEnvFile('brave.env');
+    return !!(env.BRAVE_API_KEY || process.env.BRAVE_API_KEY);
+  }
+  if (providerId === 'openrouter') {
+    const env = loadEnvFile('openrouter.env');
+    return !!(env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY);
+  }
+  if (providerId === 'elevenlabs') {
+    const env = loadEnvFile('elevenlabs.env');
+    return !!(env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY);
   }
   return false;
 }

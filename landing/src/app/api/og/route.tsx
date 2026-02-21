@@ -1,4 +1,5 @@
 import { ImageResponse } from '@vercel/og';
+import statsData from '@/lib/stats.json';
 
 export const runtime = 'edge';
 
@@ -57,9 +58,9 @@ export async function GET() {
             fontSize: 28,
           }}
         >
-          <span>1,400+ APIs</span>
+          <span>{statsData.apiCount.toLocaleString()}+ APIs</span>
           <span>•</span>
-          <span>52 Categories</span>
+          <span>{statsData.categoryCount}+ Categories</span>
           <span>•</span>
           <span>MCP Native</span>
         </div>
