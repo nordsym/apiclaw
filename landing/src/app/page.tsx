@@ -296,7 +296,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
                 <span className="gradient-text">The API Layer</span>
                 <br />
-                <span className="text-text-primary">for Autonomous Agents</span>
+                <span className="text-text-primary">for AI Agents</span>
               </h1>
               
               <p className="text-xl md:text-2xl text-text-secondary mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -331,18 +331,7 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* Trusted by */}
-              <div className="pt-8 border-t border-border">
-                <p className="text-sm text-text-muted mb-4">Trusted by agents worldwide</p>
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                  {trustedBy.map((name, i) => (
-                    <span key={i} className="text-sm text-text-secondary px-3 py-1.5 rounded-lg bg-surface border border-border">
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+                          </div>
 
             {/* Right: Terminal */}
             <div className="relative">
@@ -830,10 +819,8 @@ export default function Home() {
           <span className="text-xl">🦞</span>
           <span className="font-medium text-sm hidden sm:inline">Chat with the bot</span>
         </div>
-        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs text-text-muted whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-          Talk to the AI that builds APIClaw
-          <br />
-          <span className="text-text-primary">Opens in Telegram</span>
+        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs whitespace-nowrap shadow-lg">
+          <span className="text-text-primary font-medium">Talk to the Clawdbot building this</span>
         </div>
       </a>
     </main>

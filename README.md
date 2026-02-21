@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://apiclaw.nordsym.com/logo.svg" alt="APIClaw" width="80" height="80" />
-</p>
-
 <h1 align="center">🦞 APIClaw</h1>
 
 <p align="center">
@@ -21,8 +17,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/APIs-6,500+-ef4444" alt="APIs" />
-  <img src="https://img.shields.io/badge/Categories-330+-171717" alt="Categories" />
+  <img src="https://img.shields.io/badge/APIs-10,001-ef4444" alt="APIs" />
+  <img src="https://img.shields.io/badge/Categories-446-171717" alt="Categories" />
   <img src="https://img.shields.io/badge/Instant_Connect-6_APIs-00d4ff" alt="Instant Connect" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />

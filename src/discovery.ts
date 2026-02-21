@@ -39,7 +39,7 @@ export function discoverAPIs(
     if (category && api.category !== category) continue;
     
     // Region filter
-    if (region && !api.regions.includes(region) && !api.regions.includes('global')) continue;
+    if (region && api.regions && !api.regions.includes(region) && !api.regions.includes('global')) continue;
     
     // Calculate relevance score
     let score = 0;
@@ -48,13 +48,13 @@ export function discoverAPIs(
     // Check keywords
     for (const word of queryWords) {
       // Direct keyword match
-      if (api.keywords.some(k => k.includes(word))) {
+      if (api.keywords?.some(k => k.includes(word))) {
         score += 10;
         matchReasons.push(`keyword: ${word}`);
       }
       
       // Capability match
-      if (api.capabilities.some(c => c.includes(word))) {
+      if (api.capabilities?.some(c => c.includes(word))) {
         score += 15;
         matchReasons.push(`capability: ${word}`);
       }
@@ -72,20 +72,20 @@ export function discoverAPIs(
       }
       
       // Feature match
-      if (api.features.some(f => f.toLowerCase().includes(word))) {
+      if (api.features?.some(f => f.toLowerCase().includes(word))) {
         score += 8;
         matchReasons.push(`feature: ${word}`);
       }
     }
     
-    // Boost for high success rate
-    score += api.agent_success_rate * 10;
+    // Boost for high success rate (default to 0.8 if not set)
+    score += (api.agent_success_rate ?? 0.8) * 10;
     
-    // Boost for low latency
-    score += Math.max(0, (1000 - api.avg_latency_ms) / 100);
+    // Boost for low latency (default to 500ms if not set)
+    score += Math.max(0, (1000 - (api.avg_latency_ms ?? 500)) / 100);
     
     // Boost for free tier
-    if (api.pricing.free_tier) {
+    if (api.pricing?.free_tier) {
       score += 5;
       matchReasons.push('has free tier');
     }
