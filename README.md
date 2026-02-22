@@ -234,11 +234,15 @@ More coming soon.
 
 ---
 
-## Philosophy
+## What Makes This Different
 
-> "Everyone's building better dashboards. We deleted the dashboard entirely. Agents don't click buttons—they call endpoints."
+Most API marketplaces make agents navigate human UIs. We flip it:
 
-APIClaw is **agent-native infrastructure**. No UI needed at any point. Your agent discovers APIs, evaluates options, and integrates—all programmatically.
+- **Agents query via MCP** → Get 15,000 APIs, ranked by fit, structured as JSON
+- **Providers manage via dashboard** → When they want to, not as a blocker
+- **Zero manual API key juggling** → Instant Connect handles auth
+
+We have docs, a landing page, dashboards—they're just not required for agents to work. Agents can skip straight to the API.
 
 ---
 
