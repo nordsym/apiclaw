@@ -119,6 +119,18 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  replicate: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('replicate.env');
+      const key = env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_TOKEN;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**
@@ -158,6 +170,10 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'elevenlabs') {
     const env = loadEnvFile('elevenlabs.env');
     return !!(env.ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY);
+  }
+  if (providerId === 'replicate') {
+    const env = loadEnvFile('replicate.env');
+    return !!(env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_TOKEN);
   }
   return false;
 }

@@ -263,6 +263,106 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       };
     },
   },
+
+  // Replicate - Run any AI model (images, audio, video, text)
+  replicate: {
+    run: async (params, creds) => {
+      const { model, input } = params;
+      
+      if (!model) {
+        return { success: false, provider: 'replicate', action: 'run', error: 'Missing required param: model (e.g., "stability-ai/sdxl:...")' };
+      }
+      if (!input) {
+        return { success: false, provider: 'replicate', action: 'run', error: 'Missing required param: input (object with model inputs)' };
+      }
+
+      // Parse model into owner/name and version
+      const [modelPath, version] = model.split(':');
+      
+      // Create prediction
+      const response = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          version: version || undefined,
+          model: version ? undefined : modelPath,
+          input,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({})) as Record<string, unknown>;
+        return { success: false, provider: 'replicate', action: 'run', error: (error.detail as string) || 'Prediction failed' };
+      }
+
+      const prediction = await response.json() as Record<string, unknown>;
+      
+      // Poll for completion (max 60 seconds)
+      let result = prediction;
+      const startTime = Date.now();
+      while (result.status === 'starting' || result.status === 'processing') {
+        if (Date.now() - startTime > 60000) {
+          return { 
+            success: true, 
+            provider: 'replicate', 
+            action: 'run',
+            data: { 
+              status: 'pending',
+              prediction_id: result.id,
+              message: 'Prediction still running. Use prediction_id to check status.',
+              urls: result.urls
+            }
+          };
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const pollResponse = await fetch((result.urls as Record<string, string>)?.get || `https://api.replicate.com/v1/predictions/${result.id}`, {
+          headers: { 'Authorization': `Bearer ${creds.api_key}` },
+        });
+        result = await pollResponse.json() as Record<string, unknown>;
+      }
+
+      if (result.status === 'failed') {
+        return { success: false, provider: 'replicate', action: 'run', error: (result.error as string) || 'Prediction failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'replicate', 
+        action: 'run',
+        data: { 
+          status: result.status,
+          output: result.output,
+          model: modelPath,
+          metrics: result.metrics
+        }
+      };
+    },
+
+    list_models: async (_params, creds) => {
+      const response = await fetch('https://api.replicate.com/v1/models', {
+        headers: { 'Authorization': `Bearer ${creds.api_key}` },
+      });
+
+      if (!response.ok) {
+        return { success: false, provider: 'replicate', action: 'list_models', error: 'Failed to list models' };
+      }
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      return { 
+        success: true, 
+        provider: 'replicate', 
+        action: 'list_models',
+        data: { 
+          models: data.results,
+          message: 'Use model owner/name with run action. Popular: stability-ai/sdxl, meta/llama-2-70b-chat, openai/whisper'
+        }
+      };
+    },
+  },
 };
 
 // Get available actions for a provider

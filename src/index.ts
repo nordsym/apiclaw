@@ -228,6 +228,7 @@ Available instant-connect providers:
   • resend — Email
   • openrouter — LLM routing
   • elevenlabs — Text-to-speech
+  • replicate — Run any AI model (images, video, audio)
 
 BROWSE:
   list_categories()
@@ -529,7 +530,7 @@ async function main() {
 
 ✓ 10,001 APIs indexed
 ✓ 446 categories  
-✓ 6 instant-connect providers ready
+✓ 7 instant-connect providers ready
 
 Quick Start:
   discover_apis("send SMS to Sweden")

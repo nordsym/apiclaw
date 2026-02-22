@@ -777,7 +777,7 @@ export default function Home() {
                 <li><a href="#for-providers" className="hover:text-text-primary transition">For Providers</a></li>
                 <li><a href="/providers/dashboard" className="hover:text-text-primary transition">Provider Dashboard</a></li>
                 <li><a href="#pricing" className="hover:text-text-primary transition">Pricing</a></li>
-                <li><a href="https://github.com/nordsym/apiclaw#installation" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Documentation</a></li>
+                <li><a href="/docs" className="hover:text-text-primary transition">Documentation</a></li>
               </ul>
             </div>
 
