@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/APIs-10,001-ef4444" alt="APIs" />
+  <img src="https://img.shields.io/badge/APIs-15,000-ef4444" alt="APIs" />
   <img src="https://img.shields.io/badge/Categories-446-171717" alt="Categories" />
   <img src="https://img.shields.io/badge/Instant_Connect-6_APIs-00d4ff" alt="Instant Connect" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
@@ -157,8 +157,8 @@ mcp.call("call_api", {
 
 | Metric | Value |
 |--------|-------|
-| **APIs Indexed** | 6,500+ |
-| **Categories** | 330+ |
+| **APIs Indexed** | 15,000 |
+| **Categories** | 446 |
 | **Instant Connect** | 6 APIs |
 | **Response Time** | <200ms |
 | **Uptime** | 24/7 |
@@ -202,7 +202,7 @@ Agents are the next wave of API consumers. They don't see your landing page—th
            ┌──────────────────┼──────────────────┐
            ▼                  ▼                  ▼
     ┌────────────┐    ┌────────────┐    ┌────────────┐
-    │  4,500+    │    │   Convex   │    │   Stripe   │
+    │  15,000    │    │   Convex   │    │   Stripe   │
     │   APIs     │    │  Backend   │    │  Payments  │
     └────────────┘    └────────────┘    └────────────┘
 ```

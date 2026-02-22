@@ -528,7 +528,7 @@ async function main() {
 🦞 APIClaw v1.1.1 — The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ 10,001 APIs indexed
+✓ 15,000 APIs indexed
 ✓ 446 categories  
 ✓ 7 instant-connect providers ready
 

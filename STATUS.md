@@ -11,8 +11,8 @@
 | **npm** | ✅ Live | `@nordsym/apiclaw@1.0.0` (publicerad 16 feb) |
 | **Landing** | ✅ Live | https://apiclaw.nordsym.com |
 | **Convex** | ✅ Deployat | `brilliant-puffin-712` |
-| **API Registry** | ✅ 11,017 | Version 3.1.0, uppdaterad 22 feb |
-| **Kategorier** | ✅ 572 | Auto-extraherade |
+| **API Registry** | ✅ 15,000 | Version 3.2.0, uppdaterad 22 feb |
+| **Kategorier** | ✅ 446 | Auto-extraherade |
 
 ---
 
@@ -25,7 +25,7 @@ Local:      v0.3.0 (package.json)
 Registry:   https://registry.npmjs.org/@nordsym/apiclaw
 ```
 
-**⚠️ Notera:** Lokal version (0.3.0) != publicerad (1.0.0). Vid nästa publish, bumpa till 1.1.0.
+**⚠️ Notera:** Lokal version (1.1.2) != publicerad (1.0.0). Vid nästa publish, bumpa till 1.2.0.
 
 **Installation:**
 ```bash
@@ -87,18 +87,18 @@ npx convex deploy
 | | |
 |-|-|
 | **Fil** | `src/registry/apis.json` |
-| **Antal API:er** | 10,001 |
-| **Kategorier** | 572 |
-| **Version** | 3.0.0 |
-| **Senast uppdaterad** | 2026-02-21 |
+| **Antal API:er** | 15,000 |
+| **Kategorier** | 446 |
+| **Version** | 3.2.1 |
+| **Senast uppdaterad** | 2026-02-22 |
 
 **Struktur:**
 ```json
 {
-  "version": "3.0.0",
-  "source": "apis.guru + manual",
-  "lastUpdated": "2026-02-21",
-  "count": 7692,
+  "version": "3.2.1",
+  "source": "apis.guru + manual curation",
+  "lastUpdated": "2026-02-22",
+  "count": 15000,
   "apis": [...]
 }
 ```
@@ -151,7 +151,7 @@ apiclaw/
 │   ├── credits.ts          # Credit-system
 │   ├── stripe.ts           # Stripe (förberett)
 │   └── registry/
-│       └── apis.json       # 7,692 API:er
+│       └── apis.json       # 15,000 API:er
 │
 ├── landing/                # Next.js frontend
 │   └── src/app/
@@ -217,7 +217,7 @@ bash scripts/sync-and-deploy.sh
 
 ## 📈 Nästa steg (prioriterat)
 
-1. **Öka API-antal** — Scrapa fler källor för 10k+
+1. ~~**Öka API-antal**~~ ✅ **DONE: 15,000 APIs reached!**
 2. **Testa Instant Connect E2E** — Verifiera alla 6 providers
 3. **Stripe wiring** — Koppla betalflöde
 4. **Launch prep** — PH, X thread, etc.
@@ -228,10 +228,11 @@ bash scripts/sync-and-deploy.sh
 
 | Datum | Ändring |
 |-------|---------|
+| 2026-02-22 | 🎉 **15,000 APIs milestone reached!** Registry v3.2.1 |
+| 2026-02-22 | Kategorier konsoliderade: 572 → 446 |
 | 2026-02-21 | STATUS.md skapad, verifierad mot prod |
 | 2026-02-16 | npm v1.0.0 publicerad |
-| 2026-02-21 | Registry uppdaterat till 7,692 API:er |
 
 ---
 
-*Senast verifierad: 21 Feb 2026, 17:15 CET*
+*Senast verifierad: 22 Feb 2026, kl 08:30 CET*
