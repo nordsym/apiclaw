@@ -131,6 +131,18 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  firecrawl: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('firecrawl.env');
+      const key = env.FIRECRAWL_API_KEY || process.env.FIRECRAWL_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**

@@ -274,7 +274,7 @@ export default function DocsPage() {
             <ul className="space-y-2 text-gray-300">
               <li>
                 <strong>Telegram:</strong>{' '}
-                <a href="https://t.me/SymbotAPI_bot" className="text-orange-400 hover:underline">@SymbotAPI_bot</a>
+                <a href="https://t.me/Symbot_apiclaw_bot" className="text-orange-400 hover:underline">@Symbot_apiclaw_bot</a>
               </li>
               <li>
                 <strong>GitHub:</strong>{' '}

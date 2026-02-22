@@ -363,6 +363,99 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       };
     },
   },
+
+  // Firecrawl - Web scraping and crawling
+  firecrawl: {
+    scrape: async (params, creds) => {
+      const { url, formats = ['markdown'] } = params;
+      
+      if (!url) {
+        return { success: false, provider: 'firecrawl', action: 'scrape', error: 'Missing required param: url' };
+      }
+
+      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url, formats }),
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok || !data.success) {
+        return { success: false, provider: 'firecrawl', action: 'scrape', error: (data.error as string) || 'Scrape failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'firecrawl', 
+        action: 'scrape',
+        data: data.data,
+      };
+    },
+
+    crawl: async (params, creds) => {
+      const { url, limit = 10 } = params;
+      
+      if (!url) {
+        return { success: false, provider: 'firecrawl', action: 'crawl', error: 'Missing required param: url' };
+      }
+
+      const response = await fetch('https://api.firecrawl.dev/v1/crawl', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url, limit }),
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok || !data.success) {
+        return { success: false, provider: 'firecrawl', action: 'crawl', error: (data.error as string) || 'Crawl failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'firecrawl', 
+        action: 'crawl',
+        data: { id: data.id, status: 'started', message: 'Crawl job started. Poll status with crawl_status action.' },
+      };
+    },
+
+    map: async (params, creds) => {
+      const { url } = params;
+      
+      if (!url) {
+        return { success: false, provider: 'firecrawl', action: 'map', error: 'Missing required param: url' };
+      }
+
+      const response = await fetch('https://api.firecrawl.dev/v1/map', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok || !data.success) {
+        return { success: false, provider: 'firecrawl', action: 'map', error: (data.error as string) || 'Map failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'firecrawl', 
+        action: 'map',
+        data: { links: data.links },
+      };
+    },
+  },
 };
 
 // Get available actions for a provider

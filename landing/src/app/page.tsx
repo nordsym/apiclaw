@@ -33,11 +33,11 @@ const howItWorks = [
     icon: Search,
     codeJsx: (
       <>
-        <span className="text-gray-500">{"// Agent needs to send transactional email"}</span>{"\n"}
+        <span className="text-gray-500">{"// Agent needs to send SMS in Sweden"}</span>{"\n"}
         <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
-        {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"email"</span>,{"\n"}
-        {"  "}<span className="text-red-400">type</span>: <span className="text-green-400">"transactional"</span>,{"\n"}
-        {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"$0.001/email"</span>{"\n"}
+        {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"sms"</span>,{"\n"}
+        {"  "}<span className="text-red-400">region</span>: <span className="text-green-400">"sweden"</span>,{"\n"}
+        {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"€0.10/sms"</span>{"\n"}
         {"}"})
       </>
     ),
@@ -52,10 +52,10 @@ const howItWorks = [
         <span className="text-gray-500">{"// Structured response"}</span>{"\n"}
         {"{"}{"\n"}
         {"  "}<span className="text-red-400">"matches"</span>: [{"\n"}
-        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"Resend"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"$0.0005"</span>{" },"}{"\n"}
-        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"SendGrid"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"$0.001"</span>{" }"}{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"46elks"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"€0.05"</span>{" },"}{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"Twilio"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"€0.08"</span>{" }"}{"\n"}
         {"  "}],{"\n"}
-        {"  "}<span className="text-red-400">"bestMatch"</span>: <span className="text-green-400">"Resend"</span>{"\n"}
+        {"  "}<span className="text-red-400">"bestMatch"</span>: <span className="text-green-400">"46elks"</span>{"\n"}
         {"}"}
       </>
     ),
@@ -70,7 +70,7 @@ const howItWorks = [
         <span className="text-gray-500">{"// Get full API spec"}</span>{"\n"}
         <span className="text-purple-400">const</span> <span className="text-blue-400">spec</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
         {"  "}<span className="text-red-400">action</span>: <span className="text-green-400">"get_spec"</span>,{"\n"}
-        {"  "}<span className="text-red-400">api</span>: <span className="text-green-400">"Resend"</span>{"\n"}
+        {"  "}<span className="text-red-400">api</span>: <span className="text-green-400">"46elks"</span>{"\n"}
         {"}"}){"\n"}
         <span className="text-gray-500">{"// → docs, auth, endpoints, examples"}</span>
       </>
@@ -810,7 +810,7 @@ export default function Home() {
 
       {/* Telegram Chat Bubble */}
       <a
-        href="https://t.me/SymbotAPI_bot"
+        href="https://t.me/Symbot_apiclaw_bot"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 group"
