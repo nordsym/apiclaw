@@ -330,6 +330,12 @@ export default function Home() {
                   View on GitHub
                 </a>
               </div>
+              
+              {/* Social proof */}
+              <p className="text-sm text-text-muted mt-4 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>Trusted by agents using Claude, GPT, and AutoGPT</span>
+              </p>
 
                           </div>
 
@@ -388,6 +394,60 @@ export default function Home() {
                 <div className="stat-label">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Before/After */}
+      <section className="py-12 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="p-6 rounded-xl border border-red-500/20 bg-red-500/5">
+              <div className="flex items-center gap-2 text-red-400 font-medium mb-4">
+                <span className="text-xl">😤</span> Without APIClaw
+              </div>
+              <ul className="space-y-3 text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 mt-1">✗</span>
+                  <span>3+ hours searching for the right API</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 mt-1">✗</span>
+                  <span>Create accounts, manage API keys</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 mt-1">✗</span>
+                  <span>Read docs, figure out auth, test endpoints</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-400 mt-1">✗</span>
+                  <span>Your agent waits... and waits...</span>
+                </li>
+              </ul>
+            </div>
+            <div className="p-6 rounded-xl border border-green-500/20 bg-green-500/5">
+              <div className="flex items-center gap-2 text-green-400 font-medium mb-4">
+                <span className="text-xl">🦞</span> With APIClaw
+              </div>
+              <ul className="space-y-3 text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span><strong>30 seconds</strong> to discover + execute</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span>No accounts, no API keys needed</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span>Instant Connect: call APIs directly</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-400 mt-1">✓</span>
+                  <span>Your agent ships. Today.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -661,9 +721,10 @@ export default function Home() {
               </div>
               <h3 className="text-2xl font-bold mb-2">Provisioning</h3>
               <p className="text-text-secondary mb-6">Agent-native credential management</p>
-              <div className="text-5xl font-black mb-6 text-text-muted">
-                TBD
+              <div className="text-3xl font-bold mb-2 text-text-muted">
+                Free Beta
               </div>
+              <p className="text-sm text-text-muted mb-4">Early adopters get extended free access</p>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3 text-text-muted">
                   <Check className="w-5 h-5 flex-shrink-0" />

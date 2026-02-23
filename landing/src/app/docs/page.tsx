@@ -112,6 +112,67 @@ export default function DocsPage() {
           </div>
         </section>
 
+
+        {/* Examples */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <span className="text-[var(--accent)]">💡</span> Examples
+          </h2>
+          
+          <div className="space-y-6">
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
+              <h3 className="text-lg font-semibold mb-4">Send an SMS</h3>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm">
+                  <span className="text-[var(--text-muted)]">// Find SMS providers for Sweden</span>{'\n'}
+                  <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send SMS Sweden&quot;</span>{' }'}){'\n\n'}
+                  <span className="text-[var(--text-muted)]">// Send via instant-connect</span>{'\n'}
+                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;46elks&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;sms&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
+                  {"    "}<span className="text-sky-600 dark:text-sky-400">to</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;+46701234567&quot;</span>,{'\n'}
+                  {"    "}<span className="text-sky-600 dark:text-sky-400">message</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello from APIClaw!&quot;</span>{'\n'}
+                  {"  }"}{'\n'}
+                  {'}'})
+                </code>
+              </pre>
+            </div>
+
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
+              <h3 className="text-lg font-semibold mb-4">Search the web</h3>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm">
+                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;brave_search&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;search&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;best MCP servers 2026&quot;</span>{' }'}{'\n'}
+                  {'}'})
+                </code>
+              </pre>
+            </div>
+
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
+              <h3 className="text-lg font-semibold mb-4">Generate speech</h3>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm">
+                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;elevenlabs&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;tts&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
+                  {"    "}<span className="text-sky-600 dark:text-sky-400">text</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello, I am an AI agent!&quot;</span>,{'\n'}
+                  {"    "}<span className="text-sky-600 dark:text-sky-400">voice</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;adam&quot;</span>{'\n'}
+                  {"  }"}{'\n'}
+                  {'}'})
+                </code>
+              </pre>
+            </div>
+          </div>
+        </section>
+
+        {/* For Providers */}
+        <section className="mb-16">
+
         {/* Tools Reference */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -209,66 +270,6 @@ export default function DocsPage() {
             </div>
           </div>
         </section>
-
-        {/* Examples */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">💡</span> Examples
-          </h2>
-          
-          <div className="space-y-6">
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Send an SMS</h3>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm">
-                  <span className="text-[var(--text-muted)]">// Find SMS providers for Sweden</span>{'\n'}
-                  <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send SMS Sweden&quot;</span>{' }'}){'\n\n'}
-                  <span className="text-[var(--text-muted)]">// Send via instant-connect</span>{'\n'}
-                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;46elks&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;sms&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">to</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;+46701234567&quot;</span>,{'\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">message</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello from APIClaw!&quot;</span>{'\n'}
-                  {"  }"}{'\n'}
-                  {'}'})
-                </code>
-              </pre>
-            </div>
-
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Search the web</h3>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm">
-                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;brave_search&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;search&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;best MCP servers 2026&quot;</span>{' }'}{'\n'}
-                  {'}'})
-                </code>
-              </pre>
-            </div>
-
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Generate speech</h3>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm">
-                  <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;elevenlabs&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;tts&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">text</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello, I am an AI agent!&quot;</span>,{'\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">voice</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;adam&quot;</span>{'\n'}
-                  {"  }"}{'\n'}
-                  {'}'})
-                </code>
-              </pre>
-            </div>
-          </div>
-        </section>
-
-        {/* For Providers */}
-        <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <span className="text-[var(--accent)]">🤝</span> For API Providers
           </h2>
