@@ -432,7 +432,7 @@ export default function Home() {
               <ul className="space-y-3 text-text-secondary">
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span><strong>30 seconds</strong> to discover + execute</span>
+                  <span><strong>∞ hours saved</strong> per integration</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
