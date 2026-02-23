@@ -326,13 +326,11 @@ export default function Home() {
                   <span className="text-xs opacity-70">copy</span>
                 </button>
                 <a
-                  href="https://github.com/nordsym/apiclaw"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/docs"
                   className="btn-secondary"
                 >
-                  <Github className="w-5 h-5" />
-                  View on GitHub
+                  Get Started
+                  <ArrowRight className="w-5 h-5" />
                 </a>
               </div>
               
