@@ -137,12 +137,26 @@ const terminalLines = [
   { type: "accent", text: "→ Add to Claude Desktop: Settings → MCP → Add Server", delay: 0 },
 ];
 
+const directCallProviders = [
+  { name: "Brave Search", desc: "Web search", icon: "🔍" },
+  { name: "46elks", desc: "SMS (Sweden)", icon: "📱" },
+  { name: "Twilio", desc: "SMS (Global)", icon: "📲" },
+  { name: "Resend", desc: "Email", icon: "📧" },
+  { name: "OpenRouter", desc: "LLM routing", icon: "🤖" },
+  { name: "ElevenLabs", desc: "Text-to-speech", icon: "🔊" },
+  { name: "Perplexity", desc: "AI search", icon: "🧠" },
+  { name: "Anthropic", desc: "Claude API", icon: "🎭" },
+  { name: "OpenAI", desc: "GPT API", icon: "⚡" },
+  { name: "Replicate", desc: "ML models", icon: "🎨" },
+];
+
 export default function Home() {
   const [isDark, setIsDark] = useState(true);
   const [terminalOutput, setTerminalOutput] = useState<typeof terminalLines>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [showProvidersModal, setShowProvidersModal] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
 
   // Scroll-based active section detection using Intersection Observer
@@ -293,9 +307,12 @@ export default function Home() {
                 <div className="badge badge-live inline-flex">
                   <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
                 </div>
-                <div className="badge inline-flex bg-accent/10 border-accent/30 text-accent">
+                <button 
+                  onClick={() => setShowProvidersModal(true)}
+                  className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+                >
                   <span className="flex items-center gap-2"><Zap className="w-3 h-3" />10 Direct Call providers • more coming</span>
-                </div>
+                </button>
               </div>
               
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
@@ -950,6 +967,64 @@ export default function Home() {
           <span className="text-text-primary font-medium">Talk to the Clawdbot building this</span>
         </div>
       </a>
+
+      {/* Direct Call Providers Modal */}
+      {showProvidersModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowProvidersModal(false)}
+        >
+          <div 
+            className="bg-background border border-border rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-accent" />
+                  Direct Call Providers
+                </h3>
+                <button 
+                  onClick={() => setShowProvidersModal(false)}
+                  className="p-2 hover:bg-surface rounded-lg transition-colors"
+                >
+                  <span className="text-xl">×</span>
+                </button>
+              </div>
+              <p className="text-sm text-text-muted mt-1">No API keys needed. Call directly through APIClaw.</p>
+            </div>
+            
+            <div className="p-4 max-h-[40vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {directCallProviders.map((provider, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border">
+                    <span className="text-xl">{provider.icon}</span>
+                    <div>
+                      <div className="font-medium text-sm">{provider.name}</div>
+                      <div className="text-xs text-text-muted">{provider.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-border bg-surface/50">
+              <p className="text-sm text-text-secondary mb-4 text-center">
+                Want your API here? Get discovered by thousands of AI agents.
+              </p>
+              <a
+                href="https://nordsym.github.io/NordSym-Scheduler/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary w-full justify-center"
+              >
+                <span>Book a Call</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
