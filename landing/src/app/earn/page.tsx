@@ -73,12 +73,12 @@ export default function EarnPage() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [totalCredits] = useState(1350); // Demo value
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('apiclaw-theme') as 'light' | 'dark' | null;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
+    // Default to light
+    const initialTheme = savedTheme || 'light';
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
@@ -116,14 +116,14 @@ export default function EarnPage() {
               APIClaw
             </span>
           </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+          <nav className="flex items-center gap-4 md:gap-6">
+            <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Home
             </Link>
-            <Link href="/docs" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+            <Link href="/docs" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Docs
             </Link>
-            <Link href="/providers" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">
+            <Link href="/providers" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Providers
             </Link>
             <button

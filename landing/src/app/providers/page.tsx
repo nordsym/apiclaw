@@ -60,11 +60,12 @@ const stats = [
 ];
 
 export default function ProvidersPage() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
-    const prefersDark = saved !== 'light';
+    // Default to light
+    const prefersDark = saved === 'dark';
     setIsDark(prefersDark);
     document.documentElement.classList.toggle('dark', prefersDark);
   }, []);

@@ -5,12 +5,12 @@ import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export default function DocsPage() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('apiclaw-theme') as 'light' | 'dark' | null;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
+    // Default to light for docs
+    const initialTheme = savedTheme || 'light';
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);
@@ -33,14 +33,14 @@ export default function DocsPage() {
               APIClaw
             </span>
           </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">Home</Link>
-            <Link href="/providers" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">Providers</Link>
-            <Link href="/earn" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors">Earn Credits</Link>
+          <nav className="flex items-center gap-4 md:gap-6">
+            <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Home</Link>
+            <Link href="/providers" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Providers</Link>
+            <Link href="/earn" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Earn Credits</Link>
             <a 
               href="https://github.com/nordsym/apiclaw" 
               target="_blank"
-              className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+              className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base"
             >
               GitHub
             </a>
