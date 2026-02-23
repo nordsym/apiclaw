@@ -217,18 +217,19 @@ DISCOVER APIs:
 GET DETAILS:
   get_api_details({ api_id: "46elks" })
 
-INSTANT CONNECT (6 APIs, no key needed):
+INSTANT CONNECT (8 APIs, no key needed):
   get_connected_providers()
-  call_api({ provider: "brave_search", endpoint: "search", params: { q: "AI agents" } })
+  call_api({ provider: "brave_search", endpoint: "search", params: { query: "AI agents" } })
 
 Available instant-connect providers:
   • brave_search — Web search
   • 46elks — SMS (Sweden)
   • twilio — SMS (Global)
   • resend — Email
-  • openrouter — LLM routing
+  • openrouter — LLM routing (100+ models)
   • elevenlabs — Text-to-speech
-  • replicate — Run any AI model (images, video, audio)
+  • replicate — AI models (images, video, audio)
+  • firecrawl — Web scraping & crawling
 
 BROWSE:
   list_categories()
@@ -525,12 +526,12 @@ async function main() {
   
   // Welcome message with onboarding
   console.error(`
-🦞 APIClaw v1.1.1 — The API Layer for AI Agents
+🦞 APIClaw v1.1.5 — The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ 15,000 APIs indexed
-✓ 446 categories  
-✓ 7 instant-connect providers ready
+✓ 16,000+ APIs indexed
+✓ 23 categories  
+✓ 8 instant-connect providers ready
 
 Quick Start:
   discover_apis("send SMS to Sweden")

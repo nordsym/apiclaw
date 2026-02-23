@@ -131,7 +131,7 @@ export default function DocsPage() {
             {/* discover_apis */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">discover_apis</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Search 10,000+ APIs using natural language.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Search 16,000+ APIs using natural language.</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{\n'}
@@ -202,7 +202,7 @@ export default function DocsPage() {
             {/* list_categories */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">list_categories</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Browse all 446 API categories.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Browse all API categories (23 main categories).</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm text-[var(--text-primary)]">list_categories()</code>
               </pre>
@@ -243,7 +243,7 @@ export default function DocsPage() {
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;brave_search&quot;</span>,{'\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;search&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">q</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;best MCP servers 2026&quot;</span>{' }'}{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;best MCP servers 2026&quot;</span>{' }'}{'\n'}
                   {'}'})
                 </code>
               </pre>
