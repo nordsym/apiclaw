@@ -289,8 +289,13 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
-              <div className="badge badge-live mb-6 inline-flex">
-                <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-6">
+                <div className="badge badge-live inline-flex">
+                  <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
+                </div>
+                <div className="badge inline-flex bg-accent/10 border-accent/30 text-accent">
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />10 Direct Call providers • more coming</span>
+                </div>
               </div>
               
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
@@ -440,7 +445,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span>Direct Call: call APIs directly</span>
+                  <span>Direct Call: 10 providers, full API depth</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
@@ -449,6 +454,10 @@ export default function Home() {
               </ul>
             </div>
           </div>
+          <p className="text-center text-sm text-text-muted mt-8">
+            <Rocket className="w-4 h-4 inline mr-1" />
+            New Direct Call providers added weekly
+          </p>
         </div>
       </section>
 
