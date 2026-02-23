@@ -459,6 +459,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Quick Start */}
+      <section className="py-16 px-6 bg-surface/50">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3">
+              <Zap className="w-6 h-6 text-accent" />
+              Quick Start
+            </h2>
+            <p className="text-text-secondary mt-2">Get running in 30 seconds</p>
+          </div>
+          
+          <div className="space-y-6">
+            {/* Install */}
+            <div className="bg-background border border-border rounded-xl p-6">
+              <p className="text-sm text-text-muted mb-3">Run directly or install globally:</p>
+              <pre className="bg-surface-elevated border border-border rounded-lg p-4 overflow-x-auto text-sm">
+                <code>
+                  <span className="text-text-muted"># Run directly with npx</span>{"\n"}
+                  <span className="text-accent">npx</span> @nordsym/apiclaw{"\n\n"}
+                  <span className="text-text-muted"># Or install globally</span>{"\n"}
+                  <span className="text-accent">npm</span> install -g @nordsym/apiclaw{"\n"}
+                  apiclaw
+                </code>
+              </pre>
+            </div>
+
+            {/* MCP Config */}
+            <div className="bg-background border border-border rounded-xl p-6">
+              <p className="text-sm text-text-muted mb-3">Add to Claude Desktop (MCP config):</p>
+              <pre className="bg-surface-elevated border border-border rounded-lg p-4 overflow-x-auto text-sm">
+                <code>
+{`{
+  "mcpServers": {
+    "apiclaw": {
+      "command": "npx",
+      "args": ["@nordsym/apiclaw"]
+    }
+  }
+}`}
+                </code>
+              </pre>
+            </div>
+          </div>
+          
+          <p className="text-center text-sm text-text-muted mt-6">
+            Works with Claude Desktop, Cursor, and any MCP-compatible client
+          </p>
+        </div>
+      </section>
+
       <div className="divider" />
 
       {/* How It Works */}
