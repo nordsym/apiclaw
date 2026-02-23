@@ -334,7 +334,7 @@ export default function Home() {
               {/* Social proof */}
               <p className="text-sm text-text-muted mt-4 flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>Trusted by agents using Claude, GPT, and AutoGPT</span>
+                <span>The API layer agent builders are switching to</span>
               </p>
 
                           </div>
