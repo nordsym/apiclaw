@@ -138,16 +138,15 @@ const terminalLines = [
 ];
 
 const directCallProviders = [
-  { name: "Brave Search", desc: "Web search", icon: "🔍" },
-  { name: "46elks", desc: "SMS (Sweden)", icon: "📱" },
-  { name: "Twilio", desc: "SMS (Global)", icon: "📲" },
-  { name: "Resend", desc: "Email", icon: "📧" },
-  { name: "OpenRouter", desc: "LLM routing", icon: "🤖" },
-  { name: "ElevenLabs", desc: "Text-to-speech", icon: "🔊" },
-  { name: "Perplexity", desc: "AI search", icon: "🧠" },
-  { name: "Anthropic", desc: "Claude API", icon: "🎭" },
-  { name: "OpenAI", desc: "GPT API", icon: "⚡" },
-  { name: "Replicate", desc: "ML models", icon: "🎨" },
+  { name: "46elks", desc: "SMS (Sweden)" },
+  { name: "Twilio", desc: "SMS (Global)" },
+  { name: "Resend", desc: "Email" },
+  { name: "Brave Search", desc: "Web search" },
+  { name: "OpenRouter", desc: "100+ LLMs" },
+  { name: "ElevenLabs", desc: "Text-to-speech" },
+  { name: "Firecrawl", desc: "Web scraping" },
+  { name: "GitHub", desc: "Repos & Issues" },
+  { name: "Replicate", desc: "1000s of ML models" },
 ];
 
 export default function Home() {
@@ -311,7 +310,7 @@ export default function Home() {
                   onClick={() => setShowProvidersModal(true)}
                   className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />10 Direct Call providers • more coming</span>
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />Direct Call: SMS, Email, Search, AI & more</span>
                 </button>
               </div>
               
@@ -460,7 +459,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span>Direct Call: 10 providers, full API depth</span>
+                  <span>Direct Call: SMS, Email, AI, and more</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
@@ -997,12 +996,9 @@ export default function Home() {
             <div className="p-4 max-h-[40vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 {directCallProviders.map((provider, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border">
-                    <span className="text-xl">{provider.icon}</span>
-                    <div>
-                      <div className="font-medium text-sm">{provider.name}</div>
-                      <div className="text-xs text-text-muted">{provider.desc}</div>
-                    </div>
+                  <div key={i} className="p-3 rounded-xl bg-surface border border-border">
+                    <div className="font-medium text-sm">{provider.name}</div>
+                    <div className="text-xs text-text-muted">{provider.desc}</div>
                   </div>
                 ))}
               </div>
