@@ -126,7 +126,7 @@ export default function DocsPage() {
                 <code className="text-sm">
                   <span className="text-[var(--text-muted)]">// Find SMS providers for Sweden</span>{'\n'}
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send SMS Sweden&quot;</span>{' }'}){'\n\n'}
-                  <span className="text-[var(--text-muted)]">// Send via instant-connect</span>{'\n'}
+                  <span className="text-[var(--text-muted)]">// Send via direct-call</span>{'\n'}
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;46elks&quot;</span>,{'\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;sms&quot;</span>,{'\n'}
@@ -228,7 +228,7 @@ export default function DocsPage() {
             {/* get_connected_providers */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">get_connected_providers</h3>
-              <p className="text-[var(--text-secondary)] mb-4">List all instant-connect providers (no API key needed).</p>
+              <p className="text-[var(--text-secondary)] mb-4">List all direct-call providers (no API key needed).</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm text-[var(--text-primary)]">get_connected_providers()</code>
               </pre>
@@ -248,7 +248,7 @@ export default function DocsPage() {
             {/* call_api */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">call_api</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Execute an API call through an instant-connect provider.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Execute an API call through an direct-call provider.</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}

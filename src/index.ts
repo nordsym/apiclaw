@@ -150,7 +150,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: 'Execute an API call through APIClaw Instant Connect. No API keys needed - we handle authentication.',
+    description: 'Execute an API call through APIClaw Direct Call. No API keys needed - we handle authentication.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -172,7 +172,7 @@ const tools: Tool[] = [
   },
   {
     name: 'list_connected',
-    description: 'List all APIs available for Instant Connect (no API key needed).',
+    description: 'List all APIs available for Direct Call (no API key needed).',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -217,11 +217,11 @@ DISCOVER APIs:
 GET DETAILS:
   get_api_details({ api_id: "46elks" })
 
-INSTANT CONNECT (8 APIs, no key needed):
+DIRECT CALL (8 APIs, no key needed):
   get_connected_providers()
   call_api({ provider: "brave_search", endpoint: "search", params: { query: "AI agents" } })
 
-Available instant-connect providers:
+Available direct-call providers:
   • brave_search — Web search
   • 46elks — SMS (Sweden)
   • twilio — SMS (Global)
@@ -479,7 +479,7 @@ Docs: https://apiclaw.nordsym.com
               type: 'text',
               text: JSON.stringify({
                 status: 'success',
-                message: 'These APIs are available for Instant Connect - no API key needed!',
+                message: 'These APIs are available for Direct Call - no API key needed!',
                 connected_providers: connected,
                 usage: 'Use call_api with provider, action, and params to execute calls.'
               }, null, 2)
@@ -531,14 +531,14 @@ async function main() {
 
 ✓ 16,000+ APIs indexed
 ✓ 23 categories  
-✓ 9 instant-connect providers ready
+✓ 9 direct-call providers ready
 
 Quick Start:
   discover_apis("send SMS to Sweden")
   discover_apis("search the web")
   discover_apis("generate speech from text")
 
-Instant Connect (no API key needed):
+Direct Call (no API key needed):
   get_connected_providers()
   call_api({ provider: "brave_search", ... })
 

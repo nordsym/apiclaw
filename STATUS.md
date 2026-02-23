@@ -72,7 +72,7 @@ npx vercel --prod
 - `magicLinks` — Email-auth tokens
 - `payouts` — Provider-utbetalningar
 
-**⚠️ Env vars:** Inga satta på prod. Behövs för server-side Instant Connect.
+**⚠️ Env vars:** Inga satta på prod. Behövs för server-side Direct Call.
 
 **Deploy:**
 ```bash
@@ -105,7 +105,7 @@ npx convex deploy
 
 ---
 
-## ⚡ Instant Connect
+## ⚡ Direct Call
 
 **6 providers konfigurerade lokalt:**
 
@@ -131,8 +131,8 @@ npx convex deploy
 | `discover_apis` | Sök API:er efter capability | ✅ |
 | `get_api_details` | Hämta full API-info | ✅ |
 | `list_categories` | Lista alla kategorier | ✅ |
-| `list_connected` | Visa Instant Connect-providers | ✅ |
-| `call_api` | Kör API via Instant Connect | ✅ |
+| `list_connected` | Visa Direct Call-providers | ✅ |
+| `call_api` | Kör API via Direct Call | ✅ |
 | `purchase_access` | Köp API-access | ✅ |
 | `check_balance` | Kolla credits | ✅ |
 | `add_credits` | Lägg till test-credits | ✅ |
@@ -146,7 +146,7 @@ apiclaw/
 ├── src/                    # MCP Server (TypeScript)
 │   ├── index.ts            # Huvudfil, MCP tool definitions
 │   ├── discovery.ts        # Söklogik
-│   ├── execute.ts          # Instant Connect handlers
+│   ├── execute.ts          # Direct Call handlers
 │   ├── credentials.ts      # Credential-hantering
 │   ├── credits.ts          # Credit-system
 │   ├── stripe.ts           # Stripe (förberett)
@@ -209,7 +209,7 @@ bash scripts/sync-and-deploy.sh
 |---------|-----------|---------|
 | Stripe payments live | Medium | Behöver webhook setup |
 | Provider dashboard med live data | Medium | Ingen data i Convex |
-| Cloud Instant Connect | Medium | Credentials ej i cloud |
+| Cloud Direct Call | Medium | Credentials ej i cloud |
 | Rate limiting | Låg | — |
 | Usage metering | Låg | Schema finns |
 
@@ -218,7 +218,7 @@ bash scripts/sync-and-deploy.sh
 ## 📈 Nästa steg (prioriterat)
 
 1. ~~**Öka API-antal**~~ ✅ **DONE: 15,000 APIs reached!**
-2. **Testa Instant Connect E2E** — Verifiera alla 6 providers
+2. **Testa Direct Call E2E** — Verifiera alla 6 providers
 3. **Stripe wiring** — Koppla betalflöde
 4. **Launch prep** — PH, X thread, etc.
 

@@ -325,7 +325,7 @@ function generateCredentials(providerId: string): object {
 export default http;
 
 // ==============================================
-// INSTANT CONNECT PROXY ENDPOINTS
+// DIRECT CALL PROXY ENDPOINTS
 // ==============================================
 
 // OpenRouter proxy

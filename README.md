@@ -19,7 +19,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/APIs-15,000-ef4444" alt="APIs" />
   <img src="https://img.shields.io/badge/Categories-446-171717" alt="Categories" />
-  <img src="https://img.shields.io/badge/Instant_Connect-6_APIs-00d4ff" alt="Instant Connect" />
+  <img src="https://img.shields.io/badge/Direct_Call-6_APIs-00d4ff" alt="Direct Call" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
 </p>
@@ -103,7 +103,7 @@ mcp.call("purchase_access", {
 // → Real API keys, ready to use
 ```
 
-### ⚡ Instant Connect (NEW!)
+### ⚡ Direct Call (NEW!)
 
 **No API keys needed.** Execute API calls directly through APIClaw.
 
@@ -140,7 +140,7 @@ mcp.call("call_api", {
 })
 ```
 
-**Available Instant Connect APIs:**
+**Available Direct Call APIs:**
 
 | Provider | Actions | Description |
 |----------|---------|-------------|
@@ -159,7 +159,7 @@ mcp.call("call_api", {
 |--------|-------|
 | **APIs Indexed** | 15,000 |
 | **Categories** | 446 |
-| **Instant Connect** | 6 APIs |
+| **Direct Call** | 6 APIs |
 | **Response Time** | <200ms |
 | **Uptime** | 24/7 |
 
@@ -240,7 +240,7 @@ Most API marketplaces make agents navigate human UIs. We flip it:
 
 - **Agents query via MCP** → Get 15,000 APIs, ranked by fit, structured as JSON
 - **Providers manage via dashboard** → When they want to, not as a blocker
-- **Zero manual API key juggling** → Instant Connect handles auth
+- **Zero manual API key juggling** → Direct Call handles auth
 
 We have docs, a landing page, dashboards—they're just not required for agents to work. Agents can skip straight to the API.
 
