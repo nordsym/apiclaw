@@ -686,9 +686,14 @@ export default function Home() {
                   Unified billing
                 </li>
               </ul>
-              <button className="btn-secondary w-full justify-center opacity-50 cursor-not-allowed" disabled>
+              <a 
+                href="https://t.me/Symbot_apiclaw_bot?start=waitlist" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary w-full justify-center hover:bg-surface-elevated transition-colors"
+              >
                 Join Waitlist
-              </button>
+              </a>
             </div>
           </div>
         </div>

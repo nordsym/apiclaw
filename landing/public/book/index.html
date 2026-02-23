@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Call | APIClaw</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+      --text-subtle: #888888;
+      --input-bg: #f5f5f5;
+      --accent: #dc2626;
+      --accent-hover: #b91c1c;
+    }
+    
+    [data-theme="dark"] {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #262626;
+      --text: #e5e5e5;
+      --text-muted: #888888;
+      --text-subtle: #555555;
+      --input-bg: #0d0d0d;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .container {
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    .theme-toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    
+    .theme-toggle:hover {
+      border-color: var(--accent);
+    }
+    
+    .logo { font-size: 48px; margin-bottom: 12px; }
+    h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+    .tagline { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    
+    .card h2 {
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 15px;
+      transition: border-color 0.2s, background 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    textarea { resize: vertical; min-height: 80px; }
+    
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-subtle);
+    }
+    
+    .footer a { color: var(--accent); text-decoration: none; }
+    
+    .success {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    
+    .success .icon { font-size: 48px; margin-bottom: 16px; }
+    .success h3 { font-size: 20px; color: var(--text); margin-bottom: 8px; }
+    .success p { color: var(--text-muted); }
+    
+    .times-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .time-slot {
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      color: var(--text);
+    }
+    
+    .time-slot:hover { border-color: var(--accent); }
+    .time-slot.selected { 
+      border-color: var(--accent); 
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
+      <div class="logo">🦞</div>
+      <h1>APIClaw</h1>
+      <p class="tagline">The API Layer for AI Agents</p>
+    </div>
+    
+    <div class="card" id="form-card">
+      <h2>Book a Call</h2>
+      <p>15-20 min to discuss Direct Connect partnership and API integration.</p>
+      
+      <form id="booking-form">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="name" required placeholder="Anders Hamnes">
+        </div>
+        
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="anders@company.com">
+        </div>
+        
+        <div class="form-group">
+          <label>Company</label>
+          <input type="text" name="company" required placeholder="Oneflow">
+        </div>
+        
+        <div class="form-group">
+          <label>Preferred Day</label>
+          <select name="day" required>
+            <option value="">Select a day</option>
+            <option value="tuesday">Tuesday (Feb 25)</option>
+            <option value="wednesday">Wednesday (Feb 26)</option>
+            <option value="thursday">Thursday (Feb 27)</option>
+            <option value="friday">Friday (Feb 28)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Preferred Time (CET)</label>
+          <div class="times-grid">
+            <div class="time-slot" data-time="09:00">09:00</div>
+            <div class="time-slot" data-time="10:00">10:00</div>
+            <div class="time-slot" data-time="11:00">11:00</div>
+            <div class="time-slot" data-time="14:00">14:00</div>
+            <div class="time-slot" data-time="15:00">15:00</div>
+            <div class="time-slot" data-time="16:00">16:00</div>
+          </div>
+          <input type="hidden" name="time" id="selected-time" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Anything specific? (optional)</label>
+          <textarea name="notes" placeholder="Tell us about your API..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn" id="submit-btn">
+          🦞 Book Meeting
+        </button>
+      </form>
+    </div>
+    
+    <div class="card success" id="success-card">
+      <div class="icon">✅</div>
+      <h3>Meeting Request Sent!</h3>
+      <p>We'll confirm the time via email shortly.</p>
+    </div>
+    
+    <div class="footer">
+      <a href="https://apiclaw.nordsym.com">apiclaw.nordsym.com</a> · NordSym AB
+    </div>
+  </div>
+  
+  <script>
+    // Theme toggle
+    const toggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+    
+    // Check saved preference or system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      toggle.textContent = '☀️';
+    }
+    
+    toggle.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        toggle.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        toggle.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+    
+    // Time slot selection
+    document.querySelectorAll('.time-slot').forEach(slot => {
+      slot.addEventListener('click', () => {
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        document.getElementById('selected-time').value = slot.dataset.time;
+      });
+    });
+    
+    // Form submission
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        await fetch('https://nordsym.app.n8n.cloud/webhook/apiclaw-booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        document.getElementById('form-card').style.display = 'none';
+        document.getElementById('success-card').style.display = 'block';
+      } catch (err) {
+        alert('Something went wrong. Please email symbot@nordsym.com directly.');
+        btn.disabled = false;
+        btn.textContent = '🦞 Book Meeting';
+      }
+    });
+  </script>
+</body>
+</html>
