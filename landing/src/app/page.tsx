@@ -470,36 +470,40 @@ export default function Home() {
             <p className="text-text-secondary mt-2">Get running in 30 seconds</p>
           </div>
           
-          <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {/* Install */}
-            <div className="bg-background border border-border rounded-xl p-6">
-              <p className="text-sm text-text-muted mb-3">Run directly or install globally:</p>
-              <pre className="bg-surface-elevated border border-border rounded-lg p-4 overflow-x-auto text-sm">
-                <code>
-                  <span className="text-text-muted"># Run directly with npx</span>{"\n"}
-                  <span className="text-accent">npx</span> @nordsym/apiclaw{"\n\n"}
-                  <span className="text-text-muted"># Or install globally</span>{"\n"}
-                  <span className="text-accent">npm</span> install -g @nordsym/apiclaw{"\n"}
-                  apiclaw
-                </code>
-              </pre>
+            <div className="code-preview">
+              <div className="code-preview-header">
+                terminal
+              </div>
+              <div className="code-preview-body">
+                <pre className="text-sm whitespace-pre-wrap">
+                  <span className="text-gray-500"># Run directly with npx</span>{"\n"}
+                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw{"\n\n"}
+                  <span className="text-gray-500"># Or install globally</span>{"\n"}
+                  <span className="text-green-400">$</span> <span className="text-blue-400">npm</span> install -g @nordsym/apiclaw{"\n"}
+                  <span className="text-green-400">$</span> apiclaw
+                </pre>
+              </div>
             </div>
 
             {/* MCP Config */}
-            <div className="bg-background border border-border rounded-xl p-6">
-              <p className="text-sm text-text-muted mb-3">Add to Claude Desktop (MCP config):</p>
-              <pre className="bg-surface-elevated border border-border rounded-lg p-4 overflow-x-auto text-sm">
-                <code>
-{`{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
-    }
-  }
-}`}
-                </code>
-              </pre>
+            <div className="code-preview">
+              <div className="code-preview-header">
+                claude_desktop_config.json
+              </div>
+              <div className="code-preview-body">
+                <pre className="text-sm whitespace-pre-wrap">
+                  <span className="text-gray-500">{"{"}</span>{"\n"}
+                  {"  "}<span className="text-red-400">"mcpServers"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
+                  {"    "}<span className="text-red-400">"apiclaw"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
+                  {"      "}<span className="text-red-400">"command"</span>: <span className="text-green-400">"npx"</span>,{"\n"}
+                  {"      "}<span className="text-red-400">"args"</span>: [<span className="text-green-400">"@nordsym/apiclaw"</span>]{"\n"}
+                  {"    "}<span className="text-gray-500">{"}"}</span>{"\n"}
+                  {"  "}<span className="text-gray-500">{"}"}</span>{"\n"}
+                  <span className="text-gray-500">{"}"}</span>
+                </pre>
+              </div>
             </div>
           </div>
           
