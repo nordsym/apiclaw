@@ -63,6 +63,7 @@ export interface APICredentials {
   api_key?: string;
   username?: string;
   password?: string;
+  token?: string;
   expires_at?: string;
 }
 

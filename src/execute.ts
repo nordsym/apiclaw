@@ -456,6 +456,196 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       };
     },
   },
+
+  // GitHub - Code & Repos
+  github: {
+    search_repos: async (params, creds) => {
+      const { query, sort = 'stars', limit = 10 } = params;
+      
+      if (!query) {
+        return { success: false, provider: 'github', action: 'search_repos', error: 'Missing required param: query' };
+      }
+
+      const response = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=${limit}`, {
+        headers: {
+          'Authorization': `Bearer ${creds.token}`,
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'APIClaw',
+        },
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok) {
+        return { success: false, provider: 'github', action: 'search_repos', error: (data.message as string) || 'Search failed' };
+      }
+
+      const items = (data.items as any[]) || [];
+      return { 
+        success: true, 
+        provider: 'github', 
+        action: 'search_repos',
+        data: { 
+          total: data.total_count,
+          repos: items.slice(0, limit).map(r => ({
+            name: r.full_name,
+            description: r.description,
+            stars: r.stargazers_count,
+            url: r.html_url,
+            language: r.language,
+          }))
+        },
+      };
+    },
+
+    get_repo: async (params, creds) => {
+      const { owner, repo } = params;
+      
+      if (!owner || !repo) {
+        return { success: false, provider: 'github', action: 'get_repo', error: 'Missing required params: owner, repo' };
+      }
+
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+        headers: {
+          'Authorization': `Bearer ${creds.token}`,
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'APIClaw',
+        },
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok) {
+        return { success: false, provider: 'github', action: 'get_repo', error: (data.message as string) || 'Get repo failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'github', 
+        action: 'get_repo',
+        data: {
+          name: data.full_name,
+          description: data.description,
+          stars: data.stargazers_count,
+          forks: data.forks_count,
+          language: data.language,
+          url: data.html_url,
+          created: data.created_at,
+          updated: data.updated_at,
+        },
+      };
+    },
+
+    list_issues: async (params, creds) => {
+      const { owner, repo, state = 'open', limit = 10 } = params;
+      
+      if (!owner || !repo) {
+        return { success: false, provider: 'github', action: 'list_issues', error: 'Missing required params: owner, repo' };
+      }
+
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?state=${state}&per_page=${limit}`, {
+        headers: {
+          'Authorization': `Bearer ${creds.token}`,
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'APIClaw',
+        },
+      });
+
+      const data = await response.json() as unknown[];
+      
+      if (!response.ok) {
+        return { success: false, provider: 'github', action: 'list_issues', error: 'List issues failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'github', 
+        action: 'list_issues',
+        data: { 
+          issues: (data as any[]).map(i => ({
+            number: i.number,
+            title: i.title,
+            state: i.state,
+            user: i.user?.login,
+            url: i.html_url,
+            created: i.created_at,
+          }))
+        },
+      };
+    },
+
+    create_issue: async (params, creds) => {
+      const { owner, repo, title, body = '' } = params;
+      
+      if (!owner || !repo || !title) {
+        return { success: false, provider: 'github', action: 'create_issue', error: 'Missing required params: owner, repo, title' };
+      }
+
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.token}`,
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'APIClaw',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, body }),
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok) {
+        return { success: false, provider: 'github', action: 'create_issue', error: (data.message as string) || 'Create issue failed' };
+      }
+
+      return { 
+        success: true, 
+        provider: 'github', 
+        action: 'create_issue',
+        data: { 
+          number: data.number,
+          url: data.html_url,
+        },
+      };
+    },
+
+    get_file: async (params, creds) => {
+      const { owner, repo, path } = params;
+      
+      if (!owner || !repo || !path) {
+        return { success: false, provider: 'github', action: 'get_file', error: 'Missing required params: owner, repo, path' };
+      }
+
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: {
+          'Authorization': `Bearer ${creds.token}`,
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'APIClaw',
+        },
+      });
+
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!response.ok) {
+        return { success: false, provider: 'github', action: 'get_file', error: (data.message as string) || 'Get file failed' };
+      }
+
+      // Decode base64 content
+      const content = data.content ? Buffer.from(data.content as string, 'base64').toString('utf-8') : null;
+
+      return { 
+        success: true, 
+        provider: 'github', 
+        action: 'get_file',
+        data: { 
+          name: data.name,
+          path: data.path,
+          size: data.size,
+          content,
+        },
+      };
+    },
+  },
 };
 
 // Get available actions for a provider

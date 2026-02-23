@@ -143,6 +143,18 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  github: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('github.env');
+      const key = env.GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+      if (key) {
+        return { type: 'bearer', token: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**

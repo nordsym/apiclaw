@@ -531,7 +531,7 @@ async function main() {
 
 ✓ 16,000+ APIs indexed
 ✓ 23 categories  
-✓ 8 instant-connect providers ready
+✓ 9 instant-connect providers ready
 
 Quick Start:
   discover_apis("send SMS to Sweden")
