@@ -204,10 +204,10 @@ export default function DocsPage() {
               <div className="mt-4 text-sm text-[var(--text-muted)]">
                 <strong className="text-[var(--text-primary)]">Parameters:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li><code className="text-[var(--accent)]">query</code - Natural language description</li>
-                  <li><code className="text-[var(--accent)]">category</code - Filter: communication, search, ai</li>
-                  <li><code className="text-[var(--accent)]">max_results</code - Number of results (default: 5)</li>
-                  <li><code className="text-[var(--accent)]">region</code - Filter by region (e.g., &quot;sweden&quot;)</li>
+                  <li><code className="text-[var(--accent)]">query</code> - Natural language description</li>
+                  <li><code className="text-[var(--accent)]">category</code> - Filter: communication, search, ai</li>
+                  <li><code className="text-[var(--accent)]">max_results</code> - Number of results (default: 5)</li>
+                  <li><code className="text-[var(--accent)]">region</code> - Filter by region (e.g., &quot;sweden&quot;)</li>
                 </ul>
               </div>
             </div>
@@ -235,12 +235,12 @@ export default function DocsPage() {
               <div className="mt-4 text-sm text-[var(--text-muted)]">
                 <strong className="text-[var(--text-primary)]">Currently available:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li><code className="text-[var(--accent)]">brave_search</code - Web search</li>
-                  <li><code className="text-[var(--accent)]">46elks</code - SMS (Sweden)</li>
-                  <li><code className="text-[var(--accent)]">twilio</code - SMS (Global)</li>
-                  <li><code className="text-[var(--accent)]">resend</code - Email</li>
-                  <li><code className="text-[var(--accent)]">openrouter</code - LLM routing</li>
-                  <li><code className="text-[var(--accent)]">elevenlabs</code - Text-to-speech</li>
+                  <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
+                  <li><code className="text-[var(--accent)]">46elks</code> - SMS (Sweden)</li>
+                  <li><code className="text-[var(--accent)]">twilio</code> - SMS (Global)</li>
+                  <li><code className="text-[var(--accent)]">resend</code> - Email</li>
+                  <li><code className="text-[var(--accent)]">openrouter</code> - LLM routing</li>
+                  <li><code className="text-[var(--accent)]">elevenlabs</code> - Text-to-speech</li>
                 </ul>
               </div>
             </div>
