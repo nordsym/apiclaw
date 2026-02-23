@@ -148,7 +148,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
   // Resend - Email
   resend: {
     send_email: async (params, creds) => {
-      const { to, subject, html, text, from = 'APIClaw <noreply@apiclaw.com>' } = params;
+      const { to, subject, html, text, from = 'APIClaw <noreply@apiclaw.nordsym.com>' } = params;
       
       if (!to || !subject || (!html && !text)) {
         return { success: false, provider: 'resend', action: 'send_email', error: 'Missing required params: to, subject, html or text' };
