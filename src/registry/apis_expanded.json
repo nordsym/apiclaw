@@ -1,8 +1,8 @@
 {
   "version": "3.0.0",
-  "source": "APIClaw aggregated registry",
-  "lastUpdated": "2026-02-22",
-  "count": 8312,
+  "source": "night-expansion-03",
+  "lastUpdated": "2026-02-23T03:10:20.198748",
+  "count": 8624,
   "apis": [
     {
       "id": "ipstack",
@@ -100848,6 +100848,3126 @@
         "ticketing"
       ],
       "source": "category_expansion"
+    },
+    {
+      "id": "adv-amazon-mobile-ads-8092",
+      "name": "Amazon Mobile Ads",
+      "description": "Monetize across platforms with multiple ad formats",
+      "category": "Advertising",
+      "baseUrl": "https://developer.amazon.com/ads",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "adv-facebook-marketing-a-860",
+      "name": "Facebook Marketing API",
+      "description": "Manage ads and campaigns using the Facebook API",
+      "category": "Advertising",
+      "baseUrl": "https://developers.facebook.com/docs/marketing-apis",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "adv-google-adsense-2346",
+      "name": "Google AdSense",
+      "description": "Free, flexible way to earn money from websites and apps",
+      "category": "Advertising",
+      "baseUrl": "https://developers.google.com/adsense",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "adv-google-adwords-api-5904",
+      "name": "Google AdWords API",
+      "description": "Manage Google AdWords campaigns programmatically",
+      "category": "Advertising",
+      "baseUrl": "https://developers.google.com/adwords/api",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "adv-kevel-ad-apis-9874",
+      "name": "Kevel Ad APIs",
+      "description": "Build your own ad server with Kevel's ad APIs",
+      "category": "Advertising",
+      "baseUrl": "https://dev.kevel.co",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "adv-microsoft-bing-ads-1557",
+      "name": "Microsoft Bing Ads",
+      "description": "Programmatic access to Bing advertising technologies",
+      "category": "Advertising",
+      "baseUrl": "https://docs.microsoft.com/en-us/advertising/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ana-ditchcarbon-api-7535",
+      "name": "DitchCarbon API",
+      "description": "Company and product carbon emissions disclosures",
+      "category": "Analytics",
+      "baseUrl": "https://docs.ditchcarbon.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ana-open-web-analytics-7847",
+      "name": "Open Web Analytics",
+      "description": "Request and work with data outside OWA interface",
+      "category": "Analytics",
+      "baseUrl": "https://github.com/padams/Open-Web-Analytics",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ar/-arcore-5422",
+      "name": "ARCore",
+      "description": "Google's AR platform for Android",
+      "category": "AR/VR",
+      "baseUrl": "https://developers.google.com/ar",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ar/-arkit-2277",
+      "name": "ARKit",
+      "description": "Apple's AR framework for iOS",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.apple.com/arkit/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ar/-8th-wall-3589",
+      "name": "8th Wall",
+      "description": "WebAR platform for browsers",
+      "category": "AR/VR",
+      "baseUrl": "https://www.8thwall.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "bar-dynamic-qr-code-5313",
+      "name": "Dynamic QR Code",
+      "description": "Generate dynamic and static QR Codes",
+      "category": "Barcode",
+      "baseUrl": "https://rapidapi.com/updeploy-tools/api/qr-code-dynamic-and-static1/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "bar-google-barcode-8621",
+      "name": "Google Barcode",
+      "description": "Barcode detection in real-time on device",
+      "category": "Barcode",
+      "baseUrl": "https://developers.google.com/ml-kit/vision/barcode-scanning",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "big-google-charts-273",
+      "name": "Google Charts",
+      "description": "Free tool for visualizing data from websites",
+      "category": "Big Data",
+      "baseUrl": "https://developers.google.com/chart/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "big-apache-spark-9194",
+      "name": "Apache Spark",
+      "description": "Unified analytics engine for big data",
+      "category": "Big Data",
+      "baseUrl": "https://spark.apache.org/docs/latest/api.html",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "cry-bitcoin-core-949",
+      "name": "Bitcoin Core",
+      "description": "Bitcoin node RPC API",
+      "category": "Cryptocurrency",
+      "baseUrl": "https://developer.bitcoin.org/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "cry-block-io-9171",
+      "name": "Block.io",
+      "description": "Versatile and secure wallet for all coins",
+      "category": "Cryptocurrency",
+      "baseUrl": "https://block.io/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "cry-blockfacts-5764",
+      "name": "BlockFacts",
+      "description": "Compliance-first digital asset data",
+      "category": "Cryptocurrency",
+      "baseUrl": "https://blockfacts.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sec-google-recaptcha-3335",
+      "name": "Google reCAPTCHA",
+      "description": "Protect websites from spam and abuse",
+      "category": "Security",
+      "baseUrl": "https://developers.google.com/recaptcha/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "com-commerce-layer-5692",
+      "name": "Commerce Layer",
+      "description": "Headless commerce platform",
+      "category": "Commerce",
+      "baseUrl": "https://docs.commercelayer.io/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "com-africa's-talking-2053",
+      "name": "Africa's Talking",
+      "description": "Access African telco services via HTTP",
+      "category": "Communication",
+      "baseUrl": "https://africastalking.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "com-nexmo/vonage-5730",
+      "name": "Nexmo/Vonage",
+      "description": "Voice, SMS, and messaging",
+      "category": "Communication",
+      "baseUrl": "https://developer.vonage.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "con-jokes-api-2555",
+      "name": "Jokes API",
+      "description": "Full featured jokes database",
+      "category": "Content",
+      "baseUrl": "https://jokes.one/api/joke/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "con-perfect-tense-6628",
+      "name": "Perfect Tense",
+      "description": "AI spelling and grammar checking",
+      "category": "Content",
+      "baseUrl": "https://www.perfecttense.com/developers",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "con-random-facts-2514",
+      "name": "Random Facts",
+      "description": "Random interesting facts",
+      "category": "Content",
+      "baseUrl": "https://fungenerators.com/api/facts/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "con-quotable-9492",
+      "name": "Quotable",
+      "description": "Random quotes API",
+      "category": "Content",
+      "baseUrl": "https://github.com/lukePeavey/quotable",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "des-canva-1891",
+      "name": "Canva",
+      "description": "Design platform API",
+      "category": "Design",
+      "baseUrl": "https://www.canva.com/developers/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dic-oxford-dictionary-3812",
+      "name": "Oxford Dictionary",
+      "description": "English dictionary and thesaurus",
+      "category": "Dictionary",
+      "baseUrl": "https://developer.oxforddictionaries.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dic-words-api-7161",
+      "name": "Words API",
+      "description": "Definitions for 150,000+ words",
+      "category": "Dictionary",
+      "baseUrl": "https://www.wordsapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ent-epic-games-store-2873",
+      "name": "Epic Games Store",
+      "description": "Game store API",
+      "category": "Entertainment",
+      "baseUrl": "https://dev.epicgames.com/docs/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "eve-meetup-69",
+      "name": "Meetup",
+      "description": "Event discovery platform",
+      "category": "Events",
+      "baseUrl": "https://www.meetup.com/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "fin-interactive-brokers-9103",
+      "name": "Interactive Brokers",
+      "description": "Trading platform API",
+      "category": "Finance",
+      "baseUrl": "https://www.interactivebrokers.com/en/trading/ib-api.php",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "gam-pokemon-api-1359",
+      "name": "Pokemon API",
+      "description": "Pokemon data",
+      "category": "Games",
+      "baseUrl": "https://pokeapi.co/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "gam-open-trivia-db-7597",
+      "name": "Open Trivia DB",
+      "description": "Trivia questions database",
+      "category": "Games",
+      "baseUrl": "https://opentdb.com/api_config.php",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "geo-ipinfo-io-4246",
+      "name": "ipinfo.io",
+      "description": "IP geolocation and data",
+      "category": "Geocoding",
+      "baseUrl": "https://ipinfo.io/developers",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "gov-scb-(statistics-swed-4681",
+      "name": "SCB (Statistics Sweden)",
+      "description": "Swedish statistics",
+      "category": "Government",
+      "baseUrl": "https://www.scb.se/en/services/open-data-api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "gov-bolagsverket-9085",
+      "name": "Bolagsverket",
+      "description": "Swedish company register",
+      "category": "Government",
+      "baseUrl": "https://bolagsverket.se/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "hea-nppes-npi-registry-4366",
+      "name": "NPPES NPI Registry",
+      "description": "US healthcare provider registry",
+      "category": "Health",
+      "baseUrl": "https://npiregistry.cms.hhs.gov/api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "hea-fhir-7306",
+      "name": "FHIR",
+      "description": "Healthcare interoperability standard",
+      "category": "Health",
+      "baseUrl": "https://www.hl7.org/fhir/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-thingspeak-9026",
+      "name": "ThingSpeak",
+      "description": "IoT data platform",
+      "category": "IoT",
+      "baseUrl": "https://thingspeak.com/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-blynk-6684",
+      "name": "Blynk",
+      "description": "IoT platform for hardware",
+      "category": "IoT",
+      "baseUrl": "https://blynk.io/en/developers",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-adafruit-io-6497",
+      "name": "Adafruit IO",
+      "description": "IoT cloud service",
+      "category": "IoT",
+      "baseUrl": "https://io.adafruit.com/api/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-azure-iot-hub-2901",
+      "name": "Azure IoT Hub",
+      "description": "Microsoft IoT services",
+      "category": "IoT",
+      "baseUrl": "https://docs.microsoft.com/en-us/azure/iot-hub/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-google-cloud-iot-4614",
+      "name": "Google Cloud IoT",
+      "description": "Google IoT services",
+      "category": "IoT",
+      "baseUrl": "https://cloud.google.com/iot-core/docs",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "iot-home-assistant-7263",
+      "name": "Home Assistant",
+      "description": "Home automation platform",
+      "category": "IoT",
+      "baseUrl": "https://developers.home-assistant.io/docs/api/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "job-github-jobs-1234",
+      "name": "GitHub Jobs",
+      "description": "Tech job listings",
+      "category": "Jobs",
+      "baseUrl": "https://jobs.github.com/api",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "job-indeed-3958",
+      "name": "Indeed",
+      "description": "Job search platform",
+      "category": "Jobs",
+      "baseUrl": "https://www.indeed.com/publisher",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "job-linkedin-jobs-6491",
+      "name": "LinkedIn Jobs",
+      "description": "Professional job listings",
+      "category": "Jobs",
+      "baseUrl": "https://www.linkedin.com/developers/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "job-remotive-578",
+      "name": "Remotive",
+      "description": "Remote job listings",
+      "category": "Jobs",
+      "baseUrl": "https://remotive.io/api-documentation",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "job-glassdoor-4990",
+      "name": "Glassdoor",
+      "description": "Company reviews and salaries",
+      "category": "Jobs",
+      "baseUrl": "https://www.glassdoor.com/developer/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-openai-5790",
+      "name": "OpenAI",
+      "description": "GPT and AI models",
+      "category": "AI/ML",
+      "baseUrl": "https://platform.openai.com/docs/api-reference",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-google-vertex-ai-4418",
+      "name": "Google Vertex AI",
+      "description": "Google AI platform",
+      "category": "AI/ML",
+      "baseUrl": "https://cloud.google.com/vertex-ai/docs",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-hugging-face-3330",
+      "name": "Hugging Face",
+      "description": "ML models and datasets",
+      "category": "AI/ML",
+      "baseUrl": "https://huggingface.co/docs/api-inference/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-whisper-(openai)-4387",
+      "name": "Whisper (OpenAI)",
+      "description": "Speech recognition model",
+      "category": "AI/ML",
+      "baseUrl": "https://platform.openai.com/docs/guides/speech-to-text",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-dall-e-6524",
+      "name": "DALL-E",
+      "description": "AI image generation",
+      "category": "AI/ML",
+      "baseUrl": "https://platform.openai.com/docs/guides/images",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-gpt-4-vision-6452",
+      "name": "GPT-4 Vision",
+      "description": "AI vision analysis",
+      "category": "AI/ML",
+      "baseUrl": "https://platform.openai.com/docs/guides/vision",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-google-vision-ai-1321",
+      "name": "Google Vision AI",
+      "description": "Image analysis",
+      "category": "AI/ML",
+      "baseUrl": "https://cloud.google.com/vision/docs",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ai/-azure-computer-visio-9071",
+      "name": "Azure Computer Vision",
+      "description": "Image analysis API",
+      "category": "AI/ML",
+      "baseUrl": "https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "map-yandex-maps-6036",
+      "name": "Yandex Maps",
+      "description": "Russian maps platform",
+      "category": "Maps",
+      "baseUrl": "https://yandex.com/dev/maps/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "map-leaflet-8882",
+      "name": "Leaflet",
+      "description": "Open source JS maps library",
+      "category": "Maps",
+      "baseUrl": "https://leafletjs.com/reference.html",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "map-openlayers-8310",
+      "name": "OpenLayers",
+      "description": "Open source map library",
+      "category": "Maps",
+      "baseUrl": "https://openlayers.org/en/latest/apidoc/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "mus-audioscrobbler-(last-6279",
+      "name": "AudioScrobbler (Last.fm)",
+      "description": "Music scrobbling data",
+      "category": "Music",
+      "baseUrl": "https://www.last.fm/api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "mus-apple-music-3727",
+      "name": "Apple Music",
+      "description": "Music streaming service",
+      "category": "Music",
+      "baseUrl": "https://developer.apple.com/documentation/applemusicapi",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "new-hacker-news-6337",
+      "name": "Hacker News",
+      "description": "Tech news and discussions",
+      "category": "News",
+      "baseUrl": "https://github.com/HackerNews/API",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ope-oecd-78",
+      "name": "OECD",
+      "description": "Economic data",
+      "category": "Open Data",
+      "baseUrl": "https://data.oecd.org/api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-swish-4761",
+      "name": "Swish",
+      "description": "Swedish mobile payments",
+      "category": "Payments",
+      "baseUrl": "https://developer.swish.nu/",
+      "authType": "certificate",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-ideal-9868",
+      "name": "iDEAL",
+      "description": "Dutch online payments",
+      "category": "Payments",
+      "baseUrl": "https://www.ideal.nl/en/developers/",
+      "authType": "certificate",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-bancontact-4328",
+      "name": "Bancontact",
+      "description": "Belgian payment system",
+      "category": "Payments",
+      "baseUrl": "https://developer.bancontact.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-mobilepay-1695",
+      "name": "MobilePay",
+      "description": "Danish mobile payments",
+      "category": "Payments",
+      "baseUrl": "https://developer.mobilepay.dk/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-vipps-3124",
+      "name": "Vipps",
+      "description": "Norwegian mobile payments",
+      "category": "Payments",
+      "baseUrl": "https://vippsas.github.io/vipps-developers/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-revolut-1298",
+      "name": "Revolut",
+      "description": "Digital banking API",
+      "category": "Payments",
+      "baseUrl": "https://developer.revolut.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pay-checkout-com-5284",
+      "name": "Checkout.com",
+      "description": "Payment processing",
+      "category": "Payments",
+      "baseUrl": "https://api-reference.checkout.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pho-500px-3404",
+      "name": "500px",
+      "description": "Photography community",
+      "category": "Photography",
+      "baseUrl": "https://github.com/500px/legacy-api-documentation",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "pho-placeimg-398",
+      "name": "PlaceImg",
+      "description": "Placeholder images by category",
+      "category": "Photography",
+      "baseUrl": "https://placeimg.com/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sci-pubmed-4621",
+      "name": "PubMed",
+      "description": "Biomedical literature",
+      "category": "Science",
+      "baseUrl": "https://www.ncbi.nlm.nih.gov/home/develop/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sci-wolfram-alpha-4890",
+      "name": "Wolfram Alpha",
+      "description": "Computational knowledge",
+      "category": "Science",
+      "baseUrl": "https://products.wolframalpha.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sci-numbersapi-1440",
+      "name": "NumbersAPI",
+      "description": "Facts about numbers",
+      "category": "Science",
+      "baseUrl": "http://numbersapi.com/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sec-circl-5581",
+      "name": "CIRCL",
+      "description": "Threat intelligence",
+      "category": "Security",
+      "baseUrl": "https://www.circl.lu/services/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sec-alienvault-otx-1502",
+      "name": "AlienVault OTX",
+      "description": "Open threat exchange",
+      "category": "Security",
+      "baseUrl": "https://otx.alienvault.com/api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "sec-urlscan-7255",
+      "name": "URLScan",
+      "description": "URL analysis service",
+      "category": "Security",
+      "baseUrl": "https://urlscan.io/docs/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-twitter/x-8167",
+      "name": "Twitter/X",
+      "description": "Social media platform API",
+      "category": "Social",
+      "baseUrl": "https://developer.twitter.com/en/docs",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-facebook-graph-7989",
+      "name": "Facebook Graph",
+      "description": "Facebook data API",
+      "category": "Social",
+      "baseUrl": "https://developers.facebook.com/docs/graph-api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-instagram-basic-disp-8377",
+      "name": "Instagram Basic Display",
+      "description": "Instagram user data",
+      "category": "Social",
+      "baseUrl": "https://developers.facebook.com/docs/instagram-basic-display-api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-snapchat-5901",
+      "name": "Snapchat",
+      "description": "Snap Kit APIs",
+      "category": "Social",
+      "baseUrl": "https://kit.snapchat.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-threads-770",
+      "name": "Threads",
+      "description": "Meta's text-based social app",
+      "category": "Social",
+      "baseUrl": "https://developers.facebook.com/docs/threads/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "soc-signal-3226",
+      "name": "Signal",
+      "description": "Encrypted messaging",
+      "category": "Social",
+      "baseUrl": "https://signal.org/docs/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "spo-sportmonks-1689",
+      "name": "Sportmonks",
+      "description": "Football/soccer data",
+      "category": "Sports",
+      "baseUrl": "https://docs.sportmonks.com/football/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "spo-mlb-stats-1669",
+      "name": "MLB Stats",
+      "description": "Baseball statistics",
+      "category": "Sports",
+      "baseUrl": "https://statsapi.mlb.com/docs/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "spo-nhl-stats-2102",
+      "name": "NHL Stats",
+      "description": "Hockey statistics",
+      "category": "Sports",
+      "baseUrl": "https://gitlab.com/dword4/nhlapi",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-google-directions-8344",
+      "name": "Google Directions",
+      "description": "Route planning",
+      "category": "Transportation",
+      "baseUrl": "https://developers.google.com/maps/documentation/directions/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-osrm-2869",
+      "name": "OSRM",
+      "description": "Open source routing machine",
+      "category": "Transportation",
+      "baseUrl": "http://project-osrm.org/docs/v5.24.0/api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-transport-api-9958",
+      "name": "Transport API",
+      "description": "UK public transport",
+      "category": "Transportation",
+      "baseUrl": "https://developer.transportapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-deutsche-bahn-1560",
+      "name": "Deutsche Bahn",
+      "description": "German railways",
+      "category": "Transportation",
+      "baseUrl": "https://developer.deutschebahn.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-sl-(stockholm)-8805",
+      "name": "SL (Stockholm)",
+      "description": "Stockholm public transport",
+      "category": "Transportation",
+      "baseUrl": "https://www.trafiklab.se/api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-v\u00e4sttrafik-965",
+      "name": "V\u00e4sttrafik",
+      "description": "Swedish public transport",
+      "category": "Transportation",
+      "baseUrl": "https://developer.vasttrafik.se/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-sk\u00e5netrafiken-3585",
+      "name": "Sk\u00e5netrafiken",
+      "description": "Swedish public transport",
+      "category": "Transportation",
+      "baseUrl": "https://www.skanetrafiken.se/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-marine-traffic-3315",
+      "name": "Marine Traffic",
+      "description": "Ship tracking",
+      "category": "Transportation",
+      "baseUrl": "https://www.marinetraffic.com/en/ais-api-services",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "tra-vesselfinder-8235",
+      "name": "VesselFinder",
+      "description": "Ship tracking API",
+      "category": "Transportation",
+      "baseUrl": "https://api.vesselfinder.com/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "veh-tesla-70",
+      "name": "Tesla",
+      "description": "Tesla vehicle API",
+      "category": "Vehicle",
+      "baseUrl": "https://tesla-api.timdorr.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "veh-edmunds-1182",
+      "name": "Edmunds",
+      "description": "Vehicle data and pricing",
+      "category": "Vehicle",
+      "baseUrl": "https://developer.edmunds.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "veh-carmd-5893",
+      "name": "CarMD",
+      "description": "Vehicle diagnostics",
+      "category": "Vehicle",
+      "baseUrl": "https://www.carmd.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "veh-vin-decoder-694",
+      "name": "VIN Decoder",
+      "description": "Vehicle identification",
+      "category": "Vehicle",
+      "baseUrl": "https://vindecoder.eu/api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "vid-kaltura-1852",
+      "name": "Kaltura",
+      "description": "Video platform",
+      "category": "Video",
+      "baseUrl": "https://developer.kaltura.com/api-docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-weather-underground-2340",
+      "name": "Weather Underground",
+      "description": "Weather data network",
+      "category": "Weather",
+      "baseUrl": "https://www.wunderground.com/weather/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-dark-sky-453",
+      "name": "Dark Sky",
+      "description": "Weather forecasts (Apple)",
+      "category": "Weather",
+      "baseUrl": "https://darksky.net/dev",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-climacell/tomorrow-i-2103",
+      "name": "ClimaCell/Tomorrow.io",
+      "description": "Weather intelligence",
+      "category": "Weather",
+      "baseUrl": "https://docs.tomorrow.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-met-no-2056",
+      "name": "Met.no",
+      "description": "Norwegian weather service",
+      "category": "Weather",
+      "baseUrl": "https://api.met.no/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-smhi-9663",
+      "name": "SMHI",
+      "description": "Swedish weather data",
+      "category": "Weather",
+      "baseUrl": "https://opendata.smhi.se/apidocs/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "wea-dmi-(denmark)-548",
+      "name": "DMI (Denmark)",
+      "description": "Danish weather service",
+      "category": "Weather",
+      "baseUrl": "https://opendatadocs.dmi.govcloud.dk/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-aws-7139",
+      "name": "AWS",
+      "description": "Amazon Web Services",
+      "category": "Development",
+      "baseUrl": "https://docs.aws.amazon.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-google-cloud-2036",
+      "name": "Google Cloud",
+      "description": "Google Cloud Platform",
+      "category": "Development",
+      "baseUrl": "https://cloud.google.com/apis/docs/overview",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-azure-3732",
+      "name": "Azure",
+      "description": "Microsoft Azure",
+      "category": "Development",
+      "baseUrl": "https://docs.microsoft.com/en-us/rest/api/azure/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-rubygems-9906",
+      "name": "RubyGems",
+      "description": "Ruby package manager",
+      "category": "Development",
+      "baseUrl": "https://guides.rubygems.org/rubygems-org-api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-flagsmith-8230",
+      "name": "Flagsmith",
+      "description": "Feature flags",
+      "category": "Development",
+      "baseUrl": "https://docs.flagsmith.com/basic-features/managing-features",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "dev-close-com-4488",
+      "name": "Close.com",
+      "description": "Sales CRM",
+      "category": "Development",
+      "baseUrl": "https://developer.close.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03"
+    },
+    {
+      "id": "ani-axolotl-api-3867",
+      "name": "Axolotl API",
+      "description": "Collection of axolotl pictures and facts",
+      "category": "Animals",
+      "baseUrl": "https://theaxolotlapi.netlify.app/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-the-cat-api-7071",
+      "name": "The Cat API",
+      "description": "Pictures of cats from Tumblr",
+      "category": "Animals",
+      "baseUrl": "https://thecatapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-dog-ceo-4608",
+      "name": "Dog CEO",
+      "description": "Dogs based on Stanford Dogs Dataset",
+      "category": "Animals",
+      "baseUrl": "https://dog.ceo/dog-api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-iucn-red-list-4259",
+      "name": "IUCN Red List",
+      "description": "Threatened species data",
+      "category": "Animals",
+      "baseUrl": "https://apiv3.iucnredlist.org/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-random-dog-6939",
+      "name": "Random Dog",
+      "description": "Random dog pictures",
+      "category": "Animals",
+      "baseUrl": "https://random.dog/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-random-duck-8741",
+      "name": "Random Duck",
+      "description": "Random duck pictures",
+      "category": "Animals",
+      "baseUrl": "https://random-d.uk/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-random-fox-4623",
+      "name": "Random Fox",
+      "description": "Random fox pictures",
+      "category": "Animals",
+      "baseUrl": "https://randomfox.ca/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-the-dog-api-6349",
+      "name": "The Dog API",
+      "description": "All about dogs",
+      "category": "Animals",
+      "baseUrl": "https://thedogapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-danbooru-8903",
+      "name": "Danbooru",
+      "description": "Anime images by tags",
+      "category": "Anime",
+      "baseUrl": "https://danbooru.donmai.us/wiki_pages/help:api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-myanimelist-(jikan)-5406",
+      "name": "MyAnimeList (Jikan)",
+      "description": "Unofficial MAL API",
+      "category": "Anime",
+      "baseUrl": "https://jikan.moe/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ani-trace-moe-3101",
+      "name": "Trace.moe",
+      "description": "Scene finder from screenshot",
+      "category": "Anime",
+      "baseUrl": "https://soruly.github.io/trace.moe-api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "art-metropolitan-museum-2881",
+      "name": "Metropolitan Museum",
+      "description": "Met Museum data",
+      "category": "Art",
+      "baseUrl": "https://metmuseum.github.io/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "bus-tomba-5508",
+      "name": "Tomba",
+      "description": "Email finder",
+      "category": "Business",
+      "baseUrl": "https://tomba.io/api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-web3-storage-3385",
+      "name": "Web3.Storage",
+      "description": "IPFS storage",
+      "category": "Storage",
+      "baseUrl": "https://web3.storage/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "val-lob-7958",
+      "name": "Lob",
+      "description": "Address verification",
+      "category": "Validation",
+      "baseUrl": "https://www.lob.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "val-smarty-520",
+      "name": "Smarty",
+      "description": "US address validation",
+      "category": "Validation",
+      "baseUrl": "https://www.smarty.com/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ema-email-validation-(ab-6098",
+      "name": "Email Validation (Abstract)",
+      "description": "Email verification",
+      "category": "Email",
+      "baseUrl": "https://www.abstractapi.com/email-verification-validation-api",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ent-chuck-norris-6132",
+      "name": "Chuck Norris",
+      "description": "Chuck Norris jokes",
+      "category": "Entertainment",
+      "baseUrl": "https://api.chucknorris.io/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ent-fun-translations-4588",
+      "name": "Fun Translations",
+      "description": "Translate to movie languages",
+      "category": "Entertainment",
+      "baseUrl": "https://funtranslations.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ent-lord-of-the-rings-9874",
+      "name": "Lord of the Rings",
+      "description": "LOTR data",
+      "category": "Entertainment",
+      "baseUrl": "https://the-one-api.dev/documentation",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ent-star-trek-5526",
+      "name": "Star Trek",
+      "description": "Star Trek data",
+      "category": "Entertainment",
+      "baseUrl": "https://stapi.co/api-documentation",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ent-stockx-321",
+      "name": "StockX",
+      "description": "Sneaker and fashion data",
+      "category": "Entertainment",
+      "baseUrl": "https://stockx.vlour.me/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-amazon-s3-7010",
+      "name": "Amazon S3",
+      "description": "Object storage",
+      "category": "Storage",
+      "baseUrl": "https://docs.aws.amazon.com/s3/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-digitalocean-spaces-9268",
+      "name": "DigitalOcean Spaces",
+      "description": "Object storage",
+      "category": "Storage",
+      "baseUrl": "https://docs.digitalocean.com/products/spaces/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-pdf-blocks-4713",
+      "name": "PDF Blocks",
+      "description": "PDF operations",
+      "category": "Storage",
+      "baseUrl": "https://www.pdfblocks.com/docs/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-smash-8",
+      "name": "Smash",
+      "description": "Large file upload",
+      "category": "Storage",
+      "baseUrl": "https://api.fromsmash.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sto-vector-express-8107",
+      "name": "Vector Express",
+      "description": "Vector file conversion",
+      "category": "Storage",
+      "baseUrl": "https://github.com/smidyo/vectorexpress-api",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "fin-atom-finance-2122",
+      "name": "Atom Finance",
+      "description": "Market and earnings data",
+      "category": "Finance",
+      "baseUrl": "https://docs.atom.finance/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "fin-parqet-logo-9986",
+      "name": "Parqet Logo",
+      "description": "Company logos",
+      "category": "Finance",
+      "baseUrl": "https://developers.parqet.com/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "fit-healthgraph-(runkeep-1168",
+      "name": "HealthGraph (RunKeeper)",
+      "description": "Health data",
+      "category": "Fitness",
+      "baseUrl": "https://runkeeper.com/developer/healthgraph/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "goo-google-customsearch-863",
+      "name": "Google CustomSearch",
+      "description": "Custom search engine",
+      "category": "Google",
+      "baseUrl": "https://developers.google.com/custom-search/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "goo-google-fitness-808",
+      "name": "Google Fitness",
+      "description": "Health tracking",
+      "category": "Google",
+      "baseUrl": "https://developers.google.com/fit/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "goo-google-genomics-1845",
+      "name": "Google Genomics",
+      "description": "Genomics data",
+      "category": "Google",
+      "baseUrl": "https://cloud.google.com/genomics/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "goo-google-identity-7302",
+      "name": "Google Identity",
+      "description": "Identity platform",
+      "category": "Google",
+      "baseUrl": "https://developers.google.com/identity/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "goo-google-monitoring-8915",
+      "name": "Google Monitoring",
+      "description": "Cloud monitoring",
+      "category": "Google",
+      "baseUrl": "https://cloud.google.com/monitoring/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sec-blockscore-3506",
+      "name": "BlockScore",
+      "description": "Identity verification",
+      "category": "Security",
+      "baseUrl": "https://docs.blockscore.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "sec-whitepages-pro-7685",
+      "name": "Whitepages Pro",
+      "description": "Identity verification",
+      "category": "Security",
+      "baseUrl": "https://pro.whitepages.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-facebook-login-9050",
+      "name": "Facebook Login",
+      "description": "Facebook authentication",
+      "category": "Auth",
+      "baseUrl": "https://developers.facebook.com/docs/facebook-login",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-github-auth-9159",
+      "name": "GitHub Auth",
+      "description": "GitHub authentication",
+      "category": "Auth",
+      "baseUrl": "https://docs.github.com/en/developers/apps/building-oauth-apps",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-instagram-auth-4092",
+      "name": "Instagram Auth",
+      "description": "Instagram login",
+      "category": "Auth",
+      "baseUrl": "https://developers.facebook.com/docs/instagram-basic-display-api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-linkedin-auth-7095",
+      "name": "LinkedIn Auth",
+      "description": "LinkedIn sign-in",
+      "category": "Auth",
+      "baseUrl": "https://docs.microsoft.com/en-us/linkedin/shared/authentication/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-paypal-auth-2879",
+      "name": "PayPal Auth",
+      "description": "PayPal login",
+      "category": "Auth",
+      "baseUrl": "https://developer.paypal.com/docs/log-in-with-paypal/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-salesforce-auth-3317",
+      "name": "Salesforce Auth",
+      "description": "Salesforce authentication",
+      "category": "Auth",
+      "baseUrl": "https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_understanding_authentication.htm",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "aut-twitter-auth-9471",
+      "name": "Twitter Auth",
+      "description": "Twitter sign-in",
+      "category": "Auth",
+      "baseUrl": "https://developer.twitter.com/en/docs/authentication",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tes-faker-api-6225",
+      "name": "Faker API",
+      "description": "Fake data generation",
+      "category": "Test Data",
+      "baseUrl": "https://fakerapi.it/en",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tes-lorem-ipsum-2747",
+      "name": "Lorem Ipsum",
+      "description": "Placeholder text",
+      "category": "Test Data",
+      "baseUrl": "https://loripsum.net/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ai/-dandelion-1165",
+      "name": "Dandelion",
+      "description": "Semantic text analytics",
+      "category": "AI/ML",
+      "baseUrl": "https://dandelion.eu/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ai/-google-natural-langu-7278",
+      "name": "Google Natural Language",
+      "description": "NLP API",
+      "category": "AI/ML",
+      "baseUrl": "https://cloud.google.com/natural-language/docs/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ai/-language-tool-5822",
+      "name": "Language Tool",
+      "description": "Grammar checking",
+      "category": "AI/ML",
+      "baseUrl": "https://languagetool.org/http-api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ai/-lilt-4287",
+      "name": "Lilt",
+      "description": "Translation API",
+      "category": "AI/ML",
+      "baseUrl": "https://lilt.com/docs/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "ai/-meaning-cloud-7845",
+      "name": "Meaning Cloud",
+      "description": "Text analytics",
+      "category": "AI/ML",
+      "baseUrl": "https://www.meaningcloud.com/developer/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tra-postmates-9935",
+      "name": "Postmates",
+      "description": "Local delivery",
+      "category": "Tracking",
+      "baseUrl": "https://developer.postmates.com/docs",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tra-ship24-9452",
+      "name": "Ship24",
+      "description": "Universal tracking",
+      "category": "Tracking",
+      "baseUrl": "https://www.ship24.com/en/developer",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tra-trackingmore-8660",
+      "name": "TrackingMore",
+      "description": "Multi-carrier tracking",
+      "category": "Tracking",
+      "baseUrl": "https://www.trackingmore.com/api-index.html",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "tra-dhl-4646",
+      "name": "DHL",
+      "description": "DHL shipping",
+      "category": "Tracking",
+      "baseUrl": "https://developer.dhl.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "dev-screenshotapi-7215",
+      "name": "ScreenshotAPI",
+      "description": "Website screenshots",
+      "category": "Development",
+      "baseUrl": "https://screenshotapi.net/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch2"
+    },
+    {
+      "id": "fin-1forge-finance-4949",
+      "name": "1Forge Finance",
+      "description": "Stock and Forex Data and Realtime Quotes",
+      "category": "Finance",
+      "baseUrl": "https://1forge.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "sec-1password-events-565",
+      "name": "1Password Events",
+      "description": "1Password Events API",
+      "category": "Security",
+      "baseUrl": "https://events.1password.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-ably-platform-2323",
+      "name": "Ably Platform",
+      "description": "REST API for Ably realtime messaging",
+      "category": "Communication",
+      "baseUrl": "https://rest.ably.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-ably-control-6126",
+      "name": "Ably Control",
+      "description": "Ably Control API for account management",
+      "category": "Communication",
+      "baseUrl": "https://control.ably.net/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "geo-abstract-geolocation-2349",
+      "name": "Abstract Geolocation",
+      "description": "IP geolocation API",
+      "category": "Geocoding",
+      "baseUrl": "https://ipgeolocation.abstractapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "cms-adobe-experience-man-5283",
+      "name": "Adobe Experience Manager",
+      "description": "AEM API for content management",
+      "category": "CMS",
+      "baseUrl": "https://aem.adobe.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "pay-adyen-account-9214",
+      "name": "Adyen Account",
+      "description": "Account management for Adyen platform",
+      "category": "Payments",
+      "baseUrl": "https://cal-test.adyen.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "pay-adyen-balance-contro-5565",
+      "name": "Adyen Balance Control",
+      "description": "Transfer funds between merchant accounts",
+      "category": "Payments",
+      "baseUrl": "https://pal-test.adyen.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "pay-adyen-checkout-3885",
+      "name": "Adyen Checkout",
+      "description": "Adyen payment checkout API",
+      "category": "Payments",
+      "baseUrl": "https://checkout-test.adyen.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "pay-adyen-configuration-7167",
+      "name": "Adyen Configuration",
+      "description": "Balance platform configuration",
+      "category": "Payments",
+      "baseUrl": "https://balanceplatform-api-test.adyen.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "pay-adyen-binlookup-8448",
+      "name": "Adyen BinLookup",
+      "description": "BIN lookup for card information",
+      "category": "Payments",
+      "baseUrl": "https://pal-test.adyen.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "agr-agco-fuse-4460",
+      "name": "AGCO Fuse",
+      "description": "Agricultural equipment API",
+      "category": "Agriculture",
+      "baseUrl": "https://api.agcodigital.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "agr-agromonitoring-2154",
+      "name": "AgroMonitoring",
+      "description": "Agricultural monitoring API",
+      "category": "Agriculture",
+      "baseUrl": "https://api.agromonitoring.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "agr-agridata-3657",
+      "name": "Agridata",
+      "description": "Agricultural data API",
+      "category": "Agriculture",
+      "baseUrl": "https://api.agridata.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "env-breezometer-3879",
+      "name": "Breezometer",
+      "description": "Air quality and pollen data",
+      "category": "Environment",
+      "baseUrl": "https://api.breezometer.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "tra-kiwi-com-4199",
+      "name": "Kiwi.com",
+      "description": "Flight search and booking",
+      "category": "Transportation",
+      "baseUrl": "https://api.tequila.kiwi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "tra-duffel-1193",
+      "name": "Duffel",
+      "description": "Travel booking API",
+      "category": "Transportation",
+      "baseUrl": "https://api.duffel.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "tra-travelpayouts-9384",
+      "name": "Travelpayouts",
+      "description": "Affiliate travel API",
+      "category": "Transportation",
+      "baseUrl": "https://api.travelpayouts.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-rapidapi-6396",
+      "name": "RapidAPI",
+      "description": "API marketplace",
+      "category": "Development",
+      "baseUrl": "https://rapidapi.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-kong-7546",
+      "name": "Kong",
+      "description": "API gateway",
+      "category": "Development",
+      "baseUrl": "https://api.konghq.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-swaggerhub-7268",
+      "name": "SwaggerHub",
+      "description": "API design and documentation",
+      "category": "Development",
+      "baseUrl": "https://api.swaggerhub.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-app-store-connect-3430",
+      "name": "App Store Connect",
+      "description": "Apple App Store management",
+      "category": "Development",
+      "baseUrl": "https://api.appstoreconnect.apple.com/",
+      "authType": "jwt",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-google-play-develope-1099",
+      "name": "Google Play Developer",
+      "description": "Play Store management",
+      "category": "Development",
+      "baseUrl": "https://androidpublisher.googleapis.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ana-app-annie-9939",
+      "name": "App Annie",
+      "description": "App market data",
+      "category": "Analytics",
+      "baseUrl": "https://api.appannie.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ana-sensortower-805",
+      "name": "SensorTower",
+      "description": "Mobile app intelligence",
+      "category": "Analytics",
+      "baseUrl": "https://api.sensortower.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ana-appfigures-1396",
+      "name": "Appfigures",
+      "description": "App analytics",
+      "category": "Analytics",
+      "baseUrl": "https://api.appfigures.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ar/-echo3d-3988",
+      "name": "Echo3D",
+      "description": "3D asset management",
+      "category": "AR/VR",
+      "baseUrl": "https://api.echo3d.co/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ar/-sketchfab-8843",
+      "name": "Sketchfab",
+      "description": "3D model platform",
+      "category": "AR/VR",
+      "baseUrl": "https://api.sketchfab.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ar/-poly-(google)-5932",
+      "name": "Poly (Google)",
+      "description": "3D object library",
+      "category": "AR/VR",
+      "baseUrl": "https://poly.googleapis.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ar/-cgtrader-300",
+      "name": "CGTrader",
+      "description": "3D model marketplace",
+      "category": "AR/VR",
+      "baseUrl": "https://www.cgtrader.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ar/-turbosquid-9012",
+      "name": "TurboSquid",
+      "description": "3D model marketplace",
+      "category": "AR/VR",
+      "baseUrl": "https://www.turbosquid.com/API/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-anchor-5620",
+      "name": "Anchor",
+      "description": "Podcast hosting",
+      "category": "Media",
+      "baseUrl": "https://anchor.fm/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-buzzsprout-1811",
+      "name": "Buzzsprout",
+      "description": "Podcast hosting",
+      "category": "Media",
+      "baseUrl": "https://www.buzzsprout.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-transistor-8151",
+      "name": "Transistor",
+      "description": "Podcast hosting",
+      "category": "Media",
+      "baseUrl": "https://api.transistor.fm/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-podbean-4479",
+      "name": "Podbean",
+      "description": "Podcast hosting",
+      "category": "Media",
+      "baseUrl": "https://api.podbean.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-listen-notes-6151",
+      "name": "Listen Notes",
+      "description": "Podcast search",
+      "category": "Media",
+      "baseUrl": "https://listen-api.listennotes.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-podcast-index-5463",
+      "name": "Podcast Index",
+      "description": "Open podcast database",
+      "category": "Media",
+      "baseUrl": "https://api.podcastindex.org/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-audd-io-3432",
+      "name": "Audd.io",
+      "description": "Music recognition",
+      "category": "Media",
+      "baseUrl": "https://api.audd.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "med-acrcloud-2744",
+      "name": "ACRCloud",
+      "description": "Audio recognition",
+      "category": "Media",
+      "baseUrl": "https://api.acrcloud.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "sec-checkr-5062",
+      "name": "Checkr",
+      "description": "Background checks",
+      "category": "Security",
+      "baseUrl": "https://api.checkr.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "sec-goodhire-5075",
+      "name": "GoodHire",
+      "description": "Background checks",
+      "category": "Security",
+      "baseUrl": "https://api.goodhire.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "sec-sterling-1364",
+      "name": "Sterling",
+      "description": "Background screening",
+      "category": "Security",
+      "baseUrl": "https://api.sterlingcheck.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-truelayer-8869",
+      "name": "TrueLayer",
+      "description": "Open banking",
+      "category": "Finance",
+      "baseUrl": "https://api.truelayer.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-salt-edge-7078",
+      "name": "Salt Edge",
+      "description": "Open banking aggregation",
+      "category": "Finance",
+      "baseUrl": "https://www.saltedge.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-recurly-3333",
+      "name": "Recurly",
+      "description": "Subscription management",
+      "category": "Commerce",
+      "baseUrl": "https://v3.recurly.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-zuora-4615",
+      "name": "Zuora",
+      "description": "Subscription platform",
+      "category": "Commerce",
+      "baseUrl": "https://rest.zuora.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-fastspring-9754",
+      "name": "FastSpring",
+      "description": "E-commerce platform",
+      "category": "Commerce",
+      "baseUrl": "https://api.fastspring.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "hea-23andme-3017",
+      "name": "23andMe",
+      "description": "Genetics API",
+      "category": "Health",
+      "baseUrl": "https://api.23andme.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "hea-usda-fooddata-801",
+      "name": "USDA FoodData",
+      "description": "Food nutrition data",
+      "category": "Health",
+      "baseUrl": "https://api.nal.usda.gov/fdc/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "hea-edamam-food-6049",
+      "name": "Edamam Food",
+      "description": "Food database",
+      "category": "Health",
+      "baseUrl": "https://api.edamam.com/api/food-database/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "cms-ghost-admin-3258",
+      "name": "Ghost Admin",
+      "description": "Ghost CMS API",
+      "category": "CMS",
+      "baseUrl": "https://yoursite.ghost.io/ghost/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "cms-wordpress-7004",
+      "name": "WordPress",
+      "description": "WordPress REST API",
+      "category": "CMS",
+      "baseUrl": "https://developer.wordpress.com/docs/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "cms-datocms-7781",
+      "name": "DatoCMS",
+      "description": "Headless CMS",
+      "category": "CMS",
+      "baseUrl": "https://site-api.datocms.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-discord-bot-9754",
+      "name": "Discord Bot",
+      "description": "Discord bots",
+      "category": "Communication",
+      "baseUrl": "https://discord.com/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-slack-bot-32",
+      "name": "Slack Bot",
+      "description": "Slack workspace bots",
+      "category": "Communication",
+      "baseUrl": "https://slack.com/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-microsoft-bot-framew-9566",
+      "name": "Microsoft Bot Framework",
+      "description": "Bot building",
+      "category": "AI/ML",
+      "baseUrl": "https://api.botframework.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-amazon-lex-1667",
+      "name": "Amazon Lex",
+      "description": "Conversational interfaces",
+      "category": "AI/ML",
+      "baseUrl": "https://runtime.lex.amazonaws.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-rasa-8130",
+      "name": "Rasa",
+      "description": "Open source conversational AI",
+      "category": "AI/ML",
+      "baseUrl": "https://rasa.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-botpress-5459",
+      "name": "Botpress",
+      "description": "Open source bot platform",
+      "category": "AI/ML",
+      "baseUrl": "https://botpress.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-chrome-web-store-825",
+      "name": "Chrome Web Store",
+      "description": "Extension marketplace",
+      "category": "Development",
+      "baseUrl": "https://www.googleapis.com/chromewebstore/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-firefox-add-ons-1939",
+      "name": "Firefox Add-ons",
+      "description": "Extension marketplace",
+      "category": "Development",
+      "baseUrl": "https://addons.mozilla.org/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-cloudflare-9900",
+      "name": "Cloudflare",
+      "description": "CDN and security",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.cloudflare.com/client/v4/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-fastly-5221",
+      "name": "Fastly",
+      "description": "Edge cloud platform",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.fastly.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-akamai-6658",
+      "name": "Akamai",
+      "description": "CDN and security",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.akamai.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-keycdn-3903",
+      "name": "KeyCDN",
+      "description": "Content delivery",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.keycdn.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-bunnycdn-4190",
+      "name": "BunnyCDN",
+      "description": "Content delivery",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.bunny.net/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-stackpath-5747",
+      "name": "StackPath",
+      "description": "Edge services",
+      "category": "Infrastructure",
+      "baseUrl": "https://gateway.stackpath.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-chatwoot-4387",
+      "name": "Chatwoot",
+      "description": "Open source customer engagement",
+      "category": "Communication",
+      "baseUrl": "https://app.chatwoot.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-codacy-5723",
+      "name": "Codacy",
+      "description": "Code review automation",
+      "category": "Development",
+      "baseUrl": "https://api.codacy.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-codeclimate-7314",
+      "name": "CodeClimate",
+      "description": "Code quality",
+      "category": "Development",
+      "baseUrl": "https://api.codeclimate.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-codecov-5725",
+      "name": "Codecov",
+      "description": "Code coverage",
+      "category": "Development",
+      "baseUrl": "https://codecov.io/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-coveralls-3385",
+      "name": "Coveralls",
+      "description": "Code coverage",
+      "category": "Development",
+      "baseUrl": "https://coveralls.io/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "sec-snyk-5774",
+      "name": "Snyk",
+      "description": "Security scanning",
+      "category": "Security",
+      "baseUrl": "https://snyk.io/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-dependabot-2129",
+      "name": "Dependabot",
+      "description": "Dependency updates",
+      "category": "Development",
+      "baseUrl": "https://api.dependabot.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-renovate-9829",
+      "name": "Renovate",
+      "description": "Dependency updates",
+      "category": "Development",
+      "baseUrl": "https://api.renovatebot.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "bus-crunchbase-1561",
+      "name": "Crunchbase",
+      "description": "Company data",
+      "category": "Business",
+      "baseUrl": "https://api.crunchbase.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-pitchbook-7276",
+      "name": "PitchBook",
+      "description": "Private market data",
+      "category": "Finance",
+      "baseUrl": "https://api.pitchbook.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "bus-lusha-8429",
+      "name": "Lusha",
+      "description": "B2B contact data",
+      "category": "Business",
+      "baseUrl": "https://api.lusha.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "bus-fullcontact-9764",
+      "name": "FullContact",
+      "description": "Identity resolution",
+      "category": "Business",
+      "baseUrl": "https://api.fullcontact.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "bus-conga-4260",
+      "name": "Conga",
+      "description": "Document generation",
+      "category": "Business",
+      "baseUrl": "https://api.conga.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-peopledatalabs-2600",
+      "name": "PeopleDataLabs",
+      "description": "Person and company data",
+      "category": "Data",
+      "baseUrl": "https://api.peopledatalabs.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-slintel-4559",
+      "name": "Slintel",
+      "description": "Sales intelligence",
+      "category": "Data",
+      "baseUrl": "https://api.slintel.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-leadgenius-6923",
+      "name": "LeadGenius",
+      "description": "B2B data",
+      "category": "Data",
+      "baseUrl": "https://api.leadgenius.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-snov-io-631",
+      "name": "Snov.io",
+      "description": "Lead generation",
+      "category": "Data",
+      "baseUrl": "https://api.snov.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-redis-cloud-6078",
+      "name": "Redis Cloud",
+      "description": "Redis as a service",
+      "category": "Database",
+      "baseUrl": "https://api.redislabs.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dat-xata-440",
+      "name": "Xata",
+      "description": "Serverless database",
+      "category": "Database",
+      "baseUrl": "https://api.xata.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-raycast-6926",
+      "name": "Raycast",
+      "description": "Productivity launcher",
+      "category": "Development",
+      "baseUrl": "https://api.raycast.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-alfred-170",
+      "name": "Alfred",
+      "description": "Mac productivity",
+      "category": "Development",
+      "baseUrl": "https://www.alfredapp.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-fig-7296",
+      "name": "Fig",
+      "description": "Terminal autocomplete",
+      "category": "Development",
+      "baseUrl": "https://api.fig.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-warp-7070",
+      "name": "Warp",
+      "description": "Modern terminal",
+      "category": "Development",
+      "baseUrl": "https://api.warp.dev/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-codeium-1574",
+      "name": "Codeium",
+      "description": "AI code completion",
+      "category": "AI/ML",
+      "baseUrl": "https://api.codeium.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ai/-tabnine-2974",
+      "name": "Tabnine",
+      "description": "AI assistant",
+      "category": "AI/ML",
+      "baseUrl": "https://api.tabnine.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-sourcegraph-1357",
+      "name": "Sourcegraph",
+      "description": "Code search",
+      "category": "Development",
+      "baseUrl": "https://sourcegraph.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-grep-app-697",
+      "name": "Grep.app",
+      "description": "Code search",
+      "category": "Development",
+      "baseUrl": "https://grep.app/api/",
+      "authType": "none",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-cloudflare-dns-2158",
+      "name": "Cloudflare DNS",
+      "description": "DNS management",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.cloudflare.com/client/v4/zones/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-route-53-2324",
+      "name": "Route 53",
+      "description": "AWS DNS",
+      "category": "Infrastructure",
+      "baseUrl": "https://route53.amazonaws.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-dnsimple-2557",
+      "name": "DNSimple",
+      "description": "Domain management",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.dnsimple.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-name-com-9610",
+      "name": "Name.com",
+      "description": "Domain registrar",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.name.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-namecheap-7479",
+      "name": "Namecheap",
+      "description": "Domain registrar",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.namecheap.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-godaddy-7112",
+      "name": "GoDaddy",
+      "description": "Domain registrar",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.godaddy.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-gandi-2962",
+      "name": "Gandi",
+      "description": "Domain registrar",
+      "category": "Infrastructure",
+      "baseUrl": "https://api.gandi.net/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "inf-porkbun-7660",
+      "name": "Porkbun",
+      "description": "Domain registrar",
+      "category": "Infrastructure",
+      "baseUrl": "https://porkbun.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "doc-docspring-8564",
+      "name": "DocSpring",
+      "description": "PDF generation",
+      "category": "Documents",
+      "baseUrl": "https://api.docspring.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "doc-pspdfkit-7947",
+      "name": "PSPDFKit",
+      "description": "PDF SDK",
+      "category": "Documents",
+      "baseUrl": "https://api.pspdfkit.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "doc-anvil-5540",
+      "name": "Anvil",
+      "description": "Paperwork automation",
+      "category": "Documents",
+      "baseUrl": "https://api.useanvil.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "doc-documentero-5110",
+      "name": "Documentero",
+      "description": "Document generation",
+      "category": "Documents",
+      "baseUrl": "https://app.documentero.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "doc-carbone-3266",
+      "name": "Carbone",
+      "description": "Document generation",
+      "category": "Documents",
+      "baseUrl": "https://api.carbone.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-shopify-admin-7675",
+      "name": "Shopify Admin",
+      "description": "Store management",
+      "category": "Commerce",
+      "baseUrl": "https://mystore.myshopify.com/admin/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-prestashop-7936",
+      "name": "PrestaShop",
+      "description": "E-commerce solution",
+      "category": "Commerce",
+      "baseUrl": "https://yourstore.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-saleor-3682",
+      "name": "Saleor",
+      "description": "Headless commerce",
+      "category": "Commerce",
+      "baseUrl": "https://api.saleor.io/",
+      "authType": "jwt",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-medusa-2331",
+      "name": "Medusa",
+      "description": "Open source commerce",
+      "category": "Commerce",
+      "baseUrl": "https://api.medusajs.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-swell-4491",
+      "name": "Swell",
+      "description": "Headless commerce",
+      "category": "Commerce",
+      "baseUrl": "https://api.swell.store/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-blackboard-2513",
+      "name": "Blackboard",
+      "description": "Learning management",
+      "category": "Education",
+      "baseUrl": "https://developer.blackboard.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-moodle-5545",
+      "name": "Moodle",
+      "description": "Open source LMS",
+      "category": "Education",
+      "baseUrl": "https://yourmoodle.com/webservice/rest/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-teachable-6277",
+      "name": "Teachable",
+      "description": "Course platform",
+      "category": "Education",
+      "baseUrl": "https://yourschool.teachable.com/api/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-thinkific-1857",
+      "name": "Thinkific",
+      "description": "Course platform",
+      "category": "Education",
+      "baseUrl": "https://api.thinkific.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-kajabi-1863",
+      "name": "Kajabi",
+      "description": "Course platform",
+      "category": "Education",
+      "baseUrl": "https://kajabi.com/api/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "edu-podia-8633",
+      "name": "Podia",
+      "description": "Digital products",
+      "category": "Education",
+      "baseUrl": "https://api.podia.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "mar-convertkit-5357",
+      "name": "ConvertKit",
+      "description": "Creator marketing",
+      "category": "Marketing",
+      "baseUrl": "https://api.convertkit.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "mar-drip-6416",
+      "name": "Drip",
+      "description": "E-commerce CRM",
+      "category": "Marketing",
+      "baseUrl": "https://api.getdrip.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "mar-activecampaign-5732",
+      "name": "ActiveCampaign",
+      "description": "Email automation",
+      "category": "Marketing",
+      "baseUrl": "https://yoursite.api-us1.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "mar-vero-7884",
+      "name": "Vero",
+      "description": "Event-driven email",
+      "category": "Marketing",
+      "baseUrl": "https://api.getvero.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-mailersend-8907",
+      "name": "Mailersend",
+      "description": "Transactional email",
+      "category": "Communication",
+      "baseUrl": "https://api.mailersend.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-smtp2go-8314",
+      "name": "SMTP2GO",
+      "description": "Email delivery",
+      "category": "Communication",
+      "baseUrl": "https://api.smtp2go.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "com-elastic-email-3061",
+      "name": "Elastic Email",
+      "description": "Email API",
+      "category": "Communication",
+      "baseUrl": "https://api.elasticemail.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ent-sap-1075",
+      "name": "SAP",
+      "description": "Enterprise software",
+      "category": "Enterprise",
+      "baseUrl": "https://api.sap.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ent-oracle-cloud-6356",
+      "name": "Oracle Cloud",
+      "description": "Enterprise cloud",
+      "category": "Enterprise",
+      "baseUrl": "https://api.oracle.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ent-microsoft-dynamics-8790",
+      "name": "Microsoft Dynamics",
+      "description": "Business applications",
+      "category": "Enterprise",
+      "baseUrl": "https://api.dynamics.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "ent-netsuite-8315",
+      "name": "NetSuite",
+      "description": "ERP system",
+      "category": "Enterprise",
+      "baseUrl": "https://api.netsuite.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-split-9279",
+      "name": "Split",
+      "description": "Feature delivery",
+      "category": "Development",
+      "baseUrl": "https://api.split.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-optimizely-3569",
+      "name": "Optimizely",
+      "description": "Experimentation",
+      "category": "Development",
+      "baseUrl": "https://api.optimizely.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-configcat-6629",
+      "name": "ConfigCat",
+      "description": "Feature flags",
+      "category": "Development",
+      "baseUrl": "https://api.configcat.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-unleash-7118",
+      "name": "Unleash",
+      "description": "Open source feature flags",
+      "category": "Development",
+      "baseUrl": "https://api.getunleash.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "dev-growthbook-3084",
+      "name": "GrowthBook",
+      "description": "Feature flags and A/B tests",
+      "category": "Development",
+      "baseUrl": "https://api.growthbook.io/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-modern-treasury-3611",
+      "name": "Modern Treasury",
+      "description": "Payment operations",
+      "category": "Finance",
+      "baseUrl": "https://api.moderntreasury.com/",
+      "authType": "basic",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-lithic-6296",
+      "name": "Lithic",
+      "description": "Card issuing",
+      "category": "Finance",
+      "baseUrl": "https://api.lithic.com/",
+      "authType": "apiKey",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-increase-2394",
+      "name": "Increase",
+      "description": "Banking infrastructure",
+      "category": "Finance",
+      "baseUrl": "https://api.increase.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-unit-8826",
+      "name": "Unit",
+      "description": "Banking as a service",
+      "category": "Finance",
+      "baseUrl": "https://api.s.unit.sh/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-synapse-6830",
+      "name": "Synapse",
+      "description": "Financial infrastructure",
+      "category": "Finance",
+      "baseUrl": "https://api.synapsefi.com/",
+      "authType": "oauth",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-treasury-prime-8482",
+      "name": "Treasury Prime",
+      "description": "Banking API",
+      "category": "Finance",
+      "baseUrl": "https://api.treasuryprime.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
+    },
+    {
+      "id": "fin-column-3840",
+      "name": "Column",
+      "description": "Banking infrastructure",
+      "category": "Finance",
+      "baseUrl": "https://api.column.com/",
+      "authType": "bearer",
+      "pricingModel": "freemium",
+      "source": "night-expansion-03-batch3-apisguru"
     }
   ]
 }
