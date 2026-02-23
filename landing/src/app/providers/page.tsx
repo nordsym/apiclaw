@@ -127,7 +127,7 @@ export default function ProvidersPage() {
           </h1>
           
           <p className="text-xl md:text-2xl text-text-secondary mb-4 max-w-2xl mx-auto leading-relaxed">
-            The agentic era is here. Agents don&apos;t browse — they query.
+            The agentic era is here. Agents don&apos;t browse. They query.
           </p>
           <p className="text-lg text-text-muted mb-12">
             List your API where agents are looking.
@@ -136,7 +136,7 @@ export default function ProvidersPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Link href="/providers/register" className="btn-primary glow">
               <Zap className="w-5 h-5" />
-              List Your API — Free
+              List Your API (Free)
             </Link>
             <a href="#how-it-works" className="btn-secondary">
               <span>How It Works</span>
@@ -327,7 +327,7 @@ export default function ProvidersPage() {
           </p>
           <Link href="/providers/register" className="btn-primary glow inline-flex">
             <Zap className="w-5 h-5" />
-            List Your API — Free
+            List Your API (Free)
           </Link>
         </div>
       </section>

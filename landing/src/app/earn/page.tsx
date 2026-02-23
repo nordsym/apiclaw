@@ -278,7 +278,7 @@ export default function EarnPage() {
               </div>
               <h3 className="font-semibold mb-2">Use</h3>
               <p className="text-[var(--text-secondary)] text-sm">
-                Spend credits on API calls — SMS, search, AI, and more
+                Spend credits on API calls: SMS, search, AI, and more
               </p>
             </div>
             <div className="text-center">

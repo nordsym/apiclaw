@@ -242,7 +242,7 @@ export default function RegisterPage() {
               </p>
               
               <p style="color: #737373; font-size: 14px; margin-top: 32px;">
-                — The APIClaw Team<br>
+                - The APIClaw Team<br>
                 <a href="https://apiclaw.nordsym.com" style="color: #ef4444;">apiclaw.nordsym.com</a>
               </p>
             </div>

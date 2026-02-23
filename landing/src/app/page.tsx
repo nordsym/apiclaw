@@ -29,7 +29,7 @@ const howItWorks = [
   {
     step: "1",
     title: "Agent Asks",
-    description: "Your agent queries APIClaw for a capability—not a product name.",
+    description: "Your agent queries APIClaw for a capability. Not a product name.",
     icon: Search,
     codeJsx: (
       <>
@@ -63,7 +63,7 @@ const howItWorks = [
   {
     step: "3",
     title: "Agent Integrates",
-    description: "Full specs, auth details, endpoints—everything to start building.",
+    description: "Full specs, auth details, endpoints. Everything to start building.",
     icon: Rocket,
     codeJsx: (
       <>
@@ -92,7 +92,7 @@ const agentBenefits = [
   {
     icon: Database,
     title: "Structured Data",
-    description: "JSON responses with pricing, limits, regions, auth—everything an agent needs.",
+    description: "JSON responses with pricing, limits, regions, auth. Everything an agent needs.",
   },
   {
     icon: Shield,
@@ -349,7 +349,7 @@ export default function Home() {
                   <div className="terminal-dot terminal-dot-red" />
                   <div className="terminal-dot terminal-dot-yellow" />
                   <div className="terminal-dot terminal-dot-green" />
-                  <span className="terminal-title">apiclaw — zsh</span>
+                  <span className="terminal-title">apiclaw</span>
                 </div>
                 <div className="terminal-body">
                   {terminalOutput.map((line, i) => (
@@ -603,7 +603,7 @@ export default function Home() {
 
             <div className="code-preview">
               <div className="code-preview-header">
-                agent.ts — Claude Agent Example
+                agent.ts
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm">
@@ -700,7 +700,7 @@ export default function Home() {
               </h2>
               
               <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-                AI agents are the new developers. They don't browse landing pages—
+                AI agents are the new developers. They don't browse landing pages. 
                 they query capabilities. Get your API in front of them.
               </p>
 
