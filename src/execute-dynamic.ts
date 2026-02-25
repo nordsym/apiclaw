@@ -64,7 +64,7 @@ interface UsageStats {
 }
 
 // Convex HTTP API
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.site';
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
 
 async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T | null> {
   try {
@@ -111,7 +111,25 @@ export async function hasDynamicConfig(providerId: string): Promise<boolean> {
  * Fetch provider direct call configuration from Convex
  */
 export async function getProviderConfig(providerId: string): Promise<ProviderDirectCallConfig | null> {
-  return convexQuery<ProviderDirectCallConfig>('providerDirectCall:getByProviderId', { providerId });
+  // First try by API slug (for agent execution by name)
+  const bySlug = await convexQuery<ProviderDirectCallConfig>('directCall:getByApiSlug', { slug: providerId });
+  // Check for error response from Convex (not a real config)
+  const bySlugAny = bySlug as any;
+  if (bySlug && !(bySlugAny.status === 'error' || bySlugAny.errorMessage)) {
+    return bySlug;
+  }
+  
+  // Only try direct provider ID lookup if it looks like a Convex ID (starts with valid prefix)
+  // Convex IDs typically look like: k97xxx...
+  if (providerId.match(/^[a-z][a-z0-9]{2,}/)) {
+    const byId = await convexQuery<ProviderDirectCallConfig>('directCall:getDirectCallConfig', { providerId });
+    const byIdAny = byId as any;
+    if (byId && !(byIdAny.status === 'error' || byIdAny.errorMessage)) {
+      return byId;
+    }
+  }
+  
+  return null;
 }
 
 /**
@@ -122,7 +140,7 @@ export async function getActionConfig(providerId: string, actionName: string): P
   const config = await getProviderConfig(providerId);
   if (!config) return null;
   
-  return convexQuery<ProviderAction>('providerActions:getByName', { 
+  return convexQuery<ProviderAction>('directCall:getActionByName', { 
     directCallId: config._id, 
     name: actionName 
   });
@@ -132,7 +150,7 @@ export async function getActionConfig(providerId: string, actionName: string): P
  * Get user's current usage for rate limiting
  */
 export async function getUserUsage(userId: string, providerId: string): Promise<UsageStats> {
-  const usage = await convexQuery<UsageStats>('usageLog:getUserUsage', { userId, providerId });
+  const usage = await convexQuery<UsageStats>('usage:getUserUsage', { userId, providerId });
   return usage || { minute: 0, day: 0 };
 }
 
@@ -311,7 +329,7 @@ export async function logUsage(params: {
   latencyMs: number;
   creditsUsed: number;
 }): Promise<void> {
-  await convexMutation('usageLog:create', params);
+  await convexMutation('usage:logUsage', params);
 }
 
 /**
@@ -521,7 +539,7 @@ export async function listDynamicActions(providerId: string): Promise<string[]> 
     return [];
   }
   
-  const actions = await convexQuery<ProviderAction[]>('providerActions:listByDirectCall', { 
+  const actions = await convexQuery<ProviderAction[]>('directCall:getActions', { 
     directCallId: config._id 
   });
   

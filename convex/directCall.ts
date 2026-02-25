@@ -298,6 +298,48 @@ export const getConfig = query({
   },
 });
 
+/**
+ * Get Direct Call config by API slug (for MCP/agent execution)
+ * Looks up API by name, then gets the Direct Call config
+ */
+export const getByApiSlug = query({
+  args: {
+    slug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Normalize slug (lowercase, replace spaces/dashes)
+    const normalizedSlug = args.slug.toLowerCase().replace(/[\s-]/g, '_');
+    
+    // Find API by name (case-insensitive match)
+    const apis = await ctx.db.query("providerAPIs").collect();
+    const api = apis.find(a => 
+      a.name.toLowerCase().replace(/[\s-]/g, '_') === normalizedSlug ||
+      a.name.toLowerCase() === args.slug.toLowerCase()
+    );
+    
+    if (!api) {
+      return null;
+    }
+    
+    // Get Direct Call config for this API
+    const config = await ctx.db
+      .query("providerDirectCall")
+      .withIndex("by_apiId")
+      .filter((q) => q.eq(q.field("apiId"), api._id))
+      .first();
+    
+    if (!config || config.status !== 'live') {
+      return null;
+    }
+    
+    return {
+      ...config,
+      apiName: api.name,
+      apiSlug: normalizedSlug,
+    };
+  },
+});
+
 // ============================================
 // TEST ACTION
 // ============================================
