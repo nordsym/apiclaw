@@ -338,45 +338,56 @@ export const getAnalytics = query({
 
     const startTime = now - periodMs;
 
-    // Get all API calls for this provider
-    const allCalls = await ctx.db
-      .query("apiCalls")
+    // Get usage logs for this provider (from Direct Call usageLog)
+    const usageLogs = await ctx.db
+      .query("usageLog")
       .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
       .collect();
 
-    const periodCalls = allCalls.filter((c) => c.timestamp >= startTime);
+    const periodCalls = usageLogs.filter((c) => c.timestamp >= startTime);
 
     // Calculate metrics
     const totalCalls = periodCalls.length;
-    const uniqueAgents = new Set(periodCalls.map((c) => c.agentId)).size;
-    const totalRevenue = periodCalls.reduce((sum, c) => sum + c.costUsd, 0);
+    const uniqueAgents = new Set(periodCalls.map((c) => c.userId)).size;
+    const totalRevenue = periodCalls.reduce((sum, c) => sum + (c.creditsUsed / 100), 0); // cents to dollars
+    const successCount = periodCalls.filter((c) => c.success).length;
+    const successRate = totalCalls > 0 ? (successCount / totalCalls) * 100 : 100;
+    const avgLatency = totalCalls > 0 
+      ? periodCalls.reduce((sum, c) => sum + c.latencyMs, 0) / totalCalls 
+      : 0;
 
     // Calls over time (daily buckets)
-    const callsByDay: Record<string, number> = {};
-    const revenueByDay: Record<string, number> = {};
+    const callsByDay: Record<string, { calls: number; revenue: number; success: number }> = {};
 
     periodCalls.forEach((call) => {
       const day = new Date(call.timestamp).toISOString().split("T")[0];
-      callsByDay[day] = (callsByDay[day] || 0) + 1;
-      revenueByDay[day] = (revenueByDay[day] || 0) + call.costUsd;
+      if (!callsByDay[day]) {
+        callsByDay[day] = { calls: 0, revenue: 0, success: 0 };
+      }
+      callsByDay[day].calls += 1;
+      callsByDay[day].revenue += call.creditsUsed / 100;
+      if (call.success) callsByDay[day].success += 1;
     });
 
-    // Top agents
+    // Top agents (users)
     const agentCallCounts: Record<string, number> = {};
     periodCalls.forEach((call) => {
-      agentCallCounts[call.agentId] = (agentCallCounts[call.agentId] || 0) + 1;
+      agentCallCounts[call.userId] = (agentCallCounts[call.userId] || 0) + 1;
     });
     const topAgents = Object.entries(agentCallCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([agentId, calls]) => ({ agentId, calls }));
 
-    // By region
-    const callsByRegion: Record<string, number> = {};
+    // Top actions
+    const actionCallCounts: Record<string, number> = {};
     periodCalls.forEach((call) => {
-      const region = call.region || "Unknown";
-      callsByRegion[region] = (callsByRegion[region] || 0) + 1;
+      actionCallCounts[call.actionName] = (actionCallCounts[call.actionName] || 0) + 1;
     });
+    const topActions = Object.entries(actionCallCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([actionName, calls]) => ({ actionName, calls }));
 
     // Get provider's APIs
     const apis = await ctx.db
@@ -384,32 +395,93 @@ export const getAnalytics = query({
       .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
       .collect();
 
-    // Calls per API
-    const callsByApi: Record<string, number> = {};
+    // Get Direct Call configs to map directCallId to apiId
+    const directCallConfigs = await ctx.db
+      .query("providerDirectCall")
+      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
+      .collect();
+
+    // Calls per API (via directCallId → apiId mapping)
+    const callsByDirectCallId: Record<string, number> = {};
     periodCalls.forEach((call) => {
-      const apiIdStr = call.apiId as string;
-      callsByApi[apiIdStr] = (callsByApi[apiIdStr] || 0) + 1;
+      const dcId = call.directCallId as string;
+      callsByDirectCallId[dcId] = (callsByDirectCallId[dcId] || 0) + 1;
     });
+
+    // Map to apiId
+    const callsByApiId: Record<string, number> = {};
+    directCallConfigs.forEach((dc) => {
+      if (dc.apiId) {
+        callsByApiId[dc.apiId as string] = callsByDirectCallId[dc._id as string] || 0;
+      }
+    });
+
+    // Preview data for providers with no usage yet
+    const isPreview = totalCalls === 0;
+    
+    if (isPreview) {
+      // Generate preview data so providers can see what the dashboard looks like
+      const previewDays = [];
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date(now - i * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        previewDays.push({
+          date,
+          calls: Math.floor(Math.random() * 50) + 10,
+          revenue: Math.random() * 5,
+        });
+      }
+      
+      return {
+        totalCalls: 847,
+        uniqueAgents: 23,
+        totalRevenue: 42.35,
+        successRate: 98.2,
+        avgLatency: 145,
+        callsByDay: previewDays,
+        topAgents: [
+          { agentId: "agent_demo_1", calls: 234 },
+          { agentId: "agent_demo_2", calls: 189 },
+          { agentId: "agent_demo_3", calls: 156 },
+          { agentId: "agent_demo_4", calls: 98 },
+          { agentId: "agent_demo_5", calls: 67 },
+        ],
+        topActions: [
+          { actionName: "send_message", calls: 412 },
+          { actionName: "get_status", calls: 289 },
+          { actionName: "create_invoice", calls: 146 },
+        ],
+        apis: apis.map((api) => ({
+          id: api._id,
+          name: api.name,
+          calls: Math.floor(Math.random() * 200) + 50,
+          status: api.status,
+        })),
+        isPreview: true,
+      };
+    }
 
     return {
       totalCalls,
       uniqueAgents,
       totalRevenue,
+      successRate,
+      avgLatency,
       callsByDay: Object.entries(callsByDay)
-        .map(([date, calls]) => ({
+        .map(([date, data]) => ({
           date,
-          calls,
-          revenue: revenueByDay[date] || 0,
+          calls: data.calls,
+          revenue: data.revenue,
         }))
         .sort((a, b) => a.date.localeCompare(b.date)),
       topAgents,
-      callsByRegion,
+      topActions,
       apis: apis.map((api) => ({
         id: api._id,
         name: api.name,
-        calls: callsByApi[api._id as string] || 0,
+        calls: callsByApiId[api._id as string] || 0,
         status: api.status,
       })),
+      isPreview: false,
     };
   },
 });

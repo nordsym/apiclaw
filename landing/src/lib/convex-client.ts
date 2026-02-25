@@ -66,10 +66,14 @@ export interface Analytics {
   totalCalls: number;
   uniqueAgents: number;
   totalRevenue: number;
+  successRate?: number;
+  avgLatency?: number;
   callsByDay: DailyStats[];
   topAgents: { agentId: string; calls: number }[];
-  callsByRegion: Record<string, number>;
+  topActions?: { actionName: string; calls: number }[];
+  callsByRegion?: Record<string, number>;
   apis: { id: string; name: string; calls: number; status: string }[];
+  isPreview?: boolean;
 }
 
 export interface Earnings {

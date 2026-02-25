@@ -266,6 +266,17 @@ function OverviewTab({
   // Has analytics data - show charts
   return (
     <div className="space-y-8">
+      {/* Preview Banner */}
+      {analytics.isPreview && (
+        <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-accent flex-shrink-0" />
+          <div>
+            <p className="font-medium text-accent">Preview Mode</p>
+            <p className="text-sm text-text-muted">This is sample data. Real analytics will appear once agents start using your API.</p>
+          </div>
+        </div>
+      )}
+
       <h2 className="text-2xl font-bold">Analytics</h2>
 
       {/* Stats Grid */}
@@ -287,9 +298,9 @@ function OverviewTab({
           accent
         />
         <StatCard
-          title="Listed APIs"
-          value={apis.length.toString()}
-          icon={TrendingUp}
+          title="Success Rate"
+          value={`${(analytics.successRate || 100).toFixed(1)}%`}
+          icon={Check}
         />
       </div>
 
@@ -351,6 +362,26 @@ function OverviewTab({
                 <p className="text-text-muted text-sm">No agent activity yet</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Actions */}
+      {analytics.topActions && analytics.topActions.length > 0 && (
+        <div className="bg-surface-elevated rounded-2xl border border-border p-6">
+          <h3 className="font-semibold mb-4">Top Actions</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {analytics.topActions.slice(0, 6).map((action, i) => (
+              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-surface">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm font-mono">{action.actionName}</span>
+                </div>
+                <span className="text-sm text-text-muted">{action.calls.toLocaleString()}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
