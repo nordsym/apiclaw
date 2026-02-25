@@ -418,10 +418,10 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
       ) : (
         <div className="grid gap-4">
           {apis.map((api) => (
-            <div key={api._id} className="rounded-2xl border border-border bg-surface-elevated p-6">
+            <Link key={api._id} href={`/providers/dashboard/${api._id}`} className="block rounded-2xl border border-border bg-surface-elevated p-6 hover:border-accent/50 transition cursor-pointer">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">🔌</span>
+                  <Zap className="w-8 h-8 text-accent" />
                   <div>
                     <h3 className="font-semibold text-lg">{api.name}</h3>
                     <span className="text-sm text-text-muted">{api.category}</span>
@@ -453,12 +453,13 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-accent hover:underline flex items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Documentation <ExternalLink className="w-3 h-3" />
                   </a>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
