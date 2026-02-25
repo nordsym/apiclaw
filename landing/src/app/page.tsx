@@ -127,7 +127,7 @@ const providerBenefits = [
 const terminalLines = [
   { type: "prompt", text: "npx @nordsym/apiclaw" },
   { type: "output", text: "", delay: 500 },
-  { type: "output", text: "🦞 APIClaw v1.0.0", delay: 100 },
+  { type: "output", text: "🦞 APIClaw v1.2.2", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
   { type: "success", text: `✓ ${statsData.apiCount.toLocaleString()} APIs loaded`, delay: 200 },
