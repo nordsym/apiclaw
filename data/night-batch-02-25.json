@@ -1,0 +1,2732 @@
+[
+  {
+    "name": "1Forge Finance",
+    "description": "Stock and Forex Data and Realtime Quotes",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://1forge.com"
+  },
+  {
+    "name": "1Password Connect",
+    "description": "REST API interface for 1Password password manager",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://1password.com"
+  },
+  {
+    "name": "1Password Events",
+    "description": "1Password Events API for audit trails",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://1password.com"
+  },
+  {
+    "name": "Authentiq API",
+    "description": "Strong authentication without passwords",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://authentiq.com"
+  },
+  {
+    "name": "Ably Platform",
+    "description": "Realtime pub/sub messaging platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://ably.io"
+  },
+  {
+    "name": "Ably Control",
+    "description": "Manage Ably applications and accounts",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://ably.net"
+  },
+  {
+    "name": "Abstract IP Geolocation",
+    "description": "IP geolocation API with currency and flag data",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://abstractapi.com"
+  },
+  {
+    "name": "Adafruit IO",
+    "description": "Internet of Things data platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://io.adafruit.com"
+  },
+  {
+    "name": "Adobe AEM",
+    "description": "Adobe Experience Manager API",
+    "category": "CMS",
+    "authType": "basic",
+    "baseUrl": "https://adobe.com"
+  },
+  {
+    "name": "Adyen Checkout",
+    "description": "Online payments with cards, wallets, local methods",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Payments",
+    "description": "Initiate, settle, modify payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Balance Platform",
+    "description": "Account holders, balance accounts, cards",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Management",
+    "description": "Configure company and merchant accounts",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen BinLookup",
+    "description": "BIN lookup for card information",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Data Protection",
+    "description": "GDPR Subject Erasure Requests",
+    "category": "Compliance",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Fund Service",
+    "description": "Fund management on marketplace platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Adyen Legal Entity",
+    "description": "Legal entity management for verification",
+    "category": "Compliance",
+    "authType": "basic",
+    "baseUrl": "https://adyen.com"
+  },
+  {
+    "name": "Agco API",
+    "description": "Agricultural equipment API",
+    "category": "Agriculture",
+    "authType": "oauth",
+    "baseUrl": "https://agco.com"
+  },
+  {
+    "name": "Akamai Edge DNS",
+    "description": "Edge DNS management",
+    "category": "DNS",
+    "authType": "apiKey",
+    "baseUrl": "https://akamai.com"
+  },
+  {
+    "name": "Alibaba Cloud",
+    "description": "Alibaba cloud services API",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://alibabacloud.com"
+  },
+  {
+    "name": "Amazon API Gateway",
+    "description": "Create and manage APIs",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon CloudFormation",
+    "description": "Infrastructure as code",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon CloudWatch",
+    "description": "Monitoring and observability",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Cognito",
+    "description": "User authentication service",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon DynamoDB",
+    "description": "NoSQL database service",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon EC2",
+    "description": "Elastic Compute Cloud",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon ECS",
+    "description": "Container orchestration",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon EKS",
+    "description": "Kubernetes service",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon ElastiCache",
+    "description": "In-memory caching",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon EventBridge",
+    "description": "Serverless event bus",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Kinesis",
+    "description": "Real-time data streaming",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Lambda",
+    "description": "Serverless compute",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon RDS",
+    "description": "Relational database service",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Route 53",
+    "description": "DNS web service",
+    "category": "DNS",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon S3",
+    "description": "Object storage service",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon SES",
+    "description": "Email sending service",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon SNS",
+    "description": "Push notification service",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon SQS",
+    "description": "Message queue service",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Textract",
+    "description": "Document text extraction",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Transcribe",
+    "description": "Speech to text service",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Amazon Translate",
+    "description": "Neural machine translation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Google Drive API",
+    "description": "File storage and sync",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/drive"
+  },
+  {
+    "name": "Google Sheets API",
+    "description": "Spreadsheet manipulation",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/sheets"
+  },
+  {
+    "name": "Google Docs API",
+    "description": "Document editing API",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/docs"
+  },
+  {
+    "name": "Google Calendar API",
+    "description": "Calendar management",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/calendar"
+  },
+  {
+    "name": "Google Gmail API",
+    "description": "Email access and management",
+    "category": "Email",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/gmail"
+  },
+  {
+    "name": "Google Cloud Vision",
+    "description": "Image analysis API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/vision"
+  },
+  {
+    "name": "Google Cloud Speech",
+    "description": "Speech recognition API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/speech"
+  },
+  {
+    "name": "Google Cloud Translation",
+    "description": "Text translation API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/translate"
+  },
+  {
+    "name": "Google Cloud Natural Language",
+    "description": "NLP analysis API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/natural-language"
+  },
+  {
+    "name": "Google Cloud Storage",
+    "description": "Object storage",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/storage"
+  },
+  {
+    "name": "Google BigQuery",
+    "description": "Data warehouse analytics",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/bigquery"
+  },
+  {
+    "name": "Google Pub/Sub",
+    "description": "Messaging service",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/pubsub"
+  },
+  {
+    "name": "Google Firebase Auth",
+    "description": "Firebase authentication",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Firebase Firestore",
+    "description": "NoSQL document database",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Firebase Realtime DB",
+    "description": "Realtime database",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Firebase Hosting",
+    "description": "Web hosting service",
+    "category": "Hosting",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Firebase Functions",
+    "description": "Serverless functions",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Analytics Reporting",
+    "description": "Analytics data access",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/analytics"
+  },
+  {
+    "name": "Google Search Console",
+    "description": "SEO performance data",
+    "category": "SEO",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/webmaster-tools"
+  },
+  {
+    "name": "Google PageSpeed Insights",
+    "description": "Website performance analysis",
+    "category": "Performance",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/speed"
+  },
+  {
+    "name": "Google Safe Browsing",
+    "description": "URL safety checking",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/safe-browsing"
+  },
+  {
+    "name": "Google reCAPTCHA",
+    "description": "Bot protection service",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/recaptcha"
+  },
+  {
+    "name": "YouTube Data API",
+    "description": "YouTube video and channel data",
+    "category": "Video",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/youtube"
+  },
+  {
+    "name": "YouTube Analytics API",
+    "description": "YouTube channel analytics",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/youtube"
+  },
+  {
+    "name": "Azure Active Directory",
+    "description": "Identity management",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Blob Storage",
+    "description": "Object storage service",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Cognitive Services",
+    "description": "AI APIs collection",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Computer Vision",
+    "description": "Image analysis",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Face API",
+    "description": "Facial recognition",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Speech Services",
+    "description": "Speech to text and TTS",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Text Analytics",
+    "description": "NLP text analysis",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Translator",
+    "description": "Translation service",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure DevOps",
+    "description": "Development platform",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://dev.azure.com"
+  },
+  {
+    "name": "Azure Functions",
+    "description": "Serverless compute",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Key Vault",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Azure Logic Apps",
+    "description": "Workflow automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Microsoft Graph",
+    "description": "Microsoft 365 unified API",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://graph.microsoft.com"
+  },
+  {
+    "name": "Microsoft Teams API",
+    "description": "Teams integration API",
+    "category": "Communication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.microsoft.com/teams"
+  },
+  {
+    "name": "Microsoft Outlook API",
+    "description": "Email and calendar",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developer.microsoft.com/outlook"
+  },
+  {
+    "name": "Microsoft OneDrive API",
+    "description": "Cloud storage",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://developer.microsoft.com/onedrive"
+  },
+  {
+    "name": "Microsoft SharePoint API",
+    "description": "Collaboration platform",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developer.microsoft.com/sharepoint"
+  },
+  {
+    "name": "Bing Search API",
+    "description": "Web search engine",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://www.microsoft.com/bing"
+  },
+  {
+    "name": "Bing Maps API",
+    "description": "Mapping service",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://www.microsoft.com/maps"
+  },
+  {
+    "name": "LinkedIn API",
+    "description": "Professional network API",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developer.linkedin.com"
+  },
+  {
+    "name": "GitHub API",
+    "description": "Source code hosting",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://api.github.com"
+  },
+  {
+    "name": "Twilio SMS",
+    "description": "SMS messaging API",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://twilio.com"
+  },
+  {
+    "name": "Twilio Voice",
+    "description": "Voice calling API",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://twilio.com"
+  },
+  {
+    "name": "Twilio Video",
+    "description": "Video conferencing API",
+    "category": "Video",
+    "authType": "basic",
+    "baseUrl": "https://twilio.com"
+  },
+  {
+    "name": "Twilio WhatsApp",
+    "description": "WhatsApp messaging",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://twilio.com"
+  },
+  {
+    "name": "SendGrid Email",
+    "description": "Email delivery service",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://sendgrid.com"
+  },
+  {
+    "name": "Mailgun",
+    "description": "Email API service",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://mailgun.com"
+  },
+  {
+    "name": "Mailchimp",
+    "description": "Email marketing platform",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://mailchimp.com"
+  },
+  {
+    "name": "Postmark",
+    "description": "Transactional email",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://postmarkapp.com"
+  },
+  {
+    "name": "Vonage SMS",
+    "description": "SMS and voice API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://vonage.com"
+  },
+  {
+    "name": "Vonage Voice",
+    "description": "Voice calling API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://vonage.com"
+  },
+  {
+    "name": "MessageBird",
+    "description": "Omnichannel messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://messagebird.com"
+  },
+  {
+    "name": "Plivo SMS",
+    "description": "Cloud communications",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://plivo.com"
+  },
+  {
+    "name": "Bandwidth",
+    "description": "Voice and messaging APIs",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://bandwidth.com"
+  },
+  {
+    "name": "Sinch SMS",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://sinch.com"
+  },
+  {
+    "name": "Telnyx",
+    "description": "Telecom infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://telnyx.com"
+  },
+  {
+    "name": "Slack Web API",
+    "description": "Workspace communication",
+    "category": "Communication",
+    "authType": "oauth",
+    "baseUrl": "https://api.slack.com"
+  },
+  {
+    "name": "Discord API",
+    "description": "Gaming communication",
+    "category": "Communication",
+    "authType": "oauth",
+    "baseUrl": "https://discord.com/developers"
+  },
+  {
+    "name": "Telegram Bot API",
+    "description": "Telegram messaging bots",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://core.telegram.org"
+  },
+  {
+    "name": "WhatsApp Business API",
+    "description": "WhatsApp for business",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.facebook.com/docs/whatsapp"
+  },
+  {
+    "name": "Intercom",
+    "description": "Customer messaging platform",
+    "category": "Customer Service",
+    "authType": "oauth",
+    "baseUrl": "https://developers.intercom.com"
+  },
+  {
+    "name": "Zendesk API",
+    "description": "Customer service platform",
+    "category": "Customer Service",
+    "authType": "oauth",
+    "baseUrl": "https://developer.zendesk.com"
+  },
+  {
+    "name": "Freshdesk API",
+    "description": "Help desk software",
+    "category": "Customer Service",
+    "authType": "apiKey",
+    "baseUrl": "https://freshdesk.com"
+  },
+  {
+    "name": "Help Scout",
+    "description": "Help desk API",
+    "category": "Customer Service",
+    "authType": "oauth",
+    "baseUrl": "https://developer.helpscout.com"
+  },
+  {
+    "name": "Shopify Admin API",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "authType": "oauth",
+    "baseUrl": "https://shopify.dev"
+  },
+  {
+    "name": "Shopify Storefront API",
+    "description": "Storefront access",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://shopify.dev"
+  },
+  {
+    "name": "WooCommerce API",
+    "description": "WordPress e-commerce",
+    "category": "E-commerce",
+    "authType": "basic",
+    "baseUrl": "https://woocommerce.github.io/woocommerce-rest-api-docs"
+  },
+  {
+    "name": "BigCommerce API",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "authType": "oauth",
+    "baseUrl": "https://developer.bigcommerce.com"
+  },
+  {
+    "name": "Magento API",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "authType": "oauth",
+    "baseUrl": "https://devdocs.magento.com"
+  },
+  {
+    "name": "PrestaShop API",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://devdocs.prestashop.com"
+  },
+  {
+    "name": "Stripe API",
+    "description": "Payment processing",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://stripe.com"
+  },
+  {
+    "name": "Stripe Connect",
+    "description": "Marketplace payments",
+    "category": "Payments",
+    "authType": "oauth",
+    "baseUrl": "https://stripe.com/connect"
+  },
+  {
+    "name": "Stripe Billing",
+    "description": "Subscription billing",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://stripe.com/billing"
+  },
+  {
+    "name": "PayPal API",
+    "description": "Payment processing",
+    "category": "Payments",
+    "authType": "oauth",
+    "baseUrl": "https://developer.paypal.com"
+  },
+  {
+    "name": "Braintree",
+    "description": "Payment gateway",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.braintreepayments.com"
+  },
+  {
+    "name": "Square Payments",
+    "description": "Payment processing",
+    "category": "Payments",
+    "authType": "oauth",
+    "baseUrl": "https://developer.squareup.com"
+  },
+  {
+    "name": "Mollie Payments",
+    "description": "European payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.mollie.com"
+  },
+  {
+    "name": "Klarna API",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.klarna.com"
+  },
+  {
+    "name": "Affirm API",
+    "description": "Installment payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.affirm.com"
+  },
+  {
+    "name": "Afterpay API",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.afterpay.com"
+  },
+  {
+    "name": "Razorpay",
+    "description": "Indian payment gateway",
+    "category": "Payments",
+    "authType": "basic",
+    "baseUrl": "https://razorpay.com/docs"
+  },
+  {
+    "name": "Paytm API",
+    "description": "Indian digital payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.paytm.com"
+  },
+  {
+    "name": "Wise API",
+    "description": "International transfers",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://api-docs.wise.com"
+  },
+  {
+    "name": "OpenAI API",
+    "description": "GPT and AI models",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://platform.openai.com"
+  },
+  {
+    "name": "Anthropic Claude",
+    "description": "Claude AI assistant",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://anthropic.com"
+  },
+  {
+    "name": "Cohere",
+    "description": "NLP AI platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cohere.ai"
+  },
+  {
+    "name": "Hugging Face",
+    "description": "ML model hub",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://huggingface.co"
+  },
+  {
+    "name": "Replicate",
+    "description": "ML model hosting",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://replicate.com"
+  },
+  {
+    "name": "Stability AI",
+    "description": "Image generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://stability.ai"
+  },
+  {
+    "name": "Midjourney API",
+    "description": "AI art generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://midjourney.com"
+  },
+  {
+    "name": "DALL-E API",
+    "description": "AI image generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://openai.com"
+  },
+  {
+    "name": "AssemblyAI",
+    "description": "Speech recognition",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://assemblyai.com"
+  },
+  {
+    "name": "Deepgram",
+    "description": "Speech-to-text API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://deepgram.com"
+  },
+  {
+    "name": "Rev.ai",
+    "description": "Speech recognition",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rev.ai"
+  },
+  {
+    "name": "Whisper API",
+    "description": "OpenAI speech recognition",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://openai.com"
+  },
+  {
+    "name": "ElevenLabs",
+    "description": "AI voice synthesis",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://elevenlabs.io"
+  },
+  {
+    "name": "Murf.ai",
+    "description": "AI voice generator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://murf.ai"
+  },
+  {
+    "name": "Play.ht",
+    "description": "AI text to speech",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://play.ht"
+  },
+  {
+    "name": "Resemble.ai",
+    "description": "Voice cloning API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://resemble.ai"
+  },
+  {
+    "name": "Clarifai",
+    "description": "Computer vision platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://clarifai.com"
+  },
+  {
+    "name": "Roboflow",
+    "description": "Computer vision tools",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://roboflow.com"
+  },
+  {
+    "name": "Amazon Rekognition",
+    "description": "Image analysis",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/rekognition"
+  },
+  {
+    "name": "Amazon Comprehend",
+    "description": "NLP service",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/comprehend"
+  },
+  {
+    "name": "Amazon Polly",
+    "description": "Text to speech",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/polly"
+  },
+  {
+    "name": "Amazon Lex",
+    "description": "Conversational AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/lex"
+  },
+  {
+    "name": "Amazon SageMaker",
+    "description": "ML model training",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/sagemaker"
+  },
+  {
+    "name": "IBM Watson NLU",
+    "description": "Natural language understanding",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ibm.com/watson"
+  },
+  {
+    "name": "IBM Watson Assistant",
+    "description": "Conversational AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ibm.com/watson"
+  },
+  {
+    "name": "IBM Watson Discovery",
+    "description": "AI search engine",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ibm.com/watson"
+  },
+  {
+    "name": "Wit.ai",
+    "description": "NLP for apps",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://wit.ai"
+  },
+  {
+    "name": "Dialogflow",
+    "description": "Conversational AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/dialogflow"
+  },
+  {
+    "name": "Rasa",
+    "description": "Open source NLU",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://rasa.com"
+  },
+  {
+    "name": "Perspective API",
+    "description": "Toxicity detection",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://perspectiveapi.com"
+  },
+  {
+    "name": "Mixpanel",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://mixpanel.com"
+  },
+  {
+    "name": "Amplitude",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://amplitude.com"
+  },
+  {
+    "name": "Segment",
+    "description": "Customer data platform",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://segment.com"
+  },
+  {
+    "name": "Snowflake",
+    "description": "Data warehouse",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://snowflake.com"
+  },
+  {
+    "name": "Databricks",
+    "description": "Data lakehouse platform",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://databricks.com"
+  },
+  {
+    "name": "Fivetran",
+    "description": "Data connectors",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://fivetran.com"
+  },
+  {
+    "name": "Airbyte",
+    "description": "Data integration",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://airbyte.com"
+  },
+  {
+    "name": "dbt Cloud",
+    "description": "Data transformation",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://getdbt.com"
+  },
+  {
+    "name": "Looker",
+    "description": "BI platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://looker.com"
+  },
+  {
+    "name": "Metabase",
+    "description": "BI tool",
+    "category": "Analytics",
+    "authType": "none",
+    "baseUrl": "https://metabase.com"
+  },
+  {
+    "name": "Tableau",
+    "description": "Data visualization",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://tableau.com"
+  },
+  {
+    "name": "Power BI",
+    "description": "Business intelligence",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://powerbi.microsoft.com"
+  },
+  {
+    "name": "Heap Analytics",
+    "description": "Digital analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://heap.io"
+  },
+  {
+    "name": "Hotjar",
+    "description": "Behavior analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://hotjar.com"
+  },
+  {
+    "name": "FullStory",
+    "description": "Digital experience analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://fullstory.com"
+  },
+  {
+    "name": "LogRocket",
+    "description": "Session replay",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://logrocket.com"
+  },
+  {
+    "name": "Posthog",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://posthog.com"
+  },
+  {
+    "name": "Plausible",
+    "description": "Privacy-friendly analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://plausible.io"
+  },
+  {
+    "name": "Vercel API",
+    "description": "Deployment platform",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://vercel.com"
+  },
+  {
+    "name": "Netlify API",
+    "description": "Web hosting platform",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://netlify.com"
+  },
+  {
+    "name": "Heroku API",
+    "description": "Cloud platform",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://heroku.com"
+  },
+  {
+    "name": "Railway API",
+    "description": "Deployment platform",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://railway.app"
+  },
+  {
+    "name": "Render API",
+    "description": "Cloud platform",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://render.com"
+  },
+  {
+    "name": "DigitalOcean API",
+    "description": "Cloud infrastructure",
+    "category": "Cloud",
+    "authType": "oauth",
+    "baseUrl": "https://digitalocean.com"
+  },
+  {
+    "name": "Linode API",
+    "description": "Cloud hosting",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://linode.com"
+  },
+  {
+    "name": "Vultr API",
+    "description": "Cloud compute",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://vultr.com"
+  },
+  {
+    "name": "Hetzner API",
+    "description": "Cloud hosting",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://hetzner.com"
+  },
+  {
+    "name": "Cloudflare API",
+    "description": "CDN and security",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudflare.com"
+  },
+  {
+    "name": "Fastly API",
+    "description": "Edge cloud platform",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://fastly.com"
+  },
+  {
+    "name": "Akamai API",
+    "description": "CDN and security",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://akamai.com"
+  },
+  {
+    "name": "KeyCDN",
+    "description": "Content delivery",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://keycdn.com"
+  },
+  {
+    "name": "BunnyCDN",
+    "description": "Content delivery",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://bunny.net"
+  },
+  {
+    "name": "imgix",
+    "description": "Image processing CDN",
+    "category": "CDN",
+    "authType": "apiKey",
+    "baseUrl": "https://imgix.com"
+  },
+  {
+    "name": "Cloudinary",
+    "description": "Media management",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudinary.com"
+  },
+  {
+    "name": "Uploadcare",
+    "description": "File uploading",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://uploadcare.com"
+  },
+  {
+    "name": "Filestack",
+    "description": "File handling",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://filestack.com"
+  },
+  {
+    "name": "Transloadit",
+    "description": "File processing",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://transloadit.com"
+  },
+  {
+    "name": "Sentry",
+    "description": "Error tracking",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://sentry.io"
+  },
+  {
+    "name": "Bugsnag",
+    "description": "Error monitoring",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://bugsnag.com"
+  },
+  {
+    "name": "Rollbar",
+    "description": "Error tracking",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://rollbar.com"
+  },
+  {
+    "name": "Datadog",
+    "description": "Monitoring platform",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://datadoghq.com"
+  },
+  {
+    "name": "New Relic",
+    "description": "Observability platform",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://newrelic.com"
+  },
+  {
+    "name": "Grafana Cloud",
+    "description": "Observability stack",
+    "category": "Monitoring",
+    "authType": "apiKey",
+    "baseUrl": "https://grafana.com"
+  },
+  {
+    "name": "PagerDuty",
+    "description": "Incident management",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://pagerduty.com"
+  },
+  {
+    "name": "Opsgenie",
+    "description": "Alert management",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://opsgenie.com"
+  },
+  {
+    "name": "StatusPage",
+    "description": "Status page hosting",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://statuspage.io"
+  },
+  {
+    "name": "Salesforce API",
+    "description": "CRM platform",
+    "category": "CRM",
+    "authType": "oauth",
+    "baseUrl": "https://developer.salesforce.com"
+  },
+  {
+    "name": "HubSpot API",
+    "description": "Marketing and CRM",
+    "category": "CRM",
+    "authType": "oauth",
+    "baseUrl": "https://developers.hubspot.com"
+  },
+  {
+    "name": "Pipedrive API",
+    "description": "Sales CRM",
+    "category": "CRM",
+    "authType": "oauth",
+    "baseUrl": "https://developers.pipedrive.com"
+  },
+  {
+    "name": "Zoho CRM",
+    "description": "CRM platform",
+    "category": "CRM",
+    "authType": "oauth",
+    "baseUrl": "https://zoho.com/crm"
+  },
+  {
+    "name": "Close CRM",
+    "description": "Sales CRM",
+    "category": "CRM",
+    "authType": "apiKey",
+    "baseUrl": "https://close.com"
+  },
+  {
+    "name": "Copper CRM",
+    "description": "Google Workspace CRM",
+    "category": "CRM",
+    "authType": "apiKey",
+    "baseUrl": "https://copper.com"
+  },
+  {
+    "name": "Freshsales",
+    "description": "Sales CRM",
+    "category": "CRM",
+    "authType": "apiKey",
+    "baseUrl": "https://freshworks.com"
+  },
+  {
+    "name": "Monday.com",
+    "description": "Work OS platform",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://monday.com"
+  },
+  {
+    "name": "Notion API",
+    "description": "All-in-one workspace",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developers.notion.com"
+  },
+  {
+    "name": "Airtable API",
+    "description": "Database platform",
+    "category": "Database",
+    "authType": "apiKey",
+    "baseUrl": "https://airtable.com/api"
+  },
+  {
+    "name": "Coda API",
+    "description": "Doc-based apps",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://coda.io/developers"
+  },
+  {
+    "name": "ClickUp API",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://clickup.com/api"
+  },
+  {
+    "name": "Asana API",
+    "description": "Work management",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://developers.asana.com"
+  },
+  {
+    "name": "Trello API",
+    "description": "Project boards",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.atlassian.com/cloud/trello"
+  },
+  {
+    "name": "Jira API",
+    "description": "Issue tracking",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://developer.atlassian.com/cloud/jira"
+  },
+  {
+    "name": "Linear API",
+    "description": "Issue tracking",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://linear.app"
+  },
+  {
+    "name": "Shortcut API",
+    "description": "Project management",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://shortcut.com"
+  },
+  {
+    "name": "Height API",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://height.app"
+  },
+  {
+    "name": "Google Maps",
+    "description": "Mapping platform",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/maps"
+  },
+  {
+    "name": "Google Geocoding",
+    "description": "Address geocoding",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/maps"
+  },
+  {
+    "name": "Google Places",
+    "description": "Places data",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/maps"
+  },
+  {
+    "name": "Google Directions",
+    "description": "Route planning",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/maps"
+  },
+  {
+    "name": "Mapbox",
+    "description": "Custom maps",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://mapbox.com"
+  },
+  {
+    "name": "HERE Maps",
+    "description": "Location services",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.here.com"
+  },
+  {
+    "name": "TomTom Maps",
+    "description": "Navigation and maps",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.tomtom.com"
+  },
+  {
+    "name": "OpenStreetMap",
+    "description": "Open source maps",
+    "category": "Maps",
+    "authType": "none",
+    "baseUrl": "https://wiki.openstreetmap.org"
+  },
+  {
+    "name": "Nominatim",
+    "description": "OSM geocoding",
+    "category": "Maps",
+    "authType": "none",
+    "baseUrl": "https://nominatim.org"
+  },
+  {
+    "name": "What3Words",
+    "description": "Location encoding",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://what3words.com"
+  },
+  {
+    "name": "Radar.io",
+    "description": "Location platform",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://radar.io"
+  },
+  {
+    "name": "ipgeolocation.io",
+    "description": "IP geolocation",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://ipgeolocation.io"
+  },
+  {
+    "name": "IPinfo",
+    "description": "IP address data",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://ipinfo.io"
+  },
+  {
+    "name": "MaxMind GeoIP",
+    "description": "IP geolocation",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://maxmind.com"
+  },
+  {
+    "name": "DB-IP",
+    "description": "IP to location",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://db-ip.com"
+  },
+  {
+    "name": "OpenWeather",
+    "description": "Weather data API",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://openweathermap.org"
+  },
+  {
+    "name": "WeatherAPI",
+    "description": "Weather and geo data",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://weatherapi.com"
+  },
+  {
+    "name": "Weather.gov",
+    "description": "US weather service",
+    "category": "Weather",
+    "authType": "none",
+    "baseUrl": "https://weather.gov"
+  },
+  {
+    "name": "Tomorrow.io",
+    "description": "Weather intelligence",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://tomorrow.io"
+  },
+  {
+    "name": "Weatherbit",
+    "description": "Weather forecast",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://weatherbit.io"
+  },
+  {
+    "name": "VisualCrossing",
+    "description": "Historical weather",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://visualcrossing.com"
+  },
+  {
+    "name": "Open-Meteo",
+    "description": "Free weather API",
+    "category": "Weather",
+    "authType": "none",
+    "baseUrl": "https://open-meteo.com"
+  },
+  {
+    "name": "AccuWeather",
+    "description": "Weather forecasts",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.accuweather.com"
+  },
+  {
+    "name": "Aeris Weather",
+    "description": "Weather API",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://aerisweather.com"
+  },
+  {
+    "name": "Storm Glass",
+    "description": "Marine weather",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://stormglass.io"
+  },
+  {
+    "name": "Twitter API v2",
+    "description": "Twitter platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developer.twitter.com"
+  },
+  {
+    "name": "Facebook Graph API",
+    "description": "Facebook platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "Instagram Graph API",
+    "description": "Instagram platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "TikTok API",
+    "description": "TikTok platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.tiktok.com"
+  },
+  {
+    "name": "Pinterest API",
+    "description": "Pinterest platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.pinterest.com"
+  },
+  {
+    "name": "Reddit API",
+    "description": "Reddit platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://reddit.com/dev/api"
+  },
+  {
+    "name": "Tumblr API",
+    "description": "Blogging platform",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://tumblr.com/docs/en/api"
+  },
+  {
+    "name": "Mastodon API",
+    "description": "Decentralized social",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://docs.joinmastodon.org"
+  },
+  {
+    "name": "Bluesky API",
+    "description": "AT Protocol social",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://bsky.social"
+  },
+  {
+    "name": "Spotify Web API",
+    "description": "Music streaming",
+    "category": "Music",
+    "authType": "oauth",
+    "baseUrl": "https://developer.spotify.com"
+  },
+  {
+    "name": "SoundCloud API",
+    "description": "Audio sharing",
+    "category": "Music",
+    "authType": "oauth",
+    "baseUrl": "https://developers.soundcloud.com"
+  },
+  {
+    "name": "Deezer API",
+    "description": "Music streaming",
+    "category": "Music",
+    "authType": "oauth",
+    "baseUrl": "https://developers.deezer.com"
+  },
+  {
+    "name": "Last.fm API",
+    "description": "Music discovery",
+    "category": "Music",
+    "authType": "apiKey",
+    "baseUrl": "https://last.fm/api"
+  },
+  {
+    "name": "Genius API",
+    "description": "Song lyrics",
+    "category": "Music",
+    "authType": "oauth",
+    "baseUrl": "https://genius.com/developers"
+  },
+  {
+    "name": "Musixmatch",
+    "description": "Lyrics database",
+    "category": "Music",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.musixmatch.com"
+  },
+  {
+    "name": "TMDB API",
+    "description": "Movie database",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://themoviedb.org"
+  },
+  {
+    "name": "OMDB API",
+    "description": "Open movie database",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://omdbapi.com"
+  },
+  {
+    "name": "TVMaze API",
+    "description": "TV show database",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://tvmaze.com/api"
+  },
+  {
+    "name": "Trakt API",
+    "description": "TV and movie tracking",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://trakt.tv/api-docs"
+  },
+  {
+    "name": "IGDB",
+    "description": "Video game database",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://igdb.com/api"
+  },
+  {
+    "name": "RAWG",
+    "description": "Video games database",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://rawg.io"
+  },
+  {
+    "name": "GiantBomb",
+    "description": "Game wiki API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://giantbomb.com"
+  },
+  {
+    "name": "Twitch API",
+    "description": "Gaming streaming",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://dev.twitch.tv"
+  },
+  {
+    "name": "Steam Web API",
+    "description": "Gaming platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://steamcommunity.com/dev"
+  },
+  {
+    "name": "Vimeo API",
+    "description": "Video hosting",
+    "category": "Video",
+    "authType": "oauth",
+    "baseUrl": "https://developer.vimeo.com"
+  },
+  {
+    "name": "Wistia",
+    "description": "Video hosting",
+    "category": "Video",
+    "authType": "apiKey",
+    "baseUrl": "https://wistia.com/support/developers"
+  },
+  {
+    "name": "Mux",
+    "description": "Video infrastructure",
+    "category": "Video",
+    "authType": "basic",
+    "baseUrl": "https://mux.com"
+  },
+  {
+    "name": "api.video",
+    "description": "Video hosting API",
+    "category": "Video",
+    "authType": "apiKey",
+    "baseUrl": "https://api.video"
+  },
+  {
+    "name": "Giphy API",
+    "description": "GIF database",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.giphy.com"
+  },
+  {
+    "name": "Tenor GIF",
+    "description": "GIF search",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://tenor.com/gifapi"
+  },
+  {
+    "name": "Unsplash API",
+    "description": "Stock photos",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://unsplash.com/developers"
+  },
+  {
+    "name": "Pexels API",
+    "description": "Stock photos and videos",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://pexels.com/api"
+  },
+  {
+    "name": "Pixabay API",
+    "description": "Free images",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://pixabay.com/api"
+  },
+  {
+    "name": "Shutterstock API",
+    "description": "Stock content",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://developers.shutterstock.com"
+  },
+  {
+    "name": "Plaid API",
+    "description": "Financial data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://plaid.com"
+  },
+  {
+    "name": "Yodlee",
+    "description": "Financial aggregation",
+    "category": "Finance",
+    "authType": "oauth",
+    "baseUrl": "https://yodlee.com"
+  },
+  {
+    "name": "Finicity",
+    "description": "Open banking",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://finicity.com"
+  },
+  {
+    "name": "Alpha Vantage",
+    "description": "Stock market data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://alphavantage.co"
+  },
+  {
+    "name": "Polygon.io",
+    "description": "Stock and crypto data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://polygon.io"
+  },
+  {
+    "name": "IEX Cloud",
+    "description": "Financial data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://iexcloud.io"
+  },
+  {
+    "name": "Finnhub",
+    "description": "Stock API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://finnhub.io"
+  },
+  {
+    "name": "Twelve Data",
+    "description": "Stock market API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://twelvedata.com"
+  },
+  {
+    "name": "Financial Modeling Prep",
+    "description": "Stock data API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://financialmodelingprep.com"
+  },
+  {
+    "name": "EOD Historical Data",
+    "description": "Market data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://eodhistoricaldata.com"
+  },
+  {
+    "name": "CoinGecko",
+    "description": "Crypto market data",
+    "category": "Crypto",
+    "authType": "none",
+    "baseUrl": "https://coingecko.com"
+  },
+  {
+    "name": "CoinMarketCap",
+    "description": "Crypto prices",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://coinmarketcap.com"
+  },
+  {
+    "name": "CryptoCompare",
+    "description": "Crypto data",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://cryptocompare.com"
+  },
+  {
+    "name": "Binance API",
+    "description": "Crypto exchange",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://binance.com"
+  },
+  {
+    "name": "Coinbase API",
+    "description": "Crypto platform",
+    "category": "Crypto",
+    "authType": "oauth",
+    "baseUrl": "https://developers.coinbase.com"
+  },
+  {
+    "name": "Kraken API",
+    "description": "Crypto exchange",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://kraken.com"
+  },
+  {
+    "name": "Blockchain.com",
+    "description": "Bitcoin data",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://blockchain.com"
+  },
+  {
+    "name": "Etherscan",
+    "description": "Ethereum explorer",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://etherscan.io"
+  },
+  {
+    "name": "Alchemy",
+    "description": "Blockchain API",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://alchemy.com"
+  },
+  {
+    "name": "Infura",
+    "description": "Ethereum node API",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://infura.io"
+  },
+  {
+    "name": "Moralis",
+    "description": "Web3 development",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://moralis.io"
+  },
+  {
+    "name": "QuickNode",
+    "description": "Blockchain nodes",
+    "category": "Crypto",
+    "authType": "apiKey",
+    "baseUrl": "https://quicknode.com"
+  },
+  {
+    "name": "Calendly API",
+    "description": "Scheduling platform",
+    "category": "Scheduling",
+    "authType": "oauth",
+    "baseUrl": "https://developer.calendly.com"
+  },
+  {
+    "name": "Cal.com",
+    "description": "Open scheduling",
+    "category": "Scheduling",
+    "authType": "apiKey",
+    "baseUrl": "https://cal.com"
+  },
+  {
+    "name": "Acuity Scheduling",
+    "description": "Appointment scheduling",
+    "category": "Scheduling",
+    "authType": "oauth",
+    "baseUrl": "https://acuityscheduling.com"
+  },
+  {
+    "name": "SimplyBook.me",
+    "description": "Booking system",
+    "category": "Scheduling",
+    "authType": "apiKey",
+    "baseUrl": "https://simplybook.me"
+  },
+  {
+    "name": "Cronofy",
+    "description": "Calendar integration",
+    "category": "Scheduling",
+    "authType": "oauth",
+    "baseUrl": "https://cronofy.com"
+  },
+  {
+    "name": "Nylas Calendar",
+    "description": "Calendar API",
+    "category": "Scheduling",
+    "authType": "oauth",
+    "baseUrl": "https://nylas.com"
+  },
+  {
+    "name": "Typeform API",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://developer.typeform.com"
+  },
+  {
+    "name": "JotForm API",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://api.jotform.com"
+  },
+  {
+    "name": "SurveyMonkey",
+    "description": "Survey platform",
+    "category": "Surveys",
+    "authType": "oauth",
+    "baseUrl": "https://developer.surveymonkey.com"
+  },
+  {
+    "name": "Tally API",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://tally.so"
+  },
+  {
+    "name": "Google Forms",
+    "description": "Form creation",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/forms"
+  },
+  {
+    "name": "News API",
+    "description": "News aggregator",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://newsapi.org"
+  },
+  {
+    "name": "Bing News",
+    "description": "News search",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://microsoft.com/bing/news"
+  },
+  {
+    "name": "New York Times",
+    "description": "NYT articles",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.nytimes.com"
+  },
+  {
+    "name": "Guardian API",
+    "description": "Guardian articles",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://open-platform.theguardian.com"
+  },
+  {
+    "name": "Mediastack",
+    "description": "News data",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://mediastack.com"
+  },
+  {
+    "name": "GNews",
+    "description": "Google News API",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://gnews.io"
+  },
+  {
+    "name": "Currents API",
+    "description": "News aggregation",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://currentsapi.services"
+  },
+  {
+    "name": "Dev.to API",
+    "description": "Developer content",
+    "category": "Content",
+    "authType": "apiKey",
+    "baseUrl": "https://dev.to/api"
+  },
+  {
+    "name": "Hashnode API",
+    "description": "Dev blogging",
+    "category": "Content",
+    "authType": "apiKey",
+    "baseUrl": "https://hashnode.com"
+  },
+  {
+    "name": "Medium API",
+    "description": "Publishing platform",
+    "category": "Content",
+    "authType": "oauth",
+    "baseUrl": "https://medium.com"
+  },
+  {
+    "name": "WordPress API",
+    "description": "Blogging platform",
+    "category": "CMS",
+    "authType": "oauth",
+    "baseUrl": "https://developer.wordpress.com"
+  },
+  {
+    "name": "Ghost API",
+    "description": "Publishing platform",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://ghost.org"
+  },
+  {
+    "name": "Contentful",
+    "description": "Headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://contentful.com"
+  },
+  {
+    "name": "Sanity",
+    "description": "Content platform",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://sanity.io"
+  },
+  {
+    "name": "Strapi",
+    "description": "Headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://strapi.io"
+  },
+  {
+    "name": "Prismic",
+    "description": "Headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://prismic.io"
+  },
+  {
+    "name": "DatoCMS",
+    "description": "Headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://datocms.com"
+  },
+  {
+    "name": "Storyblok",
+    "description": "Headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://storyblok.com"
+  },
+  {
+    "name": "Shippo",
+    "description": "Shipping API",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://goshippo.com"
+  },
+  {
+    "name": "EasyPost",
+    "description": "Shipping API",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://easypost.com"
+  },
+  {
+    "name": "ShipEngine",
+    "description": "Multi-carrier shipping",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://shipengine.com"
+  },
+  {
+    "name": "AfterShip",
+    "description": "Shipment tracking",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://aftership.com"
+  },
+  {
+    "name": "UPS API",
+    "description": "UPS shipping",
+    "category": "Shipping",
+    "authType": "oauth",
+    "baseUrl": "https://developer.ups.com"
+  },
+  {
+    "name": "FedEx API",
+    "description": "FedEx shipping",
+    "category": "Shipping",
+    "authType": "oauth",
+    "baseUrl": "https://developer.fedex.com"
+  },
+  {
+    "name": "USPS Web Tools",
+    "description": "Postal service",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://usps.com/webtools"
+  },
+  {
+    "name": "DHL API",
+    "description": "DHL shipping",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.dhl.com"
+  },
+  {
+    "name": "Algolia",
+    "description": "Search-as-a-service",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://algolia.com"
+  },
+  {
+    "name": "Elasticsearch",
+    "description": "Search engine",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://elastic.co"
+  },
+  {
+    "name": "MeiliSearch",
+    "description": "Fast search engine",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://meilisearch.com"
+  },
+  {
+    "name": "Typesense",
+    "description": "Search engine",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://typesense.org"
+  },
+  {
+    "name": "Pinecone",
+    "description": "Vector database",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://pinecone.io"
+  },
+  {
+    "name": "Weaviate",
+    "description": "Vector search",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://weaviate.io"
+  },
+  {
+    "name": "Qdrant",
+    "description": "Vector similarity",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://qdrant.tech"
+  },
+  {
+    "name": "DocuSign",
+    "description": "E-signatures",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://developers.docusign.com"
+  },
+  {
+    "name": "PandaDoc",
+    "description": "Document automation",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://pandadoc.com"
+  },
+  {
+    "name": "HelloSign",
+    "description": "E-signatures",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://hellosign.com"
+  },
+  {
+    "name": "SignNow",
+    "description": "E-signatures",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://signnow.com"
+  },
+  {
+    "name": "Adobe Sign",
+    "description": "E-signatures",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://adobe.com/sign"
+  },
+  {
+    "name": "PDFco",
+    "description": "PDF processing",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://pdf.co"
+  },
+  {
+    "name": "ILovePDF",
+    "description": "PDF tools",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://ilovepdf.com"
+  },
+  {
+    "name": "ConvertAPI",
+    "description": "File conversion",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://convertapi.com"
+  },
+  {
+    "name": "Zamzar",
+    "description": "File conversion",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://zamzar.com"
+  },
+  {
+    "name": "QR Code Generator",
+    "description": "Generate QR codes",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://qr-code-generator.com"
+  },
+  {
+    "name": "goQR.me",
+    "description": "QR code API",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://goqr.me"
+  },
+  {
+    "name": "Barcode Lookup",
+    "description": "UPC lookup",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://barcodelookup.com"
+  },
+  {
+    "name": "UPCitemdb",
+    "description": "Barcode database",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://upcitemdb.com"
+  },
+  {
+    "name": "Bitly API",
+    "description": "URL shortening",
+    "category": "Utilities",
+    "authType": "oauth",
+    "baseUrl": "https://bitly.com"
+  },
+  {
+    "name": "Rebrandly",
+    "description": "Link management",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://rebrandly.com"
+  },
+  {
+    "name": "Short.io",
+    "description": "URL shortener",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://short.io"
+  },
+  {
+    "name": "TinyURL API",
+    "description": "URL shortening",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://tinyurl.com"
+  },
+  {
+    "name": "Dub.co",
+    "description": "Link management",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://dub.co"
+  },
+  {
+    "name": "Abstract Email",
+    "description": "Email validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://abstractapi.com"
+  },
+  {
+    "name": "Hunter.io",
+    "description": "Email finder",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://hunter.io"
+  },
+  {
+    "name": "ZeroBounce",
+    "description": "Email validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://zerobounce.net"
+  },
+  {
+    "name": "NeverBounce",
+    "description": "Email verification",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://neverbounce.com"
+  },
+  {
+    "name": "Clearout",
+    "description": "Email validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://clearout.io"
+  },
+  {
+    "name": "NumVerify",
+    "description": "Phone validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://numverify.com"
+  },
+  {
+    "name": "AbstractPhone",
+    "description": "Phone validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://abstractapi.com"
+  },
+  {
+    "name": "VAT API",
+    "description": "VAT validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://vat-api.eu"
+  },
+  {
+    "name": "Vatlayer",
+    "description": "EU VAT validation",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://vatlayer.com"
+  },
+  {
+    "name": "Random User",
+    "description": "Random user generator",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://randomuser.me"
+  },
+  {
+    "name": "JSONPlaceholder",
+    "description": "Fake REST API",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://jsonplaceholder.typicode.com"
+  },
+  {
+    "name": "Reqres",
+    "description": "Fake REST API",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://reqres.in"
+  },
+  {
+    "name": "HTTPbin",
+    "description": "HTTP test service",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://httpbin.org"
+  },
+  {
+    "name": "Lorem Ipsum API",
+    "description": "Placeholder text",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://loremipsum.io"
+  },
+  {
+    "name": "Faker API",
+    "description": "Fake data generator",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://fakerapi.it"
+  },
+  {
+    "name": "Have I Been Pwned",
+    "description": "Data breach check",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://haveibeenpwned.com"
+  },
+  {
+    "name": "VirusTotal",
+    "description": "File/URL scanning",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://virustotal.com"
+  },
+  {
+    "name": "Shodan",
+    "description": "Internet scanner",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://shodan.io"
+  },
+  {
+    "name": "SecurityTrails",
+    "description": "DNS and IP data",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://securitytrails.com"
+  },
+  {
+    "name": "BuiltWith",
+    "description": "Technology lookup",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://builtwith.com"
+  },
+  {
+    "name": "Wappalyzer",
+    "description": "Technology profiler",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://wappalyzer.com"
+  },
+  {
+    "name": "SimilarWeb",
+    "description": "Traffic analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://similarweb.com"
+  },
+  {
+    "name": "SEMrush",
+    "description": "SEO platform",
+    "category": "SEO",
+    "authType": "apiKey",
+    "baseUrl": "https://semrush.com"
+  },
+  {
+    "name": "Ahrefs API",
+    "description": "SEO toolset",
+    "category": "SEO",
+    "authType": "apiKey",
+    "baseUrl": "https://ahrefs.com"
+  },
+  {
+    "name": "Moz API",
+    "description": "SEO metrics",
+    "category": "SEO",
+    "authType": "apiKey",
+    "baseUrl": "https://moz.com"
+  }
+]
