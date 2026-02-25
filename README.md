@@ -215,10 +215,16 @@ These providers have **real credentials** available:
 
 | Provider | Category | What You Get |
 |----------|----------|--------------|
-| **46elks** | SMS/Voice | Real API keys for Swedish/EU SMS |
-| **Twilio** | SMS/Voice | Production credentials |
-
-More coming soon.
+| **Replicate** | AI Models | Run any ML model via API |
+| **OpenRouter** | LLMs | Access to 100+ language models |
+| **Firecrawl** | Web Scraping | Extract data from any website |
+| **E2B** | Code Sandbox | Secure code execution for agents |
+| **GitHub** | Development | Repos, issues, code search |
+| **46elks** | SMS/Voice | Swedish/EU SMS and voice calls |
+| **Twilio** | SMS/Voice | Global SMS and voice |
+| **Resend** | Email | Transactional email API |
+| **ElevenLabs** | Voice AI | Text-to-speech generation |
+| **Fortnox** | ERP | Swedish accounting integration |
 
 ---
 
