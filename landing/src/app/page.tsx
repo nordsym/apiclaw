@@ -4,7 +4,7 @@ import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
-  Play, ChevronRight, Star, Users, Cpu, Activity
+  Play, ChevronRight, Star, Users, Cpu, Activity, Copy
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
@@ -154,6 +154,13 @@ export default function Home() {
   const [terminalOutput, setTerminalOutput] = useState<typeof terminalLines>([]);
   const [isTyping, setIsTyping] = useState(true);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [showCopied, setShowCopied] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText('npx @nordsym/apiclaw');
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -853,14 +860,20 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText('npx @nordsym/apiclaw');
-                  alert('Copied: npx @nordsym/apiclaw');
-                }}
-                className="btn-primary"
+                onClick={copyToClipboard}
+                className="btn-primary group relative"
               >
-                <Terminal className="w-5 h-5" />
-                npx @nordsym/apiclaw
+                {showCopied ? (
+                  <Check className="w-5 h-5 text-green-400" />
+                ) : (
+                  <Copy className="w-5 h-5" />
+                )}
+                <code className="font-mono">npx @nordsym/apiclaw</code>
+                {showCopied && (
+                  <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded-lg whitespace-nowrap">
+                    Copied! Run in terminal
+                  </span>
+                )}
               </button>
               <a
                 href="https://github.com/nordsym/apiclaw"
