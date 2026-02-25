@@ -20,6 +20,7 @@ import {
   Loader2,
   RefreshCw,
   Plus,
+  Rocket,
 } from "lucide-react";
 import {
   LineChart,
@@ -195,7 +196,7 @@ function OverviewTab({
 
         {/* Getting Started */}
         <div className="rounded-2xl border border-accent/30 bg-accent/5 p-8">
-          <h3 className="font-bold text-xl mb-4">🚀 Getting Started</h3>
+          <h3 className="font-bold text-xl mb-4 flex items-center gap-2"><Rocket className="w-5 h-5 text-accent" /> Getting Started</h3>
           <p className="text-text-secondary mb-6">
             Your APIs are listed and discoverable by AI agents. Here&apos;s what happens next:
           </p>
@@ -226,7 +227,7 @@ function OverviewTab({
           </div>
           <div className="grid gap-4">
             {apis.map((api) => (
-              <div key={api._id} className="rounded-xl border border-border bg-surface-elevated p-5">
+              <Link key={api._id} href={`/providers/dashboard/${api._id}`} className="block rounded-xl border border-border bg-surface-elevated p-5 hover:border-accent/50 transition cursor-pointer">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold">{api.name}</h4>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -240,12 +241,12 @@ function OverviewTab({
                   <span>{api.category}</span>
                   <span>{api.discoveryCount || 0} discoveries</span>
                   {api.docsUrl && (
-                    <a href={api.docsUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1">
+                    <a href={api.docsUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       Docs <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
             {apis.length === 0 && (
               <div className="text-center py-12 rounded-xl border border-dashed border-border">
