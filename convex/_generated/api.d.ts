@@ -10,11 +10,13 @@
 
 import type * as analytics from "../analytics.js";
 import type * as credits from "../credits.js";
+import type * as directCall from "../directCall.js";
 import type * as http from "../http.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
 import type * as telemetry from "../telemetry.js";
+import type * as usage from "../usage.js";
 
 import type {
   ApiFromModules,
@@ -25,11 +27,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   credits: typeof credits;
+  directCall: typeof directCall;
   http: typeof http;
   providers: typeof providers;
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;
   telemetry: typeof telemetry;
+  usage: typeof usage;
 }>;
 
 /**

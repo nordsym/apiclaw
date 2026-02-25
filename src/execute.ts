@@ -4,6 +4,7 @@
 
 import { getCredentials } from './credentials.js';
 import { callProxy, PROXY_PROVIDERS } from './proxy.js';
+import { executeDynamicAction, hasDynamicConfig, listDynamicActions } from './execute-dynamic.js';
 
 interface ExecuteResult {
   success: boolean;
@@ -734,12 +735,24 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
   },
 };
 
-// Get available actions for a provider
+// Get available actions for a provider (static handlers only)
 export function getProviderActions(providerId: string): string[] {
   return Object.keys(handlers[providerId] || {});
 }
 
-// Get all connected providers with their actions
+// Get available actions for a provider (includes dynamic providers)
+export async function getProviderActionsAsync(providerId: string): Promise<string[]> {
+  // First check static handlers
+  const staticActions = Object.keys(handlers[providerId] || {});
+  if (staticActions.length > 0) {
+    return staticActions;
+  }
+  
+  // Then check dynamic providers
+  return listDynamicActions(providerId);
+}
+
+// Get all connected providers with their actions (static handlers only)
 export function getConnectedProviders(): { provider: string; actions: string[] }[] {
   return Object.entries(handlers).map(([provider, actions]) => ({
     provider,
@@ -751,11 +764,31 @@ export function getConnectedProviders(): { provider: string; actions: string[] }
 export async function executeAPICall(
   providerId: string, 
   action: string, 
-  params: Record<string, any>
+  params: Record<string, any>,
+  userId?: string
 ): Promise<ExecuteResult> {
+  // Check for dynamic (self-service) provider config first
+  if (userId) {
+    const isDynamic = await hasDynamicConfig(providerId);
+    if (isDynamic) {
+      return executeDynamicAction(providerId, action, params, userId);
+    }
+  }
+  
+  // Fall back to hardcoded handlers
   // Check if provider exists
   const providerHandlers = handlers[providerId];
   if (!providerHandlers) {
+    // Check if it might be a dynamic provider without userId
+    const dynamicActions = await listDynamicActions(providerId);
+    if (dynamicActions.length > 0) {
+      return {
+        success: false,
+        provider: providerId,
+        action,
+        error: `Provider '${providerId}' requires userId for dynamic execution. Available actions: ${dynamicActions.join(', ')}`,
+      };
+    }
     return {
       success: false,
       provider: providerId,

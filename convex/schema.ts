@@ -217,4 +217,75 @@ export default defineSchema({
   })
     .index("by_type", ["type"])
     .index("by_timestamp", ["timestamp"]),
+
+  // ============================================
+  // SELF-SERVICE DIRECT CALL TABLES
+  // ============================================
+
+  // Provider Direct Call configuration (master key, limits, pricing)
+  providerDirectCall: defineTable({
+    providerId: v.id("providers"),
+    apiId: v.optional(v.id("providerAPIs")),
+    baseUrl: v.string(),
+    authType: v.string(), // "bearer" | "basic" | "api_key" | "none"
+    authHeader: v.string(), // e.g. "Authorization", "X-API-Key"
+    authPrefix: v.string(), // e.g. "Bearer ", "Basic ", ""
+    encryptedMasterKey: v.string(),
+    rateLimitPerUser: v.number(), // requests per minute per user
+    rateLimitPerDay: v.number(), // requests per day per user
+    pricePerRequest: v.number(), // in USD cents
+    status: v.string(), // "draft" | "testing" | "live"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    publishedAt: v.optional(v.number()),
+  })
+    .index("by_providerId", ["providerId"])
+    .index("by_apiId", ["apiId"])
+    .index("by_status", ["status"]),
+
+  // Actions defined by providers for their Direct Call APIs
+  providerActions: defineTable({
+    directCallId: v.id("providerDirectCall"),
+    name: v.string(), // machine name, e.g. "send_sms"
+    displayName: v.string(), // human-friendly, e.g. "Send SMS"
+    description: v.string(),
+    method: v.string(), // "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+    path: v.string(), // e.g. "/v1/messages" or "/users/{userId}"
+    params: v.array(v.object({
+      name: v.string(),
+      type: v.string(), // "string" | "number" | "boolean" | "object"
+      required: v.boolean(),
+      description: v.string(),
+      default: v.optional(v.any()),
+      in: v.string(), // "body" | "query" | "path"
+    })),
+    responseMapping: v.array(v.object({
+      name: v.string(),
+      path: v.string(), // JSON path, e.g. "data.id" or "results[0].name"
+    })),
+    enabled: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_directCallId", ["directCallId"])
+    .index("by_directCallId_name", ["directCallId", "name"]),
+
+  // Usage logs for Direct Call actions
+  usageLog: defineTable({
+    userId: v.string(),
+    providerId: v.id("providers"),
+    directCallId: v.id("providerDirectCall"),
+    actionName: v.string(),
+    timestamp: v.number(),
+    success: v.boolean(),
+    latencyMs: v.number(),
+    creditsUsed: v.number(), // in USD cents
+    errorMessage: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_providerId", ["providerId"])
+    .index("by_directCallId", ["directCallId"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_userId_providerId", ["userId", "providerId"])
+    .index("by_userId_timestamp", ["userId", "timestamp"]),
 });
