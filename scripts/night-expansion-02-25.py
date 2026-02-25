@@ -1,347 +1,668 @@
 #!/usr/bin/env python3
 """
-APIClaw Night Expansion - 2026-02-25 02:00
-Adds new APIs from APIs.guru and other sources
-Target: +1000 APIs per run
+APIClaw Night Expansion - February 25, 2026
+Parse APIs from multiple sources and add to registry
 """
 
 import json
-import urllib.request
-import os
+import re
+from pathlib import Path
 from datetime import datetime
 
-REGISTRY_PATH = os.path.expanduser("~/Projects/apiclaw/src/registry/apis.json")
-APISGURU_CACHE = os.path.expanduser("~/Projects/apiclaw/scripts/apisguru-data.json")
+OUTPUT_PATH = Path(__file__).parent.parent / "data" / "night-expansion-02-25.json"
+EXISTING_PATH = Path(__file__).parent.parent / "data" / "night-batch-02-25.json"
 
-def load_registry():
-    """Load current API registry"""
-    with open(REGISTRY_PATH, 'r') as f:
-        return json.load(f)
+def parse_auth(auth_str):
+    """Convert auth string to standard format"""
+    auth_lower = auth_str.lower() if auth_str else "none"
+    if "oauth" in auth_lower:
+        return "oauth"
+    elif "apikey" in auth_lower or "api key" in auth_lower or auth_lower == "apikey":
+        return "apiKey"
+    elif "x-mashape" in auth_lower:
+        return "apiKey"
+    elif auth_lower == "no" or auth_lower == "none" or not auth_str:
+        return "none"
+    return "apiKey"
 
-def save_registry(data):
-    """Save updated registry"""
-    data['lastUpdated'] = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-    data['count'] = len(data['apis'])
-    with open(REGISTRY_PATH, 'w') as f:
-        json.dump(data, f, indent=2)
-
-def get_existing_ids(registry):
-    """Get set of existing API IDs"""
-    return {api.get('id', '').lower() for api in registry.get('apis', [])}
-
-def fetch_apisguru():
-    """Fetch APIs.guru list (use cache if available)"""
-    if os.path.exists(APISGURU_CACHE):
-        with open(APISGURU_CACHE, 'r') as f:
-            return json.load(f)
-    
-    print("Fetching from APIs.guru...")
-    url = "https://api.apis.guru/v2/list.json"
-    with urllib.request.urlopen(url, timeout=60) as response:
-        data = json.loads(response.read().decode())
-        # Cache for future use
-        with open(APISGURU_CACHE, 'w') as f:
-            json.dump(data, f)
-        return data
-
-def categorize_api(info):
-    """Map APIs.guru category to APIClaw category"""
-    categories = info.get('x-apisguru-categories', [])
-    
-    category_map = {
-        'financial': 'Finance',
-        'payment': 'Finance',
-        'security': 'Security',
-        'cloud': 'Cloud',
-        'analytics': 'Analytics',
-        'social': 'Social',
-        'marketing': 'Marketing',
-        'media': 'Media',
-        'developer_tools': 'Development',
-        'machine_learning': 'Machine Learning',
-        'iot': 'IoT',
-        'open_data': 'Open Data',
-        'ecommerce': 'E-commerce',
-        'email': 'Communication',
-        'messaging': 'Communication',
-        'location': 'Geocoding',
-        'search': 'Search',
-        'backend': 'Development',
-        'text': 'Text Analysis',
-        'entertainment': 'Entertainment',
-        'health': 'Health',
-        'education': 'Education',
-        'news': 'News',
-        'sports': 'Sports',
-        'transportation': 'Transportation',
-        'travel': 'Travel',
-        'food': 'Food & Drink',
-        'government': 'Government',
-        'jobs': 'Jobs',
-        'music': 'Music',
-        'video': 'Video',
-        'weather': 'Weather',
-    }
-    
-    for cat in categories:
-        if cat.lower() in category_map:
-            return category_map[cat.lower()]
-    
-    return 'Other'
-
-def parse_apisguru_entry(provider, data):
-    """Convert APIs.guru entry to APIClaw format"""
-    preferred_version = data.get('preferred', list(data.get('versions', {}).keys())[0] if data.get('versions') else None)
-    
-    if not preferred_version:
-        return None
-        
-    version_info = data.get('versions', {}).get(preferred_version, {})
-    info = version_info.get('info', {})
-    
-    # Generate clean ID
-    api_id = provider.replace('.', '-').replace(':', '-').lower()
-    
-    # Extract title
-    title = info.get('title', provider)
-    
-    # Extract description
-    desc = info.get('description', '')
-    if len(desc) > 500:
-        desc = desc[:497] + '...'
-    
-    # Get contact/link
-    contact = info.get('contact', {})
-    link = contact.get('url', '')
+def get_base_url(link):
+    """Extract base URL from link"""
     if not link:
-        origin = info.get('x-origin', [])
-        if origin and isinstance(origin, list) and len(origin) > 0:
-            link = origin[0].get('url', '')
-    if not link:
-        link = version_info.get('swaggerUrl', '')
-    
-    # Determine auth type
-    auth = 'Unknown'
-    if 'apiKey' in str(info).lower() or 'api key' in str(info).lower():
-        auth = 'apiKey'
-    elif 'oauth' in str(info).lower():
-        auth = 'OAuth'
-    elif 'basic' in str(info).lower():
-        auth = 'HTTP Basic'
-    
-    return {
-        'id': api_id,
-        'name': title,
-        'description': desc.replace('\n', ' ').strip() if desc else f"API provided by {provider}",
-        'category': categorize_api(info),
-        'auth': auth,
-        'https': True,
-        'cors': 'unknown',
-        'link': link,
-        'pricing': 'unknown',
-        'keywords': list(set([
-            kw.lower() for kw in 
-            info.get('x-apisguru-categories', []) + 
-            (info.get('x-tags', []) if isinstance(info.get('x-tags'), list) else [])
-        ]))[:10],
-        'source': 'apis.guru',
-        'version': preferred_version,
-        'openapiSpec': version_info.get('swaggerUrl', '')
-    }
+        return ""
+    # Clean up the URL
+    match = re.match(r'https?://([^/]+)', link)
+    if match:
+        return f"https://{match.group(1)}"
+    return link
 
-def generate_additional_apis():
-    """Generate additional curated APIs not in APIs.guru"""
-    return [
-        # Swedish/Nordic APIs
-        {"id": "postnord", "name": "PostNord", "description": "Track packages and access postal services in Scandinavia", "category": "Logistics", "auth": "apiKey", "https": True, "cors": "unknown", "link": "https://developer.postnord.com/", "pricing": "freemium", "keywords": ["shipping", "tracking", "nordic", "logistics"]},
-        {"id": "klarna-checkout", "name": "Klarna Checkout", "description": "Buy now, pay later payment solution", "category": "Finance", "auth": "apiKey", "https": True, "cors": "unknown", "link": "https://docs.klarna.com/", "pricing": "paid", "keywords": ["payments", "bnpl", "checkout"]},
-        {"id": "bankid-se", "name": "BankID Sweden", "description": "Swedish electronic identification solution", "category": "Security", "auth": "certificate", "https": True, "cors": "no", "link": "https://www.bankid.com/utvecklare", "pricing": "paid", "keywords": ["identity", "authentication", "sweden"]},
-        {"id": "swish", "name": "Swish", "description": "Swedish mobile payment system", "category": "Finance", "auth": "certificate", "https": True, "cors": "no", "link": "https://developer.swish.nu/", "pricing": "paid", "keywords": ["payments", "mobile", "sweden"]},
-        {"id": "scb-api", "name": "Statistics Sweden", "description": "Official Swedish statistics and data", "category": "Open Data", "auth": "None", "https": True, "cors": "yes", "link": "https://www.scb.se/en/services/open-data-api/", "pricing": "free", "keywords": ["statistics", "sweden", "government", "data"]},
-        
-        # AI/ML APIs
-        {"id": "anthropic-claude", "name": "Anthropic Claude", "description": "Claude AI assistant API for conversational AI", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.anthropic.com/", "pricing": "paid", "keywords": ["ai", "llm", "chat", "assistant"]},
-        {"id": "openai-gpt", "name": "OpenAI GPT", "description": "GPT language models for text generation", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://platform.openai.com/docs/", "pricing": "paid", "keywords": ["ai", "llm", "gpt", "text"]},
-        {"id": "perplexity", "name": "Perplexity AI", "description": "AI-powered search and answer engine", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.perplexity.ai/", "pricing": "paid", "keywords": ["ai", "search", "llm"]},
-        {"id": "groq", "name": "Groq", "description": "Fast inference for LLMs on custom hardware", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://console.groq.com/docs/", "pricing": "freemium", "keywords": ["ai", "llm", "inference", "fast"]},
-        {"id": "together-ai", "name": "Together AI", "description": "Run and fine-tune open-source AI models", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.together.ai/", "pricing": "freemium", "keywords": ["ai", "llm", "open-source"]},
-        {"id": "replicate", "name": "Replicate", "description": "Run machine learning models in the cloud", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://replicate.com/docs/", "pricing": "paid", "keywords": ["ai", "ml", "models", "cloud"]},
-        {"id": "huggingface-inference", "name": "Hugging Face Inference", "description": "Inference API for thousands of ML models", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://huggingface.co/docs/api-inference/", "pricing": "freemium", "keywords": ["ai", "ml", "models", "transformers"]},
-        {"id": "stability-ai", "name": "Stability AI", "description": "Stable Diffusion and other generative models", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://platform.stability.ai/docs/", "pricing": "paid", "keywords": ["ai", "images", "generation", "diffusion"]},
-        {"id": "midjourney", "name": "Midjourney", "description": "AI image generation service", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "unknown", "link": "https://docs.midjourney.com/", "pricing": "paid", "keywords": ["ai", "images", "generation", "art"]},
-        {"id": "elevenlabs", "name": "ElevenLabs", "description": "AI voice synthesis and cloning", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.elevenlabs.io/", "pricing": "freemium", "keywords": ["ai", "voice", "tts", "audio"]},
-        {"id": "assembly-ai", "name": "AssemblyAI", "description": "Speech-to-text and audio intelligence", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.assemblyai.com/docs/", "pricing": "freemium", "keywords": ["ai", "speech", "transcription", "audio"]},
-        {"id": "deepgram", "name": "Deepgram", "description": "Speech recognition and understanding API", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developers.deepgram.com/", "pricing": "freemium", "keywords": ["ai", "speech", "transcription"]},
-        {"id": "cohere", "name": "Cohere", "description": "Enterprise NLP and embeddings API", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.cohere.com/", "pricing": "freemium", "keywords": ["ai", "nlp", "embeddings", "enterprise"]},
-        {"id": "voyage-ai", "name": "Voyage AI", "description": "State-of-the-art embedding models", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.voyageai.com/", "pricing": "paid", "keywords": ["ai", "embeddings", "search"]},
-        
-        # Developer Tools
-        {"id": "vercel-api", "name": "Vercel", "description": "Deploy and manage web applications", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://vercel.com/docs/rest-api", "pricing": "freemium", "keywords": ["hosting", "deploy", "serverless"]},
-        {"id": "railway", "name": "Railway", "description": "Deploy apps and databases instantly", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.railway.app/reference/public-api", "pricing": "freemium", "keywords": ["hosting", "deploy", "database"]},
-        {"id": "render-api", "name": "Render", "description": "Cloud application platform API", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://render.com/docs/api", "pricing": "freemium", "keywords": ["hosting", "deploy", "cloud"]},
-        {"id": "supabase", "name": "Supabase", "description": "Open source Firebase alternative", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://supabase.com/docs/reference/api", "pricing": "freemium", "keywords": ["database", "auth", "storage", "realtime"]},
-        {"id": "planetscale", "name": "PlanetScale", "description": "Serverless MySQL platform", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://planetscale.com/docs/concepts/api", "pricing": "freemium", "keywords": ["database", "mysql", "serverless"]},
-        {"id": "neon", "name": "Neon", "description": "Serverless Postgres database", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://neon.tech/docs/reference/api-reference", "pricing": "freemium", "keywords": ["database", "postgres", "serverless"]},
-        {"id": "upstash", "name": "Upstash", "description": "Serverless Redis and Kafka", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.upstash.com/redis/rest/getstarted", "pricing": "freemium", "keywords": ["database", "redis", "kafka", "serverless"]},
-        {"id": "turso", "name": "Turso", "description": "SQLite at the edge", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.turso.tech/", "pricing": "freemium", "keywords": ["database", "sqlite", "edge"]},
-        {"id": "convex", "name": "Convex", "description": "Reactive backend platform", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.convex.dev/", "pricing": "freemium", "keywords": ["database", "backend", "realtime"]},
-        
-        # Communication
-        {"id": "resend", "name": "Resend", "description": "Email API for developers", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://resend.com/docs/api-reference/introduction", "pricing": "freemium", "keywords": ["email", "smtp", "transactional"]},
-        {"id": "postmark", "name": "Postmark", "description": "Transactional email delivery", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://postmarkapp.com/developer", "pricing": "paid", "keywords": ["email", "transactional"]},
-        {"id": "46elks", "name": "46elks", "description": "SMS, MMS, and voice API", "category": "Communication", "auth": "HTTP Basic", "https": True, "cors": "yes", "link": "https://46elks.com/docs", "pricing": "paid", "keywords": ["sms", "voice", "mms", "nordic"]},
-        {"id": "telnyx", "name": "Telnyx", "description": "Global communications platform", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developers.telnyx.com/", "pricing": "paid", "keywords": ["sms", "voice", "sip"]},
-        {"id": "plivo", "name": "Plivo", "description": "Voice and SMS API platform", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.plivo.com/docs/", "pricing": "paid", "keywords": ["sms", "voice", "telephony"]},
-        {"id": "vonage", "name": "Vonage", "description": "Communications APIs (formerly Nexmo)", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developer.vonage.com/", "pricing": "paid", "keywords": ["sms", "voice", "video", "verify"]},
-        {"id": "messagebird", "name": "MessageBird", "description": "Omnichannel communication platform", "category": "Communication", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developers.messagebird.com/", "pricing": "paid", "keywords": ["sms", "whatsapp", "voice"]},
-        
-        # E-commerce & Payments
-        {"id": "shopify-admin", "name": "Shopify Admin", "description": "Manage Shopify stores programmatically", "category": "E-commerce", "auth": "OAuth", "https": True, "cors": "yes", "link": "https://shopify.dev/docs/admin-api", "pricing": "paid", "keywords": ["ecommerce", "shop", "products"]},
-        {"id": "woocommerce", "name": "WooCommerce", "description": "WordPress e-commerce REST API", "category": "E-commerce", "auth": "OAuth", "https": True, "cors": "unknown", "link": "https://woocommerce.github.io/woocommerce-rest-api-docs/", "pricing": "free", "keywords": ["ecommerce", "wordpress", "products"]},
-        {"id": "bigcommerce", "name": "BigCommerce", "description": "E-commerce platform API", "category": "E-commerce", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developer.bigcommerce.com/", "pricing": "paid", "keywords": ["ecommerce", "shop", "products"]},
-        {"id": "mollie", "name": "Mollie", "description": "European payment gateway", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.mollie.com/", "pricing": "paid", "keywords": ["payments", "europe", "gateway"]},
-        {"id": "adyen-api", "name": "Adyen", "description": "Global payment platform", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.adyen.com/", "pricing": "paid", "keywords": ["payments", "global", "enterprise"]},
-        {"id": "wise-api", "name": "Wise (TransferWise)", "description": "International money transfers", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://api-docs.wise.com/", "pricing": "paid", "keywords": ["payments", "transfer", "forex"]},
-        {"id": "revolut-business", "name": "Revolut Business", "description": "Business banking and payments", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developer.revolut.com/docs/business/", "pricing": "paid", "keywords": ["banking", "payments", "business"]},
-        
-        # Social & Marketing
-        {"id": "meta-graph", "name": "Meta Graph API", "description": "Access Facebook and Instagram data", "category": "Social", "auth": "OAuth", "https": True, "cors": "no", "link": "https://developers.facebook.com/docs/graph-api/", "pricing": "free", "keywords": ["facebook", "instagram", "social"]},
-        {"id": "linkedin-api", "name": "LinkedIn", "description": "Professional network API", "category": "Social", "auth": "OAuth", "https": True, "cors": "no", "link": "https://learn.microsoft.com/en-us/linkedin/", "pricing": "free", "keywords": ["linkedin", "professional", "social"]},
-        {"id": "tiktok-api", "name": "TikTok", "description": "TikTok for developers", "category": "Social", "auth": "OAuth", "https": True, "cors": "unknown", "link": "https://developers.tiktok.com/", "pricing": "free", "keywords": ["tiktok", "video", "social"]},
-        {"id": "pinterest-api", "name": "Pinterest", "description": "Visual discovery platform API", "category": "Social", "auth": "OAuth", "https": True, "cors": "unknown", "link": "https://developers.pinterest.com/docs/api/v5/", "pricing": "free", "keywords": ["pinterest", "visual", "social"]},
-        {"id": "reddit-api", "name": "Reddit", "description": "Reddit data and posting API", "category": "Social", "auth": "OAuth", "https": True, "cors": "no", "link": "https://www.reddit.com/dev/api/", "pricing": "free", "keywords": ["reddit", "community", "social"]},
-        {"id": "discord-api", "name": "Discord", "description": "Chat and community platform API", "category": "Social", "auth": "apiKey", "https": True, "cors": "no", "link": "https://discord.com/developers/docs/intro", "pricing": "free", "keywords": ["discord", "chat", "gaming"]},
-        {"id": "slack-api", "name": "Slack", "description": "Team communication platform API", "category": "Communication", "auth": "OAuth", "https": True, "cors": "yes", "link": "https://api.slack.com/", "pricing": "freemium", "keywords": ["slack", "chat", "team"]},
-        {"id": "notion-api", "name": "Notion", "description": "Workspace and notes API", "category": "Productivity", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developers.notion.com/", "pricing": "freemium", "keywords": ["notion", "notes", "workspace"]},
-        {"id": "airtable-api", "name": "Airtable", "description": "Spreadsheet-database hybrid API", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://airtable.com/developers/web/api/introduction", "pricing": "freemium", "keywords": ["airtable", "database", "spreadsheet"]},
-        
-        # Media & Content
-        {"id": "cloudflare-images", "name": "Cloudflare Images", "description": "Image storage and optimization", "category": "Media", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developers.cloudflare.com/images/", "pricing": "paid", "keywords": ["images", "cdn", "optimization"]},
-        {"id": "cloudinary", "name": "Cloudinary", "description": "Media management platform", "category": "Media", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://cloudinary.com/documentation/", "pricing": "freemium", "keywords": ["images", "video", "media"]},
-        {"id": "imgix", "name": "Imgix", "description": "Real-time image processing", "category": "Media", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.imgix.com/", "pricing": "paid", "keywords": ["images", "processing", "cdn"]},
-        {"id": "mux", "name": "Mux", "description": "Video infrastructure API", "category": "Media", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.mux.com/", "pricing": "paid", "keywords": ["video", "streaming", "analytics"]},
-        {"id": "bunny-stream", "name": "Bunny Stream", "description": "Video hosting and delivery", "category": "Media", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.bunny.net/docs/stream-api", "pricing": "paid", "keywords": ["video", "streaming", "cdn"]},
-        
-        # Data & Analytics
-        {"id": "plausible", "name": "Plausible Analytics", "description": "Privacy-friendly web analytics", "category": "Analytics", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://plausible.io/docs/stats-api", "pricing": "paid", "keywords": ["analytics", "privacy", "web"]},
-        {"id": "posthog", "name": "PostHog", "description": "Product analytics platform", "category": "Analytics", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://posthog.com/docs/api", "pricing": "freemium", "keywords": ["analytics", "product", "events"]},
-        {"id": "mixpanel", "name": "Mixpanel", "description": "Product analytics and engagement", "category": "Analytics", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developer.mixpanel.com/", "pricing": "freemium", "keywords": ["analytics", "events", "funnels"]},
-        {"id": "amplitude", "name": "Amplitude", "description": "Digital analytics platform", "category": "Analytics", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.docs.developers.amplitude.com/", "pricing": "freemium", "keywords": ["analytics", "digital", "product"]},
-        {"id": "segment", "name": "Segment", "description": "Customer data platform", "category": "Analytics", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://segment.com/docs/connections/sources/catalog/libraries/server/", "pricing": "freemium", "keywords": ["cdp", "data", "tracking"]},
-        
-        # Search & Discovery
-        {"id": "algolia", "name": "Algolia", "description": "Search and discovery platform", "category": "Search", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.algolia.com/doc/", "pricing": "freemium", "keywords": ["search", "discovery", "instant"]},
-        {"id": "typesense", "name": "Typesense", "description": "Open source search engine", "category": "Search", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://typesense.org/docs/", "pricing": "freemium", "keywords": ["search", "open-source", "typo-tolerant"]},
-        {"id": "meilisearch", "name": "Meilisearch", "description": "Lightning-fast search engine", "category": "Search", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.meilisearch.com/docs", "pricing": "freemium", "keywords": ["search", "fast", "open-source"]},
-        {"id": "pinecone", "name": "Pinecone", "description": "Vector database for ML", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.pinecone.io/", "pricing": "freemium", "keywords": ["vector", "database", "ml", "embeddings"]},
-        {"id": "weaviate", "name": "Weaviate", "description": "Vector search engine", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://weaviate.io/developers/weaviate", "pricing": "freemium", "keywords": ["vector", "search", "ml"]},
-        {"id": "qdrant", "name": "Qdrant", "description": "Vector similarity search engine", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://qdrant.tech/documentation/", "pricing": "freemium", "keywords": ["vector", "search", "similarity"]},
-        {"id": "chroma", "name": "Chroma", "description": "AI-native embedding database", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.trychroma.com/", "pricing": "freemium", "keywords": ["vector", "embeddings", "ai"]},
-        
-        # Automation & Integration
-        {"id": "zapier-api", "name": "Zapier", "description": "Workflow automation platform", "category": "Automation", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://platform.zapier.com/docs/start", "pricing": "freemium", "keywords": ["automation", "integration", "workflow"]},
-        {"id": "make-api", "name": "Make (Integromat)", "description": "Visual automation platform", "category": "Automation", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.make.com/en/api-documentation", "pricing": "freemium", "keywords": ["automation", "integration", "visual"]},
-        {"id": "n8n-api", "name": "n8n", "description": "Fair-code workflow automation", "category": "Automation", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.n8n.io/api/", "pricing": "freemium", "keywords": ["automation", "workflow", "self-hosted"]},
-        {"id": "pipedream", "name": "Pipedream", "description": "Developer-focused integration platform", "category": "Automation", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://pipedream.com/docs/api/", "pricing": "freemium", "keywords": ["automation", "integration", "code"]},
-        
-        # More AI Tools
-        {"id": "langchain", "name": "LangChain", "description": "LLM application framework", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://python.langchain.com/docs/", "pricing": "free", "keywords": ["ai", "llm", "framework", "agents"]},
-        {"id": "llamaindex", "name": "LlamaIndex", "description": "Data framework for LLM apps", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.llamaindex.ai/", "pricing": "free", "keywords": ["ai", "llm", "rag", "data"]},
-        {"id": "openrouter", "name": "OpenRouter", "description": "Unified API for LLMs", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://openrouter.ai/docs", "pricing": "paid", "keywords": ["ai", "llm", "unified", "routing"]},
-        {"id": "fireworks-ai", "name": "Fireworks AI", "description": "Fast generative AI inference", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://readme.fireworks.ai/docs", "pricing": "freemium", "keywords": ["ai", "inference", "fast"]},
-        {"id": "mistral-api", "name": "Mistral AI", "description": "Mistral language models API", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.mistral.ai/", "pricing": "paid", "keywords": ["ai", "llm", "mistral"]},
-        {"id": "anthropic-tools", "name": "Anthropic Tools", "description": "Tool use and function calling for Claude", "category": "Machine Learning", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.anthropic.com/claude/docs/tool-use", "pricing": "paid", "keywords": ["ai", "tools", "function-calling"]},
-        {"id": "cursor-api", "name": "Cursor", "description": "AI code editor API", "category": "Development", "auth": "apiKey", "https": True, "cors": "unknown", "link": "https://cursor.sh/", "pricing": "freemium", "keywords": ["ai", "coding", "editor"]},
-        {"id": "codeium", "name": "Codeium", "description": "Free AI code completion", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://codeium.com/", "pricing": "freemium", "keywords": ["ai", "coding", "completion"]},
-        {"id": "tabnine", "name": "Tabnine", "description": "AI code assistant", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://www.tabnine.com/", "pricing": "freemium", "keywords": ["ai", "coding", "completion"]},
-        
-        # Crypto & Web3
-        {"id": "coinbase-api", "name": "Coinbase", "description": "Cryptocurrency exchange API", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.cdp.coinbase.com/", "pricing": "freemium", "keywords": ["crypto", "exchange", "trading"]},
-        {"id": "binance-api", "name": "Binance", "description": "Largest crypto exchange API", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://binance-docs.github.io/apidocs/", "pricing": "free", "keywords": ["crypto", "exchange", "trading"]},
-        {"id": "kraken-api", "name": "Kraken", "description": "Crypto exchange and bank API", "category": "Finance", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.kraken.com/", "pricing": "freemium", "keywords": ["crypto", "exchange", "trading"]},
-        {"id": "alchemy", "name": "Alchemy", "description": "Web3 development platform", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.alchemy.com/", "pricing": "freemium", "keywords": ["web3", "blockchain", "ethereum"]},
-        {"id": "infura", "name": "Infura", "description": "Ethereum and IPFS APIs", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.infura.io/", "pricing": "freemium", "keywords": ["web3", "ethereum", "ipfs"]},
-        {"id": "moralis", "name": "Moralis", "description": "Web3 data API", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.moralis.io/", "pricing": "freemium", "keywords": ["web3", "blockchain", "data"]},
-        {"id": "thegraph", "name": "The Graph", "description": "Blockchain data indexing protocol", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://thegraph.com/docs/", "pricing": "freemium", "keywords": ["web3", "indexing", "graphql"]},
-        
-        # Security & Auth
-        {"id": "auth0", "name": "Auth0", "description": "Identity platform", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://auth0.com/docs/api", "pricing": "freemium", "keywords": ["auth", "identity", "sso"]},
-        {"id": "clerk", "name": "Clerk", "description": "User management and auth", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://clerk.com/docs/reference/backend-api", "pricing": "freemium", "keywords": ["auth", "users", "management"]},
-        {"id": "workos", "name": "WorkOS", "description": "Enterprise-ready auth", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://workos.com/docs/reference", "pricing": "freemium", "keywords": ["auth", "sso", "enterprise"]},
-        {"id": "stytch", "name": "Stytch", "description": "Passwordless auth platform", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://stytch.com/docs/api", "pricing": "freemium", "keywords": ["auth", "passwordless", "magic-link"]},
-        {"id": "passage", "name": "Passage by 1Password", "description": "Passkey authentication", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.passage.id/", "pricing": "freemium", "keywords": ["auth", "passkeys", "biometric"]},
-        {"id": "snyk", "name": "Snyk", "description": "Security vulnerability scanning", "category": "Security", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://snyk.docs.apiary.io/", "pricing": "freemium", "keywords": ["security", "vulnerabilities", "scanning"]},
-        {"id": "sonarcloud", "name": "SonarCloud", "description": "Code quality and security", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://sonarcloud.io/web_api", "pricing": "freemium", "keywords": ["code-quality", "security", "analysis"]},
-        
-        # Monitoring & Observability
-        {"id": "sentry-api", "name": "Sentry", "description": "Error tracking and monitoring", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.sentry.io/api/", "pricing": "freemium", "keywords": ["errors", "monitoring", "debugging"]},
-        {"id": "datadog-api", "name": "Datadog", "description": "Infrastructure monitoring", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.datadoghq.com/api/", "pricing": "paid", "keywords": ["monitoring", "metrics", "apm"]},
-        {"id": "newrelic", "name": "New Relic", "description": "Full-stack observability", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.newrelic.com/docs/apis/intro-apis/", "pricing": "freemium", "keywords": ["monitoring", "apm", "observability"]},
-        {"id": "grafana", "name": "Grafana Cloud", "description": "Observability platform", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://grafana.com/docs/grafana/latest/http_api/", "pricing": "freemium", "keywords": ["monitoring", "dashboards", "metrics"]},
-        {"id": "pagerduty", "name": "PagerDuty", "description": "Incident management", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://developer.pagerduty.com/docs/", "pricing": "paid", "keywords": ["incidents", "alerts", "oncall"]},
-        {"id": "opsgenie", "name": "Opsgenie", "description": "Alert management", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://docs.opsgenie.com/docs/api-overview", "pricing": "freemium", "keywords": ["alerts", "oncall", "management"]},
-        {"id": "betteruptime", "name": "Better Uptime", "description": "Uptime monitoring", "category": "Development", "auth": "apiKey", "https": True, "cors": "yes", "link": "https://betterstack.com/docs/uptime/api/", "pricing": "freemium", "keywords": ["uptime", "monitoring", "status"]},
-    ]
+def load_existing():
+    """Load existing APIs to avoid duplicates"""
+    existing_names = set()
+    if EXISTING_PATH.exists():
+        with open(EXISTING_PATH, 'r') as f:
+            data = json.load(f)
+            for api in data:
+                existing_names.add(api['name'].lower())
+    return existing_names
+
+# ============================================================
+# PARSED DATA FROM public-apis/public-apis (toddmotto fork)
+# ============================================================
+
+PUBLIC_APIS_DATA = [
+    # Animals
+    {"name": "AdoptAPet", "description": "Resource to help get pets adopted", "category": "Animals", "auth": "apiKey", "url": "https://www.adoptapet.com"},
+    {"name": "Axolotl", "description": "Collection of axolotl pictures and facts", "category": "Animals", "auth": "none", "url": "https://theaxolotlapi.netlify.app"},
+    {"name": "Cat Facts", "description": "Daily cat facts", "category": "Animals", "auth": "none", "url": "https://alexwohlbruck.github.io/cat-facts"},
+    {"name": "Cataas", "description": "Cat as a service (cats pictures and gifs)", "category": "Animals", "auth": "none", "url": "https://cataas.com"},
+    {"name": "TheCatAPI", "description": "Pictures of cats from Tumblr", "category": "Animals", "auth": "apiKey", "url": "https://thecatapi.com"},
+    {"name": "Dog Facts", "description": "Random dog facts", "category": "Animals", "auth": "none", "url": "https://dukengn.github.io/Dog-facts-API"},
+    {"name": "Dog CEO", "description": "Based on the Stanford Dogs Dataset", "category": "Animals", "auth": "none", "url": "https://dog.ceo"},
+    {"name": "eBird", "description": "Retrieve recent or notable birding observations", "category": "Animals", "auth": "apiKey", "url": "https://ebird.org"},
+    {"name": "FishWatch", "description": "Information and pictures about fish species", "category": "Animals", "auth": "none", "url": "https://www.fishwatch.gov"},
+    {"name": "HTTP Cat", "description": "Cat for every HTTP Status", "category": "Animals", "auth": "none", "url": "https://http.cat"},
+    {"name": "HTTP Dog", "description": "Dogs for every HTTP response status code", "category": "Animals", "auth": "none", "url": "https://http.dog"},
+    {"name": "IUCN Red List", "description": "IUCN Red List of Threatened Species", "category": "Animals", "auth": "apiKey", "url": "https://apiv3.iucnredlist.org"},
+    {"name": "MeowFacts", "description": "Get random cat facts", "category": "Animals", "auth": "none", "url": "https://github.com/wh-iterabb-it/meowfacts"},
+    {"name": "Petfinder", "description": "Petfinder is dedicated to helping pets find homes", "category": "Animals", "auth": "apiKey", "url": "https://www.petfinder.com"},
+    {"name": "PlaceBear", "description": "Placeholder bear pictures", "category": "Animals", "auth": "none", "url": "https://placebear.com"},
+    {"name": "PlaceDog", "description": "Placeholder Dog pictures", "category": "Animals", "auth": "none", "url": "https://place.dog"},
+    {"name": "PlaceKitten", "description": "Placeholder Kitten pictures", "category": "Animals", "auth": "none", "url": "https://placekitten.com"},
+    {"name": "RandomDog", "description": "Random pictures of dogs", "category": "Animals", "auth": "none", "url": "https://random.dog"},
+    {"name": "RandomDuck", "description": "Random pictures of ducks", "category": "Animals", "auth": "none", "url": "https://random-d.uk"},
+    {"name": "RandomFox", "description": "Random pictures of foxes", "category": "Animals", "auth": "none", "url": "https://randomfox.ca"},
+    {"name": "Shibe.Online", "description": "Random pictures of Shiba Inu, cats or birds", "category": "Animals", "auth": "none", "url": "https://shibe.online"},
+    {"name": "TheDogAPI", "description": "Public service all about Dogs", "category": "Animals", "auth": "apiKey", "url": "https://thedogapi.com"},
+    {"name": "xeno-canto", "description": "Bird recordings", "category": "Animals", "auth": "none", "url": "https://xeno-canto.org"},
+    {"name": "Zoo Animals", "description": "Facts and pictures of zoo animals", "category": "Animals", "auth": "none", "url": "https://zoo-animal-api.herokuapp.com"},
+    
+    # Anime
+    {"name": "AniAPI", "description": "Anime discovery, streaming & syncing with trackers", "category": "Entertainment", "auth": "oauth", "url": "https://aniapi.com"},
+    {"name": "AniDB", "description": "Anime Database", "category": "Entertainment", "auth": "apiKey", "url": "https://wiki.anidb.net"},
+    {"name": "AniList", "description": "Anime discovery & tracking", "category": "Entertainment", "auth": "oauth", "url": "https://anilist.co"},
+    {"name": "AnimeChan", "description": "Anime quotes (over 10k+)", "category": "Entertainment", "auth": "none", "url": "https://github.com/RocktimSaikia/anime-chan"},
+    {"name": "AnimeFacts", "description": "Anime Facts (over 100+)", "category": "Entertainment", "auth": "none", "url": "https://chandan-02.github.io/anime-facts-rest-api"},
+    {"name": "AnimeNewsNetwork", "description": "Anime industry news", "category": "Entertainment", "auth": "none", "url": "https://www.animenewsnetwork.com"},
+    {"name": "Catboy", "description": "Neko images, funny GIFs & more", "category": "Entertainment", "auth": "none", "url": "https://catboys.com"},
+    {"name": "Danbooru Anime", "description": "Thousands of anime artist database", "category": "Entertainment", "auth": "apiKey", "url": "https://danbooru.donmai.us"},
+    {"name": "Jikan", "description": "Unofficial MyAnimeList API", "category": "Entertainment", "auth": "none", "url": "https://jikan.moe"},
+    {"name": "Kitsu", "description": "Anime discovery platform", "category": "Entertainment", "auth": "oauth", "url": "https://kitsu.docs.apiary.io"},
+    {"name": "MangaDex", "description": "Manga Database and Community", "category": "Entertainment", "auth": "apiKey", "url": "https://api.mangadex.org"},
+    {"name": "MyAnimeList", "description": "Anime and Manga Database and Community", "category": "Entertainment", "auth": "oauth", "url": "https://myanimelist.net"},
+    {"name": "NekosBest", "description": "Neko Images & Anime roleplaying GIFs", "category": "Entertainment", "auth": "none", "url": "https://docs.nekos.best"},
+    {"name": "Shikimori", "description": "Anime discovery, tracking, forum, rates", "category": "Entertainment", "auth": "oauth", "url": "https://shikimori.one"},
+    {"name": "Studio Ghibli", "description": "Resources from Studio Ghibli films", "category": "Entertainment", "auth": "none", "url": "https://ghibliapi.herokuapp.com"},
+    {"name": "Trace Moe", "description": "Get exact scene of anime from screenshot", "category": "Entertainment", "auth": "none", "url": "https://soruly.github.io/trace.moe-api"},
+    {"name": "Waifu.im", "description": "Get waifu pictures from archive of 4000+ images", "category": "Entertainment", "auth": "none", "url": "https://waifu.im"},
+    {"name": "Waifu.pics", "description": "Image sharing platform for anime images", "category": "Entertainment", "auth": "none", "url": "https://waifu.pics"},
+    
+    # Anti-Malware
+    {"name": "AbuseIPDB", "description": "IP/domain/URL reputation", "category": "Security", "auth": "apiKey", "url": "https://docs.abuseipdb.com"},
+    {"name": "AlienVault OTX", "description": "IP/domain/URL reputation", "category": "Security", "auth": "apiKey", "url": "https://otx.alienvault.com"},
+    {"name": "CAPEsandbox", "description": "Malware execution and analysis", "category": "Security", "auth": "apiKey", "url": "https://capev2.readthedocs.io"},
+    {"name": "Google Safe Browsing", "description": "Google Link/Domain Flagging", "category": "Security", "auth": "apiKey", "url": "https://developers.google.com/safe-browsing"},
+    {"name": "MalDatabase", "description": "Malware datasets and threat intelligence feeds", "category": "Security", "auth": "apiKey", "url": "https://maldatabase.com"},
+    {"name": "MalShare", "description": "Malware Archive / file sourcing", "category": "Security", "auth": "apiKey", "url": "https://malshare.com"},
+    {"name": "MalwareBazaar", "description": "Collect and share malware samples", "category": "Security", "auth": "apiKey", "url": "https://bazaar.abuse.ch"},
+    {"name": "NoPhishy", "description": "Check links for known phishing attempts", "category": "Security", "auth": "apiKey", "url": "https://rapidapi.com/Amiichu/api/exerra-phishing-check"},
+    {"name": "Phisherman", "description": "IP/domain/URL reputation", "category": "Security", "auth": "apiKey", "url": "https://phisherman.gg"},
+    {"name": "URLhaus", "description": "Bulk queries and Download Malware Samples", "category": "Security", "auth": "none", "url": "https://urlhaus-api.abuse.ch"},
+    {"name": "URLScan.io", "description": "Scan and Analyse URLs", "category": "Security", "auth": "apiKey", "url": "https://urlscan.io"},
+    {"name": "VirusTotal", "description": "VirusTotal File/URL Analysis", "category": "Security", "auth": "apiKey", "url": "https://www.virustotal.com"},
+    {"name": "Web of Trust", "description": "IP/domain/URL reputation", "category": "Security", "auth": "apiKey", "url": "https://support.mywot.com"},
+    
+    # Art & Design
+    {"name": "Améthyste", "description": "Generate images for Discord users", "category": "Media", "auth": "apiKey", "url": "https://api.amethyste.moe"},
+    {"name": "Art Institute of Chicago", "description": "Art museum collection API", "category": "Media", "auth": "none", "url": "https://api.artic.edu"},
+    {"name": "Colormind", "description": "Color scheme generator", "category": "Design", "auth": "none", "url": "http://colormind.io"},
+    {"name": "ColourLovers", "description": "Get various patterns, palettes and images", "category": "Design", "auth": "none", "url": "http://www.colourlovers.com/api"},
+    {"name": "Cooper Hewitt", "description": "Smithsonian Design Museum", "category": "Media", "auth": "apiKey", "url": "https://collection.cooperhewitt.org"},
+    {"name": "Dribbble", "description": "Discover top designers & creatives", "category": "Design", "auth": "oauth", "url": "https://developer.dribbble.com"},
+    {"name": "EmojiHub", "description": "Get emojis by categories and groups", "category": "Utilities", "auth": "none", "url": "https://github.com/cheatsnake/emojihub"},
+    {"name": "Europeana", "description": "European Museum and Galleries content", "category": "Media", "auth": "apiKey", "url": "https://pro.europeana.eu"},
+    {"name": "Harvard Art Museums", "description": "Art collection API", "category": "Media", "auth": "apiKey", "url": "https://github.com/harvardartmuseums/api-docs"},
+    {"name": "Icon Horse", "description": "Favicons for any website with fallbacks", "category": "Utilities", "auth": "none", "url": "https://icon.horse"},
+    {"name": "Iconfinder", "description": "Icons marketplace API", "category": "Design", "auth": "apiKey", "url": "https://developer.iconfinder.com"},
+    {"name": "Icons8", "description": "Icons library", "category": "Design", "auth": "none", "url": "https://img.icons8.com"},
+    {"name": "Lordicon", "description": "Icons with predone Animations", "category": "Design", "auth": "none", "url": "https://lordicon.com"},
+    {"name": "Metropolitan Museum of Art", "description": "Met Museum of Art collection", "category": "Media", "auth": "none", "url": "https://metmuseum.github.io"},
+    {"name": "Noun Project", "description": "Icons collection", "category": "Design", "auth": "oauth", "url": "http://api.thenounproject.com"},
+    {"name": "PHP-Noise", "description": "Noise Background Image Generator", "category": "Design", "auth": "none", "url": "https://php-noise.com"},
+    {"name": "Pixel Encounter", "description": "SVG Icon Generator", "category": "Design", "auth": "none", "url": "https://pixelencounter.com"},
+    {"name": "Rijksmuseum", "description": "RijksMuseum Data", "category": "Media", "auth": "apiKey", "url": "https://data.rijksmuseum.nl"},
+    {"name": "Word Cloud", "description": "Easily create word clouds", "category": "Utilities", "auth": "apiKey", "url": "https://wordcloudapi.com"},
+    {"name": "xColors", "description": "Generate & convert colors", "category": "Design", "auth": "none", "url": "https://x-colors.herokuapp.com"},
+    
+    # Authentication
+    {"name": "Auth0", "description": "Authentication and authorization platform", "category": "Authentication", "auth": "apiKey", "url": "https://auth0.com"},
+    {"name": "GetOTP", "description": "Implement OTP flow quickly", "category": "Authentication", "auth": "apiKey", "url": "https://otp.dev"},
+    {"name": "Micro User Service", "description": "User management and authentication", "category": "Authentication", "auth": "apiKey", "url": "https://m3o.com/user"},
+    {"name": "MojoAuth", "description": "Passwordless authentication platform", "category": "Authentication", "auth": "apiKey", "url": "https://mojoauth.com"},
+    {"name": "SAWO Labs", "description": "Passwordless authentication integration", "category": "Authentication", "auth": "apiKey", "url": "https://sawolabs.com"},
+    {"name": "Stytch", "description": "User infrastructure for modern applications", "category": "Authentication", "auth": "apiKey", "url": "https://stytch.com"},
+    {"name": "Warrant", "description": "APIs for authorization and access control", "category": "Authentication", "auth": "apiKey", "url": "https://warrant.dev"},
+    
+    # Blockchain
+    {"name": "Bitquery", "description": "Onchain GraphQL APIs & DEX APIs", "category": "Finance", "auth": "apiKey", "url": "https://graphql.bitquery.io"},
+    {"name": "Chainlink", "description": "Build hybrid smart contracts", "category": "Finance", "auth": "none", "url": "https://chain.link"},
+    {"name": "Chainpoint", "description": "Anchor data to the Bitcoin blockchain", "category": "Finance", "auth": "none", "url": "https://tierion.com/chainpoint"},
+    {"name": "Covalent", "description": "Multi-blockchain data aggregator", "category": "Finance", "auth": "apiKey", "url": "https://www.covalenthq.com"},
+    {"name": "Etherscan", "description": "Ethereum explorer API", "category": "Finance", "auth": "apiKey", "url": "https://etherscan.io"},
+    {"name": "Helium", "description": "Helium blockchain network API", "category": "Finance", "auth": "none", "url": "https://docs.helium.com"},
+    {"name": "Nownodes", "description": "Blockchain-as-a-service solution", "category": "Finance", "auth": "apiKey", "url": "https://nownodes.io"},
+    {"name": "The Graph", "description": "Indexing protocol with GraphQL", "category": "Finance", "auth": "apiKey", "url": "https://thegraph.com"},
+    {"name": "Watchdata", "description": "Ethereum blockchain access", "category": "Finance", "auth": "apiKey", "url": "https://docs.watchdata.io"},
+    
+    # Books
+    {"name": "A Bíblia Digital", "description": "Bible multiple versions API", "category": "Education", "auth": "apiKey", "url": "https://www.abibliadigital.com.br"},
+    {"name": "Bhagavad Gita", "description": "Bhagavad Gita API with 21+ translations", "category": "Education", "auth": "apiKey", "url": "https://docs.bhagavadgitaapi.in"},
+    {"name": "Bible-api", "description": "Free Bible API with multiple languages", "category": "Education", "auth": "none", "url": "https://bible-api.com"},
+    {"name": "Google Books", "description": "Google Books API", "category": "Education", "auth": "oauth", "url": "https://developers.google.com/books"},
+    {"name": "Gutendex", "description": "Project Gutenberg Books Library", "category": "Education", "auth": "none", "url": "https://gutendex.com"},
+    {"name": "Open Library", "description": "Books, book covers and related data", "category": "Education", "auth": "none", "url": "https://openlibrary.org"},
+    {"name": "PoetryDB", "description": "Vast poetry collection API", "category": "Education", "auth": "none", "url": "https://github.com/thundercomb/poetrydb"},
+    {"name": "Quran Cloud", "description": "RESTful Quran API", "category": "Education", "auth": "none", "url": "https://alquran.cloud"},
+    {"name": "The Bible", "description": "Everything you need from the Bible", "category": "Education", "auth": "apiKey", "url": "https://docs.api.bible"},
+    {"name": "Wizard World", "description": "Harry Potter universe information", "category": "Entertainment", "auth": "none", "url": "https://wizard-world-api.herokuapp.com"},
+    
+    # Business
+    {"name": "Apache Superset", "description": "BI dashboards and data sources", "category": "Business", "auth": "apiKey", "url": "https://superset.apache.org"},
+    {"name": "Charity Search", "description": "Non-profit charity data", "category": "Business", "auth": "apiKey", "url": "http://charityapi.orghunter.com"},
+    {"name": "Clearbit Logo", "description": "Search for company logos", "category": "Business", "auth": "apiKey", "url": "https://clearbit.com"},
+    {"name": "Domainsdb.info", "description": "Registered Domain Names Search", "category": "Business", "auth": "none", "url": "https://domainsdb.info"},
+    {"name": "Freelancer", "description": "Hire freelancers to get work done", "category": "Business", "auth": "oauth", "url": "https://developers.freelancer.com"},
+    {"name": "Gmail API", "description": "Flexible, RESTful access to inbox", "category": "Communication", "auth": "oauth", "url": "https://developers.google.com/gmail"},
+    {"name": "Google Analytics", "description": "Collect and analyze your data", "category": "Analytics", "auth": "oauth", "url": "https://developers.google.com/analytics"},
+    {"name": "Instatus", "description": "Status page API", "category": "DevOps", "auth": "apiKey", "url": "https://instatus.com"},
+    {"name": "Mailchimp", "description": "Marketing campaigns and transactional mails", "category": "Communication", "auth": "apiKey", "url": "https://mailchimp.com"},
+    {"name": "Redash", "description": "Access queries and dashboards", "category": "Analytics", "auth": "apiKey", "url": "https://redash.io"},
+    {"name": "Smartsheet", "description": "Access Smartsheet data programmatically", "category": "Business", "auth": "oauth", "url": "https://smartsheet.redoc.ly"},
+    {"name": "Square", "description": "Take payments, manage refunds", "category": "Payments", "auth": "oauth", "url": "https://developer.squareup.com"},
+    {"name": "Tomba", "description": "Email Finder for B2B sales", "category": "Business", "auth": "apiKey", "url": "https://tomba.io"},
+    {"name": "Trello", "description": "Boards, lists and cards", "category": "Business", "auth": "oauth", "url": "https://developers.trello.com"},
+    
+    # Calendar
+    {"name": "Abstract Public Holidays", "description": "Holidays via API", "category": "Utilities", "auth": "apiKey", "url": "https://www.abstractapi.com"},
+    {"name": "Calendarific", "description": "Worldwide Holidays", "category": "Utilities", "auth": "apiKey", "url": "https://calendarific.com"},
+    {"name": "Google Calendar", "description": "Calendar events API", "category": "Utilities", "auth": "oauth", "url": "https://developers.google.com/calendar"},
+    {"name": "Hebrew Calendar", "description": "Gregorian/Hebrew conversion", "category": "Utilities", "auth": "none", "url": "https://www.hebcal.com"},
+    {"name": "Nager.Date", "description": "Public holidays for 90+ countries", "category": "Utilities", "auth": "none", "url": "https://date.nager.at"},
+    {"name": "Namedays Calendar", "description": "Namedays for multiple countries", "category": "Utilities", "auth": "none", "url": "https://nameday.abalin.net"},
+    
+    # Cloud Storage
+    {"name": "Box", "description": "File Sharing and Storage", "category": "Storage", "auth": "oauth", "url": "https://developer.box.com"},
+    {"name": "Dropbox", "description": "File Sharing and Storage", "category": "Storage", "auth": "oauth", "url": "https://www.dropbox.com/developers"},
+    {"name": "File.io", "description": "Simple file sharing", "category": "Storage", "auth": "none", "url": "https://www.file.io"},
+    {"name": "GoFile", "description": "Unlimited size file uploads", "category": "Storage", "auth": "apiKey", "url": "https://gofile.io"},
+    {"name": "Google Drive", "description": "File Sharing and Storage", "category": "Storage", "auth": "oauth", "url": "https://developers.google.com/drive"},
+    {"name": "Imgur", "description": "Image hosting API", "category": "Storage", "auth": "apiKey", "url": "https://api.imgbb.com"},
+    {"name": "OneDrive", "description": "Microsoft File Storage", "category": "Storage", "auth": "oauth", "url": "https://developer.microsoft.com/onedrive"},
+    {"name": "Pastebin", "description": "Plain Text Storage", "category": "Storage", "auth": "apiKey", "url": "https://pastebin.com"},
+    {"name": "Pinata", "description": "IPFS Pinning Services API", "category": "Storage", "auth": "apiKey", "url": "https://docs.pinata.cloud"},
+    {"name": "Web3 Storage", "description": "Decentralized storage with 1TB free", "category": "Storage", "auth": "apiKey", "url": "https://web3.storage"},
+    
+    # CI/CD
+    {"name": "Bitrise", "description": "Build tool and processes integrations", "category": "DevOps", "auth": "apiKey", "url": "https://api-docs.bitrise.io"},
+    {"name": "Buddy", "description": "Continuous integration and delivery", "category": "DevOps", "auth": "oauth", "url": "https://buddy.works"},
+    {"name": "CircleCI", "description": "Automate software development", "category": "DevOps", "auth": "apiKey", "url": "https://circleci.com"},
+    {"name": "Travis CI", "description": "Sync GitHub projects with Travis CI", "category": "DevOps", "auth": "apiKey", "url": "https://docs.travis-ci.com"},
+    
+    # Cryptocurrency
+    {"name": "0x", "description": "Token and pool stats", "category": "Finance", "auth": "none", "url": "https://0x.org"},
+    {"name": "1inch", "description": "Decentralize exchange API", "category": "Finance", "auth": "none", "url": "https://1inch.io"},
+    {"name": "Alchemy Ethereum", "description": "Ethereum Node-as-a-Service", "category": "Finance", "auth": "apiKey", "url": "https://docs.alchemy.com"},
+    {"name": "Binance", "description": "Cryptocurrency exchange", "category": "Finance", "auth": "apiKey", "url": "https://www.binance.com"},
+    {"name": "Bitfinex", "description": "Cryptocurrency Trading Platform", "category": "Finance", "auth": "apiKey", "url": "https://docs.bitfinex.com"},
+    {"name": "Bitmex", "description": "Real-Time Cryptocurrency derivatives", "category": "Finance", "auth": "apiKey", "url": "https://www.bitmex.com"},
+    {"name": "Bittrex", "description": "Next Generation Crypto Trading", "category": "Finance", "auth": "apiKey", "url": "https://bittrex.github.io"},
+    {"name": "Blockchain.com", "description": "Bitcoin Payment, Wallet & Transaction", "category": "Finance", "auth": "apiKey", "url": "https://www.blockchain.com"},
+    {"name": "blockfrost Cardano", "description": "Cardano mainnet and testnets", "category": "Finance", "auth": "apiKey", "url": "https://blockfrost.io"},
+    {"name": "Bybit", "description": "Cryptocurrency data feed", "category": "Finance", "auth": "apiKey", "url": "https://bybit-exchange.github.io"},
+    {"name": "CoinAPI", "description": "All Currency Exchanges unified API", "category": "Finance", "auth": "apiKey", "url": "https://docs.coinapi.io"},
+    {"name": "Coinbase", "description": "Bitcoin, Ethereum Prices", "category": "Finance", "auth": "apiKey", "url": "https://developers.coinbase.com"},
+    {"name": "CoinCap", "description": "Real time Cryptocurrency prices", "category": "Finance", "auth": "none", "url": "https://docs.coincap.io"},
+    {"name": "CoinGecko", "description": "Cryptocurrency Price, Market Data", "category": "Finance", "auth": "none", "url": "https://www.coingecko.com"},
+    {"name": "CoinMarketCap", "description": "Cryptocurrencies Prices", "category": "Finance", "auth": "apiKey", "url": "https://coinmarketcap.com"},
+    {"name": "CoinRanking", "description": "Live Cryptocurrency data", "category": "Finance", "auth": "apiKey", "url": "https://developers.coinranking.com"},
+    {"name": "dYdX", "description": "Decentralized cryptocurrency exchange", "category": "Finance", "auth": "apiKey", "url": "https://docs.dydx.exchange"},
+    {"name": "Ethplorer", "description": "Ethereum tokens, balances, addresses", "category": "Finance", "auth": "apiKey", "url": "https://github.com/EverexIO/Ethplorer"},
+    {"name": "FTX", "description": "REST, websocket, and FTX APIs", "category": "Finance", "auth": "apiKey", "url": "https://docs.ftx.com"},
+    {"name": "Gemini", "description": "Cryptocurrencies Exchange", "category": "Finance", "auth": "none", "url": "https://docs.gemini.com"},
+    {"name": "Huobi", "description": "Cryptocurrency exchange", "category": "Finance", "auth": "apiKey", "url": "https://huobiapi.github.io"},
+    {"name": "INFURA Ethereum", "description": "Ethereum mainnet and testnets", "category": "Finance", "auth": "apiKey", "url": "https://infura.io"},
+    {"name": "Kraken", "description": "Cryptocurrencies Exchange", "category": "Finance", "auth": "apiKey", "url": "https://docs.kraken.com"},
+    {"name": "KuCoin", "description": "Cryptocurrency Trading Platform", "category": "Finance", "auth": "apiKey", "url": "https://docs.kucoin.com"},
+    {"name": "Mempool", "description": "Bitcoin API Service", "category": "Finance", "auth": "none", "url": "https://mempool.space"},
+    {"name": "Messari", "description": "API for crypto assets", "category": "Finance", "auth": "none", "url": "https://messari.io"},
+    {"name": "Solana JSON RPC", "description": "Solana Blockchain endpoints", "category": "Finance", "auth": "none", "url": "https://docs.solana.com"},
+    
+    # Currency Exchange
+    {"name": "1Forge", "description": "Forex currency market data", "category": "Finance", "auth": "apiKey", "url": "https://1forge.com"},
+    {"name": "Currency-api", "description": "Free Currency Exchange Rates", "category": "Finance", "auth": "none", "url": "https://github.com/fawazahmed0/currency-api"},
+    {"name": "CurrencyFreaks", "description": "Current and historical exchange rates", "category": "Finance", "auth": "apiKey", "url": "https://currencyfreaks.com"},
+    {"name": "CurrencyScoop", "description": "Real-time and historical currency rates", "category": "Finance", "auth": "apiKey", "url": "https://currencyscoop.com"},
+    {"name": "ExchangeRate-API", "description": "Free currency conversion", "category": "Finance", "auth": "apiKey", "url": "https://www.exchangerate-api.com"},
+    {"name": "Exchangerate.host", "description": "Foreign exchange & crypto rates", "category": "Finance", "auth": "none", "url": "https://exchangerate.host"},
+    {"name": "Frankfurter", "description": "Exchange rates and currency conversion", "category": "Finance", "auth": "none", "url": "https://www.frankfurter.app"},
+    {"name": "Fixer.io", "description": "Foreign exchange rates", "category": "Finance", "auth": "apiKey", "url": "https://fixer.io"},
+    
+    # Data Validation
+    {"name": "Lob Address", "description": "US Address Verification", "category": "Utilities", "auth": "apiKey", "url": "https://lob.com"},
+    {"name": "Postman Echo", "description": "Test api server", "category": "Development", "auth": "none", "url": "https://www.postman-echo.com"},
+    {"name": "PurgoMalum", "description": "Content validator against profanity", "category": "Utilities", "auth": "none", "url": "http://www.purgomalum.com"},
+    {"name": "vatlayer", "description": "VAT number validation", "category": "Business", "auth": "apiKey", "url": "https://vatlayer.com"},
+    
+    # Development
+    {"name": "24 Pull Requests", "description": "Open source collaboration", "category": "Development", "auth": "none", "url": "https://24pullrequests.com"},
+    {"name": "Abstract Screenshot", "description": "Take programmatic screenshots", "category": "Utilities", "auth": "apiKey", "url": "https://www.abstractapi.com"},
+    {"name": "Agify.io", "description": "Estimates age from first name", "category": "Utilities", "auth": "none", "url": "https://agify.io"},
+    {"name": "ApiFlash", "description": "Chrome based screenshot API", "category": "Utilities", "auth": "apiKey", "url": "https://apiflash.com"},
+    {"name": "APIs.guru", "description": "Wikipedia for Web APIs", "category": "Development", "auth": "none", "url": "https://apis.guru"},
+    {"name": "Azure DevOps", "description": "REST API for Azure DevOps", "category": "DevOps", "auth": "apiKey", "url": "https://docs.microsoft.com/azure/devops"},
+    {"name": "Beeceptor", "description": "Build a mock Rest API endpoint", "category": "Development", "auth": "none", "url": "https://beeceptor.com"},
+    {"name": "Bitbucket", "description": "Bitbucket API", "category": "Development", "auth": "oauth", "url": "https://developer.atlassian.com/bitbucket"},
+    {"name": "Bored", "description": "Find random activities", "category": "Entertainment", "auth": "none", "url": "https://www.boredapi.com"},
+    {"name": "CDNJS", "description": "Library info on CDNJS", "category": "Development", "auth": "none", "url": "https://api.cdnjs.com"},
+    {"name": "CountAPI", "description": "Free counting service", "category": "Utilities", "auth": "none", "url": "https://countapi.xyz"},
+    {"name": "Docker Hub", "description": "Interact with Docker Hub", "category": "DevOps", "auth": "apiKey", "url": "https://docs.docker.com/docker-hub"},
+    {"name": "Genderize.io", "description": "Estimates gender from first name", "category": "Utilities", "auth": "none", "url": "https://genderize.io"},
+    {"name": "Ghost", "description": "Get Published content into your Website", "category": "CMS", "auth": "apiKey", "url": "https://ghost.org"},
+    {"name": "GitHub", "description": "Make use of GitHub repositories", "category": "Development", "auth": "oauth", "url": "https://docs.github.com"},
+    {"name": "GitLab", "description": "Automate GitLab interaction", "category": "Development", "auth": "oauth", "url": "https://docs.gitlab.com"},
+    {"name": "Google Docs", "description": "Read, write, and format documents", "category": "Business", "auth": "oauth", "url": "https://developers.google.com/docs"},
+    {"name": "Google Firebase", "description": "Mobile application development platform", "category": "Development", "auth": "apiKey", "url": "https://firebase.google.com"},
+    {"name": "Google Fonts", "description": "Metadata for font families", "category": "Design", "auth": "apiKey", "url": "https://developers.google.com/fonts"},
+    {"name": "Google Sheets", "description": "Read, write, and format sheets", "category": "Business", "auth": "oauth", "url": "https://developers.google.com/sheets"},
+    {"name": "Hasura", "description": "GraphQL and REST API Engine", "category": "Development", "auth": "apiKey", "url": "https://hasura.io"},
+    {"name": "Heroku", "description": "REST API for Heroku apps", "category": "DevOps", "auth": "oauth", "url": "https://devcenter.heroku.com"},
+    {"name": "HTTPbin", "description": "HTTP Request & Response Service", "category": "Development", "auth": "none", "url": "https://httpbin.org"},
+    {"name": "Hunter", "description": "Domain search, email finder, verifier", "category": "Business", "auth": "apiKey", "url": "https://hunter.io"},
+    {"name": "IPify", "description": "Simple IP Address API", "category": "Utilities", "auth": "none", "url": "https://www.ipify.org"},
+    {"name": "IPinfo", "description": "Another simple IP Address API", "category": "Utilities", "auth": "none", "url": "https://ipinfo.io"},
+    {"name": "jsDelivr", "description": "Package info and download stats", "category": "Development", "auth": "none", "url": "https://github.com/jsdelivr/data.jsdelivr.com"},
+    {"name": "JSONbin.io", "description": "Free JSON storage service", "category": "Storage", "auth": "apiKey", "url": "https://jsonbin.io"},
+    {"name": "Nationalize.io", "description": "Estimate nationality of first name", "category": "Utilities", "auth": "none", "url": "https://nationalize.io"},
+    {"name": "Netlify", "description": "Netlify hosting service API", "category": "DevOps", "auth": "oauth", "url": "https://docs.netlify.com"},
+    {"name": "NetworkCalc", "description": "Network calculator tools", "category": "Utilities", "auth": "none", "url": "https://networkcalc.com"},
+    {"name": "npm Registry", "description": "Query Node.js libraries programatically", "category": "Development", "auth": "none", "url": "https://github.com/npm/registry"},
+    {"name": "OneSignal", "description": "Push Notifications, Email, SMS", "category": "Communication", "auth": "apiKey", "url": "https://documentation.onesignal.com"},
+    {"name": "Postman", "description": "Tool for testing APIs", "category": "Development", "auth": "apiKey", "url": "https://www.postman.com"},
+    {"name": "QuickChart", "description": "Generate chart and graph images", "category": "Utilities", "auth": "none", "url": "https://quickchart.io"},
+    {"name": "ReqRes", "description": "Hosted REST-API for AJAX requests", "category": "Development", "auth": "none", "url": "https://reqres.in"},
+    {"name": "ScraperApi", "description": "Build scalable web scrapers", "category": "Development", "auth": "apiKey", "url": "https://www.scraperapi.com"},
+    {"name": "ScreenshotAPI.net", "description": "Create pixel-perfect screenshots", "category": "Utilities", "auth": "apiKey", "url": "https://screenshotapi.net"},
+    {"name": "StackExchange", "description": "Q&A forum for developers", "category": "Development", "auth": "oauth", "url": "https://api.stackexchange.com"},
+    
+    # Dictionaries
+    {"name": "Free Dictionary", "description": "Word definitions for free", "category": "Education", "auth": "none", "url": "https://dictionaryapi.dev"},
+    {"name": "Lingua Robot", "description": "Word definitions, pronunciations, synonyms", "category": "Education", "auth": "apiKey", "url": "https://www.linguarobot.io"},
+    {"name": "Merriam-Webster", "description": "Dictionary and Thesaurus Data", "category": "Education", "auth": "apiKey", "url": "https://dictionaryapi.com"},
+    {"name": "Oxford Dictionary", "description": "Dictionary Data", "category": "Education", "auth": "apiKey", "url": "https://developer.oxforddictionaries.com"},
+    {"name": "Wordnik", "description": "Dictionary Data", "category": "Education", "auth": "apiKey", "url": "https://developer.wordnik.com"},
+    {"name": "Words API", "description": "Definitions and synonyms for 150,000+ words", "category": "Education", "auth": "apiKey", "url": "https://www.wordsapi.com"},
+    
+    # Documents & Productivity
+    {"name": "Airtable", "description": "Integrate with Airtable", "category": "Business", "auth": "apiKey", "url": "https://airtable.com/api"},
+    {"name": "Asana", "description": "Programmatic access to Asana data", "category": "Business", "auth": "apiKey", "url": "https://developers.asana.com"},
+    {"name": "ClickUp", "description": "Cloud-based project management", "category": "Business", "auth": "oauth", "url": "https://clickup.com"},
+    {"name": "Clockify", "description": "Time tracking REST API", "category": "Business", "auth": "apiKey", "url": "https://clockify.me"},
+    {"name": "CloudConvert", "description": "Online file converter", "category": "Utilities", "auth": "apiKey", "url": "https://cloudconvert.com"},
+    {"name": "CraftMyPDF", "description": "Generate PDF documents from templates", "category": "Utilities", "auth": "apiKey", "url": "https://craftmypdf.com"},
+    {"name": "iLovePDF", "description": "Convert, merge, split PDFs", "category": "Utilities", "auth": "apiKey", "url": "https://developer.ilovepdf.com"},
+    {"name": "JIRA", "description": "Issue tracking product", "category": "Business", "auth": "oauth", "url": "https://developer.atlassian.com/server/jira"},
+    {"name": "Monday", "description": "Access monday.com account data", "category": "Business", "auth": "apiKey", "url": "https://api.developer.monday.com"},
+    {"name": "Notion", "description": "Integrate with Notion", "category": "Business", "auth": "oauth", "url": "https://developers.notion.com"},
+    {"name": "PandaDoc", "description": "DocGen and eSignatures API", "category": "Business", "auth": "apiKey", "url": "https://developers.pandadoc.com"},
+    {"name": "Todoist", "description": "Todo Lists", "category": "Business", "auth": "oauth", "url": "https://developer.todoist.com"},
+    {"name": "WakaTime", "description": "Automated time tracking leaderboards", "category": "Development", "auth": "none", "url": "https://wakatime.com"},
+    
+    # Email
+    {"name": "Abstract Email Validation", "description": "Validate email addresses", "category": "Communication", "auth": "apiKey", "url": "https://www.abstractapi.com"},
+    {"name": "Disify", "description": "Validate and detect disposable emails", "category": "Communication", "auth": "none", "url": "https://www.disify.com"},
+    {"name": "DropMail", "description": "GraphQL API for ephemeral e-mail", "category": "Communication", "auth": "none", "url": "https://dropmail.me"},
+    {"name": "Guerrilla Mail", "description": "Disposable temporary Email addresses", "category": "Communication", "auth": "none", "url": "https://www.guerrillamail.com"},
+    {"name": "Kickbox", "description": "Email verification API", "category": "Communication", "auth": "none", "url": "https://open.kickbox.com"},
+    {"name": "mail.gw", "description": "10 Minute Mail", "category": "Communication", "auth": "none", "url": "https://docs.mail.gw"},
+    {"name": "mail.tm", "description": "Temporary Email Service", "category": "Communication", "auth": "none", "url": "https://docs.mail.tm"},
+    {"name": "Sendgrid", "description": "Cloud-based SMTP provider", "category": "Communication", "auth": "apiKey", "url": "https://docs.sendgrid.com"},
+    {"name": "Sendinblue", "description": "Marketing and transactional email", "category": "Communication", "auth": "apiKey", "url": "https://developers.sendinblue.com"},
+    
+    # Entertainment
+    {"name": "Chuck Norris", "description": "Hand curated Chuck Norris jokes", "category": "Entertainment", "auth": "none", "url": "https://api.chucknorris.io"},
+    {"name": "Corporate Buzz Words", "description": "Corporate Buzz Words Generator", "category": "Entertainment", "auth": "none", "url": "https://github.com/sameerkumar18/corporate-bs-generator-api"},
+    {"name": "Excuser", "description": "Get random excuses", "category": "Entertainment", "auth": "none", "url": "https://excuser.herokuapp.com"},
+    {"name": "Fun Fact", "description": "Random fun facts", "category": "Entertainment", "auth": "none", "url": "https://api.aakhilv.me"},
+    {"name": "Imgflip", "description": "Array of popular memes", "category": "Entertainment", "auth": "none", "url": "https://imgflip.com"},
+    {"name": "Random Useless Facts", "description": "Get useless but true facts", "category": "Entertainment", "auth": "none", "url": "https://uselessfacts.jsph.pl"},
+    {"name": "Techy", "description": "Tech-savvy sounding phrases", "category": "Entertainment", "auth": "none", "url": "https://techy-api.vercel.app"},
+    {"name": "Yo Momma Jokes", "description": "REST API for Yo Momma Jokes", "category": "Entertainment", "auth": "none", "url": "https://github.com/beanboi7/yomomma-apiv2"},
+    
+    # Environment
+    {"name": "Carbon Interface", "description": "Calculate carbon emissions estimates", "category": "Environment", "auth": "apiKey", "url": "https://docs.carboninterface.com"},
+    {"name": "Climatiq", "description": "Calculate environmental footprint", "category": "Environment", "auth": "apiKey", "url": "https://docs.climatiq.io"},
+    {"name": "IQAir", "description": "Air quality and weather data", "category": "Environment", "auth": "apiKey", "url": "https://www.iqair.com"},
+    {"name": "OpenAQ", "description": "Open air quality data", "category": "Environment", "auth": "apiKey", "url": "https://docs.openaq.org"},
+    {"name": "UK Carbon Intensity", "description": "Carbon Intensity API for Great Britain", "category": "Environment", "auth": "none", "url": "https://carbon-intensity.github.io"},
+    
+    # Events
+    {"name": "Eventbrite", "description": "Find events", "category": "Events", "auth": "oauth", "url": "https://www.eventbrite.com/platform"},
+    {"name": "SeatGeek", "description": "Search events, venues and performers", "category": "Events", "auth": "apiKey", "url": "https://platform.seatgeek.com"},
+    {"name": "Ticketmaster", "description": "Search events, attractions, or venues", "category": "Events", "auth": "apiKey", "url": "http://developer.ticketmaster.com"},
+    
+    # Finance
+    {"name": "Alpha Vantage", "description": "Realtime and historical stock data", "category": "Finance", "auth": "apiKey", "url": "https://www.alphavantage.co"},
+    {"name": "IEX Cloud", "description": "Realtime & Historical Stock Data", "category": "Finance", "auth": "apiKey", "url": "https://iexcloud.io"},
+    {"name": "Finnhub", "description": "Real-Time RESTful APIs for Stocks", "category": "Finance", "auth": "apiKey", "url": "https://finnhub.io"},
+    {"name": "FRED", "description": "Economic data from Federal Reserve", "category": "Finance", "auth": "apiKey", "url": "https://fred.stlouisfed.org"},
+    {"name": "Plaid", "description": "Connect with bank accounts", "category": "Finance", "auth": "apiKey", "url": "https://plaid.com"},
+    {"name": "Polygon", "description": "Historical stock market data", "category": "Finance", "auth": "apiKey", "url": "https://polygon.io"},
+    {"name": "SEC EDGAR", "description": "Annual reports of public US companies", "category": "Finance", "auth": "none", "url": "https://www.sec.gov/edgar"},
+    {"name": "Twelve Data", "description": "Stock market data (real-time & historical)", "category": "Finance", "auth": "apiKey", "url": "https://twelvedata.com"},
+    {"name": "Yahoo Finance", "description": "Real time stock market data", "category": "Finance", "auth": "apiKey", "url": "https://www.yahoofinanceapi.com"},
+    {"name": "YNAB", "description": "Budgeting & Planning", "category": "Finance", "auth": "oauth", "url": "https://api.youneedabudget.com"},
+    
+    # Food & Drink
+    {"name": "Edamam Nutrition", "description": "Nutrition Analysis", "category": "Food", "auth": "apiKey", "url": "https://developer.edamam.com"},
+    {"name": "Edamam Recipes", "description": "Recipe Search", "category": "Food", "auth": "apiKey", "url": "https://developer.edamam.com"},
+    {"name": "Open Brewery DB", "description": "Breweries, Cideries and Craft Beer", "category": "Food", "auth": "none", "url": "https://www.openbrewerydb.org"},
+    {"name": "Open Food Facts", "description": "Food Products Database", "category": "Food", "auth": "none", "url": "https://world.openfoodfacts.org"},
+    {"name": "PunkAPI", "description": "Brewdog Beer Recipes", "category": "Food", "auth": "none", "url": "https://punkapi.com"},
+    {"name": "Spoonacular", "description": "Recipes, Food Products, Meal Planning", "category": "Food", "auth": "apiKey", "url": "https://spoonacular.com"},
+    {"name": "TheCocktailDB", "description": "Cocktail Recipes", "category": "Food", "auth": "apiKey", "url": "https://www.thecocktaildb.com"},
+    {"name": "TheMealDB", "description": "Meal Recipes", "category": "Food", "auth": "apiKey", "url": "https://www.themealdb.com"},
+    {"name": "Zestful", "description": "Parse recipe ingredients", "category": "Food", "auth": "apiKey", "url": "https://zestfuldata.com"},
+    
+    # Games & Comics
+    {"name": "AmiiboAPI", "description": "Nintendo Amiibo Information", "category": "Games", "auth": "none", "url": "https://amiiboapi.com"},
+    {"name": "Battle.net", "description": "Diablo III, Hearthstone, WoW data", "category": "Games", "auth": "oauth", "url": "https://develop.battle.net"},
+    {"name": "Chess.com", "description": "Chess.com read-only REST API", "category": "Games", "auth": "none", "url": "https://www.chess.com"},
+    {"name": "Clash of Clans", "description": "Clash of Clans Game Information", "category": "Games", "auth": "apiKey", "url": "https://developer.clashofclans.com"},
+    {"name": "Clash Royale", "description": "Clash Royale Game Information", "category": "Games", "auth": "apiKey", "url": "https://developer.clashroyale.com"},
+    {"name": "Comic Vine", "description": "Comics information", "category": "Entertainment", "auth": "none", "url": "https://comicvine.gamespot.com"},
+    {"name": "Deck of Cards", "description": "Deck of Cards API", "category": "Games", "auth": "none", "url": "http://deckofcardsapi.com"},
+    {"name": "FFXIV Collect", "description": "Final Fantasy XIV collectables", "category": "Games", "auth": "none", "url": "https://ffxivcollect.com"},
+    {"name": "FreeToGame", "description": "Free-To-Play Games Database", "category": "Games", "auth": "none", "url": "https://www.freetogame.com"},
+    {"name": "GamerPower", "description": "Game Giveaways Tracker", "category": "Games", "auth": "none", "url": "https://www.gamerpower.com"},
+    {"name": "Genshin Impact", "description": "Genshin Impact game data", "category": "Games", "auth": "none", "url": "https://genshin.dev"},
+    {"name": "Giant Bomb", "description": "Video Games database", "category": "Games", "auth": "apiKey", "url": "https://www.giantbomb.com"},
+    {"name": "Guild Wars 2", "description": "Guild Wars 2 Game Information", "category": "Games", "auth": "apiKey", "url": "https://wiki.guildwars2.com"},
+    {"name": "Hyrule Compendium", "description": "Zelda: BOTW data", "category": "Games", "auth": "none", "url": "https://github.com/gadhagod/Hyrule-Compendium-API"},
+    {"name": "IGDB", "description": "Video Game Database", "category": "Games", "auth": "apiKey", "url": "https://api-docs.igdb.com"},
+    {"name": "JokeAPI", "description": "Programming, Miscellaneous Jokes", "category": "Entertainment", "auth": "none", "url": "https://sv443.net/jokeapi"},
+    {"name": "Lichess", "description": "Access Lichess data", "category": "Games", "auth": "oauth", "url": "https://lichess.org/api"},
+    {"name": "Magic The Gathering", "description": "MTG Game Information", "category": "Games", "auth": "none", "url": "http://magicthegathering.io"},
+    {"name": "Marvel", "description": "Marvel Comics", "category": "Entertainment", "auth": "apiKey", "url": "https://developer.marvel.com"},
+    {"name": "MMO Games", "description": "MMO Games Database, News", "category": "Games", "auth": "none", "url": "https://www.mmobomb.com"},
+    {"name": "Open Trivia", "description": "Trivia Questions", "category": "Entertainment", "auth": "none", "url": "https://opentdb.com"},
+    {"name": "PandaScore", "description": "E-sports games and results", "category": "Games", "auth": "apiKey", "url": "https://developers.pandascore.co"},
+    {"name": "Pokéapi", "description": "Pokémon Information", "category": "Games", "auth": "none", "url": "https://pokeapi.co"},
+    {"name": "Pokémon TCG", "description": "Pokémon TCG Information", "category": "Games", "auth": "none", "url": "https://pokemontcg.io"},
+    {"name": "PUBG", "description": "Access PUBG data", "category": "Games", "auth": "apiKey", "url": "https://developer.pubg.com"},
+    {"name": "RAWG", "description": "500,000+ games for 50 platforms", "category": "Games", "auth": "apiKey", "url": "https://rawg.io"},
+    {"name": "Rick and Morty", "description": "All Rick and Morty information", "category": "Entertainment", "auth": "none", "url": "https://rickandmortyapi.com"},
+    {"name": "Riot Games", "description": "League of Legends Game Information", "category": "Games", "auth": "apiKey", "url": "https://developer.riotgames.com"},
+    {"name": "Scryfall", "description": "Magic: The Gathering database", "category": "Games", "auth": "none", "url": "https://scryfall.com"},
+    {"name": "Steam", "description": "Steam Web API", "category": "Games", "auth": "apiKey", "url": "https://steamapi.xpaw.me"},
+    {"name": "SuperHeroes", "description": "SuperHeroes and Villains data", "category": "Entertainment", "auth": "apiKey", "url": "https://superheroapi.com"},
+    {"name": "TCGdex", "description": "Pokémon TCG Information multi-language", "category": "Games", "auth": "none", "url": "https://www.tcgdex.net"},
+    {"name": "xkcd", "description": "Retrieve xkcd comics as JSON", "category": "Entertainment", "auth": "none", "url": "https://xkcd.com"},
+    {"name": "Yu-Gi-Oh!", "description": "Yu-Gi-Oh! TCG Information", "category": "Games", "auth": "none", "url": "https://db.ygoprodeck.com"},
+]
+
+# Additional APIs from n0shake/Public-APIs
+ADDITIONAL_APIS = [
+    # Communication
+    {"name": "Africa's Talking", "description": "Access African telco services through HTTP API", "category": "Communication", "auth": "apiKey", "url": "https://africastalking.com"},
+    {"name": "iP1sms", "description": "Send and receive SMS worldwide", "category": "Communication", "auth": "apiKey", "url": "https://www.ip1sms.com"},
+    {"name": "Eqivo", "description": "Telephony/Programmable-Voice API platform", "category": "Communication", "auth": "none", "url": "https://eqivo.org"},
+    {"name": "MailGun", "description": "Transactional Email API Service", "category": "Communication", "auth": "apiKey", "url": "https://mailgun.com"},
+    {"name": "Nexmo", "description": "Phone calls, SMS worldwide", "category": "Communication", "auth": "apiKey", "url": "https://developer.nexmo.com"},
+    {"name": "Sakari", "description": "Send SMS to 200+ countries", "category": "Communication", "auth": "apiKey", "url": "https://developer.sakari.io"},
+    {"name": "Telnyx", "description": "Voice, SMS, Fax, Networking, IoT", "category": "Communication", "auth": "apiKey", "url": "https://developers.telnyx.com"},
+    {"name": "The SMS Works", "description": "Low-cost, reliable SMS API", "category": "Communication", "auth": "apiKey", "url": "https://thesmsworks.co.uk"},
+    {"name": "Twilio", "description": "APIs for SMS, Voice, Video", "category": "Communication", "auth": "apiKey", "url": "https://www.twilio.com"},
+    
+    # Content
+    {"name": "Bible", "description": "JSON API for public domain bible translations", "category": "Education", "auth": "none", "url": "https://bible-api.com"},
+    {"name": "Fruits API", "description": "API GraphQL with fruit tree info", "category": "Food", "auth": "none", "url": "https://github.com/Franqsanz/fruits-api"},
+    {"name": "Jokes", "description": "Full featured Jokes API", "category": "Entertainment", "auth": "apiKey", "url": "https://jokes.one"},
+    {"name": "Perfect Tense API", "description": "Spelling and grammar checking AI", "category": "Education", "auth": "apiKey", "url": "https://www.perfecttense.com"},
+    {"name": "Random Data Generator", "description": "Generate telephones, text, passwords", "category": "Utilities", "auth": "apiKey", "url": "https://randommer.io"},
+    {"name": "Random Facts", "description": "Random Facts API", "category": "Entertainment", "auth": "apiKey", "url": "https://fungenerators.com/api/facts"},
+    {"name": "Today in History", "description": "Daily historical events API", "category": "Education", "auth": "none", "url": "https://history.muffinlabs.com"},
+    {"name": "Wikipedia", "description": "Free multilingual Encyclopedia", "category": "Education", "auth": "none", "url": "https://en.wikipedia.org/w/api.php"},
+    
+    # Face Recognition
+    {"name": "Kairos", "description": "Face recognition, emotion analysis", "category": "AI", "auth": "apiKey", "url": "https://www.kairos.com"},
+    {"name": "Skybiometry", "description": "Face detection and grouping", "category": "AI", "auth": "none", "url": "https://www.skybiometry.com"},
+    
+    # Fitness
+    {"name": "FitBit", "description": "Fitbit activity trackers API", "category": "Health", "auth": "oauth", "url": "https://dev.fitbit.com"},
+    {"name": "Open Food Facts", "description": "Food product database", "category": "Health", "auth": "none", "url": "https://en.wiki.openfoodfacts.org"},
+    {"name": "Strava", "description": "Athletes, activities and segments", "category": "Health", "auth": "oauth", "url": "https://strava.github.io/api"},
+    {"name": "Withings", "description": "Withings activity trackers", "category": "Health", "auth": "oauth", "url": "http://oauth.withings.com"},
+    
+    # Google Services
+    {"name": "Google BigQuery", "description": "Data platform for customers", "category": "Analytics", "auth": "oauth", "url": "https://cloud.google.com/bigquery"},
+    {"name": "Google CustomSearch", "description": "Search within websites", "category": "Search", "auth": "apiKey", "url": "https://developers.google.com/custom-search"},
+    {"name": "Google Fitness API", "description": "The Fit API", "category": "Health", "auth": "oauth", "url": "https://developers.google.com/fit"},
+    {"name": "Google Identity", "description": "Federated login for third party sites", "category": "Authentication", "auth": "apiKey", "url": "https://developers.google.com/identity"},
+    {"name": "Google Monitoring", "description": "API monitoring data", "category": "DevOps", "auth": "oauth", "url": "https://cloud.google.com/monitoring"},
+    
+    # Identity Verification
+    {"name": "Cognito", "description": "Verifying and retrieving identity", "category": "Authentication", "auth": "apiKey", "url": "https://cognitohq.com"},
+    {"name": "Whitepages Pro", "description": "Global Identity Verification API", "category": "Authentication", "auth": "apiKey", "url": "https://pro.whitepages.com"},
+    
+    # IoT
+    {"name": "Particle", "description": "API to manage Particle devices", "category": "IoT", "auth": "apiKey", "url": "https://docs.particle.io"},
+    {"name": "PubNub", "description": "Real time applications with hardware", "category": "IoT", "auth": "none", "url": "https://www.pubnub.com"},
+    {"name": "Philips Hue", "description": "Control Hue brand lights", "category": "IoT", "auth": "none", "url": "https://developers.meethue.com"},
+    {"name": "SmartThings", "description": "Samsung SmartThings Smart Home Hub", "category": "IoT", "auth": "oauth", "url": "http://developer.smartthings.com"},
+    {"name": "ThingSpeak", "description": "IoT application to store/retrieve data", "category": "IoT", "auth": "none", "url": "https://github.com/iobridge/ThingSpeak"},
+    
+    # Login Authentication
+    {"name": "Facebook Login", "description": "Secure, fast login for apps", "category": "Authentication", "auth": "oauth", "url": "https://developers.facebook.com/docs/facebook-login"},
+    {"name": "LinkedIn", "description": "Sign in with professional identity", "category": "Authentication", "auth": "oauth", "url": "https://developer.linkedin.com"},
+    {"name": "PayPal", "description": "Sign in with PayPal credentials", "category": "Authentication", "auth": "oauth", "url": "https://developer.paypal.com"},
+    {"name": "Salesforce", "description": "OAuth protocol access to data", "category": "Authentication", "auth": "oauth", "url": "https://developer.salesforce.com"},
+    {"name": "Twitter Sign-in", "description": "Works on websites, iOS, mobile, desktop", "category": "Authentication", "auth": "oauth", "url": "https://developer.twitter.com"},
+    {"name": "WorkOS", "description": "Single Sign-On for Enterprise", "category": "Authentication", "auth": "apiKey", "url": "https://workos.com"},
+    
+    # Machine Learning
+    {"name": "Amazon ML", "description": "Amazon Machine Learning API", "category": "AI", "auth": "apiKey", "url": "http://docs.aws.amazon.com/machine-learning"},
+    {"name": "AYLIEN", "description": "NLP and Information Retrieval tools", "category": "AI", "auth": "apiKey", "url": "http://aylien.com"},
+    {"name": "Big ML", "description": "Machine Learning API focused on decision trees", "category": "AI", "auth": "apiKey", "url": "http://bigml.com/api"},
+    {"name": "Cloud ML Engine", "description": "Cloud-based machine learning", "category": "AI", "auth": "oauth", "url": "https://cloud.google.com/ml-engine"},
+    {"name": "Microsoft Azure ML", "description": "Cognitive Services for applications", "category": "AI", "auth": "apiKey", "url": "https://azure.microsoft.com/en-us/services/cognitive-services"},
+    {"name": "OVHcloud AI Endpoints", "description": "GenAI & ML integration with APIs", "category": "AI", "auth": "apiKey", "url": "https://endpoints.ai.cloud.ovh.net"},
+    
+    # Maps
+    {"name": "Amazon Maps", "description": "Interactive 3D maps for Fire devices", "category": "Maps", "auth": "apiKey", "url": "https://developer.amazon.com/maps"},
+    {"name": "Bing Maps", "description": "Create/customize digital maps", "category": "Maps", "auth": "apiKey", "url": "https://www.microsoft.com/maps"},
+    {"name": "CartoDB", "description": "Generate maps based on data", "category": "Maps", "auth": "apiKey", "url": "https://carto.com"},
+    {"name": "Google Maps", "description": "Create/customize digital maps", "category": "Maps", "auth": "apiKey", "url": "https://developers.google.com/maps"},
+    {"name": "HERE Maps", "description": "Maps via JavaScript, iOS, Android, REST", "category": "Maps", "auth": "apiKey", "url": "https://developer.here.com"},
+    {"name": "Leaflet.js", "description": "Mobile-friendly interactive maps", "category": "Maps", "auth": "none", "url": "http://leafletjs.com"},
+    {"name": "Mapbox", "description": "Access to MapBox's API", "category": "Maps", "auth": "apiKey", "url": "https://www.mapbox.com"},
+    {"name": "OpenStreetMap", "description": "API access to OSM", "category": "Maps", "auth": "oauth", "url": "http://wiki.openstreetmap.org/wiki/API"},
+    {"name": "Yandex Maps", "description": "API for Yandex.Maps", "category": "Maps", "auth": "apiKey", "url": "https://tech.yandex.com/maps"},
+    
+    # Medical
+    {"name": "COVID-19 Data", "description": "Get Coronavirus cases per country", "category": "Health", "auth": "none", "url": "https://github.com/M-Media-Group/Covid-19-API"},
+    {"name": "Infermedica", "description": "AI-based patient triage and diagnosis", "category": "Health", "auth": "apiKey", "url": "https://developer.infermedica.com"},
+    
+    # Movies
+    {"name": "OMDB", "description": "OMDb movie information", "category": "Entertainment", "auth": "apiKey", "url": "https://www.omdbapi.com"},
+    {"name": "TMDb", "description": "The Movie Database", "category": "Entertainment", "auth": "apiKey", "url": "https://www.themoviedb.org"},
+    {"name": "Trakt", "description": "TV shows and movies tracking", "category": "Entertainment", "auth": "apiKey", "url": "https://trakt.docs.apiary.io"},
+    {"name": "TVmaze", "description": "TV Show and web series database", "category": "Entertainment", "auth": "none", "url": "https://www.tvmaze.com"},
+    
+    # Music
+    {"name": "AI Mastering", "description": "Automated audio mastering", "category": "Media", "auth": "apiKey", "url": "https://aimastering.com"},
+    {"name": "Deezer", "description": "Deezer music discovery", "category": "Media", "auth": "oauth", "url": "http://developers.deezer.com/api"},
+    {"name": "Discogs", "description": "Music artists and labels", "category": "Media", "auth": "oauth", "url": "https://www.discogs.com/developers"},
+    {"name": "Last.fm", "description": "Last.fm music API", "category": "Media", "auth": "apiKey", "url": "http://www.last.fm/api"},
+    {"name": "Musixmatch", "description": "World's most authoritative lyrics DB", "category": "Media", "auth": "apiKey", "url": "https://developer.musixmatch.com"},
+    {"name": "SoundCloud", "description": "SoundCloud API", "category": "Media", "auth": "oauth", "url": "https://developers.soundcloud.com"},
+    {"name": "Spotify", "description": "View Spotify music catalog", "category": "Media", "auth": "oauth", "url": "https://beta.developer.spotify.com"},
+    {"name": "TheAudioDB", "description": "Free JSON API for music data", "category": "Media", "auth": "apiKey", "url": "http://www.theaudiodb.com"},
+    
+    # Natural Language Processing
+    {"name": "Cloudmersive NLP", "description": "Unified NLP APIs including translation", "category": "AI", "auth": "apiKey", "url": "https://cloudmersive.com/nlp-api"},
+    {"name": "Cohere", "description": "Text summarization, entity extraction", "category": "AI", "auth": "apiKey", "url": "https://docs.cohere.com"},
+    {"name": "DialogFlow", "description": "Natural Language Interactions for Bots", "category": "AI", "auth": "oauth", "url": "https://dialogflow.com"},
+    {"name": "OpenAI API", "description": "GPT-3 and Codex access", "category": "AI", "auth": "apiKey", "url": "https://platform.openai.com"},
+    {"name": "TextRazor", "description": "Extract the Who, What, Why from text", "category": "AI", "auth": "apiKey", "url": "https://www.textrazor.com"},
+    {"name": "VoiceRSS", "description": "Convert Text to Speech", "category": "AI", "auth": "apiKey", "url": "http://www.voicerss.org"},
+    {"name": "Wit AI", "description": "Intent-based NLP API", "category": "AI", "auth": "none", "url": "https://wit.ai"},
+    
+    # News
+    {"name": "Mediastack", "description": "Scalable JSON API for news", "category": "News", "auth": "apiKey", "url": "https://mediastack.com"},
+    {"name": "New York Times", "description": "Article search, best sellers, more", "category": "News", "auth": "apiKey", "url": "http://developer.nytimes.com"},
+    {"name": "NewsAPI", "description": "70+ news sources and headlines", "category": "News", "auth": "apiKey", "url": "https://newsapi.org"},
+    {"name": "The Guardian", "description": "Access Guardian content", "category": "News", "auth": "apiKey", "url": "http://open-platform.theguardian.com"},
+    
+    # Placeholder Images
+    {"name": "DummyImage", "description": "Flexible placeholder images", "category": "Design", "auth": "none", "url": "https://dummyimage.com"},
+    {"name": "Pixabay", "description": "Free images and videos", "category": "Media", "auth": "apiKey", "url": "https://pixabay.com/api/docs"},
+    {"name": "Lorem Picsum", "description": "Beautiful placeholders from Unsplash", "category": "Design", "auth": "none", "url": "https://picsum.photos"},
+    
+    # Places
+    {"name": "Factual", "description": "Places search by lat/long", "category": "Maps", "auth": "apiKey", "url": "https://developer.factual.com"},
+    {"name": "Foursquare Venue", "description": "Places search by category", "category": "Maps", "auth": "oauth", "url": "https://developer.foursquare.com"},
+    {"name": "Google Places", "description": "Search by lat/long, keyword, type", "category": "Maps", "auth": "apiKey", "url": "https://developers.google.com/maps/documentation/places"},
+    {"name": "Yelp", "description": "Search location by category", "category": "Maps", "auth": "oauth", "url": "https://docs.developer.yelp.com"},
+    
+    # Product
+    {"name": "Product Hunt", "description": "The best new products every day", "category": "Business", "auth": "oauth", "url": "https://api.producthunt.com"},
+    
+    # Quotes
+    {"name": "Breaking Bad Quotes", "description": "Quotes from Breaking Bad", "category": "Entertainment", "auth": "none", "url": "https://breakingbadquotes.xyz"},
+    {"name": "FavQs", "description": "Collect, discover, share quotes", "category": "Entertainment", "auth": "apiKey", "url": "https://favqs.com/api"},
+    {"name": "Forismatic", "description": "Random quote per click", "category": "Entertainment", "auth": "none", "url": "http://api.forismatic.com"},
+    {"name": "Quotable", "description": "Fetch quotes by author, ID, tags", "category": "Entertainment", "auth": "none", "url": "https://github.com/lukePeavey/quotable"},
+    {"name": "They Said So", "description": "Quote of the day", "category": "Entertainment", "auth": "none", "url": "http://quotes.rest"},
+    
+    # Science
+    {"name": "NASA", "description": "NASA data including imagery", "category": "Science", "auth": "none", "url": "https://api.nasa.gov"},
+    {"name": "Open Science Framework", "description": "Workflow/project management for research", "category": "Science", "auth": "none", "url": "https://osf.io"},
+    
+    # Screenshots
+    {"name": "ApiFlash", "description": "Chrome based screenshot API", "category": "Utilities", "auth": "apiKey", "url": "https://apiflash.com"},
+    {"name": "SavePage.io", "description": "Free screenshot API", "category": "Utilities", "auth": "apiKey", "url": "https://docs.savepage.io"},
+    {"name": "ScreenshotAPI.net", "description": "Create pixel-perfect screenshots", "category": "Utilities", "auth": "apiKey", "url": "https://screenshotapi.net"},
+    
+    # Social Media
+    {"name": "Daily Motion", "description": "Build applications around DailyMotion", "category": "Social", "auth": "oauth", "url": "https://developer.dailymotion.com"},
+    {"name": "DeviantArt", "description": "Social networking for artists", "category": "Social", "auth": "oauth", "url": "https://www.deviantart.com/developers"},
+    {"name": "Facebook", "description": "Ads, games, payments, sharing stats", "category": "Social", "auth": "oauth", "url": "https://developers.facebook.com"},
+    {"name": "Flickr", "description": "Search through user content", "category": "Social", "auth": "oauth", "url": "https://www.flickr.com/services/api"},
+    {"name": "GoodReads", "description": "Access Goodreads book data", "category": "Social", "auth": "apiKey", "url": "https://www.goodreads.com/api"},
+    {"name": "Gravatar", "description": "Create profiles and avatars", "category": "Social", "auth": "none", "url": "https://en.gravatar.com"},
+    {"name": "Hacker News", "description": "HN API", "category": "Social", "auth": "none", "url": "https://github.com/HackerNews/API"},
+    {"name": "Imgur", "description": "Imgur's API", "category": "Social", "auth": "oauth", "url": "https://api.imgur.com"},
+    {"name": "Instagram", "description": "Search photos by location, user, tags", "category": "Social", "auth": "oauth", "url": "https://developers.facebook.com/docs/instagram-api"},
+    {"name": "LinkedIn", "description": "User accounts, data, connections", "category": "Social", "auth": "oauth", "url": "https://developer.linkedin.com"},
+    {"name": "Mastodon", "description": "Open-source twitter competitor", "category": "Social", "auth": "oauth", "url": "https://docs.joinmastodon.org"},
+    {"name": "Microlink", "description": "Turns any link into information", "category": "Social", "auth": "none", "url": "https://microlink.io"},
+    {"name": "Pinterest", "description": "View clicked-through or repinned Pins", "category": "Social", "auth": "oauth", "url": "https://developers.pinterest.com"},
+    {"name": "Reddit", "description": "Build clients, crawlers, scrapers", "category": "Social", "auth": "oauth", "url": "https://github.com/reddit/reddit/wiki/API"},
+    {"name": "Telegram", "description": "Build customized Telegram clients", "category": "Social", "auth": "apiKey", "url": "https://core.telegram.org"},
+    {"name": "TikTok", "description": "Display TikTok creator's videos", "category": "Social", "auth": "oauth", "url": "https://developers.tiktok.com"},
+    {"name": "Twitch", "description": "Twitch API", "category": "Social", "auth": "oauth", "url": "https://dev.twitch.tv"},
+    {"name": "Twitter", "description": "Interact with Twitter functions", "category": "Social", "auth": "oauth", "url": "https://developer.twitter.com"},
+    {"name": "Tumblr", "description": "Access content, likes, followers", "category": "Social", "auth": "oauth", "url": "https://www.tumblr.com/docs/en/api/v2"},
+    {"name": "Vimeo", "description": "Access to Vimeo's API", "category": "Social", "auth": "oauth", "url": "https://developer.vimeo.com"},
+    {"name": "Viber", "description": "Create unique experiences for Viber users", "category": "Social", "auth": "apiKey", "url": "https://developers.viber.com"},
+    {"name": "VK", "description": "VKontakte's API", "category": "Social", "auth": "oauth", "url": "https://vk.com/dev"},
+    {"name": "Wordpress", "description": "Access to Wordpress' API", "category": "Social", "auth": "oauth", "url": "https://codex.wordpress.org/WordPress_APIs"},
+    {"name": "YouTube", "description": "Add YouTube functionality", "category": "Social", "auth": "oauth", "url": "https://developers.google.com/youtube"},
+    
+    # Source Control
+    {"name": "Bitbucket", "description": "Bitbucket API", "category": "Development", "auth": "oauth", "url": "https://developer.atlassian.com/bitbucket"},
+    {"name": "GitHub Gists", "description": "Access to GitHub Gists", "category": "Development", "auth": "oauth", "url": "https://developer.github.com/v3/gists"},
+    {"name": "Mercurial", "description": "Access to Mercurial's API", "category": "Development", "auth": "none", "url": "https://www.mercurial-scm.org"},
+    {"name": "Team Foundation Server", "description": "TFS APIs with webhooks support", "category": "Development", "auth": "apiKey", "url": "https://docs.microsoft.com/en-us/azure/devops"},
+    
+    # Sport
+    {"name": "Ergast Formula 1", "description": "Formula 1 race data from 1950", "category": "Sports", "auth": "none", "url": "http://ergast.com/mrd"},
+    {"name": "Football Prediction", "description": "Predictions for upcoming football matches", "category": "Sports", "auth": "apiKey", "url": "https://boggio-analytics.com/fp-api"},
+    {"name": "OpenF1", "description": "Real-time Formula 1 data", "category": "Sports", "auth": "none", "url": "https://openf1.org"},
+    {"name": "TheSportsDB", "description": "Sports events, results, players, teams", "category": "Sports", "auth": "none", "url": "http://www.thesportsdb.com"},
+    
+    # Test Data
+    {"name": "Faker API", "description": "Generate fake data", "category": "Development", "auth": "none", "url": "https://fakerapi.it"},
+    
+    # Transportation
+    {"name": "ADS-B Exchange", "description": "Real-time airborne aircraft data", "category": "Transportation", "auth": "none", "url": "https://www.adsbexchange.com"},
+    {"name": "AfterShip", "description": "Multi-carrier shipment tracking", "category": "Transportation", "auth": "apiKey", "url": "https://www.aftership.com"},
+    {"name": "Lyft", "description": "Real-time ETAs, availability, prices", "category": "Transportation", "auth": "oauth", "url": "https://www.lyft.com"},
+    {"name": "Uber", "description": "Customize trip experiences, request rides", "category": "Transportation", "auth": "oauth", "url": "https://developer.uber.com"},
+    
+    # URL Shorteners
+    {"name": "Bitly", "description": "Access to Bitly's API", "category": "Utilities", "auth": "oauth", "url": "http://dev.bitly.com"},
+    {"name": "GoTiny", "description": "Lightweight URL shortener", "category": "Utilities", "auth": "none", "url": "https://github.com/robvanbakel/gotiny-api"},
+    {"name": "Is.gd", "description": "Simple URL shortener", "category": "Utilities", "auth": "none", "url": "https://is.gd"},
+    {"name": "Tiny.cc", "description": "Easy-to-use URL shortener", "category": "Utilities", "auth": "apiKey", "url": "https://tiny.cc"},
+    
+    # Weather
+    {"name": "AccuWeather", "description": "Hourly and minute forecasts", "category": "Weather", "auth": "apiKey", "url": "https://developer.accuweather.com"},
+    {"name": "Open-Meteo", "description": "Global weather forecast API", "category": "Weather", "auth": "none", "url": "https://open-meteo.com"},
+    {"name": "OpenWeatherMap", "description": "Current weather for 200,000+ cities", "category": "Weather", "auth": "apiKey", "url": "http://openweathermap.org"},
+    {"name": "Storm Glass", "description": "Global marine weather data", "category": "Weather", "auth": "apiKey", "url": "https://stormglass.io"},
+    {"name": "Weatherbit", "description": "Access forecasts, current, historical weather", "category": "Weather", "auth": "apiKey", "url": "https://www.weatherbit.io"},
+    {"name": "Weatherstack", "description": "Real-Time & Historical Weather Data", "category": "Weather", "auth": "apiKey", "url": "https://weatherstack.com"},
+]
 
 def main():
-    print(f"🦞 APIClaw Night Expansion - {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    print("=" * 60)
+    print("APIClaw Night Expansion - February 25, 2026")
     print("=" * 60)
     
-    # Load current registry
-    registry = load_registry()
-    initial_count = len(registry.get('apis', []))
-    print(f"📊 Current API count: {initial_count}")
+    # Load existing to avoid duplicates
+    existing = load_existing()
+    print(f"Loaded {len(existing)} existing APIs")
     
-    existing_ids = get_existing_ids(registry)
-    print(f"📝 Existing unique IDs: {len(existing_ids)}")
+    # Combine all APIs
+    all_apis = PUBLIC_APIS_DATA + ADDITIONAL_APIS
     
-    added = 0
-    skipped = 0
+    # Deduplicate and format
+    new_apis = []
+    seen_names = set()
     
-    # Process APIs.guru
-    print("\n🌐 Processing APIs.guru...")
-    try:
-        apisguru_data = fetch_apisguru()
-        for provider, data in apisguru_data.items():
-            api_entry = parse_apisguru_entry(provider, data)
-            if api_entry and api_entry['id'].lower() not in existing_ids:
-                registry['apis'].append(api_entry)
-                existing_ids.add(api_entry['id'].lower())
-                added += 1
-            else:
-                skipped += 1
-        print(f"   ✅ APIs.guru: +{added} added, {skipped} skipped (duplicates)")
-    except Exception as e:
-        print(f"   ❌ APIs.guru error: {e}")
+    for api in all_apis:
+        name_lower = api['name'].lower()
+        if name_lower not in existing and name_lower not in seen_names:
+            new_api = {
+                "name": api['name'],
+                "description": api['description'],
+                "category": api['category'],
+                "authType": parse_auth(api.get('auth', 'none')),
+                "baseUrl": get_base_url(api.get('url', ''))
+            }
+            new_apis.append(new_api)
+            seen_names.add(name_lower)
     
-    # Add curated APIs
-    print("\n📦 Adding curated APIs...")
-    curated_added = 0
-    curated_skipped = 0
-    for api in generate_additional_apis():
-        if api['id'].lower() not in existing_ids:
-            registry['apis'].append(api)
-            existing_ids.add(api['id'].lower())
-            curated_added += 1
-        else:
-            curated_skipped += 1
-    print(f"   ✅ Curated: +{curated_added} added, {curated_skipped} skipped")
+    print(f"Found {len(new_apis)} new unique APIs")
     
-    # Save updated registry
-    save_registry(registry)
+    # Save to file
+    with open(OUTPUT_PATH, 'w') as f:
+        json.dump(new_apis, f, indent=2)
     
-    final_count = len(registry.get('apis', []))
-    total_added = final_count - initial_count
+    print(f"Saved to {OUTPUT_PATH}")
+    print(f"Total new APIs: {len(new_apis)}")
     
-    print("\n" + "=" * 60)
-    print(f"📈 RESULTS:")
-    print(f"   Initial: {initial_count}")
-    print(f"   Final:   {final_count}")
-    print(f"   Added:   +{total_added}")
-    print("=" * 60)
+    # Print category breakdown
+    categories = {}
+    for api in new_apis:
+        cat = api['category']
+        categories[cat] = categories.get(cat, 0) + 1
     
-    return total_added
+    print("\nCategory breakdown:")
+    for cat, count in sorted(categories.items(), key=lambda x: -x[1])[:15]:
+        print(f"  {cat}: {count}")
+    
+    return len(new_apis)
 
 if __name__ == "__main__":
-    added = main()
-    print(f"\n✅ Expansion complete: +{added} APIs")
+    main()

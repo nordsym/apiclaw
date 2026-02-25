@@ -155,6 +155,18 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  e2b: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      const env = loadEnvFile('e2b.env');
+      const key = env.E2B_API_KEY || process.env.E2B_API_KEY;
+      if (key) {
+        return { type: 'api_key', api_key: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**
@@ -198,6 +210,10 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'replicate') {
     const env = loadEnvFile('replicate.env');
     return !!(env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_TOKEN);
+  }
+  if (providerId === 'e2b') {
+    const env = loadEnvFile('e2b.env');
+    return !!(env.E2B_API_KEY || process.env.E2B_API_KEY);
   }
   return false;
 }

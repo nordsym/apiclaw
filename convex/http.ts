@@ -54,6 +54,38 @@ const PROVIDERS = {
     regions: ["Global"],
     tags: ["tts", "voice", "audio"],
   },
+  replicate: {
+    name: "Replicate",
+    description: "Run AI models (Whisper, SDXL, Llama, etc). Pay per prediction.",
+    category: "ai",
+    pricing: "Varies by model",
+    regions: ["Global"],
+    tags: ["ai", "ml", "whisper", "image", "audio", "transcription"],
+  },
+  firecrawl: {
+    name: "Firecrawl",
+    description: "Web scraping and crawling API. Extract clean data from any URL.",
+    category: "scraping",
+    pricing: "~$0.001/page",
+    regions: ["Global"],
+    tags: ["scraping", "web", "crawl", "extract"],
+  },
+  github: {
+    name: "GitHub",
+    description: "GitHub API. Search repos, manage code, access developer data.",
+    category: "code",
+    pricing: "Free tier available",
+    regions: ["Global"],
+    tags: ["github", "code", "repos", "developer"],
+  },
+  e2b: {
+    name: "E2B",
+    description: "Secure code sandbox for AI agents. Run Python, shell commands in isolated environments.",
+    category: "sandbox",
+    pricing: "$0.000028/s (2 vCPU)",
+    regions: ["Global"],
+    tags: ["sandbox", "code", "python", "execution", "ai", "agents"],
+  },
 } as const;
 
 // CORS headers

@@ -230,6 +230,8 @@ Available direct-call providers:
   • elevenlabs — Text-to-speech
   • replicate — AI models (images, video, audio)
   • firecrawl — Web scraping & crawling
+  • github — Code repos & developer data
+  • e2b — Code sandbox for AI agents
 
 BROWSE:
   list_categories()

@@ -1,0 +1,2872 @@
+[
+  {
+    "name": "AdoptAPet",
+    "description": "Resource to help get pets adopted",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://www.adoptapet.com"
+  },
+  {
+    "name": "Axolotl",
+    "description": "Collection of axolotl pictures and facts",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://theaxolotlapi.netlify.app"
+  },
+  {
+    "name": "Cat Facts",
+    "description": "Daily cat facts",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://alexwohlbruck.github.io"
+  },
+  {
+    "name": "Cataas",
+    "description": "Cat as a service (cats pictures and gifs)",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://cataas.com"
+  },
+  {
+    "name": "TheCatAPI",
+    "description": "Pictures of cats from Tumblr",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://thecatapi.com"
+  },
+  {
+    "name": "Dog Facts",
+    "description": "Random dog facts",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://dukengn.github.io"
+  },
+  {
+    "name": "Dog CEO",
+    "description": "Based on the Stanford Dogs Dataset",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://dog.ceo"
+  },
+  {
+    "name": "eBird",
+    "description": "Retrieve recent or notable birding observations",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://ebird.org"
+  },
+  {
+    "name": "FishWatch",
+    "description": "Information and pictures about fish species",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://www.fishwatch.gov"
+  },
+  {
+    "name": "HTTP Cat",
+    "description": "Cat for every HTTP Status",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://http.cat"
+  },
+  {
+    "name": "HTTP Dog",
+    "description": "Dogs for every HTTP response status code",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://http.dog"
+  },
+  {
+    "name": "IUCN Red List",
+    "description": "IUCN Red List of Threatened Species",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://apiv3.iucnredlist.org"
+  },
+  {
+    "name": "MeowFacts",
+    "description": "Get random cat facts",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Petfinder",
+    "description": "Petfinder is dedicated to helping pets find homes",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://www.petfinder.com"
+  },
+  {
+    "name": "PlaceBear",
+    "description": "Placeholder bear pictures",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://placebear.com"
+  },
+  {
+    "name": "PlaceDog",
+    "description": "Placeholder Dog pictures",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://place.dog"
+  },
+  {
+    "name": "PlaceKitten",
+    "description": "Placeholder Kitten pictures",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://placekitten.com"
+  },
+  {
+    "name": "RandomDog",
+    "description": "Random pictures of dogs",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://random.dog"
+  },
+  {
+    "name": "RandomDuck",
+    "description": "Random pictures of ducks",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://random-d.uk"
+  },
+  {
+    "name": "RandomFox",
+    "description": "Random pictures of foxes",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://randomfox.ca"
+  },
+  {
+    "name": "Shibe.Online",
+    "description": "Random pictures of Shiba Inu, cats or birds",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://shibe.online"
+  },
+  {
+    "name": "TheDogAPI",
+    "description": "Public service all about Dogs",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://thedogapi.com"
+  },
+  {
+    "name": "xeno-canto",
+    "description": "Bird recordings",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://xeno-canto.org"
+  },
+  {
+    "name": "Zoo Animals",
+    "description": "Facts and pictures of zoo animals",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://zoo-animal-api.herokuapp.com"
+  },
+  {
+    "name": "AniAPI",
+    "description": "Anime discovery, streaming & syncing with trackers",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://aniapi.com"
+  },
+  {
+    "name": "AniDB",
+    "description": "Anime Database",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://wiki.anidb.net"
+  },
+  {
+    "name": "AniList",
+    "description": "Anime discovery & tracking",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://anilist.co"
+  },
+  {
+    "name": "AnimeChan",
+    "description": "Anime quotes (over 10k+)",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "AnimeFacts",
+    "description": "Anime Facts (over 100+)",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://chandan-02.github.io"
+  },
+  {
+    "name": "AnimeNewsNetwork",
+    "description": "Anime industry news",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://www.animenewsnetwork.com"
+  },
+  {
+    "name": "Catboy",
+    "description": "Neko images, funny GIFs & more",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://catboys.com"
+  },
+  {
+    "name": "Danbooru Anime",
+    "description": "Thousands of anime artist database",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://danbooru.donmai.us"
+  },
+  {
+    "name": "Jikan",
+    "description": "Unofficial MyAnimeList API",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://jikan.moe"
+  },
+  {
+    "name": "Kitsu",
+    "description": "Anime discovery platform",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://kitsu.docs.apiary.io"
+  },
+  {
+    "name": "MangaDex",
+    "description": "Manga Database and Community",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://api.mangadex.org"
+  },
+  {
+    "name": "MyAnimeList",
+    "description": "Anime and Manga Database and Community",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://myanimelist.net"
+  },
+  {
+    "name": "NekosBest",
+    "description": "Neko Images & Anime roleplaying GIFs",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://docs.nekos.best"
+  },
+  {
+    "name": "Shikimori",
+    "description": "Anime discovery, tracking, forum, rates",
+    "category": "Entertainment",
+    "authType": "oauth",
+    "baseUrl": "https://shikimori.one"
+  },
+  {
+    "name": "Studio Ghibli",
+    "description": "Resources from Studio Ghibli films",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://ghibliapi.herokuapp.com"
+  },
+  {
+    "name": "Trace Moe",
+    "description": "Get exact scene of anime from screenshot",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://soruly.github.io"
+  },
+  {
+    "name": "Waifu.im",
+    "description": "Get waifu pictures from archive of 4000+ images",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://waifu.im"
+  },
+  {
+    "name": "Waifu.pics",
+    "description": "Image sharing platform for anime images",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://waifu.pics"
+  },
+  {
+    "name": "AbuseIPDB",
+    "description": "IP/domain/URL reputation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.abuseipdb.com"
+  },
+  {
+    "name": "AlienVault OTX",
+    "description": "IP/domain/URL reputation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://otx.alienvault.com"
+  },
+  {
+    "name": "CAPEsandbox",
+    "description": "Malware execution and analysis",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://capev2.readthedocs.io"
+  },
+  {
+    "name": "MalDatabase",
+    "description": "Malware datasets and threat intelligence feeds",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://maldatabase.com"
+  },
+  {
+    "name": "MalShare",
+    "description": "Malware Archive / file sourcing",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://malshare.com"
+  },
+  {
+    "name": "MalwareBazaar",
+    "description": "Collect and share malware samples",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://bazaar.abuse.ch"
+  },
+  {
+    "name": "NoPhishy",
+    "description": "Check links for known phishing attempts",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://rapidapi.com"
+  },
+  {
+    "name": "Phisherman",
+    "description": "IP/domain/URL reputation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://phisherman.gg"
+  },
+  {
+    "name": "URLhaus",
+    "description": "Bulk queries and Download Malware Samples",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://urlhaus-api.abuse.ch"
+  },
+  {
+    "name": "URLScan.io",
+    "description": "Scan and Analyse URLs",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://urlscan.io"
+  },
+  {
+    "name": "Web of Trust",
+    "description": "IP/domain/URL reputation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://support.mywot.com"
+  },
+  {
+    "name": "Am\u00e9thyste",
+    "description": "Generate images for Discord users",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://api.amethyste.moe"
+  },
+  {
+    "name": "Art Institute of Chicago",
+    "description": "Art museum collection API",
+    "category": "Media",
+    "authType": "none",
+    "baseUrl": "https://api.artic.edu"
+  },
+  {
+    "name": "Colormind",
+    "description": "Color scheme generator",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://colormind.io"
+  },
+  {
+    "name": "ColourLovers",
+    "description": "Get various patterns, palettes and images",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://www.colourlovers.com"
+  },
+  {
+    "name": "Cooper Hewitt",
+    "description": "Smithsonian Design Museum",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://collection.cooperhewitt.org"
+  },
+  {
+    "name": "Dribbble",
+    "description": "Discover top designers & creatives",
+    "category": "Design",
+    "authType": "oauth",
+    "baseUrl": "https://developer.dribbble.com"
+  },
+  {
+    "name": "EmojiHub",
+    "description": "Get emojis by categories and groups",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Europeana",
+    "description": "European Museum and Galleries content",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://pro.europeana.eu"
+  },
+  {
+    "name": "Harvard Art Museums",
+    "description": "Art collection API",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Icon Horse",
+    "description": "Favicons for any website with fallbacks",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://icon.horse"
+  },
+  {
+    "name": "Iconfinder",
+    "description": "Icons marketplace API",
+    "category": "Design",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.iconfinder.com"
+  },
+  {
+    "name": "Icons8",
+    "description": "Icons library",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://img.icons8.com"
+  },
+  {
+    "name": "Lordicon",
+    "description": "Icons with predone Animations",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://lordicon.com"
+  },
+  {
+    "name": "Metropolitan Museum of Art",
+    "description": "Met Museum of Art collection",
+    "category": "Media",
+    "authType": "none",
+    "baseUrl": "https://metmuseum.github.io"
+  },
+  {
+    "name": "Noun Project",
+    "description": "Icons collection",
+    "category": "Design",
+    "authType": "oauth",
+    "baseUrl": "https://api.thenounproject.com"
+  },
+  {
+    "name": "PHP-Noise",
+    "description": "Noise Background Image Generator",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://php-noise.com"
+  },
+  {
+    "name": "Pixel Encounter",
+    "description": "SVG Icon Generator",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://pixelencounter.com"
+  },
+  {
+    "name": "Rijksmuseum",
+    "description": "RijksMuseum Data",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://data.rijksmuseum.nl"
+  },
+  {
+    "name": "Word Cloud",
+    "description": "Easily create word clouds",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://wordcloudapi.com"
+  },
+  {
+    "name": "xColors",
+    "description": "Generate & convert colors",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://x-colors.herokuapp.com"
+  },
+  {
+    "name": "Auth0",
+    "description": "Authentication and authorization platform",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://auth0.com"
+  },
+  {
+    "name": "GetOTP",
+    "description": "Implement OTP flow quickly",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://otp.dev"
+  },
+  {
+    "name": "Micro User Service",
+    "description": "User management and authentication",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://m3o.com"
+  },
+  {
+    "name": "MojoAuth",
+    "description": "Passwordless authentication platform",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://mojoauth.com"
+  },
+  {
+    "name": "SAWO Labs",
+    "description": "Passwordless authentication integration",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://sawolabs.com"
+  },
+  {
+    "name": "Stytch",
+    "description": "User infrastructure for modern applications",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://stytch.com"
+  },
+  {
+    "name": "Warrant",
+    "description": "APIs for authorization and access control",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://warrant.dev"
+  },
+  {
+    "name": "Bitquery",
+    "description": "Onchain GraphQL APIs & DEX APIs",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://graphql.bitquery.io"
+  },
+  {
+    "name": "Chainlink",
+    "description": "Build hybrid smart contracts",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://chain.link"
+  },
+  {
+    "name": "Chainpoint",
+    "description": "Anchor data to the Bitcoin blockchain",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://tierion.com"
+  },
+  {
+    "name": "Covalent",
+    "description": "Multi-blockchain data aggregator",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.covalenthq.com"
+  },
+  {
+    "name": "Helium",
+    "description": "Helium blockchain network API",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://docs.helium.com"
+  },
+  {
+    "name": "Nownodes",
+    "description": "Blockchain-as-a-service solution",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://nownodes.io"
+  },
+  {
+    "name": "The Graph",
+    "description": "Indexing protocol with GraphQL",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://thegraph.com"
+  },
+  {
+    "name": "Watchdata",
+    "description": "Ethereum blockchain access",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.watchdata.io"
+  },
+  {
+    "name": "A B\u00edblia Digital",
+    "description": "Bible multiple versions API",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.abibliadigital.com.br"
+  },
+  {
+    "name": "Bhagavad Gita",
+    "description": "Bhagavad Gita API with 21+ translations",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.bhagavadgitaapi.in"
+  },
+  {
+    "name": "Bible-api",
+    "description": "Free Bible API with multiple languages",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://bible-api.com"
+  },
+  {
+    "name": "Google Books",
+    "description": "Google Books API",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Gutendex",
+    "description": "Project Gutenberg Books Library",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://gutendex.com"
+  },
+  {
+    "name": "Open Library",
+    "description": "Books, book covers and related data",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://openlibrary.org"
+  },
+  {
+    "name": "PoetryDB",
+    "description": "Vast poetry collection API",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Quran Cloud",
+    "description": "RESTful Quran API",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://alquran.cloud"
+  },
+  {
+    "name": "The Bible",
+    "description": "Everything you need from the Bible",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.api.bible"
+  },
+  {
+    "name": "Wizard World",
+    "description": "Harry Potter universe information",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://wizard-world-api.herokuapp.com"
+  },
+  {
+    "name": "Apache Superset",
+    "description": "BI dashboards and data sources",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://superset.apache.org"
+  },
+  {
+    "name": "Charity Search",
+    "description": "Non-profit charity data",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://charityapi.orghunter.com"
+  },
+  {
+    "name": "Clearbit Logo",
+    "description": "Search for company logos",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://clearbit.com"
+  },
+  {
+    "name": "Domainsdb.info",
+    "description": "Registered Domain Names Search",
+    "category": "Business",
+    "authType": "none",
+    "baseUrl": "https://domainsdb.info"
+  },
+  {
+    "name": "Freelancer",
+    "description": "Hire freelancers to get work done",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developers.freelancer.com"
+  },
+  {
+    "name": "Gmail API",
+    "description": "Flexible, RESTful access to inbox",
+    "category": "Communication",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Analytics",
+    "description": "Collect and analyze your data",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Instatus",
+    "description": "Status page API",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://instatus.com"
+  },
+  {
+    "name": "Redash",
+    "description": "Access queries and dashboards",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://redash.io"
+  },
+  {
+    "name": "Smartsheet",
+    "description": "Access Smartsheet data programmatically",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://smartsheet.redoc.ly"
+  },
+  {
+    "name": "Square",
+    "description": "Take payments, manage refunds",
+    "category": "Payments",
+    "authType": "oauth",
+    "baseUrl": "https://developer.squareup.com"
+  },
+  {
+    "name": "Tomba",
+    "description": "Email Finder for B2B sales",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://tomba.io"
+  },
+  {
+    "name": "Trello",
+    "description": "Boards, lists and cards",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developers.trello.com"
+  },
+  {
+    "name": "Abstract Public Holidays",
+    "description": "Holidays via API",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://www.abstractapi.com"
+  },
+  {
+    "name": "Calendarific",
+    "description": "Worldwide Holidays",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://calendarific.com"
+  },
+  {
+    "name": "Google Calendar",
+    "description": "Calendar events API",
+    "category": "Utilities",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Hebrew Calendar",
+    "description": "Gregorian/Hebrew conversion",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.hebcal.com"
+  },
+  {
+    "name": "Nager.Date",
+    "description": "Public holidays for 90+ countries",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://date.nager.at"
+  },
+  {
+    "name": "Namedays Calendar",
+    "description": "Namedays for multiple countries",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://nameday.abalin.net"
+  },
+  {
+    "name": "Box",
+    "description": "File Sharing and Storage",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://developer.box.com"
+  },
+  {
+    "name": "Dropbox",
+    "description": "File Sharing and Storage",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://www.dropbox.com"
+  },
+  {
+    "name": "File.io",
+    "description": "Simple file sharing",
+    "category": "Storage",
+    "authType": "none",
+    "baseUrl": "https://www.file.io"
+  },
+  {
+    "name": "GoFile",
+    "description": "Unlimited size file uploads",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://gofile.io"
+  },
+  {
+    "name": "Google Drive",
+    "description": "File Sharing and Storage",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Imgur",
+    "description": "Image hosting API",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://api.imgbb.com"
+  },
+  {
+    "name": "OneDrive",
+    "description": "Microsoft File Storage",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://developer.microsoft.com"
+  },
+  {
+    "name": "Pastebin",
+    "description": "Plain Text Storage",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://pastebin.com"
+  },
+  {
+    "name": "Pinata",
+    "description": "IPFS Pinning Services API",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.pinata.cloud"
+  },
+  {
+    "name": "Web3 Storage",
+    "description": "Decentralized storage with 1TB free",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://web3.storage"
+  },
+  {
+    "name": "Bitrise",
+    "description": "Build tool and processes integrations",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://api-docs.bitrise.io"
+  },
+  {
+    "name": "Buddy",
+    "description": "Continuous integration and delivery",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://buddy.works"
+  },
+  {
+    "name": "CircleCI",
+    "description": "Automate software development",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://circleci.com"
+  },
+  {
+    "name": "Travis CI",
+    "description": "Sync GitHub projects with Travis CI",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.travis-ci.com"
+  },
+  {
+    "name": "0x",
+    "description": "Token and pool stats",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://0x.org"
+  },
+  {
+    "name": "1inch",
+    "description": "Decentralize exchange API",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://1inch.io"
+  },
+  {
+    "name": "Alchemy Ethereum",
+    "description": "Ethereum Node-as-a-Service",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.alchemy.com"
+  },
+  {
+    "name": "Binance",
+    "description": "Cryptocurrency exchange",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.binance.com"
+  },
+  {
+    "name": "Bitfinex",
+    "description": "Cryptocurrency Trading Platform",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.bitfinex.com"
+  },
+  {
+    "name": "Bitmex",
+    "description": "Real-Time Cryptocurrency derivatives",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.bitmex.com"
+  },
+  {
+    "name": "Bittrex",
+    "description": "Next Generation Crypto Trading",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://bittrex.github.io"
+  },
+  {
+    "name": "blockfrost Cardano",
+    "description": "Cardano mainnet and testnets",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://blockfrost.io"
+  },
+  {
+    "name": "Bybit",
+    "description": "Cryptocurrency data feed",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://bybit-exchange.github.io"
+  },
+  {
+    "name": "CoinAPI",
+    "description": "All Currency Exchanges unified API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.coinapi.io"
+  },
+  {
+    "name": "Coinbase",
+    "description": "Bitcoin, Ethereum Prices",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.coinbase.com"
+  },
+  {
+    "name": "CoinCap",
+    "description": "Real time Cryptocurrency prices",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://docs.coincap.io"
+  },
+  {
+    "name": "CoinRanking",
+    "description": "Live Cryptocurrency data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.coinranking.com"
+  },
+  {
+    "name": "dYdX",
+    "description": "Decentralized cryptocurrency exchange",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.dydx.exchange"
+  },
+  {
+    "name": "Ethplorer",
+    "description": "Ethereum tokens, balances, addresses",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "FTX",
+    "description": "REST, websocket, and FTX APIs",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.ftx.com"
+  },
+  {
+    "name": "Gemini",
+    "description": "Cryptocurrencies Exchange",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://docs.gemini.com"
+  },
+  {
+    "name": "Huobi",
+    "description": "Cryptocurrency exchange",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://huobiapi.github.io"
+  },
+  {
+    "name": "INFURA Ethereum",
+    "description": "Ethereum mainnet and testnets",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://infura.io"
+  },
+  {
+    "name": "Kraken",
+    "description": "Cryptocurrencies Exchange",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.kraken.com"
+  },
+  {
+    "name": "KuCoin",
+    "description": "Cryptocurrency Trading Platform",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.kucoin.com"
+  },
+  {
+    "name": "Mempool",
+    "description": "Bitcoin API Service",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://mempool.space"
+  },
+  {
+    "name": "Messari",
+    "description": "API for crypto assets",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://messari.io"
+  },
+  {
+    "name": "Solana JSON RPC",
+    "description": "Solana Blockchain endpoints",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://docs.solana.com"
+  },
+  {
+    "name": "1Forge",
+    "description": "Forex currency market data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://1forge.com"
+  },
+  {
+    "name": "Currency-api",
+    "description": "Free Currency Exchange Rates",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "CurrencyFreaks",
+    "description": "Current and historical exchange rates",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://currencyfreaks.com"
+  },
+  {
+    "name": "CurrencyScoop",
+    "description": "Real-time and historical currency rates",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://currencyscoop.com"
+  },
+  {
+    "name": "ExchangeRate-API",
+    "description": "Free currency conversion",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.exchangerate-api.com"
+  },
+  {
+    "name": "Exchangerate.host",
+    "description": "Foreign exchange & crypto rates",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://exchangerate.host"
+  },
+  {
+    "name": "Frankfurter",
+    "description": "Exchange rates and currency conversion",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://www.frankfurter.app"
+  },
+  {
+    "name": "Fixer.io",
+    "description": "Foreign exchange rates",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://fixer.io"
+  },
+  {
+    "name": "Lob Address",
+    "description": "US Address Verification",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://lob.com"
+  },
+  {
+    "name": "Postman Echo",
+    "description": "Test api server",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://www.postman-echo.com"
+  },
+  {
+    "name": "PurgoMalum",
+    "description": "Content validator against profanity",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.purgomalum.com"
+  },
+  {
+    "name": "24 Pull Requests",
+    "description": "Open source collaboration",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://24pullrequests.com"
+  },
+  {
+    "name": "Abstract Screenshot",
+    "description": "Take programmatic screenshots",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://www.abstractapi.com"
+  },
+  {
+    "name": "Agify.io",
+    "description": "Estimates age from first name",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://agify.io"
+  },
+  {
+    "name": "ApiFlash",
+    "description": "Chrome based screenshot API",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://apiflash.com"
+  },
+  {
+    "name": "APIs.guru",
+    "description": "Wikipedia for Web APIs",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://apis.guru"
+  },
+  {
+    "name": "Beeceptor",
+    "description": "Build a mock Rest API endpoint",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://beeceptor.com"
+  },
+  {
+    "name": "Bitbucket",
+    "description": "Bitbucket API",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://developer.atlassian.com"
+  },
+  {
+    "name": "Bored",
+    "description": "Find random activities",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://www.boredapi.com"
+  },
+  {
+    "name": "CDNJS",
+    "description": "Library info on CDNJS",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://api.cdnjs.com"
+  },
+  {
+    "name": "CountAPI",
+    "description": "Free counting service",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://countapi.xyz"
+  },
+  {
+    "name": "Docker Hub",
+    "description": "Interact with Docker Hub",
+    "category": "DevOps",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.docker.com"
+  },
+  {
+    "name": "Genderize.io",
+    "description": "Estimates gender from first name",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://genderize.io"
+  },
+  {
+    "name": "Ghost",
+    "description": "Get Published content into your Website",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://ghost.org"
+  },
+  {
+    "name": "GitHub",
+    "description": "Make use of GitHub repositories",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://docs.github.com"
+  },
+  {
+    "name": "GitLab",
+    "description": "Automate GitLab interaction",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://docs.gitlab.com"
+  },
+  {
+    "name": "Google Docs",
+    "description": "Read, write, and format documents",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Firebase",
+    "description": "Mobile application development platform",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com"
+  },
+  {
+    "name": "Google Fonts",
+    "description": "Metadata for font families",
+    "category": "Design",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Sheets",
+    "description": "Read, write, and format sheets",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Hasura",
+    "description": "GraphQL and REST API Engine",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://hasura.io"
+  },
+  {
+    "name": "Heroku",
+    "description": "REST API for Heroku apps",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://devcenter.heroku.com"
+  },
+  {
+    "name": "Hunter",
+    "description": "Domain search, email finder, verifier",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://hunter.io"
+  },
+  {
+    "name": "IPify",
+    "description": "Simple IP Address API",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.ipify.org"
+  },
+  {
+    "name": "jsDelivr",
+    "description": "Package info and download stats",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "JSONbin.io",
+    "description": "Free JSON storage service",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://jsonbin.io"
+  },
+  {
+    "name": "Nationalize.io",
+    "description": "Estimate nationality of first name",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://nationalize.io"
+  },
+  {
+    "name": "Netlify",
+    "description": "Netlify hosting service API",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://docs.netlify.com"
+  },
+  {
+    "name": "NetworkCalc",
+    "description": "Network calculator tools",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://networkcalc.com"
+  },
+  {
+    "name": "npm Registry",
+    "description": "Query Node.js libraries programatically",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "OneSignal",
+    "description": "Push Notifications, Email, SMS",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://documentation.onesignal.com"
+  },
+  {
+    "name": "Postman",
+    "description": "Tool for testing APIs",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://www.postman.com"
+  },
+  {
+    "name": "QuickChart",
+    "description": "Generate chart and graph images",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://quickchart.io"
+  },
+  {
+    "name": "ScraperApi",
+    "description": "Build scalable web scrapers",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://www.scraperapi.com"
+  },
+  {
+    "name": "ScreenshotAPI.net",
+    "description": "Create pixel-perfect screenshots",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://screenshotapi.net"
+  },
+  {
+    "name": "StackExchange",
+    "description": "Q&A forum for developers",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://api.stackexchange.com"
+  },
+  {
+    "name": "Free Dictionary",
+    "description": "Word definitions for free",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://dictionaryapi.dev"
+  },
+  {
+    "name": "Lingua Robot",
+    "description": "Word definitions, pronunciations, synonyms",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.linguarobot.io"
+  },
+  {
+    "name": "Merriam-Webster",
+    "description": "Dictionary and Thesaurus Data",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://dictionaryapi.com"
+  },
+  {
+    "name": "Oxford Dictionary",
+    "description": "Dictionary Data",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.oxforddictionaries.com"
+  },
+  {
+    "name": "Wordnik",
+    "description": "Dictionary Data",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.wordnik.com"
+  },
+  {
+    "name": "Words API",
+    "description": "Definitions and synonyms for 150,000+ words",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.wordsapi.com"
+  },
+  {
+    "name": "Airtable",
+    "description": "Integrate with Airtable",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://airtable.com"
+  },
+  {
+    "name": "Asana",
+    "description": "Programmatic access to Asana data",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.asana.com"
+  },
+  {
+    "name": "ClickUp",
+    "description": "Cloud-based project management",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://clickup.com"
+  },
+  {
+    "name": "Clockify",
+    "description": "Time tracking REST API",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://clockify.me"
+  },
+  {
+    "name": "CloudConvert",
+    "description": "Online file converter",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudconvert.com"
+  },
+  {
+    "name": "CraftMyPDF",
+    "description": "Generate PDF documents from templates",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://craftmypdf.com"
+  },
+  {
+    "name": "JIRA",
+    "description": "Issue tracking product",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developer.atlassian.com"
+  },
+  {
+    "name": "Monday",
+    "description": "Access monday.com account data",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://api.developer.monday.com"
+  },
+  {
+    "name": "Notion",
+    "description": "Integrate with Notion",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developers.notion.com"
+  },
+  {
+    "name": "Todoist",
+    "description": "Todo Lists",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://developer.todoist.com"
+  },
+  {
+    "name": "WakaTime",
+    "description": "Automated time tracking leaderboards",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://wakatime.com"
+  },
+  {
+    "name": "Abstract Email Validation",
+    "description": "Validate email addresses",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.abstractapi.com"
+  },
+  {
+    "name": "Disify",
+    "description": "Validate and detect disposable emails",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://www.disify.com"
+  },
+  {
+    "name": "DropMail",
+    "description": "GraphQL API for ephemeral e-mail",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://dropmail.me"
+  },
+  {
+    "name": "Guerrilla Mail",
+    "description": "Disposable temporary Email addresses",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://www.guerrillamail.com"
+  },
+  {
+    "name": "Kickbox",
+    "description": "Email verification API",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://open.kickbox.com"
+  },
+  {
+    "name": "mail.gw",
+    "description": "10 Minute Mail",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://docs.mail.gw"
+  },
+  {
+    "name": "mail.tm",
+    "description": "Temporary Email Service",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://docs.mail.tm"
+  },
+  {
+    "name": "Sendgrid",
+    "description": "Cloud-based SMTP provider",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.sendgrid.com"
+  },
+  {
+    "name": "Sendinblue",
+    "description": "Marketing and transactional email",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.sendinblue.com"
+  },
+  {
+    "name": "Chuck Norris",
+    "description": "Hand curated Chuck Norris jokes",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://api.chucknorris.io"
+  },
+  {
+    "name": "Corporate Buzz Words",
+    "description": "Corporate Buzz Words Generator",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Excuser",
+    "description": "Get random excuses",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://excuser.herokuapp.com"
+  },
+  {
+    "name": "Fun Fact",
+    "description": "Random fun facts",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://api.aakhilv.me"
+  },
+  {
+    "name": "Imgflip",
+    "description": "Array of popular memes",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://imgflip.com"
+  },
+  {
+    "name": "Random Useless Facts",
+    "description": "Get useless but true facts",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://uselessfacts.jsph.pl"
+  },
+  {
+    "name": "Techy",
+    "description": "Tech-savvy sounding phrases",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://techy-api.vercel.app"
+  },
+  {
+    "name": "Yo Momma Jokes",
+    "description": "REST API for Yo Momma Jokes",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Carbon Interface",
+    "description": "Calculate carbon emissions estimates",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.carboninterface.com"
+  },
+  {
+    "name": "Climatiq",
+    "description": "Calculate environmental footprint",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.climatiq.io"
+  },
+  {
+    "name": "IQAir",
+    "description": "Air quality and weather data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.iqair.com"
+  },
+  {
+    "name": "OpenAQ",
+    "description": "Open air quality data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.openaq.org"
+  },
+  {
+    "name": "UK Carbon Intensity",
+    "description": "Carbon Intensity API for Great Britain",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://carbon-intensity.github.io"
+  },
+  {
+    "name": "Eventbrite",
+    "description": "Find events",
+    "category": "Events",
+    "authType": "oauth",
+    "baseUrl": "https://www.eventbrite.com"
+  },
+  {
+    "name": "SeatGeek",
+    "description": "Search events, venues and performers",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://platform.seatgeek.com"
+  },
+  {
+    "name": "Ticketmaster",
+    "description": "Search events, attractions, or venues",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.ticketmaster.com"
+  },
+  {
+    "name": "FRED",
+    "description": "Economic data from Federal Reserve",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://fred.stlouisfed.org"
+  },
+  {
+    "name": "Plaid",
+    "description": "Connect with bank accounts",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://plaid.com"
+  },
+  {
+    "name": "Polygon",
+    "description": "Historical stock market data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://polygon.io"
+  },
+  {
+    "name": "SEC EDGAR",
+    "description": "Annual reports of public US companies",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://www.sec.gov"
+  },
+  {
+    "name": "Yahoo Finance",
+    "description": "Real time stock market data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.yahoofinanceapi.com"
+  },
+  {
+    "name": "YNAB",
+    "description": "Budgeting & Planning",
+    "category": "Finance",
+    "authType": "oauth",
+    "baseUrl": "https://api.youneedabudget.com"
+  },
+  {
+    "name": "Edamam Nutrition",
+    "description": "Nutrition Analysis",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.edamam.com"
+  },
+  {
+    "name": "Edamam Recipes",
+    "description": "Recipe Search",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.edamam.com"
+  },
+  {
+    "name": "Open Brewery DB",
+    "description": "Breweries, Cideries and Craft Beer",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "https://www.openbrewerydb.org"
+  },
+  {
+    "name": "Open Food Facts",
+    "description": "Food Products Database",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "https://world.openfoodfacts.org"
+  },
+  {
+    "name": "PunkAPI",
+    "description": "Brewdog Beer Recipes",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "https://punkapi.com"
+  },
+  {
+    "name": "Spoonacular",
+    "description": "Recipes, Food Products, Meal Planning",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://spoonacular.com"
+  },
+  {
+    "name": "TheCocktailDB",
+    "description": "Cocktail Recipes",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.thecocktaildb.com"
+  },
+  {
+    "name": "TheMealDB",
+    "description": "Meal Recipes",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.themealdb.com"
+  },
+  {
+    "name": "Zestful",
+    "description": "Parse recipe ingredients",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://zestfuldata.com"
+  },
+  {
+    "name": "AmiiboAPI",
+    "description": "Nintendo Amiibo Information",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://amiiboapi.com"
+  },
+  {
+    "name": "Battle.net",
+    "description": "Diablo III, Hearthstone, WoW data",
+    "category": "Games",
+    "authType": "oauth",
+    "baseUrl": "https://develop.battle.net"
+  },
+  {
+    "name": "Chess.com",
+    "description": "Chess.com read-only REST API",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.chess.com"
+  },
+  {
+    "name": "Clash of Clans",
+    "description": "Clash of Clans Game Information",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.clashofclans.com"
+  },
+  {
+    "name": "Clash Royale",
+    "description": "Clash Royale Game Information",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.clashroyale.com"
+  },
+  {
+    "name": "Comic Vine",
+    "description": "Comics information",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://comicvine.gamespot.com"
+  },
+  {
+    "name": "Deck of Cards",
+    "description": "Deck of Cards API",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://deckofcardsapi.com"
+  },
+  {
+    "name": "FFXIV Collect",
+    "description": "Final Fantasy XIV collectables",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://ffxivcollect.com"
+  },
+  {
+    "name": "FreeToGame",
+    "description": "Free-To-Play Games Database",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.freetogame.com"
+  },
+  {
+    "name": "GamerPower",
+    "description": "Game Giveaways Tracker",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.gamerpower.com"
+  },
+  {
+    "name": "Genshin Impact",
+    "description": "Genshin Impact game data",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://genshin.dev"
+  },
+  {
+    "name": "Giant Bomb",
+    "description": "Video Games database",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://www.giantbomb.com"
+  },
+  {
+    "name": "Guild Wars 2",
+    "description": "Guild Wars 2 Game Information",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://wiki.guildwars2.com"
+  },
+  {
+    "name": "Hyrule Compendium",
+    "description": "Zelda: BOTW data",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "JokeAPI",
+    "description": "Programming, Miscellaneous Jokes",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://sv443.net"
+  },
+  {
+    "name": "Lichess",
+    "description": "Access Lichess data",
+    "category": "Games",
+    "authType": "oauth",
+    "baseUrl": "https://lichess.org"
+  },
+  {
+    "name": "Magic The Gathering",
+    "description": "MTG Game Information",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://magicthegathering.io"
+  },
+  {
+    "name": "Marvel",
+    "description": "Marvel Comics",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.marvel.com"
+  },
+  {
+    "name": "MMO Games",
+    "description": "MMO Games Database, News",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.mmobomb.com"
+  },
+  {
+    "name": "Open Trivia",
+    "description": "Trivia Questions",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://opentdb.com"
+  },
+  {
+    "name": "PandaScore",
+    "description": "E-sports games and results",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.pandascore.co"
+  },
+  {
+    "name": "Pok\u00e9api",
+    "description": "Pok\u00e9mon Information",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://pokeapi.co"
+  },
+  {
+    "name": "Pok\u00e9mon TCG",
+    "description": "Pok\u00e9mon TCG Information",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://pokemontcg.io"
+  },
+  {
+    "name": "PUBG",
+    "description": "Access PUBG data",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.pubg.com"
+  },
+  {
+    "name": "Rick and Morty",
+    "description": "All Rick and Morty information",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://rickandmortyapi.com"
+  },
+  {
+    "name": "Riot Games",
+    "description": "League of Legends Game Information",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.riotgames.com"
+  },
+  {
+    "name": "Scryfall",
+    "description": "Magic: The Gathering database",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://scryfall.com"
+  },
+  {
+    "name": "Steam",
+    "description": "Steam Web API",
+    "category": "Games",
+    "authType": "apiKey",
+    "baseUrl": "https://steamapi.xpaw.me"
+  },
+  {
+    "name": "SuperHeroes",
+    "description": "SuperHeroes and Villains data",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://superheroapi.com"
+  },
+  {
+    "name": "TCGdex",
+    "description": "Pok\u00e9mon TCG Information multi-language",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.tcgdex.net"
+  },
+  {
+    "name": "xkcd",
+    "description": "Retrieve xkcd comics as JSON",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://xkcd.com"
+  },
+  {
+    "name": "Yu-Gi-Oh!",
+    "description": "Yu-Gi-Oh! TCG Information",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://db.ygoprodeck.com"
+  },
+  {
+    "name": "Africa's Talking",
+    "description": "Access African telco services through HTTP API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://africastalking.com"
+  },
+  {
+    "name": "iP1sms",
+    "description": "Send and receive SMS worldwide",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.ip1sms.com"
+  },
+  {
+    "name": "Eqivo",
+    "description": "Telephony/Programmable-Voice API platform",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://eqivo.org"
+  },
+  {
+    "name": "Nexmo",
+    "description": "Phone calls, SMS worldwide",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.nexmo.com"
+  },
+  {
+    "name": "Sakari",
+    "description": "Send SMS to 200+ countries",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.sakari.io"
+  },
+  {
+    "name": "The SMS Works",
+    "description": "Low-cost, reliable SMS API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://thesmsworks.co.uk"
+  },
+  {
+    "name": "Twilio",
+    "description": "APIs for SMS, Voice, Video",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.twilio.com"
+  },
+  {
+    "name": "Bible",
+    "description": "JSON API for public domain bible translations",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://bible-api.com"
+  },
+  {
+    "name": "Fruits API",
+    "description": "API GraphQL with fruit tree info",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Jokes",
+    "description": "Full featured Jokes API",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://jokes.one"
+  },
+  {
+    "name": "Perfect Tense API",
+    "description": "Spelling and grammar checking AI",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.perfecttense.com"
+  },
+  {
+    "name": "Random Data Generator",
+    "description": "Generate telephones, text, passwords",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://randommer.io"
+  },
+  {
+    "name": "Random Facts",
+    "description": "Random Facts API",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://fungenerators.com"
+  },
+  {
+    "name": "Today in History",
+    "description": "Daily historical events API",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://history.muffinlabs.com"
+  },
+  {
+    "name": "Wikipedia",
+    "description": "Free multilingual Encyclopedia",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://en.wikipedia.org"
+  },
+  {
+    "name": "Kairos",
+    "description": "Face recognition, emotion analysis",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://www.kairos.com"
+  },
+  {
+    "name": "Skybiometry",
+    "description": "Face detection and grouping",
+    "category": "AI",
+    "authType": "none",
+    "baseUrl": "https://www.skybiometry.com"
+  },
+  {
+    "name": "FitBit",
+    "description": "Fitbit activity trackers API",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://dev.fitbit.com"
+  },
+  {
+    "name": "Strava",
+    "description": "Athletes, activities and segments",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://strava.github.io"
+  },
+  {
+    "name": "Withings",
+    "description": "Withings activity trackers",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://oauth.withings.com"
+  },
+  {
+    "name": "Google CustomSearch",
+    "description": "Search within websites",
+    "category": "Search",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Fitness API",
+    "description": "The Fit API",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Identity",
+    "description": "Federated login for third party sites",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "Google Monitoring",
+    "description": "API monitoring data",
+    "category": "DevOps",
+    "authType": "oauth",
+    "baseUrl": "https://cloud.google.com"
+  },
+  {
+    "name": "Cognito",
+    "description": "Verifying and retrieving identity",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://cognitohq.com"
+  },
+  {
+    "name": "Whitepages Pro",
+    "description": "Global Identity Verification API",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://pro.whitepages.com"
+  },
+  {
+    "name": "Particle",
+    "description": "API to manage Particle devices",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.particle.io"
+  },
+  {
+    "name": "PubNub",
+    "description": "Real time applications with hardware",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://www.pubnub.com"
+  },
+  {
+    "name": "Philips Hue",
+    "description": "Control Hue brand lights",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://developers.meethue.com"
+  },
+  {
+    "name": "SmartThings",
+    "description": "Samsung SmartThings Smart Home Hub",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developer.smartthings.com"
+  },
+  {
+    "name": "ThingSpeak",
+    "description": "IoT application to store/retrieve data",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Facebook Login",
+    "description": "Secure, fast login for apps",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "LinkedIn",
+    "description": "Sign in with professional identity",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.linkedin.com"
+  },
+  {
+    "name": "PayPal",
+    "description": "Sign in with PayPal credentials",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.paypal.com"
+  },
+  {
+    "name": "Salesforce",
+    "description": "OAuth protocol access to data",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.salesforce.com"
+  },
+  {
+    "name": "Twitter Sign-in",
+    "description": "Works on websites, iOS, mobile, desktop",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.twitter.com"
+  },
+  {
+    "name": "WorkOS",
+    "description": "Single Sign-On for Enterprise",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://workos.com"
+  },
+  {
+    "name": "Amazon ML",
+    "description": "Amazon Machine Learning API",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.aws.amazon.com"
+  },
+  {
+    "name": "AYLIEN",
+    "description": "NLP and Information Retrieval tools",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://aylien.com"
+  },
+  {
+    "name": "Big ML",
+    "description": "Machine Learning API focused on decision trees",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://bigml.com"
+  },
+  {
+    "name": "Cloud ML Engine",
+    "description": "Cloud-based machine learning",
+    "category": "AI",
+    "authType": "oauth",
+    "baseUrl": "https://cloud.google.com"
+  },
+  {
+    "name": "Microsoft Azure ML",
+    "description": "Cognitive Services for applications",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "OVHcloud AI Endpoints",
+    "description": "GenAI & ML integration with APIs",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://endpoints.ai.cloud.ovh.net"
+  },
+  {
+    "name": "Amazon Maps",
+    "description": "Interactive 3D maps for Fire devices",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.amazon.com"
+  },
+  {
+    "name": "Bing Maps",
+    "description": "Create/customize digital maps",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://www.microsoft.com"
+  },
+  {
+    "name": "CartoDB",
+    "description": "Generate maps based on data",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://carto.com"
+  },
+  {
+    "name": "Leaflet.js",
+    "description": "Mobile-friendly interactive maps",
+    "category": "Maps",
+    "authType": "none",
+    "baseUrl": "https://leafletjs.com"
+  },
+  {
+    "name": "Yandex Maps",
+    "description": "API for Yandex.Maps",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://tech.yandex.com"
+  },
+  {
+    "name": "COVID-19 Data",
+    "description": "Get Coronavirus cases per country",
+    "category": "Health",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Infermedica",
+    "description": "AI-based patient triage and diagnosis",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.infermedica.com"
+  },
+  {
+    "name": "OMDB",
+    "description": "OMDb movie information",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.omdbapi.com"
+  },
+  {
+    "name": "TMDb",
+    "description": "The Movie Database",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.themoviedb.org"
+  },
+  {
+    "name": "Trakt",
+    "description": "TV shows and movies tracking",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://trakt.docs.apiary.io"
+  },
+  {
+    "name": "TVmaze",
+    "description": "TV Show and web series database",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://www.tvmaze.com"
+  },
+  {
+    "name": "AI Mastering",
+    "description": "Automated audio mastering",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://aimastering.com"
+  },
+  {
+    "name": "Deezer",
+    "description": "Deezer music discovery",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://developers.deezer.com"
+  },
+  {
+    "name": "Discogs",
+    "description": "Music artists and labels",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://www.discogs.com"
+  },
+  {
+    "name": "Last.fm",
+    "description": "Last.fm music API",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://www.last.fm"
+  },
+  {
+    "name": "SoundCloud",
+    "description": "SoundCloud API",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://developers.soundcloud.com"
+  },
+  {
+    "name": "Spotify",
+    "description": "View Spotify music catalog",
+    "category": "Media",
+    "authType": "oauth",
+    "baseUrl": "https://beta.developer.spotify.com"
+  },
+  {
+    "name": "TheAudioDB",
+    "description": "Free JSON API for music data",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://www.theaudiodb.com"
+  },
+  {
+    "name": "Cloudmersive NLP",
+    "description": "Unified NLP APIs including translation",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudmersive.com"
+  },
+  {
+    "name": "TextRazor",
+    "description": "Extract the Who, What, Why from text",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://www.textrazor.com"
+  },
+  {
+    "name": "VoiceRSS",
+    "description": "Convert Text to Speech",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://www.voicerss.org"
+  },
+  {
+    "name": "Wit AI",
+    "description": "Intent-based NLP API",
+    "category": "AI",
+    "authType": "none",
+    "baseUrl": "https://wit.ai"
+  },
+  {
+    "name": "NewsAPI",
+    "description": "70+ news sources and headlines",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://newsapi.org"
+  },
+  {
+    "name": "The Guardian",
+    "description": "Access Guardian content",
+    "category": "News",
+    "authType": "apiKey",
+    "baseUrl": "https://open-platform.theguardian.com"
+  },
+  {
+    "name": "DummyImage",
+    "description": "Flexible placeholder images",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://dummyimage.com"
+  },
+  {
+    "name": "Pixabay",
+    "description": "Free images and videos",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://pixabay.com"
+  },
+  {
+    "name": "Lorem Picsum",
+    "description": "Beautiful placeholders from Unsplash",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://picsum.photos"
+  },
+  {
+    "name": "Factual",
+    "description": "Places search by lat/long",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.factual.com"
+  },
+  {
+    "name": "Foursquare Venue",
+    "description": "Places search by category",
+    "category": "Maps",
+    "authType": "oauth",
+    "baseUrl": "https://developer.foursquare.com"
+  },
+  {
+    "name": "Yelp",
+    "description": "Search location by category",
+    "category": "Maps",
+    "authType": "oauth",
+    "baseUrl": "https://docs.developer.yelp.com"
+  },
+  {
+    "name": "Product Hunt",
+    "description": "The best new products every day",
+    "category": "Business",
+    "authType": "oauth",
+    "baseUrl": "https://api.producthunt.com"
+  },
+  {
+    "name": "Breaking Bad Quotes",
+    "description": "Quotes from Breaking Bad",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://breakingbadquotes.xyz"
+  },
+  {
+    "name": "FavQs",
+    "description": "Collect, discover, share quotes",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://favqs.com"
+  },
+  {
+    "name": "Forismatic",
+    "description": "Random quote per click",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://api.forismatic.com"
+  },
+  {
+    "name": "Quotable",
+    "description": "Fetch quotes by author, ID, tags",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "They Said So",
+    "description": "Quote of the day",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://quotes.rest"
+  },
+  {
+    "name": "NASA",
+    "description": "NASA data including imagery",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://api.nasa.gov"
+  },
+  {
+    "name": "Open Science Framework",
+    "description": "Workflow/project management for research",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://osf.io"
+  },
+  {
+    "name": "SavePage.io",
+    "description": "Free screenshot API",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.savepage.io"
+  },
+  {
+    "name": "Daily Motion",
+    "description": "Build applications around DailyMotion",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developer.dailymotion.com"
+  },
+  {
+    "name": "DeviantArt",
+    "description": "Social networking for artists",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://www.deviantart.com"
+  },
+  {
+    "name": "Facebook",
+    "description": "Ads, games, payments, sharing stats",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "Flickr",
+    "description": "Search through user content",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://www.flickr.com"
+  },
+  {
+    "name": "GoodReads",
+    "description": "Access Goodreads book data",
+    "category": "Social",
+    "authType": "apiKey",
+    "baseUrl": "https://www.goodreads.com"
+  },
+  {
+    "name": "Gravatar",
+    "description": "Create profiles and avatars",
+    "category": "Social",
+    "authType": "none",
+    "baseUrl": "https://en.gravatar.com"
+  },
+  {
+    "name": "Hacker News",
+    "description": "HN API",
+    "category": "Social",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Instagram",
+    "description": "Search photos by location, user, tags",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "Mastodon",
+    "description": "Open-source twitter competitor",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://docs.joinmastodon.org"
+  },
+  {
+    "name": "Microlink",
+    "description": "Turns any link into information",
+    "category": "Social",
+    "authType": "none",
+    "baseUrl": "https://microlink.io"
+  },
+  {
+    "name": "Pinterest",
+    "description": "View clicked-through or repinned Pins",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.pinterest.com"
+  },
+  {
+    "name": "Reddit",
+    "description": "Build clients, crawlers, scrapers",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Telegram",
+    "description": "Build customized Telegram clients",
+    "category": "Social",
+    "authType": "apiKey",
+    "baseUrl": "https://core.telegram.org"
+  },
+  {
+    "name": "TikTok",
+    "description": "Display TikTok creator's videos",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.tiktok.com"
+  },
+  {
+    "name": "Twitch",
+    "description": "Twitch API",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://dev.twitch.tv"
+  },
+  {
+    "name": "Twitter",
+    "description": "Interact with Twitter functions",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developer.twitter.com"
+  },
+  {
+    "name": "Tumblr",
+    "description": "Access content, likes, followers",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://www.tumblr.com"
+  },
+  {
+    "name": "Vimeo",
+    "description": "Access to Vimeo's API",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developer.vimeo.com"
+  },
+  {
+    "name": "Viber",
+    "description": "Create unique experiences for Viber users",
+    "category": "Social",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.viber.com"
+  },
+  {
+    "name": "VK",
+    "description": "VKontakte's API",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://vk.com"
+  },
+  {
+    "name": "Wordpress",
+    "description": "Access to Wordpress' API",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://codex.wordpress.org"
+  },
+  {
+    "name": "YouTube",
+    "description": "Add YouTube functionality",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com"
+  },
+  {
+    "name": "GitHub Gists",
+    "description": "Access to GitHub Gists",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://developer.github.com"
+  },
+  {
+    "name": "Mercurial",
+    "description": "Access to Mercurial's API",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://www.mercurial-scm.org"
+  },
+  {
+    "name": "Team Foundation Server",
+    "description": "TFS APIs with webhooks support",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.microsoft.com"
+  },
+  {
+    "name": "Ergast Formula 1",
+    "description": "Formula 1 race data from 1950",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://ergast.com"
+  },
+  {
+    "name": "Football Prediction",
+    "description": "Predictions for upcoming football matches",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://boggio-analytics.com"
+  },
+  {
+    "name": "OpenF1",
+    "description": "Real-time Formula 1 data",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://openf1.org"
+  },
+  {
+    "name": "TheSportsDB",
+    "description": "Sports events, results, players, teams",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://www.thesportsdb.com"
+  },
+  {
+    "name": "ADS-B Exchange",
+    "description": "Real-time airborne aircraft data",
+    "category": "Transportation",
+    "authType": "none",
+    "baseUrl": "https://www.adsbexchange.com"
+  },
+  {
+    "name": "Lyft",
+    "description": "Real-time ETAs, availability, prices",
+    "category": "Transportation",
+    "authType": "oauth",
+    "baseUrl": "https://www.lyft.com"
+  },
+  {
+    "name": "Uber",
+    "description": "Customize trip experiences, request rides",
+    "category": "Transportation",
+    "authType": "oauth",
+    "baseUrl": "https://developer.uber.com"
+  },
+  {
+    "name": "Bitly",
+    "description": "Access to Bitly's API",
+    "category": "Utilities",
+    "authType": "oauth",
+    "baseUrl": "https://dev.bitly.com"
+  },
+  {
+    "name": "GoTiny",
+    "description": "Lightweight URL shortener",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Is.gd",
+    "description": "Simple URL shortener",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://is.gd"
+  },
+  {
+    "name": "Tiny.cc",
+    "description": "Easy-to-use URL shortener",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://tiny.cc"
+  },
+  {
+    "name": "OpenWeatherMap",
+    "description": "Current weather for 200,000+ cities",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://openweathermap.org"
+  },
+  {
+    "name": "Weatherstack",
+    "description": "Real-Time & Historical Weather Data",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://weatherstack.com"
+  }
+]

@@ -646,6 +646,141 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       };
     },
   },
+
+  // E2B - Code Sandbox for AI Agents
+  e2b: {
+    run_code: async (params, creds) => {
+      const { code, language = 'python' } = params;
+      
+      if (!code) {
+        return { success: false, provider: 'e2b', action: 'run_code', error: 'Missing required param: code' };
+      }
+
+      // Create sandbox
+      const createResponse = await fetch('https://api.e2b.dev/sandboxes', {
+        method: 'POST',
+        headers: {
+          'X-API-Key': creds.api_key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          template: 'base',
+          timeout: 60,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        const error = await createResponse.json().catch(() => ({})) as Record<string, unknown>;
+        return { success: false, provider: 'e2b', action: 'run_code', error: (error.message as string) || 'Failed to create sandbox' };
+      }
+
+      const sandbox = await createResponse.json() as Record<string, unknown>;
+      const sandboxId = sandbox.sandboxId as string;
+
+      try {
+        // Execute code
+        const execResponse = await fetch(`https://api.e2b.dev/sandboxes/${sandboxId}/code/execution`, {
+          method: 'POST',
+          headers: {
+            'X-API-Key': creds.api_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code }),
+        });
+
+        if (!execResponse.ok) {
+          const error = await execResponse.json().catch(() => ({})) as Record<string, unknown>;
+          return { success: false, provider: 'e2b', action: 'run_code', error: (error.message as string) || 'Code execution failed' };
+        }
+
+        const result = await execResponse.json() as Record<string, unknown>;
+
+        return { 
+          success: true, 
+          provider: 'e2b', 
+          action: 'run_code',
+          data: { 
+            stdout: result.stdout || result.logs,
+            stderr: result.stderr,
+            result: result.result || result.text,
+            sandboxId,
+          },
+        };
+      } finally {
+        // Cleanup sandbox
+        await fetch(`https://api.e2b.dev/sandboxes/${sandboxId}`, {
+          method: 'DELETE',
+          headers: { 'X-API-Key': creds.api_key },
+        }).catch(() => {});
+      }
+    },
+
+    run_shell: async (params, creds) => {
+      const { command } = params;
+      
+      if (!command) {
+        return { success: false, provider: 'e2b', action: 'run_shell', error: 'Missing required param: command' };
+      }
+
+      // Create sandbox
+      const createResponse = await fetch('https://api.e2b.dev/sandboxes', {
+        method: 'POST',
+        headers: {
+          'X-API-Key': creds.api_key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          template: 'base',
+          timeout: 60,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        const error = await createResponse.json().catch(() => ({})) as Record<string, unknown>;
+        return { success: false, provider: 'e2b', action: 'run_shell', error: (error.message as string) || 'Failed to create sandbox' };
+      }
+
+      const sandbox = await createResponse.json() as Record<string, unknown>;
+      const sandboxId = sandbox.sandboxId as string;
+
+      try {
+        // Execute shell command
+        const execResponse = await fetch(`https://api.e2b.dev/sandboxes/${sandboxId}/commands`, {
+          method: 'POST',
+          headers: {
+            'X-API-Key': creds.api_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ command }),
+        });
+
+        if (!execResponse.ok) {
+          const error = await execResponse.json().catch(() => ({})) as Record<string, unknown>;
+          return { success: false, provider: 'e2b', action: 'run_shell', error: (error.message as string) || 'Shell execution failed' };
+        }
+
+        const result = await execResponse.json() as Record<string, unknown>;
+
+        return { 
+          success: true, 
+          provider: 'e2b', 
+          action: 'run_shell',
+          data: { 
+            stdout: result.stdout,
+            stderr: result.stderr,
+            exitCode: result.exitCode,
+            sandboxId,
+          },
+        };
+      } finally {
+        // Cleanup sandbox
+        await fetch(`https://api.e2b.dev/sandboxes/${sandboxId}`, {
+          method: 'DELETE',
+          headers: { 'X-API-Key': creds.api_key },
+        }).catch(() => {});
+      }
+    },
+  },
 };
 
 // Get available actions for a provider
