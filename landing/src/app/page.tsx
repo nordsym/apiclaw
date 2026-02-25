@@ -848,7 +848,7 @@ export default function Home() {
               Ready to go agent-native?
             </h2>
             <p className="text-text-secondary text-lg mb-8 max-w-lg mx-auto">
-              Join thousands of agents already discovering APIs through APIClaw.
+              The API layer for AI agents.
               Get started in under a minute.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
