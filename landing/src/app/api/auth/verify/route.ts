@@ -25,16 +25,19 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await response.json();
+    
+    // Convex wraps response in { status: "success", value: {...} }
+    const data = result.value || result;
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error || "Invalid token" }, { status: 400 });
+    if (!data.success) {
+      return NextResponse.json({ error: data.error || "Invalid token" }, { status: 400 });
     }
 
     // Return session token
     return NextResponse.json({
       success: true,
-      sessionToken: result.sessionToken,
-      provider: result.provider,
+      sessionToken: data.sessionToken,
+      provider: data.provider,
     });
   } catch (error) {
     console.error("Verify error:", error);

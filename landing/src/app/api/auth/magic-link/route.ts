@@ -24,7 +24,14 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to create magic link");
     }
 
-    const { token } = await response.json();
+    const result = await response.json();
+    
+    // Convex wraps response in { status: "success", value: {...} }
+    const token = result.value?.token || result.token;
+    
+    if (!token) {
+      throw new Error("Failed to get token from Convex");
+    }
 
     // Send magic link email via n8n
     const magicLinkUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.nordsym.com"}/providers/dashboard/verify?token=${token}`;

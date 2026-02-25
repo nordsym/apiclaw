@@ -13,7 +13,9 @@ export async function convexQuery<T>(path: string, args: Record<string, unknown>
     throw new Error(`Convex query failed: ${response.statusText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  // Convex wraps response in { status: "success", value: {...} }
+  return result.value !== undefined ? result.value : result;
 }
 
 export async function convexMutation<T>(path: string, args: Record<string, unknown>): Promise<T> {
@@ -27,7 +29,9 @@ export async function convexMutation<T>(path: string, args: Record<string, unkno
     throw new Error(`Convex mutation failed: ${response.statusText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  // Convex wraps response in { status: "success", value: {...} }
+  return result.value !== undefined ? result.value : result;
 }
 
 // Provider dashboard types
