@@ -22,6 +22,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { convexQuery, convexMutation, type ProviderAPI } from "@/lib/convex-client";
+import { ShareIntegrationModal } from "@/components/ShareIntegrationModal";
 
 interface DirectCallConfig {
   _id?: string;
@@ -56,6 +57,8 @@ export default function DirectCallSetupPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [wasLiveBefore, setWasLiveBefore] = useState(false);
 
   const [formData, setFormData] = useState<DirectCallConfig>({
     apiId,
@@ -95,6 +98,10 @@ export default function DirectCallSetupPage() {
               ...existingConfig,
               masterApiKey: "", // Never show existing key, placeholder only
             });
+            // Track if already live (to not show modal on re-saves)
+            if (existingConfig.status === "live") {
+              setWasLiveBefore(true);
+            }
           }
         } catch {
           // No existing config - that's fine
@@ -216,6 +223,12 @@ export default function DirectCallSetupPage() {
       
       // Clear the API key field after save (it's been encrypted)
       setFormData((prev) => ({ ...prev, masterApiKey: "" }));
+
+      // Show share modal when going live for the first time
+      if (formData.status === "live" && !wasLiveBefore) {
+        setShowShareModal(true);
+        setWasLiveBefore(true);
+      }
     } catch (err) {
       console.error("Save failed:", err);
       setError(err instanceof Error ? err.message : "Failed to save configuration");
@@ -580,6 +593,16 @@ export default function DirectCallSetupPage() {
           </ol>
         </div>
       )}
+
+      {/* Share Integration Modal */}
+      <ShareIntegrationModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        providerName={api?.name || ""}
+        apiName={api?.name || ""}
+        apiSlug={api?.name?.toLowerCase().replace(/\s+/g, "-") || apiId}
+        description={api?.description}
+      />
     </div>
   );
 }
