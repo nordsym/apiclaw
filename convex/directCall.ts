@@ -278,3 +278,182 @@ export const getLiveConfigs = query({
       .collect();
   },
 });
+
+/**
+ * Get Direct Call config by API ID (for test console)
+ */
+export const getConfig = query({
+  args: {
+    apiId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Try as providerAPIs ID first
+    const config = await ctx.db
+      .query("providerDirectCall")
+      .withIndex("by_apiId")
+      .filter((q) => q.eq(q.field("apiId"), args.apiId as any))
+      .first();
+    
+    return config;
+  },
+});
+
+// ============================================
+// TEST ACTION
+// ============================================
+
+/**
+ * Test an action by calling the actual provider API
+ * For V1: Provider passes their own test key
+ */
+export const testAction = mutation({
+  args: {
+    token: v.string(),
+    directCallId: v.id("providerDirectCall"),
+    actionId: v.id("providerActions"),
+    params: v.record(v.string(), v.any()),
+    testKey: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const startTime = Date.now();
+    
+    // 1. Verify provider session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+    
+    if (!session || session.expiresAt < Date.now()) {
+      return {
+        success: false,
+        error: "Unauthorized - invalid or expired session",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    
+    // 2. Get directCallConfig
+    const config = await ctx.db.get(args.directCallId);
+    if (!config) {
+      return {
+        success: false,
+        error: "Direct Call config not found",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    
+    // Verify ownership
+    if (config.providerId !== session.providerId) {
+      return {
+        success: false,
+        error: "Unauthorized - you don't own this config",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    
+    // 3. Get action
+    const action = await ctx.db.get(args.actionId);
+    if (!action) {
+      return {
+        success: false,
+        error: "Action not found",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    
+    // 4. Get API key (use testKey if provided, else use stored key)
+    // Note: For production, encryptedMasterKey would need server-side decryption
+    // For V1 test console, we use testKey directly
+    const apiKey = args.testKey || config.encryptedMasterKey;
+    if (!apiKey) {
+      return {
+        success: false,
+        error: "No API key provided. Add a test key or configure master key.",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+    
+    // 5. Build URL with path params
+    let path = action.path;
+    const queryParams: Record<string, string> = {};
+    const bodyParams: Record<string, unknown> = {};
+    
+    for (const paramDef of action.params) {
+      const value = args.params[paramDef.name];
+      if (value === undefined || value === "") continue;
+      
+      if (paramDef.in === "path") {
+        // Replace {paramName} in path
+        path = path.replace(`{${paramDef.name}}`, String(value));
+      } else if (paramDef.in === "query") {
+        queryParams[paramDef.name] = String(value);
+      } else if (paramDef.in === "body") {
+        bodyParams[paramDef.name] = value;
+      }
+    }
+    
+    // Build full URL
+    let url = config.baseUrl.replace(/\/$/, "") + path;
+    const queryString = new URLSearchParams(queryParams).toString();
+    if (queryString) {
+      url += (url.includes("?") ? "&" : "?") + queryString;
+    }
+    
+    // 6. Build headers with auth
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    };
+    
+    // Add auth header
+    if (config.authType !== "none" && apiKey) {
+      const authValue = config.authPrefix 
+        ? `${config.authPrefix}${apiKey}` 
+        : apiKey;
+      headers[config.authHeader] = authValue;
+    }
+    
+    // 7. Build fetch options
+    const fetchOptions: RequestInit = {
+      method: action.method,
+      headers,
+    };
+    
+    // Add body for non-GET requests
+    if (action.method !== "GET" && Object.keys(bodyParams).length > 0) {
+      fetchOptions.body = JSON.stringify(bodyParams);
+    }
+    
+    // 8. Execute request
+    try {
+      const response = await fetch(url, fetchOptions);
+      const latencyMs = Date.now() - startTime;
+      
+      // Try to parse response as JSON, fallback to text
+      let data: unknown;
+      const contentType = response.headers.get("content-type") || "";
+      
+      if (contentType.includes("application/json")) {
+        try {
+          data = await response.json();
+        } catch {
+          data = await response.text();
+        }
+      } else {
+        data = await response.text();
+      }
+      
+      return {
+        success: response.ok,
+        status: response.status,
+        data,
+        latencyMs,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Request failed",
+        latencyMs: Date.now() - startTime,
+      };
+    }
+  },
+});
