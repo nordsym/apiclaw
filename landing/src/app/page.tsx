@@ -852,15 +852,16 @@ export default function Home() {
               Get started in under a minute.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="https://github.com/nordsym/apiclaw"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText('npx @nordsym/apiclaw');
+                  alert('Copied: npx @nordsym/apiclaw');
+                }}
                 className="btn-primary"
               >
                 <Terminal className="w-5 h-5" />
                 npx @nordsym/apiclaw
-              </a>
+              </button>
               <a
                 href="https://github.com/nordsym/apiclaw"
                 target="_blank"

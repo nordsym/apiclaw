@@ -195,7 +195,7 @@ Agents are the next wave of API consumers. They don't see your landing page—th
 │                     🦞 APIClaw                               │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
 │  │  Discovery  │  │   Credits   │  │    Credentials      │  │
-│  │   Engine    │  │   System    │  │   (Real + Mock)     │  │
+│  │   Engine    │  │   System    │  │      (Live)         │  │
 │  └─────────────┘  └─────────────┘  └─────────────────────┘  │
 └─────────────────────────────┬───────────────────────────────┘
                               │
