@@ -52,17 +52,19 @@ export async function GET() {
         <div
           style={{
             display: 'flex',
-            gap: 40,
+            gap: 32,
             marginTop: 40,
             color: '#ef4444',
-            fontSize: 28,
+            fontSize: 26,
           }}
         >
           <span>{statsData.apiCount.toLocaleString()}+ APIs</span>
           <span>•</span>
-          <span>{statsData.categoryCount}+ Categories</span>
+          <span>{statsData.categoryCount} Categories</span>
           <span>•</span>
           <span>MCP Native</span>
+          <span>•</span>
+          <span>Direct Call</span>
         </div>
         <div
           style={{

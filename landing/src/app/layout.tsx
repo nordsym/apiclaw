@@ -18,13 +18,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "APIClaw | The API Layer for AI Agents",
-    description: "Agents discover and evaluate APIs via MCP. Structured data. Ranked results. No more googling.",
+    description: `${statsData.apiCount.toLocaleString()}+ APIs. MCP native. Direct Call: providers self-serve their APIs for AI agents.`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
     images: [
       {
-        url: "/api/og",
+        url: "/api/og?v=2",
         width: 1200,
         height: 630,
         alt: "APIClaw - The API layer for AI agents",
