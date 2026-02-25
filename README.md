@@ -240,7 +240,7 @@ These providers have **real credentials** available:
 | `get_api_details` | Full spec, auth, endpoints, examples |
 | `purchase_access` | Buy credits, receive credentials |
 | `check_balance` | View credits and active purchases |
-| `list_categories` | Browse all 90+ categories |
+| `list_categories` | Browse all 30+ categories |
 
 ---
 
