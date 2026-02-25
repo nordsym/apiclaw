@@ -19,7 +19,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/APIs-15,000-ef4444" alt="APIs" />
   <img src="https://img.shields.io/badge/Categories-446-171717" alt="Categories" />
-  <img src="https://img.shields.io/badge/Direct_Call-6_APIs-00d4ff" alt="Direct Call" />
+  <img src="https://img.shields.io/badge/Direct_Call-10_APIs-00d4ff" alt="Direct Call" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
 </p>
@@ -144,12 +144,16 @@ mcp.call("call_api", {
 
 | Provider | Actions | Description |
 |----------|---------|-------------|
+| `replicate` | `run_model`, `get_prediction` | Any ML model |
+| `openrouter` | `chat` | 100+ AI models |
+| `firecrawl` | `scrape`, `crawl` | Web scraping |
+| `e2b` | `run_code`, `run_shell` | Code sandbox |
+| `github` | `search`, `repos`, `issues` | GitHub API |
 | `46elks` | `send_sms` | Swedish SMS/Voice |
 | `twilio` | `send_sms` | Global SMS/Voice |
-| `brave_search` | `search` | Web search |
 | `resend` | `send_email` | Transactional email |
-| `openrouter` | `chat` | 100+ AI models |
 | `elevenlabs` | `text_to_speech` | Voice synthesis |
+| `fortnox` | `invoices`, `customers` | Swedish ERP |
 
 ---
 
@@ -159,7 +163,7 @@ mcp.call("call_api", {
 |--------|-------|
 | **APIs Indexed** | 15,000 |
 | **Categories** | 446 |
-| **Direct Call** | 6 APIs |
+| **Direct Call** | 10 APIs |
 | **Response Time** | <200ms |
 | **Uptime** | 24/7 |
 
