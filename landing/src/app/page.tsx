@@ -338,15 +338,20 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText('npx @nordsym/apiclaw');
-                    alert('Copied: npx @nordsym/apiclaw');
-                  }}
-                  className="btn-primary glow-pulse"
+                  onClick={copyToClipboard}
+                  className="btn-primary glow-pulse group relative"
                 >
-                  <Terminal className="w-5 h-5" />
+                  {showCopied ? (
+                    <Check className="w-5 h-5 text-green-400" />
+                  ) : (
+                    <Copy className="w-5 h-5" />
+                  )}
                   <code className="font-mono">npx @nordsym/apiclaw</code>
-                  <span className="text-xs opacity-70">copy</span>
+                  {showCopied && (
+                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded-lg whitespace-nowrap">
+                      Copied! Run in terminal
+                    </span>
+                  )}
                 </button>
                 <a
                   href="/docs"
