@@ -765,13 +765,14 @@ export async function executeAPICall(
   providerId: string, 
   action: string, 
   params: Record<string, any>,
-  userId?: string
+  userId?: string,
+  customerKey?: string
 ): Promise<ExecuteResult> {
   // Check for dynamic (self-service) provider config first
   if (userId) {
     const isDynamic = await hasDynamicConfig(providerId);
     if (isDynamic) {
-      return executeDynamicAction(providerId, action, params, userId);
+      return executeDynamicAction(providerId, action, params, userId, customerKey);
     }
   }
   
@@ -808,8 +809,10 @@ export async function executeAPICall(
     };
   }
 
-  // Get credentials - fallback to proxy if not available locally
-  const creds = getCredentials(providerId);
+  // Get credentials - customer key takes priority, then local secrets, then proxy
+  let creds = customerKey ? { apiKey: customerKey, apiSecret: '' } : getCredentials(providerId);
+  const usingCustomerKey = !!customerKey;
+  
   if (!creds) {
     // Try proxy for supported providers
     if (PROXY_PROVIDERS.includes(providerId)) {

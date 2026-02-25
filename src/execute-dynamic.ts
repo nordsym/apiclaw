@@ -339,7 +339,8 @@ export async function executeDynamicAction(
   providerId: string,
   actionName: string,
   params: Record<string, unknown>,
-  userId: string
+  userId: string,
+  customerKey?: string
 ): Promise<ExecuteResult> {
   const startTime = Date.now();
   
@@ -425,23 +426,40 @@ export async function executeDynamicAction(
     }
   }
   
-  // 6. Decrypt provider master key
-  let masterKey: string;
-  try {
-    masterKey = decryptKey(config.encryptedMasterKey);
-  } catch (error) {
-    console.error('Failed to decrypt provider key:', error);
+  // 6. Resolve API key (customer key takes priority over master key)
+  let apiKey: string;
+  let usingCustomerKey = false;
+  
+  if (customerKey) {
+    // Customer provided their own key - use it, skip usage tracking
+    apiKey = customerKey;
+    usingCustomerKey = true;
+  } else if (config.encryptedMasterKey) {
+    // Use provider's master key - track usage for billing
+    try {
+      apiKey = decryptKey(config.encryptedMasterKey);
+    } catch (error) {
+      console.error('Failed to decrypt provider key:', error);
+      return { 
+        success: false, 
+        provider: providerId, 
+        action: actionName,
+        error: 'Provider configuration error' 
+      };
+    }
+  } else {
+    // No key available
     return { 
       success: false, 
       provider: providerId, 
       action: actionName,
-      error: 'Provider configuration error' 
+      error: 'No API key available. Provide your own key via environment variable or contact provider.' 
     };
   }
   
   // 7. Build request
   const url = buildUrl(config.baseUrl, action.path, params, action.params);
-  const headers = buildAuthHeaders(config, masterKey);
+  const headers = buildAuthHeaders(config, apiKey);
   const body = action.method === 'GET' ? undefined : buildBody(params, action.params);
   
   // 8. Execute request
@@ -454,15 +472,18 @@ export async function executeDynamicAction(
     });
   } catch (error) {
     const latencyMs = Date.now() - startTime;
-    await logUsage({ 
-      userId, 
-      providerId, 
-      actionName, 
-      timestamp: Date.now(), 
-      success: false, 
-      latencyMs, 
-      creditsUsed: 0 
-    });
+    // Only log usage when using master key (for billing)
+    if (!usingCustomerKey) {
+      await logUsage({ 
+        userId, 
+        providerId, 
+        actionName, 
+        timestamp: Date.now(), 
+        success: false, 
+        latencyMs, 
+        creditsUsed: 0 
+      });
+    }
     return { 
       success: false, 
       provider: providerId, 
@@ -487,16 +508,18 @@ export async function executeDynamicAction(
     data = null;
   }
   
-  // 10. Log usage
-  await logUsage({ 
-    userId, 
-    providerId, 
-    actionName, 
-    timestamp: Date.now(), 
-    success: response.ok, 
-    latencyMs, 
-    creditsUsed: response.ok ? config.pricePerRequest : 0 
-  });
+  // 10. Log usage (only when using master key for billing)
+  if (!usingCustomerKey) {
+    await logUsage({ 
+      userId, 
+      providerId, 
+      actionName, 
+      timestamp: Date.now(), 
+      success: response.ok, 
+      latencyMs, 
+      creditsUsed: response.ok ? config.pricePerRequest : 0 
+    });
+  }
   
   // 11. Handle error response
   if (!response.ok) {

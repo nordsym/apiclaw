@@ -34,6 +34,33 @@ import { executeAPICall, getConnectedProviders } from './execute.js';
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
 
+/**
+ * Get customer API key from environment variable
+ * Convention: {PROVIDER}_API_KEY (e.g., COACCEPT_API_KEY, ELKS_API_KEY)
+ */
+function getCustomerKey(providerId: string): string | undefined {
+  // Try exact match first (e.g., 46elks -> 46ELKS_API_KEY)
+  const exactKey = `${providerId.toUpperCase().replace(/-/g, '_')}_API_KEY`;
+  if (process.env[exactKey]) {
+    return process.env[exactKey];
+  }
+  
+  // Try common variations
+  const variations = [
+    `${providerId.toUpperCase()}_API_KEY`,
+    `${providerId.toUpperCase()}_KEY`,
+    `${providerId.toUpperCase().replace(/_/g, '')}_API_KEY`,
+  ];
+  
+  for (const key of variations) {
+    if (process.env[key]) {
+      return process.env[key];
+    }
+  }
+  
+  return undefined;
+}
+
 // Tool definitions
 const tools: Tool[] = [
   {
@@ -452,8 +479,11 @@ Docs: https://apiclaw.nordsym.com
         const provider = args?.provider as string;
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
+        
+        // Check for customer-provided API key
+        const customerKey = getCustomerKey(provider);
 
-        const result = await executeAPICall(provider, action, params);
+        const result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
 
         return {
           content: [
