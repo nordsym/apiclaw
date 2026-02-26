@@ -4,10 +4,11 @@ import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
-  Play, ChevronRight, Star, Users, Cpu, Activity, Copy
+  Play, ChevronRight, Star, Users, Cpu, Activity, Copy, FileText
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
+import { HeroTabs } from "@/components/HeroTabs";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
@@ -151,19 +152,15 @@ const directCallProviders = [
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true);
-  const [terminalOutput, setTerminalOutput] = useState<typeof terminalLines>([]);
-  const [isTyping, setIsTyping] = useState(true);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [showCopied, setShowCopied] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
+  const [showProvidersModal, setShowProvidersModal] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('npx @nordsym/apiclaw');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
-  const [activeSection, setActiveSection] = useState<string>("");
-  const [showProvidersModal, setShowProvidersModal] = useState(false);
-  const terminalRef = useRef<HTMLDivElement>(null);
 
   // Scroll-based active section detection using Intersection Observer
   useEffect(() => {
@@ -202,39 +199,11 @@ export default function Home() {
     document.documentElement.classList.toggle('dark', prefersDark);
   }, []);
 
-  // Terminal animation with auto-loop
-  useEffect(() => {
-    if (currentLineIndex >= terminalLines.length) {
-      setIsTyping(false);
-      // Auto-restart after 3 seconds
-      const restartTimeout = setTimeout(() => {
-        setTerminalOutput([]);
-        setCurrentLineIndex(0);
-        setIsTyping(true);
-      }, 3000);
-      return () => clearTimeout(restartTimeout);
-    }
-
-    const line = terminalLines[currentLineIndex];
-    const timeout = setTimeout(() => {
-      setTerminalOutput(prev => [...prev, line]);
-      setCurrentLineIndex(prev => prev + 1);
-    }, line.delay);
-
-    return () => clearTimeout(timeout);
-  }, [currentLineIndex]);
-
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
     document.documentElement.classList.toggle('dark', newTheme);
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-  };
-
-  const restartTerminal = () => {
-    setTerminalOutput([]);
-    setCurrentLineIndex(0);
-    setIsTyping(true);
   };
 
   return (
@@ -275,6 +244,13 @@ export default function Home() {
             </a>
           </nav>
           <div className="flex items-center gap-3">
+            <a
+              href="/providers/dashboard"
+              className="text-sm text-text-muted hover:text-accent transition hidden md:flex items-center gap-1"
+            >
+              <FileText className="w-4 h-4" />
+              Add Your API
+            </a>
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-lg hover:bg-surface transition"
@@ -290,12 +266,6 @@ export default function Home() {
             >
               <Github className="w-4 h-4" />
               <span>GitHub</span>
-            </a>
-            <a
-              href="#how-it-works"
-              className="btn-primary !py-2 !px-3 text-xs hidden md:flex"
-            >
-              Start
             </a>
           </div>
         </div>
@@ -335,76 +305,10 @@ export default function Home() {
                 Structured data. Ranked results. Sub-200ms responses.
                 Built for the agentic era.
               </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
-                <button
-                  onClick={copyToClipboard}
-                  className="btn-primary glow-pulse group relative"
-                >
-                  {showCopied ? (
-                    <Check className="w-5 h-5 text-green-400" />
-                  ) : (
-                    <Copy className="w-5 h-5" />
-                  )}
-                  <code className="font-mono">npx @nordsym/apiclaw</code>
-                  {showCopied && (
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded-lg whitespace-nowrap">
-                      Copied! Run in terminal
-                    </span>
-                  )}
-                </button>
-                <a
-                  href="/docs"
-                  className="btn-secondary"
-                >
-                  Get Started
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-              </div>
-              
-              {/* Social proof */}
-              <p className="text-sm text-text-muted mt-4 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>The API layer agent builders are switching to</span>
-              </p>
-
-                          </div>
-
-            {/* Right: Terminal */}
-            <div className="relative">
-              <div className="terminal glow" ref={terminalRef}>
-                <div className="terminal-header">
-                  <div className="terminal-dot terminal-dot-red" />
-                  <div className="terminal-dot terminal-dot-yellow" />
-                  <div className="terminal-dot terminal-dot-green" />
-                  <span className="terminal-title">apiclaw</span>
-                </div>
-                <div className="terminal-body">
-                  {terminalOutput.map((line, i) => (
-                    <div key={i} className={`${line.text ? 'mb-1' : 'mb-2'}`}>
-                      {line.type === 'prompt' && (
-                        <>
-                          <span className="terminal-prompt">$ </span>
-                          <span className="terminal-command">{line.text}</span>
-                        </>
-                      )}
-                      {line.type === 'output' && (
-                        <span className="terminal-output">{line.text}</span>
-                      )}
-                      {line.type === 'success' && (
-                        <span className="terminal-success">{line.text}</span>
-                      )}
-                      {line.type === 'accent' && (
-                        <span className="terminal-accent">{line.text}</span>
-                      )}
-                    </div>
-                  ))}
-                  {isTyping && <span className="typing-cursor" />}
-                </div>
-              </div>
-              
-{/* Auto-loops - no replay button needed */}
             </div>
+
+            {/* Right: HeroTabs */}
+            <HeroTabs />
           </div>
         </div>
       </section>
