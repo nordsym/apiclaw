@@ -4,7 +4,8 @@ import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
-  Play, ChevronRight, Star, Users, Cpu, Activity, Copy, FileText
+  Play, ChevronRight, Star, Users, Cpu, Activity, Copy, FileText,
+  Menu, X
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
@@ -155,6 +156,7 @@ export default function Home() {
   const [showCopied, setShowCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('npx @nordsym/apiclaw');
@@ -210,13 +212,15 @@ export default function Home() {
     <main className="min-h-screen overflow-x-hidden">
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border-subtle">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-2xl logo-float">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-accent/20 flex items-center justify-center text-xl sm:text-2xl logo-float">
               🦞
             </div>
-            <span className="font-bold text-xl tracking-tight">APIClaw</span>
+            <span className="font-bold text-lg sm:text-xl tracking-tight">APIClaw</span>
           </div>
+          
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm text-text-muted">
             <a 
               href="#how-it-works" 
@@ -243,10 +247,12 @@ export default function Home() {
               Pricing
             </a>
           </nav>
-          <div className="flex items-center gap-3">
+          
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-3">
             <a
               href="/providers/dashboard"
-              className="text-sm text-text-muted hover:text-accent transition hidden md:flex items-center gap-1"
+              className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
             >
               <FileText className="w-4 h-4" />
               Add Your API
@@ -262,13 +268,86 @@ export default function Home() {
               href="https://github.com/nordsym/apiclaw"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost hidden sm:flex"
+              className="btn-ghost"
             >
               <Github className="w-4 h-4" />
               <span>GitHub</span>
             </a>
           </div>
+          
+          {/* Mobile actions */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-surface transition"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-surface transition"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-background border-t border-border">
+            <nav className="flex flex-col px-4 py-4 space-y-3 text-sm">
+              <a 
+                href="#how-it-works" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-muted hover:text-text-primary transition"
+              >
+                How It Works
+              </a>
+              <a 
+                href="#for-agents" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-muted hover:text-text-primary transition"
+              >
+                For Agents
+              </a>
+              <a 
+                href="#for-providers" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-muted hover:text-text-primary transition"
+              >
+                For Providers
+              </a>
+              <a 
+                href="#pricing" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-muted hover:text-text-primary transition"
+              >
+                Pricing
+              </a>
+              <div className="border-t border-border pt-3 mt-1 flex flex-col space-y-3">
+                <a
+                  href="/providers/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-2 text-accent font-medium flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Add Your API
+                </a>
+                <a
+                  href="https://github.com/nordsym/apiclaw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2 text-text-muted hover:text-text-primary transition flex items-center gap-2"
+                >
+                  <Github className="w-4 h-4" />
+                  GitHub
+                </a>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Hero */}
