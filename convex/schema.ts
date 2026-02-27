@@ -307,4 +307,67 @@ export default defineSchema({
   })
     .index("by_email", ["email"])
     .index("by_type", ["type"]),
+
+  // ============================================
+  // CAPABILITY LAYER (abstraction over providers)
+  // ============================================
+
+  // Capability definitions (sms, email, invoice, search, etc.)
+  capabilities: defineTable({
+    id: v.string(),              // "sms", "email", "invoice"
+    name: v.string(),            // "SMS Messaging"
+    description: v.string(),
+    category: v.string(),        // "communication", "business", "ai"
+    standardParams: v.array(v.object({
+      name: v.string(),
+      type: v.string(),          // "string" | "number" | "boolean"
+      required: v.boolean(),
+      description: v.string(),
+      default: v.optional(v.any()),
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_capability_id", ["id"])
+    .index("by_category", ["category"]),
+
+  // Provider → Capability mappings (which providers offer which capabilities)
+  providerCapabilities: defineTable({
+    providerId: v.string(),      // "46elks", "twilio"
+    capabilityId: v.string(),    // "sms"
+    priority: v.number(),        // 1 = primary, 2 = fallback
+    regions: v.array(v.string()), // ["SE", "EU", "US"]
+    pricePerUnit: v.number(),    // in smallest currency unit (cents/öre)
+    currency: v.string(),        // "SEK", "USD"
+    avgLatencyMs: v.number(),
+    paramMapping: v.any(),       // Record<string, string> - capability param → provider param
+    enabled: v.boolean(),
+    healthStatus: v.string(),    // "healthy" | "degraded" | "down"
+    lastHealthCheck: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_providerId", ["providerId"])
+    .index("by_capabilityId", ["capabilityId"])
+    .index("by_capabilityId_enabled", ["capabilityId", "enabled"])
+    .index("by_healthStatus", ["healthStatus"]),
+
+  // Capability usage logs (for analytics and billing)
+  capabilityLogs: defineTable({
+    capabilityId: v.string(),
+    providerId: v.string(),
+    userId: v.string(),
+    action: v.string(),
+    success: v.boolean(),
+    fallbackUsed: v.boolean(),
+    fallbackReason: v.optional(v.string()),
+    latencyMs: v.number(),
+    cost: v.number(),
+    currency: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_capabilityId", ["capabilityId"])
+    .index("by_providerId", ["providerId"])
+    .index("by_userId", ["userId"])
+    .index("by_timestamp", ["timestamp"]),
 });

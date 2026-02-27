@@ -40,6 +40,7 @@ import {
   generatePreview,
   validateParams 
 } from './confirmation.js';
+import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -218,6 +219,46 @@ const tools: Tool[] = [
   {
     name: 'list_connected',
     description: 'List all APIs available for Direct Call (no API key needed).',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  {
+    name: 'capability',
+    description: 'Execute an action by capability, not provider. APIClaw automatically selects the best provider, handles fallback, and optimizes for cost/speed. Example: capability("sms", "send", {to: "+46...", message: "Hello"})',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        capability: {
+          type: 'string',
+          description: 'Capability ID: "sms", "email", "search", "tts", "invoice", "llm"'
+        },
+        action: {
+          type: 'string',
+          description: 'Action to perform: "send", "search", "generate", etc.'
+        },
+        params: {
+          type: 'object',
+          description: 'Parameters for the action (capability-standard params, not provider-specific)'
+        },
+        preferences: {
+          type: 'object',
+          description: 'Optional routing preferences',
+          properties: {
+            region: { type: 'string', description: 'Preferred region: "SE", "EU", "US"' },
+            maxPrice: { type: 'number', description: 'Max price per unit in cents/öre' },
+            preferredProvider: { type: 'string', description: 'Hint to prefer a specific provider' },
+            fallback: { type: 'boolean', description: 'Enable fallback to other providers (default: true)' }
+          }
+        }
+      },
+      required: ['capability', 'action', 'params']
+    }
+  },
+  {
+    name: 'list_capabilities',
+    description: 'List all available capabilities and their providers.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -661,6 +702,75 @@ Docs: https://apiclaw.nordsym.com
               }, null, 2)
             }
           ]
+        };
+      }
+
+      case 'capability': {
+        const capabilityId = args?.capability as string;
+        const action = args?.action as string;
+        const params = (args?.params as Record<string, any>) || {};
+        const preferences = (args?.preferences as Record<string, any>) || {};
+
+        // Check if capability exists
+        const exists = await hasCapability(capabilityId);
+        if (!exists) {
+          // Try to help with available capabilities
+          const available = await listCapabilities();
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: `Unknown capability: ${capabilityId}`,
+                available_capabilities: available.map(c => c.id),
+                hint: 'Use list_capabilities to see all available capabilities.'
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        // Execute capability
+        const result = await executeCapability(
+          capabilityId,
+          action,
+          params,
+          DEFAULT_AGENT_ID,
+          preferences
+        );
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: result.success ? 'success' : 'error',
+              capability: result.capability,
+              action: result.action,
+              provider_used: result.providerUsed,
+              fallback_attempted: result.fallbackAttempted,
+              ...(result.fallbackReason ? { fallback_reason: result.fallbackReason } : {}),
+              ...(result.success ? { data: result.data } : { error: result.error }),
+              ...(result.cost !== undefined ? { cost: result.cost, currency: result.currency } : {}),
+              latency_ms: result.latencyMs,
+            }, null, 2)
+          }],
+          isError: !result.success
+        };
+      }
+
+      case 'list_capabilities': {
+        const capabilities = await listCapabilities();
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'success',
+              message: 'Available capabilities - use capability() to execute',
+              capabilities,
+              usage: 'capability("sms", "send", {to: "+46...", message: "Hello"})'
+            }, null, 2)
+          }]
         };
       }
 

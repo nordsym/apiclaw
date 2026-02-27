@@ -9,6 +9,7 @@
  */
 
 import type * as analytics from "../analytics.js";
+import type * as capabilities from "../capabilities.js";
 import type * as credits from "../credits.js";
 import type * as directCall from "../directCall.js";
 import type * as http from "../http.js";
@@ -27,6 +28,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
+  capabilities: typeof capabilities;
   credits: typeof credits;
   directCall: typeof directCall;
   http: typeof http;
