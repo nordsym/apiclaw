@@ -5,21 +5,20 @@
 </p>
 
 <p align="center">
-  Agents discover, evaluate, and integrate APIs via MCP.<br/>
-  No more googling. No dashboards. Just endpoints.
+  22,000+ APIs. One MCP config. Direct Call = no keys needed.
 </p>
 
 <p align="center">
-  <a href="https://apiclaw.nordsym.com">Website</a> •
+  <a href="https://apiclaw.com">Website</a> •
+  <a href="#direct-call">Direct Call</a> •
   <a href="#quick-start">Quick Start</a> •
-  <a href="#for-providers">For Providers</a> •
-  <a href="https://nordsym.com">NordSym</a>
+  <a href="#for-providers">For Providers</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/APIs-15,000-ef4444" alt="APIs" />
-  <img src="https://img.shields.io/badge/Categories-31-171717" alt="Categories" />
-  <img src="https://img.shields.io/badge/Direct_Call-10_APIs-00d4ff" alt="Direct Call" />
+  <img src="https://img.shields.io/badge/APIs-22,392-ef4444" alt="APIs" />
+  <img src="https://img.shields.io/badge/Categories-14-171717" alt="Categories" />
+  <img src="https://img.shields.io/badge/Direct_Call-11_Providers-00d4ff" alt="Direct Call" />
   <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
 </p>
@@ -28,17 +27,76 @@
 
 ## Why APIClaw?
 
-**AI agents are the new developers.** They don't browse documentation or click through dashboards. They query capabilities and expect structured responses.
+AI agents don't browse documentation. They query capabilities and execute.
 
-APIClaw is the missing layer between agents and the API economy.
+APIClaw is the missing layer between agents and the API economy:
 
+- **Discovery** — 22,000+ APIs, searchable by capability
+- **Direct Call** — Execute without API keys (we handle auth)
+- **One config** — Add APIClaw MCP, access everything
+
+---
+
+## Direct Call
+
+**No API keys. No setup. Just call.**
+
+Your agent can execute these APIs directly through APIClaw:
+
+```javascript
+// Run any ML model
+mcp.call("call_api", {
+  provider: "replicate",
+  action: "run_model",
+  params: {
+    model: "stability-ai/sdxl",
+    input: { prompt: "a cyber-lobster in neon lights" }
+  }
+})
+
+// Access 100+ LLMs through one endpoint
+mcp.call("call_api", {
+  provider: "openrouter",
+  action: "chat",
+  params: {
+    model: "anthropic/claude-3-opus",
+    messages: [{ role: "user", content: "Hello!" }]
+  }
+})
+
+// Execute code in secure sandbox
+mcp.call("call_api", {
+  provider: "e2b",
+  action: "run_code",
+  params: {
+    language: "python",
+    code: "print('Hello from sandbox!')"
+  }
+})
+
+// Scrape any website
+mcp.call("call_api", {
+  provider: "firecrawl",
+  action: "scrape",
+  params: { url: "https://example.com" }
+})
 ```
-Agent: "I need to send SMS to Swedish numbers"
-    ↓
-APIClaw: Here are your options, ranked by fit
-    ↓
-Agent: *integrates and ships*
-```
+
+### Available Direct Call Providers
+
+| Provider | What It Does | Actions |
+|----------|--------------|---------|
+| **OpenRouter** | 100+ AI models (Claude, GPT, Llama, etc.) | `chat` |
+| **Replicate** | Any ML model (Stable Diffusion, Whisper, etc.) | `run_model`, `get_prediction` |
+| **E2B** | Secure code sandbox for agents | `run_code`, `run_shell` |
+| **Firecrawl** | Web scraping & crawling | `scrape`, `crawl` |
+| **ElevenLabs** | Voice synthesis | `text_to_speech` |
+| **GitHub** | Repos, issues, code search | `search`, `repos`, `issues` |
+| **Brave Search** | Web search | `search` |
+| **Resend** | Transactional email | `send_email` |
+| **46elks** | SMS/Voice (Swedish/EU) | `send_sms` |
+| **Twilio** | SMS/Voice (Global) | `send_sms` |
+| **CoinGecko** | Crypto prices & data | `price`, `markets` |
 
 ---
 
@@ -47,8 +105,6 @@ Agent: *integrates and ships*
 ```bash
 npx @nordsym/apiclaw
 ```
-
-That's it. The MCP server is running.
 
 ### Add to Claude Desktop
 
@@ -63,109 +119,39 @@ That's it. The MCP server is running.
 }
 ```
 
+Works with Claude, GPT (via MCP bridge), Cursor, Cline, and any MCP-compatible client.
+
 ---
 
-## What Your Agent Can Do
+## Discovery
 
-### 🔍 Discover APIs
+22,392 APIs indexed across 14 categories:
 
 ```javascript
-// Agent asks for a capability
+// Find APIs by capability
 mcp.call("discover_apis", {
-  query: "send SMS to EU numbers",
+  query: "image generation AI",
   max_results: 5
 })
 
-// Returns ranked options with full metadata
-// → 46elks, Twilio, Vonage...
-```
-
-### 📋 Get Full Details
-
-```javascript
-// Get everything needed to integrate
+// Get full details
 mcp.call("get_api_details", {
-  api_id: "46elks"
+  api_id: "replicate"
 })
-
 // → endpoints, auth, pricing, examples
 ```
 
-### 💳 Purchase Access
+### Categories
 
-```javascript
-// Buy credits, get real credentials
-mcp.call("purchase_access", {
-  api_id: "46elks",
-  amount_usd: 10
-})
-
-// → Real API keys, ready to use
-```
-
-### ⚡ Direct Call (NEW!)
-
-**No API keys needed.** Execute API calls directly through APIClaw.
-
-```javascript
-// List available connected APIs
-mcp.call("list_connected")
-// → 46elks, twilio, brave_search, resend, openrouter, elevenlabs
-
-// Send SMS without any API key
-mcp.call("call_api", {
-  provider: "46elks",
-  action: "send_sms",
-  params: {
-    to: "+46701234567",
-    message: "Hello from APIClaw!"
-  }
-})
-
-// Search the web
-mcp.call("call_api", {
-  provider: "brave_search",
-  action: "search",
-  params: { query: "best restaurants in Stockholm" }
-})
-
-// Generate AI response
-mcp.call("call_api", {
-  provider: "openrouter",
-  action: "chat",
-  params: {
-    messages: [{ role: "user", content: "Hello!" }],
-    model: "anthropic/claude-3-haiku"
-  }
-})
-```
-
-**Available Direct Call APIs:**
-
-| Provider | Actions | Description |
-|----------|---------|-------------|
-| `replicate` | `run_model`, `get_prediction` | Any ML model |
-| `openrouter` | `chat` | 100+ AI models |
-| `firecrawl` | `scrape`, `crawl` | Web scraping |
-| `e2b` | `run_code`, `run_shell` | Code sandbox |
-| `github` | `search`, `repos`, `issues` | GitHub API |
-| `46elks` | `send_sms` | Swedish SMS/Voice |
-| `twilio` | `send_sms` | Global SMS/Voice |
-| `resend` | `send_email` | Transactional email |
-| `elevenlabs` | `text_to_speech` | Voice synthesis |
-| `fortnox` | `invoices`, `customers` | Swedish ERP |
-
----
-
-## The Numbers
-
-| Metric | Value |
-|--------|-------|
-| **APIs Indexed** | 15,000 |
-| **Categories** | 31 |
-| **Direct Call** | 10 APIs |
-| **Response Time** | <200ms |
-| **Uptime** | 24/7 |
+| Category | APIs | Category | APIs |
+|----------|------|----------|------|
+| Utilities | 7,069 | Finance | 1,179 |
+| Analytics | 2,600 | Commerce | 1,151 |
+| Development | 2,278 | Location | 976 |
+| Cloud | 1,463 | Communication | 939 |
+| AI & ML | 1,259 | Business | 923 |
+| Entertainment | 1,212 | Health | 740 |
+| Security | 491 | Social | 112 |
 
 ---
 
@@ -173,21 +159,26 @@ mcp.call("call_api", {
 
 **Get your API in front of AI agents.**
 
-Agents are the next wave of API consumers. They don't see your landing page—they query capabilities. List your API on APIClaw and get discovered.
+Agents are the next wave of API consumers. They don't see your landing page—they query capabilities.
 
-```
-→ apiclaw.nordsym.com/providers
-```
+### Self-Service Dashboard
 
-**Benefits:**
-- 🤖 Reach autonomous agents worldwide
-- 📊 Analytics on agent usage
-- ⚡ Zero integration work
-- 🆓 Free to list
+1. Sign up at [apiclaw.com/providers](https://apiclaw.com/providers)
+2. Add your API spec
+3. Configure Direct Call (optional)
+4. Go live
+
+**Direct Call benefits:**
+- Agents use your API without key setup
+- You provide one service account key
+- We handle auth routing
+- You get usage analytics
+
+→ [apiclaw.com/providers](https://apiclaw.com/providers)
 
 ---
 
-## How It Works
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -196,39 +187,23 @@ Agents are the next wave of API consumers. They don't see your landing page—th
                               │ MCP Protocol
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                     🦞 APIClaw                               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Discovery  │  │   Credits   │  │    Credentials      │  │
-│  │   Engine    │  │   System    │  │      (Live)         │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│                       🦞 APIClaw                             │
+│                                                              │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│   │  Discovery   │  │  Direct Call │  │   Provider   │     │
+│   │   22k APIs   │  │  11 Live     │  │   Dashboard  │     │
+│   └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                              │
 └─────────────────────────────┬───────────────────────────────┘
                               │
-           ┌──────────────────┼──────────────────┐
-           ▼                  ▼                  ▼
-    ┌────────────┐    ┌────────────┐    ┌────────────┐
-    │  15,000    │    │   Convex   │    │   Stripe   │
-    │   APIs     │    │  Backend   │    │  Payments  │
-    └────────────┘    └────────────┘    └────────────┘
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+  ┌──────────┐         ┌──────────┐         ┌──────────┐
+  │ OpenRouter│        │ Replicate │        │   E2B    │
+  │ Firecrawl │        │ ElevenLabs│        │  GitHub  │
+  │   + 5     │        │   Brave   │        │  + more  │
+  └──────────┘         └──────────┘         └──────────┘
 ```
-
----
-
-## Live Integrations
-
-These providers have **real credentials** available:
-
-| Provider | Category | What You Get |
-|----------|----------|--------------|
-| **Replicate** | AI Models | Run any ML model via API |
-| **OpenRouter** | LLMs | Access to 100+ language models |
-| **Firecrawl** | Web Scraping | Extract data from any website |
-| **E2B** | Code Sandbox | Secure code execution for agents |
-| **GitHub** | Development | Repos, issues, code search |
-| **46elks** | SMS/Voice | Swedish/EU SMS and voice calls |
-| **Twilio** | SMS/Voice | Global SMS and voice |
-| **Resend** | Email | Transactional email API |
-| **ElevenLabs** | Voice AI | Text-to-speech generation |
-| **Fortnox** | ERP | Swedish accounting integration |
 
 ---
 
@@ -236,30 +211,18 @@ These providers have **real credentials** available:
 
 | Tool | Description |
 |------|-------------|
-| `discover_apis` | Search by capability, get ranked matches |
-| `get_api_details` | Full spec, auth, endpoints, examples |
-| `purchase_access` | Buy credits, receive credentials |
-| `check_balance` | View credits and active purchases |
-| `list_categories` | Browse all 30+ categories |
-
----
-
-## What Makes This Different
-
-Most API marketplaces make agents navigate human UIs. We flip it:
-
-- **Agents query via MCP** → Get 15,000 APIs, ranked by fit, structured as JSON
-- **Providers manage via dashboard** → When they want to, not as a blocker
-- **Zero manual API key juggling** → Direct Call handles auth
-
-We have docs, a landing page, dashboards—they're just not required for agents to work. Agents can skip straight to the API.
+| `discover_apis` | Search 22k APIs by capability |
+| `get_api_details` | Full spec, auth, endpoints |
+| `list_connected` | Show Direct Call providers |
+| `call_api` | Execute via Direct Call |
+| `list_categories` | Browse all 14 categories |
 
 ---
 
 ## Links
 
-- **Website:** [apiclaw.nordsym.com](https://apiclaw.nordsym.com)
-- **Provider Portal:** [apiclaw.nordsym.com/providers](https://apiclaw.nordsym.com/providers)
+- **Website:** [apiclaw.com](https://apiclaw.com)
+- **Providers:** [apiclaw.com/providers](https://apiclaw.com/providers)
 - **npm:** [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)
 - **Built by:** [NordSym](https://nordsym.com)
 
