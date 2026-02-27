@@ -810,7 +810,8 @@ export async function executeAPICall(
   }
 
   // Get credentials - customer key takes priority, then local secrets, then proxy
-  let creds = customerKey ? { apiKey: customerKey, apiSecret: '' } : getCredentials(providerId);
+  // Set both apiKey and token so it works with different handler patterns (most use apiKey, GitHub uses token)
+  let creds = customerKey ? { apiKey: customerKey, api_key: customerKey, token: customerKey, apiSecret: '' } : getCredentials(providerId);
   const usingCustomerKey = !!customerKey;
   
   if (!creds) {
