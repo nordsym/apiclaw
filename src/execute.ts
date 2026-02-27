@@ -733,6 +733,112 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       }
     },
   },
+
+  // Frankfurter API - Free currency conversion (no API key needed!)
+  // Source: European Central Bank rates
+  exchangerate: {
+    convert: async (params, _creds) => {
+      const { from = 'SEK', to = 'USD', amount = 1 } = params;
+      
+      const response = await fetch(
+        `https://api.frankfurter.app/latest?from=${from}&to=${to}&amount=${amount}`
+      );
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!data.rates) {
+        return { success: false, provider: 'exchangerate', action: 'convert', error: 'Conversion failed' };
+      }
+      
+      const rates = data.rates as Record<string, number>;
+      const result = rates[to];
+      
+      return {
+        success: true,
+        provider: 'exchangerate',
+        action: 'convert',
+        data: {
+          from,
+          to,
+          amount: data.amount,
+          result,
+          rate: result / (amount as number),
+          date: data.date,
+        },
+      };
+    },
+
+    latest: async (params, _creds) => {
+      const { base = 'SEK', symbols } = params;
+      
+      let url = `https://api.frankfurter.app/latest?from=${base}`;
+      if (symbols) {
+        url += `&to=${symbols}`;
+      }
+      
+      const response = await fetch(url);
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!data.rates) {
+        return { success: false, provider: 'exchangerate', action: 'latest', error: 'Failed to fetch rates' };
+      }
+      
+      return {
+        success: true,
+        provider: 'exchangerate',
+        action: 'latest',
+        data: {
+          base: data.base,
+          date: data.date,
+          rates: data.rates,
+        },
+      };
+    },
+
+    historical: async (params, _creds) => {
+      const { date, base = 'SEK', symbols } = params;
+      
+      if (!date) {
+        return { success: false, provider: 'exchangerate', action: 'historical', error: 'Missing required param: date (YYYY-MM-DD)' };
+      }
+      
+      let url = `https://api.frankfurter.app/${date}?from=${base}`;
+      if (symbols) {
+        url += `&to=${symbols}`;
+      }
+      
+      const response = await fetch(url);
+      const data = await response.json() as Record<string, unknown>;
+      
+      if (!data.rates) {
+        return { success: false, provider: 'exchangerate', action: 'historical', error: 'Failed to fetch historical rates' };
+      }
+      
+      return {
+        success: true,
+        provider: 'exchangerate',
+        action: 'historical',
+        data: {
+          base: data.base,
+          date: data.date,
+          rates: data.rates,
+        },
+      };
+    },
+
+    currencies: async (_params, _creds) => {
+      const response = await fetch('https://api.frankfurter.app/currencies');
+      const data = await response.json() as Record<string, string>;
+      
+      return {
+        success: true,
+        provider: 'exchangerate',
+        action: 'currencies',
+        data: {
+          currencies: data,
+        },
+      };
+    },
+  },
 };
 
 // Get available actions for a provider (static handlers only)
@@ -809,10 +915,18 @@ export async function executeAPICall(
     };
   }
 
+  // Providers that don't require credentials (free/open APIs)
+  const NO_CREDS_PROVIDERS = ['exchangerate', 'coingecko'];
+  
   // Get credentials - customer key takes priority, then local secrets, then proxy
   // Set both apiKey and token so it works with different handler patterns (most use apiKey, GitHub uses token)
   let creds = customerKey ? { apiKey: customerKey, api_key: customerKey, token: customerKey, apiSecret: '' } : getCredentials(providerId);
   const usingCustomerKey = !!customerKey;
+  
+  // For providers that don't need credentials, use empty creds
+  if (!creds && NO_CREDS_PROVIDERS.includes(providerId)) {
+    creds = { apiKey: '', api_key: '', token: '', apiSecret: '' };
+  }
   
   if (!creds) {
     // Try proxy for supported providers
