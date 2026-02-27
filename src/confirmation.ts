@@ -42,11 +42,43 @@ export const CONFIRMATION_REQUIRED: Record<string, string[]> = {
 const TOKEN_EXPIRY_MS = 5 * 60 * 1000;
 
 /**
- * Check if an action requires confirmation
+ * Check if an action requires confirmation (hardcoded list only)
+ * For dynamic providers, use requiresConfirmationAsync
  */
 export function requiresConfirmation(provider: string, action: string): boolean {
   const actions = CONFIRMATION_REQUIRED[provider];
   return actions?.includes(action) ?? false;
+}
+
+/**
+ * Check if a dynamic provider action requires confirmation
+ * This is imported dynamically to avoid circular deps
+ */
+export async function requiresConfirmationAsync(
+  provider: string, 
+  action: string
+): Promise<{ required: boolean; estimatedCost?: string; isDynamic?: boolean }> {
+  // First check hardcoded list
+  if (requiresConfirmation(provider, action)) {
+    return { required: true, isDynamic: false };
+  }
+  
+  // Then check dynamic provider config
+  try {
+    const { getDynamicConfirmationConfig } = await import('./execute-dynamic.js');
+    const config = await getDynamicConfirmationConfig(provider, action);
+    if (config.required) {
+      return { 
+        required: true, 
+        estimatedCost: config.estimatedCost,
+        isDynamic: true 
+      };
+    }
+  } catch (e) {
+    // Dynamic config not available, that's ok
+  }
+  
+  return { required: false };
 }
 
 /**

@@ -267,6 +267,9 @@ export default defineSchema({
       path: v.string(), // JSON path, e.g. "data.id" or "results[0].name"
     })),
     enabled: v.boolean(),
+    // Confirmation settings for costly actions
+    requiresConfirmation: v.optional(v.boolean()), // If true, requires user confirmation before executing
+    estimatedCost: v.optional(v.string()), // Human-readable cost estimate, e.g. "~2-5 SEK per invoice"
     createdAt: v.number(),
     updatedAt: v.number(),
   })

@@ -33,7 +33,8 @@ import { executeAPICall, getConnectedProviders } from './execute.js';
 import { logAPICall } from './analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
 import { 
-  requiresConfirmation, 
+  requiresConfirmation,
+  requiresConfirmationAsync, 
   createPendingAction, 
   consumePendingAction,
   generatePreview,
@@ -551,28 +552,35 @@ Docs: https://apiclaw.nordsym.com
           };
         }
 
-        // Check if this action requires confirmation
-        if (requiresConfirmation(provider, action)) {
-          // Validate params first
-          const validation = validateParams(provider, action, params);
-          
-          if (!validation.valid) {
-            return {
-              content: [{
-                type: 'text',
-                text: JSON.stringify({
-                  status: 'error',
-                  error: 'Validation failed',
-                  missing_or_invalid: validation.errors,
-                  hint: 'Please provide all required fields before sending.',
-                }, null, 2)
-              }],
-              isError: true
-            };
+        // Check if this action requires confirmation (both hardcoded and dynamic providers)
+        const confirmCheck = await requiresConfirmationAsync(provider, action);
+        
+        if (confirmCheck.required) {
+          // Validate params first (for hardcoded providers)
+          if (!confirmCheck.isDynamic) {
+            const validation = validateParams(provider, action, params);
+            
+            if (!validation.valid) {
+              return {
+                content: [{
+                  type: 'text',
+                  text: JSON.stringify({
+                    status: 'error',
+                    error: 'Validation failed',
+                    missing_or_invalid: validation.errors,
+                    hint: 'Please provide all required fields before sending.',
+                  }, null, 2)
+                }],
+                isError: true
+              };
+            }
           }
 
           // Generate preview and create pending action
           const preview = generatePreview(provider, action, params);
+          if (confirmCheck.estimatedCost) {
+            preview.estimated_cost = confirmCheck.estimatedCost;
+          }
           const pending = createPendingAction(provider, action, params, preview, DEFAULT_AGENT_ID);
 
           return {

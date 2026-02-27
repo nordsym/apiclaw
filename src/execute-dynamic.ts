@@ -49,6 +49,9 @@ export interface ProviderAction {
   params: ActionParam[];
   responseMapping: ResponseMapping[];
   enabled: boolean;
+  // Confirmation settings for costly actions
+  requiresConfirmation?: boolean;
+  estimatedCost?: string; // e.g., "~2-5 SEK per invoice"
 }
 
 export interface ExecuteResult {
@@ -147,6 +150,31 @@ export async function getActionConfig(providerId: string, actionName: string): P
     directCallId: config._id, 
     name: actionName 
   });
+}
+
+/**
+ * Check if a dynamic action requires confirmation (for costly actions)
+ * Returns action config if confirmation required, null otherwise
+ */
+export async function getDynamicConfirmationConfig(
+  providerId: string, 
+  actionName: string
+): Promise<{ required: boolean; action?: ProviderAction; estimatedCost?: string }> {
+  const action = await getActionConfig(providerId, actionName);
+  
+  if (!action) {
+    return { required: false };
+  }
+  
+  if (action.requiresConfirmation) {
+    return { 
+      required: true, 
+      action,
+      estimatedCost: action.estimatedCost 
+    };
+  }
+  
+  return { required: false };
 }
 
 /**
