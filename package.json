@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Agent-native API discovery and Direct Call execution via MCP",
   "type": "module",
   "main": "dist/index.js",

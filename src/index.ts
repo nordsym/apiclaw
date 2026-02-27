@@ -32,6 +32,13 @@ import { hasRealCredentials } from './credentials.js';
 import { executeAPICall, getConnectedProviders } from './execute.js';
 import { logAPICall } from './analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
+import { 
+  requiresConfirmation, 
+  createPendingAction, 
+  consumePendingAction,
+  generatePreview,
+  validateParams 
+} from './confirmation.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -179,17 +186,17 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: 'Execute an API call through APIClaw Direct Call. No API keys needed - we handle authentication. For providers that require customer authentication (like CoAccept), pass your own API key via customer_key.',
+    description: 'Execute an API call through APIClaw. For actions that cost money (invoices, SMS), you will get a preview first and must confirm with the returned token. For free actions, executes immediately.',
     inputSchema: {
       type: 'object',
       properties: {
         provider: {
           type: 'string',
-          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio", "coaccept")'
+          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio", "coaccept", "frankfurter")'
         },
         action: {
           type: 'string',
-          description: 'Action to perform (e.g., "send_sms", "search", "send_email", "chat", "text_to_speech")'
+          description: 'Action to perform (e.g., "send_sms", "search", "send_email", "chat", "send_invoice", "convert")'
         },
         params: {
           type: 'object',
@@ -197,10 +204,14 @@ const tools: Tool[] = [
         },
         customer_key: {
           type: 'string',
-          description: 'Optional: Your own API key for providers that require customer authentication. If not provided, uses APIClaw shared credentials (where available).'
+          description: 'Optional: Your own API key for providers that require customer authentication (e.g., CoAccept).'
+        },
+        confirm_token: {
+          type: 'string',
+          description: 'Confirmation token from a previous call. Required to execute actions that cost money after reviewing the preview.'
         }
       },
-      required: ['provider', 'action', 'params']
+      required: ['provider', 'action']
     }
   },
   {
@@ -485,17 +496,105 @@ Docs: https://apiclaw.nordsym.com
         const provider = args?.provider as string;
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
+        const confirmToken = args?.confirm_token as string | undefined;
         
         const startTime = Date.now();
         let result: { success: boolean; provider: string; action: string; data?: any; error?: string; cost?: number };
         let apiType: 'direct' | 'open';
 
-        // Check if this is an Open API (free, no auth needed)
+        // Check if this is a confirmation of a pending action
+        if (confirmToken) {
+          const pending = consumePendingAction(confirmToken);
+          
+          if (!pending) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: 'Invalid or expired confirmation token. Please start over.',
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+
+          // Execute the confirmed action
+          apiType = 'direct';
+          const customerKey = (args?.customer_key as string) || getCustomerKey(pending.provider);
+          result = await executeAPICall(pending.provider, pending.action, pending.params, DEFAULT_AGENT_ID, customerKey);
+
+          // Log the confirmed API call
+          logAPICall({
+            timestamp: new Date().toISOString(),
+            provider: pending.provider,
+            action: pending.action,
+            type: apiType,
+            userId: DEFAULT_AGENT_ID,
+            success: result.success,
+            latencyMs: Date.now() - startTime,
+            error: result.error,
+          });
+
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: result.success ? 'success' : 'error',
+                provider: result.provider,
+                action: result.action,
+                confirmed: true,
+                ...(result.success ? { data: result.data } : { error: result.error }),
+              }, null, 2)
+            }],
+            isError: !result.success
+          };
+        }
+
+        // Check if this action requires confirmation
+        if (requiresConfirmation(provider, action)) {
+          // Validate params first
+          const validation = validateParams(provider, action, params);
+          
+          if (!validation.valid) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: 'Validation failed',
+                  missing_or_invalid: validation.errors,
+                  hint: 'Please provide all required fields before sending.',
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+
+          // Generate preview and create pending action
+          const preview = generatePreview(provider, action, params);
+          const pending = createPendingAction(provider, action, params, preview, DEFAULT_AGENT_ID);
+
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'requires_confirmation',
+                message: '⚠️ This action costs money. Please review and confirm.',
+                preview,
+                confirm_token: pending.token,
+                expires_in_seconds: 300,
+                how_to_confirm: `Call again with confirm_token: "${pending.token}"`,
+              }, null, 2)
+            }]
+          };
+        }
+
+        // Regular execution (no confirmation needed)
         if (isOpenAPI(provider)) {
           apiType = 'open';
           result = await executeOpenAPI(provider, action, params);
         } else {
-          // Direct Call - check for customer-provided API key
           apiType = 'direct';
           const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
           result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
