@@ -30,6 +30,8 @@ import {
 } from './credits.js';
 import { hasRealCredentials } from './credentials.js';
 import { executeAPICall, getConnectedProviders } from './execute.js';
+import { logAPICall } from './analytics.js';
+import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -484,10 +486,32 @@ Docs: https://apiclaw.nordsym.com
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
         
-        // Check for customer-provided API key (from args first, then env fallback)
-        const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
+        const startTime = Date.now();
+        let result: { success: boolean; provider: string; action: string; data?: any; error?: string; cost?: number };
+        let apiType: 'direct' | 'open';
 
-        const result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
+        // Check if this is an Open API (free, no auth needed)
+        if (isOpenAPI(provider)) {
+          apiType = 'open';
+          result = await executeOpenAPI(provider, action, params);
+        } else {
+          // Direct Call - check for customer-provided API key
+          apiType = 'direct';
+          const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
+          result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
+        }
+
+        // Log the API call for analytics
+        logAPICall({
+          timestamp: new Date().toISOString(),
+          provider,
+          action,
+          type: apiType,
+          userId: DEFAULT_AGENT_ID,
+          success: result.success,
+          latencyMs: Date.now() - startTime,
+          error: result.error,
+        });
 
         return {
           content: [
@@ -497,6 +521,7 @@ Docs: https://apiclaw.nordsym.com
                 status: result.success ? 'success' : 'error',
                 provider: result.provider,
                 action: result.action,
+                type: apiType,
                 ...(result.success ? { data: result.data } : { error: result.error }),
                 ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
               }, null, 2)
@@ -507,7 +532,8 @@ Docs: https://apiclaw.nordsym.com
       }
 
       case 'list_connected': {
-        const connected = getConnectedProviders();
+        const directProviders = getConnectedProviders();
+        const openProviders = listOpenAPIs();
 
         return {
           content: [
@@ -515,8 +541,15 @@ Docs: https://apiclaw.nordsym.com
               type: 'text',
               text: JSON.stringify({
                 status: 'success',
-                message: 'These APIs are available for Direct Call - no API key needed!',
-                connected_providers: connected,
+                message: 'These APIs are available via call_api - no API key needed!',
+                direct_call: {
+                  description: 'APIs where we handle authentication',
+                  providers: directProviders,
+                },
+                open_apis: {
+                  description: 'Free, open APIs (no auth required)',
+                  providers: openProviders,
+                },
                 usage: 'Use call_api with provider, action, and params to execute calls.'
               }, null, 2)
             }
