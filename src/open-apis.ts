@@ -128,6 +128,35 @@ export const openAPIs: Record<string, OpenAPIConfig> = {
       },
     },
   },
+
+  // Kroki - Diagrams as code (returns URL, not JSON)
+  kroki: {
+    name: 'Kroki',
+    description: 'Generate diagram URLs from text (Mermaid, PlantUML, GraphViz, C4)',
+    baseUrl: 'https://kroki.io',
+    actions: {
+      render: {
+        method: 'GET',
+        path: () => '', // Custom handling
+        transform: (_, params) => {
+          const type = params.type || 'mermaid';
+          const format = params.format || 'svg';
+          const diagram = params.diagram || '';
+          
+          // Base64url encode the diagram
+          const encoded = Buffer.from(diagram).toString('base64url');
+          const url = `https://kroki.io/${type}/${format}/${encoded}`;
+          
+          return {
+            url,
+            type,
+            format,
+            note: 'Open this URL to see/download the diagram',
+          };
+        },
+      },
+    },
+  },
 };
 
 /**
@@ -175,6 +204,38 @@ export async function executeOpenAPI(
   }
 
   try {
+    // Special handling for Kroki - no fetch needed, just compute URL
+    if (providerId === 'kroki') {
+      const type = params.type || 'mermaid';
+      const format = params.format || 'svg';
+      const diagram = params.diagram || '';
+      
+      if (!diagram) {
+        return {
+          success: false,
+          provider: providerId,
+          action,
+          error: 'Missing required param: diagram',
+        };
+      }
+      
+      const encoded = Buffer.from(diagram).toString('base64url');
+      const diagramUrl = `https://kroki.io/${type}/${format}/${encoded}`;
+      
+      return {
+        success: true,
+        provider: providerId,
+        action,
+        data: {
+          url: diagramUrl,
+          type,
+          format,
+          supported_types: ['mermaid', 'plantuml', 'graphviz', 'c4plantuml', 'blockdiag', 'bpmn', 'excalidraw'],
+          supported_formats: ['svg', 'png', 'pdf'],
+        },
+      };
+    }
+
     const url = config.baseUrl + actionConfig.path(params);
     const response = await fetch(url, { method: actionConfig.method });
     
