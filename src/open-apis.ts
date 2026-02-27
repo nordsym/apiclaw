@@ -204,7 +204,7 @@ export async function executeOpenAPI(
   }
 
   try {
-    // Special handling for Kroki - no fetch needed, just compute URL
+    // Special handling for Kroki - use POST to get actual image data
     if (providerId === 'kroki') {
       const type = params.type || 'mermaid';
       const format = params.format || 'svg';
@@ -219,21 +219,58 @@ export async function executeOpenAPI(
         };
       }
       
-      const encoded = Buffer.from(diagram).toString('base64url');
-      const diagramUrl = `https://kroki.io/${type}/${format}/${encoded}`;
-      
-      return {
-        success: true,
-        provider: providerId,
-        action,
-        data: {
-          url: diagramUrl,
-          type,
-          format,
-          supported_types: ['mermaid', 'plantuml', 'graphviz', 'c4plantuml', 'blockdiag', 'bpmn', 'excalidraw'],
-          supported_formats: ['svg', 'png', 'pdf'],
-        },
-      };
+      try {
+        const response = await fetch(`https://kroki.io/${type}/${format}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: diagram,
+        });
+        
+        if (!response.ok) {
+          const err = await response.text();
+          return {
+            success: false,
+            provider: providerId,
+            action,
+            error: `Kroki error: ${err}`,
+          };
+        }
+        
+        // For SVG, return the content directly; for binary, return base64
+        if (format === 'svg') {
+          const svg = await response.text();
+          return {
+            success: true,
+            provider: providerId,
+            action,
+            data: {
+              format: 'svg',
+              content: svg,
+              content_type: 'image/svg+xml',
+            },
+          };
+        } else {
+          const buffer = await response.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+          return {
+            success: true,
+            provider: providerId,
+            action,
+            data: {
+              format,
+              content_base64: base64,
+              content_type: format === 'png' ? 'image/png' : 'application/pdf',
+            },
+          };
+        }
+      } catch (e: any) {
+        return {
+          success: false,
+          provider: providerId,
+          action,
+          error: e.message || 'Kroki request failed',
+        };
+      }
     }
 
     const url = config.baseUrl + actionConfig.path(params);
