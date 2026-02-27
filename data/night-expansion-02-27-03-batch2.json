@@ -1,0 +1,1402 @@
+[
+  {
+    "name": "Arduino Cloud API",
+    "description": "IoT cloud platform for Arduino",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://www.arduino.cc/reference/en/iot/api/"
+  },
+  {
+    "name": "Particle Cloud API",
+    "description": "IoT device management platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.particle.io/reference/cloud-apis/api/"
+  },
+  {
+    "name": "Tuya IoT API",
+    "description": "Smart device platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.tuya.com/en/docs/cloud/"
+  },
+  {
+    "name": "Samsung SmartThings API",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developer.smartthings.com/docs/api/public"
+  },
+  {
+    "name": "Home Assistant API",
+    "description": "Open source home automation",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.home-assistant.io/docs/api/rest/"
+  },
+  {
+    "name": "IFTTT Service API",
+    "description": "Automation platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ifttt.com/docs/api_reference"
+  },
+  {
+    "name": "Philips Hue API",
+    "description": "Smart lighting control",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.meethue.com/develop/hue-api/"
+  },
+  {
+    "name": "LIFX API",
+    "description": "WiFi-enabled smart lights",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://api.developer.lifx.com/"
+  },
+  {
+    "name": "Nanoleaf API",
+    "description": "Smart light panels",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://forum.nanoleaf.me/docs"
+  },
+  {
+    "name": "Govee API",
+    "description": "Smart LED lighting",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.govee.com/"
+  },
+  {
+    "name": "Ecobee API",
+    "description": "Smart thermostat platform",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://www.ecobee.com/home/developer/api/introduction/index.shtml"
+  },
+  {
+    "name": "Nest API",
+    "description": "Google smart home devices",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/nest/device-access"
+  },
+  {
+    "name": "Ring API",
+    "description": "Smart security devices",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://github.com/dgreif/ring"
+  },
+  {
+    "name": "Wyze API",
+    "description": "Affordable smart home devices",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://wyze-sdk.readthedocs.io/"
+  },
+  {
+    "name": "Ubiquiti UniFi API",
+    "description": "Network management",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ubntwiki.com/products/software/unifi-controller/api"
+  },
+  {
+    "name": "TP-Link Kasa API",
+    "description": "Smart home devices",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://www.tp-link.com/us/kasa-smart/"
+  },
+  {
+    "name": "Sonos API",
+    "description": "Smart speakers",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developer.sonos.com/reference/"
+  },
+  {
+    "name": "Roku API",
+    "description": "Streaming device control",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://developer.roku.com/docs/developer-program/debugging/external-control-api.md"
+  },
+  {
+    "name": "LG ThinQ API",
+    "description": "Smart appliances",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developer.lge.com/"
+  },
+  {
+    "name": "Samsung Bixby API",
+    "description": "Voice assistant platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://bixbydevelopers.com/dev/docs/dev-guide/developers"
+  },
+  {
+    "name": "Fitbit Web API",
+    "description": "Fitness tracker data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://dev.fitbit.com/build/reference/web-api/"
+  },
+  {
+    "name": "Withings API",
+    "description": "Connected health devices",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.withings.com/api-reference"
+  },
+  {
+    "name": "Oura Ring API",
+    "description": "Sleep and activity tracker",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://cloud.ouraring.com/docs/"
+  },
+  {
+    "name": "Garmin Connect API",
+    "description": "Fitness device data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.garmin.com/gc-developer-program/overview/"
+  },
+  {
+    "name": "Whoop API",
+    "description": "Recovery and strain tracking",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.whoop.com/docs"
+  },
+  {
+    "name": "Apple HealthKit",
+    "description": "iOS health data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.apple.com/documentation/healthkit"
+  },
+  {
+    "name": "Google Fit API",
+    "description": "Health and fitness data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/fit/rest"
+  },
+  {
+    "name": "Samsung Health API",
+    "description": "Health platform",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.samsung.com/health"
+  },
+  {
+    "name": "Strava API",
+    "description": "Athletic tracking platform",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developers.strava.com/docs/reference/"
+  },
+  {
+    "name": "MapMyFitness API",
+    "description": "Workout tracking",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.mapmyfitness.com/"
+  },
+  {
+    "name": "Peloton API",
+    "description": "Connected fitness platform",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com/philosowaffle/peloton-to-garmin"
+  },
+  {
+    "name": "Cronometer API",
+    "description": "Nutrition tracking",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://cronometer.com/developer/"
+  },
+  {
+    "name": "MyFitnessPal API",
+    "description": "Calorie counting app",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://myfitnesspal.com/"
+  },
+  {
+    "name": "Nutritionix API",
+    "description": "Food and nutrition database",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.nutritionix.com/"
+  },
+  {
+    "name": "Spoonacular API",
+    "description": "Food and recipe data",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://spoonacular.com/food-api/docs"
+  },
+  {
+    "name": "Edamam API",
+    "description": "Nutrition and recipe API",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.edamam.com/"
+  },
+  {
+    "name": "USDA FoodData Central",
+    "description": "Food composition data",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://fdc.nal.usda.gov/api-guide.html"
+  },
+  {
+    "name": "Open Food Facts API",
+    "description": "Food products database",
+    "category": "Health",
+    "authType": "none",
+    "baseUrl": "https://world.openfoodfacts.org/data"
+  },
+  {
+    "name": "FDA Drug API",
+    "description": "Drug information database",
+    "category": "Health",
+    "authType": "none",
+    "baseUrl": "https://open.fda.gov/apis/drug/"
+  },
+  {
+    "name": "NIH PubMed API",
+    "description": "Medical research database",
+    "category": "Health",
+    "authType": "apiKey",
+    "baseUrl": "https://www.ncbi.nlm.nih.gov/home/develop/api/"
+  },
+  {
+    "name": "Canvas LMS API",
+    "description": "Learning management system",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://canvas.instructure.com/doc/api/"
+  },
+  {
+    "name": "Moodle API",
+    "description": "Open source LMS",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.moodle.org/dev/Web_service_API_functions"
+  },
+  {
+    "name": "Blackboard REST API",
+    "description": "Education technology platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://developer.anthology.com/portal/displayApi"
+  },
+  {
+    "name": "Schoology API",
+    "description": "LMS platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://developers.schoology.com/"
+  },
+  {
+    "name": "Google Classroom API",
+    "description": "Education platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/classroom"
+  },
+  {
+    "name": "Microsoft Education API",
+    "description": "Microsoft 365 Education",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://docs.microsoft.com/en-us/graph/api/resources/education-overview"
+  },
+  {
+    "name": "Coursera API",
+    "description": "Online learning platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://building.coursera.org/developer-program"
+  },
+  {
+    "name": "Udemy API",
+    "description": "Online course marketplace",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.udemy.com/developers/"
+  },
+  {
+    "name": "Duolingo API",
+    "description": "Language learning platform",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://www.duolingo.com/"
+  },
+  {
+    "name": "Khan Academy API",
+    "description": "Free educational content",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://github.com/Khan/khan-api"
+  },
+  {
+    "name": "Quizlet API",
+    "description": "Study tools platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://quizlet.com/api-docs/2.0/"
+  },
+  {
+    "name": "Anki API",
+    "description": "Flashcard learning",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://foosoft.net/projects/anki-connect/"
+  },
+  {
+    "name": "Codecademy API",
+    "description": "Coding education platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://www.codecademy.com/"
+  },
+  {
+    "name": "freeCodeCamp API",
+    "description": "Free coding curriculum",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://www.freecodecamp.org/news/the-freecodecamp-api/"
+  },
+  {
+    "name": "LeetCode API",
+    "description": "Coding interview platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://leetcode.com/api/"
+  },
+  {
+    "name": "HackerRank API",
+    "description": "Technical assessment platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.hackerrank.com/work/api"
+  },
+  {
+    "name": "Exercism API",
+    "description": "Code practice platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://exercism.org/docs/using/api"
+  },
+  {
+    "name": "DataCamp API",
+    "description": "Data science learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.datacamp.com/"
+  },
+  {
+    "name": "Skillshare API",
+    "description": "Creative learning platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://www.skillshare.com/"
+  },
+  {
+    "name": "edX API",
+    "description": "Online education platform",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://open.edx.org/apis-and-documentation"
+  },
+  {
+    "name": "Amadeus Travel API",
+    "description": "Flight and hotel booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.amadeus.com/self-service"
+  },
+  {
+    "name": "Skyscanner API",
+    "description": "Flight search engine",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.skyscanner.net/docs/intro"
+  },
+  {
+    "name": "Kayak API",
+    "description": "Travel search platform",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.kayak.com/"
+  },
+  {
+    "name": "Expedia API",
+    "description": "Travel booking platform",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.expediagroup.com/"
+  },
+  {
+    "name": "Booking.com API",
+    "description": "Hotel booking platform",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.booking.com/"
+  },
+  {
+    "name": "Hotels.com API",
+    "description": "Hotel search and booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.expediagroup.com/hotels-api/"
+  },
+  {
+    "name": "Airbnb API",
+    "description": "Home rental platform",
+    "category": "Travel",
+    "authType": "oauth",
+    "baseUrl": "https://www.airbnb.com/partner"
+  },
+  {
+    "name": "VRBO API",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.vrbo.com/en-us/owner/"
+  },
+  {
+    "name": "TripAdvisor API",
+    "description": "Travel reviews platform",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.tripadvisor.com/developers"
+  },
+  {
+    "name": "Yelp Fusion API",
+    "description": "Local business reviews",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.yelp.com/developers/documentation/v3"
+  },
+  {
+    "name": "Foursquare Places API",
+    "description": "Location data platform",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.foursquare.com/docs/places-api-overview"
+  },
+  {
+    "name": "Google Places API",
+    "description": "Place information",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/maps/documentation/places/web-service/overview"
+  },
+  {
+    "name": "Uber API",
+    "description": "Ride-hailing platform",
+    "category": "Travel",
+    "authType": "oauth",
+    "baseUrl": "https://developer.uber.com/docs/riders/introduction"
+  },
+  {
+    "name": "Lyft API",
+    "description": "Ride-sharing service",
+    "category": "Travel",
+    "authType": "oauth",
+    "baseUrl": "https://developer.lyft.com/docs/overview"
+  },
+  {
+    "name": "Rome2Rio API",
+    "description": "Multi-modal travel search",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rome2rio.com/documentation/"
+  },
+  {
+    "name": "FlightAware API",
+    "description": "Flight tracking data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://flightaware.com/commercial/flightxml/"
+  },
+  {
+    "name": "AviationStack API",
+    "description": "Aviation data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://aviationstack.com/documentation"
+  },
+  {
+    "name": "OpenSky Network API",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://opensky-network.org/apidoc/"
+  },
+  {
+    "name": "ADS-B Exchange API",
+    "description": "Aircraft tracking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.adsbexchange.com/data/"
+  },
+  {
+    "name": "Marine Traffic API",
+    "description": "Ship tracking data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://www.marinetraffic.com/en/ais-api-services"
+  },
+  {
+    "name": "OpenCorporates API",
+    "description": "Company data worldwide",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://api.opencorporates.com/documentation/API-Reference"
+  },
+  {
+    "name": "Crunchbase API",
+    "description": "Company and investor data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://data.crunchbase.com/docs"
+  },
+  {
+    "name": "PitchBook API",
+    "description": "Private market data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://pitchbook.com/data"
+  },
+  {
+    "name": "FullContact API",
+    "description": "Contact enrichment",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.fullcontact.com/"
+  },
+  {
+    "name": "Clearbit API",
+    "description": "Business intelligence",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://clearbit.com/docs"
+  },
+  {
+    "name": "Hunter.io API",
+    "description": "Email finder and verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://hunter.io/api-documentation/v2"
+  },
+  {
+    "name": "ZoomInfo API",
+    "description": "B2B contact data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://www.zoominfo.com/"
+  },
+  {
+    "name": "Apollo.io API",
+    "description": "Sales intelligence platform",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://apolloio.github.io/apollo-api-docs/"
+  },
+  {
+    "name": "LinkedIn Sales Navigator API",
+    "description": "Sales prospecting",
+    "category": "Legal",
+    "authType": "oauth",
+    "baseUrl": "https://docs.microsoft.com/en-us/linkedin/sales/"
+  },
+  {
+    "name": "SEC EDGAR API",
+    "description": "US securities filings",
+    "category": "Legal",
+    "authType": "none",
+    "baseUrl": "https://www.sec.gov/developer"
+  },
+  {
+    "name": "Companies House API",
+    "description": "UK company data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.company-information.service.gov.uk/"
+  },
+  {
+    "name": "OpenLEI API",
+    "description": "Legal Entity Identifier data",
+    "category": "Legal",
+    "authType": "none",
+    "baseUrl": "https://www.gleif.org/en/lei-data/gleif-concatenated-file/download-the-concatenated-file"
+  },
+  {
+    "name": "Court Listener API",
+    "description": "US court data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://www.courtlistener.com/api/rest-info/"
+  },
+  {
+    "name": "UK Parliament API",
+    "description": "Parliamentary data",
+    "category": "Legal",
+    "authType": "none",
+    "baseUrl": "https://developer.parliament.uk/"
+  },
+  {
+    "name": "US Congress API",
+    "description": "Legislative data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://api.congress.gov/"
+  },
+  {
+    "name": "EU Open Data Portal",
+    "description": "European Union data",
+    "category": "Legal",
+    "authType": "none",
+    "baseUrl": "https://data.europa.eu/en"
+  },
+  {
+    "name": "OpenStates API",
+    "description": "US state legislature data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.openstates.org/en/latest/api/v3/"
+  },
+  {
+    "name": "ProPublica Congress API",
+    "description": "Congressional data",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://www.propublica.org/datastore/api/propublica-congress-api"
+  },
+  {
+    "name": "GovInfo API",
+    "description": "US government publications",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://www.govinfo.gov/features/api"
+  },
+  {
+    "name": "Federal Register API",
+    "description": "US federal regulations",
+    "category": "Legal",
+    "authType": "none",
+    "baseUrl": "https://www.federalregister.gov/developers/api/v1"
+  },
+  {
+    "name": "Zillow API",
+    "description": "US real estate data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.zillow.com/howto/api/APIOverview.htm"
+  },
+  {
+    "name": "Redfin API",
+    "description": "Real estate brokerage",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.redfin.com/"
+  },
+  {
+    "name": "Realtor.com API",
+    "description": "Property listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.realtor.com/"
+  },
+  {
+    "name": "Rightmove API",
+    "description": "UK property portal",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rightmove.co.uk/"
+  },
+  {
+    "name": "Zoopla API",
+    "description": "UK property data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.zoopla.co.uk/"
+  },
+  {
+    "name": "Hemnet API",
+    "description": "Swedish property portal",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.hemnet.se/"
+  },
+  {
+    "name": "SimplyRETS API",
+    "description": "MLS property data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.simplyrets.com/api/index.html"
+  },
+  {
+    "name": "Walk Score API",
+    "description": "Walkability ratings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.walkscore.com/professional/api.php"
+  },
+  {
+    "name": "Rentometer API",
+    "description": "Rental price analysis",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rentometer.com/docs"
+  },
+  {
+    "name": "ATTOM Property API",
+    "description": "Property data platform",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://api.developer.attomdata.com/"
+  },
+  {
+    "name": "CoreLogic API",
+    "description": "Property intelligence",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.corelogic.com/"
+  },
+  {
+    "name": "Estated Property API",
+    "description": "US property data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://estated.com/developers"
+  },
+  {
+    "name": "Mashvisor API",
+    "description": "Investment property analytics",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.mashvisor.com/api-documentation"
+  },
+  {
+    "name": "Buildium API",
+    "description": "Property management",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.buildium.com/"
+  },
+  {
+    "name": "AppFolio API",
+    "description": "Property management software",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.appfolio.com/"
+  },
+  {
+    "name": "Yardi API",
+    "description": "Property management platform",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.yardi.com/"
+  },
+  {
+    "name": "RentManager API",
+    "description": "Rental property software",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rentmanager.com/api-documentation"
+  },
+  {
+    "name": "Apartments.com API",
+    "description": "Apartment listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.apartments.com/"
+  },
+  {
+    "name": "Rent.com API",
+    "description": "Rental listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rent.com/"
+  },
+  {
+    "name": "Trulia API",
+    "description": "Real estate marketplace",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://www.trulia.com/"
+  },
+  {
+    "name": "ESPN API",
+    "description": "Sports data and news",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://www.espn.com/apis/"
+  },
+  {
+    "name": "NBA API",
+    "description": "Basketball statistics",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://www.nba.com/stats/"
+  },
+  {
+    "name": "NFL API",
+    "description": "Football statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://api.nfl.com/docs/"
+  },
+  {
+    "name": "MLB API",
+    "description": "Baseball data",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://statsapi.mlb.com/"
+  },
+  {
+    "name": "NHL API",
+    "description": "Hockey statistics",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://gitlab.com/dword4/nhlapi"
+  },
+  {
+    "name": "Football-Data API",
+    "description": "Soccer data",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://www.football-data.org/documentation/api"
+  },
+  {
+    "name": "API-Football",
+    "description": "Football/soccer data",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://www.api-football.com/documentation-v3"
+  },
+  {
+    "name": "Sportradar API",
+    "description": "Sports data provider",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.sportradar.com/"
+  },
+  {
+    "name": "TheRundown API",
+    "description": "Sports odds and scores",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://therundown.io/api"
+  },
+  {
+    "name": "Odds API",
+    "description": "Sports betting odds",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://the-odds-api.com/"
+  },
+  {
+    "name": "Riot Games API",
+    "description": "League of Legends data",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.riotgames.com/apis"
+  },
+  {
+    "name": "Blizzard API",
+    "description": "World of Warcraft data",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://develop.battle.net/documentation"
+  },
+  {
+    "name": "Xbox Live API",
+    "description": "Xbox gaming platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.microsoft.com/en-us/gaming/xbox-live/"
+  },
+  {
+    "name": "PlayStation Network API",
+    "description": "PlayStation gaming",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://playstation.com/"
+  },
+  {
+    "name": "Nintendo API",
+    "description": "Nintendo gaming data",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://www.nintendo.com/"
+  },
+  {
+    "name": "Twitch API",
+    "description": "Game streaming platform",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://dev.twitch.tv/docs/api/"
+  },
+  {
+    "name": "Discord GameSDK",
+    "description": "Gaming social platform",
+    "category": "Gaming",
+    "authType": "oauth",
+    "baseUrl": "https://discord.com/developers/docs/game-sdk/sdk-starter-guide"
+  },
+  {
+    "name": "OpenDota API",
+    "description": "Dota 2 statistics",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://docs.opendota.com/"
+  },
+  {
+    "name": "FACEIT API",
+    "description": "Esports platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.faceit.com/docs/tools/data-api"
+  },
+  {
+    "name": "Chess.com API",
+    "description": "Chess platform",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://www.chess.com/news/view/published-data-api"
+  },
+  {
+    "name": "OpenAQ API",
+    "description": "Air quality data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://docs.openaq.org/"
+  },
+  {
+    "name": "AirVisual API",
+    "description": "Air pollution data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://api-docs.iqair.com/"
+  },
+  {
+    "name": "EPA AirNow API",
+    "description": "US air quality data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.airnowapi.org/"
+  },
+  {
+    "name": "AQICN API",
+    "description": "World air quality index",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://aqicn.org/api/"
+  },
+  {
+    "name": "Carbon Interface API",
+    "description": "Carbon footprint calculation",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.carboninterface.com/"
+  },
+  {
+    "name": "Climatiq API",
+    "description": "Carbon emission factors",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.climatiq.io/docs"
+  },
+  {
+    "name": "Electricity Maps API",
+    "description": "Carbon intensity of electricity",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://static.electricitymaps.com/api/docs/index.html"
+  },
+  {
+    "name": "WattTime API",
+    "description": "Grid carbon emissions",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.watttime.org/api-documentation/"
+  },
+  {
+    "name": "USGS Water Services",
+    "description": "Water data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://waterservices.usgs.gov/"
+  },
+  {
+    "name": "Global Forest Watch API",
+    "description": "Forest monitoring",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.globalforestwatch.org/"
+  },
+  {
+    "name": "GBIF API",
+    "description": "Biodiversity data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://www.gbif.org/developer/summary"
+  },
+  {
+    "name": "iNaturalist API",
+    "description": "Nature observations",
+    "category": "Environment",
+    "authType": "oauth",
+    "baseUrl": "https://api.inaturalist.org/v1/docs/"
+  },
+  {
+    "name": "eBird API",
+    "description": "Bird observation data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://documenter.getpostman.com/view/664302/S1ENwy59"
+  },
+  {
+    "name": "NOAA Climate Data API",
+    "description": "Climate data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2"
+  },
+  {
+    "name": "NASA POWER API",
+    "description": "Solar and meteorological data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://power.larc.nasa.gov/docs/services/api/"
+  },
+  {
+    "name": "Copernicus Climate API",
+    "description": "European climate data",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://cds.climate.copernicus.eu/api-how-to"
+  },
+  {
+    "name": "USGS Earthquake API",
+    "description": "Earthquake data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://earthquake.usgs.gov/fdsnws/event/1/"
+  },
+  {
+    "name": "WeatherStack API",
+    "description": "Weather data service",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://weatherstack.com/documentation"
+  },
+  {
+    "name": "Sunrise-Sunset API",
+    "description": "Sun times for any location",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://sunrise-sunset.org/api"
+  },
+  {
+    "name": "Moon Phase API",
+    "description": "Lunar phase data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://www.farmsense.net/api/astro-widgets/"
+  },
+  {
+    "name": "Twilio API",
+    "description": "SMS, voice, video",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.twilio.com/docs/usage/api"
+  },
+  {
+    "name": "Vonage API",
+    "description": "Communication APIs",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.vonage.com/"
+  },
+  {
+    "name": "Plivo API",
+    "description": "Voice and SMS",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.plivo.com/docs/"
+  },
+  {
+    "name": "MessageBird API",
+    "description": "Omnichannel messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.messagebird.com/"
+  },
+  {
+    "name": "Sinch API",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.sinch.com/"
+  },
+  {
+    "name": "Bandwidth API",
+    "description": "Voice and messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://dev.bandwidth.com/"
+  },
+  {
+    "name": "Telnyx API",
+    "description": "Communications platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.telnyx.com/"
+  },
+  {
+    "name": "Infobip API",
+    "description": "Omnichannel platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.infobip.com/docs/api"
+  },
+  {
+    "name": "Viber API",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.viber.com/"
+  },
+  {
+    "name": "LINE Messaging API",
+    "description": "LINE platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.line.biz/en/docs/messaging-api/"
+  },
+  {
+    "name": "Telegram Bot API",
+    "description": "Telegram messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://core.telegram.org/bots/api"
+  },
+  {
+    "name": "WhatsApp Business API",
+    "description": "WhatsApp messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.facebook.com/docs/whatsapp/cloud-api/"
+  },
+  {
+    "name": "Facebook Messenger API",
+    "description": "Messenger platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.facebook.com/docs/messenger-platform/"
+  },
+  {
+    "name": "WeChat API",
+    "description": "WeChat platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.weixin.qq.com/doc/offiaccount/en/Getting_Started/Overview.html"
+  },
+  {
+    "name": "Pusher API",
+    "description": "Realtime communication",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://pusher.com/docs/"
+  },
+  {
+    "name": "Ably API",
+    "description": "Realtime messaging",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://ably.com/docs/api"
+  },
+  {
+    "name": "PubNub API",
+    "description": "Realtime data streaming",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.pubnub.com/docs/"
+  },
+  {
+    "name": "Agora API",
+    "description": "Video and voice SDK",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.agora.io/en/"
+  },
+  {
+    "name": "Daily.co API",
+    "description": "Video calling platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.daily.co/reference/rest-api"
+  },
+  {
+    "name": "Livekit API",
+    "description": "Open source WebRTC",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.livekit.io/"
+  },
+  {
+    "name": "Plaid API",
+    "description": "Financial data aggregation",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://plaid.com/docs/api/"
+  },
+  {
+    "name": "Tink API",
+    "description": "Open banking platform",
+    "category": "Fintech",
+    "authType": "oauth",
+    "baseUrl": "https://docs.tink.com/"
+  },
+  {
+    "name": "TrueLayer API",
+    "description": "Open banking infrastructure",
+    "category": "Fintech",
+    "authType": "oauth",
+    "baseUrl": "https://docs.truelayer.com/"
+  },
+  {
+    "name": "Yapily API",
+    "description": "Open banking connections",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.yapily.com/"
+  },
+  {
+    "name": "Basiq API",
+    "description": "Financial data platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://api.basiq.io/reference/"
+  },
+  {
+    "name": "MX API",
+    "description": "Financial data platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.mx.com/"
+  },
+  {
+    "name": "Finicity API",
+    "description": "Financial data services",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.finicity.com/"
+  },
+  {
+    "name": "Wise API",
+    "description": "International transfers",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://api-docs.wise.com/"
+  },
+  {
+    "name": "Revolut Business API",
+    "description": "Business banking",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.revolut.com/docs/business/overview"
+  },
+  {
+    "name": "Mercury API",
+    "description": "Startup banking",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://mercury.com/"
+  },
+  {
+    "name": "Brex API",
+    "description": "Corporate cards and banking",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.brex.com/"
+  },
+  {
+    "name": "Ramp API",
+    "description": "Corporate card platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.ramp.com/"
+  },
+  {
+    "name": "Marqeta API",
+    "description": "Card issuing platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://www.marqeta.com/docs/developer-guides/core-api-quick-start"
+  },
+  {
+    "name": "Galileo API",
+    "description": "Payment platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.galileo-ft.com/"
+  },
+  {
+    "name": "Unit API",
+    "description": "Banking-as-a-service",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.unit.co/"
+  },
+  {
+    "name": "Synapse API",
+    "description": "Banking infrastructure",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.synapsefi.com/"
+  },
+  {
+    "name": "Bond API",
+    "description": "Embedded finance platform",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.bond.tech/"
+  },
+  {
+    "name": "Treasury Prime API",
+    "description": "Banking infrastructure",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.treasuryprime.com/"
+  },
+  {
+    "name": "Column API",
+    "description": "Bank infrastructure",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://column.com/docs/api"
+  },
+  {
+    "name": "Modern Treasury API",
+    "description": "Payment operations",
+    "category": "Fintech",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.moderntreasury.com/"
+  }
+]

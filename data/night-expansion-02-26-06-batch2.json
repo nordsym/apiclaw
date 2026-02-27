@@ -1,0 +1,1898 @@
+[
+  {
+    "id": "openmrs",
+    "name": "OpenMRS",
+    "description": "Open source medical records",
+    "category": "Healthcare",
+    "link": "https://wiki.openmrs.org/display/docs/REST+Web+Services+API+For+Clients",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hapi-fhir",
+    "name": "HAPI FHIR",
+    "description": "Healthcare interoperability",
+    "category": "Healthcare",
+    "link": "https://hapifhir.io/",
+    "auth": "None"
+  },
+  {
+    "id": "drugbank",
+    "name": "DrugBank",
+    "description": "Drug information database",
+    "category": "Healthcare",
+    "link": "https://docs.drugbank.com/v1/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "rxnorm",
+    "name": "RxNorm",
+    "description": "Drug naming standards",
+    "category": "Healthcare",
+    "link": "https://lhncbc.nlm.nih.gov/RxNav/APIs/",
+    "auth": "None"
+  },
+  {
+    "id": "openfda-drug",
+    "name": "OpenFDA Drug",
+    "description": "FDA drug data",
+    "category": "Healthcare",
+    "link": "https://open.fda.gov/apis/drug/",
+    "auth": "None"
+  },
+  {
+    "id": "clinicaltrials-gov",
+    "name": "ClinicalTrials.gov",
+    "description": "Clinical trial data",
+    "category": "Healthcare",
+    "link": "https://clinicaltrials.gov/api/",
+    "auth": "None"
+  },
+  {
+    "id": "biodigital",
+    "name": "BioDigital",
+    "description": "3D human anatomy",
+    "category": "Healthcare",
+    "link": "https://developer.biodigital.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "medlineplus",
+    "name": "MedlinePlus",
+    "description": "Health information",
+    "category": "Healthcare",
+    "link": "https://medlineplus.gov/webservices.html",
+    "auth": "None"
+  },
+  {
+    "id": "shippo",
+    "name": "Shippo",
+    "description": "Multi-carrier shipping",
+    "category": "Shipping",
+    "link": "https://goshippo.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "easypost",
+    "name": "EasyPost",
+    "description": "Shipping API",
+    "category": "Shipping",
+    "link": "https://www.easypost.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shipstation",
+    "name": "Shipstation",
+    "description": "Order management",
+    "category": "Shipping",
+    "link": "https://www.shipstation.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "postnord",
+    "name": "PostNord",
+    "description": "Nordic postal service",
+    "category": "Shipping",
+    "link": "https://developer.postnord.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "deutsche-post",
+    "name": "Deutsche Post",
+    "description": "German postal service",
+    "category": "Shipping",
+    "link": "https://developer.dhl.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "royal-mail",
+    "name": "Royal Mail",
+    "description": "UK postal service",
+    "category": "Shipping",
+    "link": "https://developer.royalmail.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "australia-post",
+    "name": "Australia Post",
+    "description": "Australian postal",
+    "category": "Shipping",
+    "link": "https://developers.auspost.com.au/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "usps",
+    "name": "USPS",
+    "description": "US Postal Service",
+    "category": "Shipping",
+    "link": "https://www.usps.com/business/web-tools-apis/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pitney-bowes",
+    "name": "Pitney Bowes",
+    "description": "Shipping and mailing",
+    "category": "Shipping",
+    "link": "https://shipping360.pitneybowes.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "freightos",
+    "name": "Freightos",
+    "description": "Freight rates",
+    "category": "Shipping",
+    "link": "https://www.freightos.com/freight-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "greenhouse",
+    "name": "Greenhouse",
+    "description": "Recruiting software",
+    "category": "HR",
+    "link": "https://developers.greenhouse.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lever",
+    "name": "Lever",
+    "description": "Recruiting platform",
+    "category": "HR",
+    "link": "https://hire.lever.co/developer/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "workable",
+    "name": "Workable",
+    "description": "Recruiting software",
+    "category": "HR",
+    "link": "https://workable.readme.io/reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bamboohr",
+    "name": "BambooHR",
+    "description": "HR software",
+    "category": "HR",
+    "link": "https://documentation.bamboohr.com/reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "gusto",
+    "name": "Gusto",
+    "description": "Payroll and benefits",
+    "category": "HR",
+    "link": "https://docs.gusto.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "rippling",
+    "name": "Rippling",
+    "description": "HR platform",
+    "category": "HR",
+    "link": "https://developer.rippling.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "personio",
+    "name": "Personio",
+    "description": "HR management",
+    "category": "HR",
+    "link": "https://developer.personio.de/reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hibob",
+    "name": "HiBob",
+    "description": "HR platform",
+    "category": "HR",
+    "link": "https://apidocs.hibob.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "namely",
+    "name": "Namely",
+    "description": "HR software",
+    "category": "HR",
+    "link": "https://developers.namely.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "zenefits",
+    "name": "Zenefits",
+    "description": "HR platform",
+    "category": "HR",
+    "link": "https://developers.zenefits.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "docusign",
+    "name": "DocuSign",
+    "description": "Electronic signatures",
+    "category": "Legal",
+    "link": "https://developers.docusign.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "hellosign",
+    "name": "HelloSign",
+    "description": "E-signatures",
+    "category": "Legal",
+    "link": "https://developers.hellosign.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ironclad",
+    "name": "Ironclad",
+    "description": "Contract management",
+    "category": "Legal",
+    "link": "https://developer.ironcladapp.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "contractworks",
+    "name": "ContractWorks",
+    "description": "Contract management",
+    "category": "Legal",
+    "link": "https://www.contractworks.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clio",
+    "name": "Clio",
+    "description": "Legal practice management",
+    "category": "Legal",
+    "link": "https://developers.clio.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "gdpr-api",
+    "name": "GDPR API",
+    "description": "GDPR compliance",
+    "category": "Legal",
+    "link": "https://gdpr-info.eu/",
+    "auth": "None"
+  },
+  {
+    "id": "vanta",
+    "name": "Vanta",
+    "description": "Compliance automation",
+    "category": "Security",
+    "link": "https://www.vanta.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "drata",
+    "name": "Drata",
+    "description": "Compliance platform",
+    "category": "Security",
+    "link": "https://drata.com/platform/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "onetrust",
+    "name": "OneTrust",
+    "description": "Privacy management",
+    "category": "Legal",
+    "link": "https://developer.onetrust.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "zendesk",
+    "name": "Zendesk",
+    "description": "Customer service",
+    "category": "Support",
+    "link": "https://developer.zendesk.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "freshdesk",
+    "name": "Freshdesk",
+    "description": "Help desk software",
+    "category": "Support",
+    "link": "https://developers.freshdesk.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "intercom",
+    "name": "Intercom",
+    "description": "Customer messaging",
+    "category": "Support",
+    "link": "https://developers.intercom.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "helpscout",
+    "name": "Helpscout",
+    "description": "Customer support",
+    "category": "Support",
+    "link": "https://developer.helpscout.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "crisp",
+    "name": "Crisp",
+    "description": "Customer messaging",
+    "category": "Support",
+    "link": "https://docs.crisp.chat/api/v1/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "drift",
+    "name": "Drift",
+    "description": "Conversational marketing",
+    "category": "Marketing",
+    "link": "https://devdocs.drift.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "tawk-to",
+    "name": "Tawk.to",
+    "description": "Live chat",
+    "category": "Support",
+    "link": "https://developer.tawk.to/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "livechat",
+    "name": "LiveChat",
+    "description": "Live chat software",
+    "category": "Support",
+    "link": "https://developers.livechat.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "kustomer",
+    "name": "Kustomer",
+    "description": "Customer service",
+    "category": "Support",
+    "link": "https://developer.kustomer.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "gorgias",
+    "name": "Gorgias",
+    "description": "E-commerce support",
+    "category": "Support",
+    "link": "https://developers.gorgias.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hubspot",
+    "name": "HubSpot",
+    "description": "Marketing platform",
+    "category": "Marketing",
+    "link": "https://developers.hubspot.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "marketo",
+    "name": "Marketo",
+    "description": "Marketing automation",
+    "category": "Marketing",
+    "link": "https://developers.marketo.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pardot",
+    "name": "Pardot",
+    "description": "B2B marketing",
+    "category": "Marketing",
+    "link": "https://developer.salesforce.com/docs/marketing/pardot/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "activecampaign",
+    "name": "ActiveCampaign",
+    "description": "Email marketing",
+    "category": "Marketing",
+    "link": "https://developers.activecampaign.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "klaviyo",
+    "name": "Klaviyo",
+    "description": "E-commerce marketing",
+    "category": "Marketing",
+    "link": "https://developers.klaviyo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "braze",
+    "name": "Braze",
+    "description": "Customer engagement",
+    "category": "Marketing",
+    "link": "https://www.braze.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "iterable",
+    "name": "Iterable",
+    "description": "Cross-channel marketing",
+    "category": "Marketing",
+    "link": "https://api.iterable.com/api/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "customer-io",
+    "name": "Customer.io",
+    "description": "Messaging automation",
+    "category": "Marketing",
+    "link": "https://customer.io/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "drip",
+    "name": "Drip",
+    "description": "E-commerce CRM",
+    "category": "Marketing",
+    "link": "https://developer.drip.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "omnisend",
+    "name": "Omnisend",
+    "description": "E-commerce marketing",
+    "category": "Marketing",
+    "link": "https://api-docs.omnisend.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "quickbooks",
+    "name": "QuickBooks",
+    "description": "Accounting software",
+    "category": "Finance",
+    "link": "https://developer.intuit.com/app/developer/qbo/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "xero",
+    "name": "Xero",
+    "description": "Accounting platform",
+    "category": "Finance",
+    "link": "https://developer.xero.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "freshbooks",
+    "name": "FreshBooks",
+    "description": "Invoicing software",
+    "category": "Finance",
+    "link": "https://www.freshbooks.com/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "wave",
+    "name": "Wave",
+    "description": "Small business accounting",
+    "category": "Finance",
+    "link": "https://developer.waveapps.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "sage",
+    "name": "Sage",
+    "description": "Accounting software",
+    "category": "Finance",
+    "link": "https://developer.sage.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "invoice-ninja",
+    "name": "Invoice Ninja",
+    "description": "Invoicing platform",
+    "category": "Finance",
+    "link": "https://invoice-ninja.readthedocs.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "harvest",
+    "name": "Harvest",
+    "description": "Time tracking",
+    "category": "Productivity",
+    "link": "https://help.getharvest.com/api-v2/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "chargebee",
+    "name": "Chargebee",
+    "description": "Subscription billing",
+    "category": "Finance",
+    "link": "https://www.chargebee.com/docs/2.0/api_v2.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "recurly",
+    "name": "Recurly",
+    "description": "Subscription management",
+    "category": "Finance",
+    "link": "https://developers.recurly.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "salesforce-api",
+    "name": "Salesforce API",
+    "description": "CRM platform",
+    "category": "Business",
+    "link": "https://developer.salesforce.com/docs/apis",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pipedrive",
+    "name": "Pipedrive",
+    "description": "Sales CRM",
+    "category": "Business",
+    "link": "https://developers.pipedrive.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "zoho-crm",
+    "name": "Zoho CRM",
+    "description": "CRM platform",
+    "category": "Business",
+    "link": "https://www.zoho.com/crm/developer/docs/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "close",
+    "name": "Close",
+    "description": "Sales CRM",
+    "category": "Business",
+    "link": "https://developer.close.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "copper",
+    "name": "Copper",
+    "description": "Google CRM",
+    "category": "Business",
+    "link": "https://developer.copper.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "insightly",
+    "name": "Insightly",
+    "description": "CRM and project",
+    "category": "Business",
+    "link": "https://api.insight.ly/v3.1/Help",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nimble",
+    "name": "Nimble",
+    "description": "Social CRM",
+    "category": "Business",
+    "link": "https://nimble.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "freshsales",
+    "name": "Freshsales",
+    "description": "Sales CRM",
+    "category": "Business",
+    "link": "https://developers.freshsales.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "monday-com",
+    "name": "Monday.com",
+    "description": "Work OS",
+    "category": "Productivity",
+    "link": "https://developer.monday.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clickup",
+    "name": "ClickUp",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://clickup.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "supabase",
+    "name": "Supabase",
+    "description": "Open source Firebase",
+    "category": "Database",
+    "link": "https://supabase.com/docs/reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "firebase",
+    "name": "Firebase",
+    "description": "App development platform",
+    "category": "Database",
+    "link": "https://firebase.google.com/docs/reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "planetscale",
+    "name": "PlanetScale",
+    "description": "Serverless MySQL",
+    "category": "Database",
+    "link": "https://planetscale.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fauna",
+    "name": "Fauna",
+    "description": "Serverless database",
+    "category": "Database",
+    "link": "https://docs.fauna.com/fauna/current/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "neon",
+    "name": "Neon",
+    "description": "Serverless Postgres",
+    "category": "Database",
+    "link": "https://neon.tech/docs/introduction/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cockroach-labs",
+    "name": "Cockroach Labs",
+    "description": "Distributed SQL",
+    "category": "Database",
+    "link": "https://www.cockroachlabs.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "upstash",
+    "name": "Upstash",
+    "description": "Serverless Redis",
+    "category": "Database",
+    "link": "https://docs.upstash.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "astra-db",
+    "name": "Astra DB",
+    "description": "Cloud Cassandra",
+    "category": "Database",
+    "link": "https://docs.datastax.com/en/astra/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "singlestore",
+    "name": "SingleStore",
+    "description": "Real-time database",
+    "category": "Database",
+    "link": "https://docs.singlestore.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "datadog",
+    "name": "Datadog",
+    "description": "Monitoring platform",
+    "category": "DevOps",
+    "link": "https://docs.datadoghq.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "new-relic",
+    "name": "New Relic",
+    "description": "Observability platform",
+    "category": "DevOps",
+    "link": "https://docs.newrelic.com/docs/apis/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "description": "Error tracking",
+    "category": "DevOps",
+    "link": "https://docs.sentry.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pagerduty",
+    "name": "PagerDuty",
+    "description": "Incident response",
+    "category": "DevOps",
+    "link": "https://developer.pagerduty.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "grafana-cloud",
+    "name": "Grafana Cloud",
+    "description": "Monitoring stack",
+    "category": "DevOps",
+    "link": "https://grafana.com/docs/grafana-cloud/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "splunk",
+    "name": "Splunk",
+    "description": "Data platform",
+    "category": "DevOps",
+    "link": "https://dev.splunk.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "logrocket",
+    "name": "LogRocket",
+    "description": "Frontend monitoring",
+    "category": "DevOps",
+    "link": "https://docs.logrocket.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "rollbar",
+    "name": "Rollbar",
+    "description": "Error tracking",
+    "category": "DevOps",
+    "link": "https://docs.rollbar.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bugsnag",
+    "name": "Bugsnag",
+    "description": "Error monitoring",
+    "category": "DevOps",
+    "link": "https://bugsnagapiv2.docs.apiary.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "airbrake",
+    "name": "Airbrake",
+    "description": "Error monitoring",
+    "category": "DevOps",
+    "link": "https://airbrake.io/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cloudflare-stream",
+    "name": "Cloudflare Stream",
+    "description": "Video streaming",
+    "category": "Video",
+    "link": "https://developers.cloudflare.com/stream/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mux",
+    "name": "Mux",
+    "description": "Video infrastructure",
+    "category": "Video",
+    "link": "https://docs.mux.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wistia",
+    "name": "Wistia",
+    "description": "Video hosting",
+    "category": "Video",
+    "link": "https://wistia.com/support/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "brightcove",
+    "name": "Brightcove",
+    "description": "Video technology",
+    "category": "Video",
+    "link": "https://apis.support.brightcove.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "jw-player",
+    "name": "JW Player",
+    "description": "Video player",
+    "category": "Video",
+    "link": "https://developer.jwplayer.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "kaltura",
+    "name": "Kaltura",
+    "description": "Video platform",
+    "category": "Video",
+    "link": "https://developer.kaltura.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "api-video",
+    "name": "api.video",
+    "description": "Video API",
+    "category": "Video",
+    "link": "https://docs.api.video/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ziggeo",
+    "name": "Ziggeo",
+    "description": "Video recording",
+    "category": "Video",
+    "link": "https://ziggeo.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "agora",
+    "name": "Agora",
+    "description": "Real-time engagement",
+    "category": "Video",
+    "link": "https://docs.agora.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "typeform",
+    "name": "Typeform",
+    "description": "Online forms",
+    "category": "Productivity",
+    "link": "https://developer.typeform.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "surveymonkey",
+    "name": "SurveyMonkey",
+    "description": "Survey platform",
+    "category": "Productivity",
+    "link": "https://developer.surveymonkey.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-forms",
+    "name": "Google Forms",
+    "description": "Forms builder",
+    "category": "Productivity",
+    "link": "https://developers.google.com/forms/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "tally",
+    "name": "Tally",
+    "description": "Form builder",
+    "category": "Productivity",
+    "link": "https://tally.so/help/webhooks",
+    "auth": "apiKey"
+  },
+  {
+    "id": "paperform",
+    "name": "Paperform",
+    "description": "Online forms",
+    "category": "Productivity",
+    "link": "https://paperform.co/help/articles/api-overview/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "formstack",
+    "name": "Formstack",
+    "description": "Form builder",
+    "category": "Productivity",
+    "link": "https://developers.formstack.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "cognito-forms",
+    "name": "Cognito Forms",
+    "description": "Form builder",
+    "category": "Productivity",
+    "link": "https://www.cognitoforms.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wufoo",
+    "name": "Wufoo",
+    "description": "Online forms",
+    "category": "Productivity",
+    "link": "https://wufoo.github.io/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "formbricks",
+    "name": "Formbricks",
+    "description": "Open source surveys",
+    "category": "Productivity",
+    "link": "https://formbricks.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "qualtrics",
+    "name": "Qualtrics",
+    "description": "Experience management",
+    "category": "Productivity",
+    "link": "https://api.qualtrics.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "calendly",
+    "name": "Calendly",
+    "description": "Scheduling automation",
+    "category": "Productivity",
+    "link": "https://developer.calendly.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "cal-com",
+    "name": "Cal.com",
+    "description": "Open source scheduling",
+    "category": "Productivity",
+    "link": "https://cal.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cronofy",
+    "name": "Cronofy",
+    "description": "Calendar API",
+    "category": "Productivity",
+    "link": "https://docs.cronofy.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "nylas",
+    "name": "Nylas",
+    "description": "Communications platform",
+    "category": "Productivity",
+    "link": "https://developer.nylas.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "acuity-scheduling",
+    "name": "Acuity Scheduling",
+    "description": "Appointment scheduling",
+    "category": "Productivity",
+    "link": "https://developers.acuityscheduling.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "doodle",
+    "name": "Doodle",
+    "description": "Meeting scheduling",
+    "category": "Productivity",
+    "link": "https://doodle.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "simplybook",
+    "name": "SimplyBook",
+    "description": "Booking system",
+    "category": "Productivity",
+    "link": "https://simplybook.me/api/developer",
+    "auth": "apiKey"
+  },
+  {
+    "id": "youcanbook-me",
+    "name": "YouCanBook.me",
+    "description": "Booking pages",
+    "category": "Productivity",
+    "link": "https://api.youcanbook.me/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "appointlet",
+    "name": "Appointlet",
+    "description": "Scheduling software",
+    "category": "Productivity",
+    "link": "https://developers.appointlet.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "setmore",
+    "name": "Setmore",
+    "description": "Appointment scheduling",
+    "category": "Productivity",
+    "link": "https://setmore.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hootsuite",
+    "name": "Hootsuite",
+    "description": "Social media management",
+    "category": "Social",
+    "link": "https://developer.hootsuite.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "sprout-social",
+    "name": "Sprout Social",
+    "description": "Social management",
+    "category": "Social",
+    "link": "https://developers.sproutsocial.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "later",
+    "name": "Later",
+    "description": "Social scheduling",
+    "category": "Social",
+    "link": "https://developers.later.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "sprinklr",
+    "name": "Sprinklr",
+    "description": "CXM platform",
+    "category": "Social",
+    "link": "https://developer.sprinklr.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "agorapulse",
+    "name": "Agorapulse",
+    "description": "Social media tool",
+    "category": "Social",
+    "link": "https://api.agorapulse.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "socialbee",
+    "name": "SocialBee",
+    "description": "Social scheduling",
+    "category": "Social",
+    "link": "https://socialbee.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "publer",
+    "name": "Publer",
+    "description": "Social scheduling",
+    "category": "Social",
+    "link": "https://publer.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "loomly",
+    "name": "Loomly",
+    "description": "Brand success platform",
+    "category": "Social",
+    "link": "https://www.loomly.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sendible",
+    "name": "Sendible",
+    "description": "Social management",
+    "category": "Social",
+    "link": "https://sendible.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "coschedule",
+    "name": "CoSchedule",
+    "description": "Marketing calendar",
+    "category": "Marketing",
+    "link": "https://coschedule.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shipbob",
+    "name": "Shipbob",
+    "description": "Fulfillment platform",
+    "category": "E-commerce",
+    "link": "https://developer.shipbob.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "printful",
+    "name": "Printful",
+    "description": "Print on demand",
+    "category": "E-commerce",
+    "link": "https://developers.printful.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "printify",
+    "name": "Printify",
+    "description": "Print on demand",
+    "category": "E-commerce",
+    "link": "https://developers.printify.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "gooten",
+    "name": "Gooten",
+    "description": "Print on demand",
+    "category": "E-commerce",
+    "link": "https://www.gooten.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "oberlo",
+    "name": "Oberlo",
+    "description": "Dropshipping",
+    "category": "E-commerce",
+    "link": "https://www.oberlo.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "spocket",
+    "name": "Spocket",
+    "description": "Dropshipping",
+    "category": "E-commerce",
+    "link": "https://www.spocket.co/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shipengine",
+    "name": "ShipEngine",
+    "description": "Shipping API",
+    "category": "Shipping",
+    "link": "https://shipengine.github.io/shipengine-openapi/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "returnly",
+    "name": "Returnly",
+    "description": "Returns platform",
+    "category": "E-commerce",
+    "link": "https://developers.returnly.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "loop-returns",
+    "name": "Loop Returns",
+    "description": "Returns management",
+    "category": "E-commerce",
+    "link": "https://developers.loopreturns.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "recharge",
+    "name": "Recharge",
+    "description": "Subscriptions",
+    "category": "E-commerce",
+    "link": "https://developer.rechargepayments.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "trustpilot",
+    "name": "Trustpilot",
+    "description": "Review platform",
+    "category": "Marketing",
+    "link": "https://documentation-apidocumentation.trustpilot.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "yotpo",
+    "name": "Yotpo",
+    "description": "E-commerce marketing",
+    "category": "Marketing",
+    "link": "https://developers.yotpo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "judge-me",
+    "name": "Judge.me",
+    "description": "Product reviews",
+    "category": "E-commerce",
+    "link": "https://judge.me/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bazaarvoice",
+    "name": "Bazaarvoice",
+    "description": "User content",
+    "category": "Marketing",
+    "link": "https://developer.bazaarvoice.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "powerreviews",
+    "name": "PowerReviews",
+    "description": "Review software",
+    "category": "Marketing",
+    "link": "https://www.powerreviews.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "stamped-io",
+    "name": "Stamped.io",
+    "description": "Reviews and loyalty",
+    "category": "Marketing",
+    "link": "https://developers.stamped.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "loox",
+    "name": "Loox",
+    "description": "Photo reviews",
+    "category": "E-commerce",
+    "link": "https://loox.io/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "reviews-io",
+    "name": "Reviews.io",
+    "description": "Review collection",
+    "category": "Marketing",
+    "link": "https://developers.reviews.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "g2",
+    "name": "G2",
+    "description": "Software reviews",
+    "category": "Marketing",
+    "link": "https://documentation.g2.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "capterra",
+    "name": "Capterra",
+    "description": "Software reviews",
+    "category": "Marketing",
+    "link": "https://www.capterra.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "zapier",
+    "name": "Zapier",
+    "description": "Workflow automation",
+    "category": "Automation",
+    "link": "https://platform.zapier.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "make",
+    "name": "Make",
+    "description": "Automation platform",
+    "category": "Automation",
+    "link": "https://www.make.com/en/api-documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "n8n",
+    "name": "n8n",
+    "description": "Workflow automation",
+    "category": "Automation",
+    "link": "https://docs.n8n.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tray-io",
+    "name": "Tray.io",
+    "description": "Integration platform",
+    "category": "Automation",
+    "link": "https://tray.io/documentation/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "workato",
+    "name": "Workato",
+    "description": "Enterprise automation",
+    "category": "Automation",
+    "link": "https://docs.workato.com/api-reference/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pipedream",
+    "name": "Pipedream",
+    "description": "Integration platform",
+    "category": "Automation",
+    "link": "https://pipedream.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ifttt",
+    "name": "IFTTT",
+    "description": "Applet automation",
+    "category": "Automation",
+    "link": "https://ifttt.com/docs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "parabola",
+    "name": "Parabola",
+    "description": "Data automation",
+    "category": "Automation",
+    "link": "https://parabola.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bardeen",
+    "name": "Bardeen",
+    "description": "Browser automation",
+    "category": "Automation",
+    "link": "https://www.bardeen.ai/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "activepieces",
+    "name": "Activepieces",
+    "description": "Open source automation",
+    "category": "Automation",
+    "link": "https://www.activepieces.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "aws-textract",
+    "name": "AWS Textract",
+    "description": "Document analysis",
+    "category": "AI",
+    "link": "https://docs.aws.amazon.com/textract/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-document-ai",
+    "name": "Google Document AI",
+    "description": "Document processing",
+    "category": "AI",
+    "link": "https://cloud.google.com/document-ai/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "azure-form-recognizer",
+    "name": "Azure Form Recognizer",
+    "description": "Form extraction",
+    "category": "AI",
+    "link": "https://docs.microsoft.com/en-us/azure/applied-ai-services/form-recognizer/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "docparser",
+    "name": "Docparser",
+    "description": "Document parsing",
+    "category": "Documents",
+    "link": "https://dev.docparser.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "rossum",
+    "name": "Rossum",
+    "description": "Document AI",
+    "category": "AI",
+    "link": "https://elis.rossum.ai/api/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hyperscience",
+    "name": "Hyperscience",
+    "description": "Document automation",
+    "category": "AI",
+    "link": "https://www.hyperscience.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "klippa",
+    "name": "Klippa",
+    "description": "Document processing",
+    "category": "Documents",
+    "link": "https://docs.klippa.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mindee",
+    "name": "Mindee",
+    "description": "Document parsing",
+    "category": "AI",
+    "link": "https://developers.mindee.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nanonets",
+    "name": "Nanonets",
+    "description": "OCR and AI",
+    "category": "AI",
+    "link": "https://nanonets.com/documentation/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "veryfi",
+    "name": "Veryfi",
+    "description": "Document intelligence",
+    "category": "AI",
+    "link": "https://www.veryfi.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vonage",
+    "name": "Vonage",
+    "description": "Communications API",
+    "category": "Communication",
+    "link": "https://developer.vonage.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "plivo",
+    "name": "Plivo",
+    "description": "Voice and SMS",
+    "category": "Communication",
+    "link": "https://www.plivo.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bandwidth",
+    "name": "Bandwidth",
+    "description": "Communications API",
+    "category": "Communication",
+    "link": "https://dev.bandwidth.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "signalwire",
+    "name": "SignalWire",
+    "description": "Communications platform",
+    "category": "Communication",
+    "link": "https://signalwire.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sinch",
+    "name": "Sinch",
+    "description": "Messaging and voice",
+    "category": "Communication",
+    "link": "https://developers.sinch.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "voximplant",
+    "name": "Voximplant",
+    "description": "Cloud communications",
+    "category": "Communication",
+    "link": "https://voximplant.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "daily",
+    "name": "Daily",
+    "description": "Video and audio",
+    "category": "Video",
+    "link": "https://docs.daily.co/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "livekit",
+    "name": "Livekit",
+    "description": "Real-time video",
+    "category": "Video",
+    "link": "https://docs.livekit.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dyte",
+    "name": "Dyte",
+    "description": "Video SDK",
+    "category": "Video",
+    "link": "https://docs.dyte.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "whereby",
+    "name": "Whereby",
+    "description": "Video meetings",
+    "category": "Video",
+    "link": "https://whereby.dev/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clearbit",
+    "name": "Clearbit",
+    "description": "Business intelligence",
+    "category": "Business",
+    "link": "https://clearbit.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "zoominfo",
+    "name": "ZoomInfo",
+    "description": "B2B data",
+    "category": "Business",
+    "link": "https://developers.zoominfo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pipl",
+    "name": "Pipl",
+    "description": "People search",
+    "category": "Business",
+    "link": "https://pipl.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "apollo-io",
+    "name": "Apollo.io",
+    "description": "Sales intelligence",
+    "category": "Business",
+    "link": "https://apolloio.github.io/apollo-api-docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "leadiq",
+    "name": "LeadIQ",
+    "description": "Sales prospecting",
+    "category": "Business",
+    "link": "https://docs.leadiq.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lusha",
+    "name": "Lusha",
+    "description": "Contact data",
+    "category": "Business",
+    "link": "https://www.lusha.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "snov-io",
+    "name": "Snov.io",
+    "description": "Sales automation",
+    "category": "Marketing",
+    "link": "https://snov.io/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "people-data-labs",
+    "name": "People Data Labs",
+    "description": "People data",
+    "category": "Business",
+    "link": "https://docs.peopledatalabs.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "yodlee",
+    "name": "Yodlee",
+    "description": "Financial aggregation",
+    "category": "Finance",
+    "link": "https://developer.yodlee.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "mx",
+    "name": "MX",
+    "description": "Financial data",
+    "category": "Finance",
+    "link": "https://docs.mx.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "finicity",
+    "name": "Finicity",
+    "description": "Financial data",
+    "category": "Finance",
+    "link": "https://docs.finicity.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tink",
+    "name": "Tink",
+    "description": "Open banking",
+    "category": "Finance",
+    "link": "https://docs.tink.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "truelayer",
+    "name": "TrueLayer",
+    "description": "Open banking",
+    "category": "Finance",
+    "link": "https://docs.truelayer.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "yapily",
+    "name": "Yapily",
+    "description": "Open banking",
+    "category": "Finance",
+    "link": "https://docs.yapily.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "salt-edge",
+    "name": "Salt Edge",
+    "description": "Financial data",
+    "category": "Finance",
+    "link": "https://docs.saltedge.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "belvo",
+    "name": "Belvo",
+    "description": "Open finance",
+    "category": "Finance",
+    "link": "https://developers.belvo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "basiq",
+    "name": "Basiq",
+    "description": "Financial data",
+    "category": "Finance",
+    "link": "https://basiq.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "adyen",
+    "name": "Adyen",
+    "description": "Global payments",
+    "category": "Finance",
+    "link": "https://docs.adyen.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "checkout-com",
+    "name": "Checkout.com",
+    "description": "Payment gateway",
+    "category": "Finance",
+    "link": "https://www.checkout.com/docs/api-reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "paddle",
+    "name": "Paddle",
+    "description": "SaaS payments",
+    "category": "Finance",
+    "link": "https://developer.paddle.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lemonsqueezy",
+    "name": "Lemonsqueezy",
+    "description": "Digital product payments",
+    "category": "Finance",
+    "link": "https://docs.lemonsqueezy.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "gumroad",
+    "name": "Gumroad",
+    "description": "Creator payments",
+    "category": "Finance",
+    "link": "https://app.gumroad.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "paystack",
+    "name": "Paystack",
+    "description": "African payments",
+    "category": "Finance",
+    "link": "https://paystack.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "flutterwave",
+    "name": "Flutterwave",
+    "description": "African payments",
+    "category": "Finance",
+    "link": "https://developer.flutterwave.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "razorpay",
+    "name": "Razorpay",
+    "description": "Indian payments",
+    "category": "Finance",
+    "link": "https://razorpay.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mollie",
+    "name": "Mollie",
+    "description": "European payments",
+    "category": "Finance",
+    "link": "https://docs.mollie.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "gocardless",
+    "name": "GoCardless",
+    "description": "Direct debit",
+    "category": "Finance",
+    "link": "https://developer.gocardless.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "aws",
+    "name": "AWS",
+    "description": "Cloud platform",
+    "category": "Cloud",
+    "link": "https://docs.aws.amazon.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "azure",
+    "name": "Azure",
+    "description": "Cloud platform",
+    "category": "Cloud",
+    "link": "https://docs.microsoft.com/en-us/rest/api/azure/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-cloud",
+    "name": "Google Cloud",
+    "description": "Cloud platform",
+    "category": "Cloud",
+    "link": "https://cloud.google.com/apis",
+    "auth": "OAuth"
+  },
+  {
+    "id": "digitalocean",
+    "name": "DigitalOcean",
+    "description": "Cloud platform",
+    "category": "Cloud",
+    "link": "https://docs.digitalocean.com/reference/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "linode",
+    "name": "Linode",
+    "description": "Cloud hosting",
+    "category": "Cloud",
+    "link": "https://www.linode.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vultr",
+    "name": "Vultr",
+    "description": "Cloud compute",
+    "category": "Cloud",
+    "link": "https://www.vultr.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hetzner",
+    "name": "Hetzner",
+    "description": "Cloud hosting",
+    "category": "Cloud",
+    "link": "https://docs.hetzner.cloud/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fly-io",
+    "name": "Fly.io",
+    "description": "App platform",
+    "category": "Cloud",
+    "link": "https://fly.io/docs/reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "railway",
+    "name": "Railway",
+    "description": "App platform",
+    "category": "Cloud",
+    "link": "https://docs.railway.app/reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "render",
+    "name": "Render",
+    "description": "Cloud platform",
+    "category": "Cloud",
+    "link": "https://render.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "description": "CDN and security",
+    "category": "Infrastructure",
+    "link": "https://api.cloudflare.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fastly",
+    "name": "Fastly",
+    "description": "Edge cloud",
+    "category": "Infrastructure",
+    "link": "https://developer.fastly.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "akamai",
+    "name": "Akamai",
+    "description": "CDN platform",
+    "category": "Infrastructure",
+    "link": "https://developer.akamai.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "bunny-cdn",
+    "name": "Bunny CDN",
+    "description": "CDN service",
+    "category": "Infrastructure",
+    "link": "https://docs.bunny.net/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "keycdn",
+    "name": "KeyCDN",
+    "description": "CDN service",
+    "category": "Infrastructure",
+    "link": "https://www.keycdn.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "stackpath",
+    "name": "StackPath",
+    "description": "Edge platform",
+    "category": "Infrastructure",
+    "link": "https://stackpath.dev/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "vercel",
+    "name": "Vercel",
+    "description": "Frontend platform",
+    "category": "Development",
+    "link": "https://vercel.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "netlify",
+    "name": "Netlify",
+    "description": "Web platform",
+    "category": "Development",
+    "link": "https://docs.netlify.com/api/get-started/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "deno-deploy",
+    "name": "Deno Deploy",
+    "description": "Edge functions",
+    "category": "Development",
+    "link": "https://deno.com/deploy/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lambda",
+    "name": "Lambda",
+    "description": "Serverless compute",
+    "category": "Cloud",
+    "link": "https://docs.aws.amazon.com/lambda/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "affirmations",
+    "name": "Affirmations",
+    "description": "Positive affirmations",
+    "category": "Entertainment",
+    "link": "https://www.affirmations.dev/",
+    "auth": "None"
+  },
+  {
+    "id": "boredapi",
+    "name": "BoredAPI",
+    "description": "Random activities",
+    "category": "Entertainment",
+    "link": "https://www.boredapi.com/",
+    "auth": "None"
+  },
+  {
+    "id": "chuck-norris",
+    "name": "Chuck Norris",
+    "description": "Chuck Norris jokes",
+    "category": "Entertainment",
+    "link": "https://api.chucknorris.io/",
+    "auth": "None"
+  },
+  {
+    "id": "dad-jokes",
+    "name": "Dad Jokes",
+    "description": "Dad jokes",
+    "category": "Entertainment",
+    "link": "https://icanhazdadjoke.com/api",
+    "auth": "None"
+  },
+  {
+    "id": "corporate-bs",
+    "name": "Corporate BS",
+    "description": "Corporate buzzwords",
+    "category": "Entertainment",
+    "link": "https://corporatebs-generator.sameerkumar.website/",
+    "auth": "None"
+  },
+  {
+    "id": "evil-insult",
+    "name": "Evil Insult",
+    "description": "Random insults",
+    "category": "Entertainment",
+    "link": "https://evilinsult.com/api/",
+    "auth": "None"
+  }
+]

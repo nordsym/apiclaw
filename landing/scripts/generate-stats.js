@@ -2,6 +2,75 @@
 const fs = require('fs');
 const path = require('path');
 
+// Category mapping (consolidate similar ones)
+const categoryMap = {
+  'AI': 'AI & ML',
+  'AI & ML': 'AI & ML',
+  'AI/ML': 'AI & ML',
+  'Machine Learning': 'AI & ML',
+  'Authentication': 'Auth & Security',
+  'Auth': 'Auth & Security',
+  'Security': 'Auth & Security',
+  'Payment': 'Payments',
+  'Payments': 'Payments',
+  'Finance': 'Finance',
+  'Cryptocurrency': 'Finance',
+  'Currency': 'Finance',
+  'Health': 'Health & Fitness',
+  'Health & Fitness': 'Health & Fitness',
+  'Healthcare': 'Health & Fitness',
+  'Fitness': 'Health & Fitness',
+  'Social': 'Social & Communication',
+  'Social Media': 'Social & Communication',
+  'Communication': 'Social & Communication',
+  'Messaging': 'Social & Communication',
+  'Data': 'Data & Analytics',
+  'Data & Analytics': 'Data & Analytics',
+  'Analytics': 'Data & Analytics',
+  'Big Data': 'Data & Analytics',
+  'Cloud': 'Cloud & Infrastructure',
+  'Cloud Storage': 'Cloud & Infrastructure',
+  'Infrastructure': 'Cloud & Infrastructure',
+  'DevOps': 'Development',
+  'Development': 'Development',
+  'Development Tools': 'Development',
+  'Testing': 'Development',
+  'E-commerce': 'Commerce',
+  'Commerce': 'Commerce',
+  'Shopping': 'Commerce',
+  'Games': 'Entertainment',
+  'Gaming': 'Entertainment',
+  'Entertainment': 'Entertainment',
+  'Music': 'Entertainment',
+  'Video': 'Media',
+  'Media': 'Media',
+  'Photography': 'Media',
+  'News': 'News & Media',
+  'News & information': 'News & Media',
+  'Geo': 'Location & Maps',
+  'Geocoding': 'Location & Maps',
+  'Geolocation': 'Location & Maps',
+  'Maps': 'Location & Maps',
+  'Location': 'Location & Maps',
+  'Spatial': 'Location & Maps',
+  'Transportation': 'Travel & Transport',
+  'Travel': 'Travel & Transport',
+  'Logistics': 'Travel & Transport',
+  'Delivery-Tracking': 'Travel & Transport',
+  'Carsharing': 'Travel & Transport',
+  'Document': 'Documents & Files',
+  'Documents': 'Documents & Files',
+  'File Storage and Manipulation': 'Documents & Files',
+  'Web Scraping': 'Search & Scraping',
+  'Search': 'Search & Scraping',
+  'Text Analysis': 'Language & Text',
+  'Language': 'Language & Text',
+  'Dictionary': 'Language & Text',
+  'Vision Analysis': 'AI & ML',
+  'Art & Design': 'Design',
+  'Design': 'Design',
+};
+
 // Try local copy first (for Vercel), then parent directory (for local dev)
 const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
 const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
@@ -11,11 +80,13 @@ const outputPath = path.join(__dirname, '../src/lib/stats.json');
 try {
   const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
   
-  const categories = [...new Set(registry.apis.map(api => api.category))];
+  // Consolidate categories using the mapping
+  const consolidatedCategories = registry.apis.map(api => categoryMap[api.category] || api.category);
+  const uniqueCategories = [...new Set(consolidatedCategories)];
   
   const stats = {
     apiCount: registry.count,
-    categoryCount: categories.length,
+    categoryCount: uniqueCategories.length,
     lastUpdated: registry.lastUpdated || new Date().toISOString().split('T')[0],
     generatedAt: new Date().toISOString()
   };
@@ -32,8 +103,8 @@ try {
   console.error('Failed to generate stats:', err);
   // Write fallback stats
   const fallback = {
-    apiCount: 4518,
-    categoryCount: 93,
+    apiCount: 19176,
+    categoryCount: 58,
     lastUpdated: new Date().toISOString().split('T')[0],
     generatedAt: new Date().toISOString()
   };

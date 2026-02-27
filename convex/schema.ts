@@ -235,6 +235,9 @@ export default defineSchema({
     rateLimitPerDay: v.number(), // requests per day per user
     pricePerRequest: v.number(), // in USD cents
     status: v.string(), // "draft" | "testing" | "live"
+    // Customer key passthrough settings
+    allowCustomerKeys: v.optional(v.boolean()), // Allow agents to pass their own API key (default: true)
+    requireCustomerKeys: v.optional(v.boolean()), // Require customer key, no master key fallback (default: false)
     createdAt: v.number(),
     updatedAt: v.number(),
     publishedAt: v.optional(v.number()),
@@ -288,4 +291,17 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"])
     .index("by_userId_providerId", ["userId", "providerId"])
     .index("by_userId_timestamp", ["userId", "timestamp"]),
+
+  // ============================================
+  // WAITLIST (for Direct Call provider leads)
+  // ============================================
+
+  waitlist: defineTable({
+    email: v.string(),
+    type: v.string(), // "provider" | "agent" | "general"
+    source: v.optional(v.string()), // "landing", "docs", etc.
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_type", ["type"]),
 });

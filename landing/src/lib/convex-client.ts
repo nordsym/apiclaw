@@ -1,6 +1,6 @@
 // Simple Convex HTTP client for the dashboard
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
 export async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
   const response = await fetch(`${CONVEX_URL}/api/query`, {
@@ -14,6 +14,12 @@ export async function convexQuery<T>(path: string, args: Record<string, unknown>
   }
 
   const result = await response.json();
+  
+  // Convex returns HTTP 200 but status: "error" for query failures
+  if (result.status === "error") {
+    throw new Error(result.errorMessage || "Query failed");
+  }
+  
   // Convex wraps response in { status: "success", value: {...} }
   return result.value !== undefined ? result.value : result;
 }
@@ -30,6 +36,12 @@ export async function convexMutation<T>(path: string, args: Record<string, unkno
   }
 
   const result = await response.json();
+  
+  // Convex returns HTTP 200 but status: "error" for mutation failures
+  if (result.status === "error") {
+    throw new Error(result.errorMessage || "Mutation failed");
+  }
+  
   // Convex wraps response in { status: "success", value: {...} }
   return result.value !== undefined ? result.value : result;
 }
@@ -54,6 +66,8 @@ export interface ProviderAPI {
   pricingNotes?: string;
   discoveryCount?: number;
   createdAt: number;
+  hasDirectCall?: boolean;
+  directCallStatus?: string;
 }
 
 export interface DailyStats {
@@ -100,7 +114,8 @@ export async function getSession(token: string): Promise<ProviderSession | null>
 
 // Get provider APIs
 export async function getProviderAPIs(providerId: string): Promise<ProviderAPI[]> {
-  return convexQuery("providers:getProviderAPIs", { providerId });
+  // Use the enhanced query that includes Direct Call status
+  return convexQuery("providers:getProviderAPIsWithStatus", { providerId });
 }
 
 // Get analytics

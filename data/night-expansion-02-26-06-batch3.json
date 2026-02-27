@@ -1,0 +1,1410 @@
+[
+  {
+    "id": "together-ai",
+    "name": "Together AI",
+    "description": "Open source AI models",
+    "category": "AI",
+    "link": "https://docs.together.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "groq",
+    "name": "Groq",
+    "description": "Fast AI inference",
+    "category": "AI",
+    "link": "https://console.groq.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fireworks-ai",
+    "name": "Fireworks AI",
+    "description": "AI model hosting",
+    "category": "AI",
+    "link": "https://readme.fireworks.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "description": "AI search",
+    "category": "AI",
+    "link": "https://docs.perplexity.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mistral-ai",
+    "name": "Mistral AI",
+    "description": "AI models",
+    "category": "AI",
+    "link": "https://docs.mistral.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ai21-labs",
+    "name": "AI21 Labs",
+    "description": "AI language models",
+    "category": "AI",
+    "link": "https://docs.ai21.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "writer",
+    "name": "Writer",
+    "description": "Enterprise AI",
+    "category": "AI",
+    "link": "https://dev.writer.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "jasper-ai",
+    "name": "Jasper AI",
+    "description": "Content AI",
+    "category": "AI",
+    "link": "https://developers.jasper.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tome",
+    "name": "Tome",
+    "description": "AI presentations",
+    "category": "AI",
+    "link": "https://tome.app/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mem-ai",
+    "name": "Mem AI",
+    "description": "AI knowledge base",
+    "category": "AI",
+    "link": "https://mem.ai/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "runway-ml",
+    "name": "Runway ML",
+    "description": "Creative AI",
+    "category": "AI",
+    "link": "https://docs.runwayml.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "leonardo-ai",
+    "name": "Leonardo AI",
+    "description": "AI image generation",
+    "category": "AI",
+    "link": "https://docs.leonardo.ai/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ideogram",
+    "name": "Ideogram",
+    "description": "AI image generation",
+    "category": "AI",
+    "link": "https://ideogram.ai/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "midjourney",
+    "name": "Midjourney",
+    "description": "AI art generation",
+    "category": "AI",
+    "link": "https://docs.midjourney.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dall-e",
+    "name": "DALL-E",
+    "description": "OpenAI image generation",
+    "category": "AI",
+    "link": "https://platform.openai.com/docs/guides/images",
+    "auth": "apiKey"
+  },
+  {
+    "id": "imgix",
+    "name": "Imgix",
+    "description": "Image CDN",
+    "category": "Media",
+    "link": "https://docs.imgix.com/apis/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "thumbor",
+    "name": "Thumbor",
+    "description": "Image processing",
+    "category": "Media",
+    "link": "https://thumbor.readthedocs.io/",
+    "auth": "None"
+  },
+  {
+    "id": "tinypng",
+    "name": "TinyPNG",
+    "description": "Image compression",
+    "category": "Media",
+    "link": "https://tinypng.com/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "kraken-io",
+    "name": "Kraken.io",
+    "description": "Image optimization",
+    "category": "Media",
+    "link": "https://kraken.io/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sharp",
+    "name": "Sharp",
+    "description": "Image processing",
+    "category": "Media",
+    "link": "https://sharp.pixelplumbing.com/api",
+    "auth": "None"
+  },
+  {
+    "id": "uploadcare",
+    "name": "Uploadcare",
+    "description": "File uploading",
+    "category": "Media",
+    "link": "https://uploadcare.com/api-refs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "imagekit",
+    "name": "ImageKit",
+    "description": "Image CDN",
+    "category": "Media",
+    "link": "https://docs.imagekit.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "browserstack",
+    "name": "BrowserStack",
+    "description": "Browser testing",
+    "category": "Testing",
+    "link": "https://www.browserstack.com/docs/automate/api-reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sauce-labs",
+    "name": "Sauce Labs",
+    "description": "Testing platform",
+    "category": "Testing",
+    "link": "https://docs.saucelabs.com/dev/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lambdatest",
+    "name": "LambdaTest",
+    "description": "Browser testing",
+    "category": "Testing",
+    "link": "https://www.lambdatest.com/support/api-doc/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "testim",
+    "name": "Testim",
+    "description": "AI testing",
+    "category": "Testing",
+    "link": "https://help.testim.io/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mabl",
+    "name": "Mabl",
+    "description": "Test automation",
+    "category": "Testing",
+    "link": "https://help.mabl.com/docs/api-overview",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cypress-dashboard",
+    "name": "Cypress Dashboard",
+    "description": "Test recording",
+    "category": "Testing",
+    "link": "https://docs.cypress.io/guides/cloud/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "applitools",
+    "name": "Applitools",
+    "description": "Visual testing",
+    "category": "Testing",
+    "link": "https://applitools.com/docs/api/eyes-sdk/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "percy",
+    "name": "Percy",
+    "description": "Visual testing",
+    "category": "Testing",
+    "link": "https://docs.percy.io/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "checkly",
+    "name": "Checkly",
+    "description": "Monitoring",
+    "category": "Testing",
+    "link": "https://www.checklyhq.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "k6",
+    "name": "k6",
+    "description": "Load testing",
+    "category": "Testing",
+    "link": "https://k6.io/docs/cloud/cloud-reference/cloud-rest-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "snyk",
+    "name": "Snyk",
+    "description": "Security scanning",
+    "category": "Security",
+    "link": "https://snyk.docs.apiary.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sonarqube",
+    "name": "SonarQube",
+    "description": "Code quality",
+    "category": "Security",
+    "link": "https://docs.sonarqube.org/latest/extend/web-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "detectify",
+    "name": "Detectify",
+    "description": "Web security",
+    "category": "Security",
+    "link": "https://developer.detectify.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "securitytrails",
+    "name": "SecurityTrails",
+    "description": "DNS data",
+    "category": "Security",
+    "link": "https://securitytrails.com/corp/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "urlscan",
+    "name": "URLScan",
+    "description": "URL analysis",
+    "category": "Security",
+    "link": "https://urlscan.io/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shodan",
+    "name": "Shodan",
+    "description": "Internet scanner",
+    "category": "Security",
+    "link": "https://developer.shodan.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "censys",
+    "name": "Censys",
+    "description": "Internet data",
+    "category": "Security",
+    "link": "https://censys.io/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "greynoise",
+    "name": "GreyNoise",
+    "description": "Threat intelligence",
+    "category": "Security",
+    "link": "https://docs.greynoise.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "libretranslate",
+    "name": "LibreTranslate",
+    "description": "Open source translation",
+    "category": "Language",
+    "link": "https://libretranslate.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lingva",
+    "name": "Lingva",
+    "description": "Translation proxy",
+    "category": "Language",
+    "link": "https://github.com/thedaviddelta/lingva-translate",
+    "auth": "None"
+  },
+  {
+    "id": "mymemory",
+    "name": "MyMemory",
+    "description": "Translation memory",
+    "category": "Language",
+    "link": "https://mymemory.translated.net/doc/spec.php",
+    "auth": "None"
+  },
+  {
+    "id": "lilt",
+    "name": "Lilt",
+    "description": "AI translation",
+    "category": "Language",
+    "link": "https://lilt.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "smartling",
+    "name": "Smartling",
+    "description": "Translation platform",
+    "category": "Language",
+    "link": "https://help.smartling.com/hc/en-us/sections/360005019093-API",
+    "auth": "apiKey"
+  },
+  {
+    "id": "crowdin",
+    "name": "Crowdin",
+    "description": "Localization platform",
+    "category": "Language",
+    "link": "https://developer.crowdin.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lokalise",
+    "name": "Lokalise",
+    "description": "Localization platform",
+    "category": "Language",
+    "link": "https://developers.lokalise.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "phrase",
+    "name": "Phrase",
+    "description": "Localization",
+    "category": "Language",
+    "link": "https://developers.phrase.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "transifex",
+    "name": "Transifex",
+    "description": "Localization platform",
+    "category": "Language",
+    "link": "https://developers.transifex.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "poeditor",
+    "name": "POEditor",
+    "description": "Localization platform",
+    "category": "Language",
+    "link": "https://poeditor.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ahrefs",
+    "name": "Ahrefs",
+    "description": "SEO tools",
+    "category": "Marketing",
+    "link": "https://ahrefs.com/api/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "moz",
+    "name": "Moz",
+    "description": "SEO software",
+    "category": "Marketing",
+    "link": "https://moz.com/products/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "semrush",
+    "name": "Semrush",
+    "description": "Marketing platform",
+    "category": "Marketing",
+    "link": "https://www.semrush.com/api-documentation/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "majestic",
+    "name": "Majestic",
+    "description": "Backlink analysis",
+    "category": "Marketing",
+    "link": "https://developer-support.majestic.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "screaming-frog",
+    "name": "Screaming Frog",
+    "description": "SEO spider",
+    "category": "Marketing",
+    "link": "https://www.screamingfrog.co.uk/seo-spider/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "spyfu",
+    "name": "SpyFu",
+    "description": "Competitor research",
+    "category": "Marketing",
+    "link": "https://www.spyfu.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "similarweb",
+    "name": "SimilarWeb",
+    "description": "Web analytics",
+    "category": "Analytics",
+    "link": "https://developer.similarweb.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "builtwith",
+    "name": "BuiltWith",
+    "description": "Technology lookup",
+    "category": "Marketing",
+    "link": "https://api.builtwith.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wappalyzer",
+    "name": "Wappalyzer",
+    "description": "Technology profiler",
+    "category": "Tools",
+    "link": "https://www.wappalyzer.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pagespeed-insights",
+    "name": "PageSpeed Insights",
+    "description": "Performance testing",
+    "category": "Tools",
+    "link": "https://developers.google.com/speed/docs/insights/v5/get-started",
+    "auth": "apiKey"
+  },
+  {
+    "id": "eventbrite",
+    "name": "Eventbrite",
+    "description": "Event management",
+    "category": "Events",
+    "link": "https://www.eventbrite.com/platform/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "meetup",
+    "name": "Meetup",
+    "description": "Events platform",
+    "category": "Events",
+    "link": "https://www.meetup.com/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "luma",
+    "name": "Luma",
+    "description": "Event hosting",
+    "category": "Events",
+    "link": "https://docs.lu.ma/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "splash",
+    "name": "Splash",
+    "description": "Event marketing",
+    "category": "Events",
+    "link": "https://api.splashthat.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bizzabo",
+    "name": "Bizzabo",
+    "description": "Event software",
+    "category": "Events",
+    "link": "https://developers.bizzabo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hopin",
+    "name": "Hopin",
+    "description": "Virtual events",
+    "category": "Events",
+    "link": "https://hopin.com/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "zoom-events",
+    "name": "Zoom Events",
+    "description": "Event platform",
+    "category": "Events",
+    "link": "https://marketplace.zoom.us/docs/api-reference/events/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "on24",
+    "name": "On24",
+    "description": "Webinar platform",
+    "category": "Events",
+    "link": "https://developer.on24.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "goldcast",
+    "name": "Goldcast",
+    "description": "B2B events",
+    "category": "Events",
+    "link": "https://www.goldcast.io/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "spotify-for-podcasters",
+    "name": "Spotify for Podcasters",
+    "description": "Podcast analytics",
+    "category": "Music",
+    "link": "https://developers.spotify.com/documentation/web-api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "podchaser",
+    "name": "Podchaser",
+    "description": "Podcast database",
+    "category": "Music",
+    "link": "https://api-docs.podchaser.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "listen-notes",
+    "name": "Listen Notes",
+    "description": "Podcast search",
+    "category": "Music",
+    "link": "https://www.listennotes.com/api/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "transistor",
+    "name": "Transistor",
+    "description": "Podcast hosting",
+    "category": "Music",
+    "link": "https://developers.transistor.fm/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "buzzsprout",
+    "name": "Buzzsprout",
+    "description": "Podcast hosting",
+    "category": "Music",
+    "link": "https://www.buzzsprout.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "anchor",
+    "name": "Anchor",
+    "description": "Podcast platform",
+    "category": "Music",
+    "link": "https://anchor.fm/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "podbean",
+    "name": "Podbean",
+    "description": "Podcast hosting",
+    "category": "Music",
+    "link": "https://developers.podbean.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "spreaker",
+    "name": "Spreaker",
+    "description": "Podcast hosting",
+    "category": "Music",
+    "link": "https://developers.spreaker.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "audioboom",
+    "name": "Audioboom",
+    "description": "Podcast network",
+    "category": "Music",
+    "link": "https://audioboom.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "libsyn",
+    "name": "Libsyn",
+    "description": "Podcast hosting",
+    "category": "Music",
+    "link": "https://api.libsyn.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clicksend",
+    "name": "Clicksend",
+    "description": "SMS gateway",
+    "category": "Communication",
+    "link": "https://developers.clicksend.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "textmagic",
+    "name": "Textmagic",
+    "description": "SMS marketing",
+    "category": "Communication",
+    "link": "https://www.textmagic.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "messente",
+    "name": "Messente",
+    "description": "SMS API",
+    "category": "Communication",
+    "link": "https://messente.com/documentation/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "infobip",
+    "name": "Infobip",
+    "description": "Communications platform",
+    "category": "Communication",
+    "link": "https://www.infobip.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "kaleyra",
+    "name": "Kaleyra",
+    "description": "CPaaS platform",
+    "category": "Communication",
+    "link": "https://developers.kaleyra.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "routee",
+    "name": "Routee",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "link": "https://docs.routee.net/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "smsapi",
+    "name": "Smsapi",
+    "description": "SMS gateway",
+    "category": "Communication",
+    "link": "https://www.smsapi.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bulksms",
+    "name": "Bulksms",
+    "description": "SMS gateway",
+    "category": "Communication",
+    "link": "https://www.bulksms.com/developer/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "textlocal",
+    "name": "Textlocal",
+    "description": "SMS service",
+    "category": "Communication",
+    "link": "https://api.txtlocal.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tatango",
+    "name": "Tatango",
+    "description": "SMS marketing",
+    "category": "Communication",
+    "link": "https://www.tatango.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mapbox",
+    "name": "Mapbox",
+    "description": "Maps platform",
+    "category": "Maps",
+    "link": "https://docs.mapbox.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "openstreetmap",
+    "name": "OpenStreetMap",
+    "description": "Open maps",
+    "category": "Maps",
+    "link": "https://wiki.openstreetmap.org/wiki/API",
+    "auth": "None"
+  },
+  {
+    "id": "radar",
+    "name": "Radar",
+    "description": "Location infrastructure",
+    "category": "Maps",
+    "link": "https://radar.com/documentation/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "precisely",
+    "name": "Precisely",
+    "description": "Location intelligence",
+    "category": "Maps",
+    "link": "https://developer.precisely.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "smarty",
+    "name": "Smarty",
+    "description": "Address validation",
+    "category": "Tools",
+    "link": "https://www.smarty.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "alchemy",
+    "name": "Alchemy",
+    "description": "Blockchain infrastructure",
+    "category": "Blockchain",
+    "link": "https://docs.alchemy.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "infura",
+    "name": "Infura",
+    "description": "Ethereum API",
+    "category": "Blockchain",
+    "link": "https://docs.infura.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "quicknode",
+    "name": "QuickNode",
+    "description": "Blockchain nodes",
+    "category": "Blockchain",
+    "link": "https://www.quicknode.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "moralis",
+    "name": "Moralis",
+    "description": "Web3 API",
+    "category": "Blockchain",
+    "link": "https://docs.moralis.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ankr",
+    "name": "Ankr",
+    "description": "Web3 infrastructure",
+    "category": "Blockchain",
+    "link": "https://www.ankr.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "opensea",
+    "name": "OpenSea",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "link": "https://docs.opensea.io/reference/api-overview",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nftport",
+    "name": "NFTPort",
+    "description": "NFT API",
+    "category": "Blockchain",
+    "link": "https://docs.nftport.xyz/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bubble",
+    "name": "Bubble",
+    "description": "No-code platform",
+    "category": "Development",
+    "link": "https://manual.bubble.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "webflow",
+    "name": "Webflow",
+    "description": "Web design platform",
+    "category": "Development",
+    "link": "https://developers.webflow.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "coda",
+    "name": "Coda",
+    "description": "Document platform",
+    "category": "Productivity",
+    "link": "https://coda.io/developers/apis/v1",
+    "auth": "apiKey"
+  },
+  {
+    "id": "retool",
+    "name": "Retool",
+    "description": "Internal tools",
+    "category": "Development",
+    "link": "https://docs.retool.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "appsmith",
+    "name": "Appsmith",
+    "description": "Internal tools",
+    "category": "Development",
+    "link": "https://docs.appsmith.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "budibase",
+    "name": "Budibase",
+    "description": "Internal tools",
+    "category": "Development",
+    "link": "https://docs.budibase.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tooljet",
+    "name": "Tooljet",
+    "description": "Low-code platform",
+    "category": "Development",
+    "link": "https://docs.tooljet.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "noloco",
+    "name": "Noloco",
+    "description": "Internal tools",
+    "category": "Development",
+    "link": "https://docs.noloco.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tableau",
+    "name": "Tableau",
+    "description": "Data visualization",
+    "category": "Analytics",
+    "link": "https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api.htm",
+    "auth": "OAuth"
+  },
+  {
+    "id": "looker",
+    "name": "Looker",
+    "description": "Business intelligence",
+    "category": "Analytics",
+    "link": "https://cloud.google.com/looker/docs/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "powerbi",
+    "name": "PowerBI",
+    "description": "Business analytics",
+    "category": "Analytics",
+    "link": "https://docs.microsoft.com/en-us/rest/api/power-bi/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "mode",
+    "name": "Mode",
+    "description": "Analytics platform",
+    "category": "Analytics",
+    "link": "https://mode.com/developer/api-reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "domo",
+    "name": "Domo",
+    "description": "Business cloud",
+    "category": "Analytics",
+    "link": "https://developer.domo.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "sisense",
+    "name": "Sisense",
+    "description": "Analytics platform",
+    "category": "Analytics",
+    "link": "https://sisense.dev/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "preset",
+    "name": "Preset",
+    "description": "Data exploration",
+    "category": "Analytics",
+    "link": "https://preset.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "redash",
+    "name": "Redash",
+    "description": "Data visualization",
+    "category": "Analytics",
+    "link": "https://redash.io/help/user-guide/integrations-and-api/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "observable",
+    "name": "Observable",
+    "description": "Data exploration",
+    "category": "Analytics",
+    "link": "https://observablehq.com/documentation/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "segment",
+    "name": "Segment",
+    "description": "Customer data platform",
+    "category": "Analytics",
+    "link": "https://segment.com/docs/connections/sources/catalog/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mparticle",
+    "name": "mParticle",
+    "description": "Customer data platform",
+    "category": "Analytics",
+    "link": "https://docs.mparticle.com/developers/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "rudderstack",
+    "name": "RudderStack",
+    "description": "Customer data platform",
+    "category": "Analytics",
+    "link": "https://www.rudderstack.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "amplitude",
+    "name": "Amplitude",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "link": "https://www.docs.developers.amplitude.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "heap",
+    "name": "Heap",
+    "description": "Digital insights",
+    "category": "Analytics",
+    "link": "https://developers.heap.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "posthog",
+    "name": "PostHog",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "link": "https://posthog.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mixpanel-api",
+    "name": "Mixpanel API",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "link": "https://developer.mixpanel.com/reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fullstory",
+    "name": "FullStory",
+    "description": "Digital experience",
+    "category": "Analytics",
+    "link": "https://developer.fullstory.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hotjar",
+    "name": "Hotjar",
+    "description": "Behavior analytics",
+    "category": "Analytics",
+    "link": "https://help.hotjar.com/hc/en-us/articles/115011789688-Hotjar-API",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pendo",
+    "name": "Pendo",
+    "description": "Product experience",
+    "category": "Analytics",
+    "link": "https://engageapi.pendo.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "launchdarkly",
+    "name": "LaunchDarkly",
+    "description": "Feature management",
+    "category": "Development",
+    "link": "https://apidocs.launchdarkly.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "split",
+    "name": "Split",
+    "description": "Feature delivery",
+    "category": "Development",
+    "link": "https://help.split.io/hc/en-us/articles/360020564931-REST-API",
+    "auth": "apiKey"
+  },
+  {
+    "id": "optimizely",
+    "name": "Optimizely",
+    "description": "Experimentation",
+    "category": "Development",
+    "link": "https://docs.developers.optimizely.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vwo",
+    "name": "VWO",
+    "description": "A/B testing",
+    "category": "Development",
+    "link": "https://developers.vwo.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ab-tasty",
+    "name": "AB Tasty",
+    "description": "Experience optimization",
+    "category": "Development",
+    "link": "https://developers.abtasty.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "kameleoon",
+    "name": "Kameleoon",
+    "description": "Feature experimentation",
+    "category": "Development",
+    "link": "https://developers.kameleoon.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "statsig",
+    "name": "Statsig",
+    "description": "Feature management",
+    "category": "Development",
+    "link": "https://docs.statsig.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "flagsmith",
+    "name": "Flagsmith",
+    "description": "Feature flags",
+    "category": "Development",
+    "link": "https://docs.flagsmith.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "growthbook",
+    "name": "GrowthBook",
+    "description": "Feature flags",
+    "category": "Development",
+    "link": "https://docs.growthbook.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "unleash",
+    "name": "Unleash",
+    "description": "Feature toggles",
+    "category": "Development",
+    "link": "https://docs.getunleash.io/reference/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "airbyte",
+    "name": "Airbyte",
+    "description": "Data integration",
+    "category": "Data",
+    "link": "https://docs.airbyte.com/api-documentation/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fivetran",
+    "name": "Fivetran",
+    "description": "Data pipelines",
+    "category": "Data",
+    "link": "https://fivetran.com/docs/rest-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "stitch",
+    "name": "Stitch",
+    "description": "ETL platform",
+    "category": "Data",
+    "link": "https://www.stitchdata.com/docs/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dbt-cloud",
+    "name": "dbt Cloud",
+    "description": "Data transformation",
+    "category": "Data",
+    "link": "https://docs.getdbt.com/dbt-cloud/api-v2",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hevo",
+    "name": "Hevo",
+    "description": "Data pipeline",
+    "category": "Data",
+    "link": "https://docs.hevodata.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "matillion",
+    "name": "Matillion",
+    "description": "Data integration",
+    "category": "Data",
+    "link": "https://documentation.matillion.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hightouch",
+    "name": "Hightouch",
+    "description": "Reverse ETL",
+    "category": "Data",
+    "link": "https://hightouch.com/docs/developer-tools/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "census",
+    "name": "Census",
+    "description": "Reverse ETL",
+    "category": "Data",
+    "link": "https://docs.getcensus.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "polytomic",
+    "name": "Polytomic",
+    "description": "Data sync",
+    "category": "Data",
+    "link": "https://apidocs.polytomic.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "grouparoo",
+    "name": "Grouparoo",
+    "description": "Data sync",
+    "category": "Data",
+    "link": "https://www.grouparoo.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "confluence",
+    "name": "Confluence",
+    "description": "Team workspace",
+    "category": "Productivity",
+    "link": "https://developer.atlassian.com/cloud/confluence/rest/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "guru",
+    "name": "Guru",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "link": "https://developer.getguru.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tettra",
+    "name": "Tettra",
+    "description": "Knowledge base",
+    "category": "Productivity",
+    "link": "https://tettra.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "slite",
+    "name": "Slite",
+    "description": "Team knowledge",
+    "category": "Productivity",
+    "link": "https://developers.slite.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nuclino",
+    "name": "Nuclino",
+    "description": "Knowledge wiki",
+    "category": "Productivity",
+    "link": "https://help.nuclino.com/d3f3b5cb-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "almanac",
+    "name": "Almanac",
+    "description": "Document platform",
+    "category": "Productivity",
+    "link": "https://almanac.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "swimm",
+    "name": "Swimm",
+    "description": "Code documentation",
+    "category": "Development",
+    "link": "https://docs.swimm.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "gitbook",
+    "name": "GitBook",
+    "description": "Documentation",
+    "category": "Documentation",
+    "link": "https://developer.gitbook.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "readme",
+    "name": "ReadMe",
+    "description": "Developer docs",
+    "category": "Documentation",
+    "link": "https://docs.readme.com/reference/intro",
+    "auth": "apiKey"
+  },
+  {
+    "id": "jira",
+    "name": "Jira",
+    "description": "Project tracking",
+    "category": "Productivity",
+    "link": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "linear",
+    "name": "Linear",
+    "description": "Issue tracking",
+    "category": "Productivity",
+    "link": "https://developers.linear.app/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "height",
+    "name": "Height",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://height.notion.site/API-9aa0e18a00824b23a1a77f2fdb2ef898",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shortcut",
+    "name": "Shortcut",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://developer.shortcut.com/api/rest/v3",
+    "auth": "apiKey"
+  },
+  {
+    "id": "basecamp",
+    "name": "Basecamp",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://github.com/basecamp/bc3-api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "teamwork",
+    "name": "Teamwork",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://developer.teamwork.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wrike",
+    "name": "Wrike",
+    "description": "Work management",
+    "category": "Productivity",
+    "link": "https://developers.wrike.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "hive",
+    "name": "Hive",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://developers.hive.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nifty",
+    "name": "Nifty",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://niftypm.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lorem-ipsum",
+    "name": "Lorem Ipsum",
+    "description": "Placeholder text",
+    "category": "Tools",
+    "link": "https://loripsum.net/",
+    "auth": "None"
+  },
+  {
+    "id": "bacon-ipsum",
+    "name": "Bacon Ipsum",
+    "description": "Meaty placeholder text",
+    "category": "Entertainment",
+    "link": "https://baconipsum.com/json-api/",
+    "auth": "None"
+  },
+  {
+    "id": "hipster-ipsum",
+    "name": "Hipster Ipsum",
+    "description": "Hipster placeholder",
+    "category": "Entertainment",
+    "link": "https://hipsum.co/api/",
+    "auth": "None"
+  },
+  {
+    "id": "cupcake-ipsum",
+    "name": "Cupcake Ipsum",
+    "description": "Sweet placeholder",
+    "category": "Entertainment",
+    "link": "http://www.cupcakeipsum.com/",
+    "auth": "None"
+  },
+  {
+    "id": "cheese-ipsum",
+    "name": "Cheese Ipsum",
+    "description": "Cheesy placeholder",
+    "category": "Entertainment",
+    "link": "http://www.cheeseipsum.co.uk/",
+    "auth": "None"
+  },
+  {
+    "id": "pirate-ipsum",
+    "name": "Pirate Ipsum",
+    "description": "Pirate placeholder",
+    "category": "Entertainment",
+    "link": "https://pirateipsum.me/api",
+    "auth": "None"
+  },
+  {
+    "id": "zombie-ipsum",
+    "name": "Zombie Ipsum",
+    "description": "Zombie placeholder",
+    "category": "Entertainment",
+    "link": "http://www.zombieipsum.com/",
+    "auth": "None"
+  },
+  {
+    "id": "samuel-l-ipsum",
+    "name": "Samuel L Ipsum",
+    "description": "Samuel L Jackson text",
+    "category": "Entertainment",
+    "link": "https://slipsum.com/",
+    "auth": "None"
+  },
+  {
+    "id": "office-ipsum",
+    "name": "Office Ipsum",
+    "description": "Office jargon",
+    "category": "Entertainment",
+    "link": "http://officeipsum.com/",
+    "auth": "None"
+  },
+  {
+    "id": "cat-ipsum",
+    "name": "Cat Ipsum",
+    "description": "Cat-themed placeholder",
+    "category": "Entertainment",
+    "link": "http://www.catipsum.com/",
+    "auth": "None"
+  }
+]

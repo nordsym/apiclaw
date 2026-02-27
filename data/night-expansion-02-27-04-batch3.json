@@ -1,0 +1,1829 @@
+[
+  {
+    "name": "Kayak",
+    "description": "Travel search",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://kayak.com"
+  },
+  {
+    "name": "Expedia",
+    "description": "Travel booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://expedia.com"
+  },
+  {
+    "name": "Hotels.com",
+    "description": "Hotel booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://hotels.com"
+  },
+  {
+    "name": "Airbnb",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://airbnb.com"
+  },
+  {
+    "name": "VRBO",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://vrbo.com"
+  },
+  {
+    "name": "Yelp Fusion",
+    "description": "Local business reviews",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://yelp.com"
+  },
+  {
+    "name": "Google Flights",
+    "description": "Flight search",
+    "category": "Travel",
+    "authType": "oauth",
+    "baseUrl": "https://google.com/flights"
+  },
+  {
+    "name": "Kiwi.com",
+    "description": "Flight booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://kiwi.com"
+  },
+  {
+    "name": "Rome2Rio",
+    "description": "Travel routing",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://rome2rio.com"
+  },
+  {
+    "name": "Sabre",
+    "description": "Travel distribution",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sabre.com"
+  },
+  {
+    "name": "Travelport",
+    "description": "Travel commerce",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://travelport.com"
+  },
+  {
+    "name": "Grab",
+    "description": "Ride-hailing Asia",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://grab.com"
+  },
+  {
+    "name": "Bolt",
+    "description": "Ride-hailing Europe",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bolt.eu"
+  },
+  {
+    "name": "Ola",
+    "description": "Ride-hailing India",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://olacabs.com"
+  },
+  {
+    "name": "DiDi",
+    "description": "Ride-hailing China",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://didiglobal.com"
+  },
+  {
+    "name": "Lime",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://lime.com"
+  },
+  {
+    "name": "Bird",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bird.co"
+  },
+  {
+    "name": "Spin",
+    "description": "Micromobility",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://spin.app"
+  },
+  {
+    "name": "Voi",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://voiscooters.com"
+  },
+  {
+    "name": "Tier",
+    "description": "Micromobility",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://tier.app"
+  },
+  {
+    "name": "Nextbike",
+    "description": "Bike sharing",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://nextbike.de"
+  },
+  {
+    "name": "Citybikes",
+    "description": "Bike sharing API",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://citybik.es"
+  },
+  {
+    "name": "FlightAware",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://flightaware.com"
+  },
+  {
+    "name": "FlightRadar24",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://flightradar24.com"
+  },
+  {
+    "name": "OpenSky",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://opensky-network.org"
+  },
+  {
+    "name": "Aviation Edge",
+    "description": "Aviation data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://aviationedge.com"
+  },
+  {
+    "name": "AeroDataBox",
+    "description": "Aviation data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://aerodatabox.com"
+  },
+  {
+    "name": "Transitland",
+    "description": "Transit data",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://transit.land"
+  },
+  {
+    "name": "OpenTripPlanner",
+    "description": "Trip planning",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://opentripplanner.org"
+  },
+  {
+    "name": "OSRM",
+    "description": "Routing engine",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://osrm.org"
+  },
+  {
+    "name": "Graphhopper",
+    "description": "Route optimization",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://graphhopper.com"
+  },
+  {
+    "name": "Mapbox Directions",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://mapbox.com"
+  },
+  {
+    "name": "Here Routing",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://here.com"
+  },
+  {
+    "name": "TomTom Routing",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://tomtom.com"
+  },
+  {
+    "name": "Waze",
+    "description": "Traffic data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://waze.com"
+  },
+  {
+    "name": "Inrix",
+    "description": "Traffic data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://inrix.com"
+  },
+  {
+    "name": "National Rail UK",
+    "description": "UK train data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://nationalrail.co.uk"
+  },
+  {
+    "name": "Deutsche Bahn",
+    "description": "German trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bahn.de"
+  },
+  {
+    "name": "SNCF",
+    "description": "French trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sncf.com"
+  },
+  {
+    "name": "Amtrak",
+    "description": "US trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://amtrak.com"
+  },
+  {
+    "name": "Trainline",
+    "description": "Train booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://trainline.com"
+  },
+  {
+    "name": "OpenTable",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://opentable.com"
+  },
+  {
+    "name": "Resy",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://resy.com"
+  },
+  {
+    "name": "Tock",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://exploretock.com"
+  },
+  {
+    "name": "SevenRooms",
+    "description": "Restaurant management",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://sevenrooms.com"
+  },
+  {
+    "name": "Toast",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://toasttab.com"
+  },
+  {
+    "name": "Square for Restaurants",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://squareup.com"
+  },
+  {
+    "name": "Lightspeed Restaurant",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://lightspeedhq.com"
+  },
+  {
+    "name": "Clover",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://clover.com"
+  },
+  {
+    "name": "DoorDash",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://doordash.com"
+  },
+  {
+    "name": "Uber Eats",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://ubereats.com"
+  },
+  {
+    "name": "Grubhub",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://grubhub.com"
+  },
+  {
+    "name": "Postmates",
+    "description": "Delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://postmates.com"
+  },
+  {
+    "name": "Deliveroo",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://deliveroo.com"
+  },
+  {
+    "name": "Just Eat",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://justeat.com"
+  },
+  {
+    "name": "Glovo",
+    "description": "Delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://glovoapp.com"
+  },
+  {
+    "name": "Rappi",
+    "description": "Delivery Latin America",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://rappi.com"
+  },
+  {
+    "name": "iFood",
+    "description": "Food delivery Brazil",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://ifood.com.br"
+  },
+  {
+    "name": "Menulog",
+    "description": "Food delivery Australia",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://menulog.com.au"
+  },
+  {
+    "name": "Swiggy",
+    "description": "Food delivery India",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://swiggy.com"
+  },
+  {
+    "name": "Zomato Delivery",
+    "description": "Food delivery India",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://zomato.com"
+  },
+  {
+    "name": "Meituan",
+    "description": "Food delivery China",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://meituan.com"
+  },
+  {
+    "name": "Ele.me",
+    "description": "Food delivery China",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://ele.me"
+  },
+  {
+    "name": "Instacart",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://instacart.com"
+  },
+  {
+    "name": "Shipt",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://shipt.com"
+  },
+  {
+    "name": "Gopuff",
+    "description": "Instant delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://gopuff.com"
+  },
+  {
+    "name": "Gorillas",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://gorillas.io"
+  },
+  {
+    "name": "Getir",
+    "description": "Quick delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://getir.com"
+  },
+  {
+    "name": "Flink",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://goflink.com"
+  },
+  {
+    "name": "FatSecret",
+    "description": "Nutrition data",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://fatsecret.com"
+  },
+  {
+    "name": "Tesla",
+    "description": "Tesla vehicle API",
+    "category": "Automotive",
+    "authType": "oauth",
+    "baseUrl": "https://tesla.com"
+  },
+  {
+    "name": "Ford",
+    "description": "Ford vehicle services",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://ford.com"
+  },
+  {
+    "name": "GM",
+    "description": "General Motors API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://gm.com"
+  },
+  {
+    "name": "BMW",
+    "description": "BMW Connected Drive",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://bmw.com"
+  },
+  {
+    "name": "Mercedes-Benz",
+    "description": "Mercedes API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://mercedes-benz.com"
+  },
+  {
+    "name": "Audi",
+    "description": "Audi Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://audi.com"
+  },
+  {
+    "name": "Volkswagen",
+    "description": "VW API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://volkswagen.com"
+  },
+  {
+    "name": "Porsche",
+    "description": "Porsche Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://porsche.com"
+  },
+  {
+    "name": "Volvo",
+    "description": "Volvo On Call",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://volvo.com"
+  },
+  {
+    "name": "Toyota",
+    "description": "Toyota Connected",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://toyota.com"
+  },
+  {
+    "name": "Honda",
+    "description": "HondaLink",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://honda.com"
+  },
+  {
+    "name": "Nissan",
+    "description": "NissanConnect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://nissan.com"
+  },
+  {
+    "name": "Hyundai",
+    "description": "Hyundai BlueLink",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://hyundai.com"
+  },
+  {
+    "name": "Kia",
+    "description": "Kia Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://kia.com"
+  },
+  {
+    "name": "Rivian",
+    "description": "Rivian API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://rivian.com"
+  },
+  {
+    "name": "Lucid",
+    "description": "Lucid Motors API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://lucidmotors.com"
+  },
+  {
+    "name": "Polestar",
+    "description": "Polestar API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://polestar.com"
+  },
+  {
+    "name": "Smartcar",
+    "description": "Connected car API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://smartcar.com"
+  },
+  {
+    "name": "Otonomo",
+    "description": "Car data platform",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://otonomo.io"
+  },
+  {
+    "name": "High Mobility",
+    "description": "Car data API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://high-mobility.com"
+  },
+  {
+    "name": "CARFAX",
+    "description": "Vehicle history",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://carfax.com"
+  },
+  {
+    "name": "AutoCheck",
+    "description": "Vehicle history",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://autocheck.com"
+  },
+  {
+    "name": "KBB",
+    "description": "Kelley Blue Book",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://kbb.com"
+  },
+  {
+    "name": "VinAudit",
+    "description": "VIN lookup",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://vinaudit.com"
+  },
+  {
+    "name": "CarMD",
+    "description": "Vehicle diagnostics",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://carmd.com"
+  },
+  {
+    "name": "Geotab",
+    "description": "Fleet telematics",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://geotab.com"
+  },
+  {
+    "name": "Samsara",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://samsara.com"
+  },
+  {
+    "name": "Verizon Connect",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://verizonconnect.com"
+  },
+  {
+    "name": "KeepTruckin",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://keeptruckin.com"
+  },
+  {
+    "name": "ChargePoint",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://chargepoint.com"
+  },
+  {
+    "name": "EVgo",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://evgo.com"
+  },
+  {
+    "name": "Electrify America",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://electrifyamerica.com"
+  },
+  {
+    "name": "IONITY",
+    "description": "EV charging Europe",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://ionity.eu"
+  },
+  {
+    "name": "Lemonade",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://lemonade.com"
+  },
+  {
+    "name": "Root",
+    "description": "Auto insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://root.com"
+  },
+  {
+    "name": "Hippo",
+    "description": "Home insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://hippo.com"
+  },
+  {
+    "name": "Metromile",
+    "description": "Pay-per-mile insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://metromile.com"
+  },
+  {
+    "name": "Next Insurance",
+    "description": "Small business insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://nextinsurance.com"
+  },
+  {
+    "name": "Bold Penguin",
+    "description": "Commercial insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://boldpenguin.com"
+  },
+  {
+    "name": "Newfront",
+    "description": "Insurance broker",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://newfront.com"
+  },
+  {
+    "name": "Vouch",
+    "description": "Startup insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://vouch.us"
+  },
+  {
+    "name": "Embroker",
+    "description": "Business insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://embroker.com"
+  },
+  {
+    "name": "Pie Insurance",
+    "description": "Workers comp",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://pieinsurance.com"
+  },
+  {
+    "name": "Coalition",
+    "description": "Cyber insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://coalitioninc.com"
+  },
+  {
+    "name": "At-Bay",
+    "description": "Cyber insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://at-bay.com"
+  },
+  {
+    "name": "Corvus",
+    "description": "Commercial insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://corvusinsurance.com"
+  },
+  {
+    "name": "Clearcover",
+    "description": "Car insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://clearcover.com"
+  },
+  {
+    "name": "Jerry",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://getjerry.com"
+  },
+  {
+    "name": "Policygenius",
+    "description": "Insurance marketplace",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://policygenius.com"
+  },
+  {
+    "name": "Insurify",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://insurify.com"
+  },
+  {
+    "name": "Gabi",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://gabi.com"
+  },
+  {
+    "name": "Cover Genius",
+    "description": "Insurance infrastructure",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://covergenius.com"
+  },
+  {
+    "name": "Sure",
+    "description": "Embedded insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://sureapp.com"
+  },
+  {
+    "name": "Boost",
+    "description": "Insurance infrastructure",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://boostinsurance.com"
+  },
+  {
+    "name": "Socotra",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://socotra.com"
+  },
+  {
+    "name": "Majesco",
+    "description": "Insurance software",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://majesco.com"
+  },
+  {
+    "name": "Guidewire",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://guidewire.com"
+  },
+  {
+    "name": "Duck Creek",
+    "description": "Insurance solutions",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://duckcreek.com"
+  },
+  {
+    "name": "Procore",
+    "description": "Construction management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://procore.com"
+  },
+  {
+    "name": "PlanGrid",
+    "description": "Construction drawings",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://plangrid.com"
+  },
+  {
+    "name": "Buildertrend",
+    "description": "Construction software",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://buildertrend.com"
+  },
+  {
+    "name": "CoConstruct",
+    "description": "Construction management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://coconstruct.com"
+  },
+  {
+    "name": "Houzz",
+    "description": "Home design",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://houzz.com"
+  },
+  {
+    "name": "BuildZoom",
+    "description": "Contractor data",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://buildzoom.com"
+  },
+  {
+    "name": "Autodesk BIM 360",
+    "description": "BIM platform",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://autodesk.com"
+  },
+  {
+    "name": "Trimble Connect",
+    "description": "Construction collaboration",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://trimble.com"
+  },
+  {
+    "name": "Bluebeam",
+    "description": "PDF markup",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://bluebeam.com"
+  },
+  {
+    "name": "eSUB",
+    "description": "Subcontractor management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://esub.com"
+  },
+  {
+    "name": "Sage 300",
+    "description": "Construction accounting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://sage.com"
+  },
+  {
+    "name": "Viewpoint",
+    "description": "Construction software",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://viewpoint.com"
+  },
+  {
+    "name": "Jonas Construction",
+    "description": "ERP for construction",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://jonas-construction.com"
+  },
+  {
+    "name": "Foundation Software",
+    "description": "Construction accounting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://foundationsoft.com"
+  },
+  {
+    "name": "CMiC",
+    "description": "Construction ERP",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://cmic.ca"
+  },
+  {
+    "name": "Fieldwire",
+    "description": "Field management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://fieldwire.com"
+  },
+  {
+    "name": "Raken",
+    "description": "Daily reporting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://rakenapp.com"
+  },
+  {
+    "name": "busybusy",
+    "description": "Time tracking",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://busybusy.com"
+  },
+  {
+    "name": "Bridgit",
+    "description": "Workforce planning",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://gobridgit.com"
+  },
+  {
+    "name": "OpenSpace",
+    "description": "360 photo documentation",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://openspace.ai"
+  },
+  {
+    "name": "Matterport",
+    "description": "3D capture",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://matterport.com"
+  },
+  {
+    "name": "DroneDeploy",
+    "description": "Drone mapping",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://dronedeploy.com"
+  },
+  {
+    "name": "Skydio",
+    "description": "Autonomous drones",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://skydio.com"
+  },
+  {
+    "name": "StructionSite",
+    "description": "Construction documentation",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://structionsite.com"
+  },
+  {
+    "name": "Join.Build",
+    "description": "Construction coordination",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://join.build"
+  },
+  {
+    "name": "Climate FieldView",
+    "description": "Digital farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://climate.com"
+  },
+  {
+    "name": "John Deere",
+    "description": "Agricultural equipment",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://deere.com"
+  },
+  {
+    "name": "Trimble Agriculture",
+    "description": "Precision ag",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agriculture.trimble.com"
+  },
+  {
+    "name": "AGCO",
+    "description": "Farm equipment",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agcocorp.com"
+  },
+  {
+    "name": "CNH Industrial",
+    "description": "Agricultural machinery",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cnhindustrial.com"
+  },
+  {
+    "name": "Farmers Edge",
+    "description": "Digital farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://farmersedge.ca"
+  },
+  {
+    "name": "Granular",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://granular.ag"
+  },
+  {
+    "name": "FarmLogs",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://farmlogs.com"
+  },
+  {
+    "name": "Conservis",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://conservis.ag"
+  },
+  {
+    "name": "Agrivi",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agrivi.com"
+  },
+  {
+    "name": "Cropio",
+    "description": "Satellite monitoring",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cropio.com"
+  },
+  {
+    "name": "OneSoil",
+    "description": "Precision farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://onesoil.ai"
+  },
+  {
+    "name": "Arable",
+    "description": "Agricultural IoT",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://arable.com"
+  },
+  {
+    "name": "Davis Instruments",
+    "description": "Weather stations",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://davisinstruments.com"
+  },
+  {
+    "name": "Semios",
+    "description": "Pest management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://semios.com"
+  },
+  {
+    "name": "Agworld",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agworld.com"
+  },
+  {
+    "name": "AgriWebb",
+    "description": "Livestock management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agriwebb.com"
+  },
+  {
+    "name": "CattleMax",
+    "description": "Cattle management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cattlemax.com"
+  },
+  {
+    "name": "Feedlot Manager",
+    "description": "Feedlot management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://feedlotmanager.com"
+  },
+  {
+    "name": "USDA NASS",
+    "description": "Agricultural statistics",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://nass.usda.gov"
+  },
+  {
+    "name": "FAO",
+    "description": "Food and agriculture data",
+    "category": "Agriculture",
+    "authType": "none",
+    "baseUrl": "https://fao.org"
+  },
+  {
+    "name": "Open Ag Data",
+    "description": "Agricultural open data",
+    "category": "Agriculture",
+    "authType": "none",
+    "baseUrl": "https://openag.io"
+  },
+  {
+    "name": "Gro Intelligence",
+    "description": "Agricultural data",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://gro-intelligence.com"
+  },
+  {
+    "name": "Agronod",
+    "description": "Agricultural API",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agronod.com"
+  },
+  {
+    "name": "Sentera",
+    "description": "Drone analytics",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://sentera.com"
+  },
+  {
+    "name": "Utility API",
+    "description": "Utility data access",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://utilityapi.com"
+  },
+  {
+    "name": "Arcadia",
+    "description": "Utility data platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://arcadia.com"
+  },
+  {
+    "name": "Pelm",
+    "description": "Utility data access",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://pelm.com"
+  },
+  {
+    "name": "Urjanet",
+    "description": "Utility bill data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://urjanet.com"
+  },
+  {
+    "name": "WattTime",
+    "description": "Electricity emissions",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://watttime.org"
+  },
+  {
+    "name": "Electricity Maps",
+    "description": "Carbon intensity",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://electricitymaps.com"
+  },
+  {
+    "name": "Open Power System Data",
+    "description": "Power system data",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://open-power-system-data.org"
+  },
+  {
+    "name": "ENTSO-E",
+    "description": "European power data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://entsoe.eu"
+  },
+  {
+    "name": "EIA",
+    "description": "US Energy Information",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://eia.gov"
+  },
+  {
+    "name": "IEA",
+    "description": "International Energy Agency",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://iea.org"
+  },
+  {
+    "name": "IRENA",
+    "description": "Renewable energy",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://irena.org"
+  },
+  {
+    "name": "NREL",
+    "description": "Renewable energy data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://nrel.gov"
+  },
+  {
+    "name": "SolarEdge",
+    "description": "Solar monitoring",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://solaredge.com"
+  },
+  {
+    "name": "Enphase",
+    "description": "Solar systems",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://enphase.com"
+  },
+  {
+    "name": "SunPower",
+    "description": "Solar energy",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://sunpower.com"
+  },
+  {
+    "name": "Tesla Energy",
+    "description": "Energy products",
+    "category": "Energy",
+    "authType": "oauth",
+    "baseUrl": "https://tesla.com"
+  },
+  {
+    "name": "Sense",
+    "description": "Home energy monitor",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://sense.com"
+  },
+  {
+    "name": "Emporia",
+    "description": "Energy monitoring",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://emporiaenergy.com"
+  },
+  {
+    "name": "Honeywell Home",
+    "description": "Smart thermostats",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://honeywellhome.com"
+  },
+  {
+    "name": "tado",
+    "description": "Smart climate",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://tado.com"
+  },
+  {
+    "name": "Netatmo",
+    "description": "Smart home devices",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://netatmo.com"
+  },
+  {
+    "name": "EnergyStar",
+    "description": "Energy efficiency",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://energystar.gov"
+  },
+  {
+    "name": "GridX",
+    "description": "Smart grid platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://gridx.de"
+  },
+  {
+    "name": "AutoGrid",
+    "description": "Energy platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://auto-grid.com"
+  },
+  {
+    "name": "Stem",
+    "description": "Energy storage",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://stem.com"
+  },
+  {
+    "name": "Fluence",
+    "description": "Energy storage",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://fluenceenergy.com"
+  },
+  {
+    "name": "Form Energy",
+    "description": "Iron-air batteries",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://formenergy.com"
+  },
+  {
+    "name": "StubHub",
+    "description": "Ticket resale",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://stubhub.com"
+  },
+  {
+    "name": "Vivid Seats",
+    "description": "Ticket marketplace",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://vividseats.com"
+  },
+  {
+    "name": "AXS",
+    "description": "Event tickets",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://axs.com"
+  },
+  {
+    "name": "Dice",
+    "description": "Event discovery",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://dice.fm"
+  },
+  {
+    "name": "Resident Advisor",
+    "description": "Electronic music events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://ra.co"
+  },
+  {
+    "name": "Cvent",
+    "description": "Event management",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://cvent.com"
+  },
+  {
+    "name": "Airmeet",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://airmeet.com"
+  },
+  {
+    "name": "Run The World",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://runtheworld.today"
+  },
+  {
+    "name": "Whova",
+    "description": "Event app",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://whova.com"
+  },
+  {
+    "name": "Swapcard",
+    "description": "Event app",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://swapcard.com"
+  },
+  {
+    "name": "Grip",
+    "description": "Event networking",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://grip.events"
+  },
+  {
+    "name": "Brella",
+    "description": "Event networking",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://brella.io"
+  },
+  {
+    "name": "Sched",
+    "description": "Event scheduling",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://sched.com"
+  },
+  {
+    "name": "Accelevents",
+    "description": "Event platform",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://accelevents.com"
+  },
+  {
+    "name": "vFairs",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://vfairs.com"
+  },
+  {
+    "name": "Charity Navigator",
+    "description": "Charity ratings",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://charitynavigator.org"
+  },
+  {
+    "name": "GuideStar",
+    "description": "Nonprofit data",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://guidestar.org"
+  },
+  {
+    "name": "GlobalGiving",
+    "description": "Crowdfunding for nonprofits",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://globalgiving.org"
+  },
+  {
+    "name": "GoFundMe Charity",
+    "description": "Charity fundraising",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://gofundme.com"
+  },
+  {
+    "name": "Network for Good",
+    "description": "Donation processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://networkforgood.com"
+  },
+  {
+    "name": "Bloomerang",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://bloomerang.co"
+  },
+  {
+    "name": "Blackbaud",
+    "description": "Nonprofit software",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://blackbaud.com"
+  },
+  {
+    "name": "Little Green Light",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://littlegreenlight.com"
+  },
+  {
+    "name": "Salesforce Nonprofit",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://salesforce.org"
+  },
+  {
+    "name": "Kindful",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://kindful.com"
+  },
+  {
+    "name": "NeonCRM",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://neonone.com"
+  },
+  {
+    "name": "Virtuous",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://virtuous.org"
+  },
+  {
+    "name": "Classy",
+    "description": "Fundraising platform",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://classy.org"
+  },
+  {
+    "name": "OneCause",
+    "description": "Fundraising events",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://onecause.com"
+  },
+  {
+    "name": "GiveWP",
+    "description": "WordPress donations",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://givewp.com"
+  },
+  {
+    "name": "Donorbox",
+    "description": "Online donations",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://donorbox.org"
+  },
+  {
+    "name": "Stripe for Nonprofits",
+    "description": "Payment processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://stripe.com"
+  },
+  {
+    "name": "PayPal Giving Fund",
+    "description": "Donation processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://paypal.com"
+  },
+  {
+    "name": "Benevity",
+    "description": "Corporate giving",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://benevity.com"
+  },
+  {
+    "name": "YourCause",
+    "description": "Employee giving",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://yourcause.com"
+  },
+  {
+    "name": "ESA",
+    "description": "European Space Agency",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://esa.int"
+  },
+  {
+    "name": "Open Notify",
+    "description": "ISS location",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://open-notify.org"
+  },
+  {
+    "name": "N2YO",
+    "description": "Satellite tracking",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://n2yo.com"
+  },
+  {
+    "name": "Launch Library",
+    "description": "Space launches",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://thespacedevs.com"
+  },
+  {
+    "name": "Ocean Biogeographic",
+    "description": "Marine biodiversity",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://obis.org"
+  },
+  {
+    "name": "World Flora Online",
+    "description": "Plant data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://worldfloraonline.org"
+  },
+  {
+    "name": "NCBI",
+    "description": "Genomic data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ncbi.nlm.nih.gov"
+  },
+  {
+    "name": "Ensembl",
+    "description": "Genome browser",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ensembl.org"
+  },
+  {
+    "name": "PDB",
+    "description": "Protein structures",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://rcsb.org"
+  },
+  {
+    "name": "ChEBI",
+    "description": "Chemical entities",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ebi.ac.uk/chebi"
+  },
+  {
+    "name": "PubChem",
+    "description": "Chemical data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://pubchem.ncbi.nlm.nih.gov"
+  },
+  {
+    "name": "Semantic Scholar",
+    "description": "Research papers",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://semanticscholar.org"
+  },
+  {
+    "name": "CrossRef",
+    "description": "Research metadata",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://crossref.org"
+  },
+  {
+    "name": "OpenCitations",
+    "description": "Citation data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://opencitations.net"
+  },
+  {
+    "name": "ORCID",
+    "description": "Researcher identifiers",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://orcid.org"
+  },
+  {
+    "name": "Dimensions",
+    "description": "Research data",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://dimensions.ai"
+  },
+  {
+    "name": "Altmetric",
+    "description": "Research impact",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://altmetric.com"
+  },
+  {
+    "name": "NOAA Climate",
+    "description": "Climate data",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://ncdc.noaa.gov"
+  },
+  {
+    "name": "Copernicus",
+    "description": "Earth observation",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://copernicus.eu"
+  },
+  {
+    "name": "Sentinel Hub",
+    "description": "Satellite imagery",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://sentinel-hub.com"
+  },
+  {
+    "name": "Planet Labs",
+    "description": "Earth imaging",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://planet.com"
+  }
+]

@@ -13,7 +13,10 @@ import {
   X,
   ArrowLeft,
   PlayCircle,
+  FileJson,
+  Download,
 } from "lucide-react";
+import { parseOpenAPISpec, ParsedAction } from "@/lib/openapi-parser";
 
 interface ActionParam {
   name: string;
@@ -34,7 +37,7 @@ interface ProviderAction {
   enabled: boolean;
 }
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.site';
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
 
 export default function ActionsPage() {
   const params = useParams();
@@ -45,6 +48,14 @@ export default function ActionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [directCallId, setDirectCallId] = useState<string | null>(null);
+  
+  // OpenAPI Import state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parsedActions, setParsedActions] = useState<ParsedAction[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     const loadActions = async () => {
@@ -146,6 +157,86 @@ export default function ActionsPage() {
     }
   };
 
+  // OpenAPI Import functions
+  const handleParseOpenAPI = async () => {
+    if (!importUrl) return;
+    
+    setIsParsing(true);
+    setParseError(null);
+    setParsedActions([]);
+    
+    const result = await parseOpenAPISpec(importUrl);
+    
+    if (result.success) {
+      setParsedActions(result.actions);
+    } else {
+      setParseError(result.error || "Failed to parse OpenAPI spec");
+    }
+    
+    setIsParsing(false);
+  };
+
+  const toggleParsedAction = (index: number) => {
+    setParsedActions(prev => prev.map((a, i) => 
+      i === index ? { ...a, selected: !a.selected } : a
+    ));
+  };
+
+  const handleImportSelected = async () => {
+    if (!directCallId) return;
+    
+    const selectedActions = parsedActions.filter(a => a.selected);
+    if (selectedActions.length === 0) return;
+    
+    setIsImporting(true);
+    
+    try {
+      // Create each action
+      for (const action of selectedActions) {
+        await fetch(`${CONVEX_URL}/api/mutation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            path: 'directCall:saveAction',
+            args: {
+              directCallId,
+              name: action.name,
+              displayName: action.displayName,
+              description: action.description,
+              method: action.method,
+              path: action.path,
+              params: action.params,
+              responseMapping: [],
+              enabled: true,
+            }
+          })
+        });
+      }
+      
+      // Reload actions
+      const actionsRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: 'directCall:getActions',
+          args: { directCallId }
+        })
+      });
+      const actionsData = await actionsRes.json();
+      setActions(actionsData || []);
+      
+      // Close modal and reset
+      setShowImportModal(false);
+      setImportUrl("");
+      setParsedActions([]);
+      
+    } catch (err) {
+      setParseError("Failed to import actions");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -183,14 +274,160 @@ export default function ActionsPage() {
             <p className="text-text-muted">Define the endpoints agents can call</p>
           </div>
         </div>
-        <Link 
-          href={`/providers/dashboard/${apiId}/actions/new`}
-          className="btn-primary"
-        >
-          <Plus className="w-4 h-4" />
-          Add Action
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="btn-secondary"
+          >
+            <FileJson className="w-4 h-4" />
+            Import from OpenAPI
+          </button>
+          <Link 
+            href={`/providers/dashboard/${apiId}/actions/new`}
+            className="btn-primary"
+          >
+            <Plus className="w-4 h-4" />
+            Add Action
+          </Link>
+        </div>
       </div>
+
+      {/* OpenAPI Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-surface-elevated rounded-2xl border border-border max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <div className="flex items-center gap-3">
+                <FileJson className="w-6 h-6 text-accent" />
+                <h2 className="text-xl font-bold">Import from OpenAPI</h2>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportUrl("");
+                  setParsedActions([]);
+                  setParseError(null);
+                }}
+                className="p-2 hover:bg-surface rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 flex-1 overflow-y-auto">
+              {/* URL Input */}
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="url"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  placeholder="https://api.example.com/openapi.json"
+                  className="flex-1 px-4 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none transition"
+                />
+                <button
+                  onClick={handleParseOpenAPI}
+                  disabled={!importUrl || isParsing}
+                  className="btn-primary disabled:opacity-50"
+                >
+                  {isParsing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Parse
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Parse Error */}
+              {parseError && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 mb-4">
+                  <AlertCircle className="w-5 h-5 inline mr-2" />
+                  {parseError}
+                </div>
+              )}
+
+              {/* Parsed Actions */}
+              {parsedActions.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-text-muted">
+                      Found {parsedActions.length} endpoints. Select which to import:
+                    </p>
+                    <button
+                      onClick={() => setParsedActions(prev => prev.map(a => ({ ...a, selected: !prev.every(p => p.selected) })))}
+                      className="text-sm text-accent hover:underline"
+                    >
+                      {parsedActions.every(a => a.selected) ? 'Deselect all' : 'Select all'}
+                    </button>
+                  </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {parsedActions.map((action, index) => (
+                      <label
+                        key={index}
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          action.selected 
+                            ? 'border-accent bg-accent/5' 
+                            : 'border-border hover:border-accent/50'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={action.selected}
+                          onChange={() => toggleParsedAction(index)}
+                          className="w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                        />
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getMethodColor(action.method)}`}>
+                          {action.method}
+                        </span>
+                        <span className="font-mono text-sm flex-1 truncate">{action.path}</span>
+                        <span className="text-text-muted text-sm truncate max-w-[150px]">{action.displayName}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            {parsedActions.length > 0 && (
+              <div className="p-6 border-t border-border flex items-center justify-between">
+                <p className="text-sm text-text-muted">
+                  {parsedActions.filter(a => a.selected).length} of {parsedActions.length} selected
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowImportModal(false)}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleImportSelected}
+                    disabled={isImporting || parsedActions.filter(a => a.selected).length === 0}
+                    className="btn-primary disabled:opacity-50"
+                  >
+                    {isImporting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Import {parsedActions.filter(a => a.selected).length} Actions
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Actions List */}
       {actions.length === 0 ? (

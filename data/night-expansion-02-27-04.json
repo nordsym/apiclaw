@@ -1,0 +1,1458 @@
+[
+  {
+    "name": "Google Gemini",
+    "description": "Google's multimodal AI model",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ai.google.dev"
+  },
+  {
+    "name": "Hugging Face Inference",
+    "description": "Run ML models via API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://huggingface.co"
+  },
+  {
+    "name": "Modal",
+    "description": "Serverless functions for ML",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://modal.com"
+  },
+  {
+    "name": "Banana",
+    "description": "Serverless GPU inference",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://banana.dev"
+  },
+  {
+    "name": "Cerebrium",
+    "description": "ML model deployment platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cerebrium.ai"
+  },
+  {
+    "name": "Baseten",
+    "description": "ML model serving infrastructure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://baseten.co"
+  },
+  {
+    "name": "OctoML",
+    "description": "ML model optimization and deployment",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://octoml.ai"
+  },
+  {
+    "name": "Anyscale",
+    "description": "Ray-based ML platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://anyscale.com"
+  },
+  {
+    "name": "AWS SageMaker",
+    "description": "Build and deploy ML models",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/sagemaker"
+  },
+  {
+    "name": "Azure OpenAI",
+    "description": "OpenAI models on Azure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Google Vertex AI",
+    "description": "Google Cloud ML platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/vertex-ai"
+  },
+  {
+    "name": "Speechmatics",
+    "description": "Speech recognition technology",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://speechmatics.com"
+  },
+  {
+    "name": "Sonix",
+    "description": "Automated transcription",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://sonix.ai"
+  },
+  {
+    "name": "Descript",
+    "description": "Audio/video editing with AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://descript.com"
+  },
+  {
+    "name": "Luma AI",
+    "description": "3D capture and reconstruction",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lumalabs.ai"
+  },
+  {
+    "name": "Microsoft Computer Vision",
+    "description": "Image analysis and OCR",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Scale AI",
+    "description": "Data labeling and AI infrastructure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://scale.com"
+  },
+  {
+    "name": "Labelbox",
+    "description": "Data labeling platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://labelbox.com"
+  },
+  {
+    "name": "Snorkel AI",
+    "description": "Data-centric AI platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://snorkel.ai"
+  },
+  {
+    "name": "Weights & Biases",
+    "description": "ML experiment tracking",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://wandb.ai"
+  },
+  {
+    "name": "Neptune.ai",
+    "description": "ML experiment tracking",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://neptune.ai"
+  },
+  {
+    "name": "Comet ML",
+    "description": "ML experiment management",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://comet.ml"
+  },
+  {
+    "name": "MLflow",
+    "description": "ML lifecycle management",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://mlflow.org"
+  },
+  {
+    "name": "Kubeflow",
+    "description": "ML on Kubernetes",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://kubeflow.org"
+  },
+  {
+    "name": "Seldon",
+    "description": "ML model deployment",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://seldon.io"
+  },
+  {
+    "name": "BentoML",
+    "description": "ML model serving",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://bentoml.com"
+  },
+  {
+    "name": "Valohai",
+    "description": "MLOps platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://valohai.com"
+  },
+  {
+    "name": "Determined AI",
+    "description": "ML training platform",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://determined.ai"
+  },
+  {
+    "name": "Paperspace",
+    "description": "GPU cloud for ML",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://paperspace.com"
+  },
+  {
+    "name": "Lambda Labs",
+    "description": "GPU cloud for deep learning",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lambdalabs.com"
+  },
+  {
+    "name": "Cloudflare Workers",
+    "description": "Serverless execution environment",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://workers.cloudflare.com"
+  },
+  {
+    "name": "AWS Lambda",
+    "description": "Serverless compute",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/lambda"
+  },
+  {
+    "name": "Google Cloud Functions",
+    "description": "Serverless functions",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/functions"
+  },
+  {
+    "name": "Turso",
+    "description": "SQLite at the edge",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://turso.tech"
+  },
+  {
+    "name": "Convex",
+    "description": "Reactive backend platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://convex.dev"
+  },
+  {
+    "name": "Xata",
+    "description": "Serverless database platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://xata.io"
+  },
+  {
+    "name": "CockroachDB",
+    "description": "Distributed SQL database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cockroachlabs.com"
+  },
+  {
+    "name": "MongoDB Atlas",
+    "description": "Cloud database service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://mongodb.com/atlas"
+  },
+  {
+    "name": "Aiven",
+    "description": "Open source data infrastructure",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aiven.io"
+  },
+  {
+    "name": "Redis Cloud",
+    "description": "Redis database as a service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://redis.com"
+  },
+  {
+    "name": "Milvus",
+    "description": "Vector database for AI",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://milvus.io"
+  },
+  {
+    "name": "Chroma",
+    "description": "AI-native embedding database",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://trychroma.com"
+  },
+  {
+    "name": "Split.io",
+    "description": "Feature flags and experiments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://split.io"
+  },
+  {
+    "name": "Prometheus",
+    "description": "Monitoring system",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://prometheus.io"
+  },
+  {
+    "name": "Honeycomb",
+    "description": "Observability for distributed systems",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://honeycomb.io"
+  },
+  {
+    "name": "Axiom",
+    "description": "Log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://axiom.co"
+  },
+  {
+    "name": "Logflare",
+    "description": "Log management for Elixir",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://logflare.app"
+  },
+  {
+    "name": "Papertrail",
+    "description": "Cloud-hosted log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://papertrailapp.com"
+  },
+  {
+    "name": "Logtail",
+    "description": "Log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://logtail.com"
+  },
+  {
+    "name": "VictorOps",
+    "description": "Incident management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://victorops.com"
+  },
+  {
+    "name": "Resend",
+    "description": "Email API for developers",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://resend.com"
+  },
+  {
+    "name": "Loops",
+    "description": "Email for SaaS",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://loops.so"
+  },
+  {
+    "name": "Brevo",
+    "description": "Email and SMS marketing platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://brevo.com"
+  },
+  {
+    "name": "Mailchimp Transactional",
+    "description": "Transactional email API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://mailchimp.com"
+  },
+  {
+    "name": "Chatwoot",
+    "description": "Open-source customer engagement",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://chatwoot.com"
+  },
+  {
+    "name": "WhatsApp Business",
+    "description": "WhatsApp messaging for businesses",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://business.whatsapp.com"
+  },
+  {
+    "name": "Facebook Messenger",
+    "description": "Messenger bot platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "46elks",
+    "description": "SMS and voice API for Sweden",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://46elks.com"
+  },
+  {
+    "name": "Pusher",
+    "description": "Realtime communication APIs",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://pusher.com"
+  },
+  {
+    "name": "Ably",
+    "description": "Realtime messaging infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://ably.com"
+  },
+  {
+    "name": "Socket.io",
+    "description": "Realtime bidirectional communication",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://socket.io"
+  },
+  {
+    "name": "100ms",
+    "description": "Video conferencing infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://100ms.live"
+  },
+  {
+    "name": "Jitsi",
+    "description": "Open source video conferencing",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://jitsi.org"
+  },
+  {
+    "name": "Stream",
+    "description": "Chat and activity feeds",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://getstream.io"
+  },
+  {
+    "name": "SendBird",
+    "description": "Chat and messaging API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://sendbird.com"
+  },
+  {
+    "name": "CometChat",
+    "description": "In-app chat SDK",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://cometchat.com"
+  },
+  {
+    "name": "TalkJS",
+    "description": "Chat API and SDK",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://talkjs.com"
+  },
+  {
+    "name": "Novu",
+    "description": "Open source notification infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://novu.co"
+  },
+  {
+    "name": "Lemon Squeezy",
+    "description": "Payments for digital products",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://lemonsqueezy.com"
+  },
+  {
+    "name": "Zuora",
+    "description": "Subscription management platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://zuora.com"
+  },
+  {
+    "name": "RevenueCat",
+    "description": "In-app subscriptions",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://revenuecat.com"
+  },
+  {
+    "name": "Adapty",
+    "description": "In-app subscriptions for mobile",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adapty.io"
+  },
+  {
+    "name": "Superwall",
+    "description": "Paywall infrastructure",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://superwall.com"
+  },
+  {
+    "name": "Klarna",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://klarna.com"
+  },
+  {
+    "name": "Affirm",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://affirm.com"
+  },
+  {
+    "name": "Afterpay",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://afterpay.com"
+  },
+  {
+    "name": "Sezzle",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://sezzle.com"
+  },
+  {
+    "name": "Wise",
+    "description": "International money transfer",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://wise.com"
+  },
+  {
+    "name": "Revolut Business",
+    "description": "Business financial platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://revolut.com"
+  },
+  {
+    "name": "Mercury",
+    "description": "Banking for startups",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://mercury.com"
+  },
+  {
+    "name": "Dwolla",
+    "description": "ACH payment API",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://dwolla.com"
+  },
+  {
+    "name": "Modern Treasury",
+    "description": "Payment operations",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://moderntreasury.com"
+  },
+  {
+    "name": "Increase",
+    "description": "Banking APIs",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://increase.com"
+  },
+  {
+    "name": "Unit",
+    "description": "Banking-as-a-service",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://unit.co"
+  },
+  {
+    "name": "Bond",
+    "description": "Embedded finance platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://bond.tech"
+  },
+  {
+    "name": "Treasury Prime",
+    "description": "Banking infrastructure",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://treasuryprime.com"
+  },
+  {
+    "name": "Medusa",
+    "description": "Open source e-commerce",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://medusajs.com"
+  },
+  {
+    "name": "Commerce.js",
+    "description": "Headless e-commerce API",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://commercejs.com"
+  },
+  {
+    "name": "Snipcart",
+    "description": "Shopping cart platform",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://snipcart.com"
+  },
+  {
+    "name": "Crystallize",
+    "description": "Product information management",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://crystallize.com"
+  },
+  {
+    "name": "Orderdesk",
+    "description": "Order management",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://orderdesk.com"
+  },
+  {
+    "name": "Google Analytics 4",
+    "description": "Website analytics",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://analytics.google.com"
+  },
+  {
+    "name": "Fathom",
+    "description": "Privacy-focused website analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://usefathom.com"
+  },
+  {
+    "name": "Simple Analytics",
+    "description": "Privacy-friendly analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://simpleanalytics.com"
+  },
+  {
+    "name": "Umami",
+    "description": "Open source website analytics",
+    "category": "Analytics",
+    "authType": "none",
+    "baseUrl": "https://umami.is"
+  },
+  {
+    "name": "Jitsu",
+    "description": "Open source data collection",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://jitsu.com"
+  },
+  {
+    "name": "Snowplow",
+    "description": "Behavioral data platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://snowplow.io"
+  },
+  {
+    "name": "Dbt",
+    "description": "Data transformation",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://getdbt.com"
+  },
+  {
+    "name": "Seamless.AI",
+    "description": "Sales leads platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://seamless.ai"
+  },
+  {
+    "name": "Smartlook",
+    "description": "Qualitative analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://smartlook.com"
+  },
+  {
+    "name": "Mouseflow",
+    "description": "Session replay and heatmaps",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://mouseflow.com"
+  },
+  {
+    "name": "CrazyEgg",
+    "description": "Heatmaps and A/B testing",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://crazyegg.com"
+  },
+  {
+    "name": "Hygraph",
+    "description": "Federated content platform",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://hygraph.com"
+  },
+  {
+    "name": "Builder.io",
+    "description": "Visual headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://builder.io"
+  },
+  {
+    "name": "Payload CMS",
+    "description": "Headless CMS and application framework",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://payloadcms.com"
+  },
+  {
+    "name": "Framer",
+    "description": "Design and publish websites",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://framer.com"
+  },
+  {
+    "name": "Bunny Stream",
+    "description": "Video hosting and streaming",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://bunny.net"
+  },
+  {
+    "name": "Bitmovin",
+    "description": "Video streaming technology",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://bitmovin.com"
+  },
+  {
+    "name": "Shutterstock",
+    "description": "Stock photography",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://shutterstock.com"
+  },
+  {
+    "name": "Adobe Stock",
+    "description": "Stock media assets",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://stock.adobe.com"
+  },
+  {
+    "name": "iStock",
+    "description": "Stock photos and media",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://istockphoto.com"
+  },
+  {
+    "name": "Tenor",
+    "description": "GIF search API",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://tenor.com"
+  },
+  {
+    "name": "Lottie Files",
+    "description": "Lottie animations library",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://lottiefiles.com"
+  },
+  {
+    "name": "Flaticon",
+    "description": "Free vector icons",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://flaticon.com"
+  },
+  {
+    "name": "The Noun Project",
+    "description": "Icons and photos",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://thenounproject.com"
+  },
+  {
+    "name": "RemoveBG",
+    "description": "Remove image backgrounds",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://remove.bg"
+  },
+  {
+    "name": "Unscreen",
+    "description": "Remove video backgrounds",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://unscreen.com"
+  },
+  {
+    "name": "Magic",
+    "description": "Passwordless login",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://magic.link"
+  },
+  {
+    "name": "Passage",
+    "description": "Passwordless authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://passage.id"
+  },
+  {
+    "name": "Descope",
+    "description": "Customer authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://descope.com"
+  },
+  {
+    "name": "FusionAuth",
+    "description": "Customer identity platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fusionauth.io"
+  },
+  {
+    "name": "Ory",
+    "description": "Open source identity platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://ory.sh"
+  },
+  {
+    "name": "Keycloak",
+    "description": "Open source IAM",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://keycloak.org"
+  },
+  {
+    "name": "SuperTokens",
+    "description": "Open source auth",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://supertokens.com"
+  },
+  {
+    "name": "Hanko",
+    "description": "Passkey authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://hanko.io"
+  },
+  {
+    "name": "PropelAuth",
+    "description": "B2B authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://propelauth.com"
+  },
+  {
+    "name": "Kinde",
+    "description": "Auth for modern applications",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://kinde.com"
+  },
+  {
+    "name": "Checkmarx",
+    "description": "Application security testing",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://checkmarx.com"
+  },
+  {
+    "name": "Veracode",
+    "description": "Application security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://veracode.com"
+  },
+  {
+    "name": "WhiteSource",
+    "description": "Open source security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://whitesourcesoftware.com"
+  },
+  {
+    "name": "GitHub Security",
+    "description": "Security features in GitHub",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "GitLab Security",
+    "description": "Security scanning",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://gitlab.com"
+  },
+  {
+    "name": "Dependabot",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://github.com/dependabot"
+  },
+  {
+    "name": "Socket",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://socket.dev"
+  },
+  {
+    "name": "Aqua Security",
+    "description": "Container security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://aquasec.com"
+  },
+  {
+    "name": "Trivy",
+    "description": "Vulnerability scanner",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://trivy.dev"
+  },
+  {
+    "name": "Grype",
+    "description": "Vulnerability scanner",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://anchore.com"
+  },
+  {
+    "name": "Falco",
+    "description": "Runtime security",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://falco.org"
+  },
+  {
+    "name": "Vault",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://vaultproject.io"
+  },
+  {
+    "name": "Doppler",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://doppler.com"
+  },
+  {
+    "name": "1Password Secrets",
+    "description": "Secrets automation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://1password.com"
+  },
+  {
+    "name": "Infisical",
+    "description": "Open source secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://infisical.com"
+  },
+  {
+    "name": "AWS Secrets Manager",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Google Secret Manager",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com"
+  },
+  {
+    "name": "CrowdStrike",
+    "description": "Endpoint security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://crowdstrike.com"
+  },
+  {
+    "name": "Carbon Black",
+    "description": "Endpoint security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://carbonblack.com"
+  },
+  {
+    "name": "SentinelOne",
+    "description": "Autonomous security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://sentinelone.com"
+  },
+  {
+    "name": "Things",
+    "description": "Task manager for Apple",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://culturedcode.com"
+  },
+  {
+    "name": "SavvyCal",
+    "description": "Scheduling made easy",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://savvycal.com"
+  },
+  {
+    "name": "Zoom",
+    "description": "Video communications",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://zoom.us"
+  },
+  {
+    "name": "Google Meet",
+    "description": "Video meetings",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://meet.google.com"
+  },
+  {
+    "name": "Microsoft Teams",
+    "description": "Collaboration platform",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://teams.microsoft.com"
+  },
+  {
+    "name": "Webex",
+    "description": "Video conferencing",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://webex.com"
+  },
+  {
+    "name": "Loom",
+    "description": "Video messaging",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://loom.com"
+  },
+  {
+    "name": "Vidyard",
+    "description": "Video hosting for business",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://vidyard.com"
+  },
+  {
+    "name": "Figma",
+    "description": "Design tool",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://figma.com"
+  },
+  {
+    "name": "Canva",
+    "description": "Design platform",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://canva.com"
+  },
+  {
+    "name": "Pitch",
+    "description": "Presentation software",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://pitch.com"
+  },
+  {
+    "name": "Miro",
+    "description": "Collaborative whiteboard",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://miro.com"
+  },
+  {
+    "name": "FigJam",
+    "description": "Whiteboard by Figma",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://figma.com/figjam"
+  },
+  {
+    "name": "Excalidraw",
+    "description": "Virtual whiteboard",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://excalidraw.com"
+  },
+  {
+    "name": "Whereby Embedded",
+    "description": "Video meeting APIs",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://whereby.com"
+  },
+  {
+    "name": "ConvertKit",
+    "description": "Email marketing for creators",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://convertkit.com"
+  },
+  {
+    "name": "Beehiiv",
+    "description": "Newsletter platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://beehiiv.com"
+  },
+  {
+    "name": "Substack",
+    "description": "Newsletter platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://substack.com"
+  },
+  {
+    "name": "Buttondown",
+    "description": "Newsletter tool",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://buttondown.email"
+  },
+  {
+    "name": "Sitebulb",
+    "description": "Website auditing tool",
+    "category": "Marketing",
+    "authType": "none",
+    "baseUrl": "https://sitebulb.com"
+  },
+  {
+    "name": "LinkResearchTools",
+    "description": "Backlink analysis",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://linkresearchtools.com"
+  },
+  {
+    "name": "Bing Webmaster Tools",
+    "description": "Bing search performance",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://bing.com/webmasters"
+  },
+  {
+    "name": "Google Ads",
+    "description": "Advertising platform",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.google.com"
+  },
+  {
+    "name": "Meta Ads",
+    "description": "Facebook and Instagram ads",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://business.facebook.com"
+  },
+  {
+    "name": "LinkedIn Ads",
+    "description": "Professional advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://business.linkedin.com"
+  },
+  {
+    "name": "Twitter Ads",
+    "description": "Twitter advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.twitter.com"
+  },
+  {
+    "name": "TikTok Ads",
+    "description": "TikTok advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.tiktok.com"
+  },
+  {
+    "name": "Pinterest Ads",
+    "description": "Pinterest advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.pinterest.com"
+  },
+  {
+    "name": "Snapchat Ads",
+    "description": "Snapchat advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://forbusiness.snapchat.com"
+  },
+  {
+    "name": "Reddit Ads",
+    "description": "Reddit advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.reddit.com"
+  },
+  {
+    "name": "Taboola",
+    "description": "Content discovery platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://taboola.com"
+  },
+  {
+    "name": "Outbrain",
+    "description": "Content recommendation",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://outbrain.com"
+  },
+  {
+    "name": "Criteo",
+    "description": "Advertising platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://criteo.com"
+  },
+  {
+    "name": "AppsFlyer",
+    "description": "Mobile attribution",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://appsflyer.com"
+  },
+  {
+    "name": "Adjust",
+    "description": "Mobile analytics",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://adjust.com"
+  },
+  {
+    "name": "Branch",
+    "description": "Mobile linking platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://branch.io"
+  },
+  {
+    "name": "Pirate Weather",
+    "description": "Weather forecasting",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://pirateweather.net"
+  },
+  {
+    "name": "YouTube Data",
+    "description": "YouTube video data",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://youtube.com"
+  },
+  {
+    "name": "JustWatch",
+    "description": "Streaming availability",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://justwatch.com"
+  },
+  {
+    "name": "Twitter API",
+    "description": "Twitter data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://twitter.com"
+  },
+  {
+    "name": "Facebook Graph",
+    "description": "Facebook data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://facebook.com"
+  },
+  {
+    "name": "Instagram Graph",
+    "description": "Instagram data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://instagram.com"
+  },
+  {
+    "name": "Bluesky",
+    "description": "Decentralized social network",
+    "category": "Social",
+    "authType": "apiKey",
+    "baseUrl": "https://bsky.app"
+  },
+  {
+    "name": "Threads",
+    "description": "Text-based social media",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://threads.net"
+  },
+  {
+    "name": "npm",
+    "description": "Node package manager",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://npmjs.com"
+  },
+  {
+    "name": "PyPI",
+    "description": "Python package index",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://pypi.org"
+  },
+  {
+    "name": "Maven Central",
+    "description": "Java packages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://maven.org"
+  },
+  {
+    "name": "NuGet",
+    "description": ".NET packages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://nuget.org"
+  },
+  {
+    "name": "Quay.io",
+    "description": "Container registry",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://quay.io"
+  },
+  {
+    "name": "Microsoft Azure",
+    "description": "Cloud services",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "OVH",
+    "description": "Cloud provider",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://ovh.com"
+  },
+  {
+    "name": "Scaleway",
+    "description": "Cloud provider",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://scaleway.com"
+  },
+  {
+    "name": "UpCloud",
+    "description": "Cloud infrastructure",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://upcloud.com"
+  },
+  {
+    "name": "Temporal",
+    "description": "Workflow orchestration",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://temporal.io"
+  },
+  {
+    "name": "Celigo",
+    "description": "Integration platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://celigo.com"
+  },
+  {
+    "name": "Airplane",
+    "description": "Internal tools platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://airplane.dev"
+  },
+  {
+    "name": "Superblocks",
+    "description": "Internal apps builder",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://superblocks.com"
+  },
+  {
+    "name": "PostgREST",
+    "description": "REST API for PostgreSQL",
+    "category": "Automation",
+    "authType": "none",
+    "baseUrl": "https://postgrest.org"
+  },
+  {
+    "name": "Pocketbase",
+    "description": "Backend in a single file",
+    "category": "Automation",
+    "authType": "none",
+    "baseUrl": "https://pocketbase.io"
+  },
+  {
+    "name": "Appwrite",
+    "description": "Backend server",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://appwrite.io"
+  },
+  {
+    "name": "Nhost",
+    "description": "Backend platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://nhost.io"
+  }
+]

@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""APIClaw Night Expansion - 2026-02-27 03:00 batch 3 - More categories"""
+
+import json
+
+# Social Media APIs (extended)
+SOCIAL_APIS = [
+    {"name": "Twitter API v2", "description": "Twitter platform access", "category": "Social", "authType": "oauth", "baseUrl": "https://developer.twitter.com/en/docs/twitter-api"},
+    {"name": "Facebook Graph API", "description": "Facebook platform", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.facebook.com/docs/graph-api/"},
+    {"name": "Instagram Graph API", "description": "Instagram for businesses", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.facebook.com/docs/instagram-api/"},
+    {"name": "LinkedIn API", "description": "Professional networking", "category": "Social", "authType": "oauth", "baseUrl": "https://docs.microsoft.com/en-us/linkedin/"},
+    {"name": "Pinterest API", "description": "Visual discovery platform", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.pinterest.com/docs/api/v5/"},
+    {"name": "TikTok API", "description": "Short video platform", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.tiktok.com/doc/"},
+    {"name": "Snapchat Marketing API", "description": "Snapchat ads platform", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.snap.com/docs/marketing-api/"},
+    {"name": "Reddit API", "description": "Social news platform", "category": "Social", "authType": "oauth", "baseUrl": "https://www.reddit.com/dev/api/"},
+    {"name": "Tumblr API", "description": "Microblogging platform", "category": "Social", "authType": "oauth", "baseUrl": "https://www.tumblr.com/docs/en/api/v2"},
+    {"name": "Mastodon API", "description": "Decentralized social network", "category": "Social", "authType": "oauth", "baseUrl": "https://docs.joinmastodon.org/api/"},
+    {"name": "Bluesky API", "description": "Decentralized social protocol", "category": "Social", "authType": "apiKey", "baseUrl": "https://atproto.com/docs"},
+    {"name": "Threads API", "description": "Meta text-based social", "category": "Social", "authType": "oauth", "baseUrl": "https://developers.facebook.com/docs/threads/"},
+    {"name": "YouTube Data API v3", "description": "Video platform data", "category": "Social", "authType": "apiKey", "baseUrl": "https://developers.google.com/youtube/v3/docs"},
+    {"name": "Flickr API", "description": "Photo sharing platform", "category": "Social", "authType": "oauth", "baseUrl": "https://www.flickr.com/services/api/"},
+    {"name": "500px API", "description": "Photography community", "category": "Social", "authType": "oauth", "baseUrl": "https://github.com/500px/legacy-api-documentation"},
+    {"name": "DeviantArt API", "description": "Art community platform", "category": "Social", "authType": "oauth", "baseUrl": "https://www.deviantart.com/developers/"},
+    {"name": "Dribbble API", "description": "Design community", "category": "Social", "authType": "oauth", "baseUrl": "https://developer.dribbble.com/v2/"},
+    {"name": "Behance API", "description": "Creative portfolio platform", "category": "Social", "authType": "oauth", "baseUrl": "https://www.behance.net/dev"},
+    {"name": "Medium API", "description": "Publishing platform", "category": "Social", "authType": "oauth", "baseUrl": "https://github.com/Medium/medium-api-docs"},
+    {"name": "Substack API", "description": "Newsletter platform", "category": "Social", "authType": "apiKey", "baseUrl": "https://substack.com/"},
+    {"name": "Ghost API", "description": "Publishing platform", "category": "Social", "authType": "apiKey", "baseUrl": "https://ghost.org/docs/api/v5/content/"},
+    {"name": "Hashnode API", "description": "Developer blogging", "category": "Social", "authType": "apiKey", "baseUrl": "https://api.hashnode.com/"},
+    {"name": "Dev.to API", "description": "Developer community", "category": "Social", "authType": "apiKey", "baseUrl": "https://developers.forem.com/api/"},
+    {"name": "Product Hunt API", "description": "Tech product launches", "category": "Social", "authType": "oauth", "baseUrl": "https://api.producthunt.com/v2/docs"},
+    {"name": "Hacker News API", "description": "Tech news aggregator", "category": "Social", "authType": "none", "baseUrl": "https://github.com/HackerNews/API"},
+]
+
+# Document & File APIs
+DOCUMENT_APIS = [
+    {"name": "Google Docs API", "description": "Create and edit documents", "category": "Documents", "authType": "oauth", "baseUrl": "https://developers.google.com/docs/api"},
+    {"name": "Google Sheets API", "description": "Spreadsheet manipulation", "category": "Documents", "authType": "oauth", "baseUrl": "https://developers.google.com/sheets/api"},
+    {"name": "Google Slides API", "description": "Presentation creation", "category": "Documents", "authType": "oauth", "baseUrl": "https://developers.google.com/slides/api"},
+    {"name": "Microsoft Word API", "description": "Word document manipulation", "category": "Documents", "authType": "oauth", "baseUrl": "https://docs.microsoft.com/en-us/graph/api/resources/document"},
+    {"name": "Microsoft Excel API", "description": "Excel workbook access", "category": "Documents", "authType": "oauth", "baseUrl": "https://docs.microsoft.com/en-us/graph/api/resources/excel"},
+    {"name": "Microsoft PowerPoint API", "description": "Presentation manipulation", "category": "Documents", "authType": "oauth", "baseUrl": "https://docs.microsoft.com/en-us/graph/api/resources/presentation"},
+    {"name": "Adobe PDF Services API", "description": "PDF manipulation", "category": "Documents", "authType": "apiKey", "baseUrl": "https://developer.adobe.com/document-services/apis/pdf-services/"},
+    {"name": "iLovePDF API", "description": "PDF tools API", "category": "Documents", "authType": "apiKey", "baseUrl": "https://developer.ilovepdf.com/"},
+    {"name": "PDFco API", "description": "PDF processing", "category": "Documents", "authType": "apiKey", "baseUrl": "https://apidocs.pdf.co/"},
+    {"name": "CloudConvert API", "description": "File conversion service", "category": "Documents", "authType": "apiKey", "baseUrl": "https://cloudconvert.com/api/v2"},
+    {"name": "Zamzar API", "description": "File format conversion", "category": "Documents", "authType": "apiKey", "baseUrl": "https://developers.zamzar.com/"},
+    {"name": "ConvertAPI", "description": "Document conversion", "category": "Documents", "authType": "apiKey", "baseUrl": "https://www.convertapi.com/doc"},
+    {"name": "DocuSign API", "description": "Electronic signatures", "category": "Documents", "authType": "oauth", "baseUrl": "https://developers.docusign.com/"},
+    {"name": "HelloSign API", "description": "eSignature platform", "category": "Documents", "authType": "apiKey", "baseUrl": "https://developers.hellosign.com/docs/api/overview/"},
+    {"name": "PandaDoc API", "description": "Document automation", "category": "Documents", "authType": "apiKey", "baseUrl": "https://developers.pandadoc.com/"},
+    {"name": "SignNow API", "description": "eSignature solution", "category": "Documents", "authType": "oauth", "baseUrl": "https://www.signnow.com/developers"},
+    {"name": "SignRequest API", "description": "Digital signatures", "category": "Documents", "authType": "apiKey", "baseUrl": "https://signrequest.com/api/v1/docs/"},
+    {"name": "Anvil API", "description": "PDF generation and filling", "category": "Documents", "authType": "apiKey", "baseUrl": "https://www.useanvil.com/docs/api/"},
+    {"name": "PDFShift API", "description": "HTML to PDF conversion", "category": "Documents", "authType": "apiKey", "baseUrl": "https://pdfshift.io/documentation"},
+    {"name": "WeasyPrint API", "description": "HTML to PDF rendering", "category": "Documents", "authType": "none", "baseUrl": "https://weasyprint.org/"},
+]
+
+# HR & Recruiting APIs
+HR_APIS = [
+    {"name": "Greenhouse API", "description": "Recruiting software", "category": "HR", "authType": "apiKey", "baseUrl": "https://developers.greenhouse.io/"},
+    {"name": "Lever API", "description": "Talent acquisition", "category": "HR", "authType": "apiKey", "baseUrl": "https://hire.lever.co/developer/documentation"},
+    {"name": "Workday API", "description": "Enterprise HR platform", "category": "HR", "authType": "oauth", "baseUrl": "https://developer.workday.com/"},
+    {"name": "BambooHR API", "description": "HR software for SMBs", "category": "HR", "authType": "apiKey", "baseUrl": "https://documentation.bamboohr.com/docs"},
+    {"name": "Gusto API", "description": "Payroll and benefits", "category": "HR", "authType": "oauth", "baseUrl": "https://docs.gusto.com/"},
+    {"name": "Rippling API", "description": "HR and IT platform", "category": "HR", "authType": "apiKey", "baseUrl": "https://developer.rippling.com/"},
+    {"name": "ADP API", "description": "Payroll and HR services", "category": "HR", "authType": "oauth", "baseUrl": "https://developers.adp.com/"},
+    {"name": "Paylocity API", "description": "Payroll and HCM", "category": "HR", "authType": "apiKey", "baseUrl": "https://www.paylocity.com/our-products/integrations/api/"},
+    {"name": "Paychex API", "description": "Payroll services", "category": "HR", "authType": "apiKey", "baseUrl": "https://developer.paychex.com/"},
+    {"name": "Zenefits API", "description": "HR platform", "category": "HR", "authType": "apiKey", "baseUrl": "https://developers.zenefits.com/"},
+    {"name": "Namely API", "description": "HR software", "category": "HR", "authType": "apiKey", "baseUrl": "https://developers.namely.com/"},
+    {"name": "Justworks API", "description": "PEO and payroll", "category": "HR", "authType": "apiKey", "baseUrl": "https://justworks.com/"},
+    {"name": "HiBob API", "description": "HRIS platform", "category": "HR", "authType": "apiKey", "baseUrl": "https://apidocs.hibob.com/"},
+    {"name": "Personio API", "description": "HR software for Europe", "category": "HR", "authType": "apiKey", "baseUrl": "https://developer.personio.de/"},
+    {"name": "Charlie HR API", "description": "UK HR platform", "category": "HR", "authType": "apiKey", "baseUrl": "https://charliehr.com/"},
+    {"name": "Ashby API", "description": "Recruiting platform", "category": "HR", "authType": "apiKey", "baseUrl": "https://developers.ashbyhq.com/"},
+    {"name": "TeamTailor API", "description": "Recruiting software", "category": "HR", "authType": "apiKey", "baseUrl": "https://docs.teamtailor.com/"},
+    {"name": "Recruitee API", "description": "Collaborative hiring", "category": "HR", "authType": "apiKey", "baseUrl": "https://docs.recruitee.com/reference"},
+    {"name": "Breezy HR API", "description": "Applicant tracking", "category": "HR", "authType": "apiKey", "baseUrl": "https://developer.breezy.hr/"},
+    {"name": "JazzHR API", "description": "Recruiting software", "category": "HR", "authType": "apiKey", "baseUrl": "https://www.jazzhr.com/developers/"},
+]
+
+# Localization & Translation APIs
+LOCALIZATION_APIS = [
+    {"name": "Google Cloud Translation", "description": "Neural machine translation", "category": "Translation", "authType": "apiKey", "baseUrl": "https://cloud.google.com/translate/docs/reference/rest"},
+    {"name": "DeepL API", "description": "AI translation service", "category": "Translation", "authType": "apiKey", "baseUrl": "https://www.deepl.com/docs-api"},
+    {"name": "Microsoft Translator", "description": "Azure translation service", "category": "Translation", "authType": "apiKey", "baseUrl": "https://docs.microsoft.com/en-us/azure/cognitive-services/translator/"},
+    {"name": "Amazon Translate", "description": "AWS translation service", "category": "Translation", "authType": "apiKey", "baseUrl": "https://docs.aws.amazon.com/translate/latest/dg/API_Reference.html"},
+    {"name": "IBM Watson Language Translator", "description": "Enterprise translation", "category": "Translation", "authType": "apiKey", "baseUrl": "https://cloud.ibm.com/apidocs/language-translator"},
+    {"name": "LibreTranslate API", "description": "Open source translation", "category": "Translation", "authType": "none", "baseUrl": "https://libretranslate.com/docs/"},
+    {"name": "Lingvanex API", "description": "Translation and NLP", "category": "Translation", "authType": "apiKey", "baseUrl": "https://lingvanex.com/translationapi/"},
+    {"name": "ModernMT API", "description": "Adaptive MT platform", "category": "Translation", "authType": "apiKey", "baseUrl": "https://www.modernmt.com/api/"},
+    {"name": "Unbabel API", "description": "AI translation with humans", "category": "Translation", "authType": "apiKey", "baseUrl": "https://unbabel.com/api/"},
+    {"name": "Lilt API", "description": "AI-powered translation", "category": "Translation", "authType": "apiKey", "baseUrl": "https://lilt.com/docs/api/"},
+    {"name": "Smartcat API", "description": "Translation management", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developers.smartcat.ai/"},
+    {"name": "Crowdin API", "description": "Localization platform", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developer.crowdin.com/api/v2/"},
+    {"name": "Lokalise API", "description": "Localization workflow", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developers.lokalise.com/reference"},
+    {"name": "Phrase API", "description": "TMS platform", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developers.phrase.com/"},
+    {"name": "Transifex API", "description": "Localization platform", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developers.transifex.com/reference"},
+    {"name": "POEditor API", "description": "Translation management", "category": "Translation", "authType": "apiKey", "baseUrl": "https://poeditor.com/docs/api"},
+    {"name": "Weglot API", "description": "Website translation", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developers.weglot.com/"},
+    {"name": "Localize API", "description": "Website localization", "category": "Translation", "authType": "apiKey", "baseUrl": "https://help.localizejs.com/docs/api-reference"},
+    {"name": "AccuWeather Translation", "description": "Weather text translation", "category": "Translation", "authType": "apiKey", "baseUrl": "https://developer.accuweather.com/"},
+    {"name": "Memsource API", "description": "Translation management", "category": "Translation", "authType": "apiKey", "baseUrl": "https://cloud.memsource.com/web/docs/api"},
+]
+
+# Monitoring & Observability APIs
+MONITORING_APIS = [
+    {"name": "Datadog API", "description": "Cloud monitoring platform", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.datadoghq.com/api/latest/"},
+    {"name": "New Relic API", "description": "Observability platform", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.newrelic.com/docs/apis/"},
+    {"name": "Dynatrace API", "description": "Software intelligence", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://www.dynatrace.com/support/help/dynatrace-api"},
+    {"name": "Splunk API", "description": "Data platform", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://dev.splunk.com/enterprise/docs/devtools/"},
+    {"name": "Grafana API", "description": "Observability dashboards", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://grafana.com/docs/grafana/latest/developers/http_api/"},
+    {"name": "Prometheus API", "description": "Metrics monitoring", "category": "Monitoring", "authType": "none", "baseUrl": "https://prometheus.io/docs/prometheus/latest/querying/api/"},
+    {"name": "PagerDuty API", "description": "Incident management", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://developer.pagerduty.com/api-reference/"},
+    {"name": "OpsGenie API", "description": "Alert management", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.opsgenie.com/docs/api-overview"},
+    {"name": "VictorOps API", "description": "Incident response", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://help.victorops.com/knowledge-base/api/"},
+    {"name": "StatusPage API", "description": "Status communication", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://developer.statuspage.io/"},
+    {"name": "Instatus API", "description": "Status page hosting", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://instatus.com/help/api"},
+    {"name": "Uptime Robot API", "description": "Website monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://uptimerobot.com/api/"},
+    {"name": "Pingdom API", "description": "Uptime monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.pingdom.com/api/"},
+    {"name": "Better Uptime API", "description": "Uptime monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://betterstack.com/docs/uptime/api/"},
+    {"name": "Site24x7 API", "description": "Infrastructure monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://www.site24x7.com/help/api/"},
+    {"name": "Sentry API", "description": "Error tracking", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.sentry.io/api/"},
+    {"name": "Rollbar API", "description": "Error monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.rollbar.com/reference"},
+    {"name": "Bugsnag API", "description": "Error monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://bugsnagapiv2.docs.apiary.io/"},
+    {"name": "LogRocket API", "description": "Frontend monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://docs.logrocket.com/reference"},
+    {"name": "Raygun API", "description": "Application monitoring", "category": "Monitoring", "authType": "apiKey", "baseUrl": "https://raygun.com/documentation/language-guides/rest-api/"},
+]
+
+# E-signature & Legal Tech APIs
+LEGALTECH_APIS = [
+    {"name": "Clio API", "description": "Legal practice management", "category": "Legal Tech", "authType": "oauth", "baseUrl": "https://app.clio.com/api/v4/documentation"},
+    {"name": "MyCase API", "description": "Law practice software", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.mycase.com/"},
+    {"name": "PracticePanther API", "description": "Legal software", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.practicepanther.com/"},
+    {"name": "Smokeball API", "description": "Legal practice management", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.smokeball.com/"},
+    {"name": "LawPay API", "description": "Legal payment processing", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.lawpay.com/"},
+    {"name": "Rocket Lawyer API", "description": "Legal documents online", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.rocketlawyer.com/"},
+    {"name": "LegalZoom API", "description": "Legal services platform", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.legalzoom.com/"},
+    {"name": "Ironclad API", "description": "Contract lifecycle management", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://developer.ironcladapp.com/"},
+    {"name": "Juro API", "description": "Contract automation", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://juro.com/"},
+    {"name": "ContractPodAi API", "description": "AI contract management", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.contractpodai.com/"},
+    {"name": "Kira Systems API", "description": "Contract analysis", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://kirasystems.com/"},
+    {"name": "Luminance API", "description": "AI for legal", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.luminance.com/"},
+    {"name": "Harvey AI API", "description": "AI for law firms", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.harvey.ai/"},
+    {"name": "CaseText API", "description": "Legal research AI", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://casetext.com/"},
+    {"name": "LexisNexis API", "description": "Legal research platform", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://developer.lexisnexis.com/"},
+    {"name": "Westlaw API", "description": "Legal research service", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://legal.thomsonreuters.com/en/products/westlaw"},
+    {"name": "CourtListener API", "description": "Court opinions database", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.courtlistener.com/api/rest-info/"},
+    {"name": "PACER API", "description": "Federal court records", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://pacer.uscourts.gov/"},
+    {"name": "Docketbird API", "description": "Court docket monitoring", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://www.docketbird.com/"},
+    {"name": "UniCourt API", "description": "Court data access", "category": "Legal Tech", "authType": "apiKey", "baseUrl": "https://unicourt.com/developers"},
+]
+
+# Event & Ticketing APIs
+EVENT_APIS = [
+    {"name": "Eventbrite API", "description": "Event management", "category": "Events", "authType": "oauth", "baseUrl": "https://www.eventbrite.com/platform/api"},
+    {"name": "Ticketmaster API", "description": "Event discovery", "category": "Events", "authType": "apiKey", "baseUrl": "https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/"},
+    {"name": "SeatGeek API", "description": "Ticket marketplace", "category": "Events", "authType": "apiKey", "baseUrl": "https://platform.seatgeek.com/"},
+    {"name": "StubHub API", "description": "Ticket exchange", "category": "Events", "authType": "oauth", "baseUrl": "https://developer.stubhub.com/"},
+    {"name": "Meetup API", "description": "Group events platform", "category": "Events", "authType": "oauth", "baseUrl": "https://www.meetup.com/api/"},
+    {"name": "Luma API", "description": "Event hosting platform", "category": "Events", "authType": "apiKey", "baseUrl": "https://lu.ma/"},
+    {"name": "Splash API", "description": "Event marketing", "category": "Events", "authType": "apiKey", "baseUrl": "https://developer.splashthat.com/"},
+    {"name": "Bizzabo API", "description": "Event management", "category": "Events", "authType": "apiKey", "baseUrl": "https://developer.bizzabo.com/"},
+    {"name": "Hopin API", "description": "Virtual events", "category": "Events", "authType": "apiKey", "baseUrl": "https://hopin.com/"},
+    {"name": "Cvent API", "description": "Event management platform", "category": "Events", "authType": "apiKey", "baseUrl": "https://developers.cvent.com/"},
+    {"name": "Swoogo API", "description": "Event management", "category": "Events", "authType": "apiKey", "baseUrl": "https://www.swoogo.com/"},
+    {"name": "Whova API", "description": "Event app platform", "category": "Events", "authType": "apiKey", "baseUrl": "https://whova.com/"},
+    {"name": "Airmeet API", "description": "Virtual events platform", "category": "Events", "authType": "apiKey", "baseUrl": "https://www.airmeet.com/"},
+    {"name": "Run The World API", "description": "Virtual events", "category": "Events", "authType": "apiKey", "baseUrl": "https://www.runtheworld.today/"},
+    {"name": "Eventmobi API", "description": "Event management", "category": "Events", "authType": "apiKey", "baseUrl": "https://www.eventmobi.com/"},
+    {"name": "Tito API", "description": "Event registration", "category": "Events", "authType": "apiKey", "baseUrl": "https://ti.to/docs/api"},
+    {"name": "Ticket Tailor API", "description": "Event ticketing", "category": "Events", "authType": "apiKey", "baseUrl": "https://developers.tickettailor.com/"},
+    {"name": "Ticket Socket API", "description": "White-label ticketing", "category": "Events", "authType": "apiKey", "baseUrl": "https://ticketsocket.com/"},
+    {"name": "Eventix API", "description": "Ticketing platform", "category": "Events", "authType": "apiKey", "baseUrl": "https://eventix.io/"},
+    {"name": "Dice API", "description": "Music event ticketing", "category": "Events", "authType": "apiKey", "baseUrl": "https://dice.fm/"},
+]
+
+# Accounting & Invoicing APIs
+ACCOUNTING_APIS = [
+    {"name": "QuickBooks API", "description": "Accounting software", "category": "Accounting", "authType": "oauth", "baseUrl": "https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/account"},
+    {"name": "Xero API", "description": "Cloud accounting", "category": "Accounting", "authType": "oauth", "baseUrl": "https://developer.xero.com/documentation/api/api-overview"},
+    {"name": "FreshBooks API", "description": "Invoicing software", "category": "Accounting", "authType": "oauth", "baseUrl": "https://www.freshbooks.com/api/start"},
+    {"name": "Wave API", "description": "Free accounting software", "category": "Accounting", "authType": "oauth", "baseUrl": "https://developer.waveapps.com/"},
+    {"name": "Zoho Books API", "description": "Accounting for SMBs", "category": "Accounting", "authType": "oauth", "baseUrl": "https://www.zoho.com/books/api/v3/"},
+    {"name": "Sage API", "description": "Business management", "category": "Accounting", "authType": "oauth", "baseUrl": "https://developer.sage.com/"},
+    {"name": "NetSuite API", "description": "ERP platform", "category": "Accounting", "authType": "oauth", "baseUrl": "https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1529585976.html"},
+    {"name": "FreeAgent API", "description": "Accounting for freelancers", "category": "Accounting", "authType": "oauth", "baseUrl": "https://dev.freeagent.com/docs/"},
+    {"name": "Harvest API", "description": "Time tracking and invoicing", "category": "Accounting", "authType": "oauth", "baseUrl": "https://help.getharvest.com/api-v2/"},
+    {"name": "Toggl Track API", "description": "Time tracking", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://developers.track.toggl.com/docs/"},
+    {"name": "Clockify API", "description": "Free time tracker", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://clockify.me/developers-api"},
+    {"name": "Invoice Ninja API", "description": "Open source invoicing", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://invoice-ninja.readthedocs.io/en/latest/api.html"},
+    {"name": "Invoiced API", "description": "Accounts receivable", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://invoiced.com/docs/api/"},
+    {"name": "Chargebee API", "description": "Subscription billing", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://apidocs.chargebee.com/docs/api"},
+    {"name": "Recurly API", "description": "Subscription management", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://developers.recurly.com/api/v2021-02-25/"},
+    {"name": "Zuora API", "description": "Subscription economy", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://www.zuora.com/developer/api-reference/"},
+    {"name": "Chargify API", "description": "Billing platform", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://developers.chargify.com/docs/api-docs"},
+    {"name": "BillSB API", "description": "Billing automation", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://billsby.com/"},
+    {"name": "PaySimple API", "description": "Payment management", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://documentation.paysimple.com/"},
+    {"name": "GoCardless API", "description": "Bank payment collection", "category": "Accounting", "authType": "apiKey", "baseUrl": "https://developer.gocardless.com/"},
+]
+
+# Combine all batches
+ALL_APIS = (
+    SOCIAL_APIS +
+    DOCUMENT_APIS +
+    HR_APIS +
+    LOCALIZATION_APIS +
+    MONITORING_APIS +
+    LEGALTECH_APIS +
+    EVENT_APIS +
+    ACCOUNTING_APIS
+)
+
+def main():
+    print(f"📦 Night Expansion 02-27 03:00 Batch 3")
+    print(f"   Total new APIs: {len(ALL_APIS)}")
+    
+    output_file = f"/Users/gustavhemmingsson/Projects/apiclaw/data/night-expansion-02-27-03-batch3.json"
+    with open(output_file, 'w') as f:
+        json.dump(ALL_APIS, f, indent=2)
+    
+    print(f"   Saved to: {output_file}")
+    
+    categories = {}
+    for api in ALL_APIS:
+        cat = api.get('category', 'Unknown')
+        categories[cat] = categories.get(cat, 0) + 1
+    
+    print(f"\n📊 By category:")
+    for cat, count in sorted(categories.items(), key=lambda x: -x[1])[:15]:
+        print(f"   {cat}: {count}")
+    
+    return len(ALL_APIS)
+
+if __name__ == "__main__":
+    main()

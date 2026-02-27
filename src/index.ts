@@ -177,13 +177,13 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: 'Execute an API call through APIClaw Direct Call. No API keys needed - we handle authentication.',
+    description: 'Execute an API call through APIClaw Direct Call. No API keys needed - we handle authentication. For providers that require customer authentication (like CoAccept), pass your own API key via customer_key.',
     inputSchema: {
       type: 'object',
       properties: {
         provider: {
           type: 'string',
-          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio")'
+          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio", "coaccept")'
         },
         action: {
           type: 'string',
@@ -192,6 +192,10 @@ const tools: Tool[] = [
         params: {
           type: 'object',
           description: 'Parameters for the action. Varies by provider/action.'
+        },
+        customer_key: {
+          type: 'string',
+          description: 'Optional: Your own API key for providers that require customer authentication. If not provided, uses APIClaw shared credentials (where available).'
         }
       },
       required: ['provider', 'action', 'params']
@@ -480,8 +484,8 @@ Docs: https://apiclaw.nordsym.com
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
         
-        // Check for customer-provided API key
-        const customerKey = getCustomerKey(provider);
+        // Check for customer-provided API key (from args first, then env fallback)
+        const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
 
         const result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
 
@@ -561,7 +565,7 @@ async function main() {
 🦞 APIClaw v1.1.5 — The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ 16,000+ APIs indexed
+✓ 19,000+ APIs indexed
 ✓ 23 categories  
 ✓ 9 direct-call providers ready
 

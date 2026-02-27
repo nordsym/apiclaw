@@ -1,0 +1,4185 @@
+{
+  "source": "RapidAPI",
+  "scraped_at": "2026-02-27T08:31:36.453121",
+  "categories_scraped": [
+    "Sports",
+    "Visual Recognition",
+    "Travel",
+    "Social",
+    "Location",
+    "Tools",
+    "Jobs",
+    "Events",
+    "Weather",
+    "Science",
+    "Cryptography",
+    "eCommerce",
+    "Cybersecurity",
+    "Finance",
+    "Text Analysis",
+    "Media",
+    "SMS",
+    "Gaming",
+    "Movies",
+    "Entertainment",
+    "Food",
+    "Database",
+    "Communication",
+    "Education",
+    "Email",
+    "Music",
+    "Transportation",
+    "Translation",
+    "Business",
+    "Health",
+    "Logistics",
+    "Data"
+  ],
+  "total_apis": 518,
+  "apis": [
+    {
+      "name": "Cricbuzz Cricket",
+      "category": "Sports",
+      "description": "Live cricket scores, commentary, latest cricket news and editorials, schedules of upcoming matches, rankings, stats",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tank01 MLB Live In-Game Real Time Statistics",
+      "category": "Sports",
+      "description": "MLB (Major League Baseball) STATS - LIVE, IN-GAME, REAL TIME, statistics with betting odds and player prop bets",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SportAPI",
+      "category": "Sports",
+      "description": "Most powerful sports API for live scores and football scores, results and stats. 20+ sports, 5000+ leagues",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TheRundown",
+      "category": "Sports",
+      "description": "Fastest real-time odds, scores, schedules, and stats from major sportsbooks",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Cricket Live Line",
+      "category": "Sports",
+      "description": "One-stop-app for all things cricket",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Live Golf Data",
+      "category": "Sports",
+      "description": "PGA Tour and LIV Tour live golf data - rankings, leaderboards, scorecards, and results",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sportspage Feeds",
+      "category": "Sports",
+      "description": "Team and schedule data, real-time scores, betting odds for NFL, NBA, MLB, NHL, NCAAF, NCAAB",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tennis API - ATP WTA ITF",
+      "category": "Sports",
+      "description": "Tennis API for ATP, WTA and ITF matches and historical stats dataset",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ODDS-API",
+      "category": "Sports",
+      "description": "Real-time odds, fixtures & tournaments from 300+ bookies covering 60+ sports worldwide",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "KicksCrew Sneakers Data",
+      "category": "Sports",
+      "description": "Products, brands, related products from Kick Screw",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sportsbook API",
+      "category": "Sports",
+      "description": "Up to the minute odds for 10+ major US sportsbooks across 30+ sports leagues",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sports Information",
+      "category": "Sports",
+      "description": "Sports Information API for NFL, NBA, MLB, NHL, Men's College Basketball",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Free API Live Football Data",
+      "category": "Sports",
+      "description": "2100+ football leagues, Livescores, players, Teams, Statistics, Standings, Odds, Fixtures",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TennisApi",
+      "category": "Sports",
+      "description": "Tennis scores for 500+ tournaments including ATP Australian Open, French Open, Wimbledon, US Open",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "LiveScore",
+      "category": "Sports",
+      "description": "Football, cricket, basketball, tennis, hockey matches, leagues, news",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AllSportsApi",
+      "category": "Sports",
+      "description": "Real-time football, esports, motorsport, ice hockey, basketball, tennis, baseball, cricket scores",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WNBA API",
+      "category": "Sports",
+      "description": "Basketball data for WNBA - scores, stats, standings",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rugby Live Data",
+      "category": "Sports",
+      "description": "Rugby fixtures, results, standings and live match coverage",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sport Highlights API",
+      "category": "Sports",
+      "description": "Real time Sport live scores, player statistics, match lineups & predictions, highlights",
+      "baseUrl": "https://rapidapi.com/search/Sports?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Recipe - Food - Nutrition",
+      "category": "Food",
+      "description": "Access over 365,000 recipes and 86,000 food products with nutritional information",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Beer",
+      "category": "Food",
+      "description": "#1 Beer API with detailed data on +50,000 beers",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DietaGram",
+      "category": "Food",
+      "description": "Nutrition facts by food photo, food name or by UPC barcode",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AI Nutritional Facts",
+      "category": "Food",
+      "description": "AI Nutritional Info",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Pizza and Desserts",
+      "category": "Food",
+      "description": "Collection of pizzas and desserts",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Nutrition by API-Ninjas",
+      "category": "Food",
+      "description": "Natural language API to extract nutrition data from any text",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Caterer Groceries Intel",
+      "category": "Food",
+      "description": "Access more than 24000 groceries data",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "gustar.io Deutsche Rezepte",
+      "category": "Food",
+      "description": "Generate German language recipes and recipe images using AI",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "The Cocktail DB",
+      "category": "Food",
+      "description": "API to get data on alcohol & cocktails",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "McDonald's Products API",
+      "category": "Food",
+      "description": "Up to date information about products sold in McDonalds stores",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Woolworths Products API",
+      "category": "Food",
+      "description": "Search for products by name or barcode",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Grocery Pricing API",
+      "category": "Food",
+      "description": "Real-time pricing data for grocery items in US Market",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Burgers Hub",
+      "category": "Food",
+      "description": "Kinds of burgers with name, image, price, ingredients",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AI Food Recipe Generator API",
+      "category": "Food",
+      "description": "Personalized meal planning with AI-driven service creates custom diet recipes",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "The Fork The Spoon",
+      "category": "Food",
+      "description": "Best restaurant and meal around the world",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Recipe and Ingredient Analysis",
+      "category": "Food",
+      "description": "Parse recipe ingredients into JSON",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Uber Eats Scraper API",
+      "category": "Food",
+      "description": "Restaurant data including names, phone, ratings, locations, menus",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Keto Diet",
+      "category": "Food",
+      "description": "450+ Ketogenic diet recipes in 10+ categories",
+      "baseUrl": "https://rapidapi.com/search/Food?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Booking COM",
+      "category": "Travel",
+      "description": "Booking.com hotel search and data",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Air Scraper",
+      "category": "Travel",
+      "description": "Flight data scraping",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Hotels",
+      "category": "Travel",
+      "description": "Hotel search and booking",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IRCTC",
+      "category": "Travel",
+      "description": "Indian railway ticket booking",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Kiwi.com Cheap Flights",
+      "category": "Travel",
+      "description": "Cheap flight search",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Flights Scraper Sky",
+      "category": "Travel",
+      "description": "Flight data scraping",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Airbnb listings",
+      "category": "Travel",
+      "description": "Airbnb property listings",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Hotels com Provider",
+      "category": "Travel",
+      "description": "Hotels.com data provider",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Flightera Flight Data",
+      "category": "Travel",
+      "description": "Comprehensive flight data",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AI Trip Planner",
+      "category": "Travel",
+      "description": "AI-powered trip planning",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Agoda com",
+      "category": "Travel",
+      "description": "Agoda hotel booking data",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Visa Requirement",
+      "category": "Travel",
+      "description": "Visa requirements by country",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ryanair",
+      "category": "Travel",
+      "description": "Ryanair flight data",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IATA Airports",
+      "category": "Travel",
+      "description": "IATA airport codes and data",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Airbnb Search",
+      "category": "Travel",
+      "description": "Airbnb property search",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tripadvisor Scraper",
+      "category": "Travel",
+      "description": "Tripadvisor data scraping",
+      "baseUrl": "https://rapidapi.com/search/Travel?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Seeking Alpha",
+      "category": "Finance",
+      "description": "Financial news and analysis",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YH Finance",
+      "category": "Finance",
+      "description": "Yahoo Finance data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Yahu Financials",
+      "category": "Finance",
+      "description": "Yahoo Financial data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "InsightSentry",
+      "category": "Finance",
+      "description": "Financial insights and analytics",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YFinance API",
+      "category": "Finance",
+      "description": "Yahoo Finance API wrapper",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real-Time Finance Data",
+      "category": "Finance",
+      "description": "Real-time financial data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rewards Credit Card API",
+      "category": "Finance",
+      "description": "Credit card rewards data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Forex Factory Scraper",
+      "category": "Finance",
+      "description": "Forex factory economic calendar data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ultimate Economic Calendar",
+      "category": "Finance",
+      "description": "Economic calendar events",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Currency Conversion and Exchange Rates",
+      "category": "Finance",
+      "description": "Currency exchange rates",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Morning Star",
+      "category": "Finance",
+      "description": "Morningstar financial data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Indian Stock Exchange API",
+      "category": "Finance",
+      "description": "Indian stock market data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Yahoo Finance Real Time",
+      "category": "Finance",
+      "description": "Real-time Yahoo Finance data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Trading Economics Scraper",
+      "category": "Finance",
+      "description": "Trading Economics data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Mboum Finance",
+      "category": "Finance",
+      "description": "Financial market data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Stock Pulse",
+      "category": "Finance",
+      "description": "Stock market pulse data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Finance API",
+      "category": "Finance",
+      "description": "General financial data API",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Spotify Downloader",
+      "category": "Entertainment",
+      "description": "Spotify track downloader",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YT Search and Download MP3",
+      "category": "Entertainment",
+      "description": "YouTube to MP3 converter",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Cloud Api Hub - Youtube Downloader",
+      "category": "Entertainment",
+      "description": "YouTube video downloader",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IMDb Top 100 Movies",
+      "category": "Entertainment",
+      "description": "Top 100 IMDb movies",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AstroPredict: Daily Horoscopes",
+      "category": "Entertainment",
+      "description": "Daily horoscopes and astrology",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Film & Show ratings",
+      "category": "Entertainment",
+      "description": "Movie and show ratings",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Euro Millions",
+      "category": "Entertainment",
+      "description": "EuroMillions lottery data",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Games Details",
+      "category": "Entertainment",
+      "description": "Video game details",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movie Database Alternative",
+      "category": "Entertainment",
+      "description": "Movie database API",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Mega Millions",
+      "category": "Entertainment",
+      "description": "Mega Millions lottery data",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Youtube Search and Download",
+      "category": "Entertainment",
+      "description": "YouTube search and download",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "PaperQuotes",
+      "category": "Entertainment",
+      "description": "Quotes API",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Quotes-Api",
+      "category": "Entertainment",
+      "description": "Famous quotes API",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "4D Results",
+      "category": "Entertainment",
+      "description": "4D lottery results",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MDBList",
+      "category": "Entertainment",
+      "description": "Movie database list",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tarot Cards",
+      "category": "Entertainment",
+      "description": "Tarot card readings",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Powerball",
+      "category": "Entertainment",
+      "description": "Powerball lottery data",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "pquotes",
+      "category": "Entertainment",
+      "description": "Quotes collection",
+      "baseUrl": "https://rapidapi.com/search/Entertainment?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real-Time LinkedIn Scraper API",
+      "category": "Data",
+      "description": "LinkedIn profile scraping",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Fresh LinkedIn Profile Data",
+      "category": "Data",
+      "description": "LinkedIn profile data",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Skip Tracing Working API",
+      "category": "Data",
+      "description": "People search and skip tracing",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "LI Data Scraper",
+      "category": "Data",
+      "description": "LinkedIn data scraping",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Twttr API",
+      "category": "Data",
+      "description": "Twitter/X data API",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "The Old Bird",
+      "category": "Data",
+      "description": "Twitter alternative API",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bulk data enrichment API",
+      "category": "Data",
+      "description": "Bulk data enrichment",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YT-API",
+      "category": "Data",
+      "description": "YouTube API wrapper",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sales data enrichment",
+      "category": "Data",
+      "description": "Sales lead enrichment",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Data enrichment API",
+      "category": "Data",
+      "description": "General data enrichment",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Website Contacts Scraper",
+      "category": "Data",
+      "description": "Extract contacts from websites",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YouTube Media Downloader",
+      "category": "Data",
+      "description": "YouTube media download",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Truecaller Data",
+      "category": "Data",
+      "description": "Truecaller phone lookup",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Local Business Data",
+      "category": "Data",
+      "description": "Local business information",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tweet API",
+      "category": "Data",
+      "description": "Tweet data API",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real-Time Web Search",
+      "category": "Data",
+      "description": "Real-time web search API",
+      "baseUrl": "https://rapidapi.com/search/Data?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YouTube MP3",
+      "category": "Tools",
+      "description": "YouTube to MP3 converter",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Temp Mail",
+      "category": "Tools",
+      "description": "Temporary email service",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Custom QR Code with Logo",
+      "category": "Tools",
+      "description": "QR code generator with logo",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Keyword Insight",
+      "category": "Tools",
+      "description": "Keyword research tool",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WhatsApp Number Validators",
+      "category": "Tools",
+      "description": "WhatsApp number validation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IP Lookup Check",
+      "category": "Tools",
+      "description": "IP address lookup",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Judge0 Extra CE",
+      "category": "Tools",
+      "description": "Extended code execution",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bulk Whatsapp Validator",
+      "category": "Tools",
+      "description": "Bulk WhatsApp validation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Moz DA PA",
+      "category": "Tools",
+      "description": "Domain authority checker",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Semrush Keyword Magic Tool",
+      "category": "Tools",
+      "description": "Semrush keyword tool",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YouTube to mp3",
+      "category": "Tools",
+      "description": "YouTube audio converter",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TempMail.so",
+      "category": "Tools",
+      "description": "Temporary email",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SEO API",
+      "category": "Tools",
+      "description": "SEO analysis API",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YTStream - Download YouTube Videos",
+      "category": "Tools",
+      "description": "YouTube video download",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Flash Temp Mail",
+      "category": "Tools",
+      "description": "Fast temporary email",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Upload Images | Hosting | Get URL",
+      "category": "Tools",
+      "description": "Image hosting service",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "OneCompiler APIs",
+      "category": "Tools",
+      "description": "Code compilation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Osint tool Investigation",
+      "category": "Tools",
+      "description": "OSINT investigation tools",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Whatsapp Profile Pic",
+      "category": "Tools",
+      "description": "WhatsApp profile pictures",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bulk Image Converter",
+      "category": "Tools",
+      "description": "Bulk image conversion",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real-Time Amazon Data",
+      "category": "eCommerce",
+      "description": "Amazon product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Aliexpress DataHub",
+      "category": "eCommerce",
+      "description": "AliExpress product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Axesso - Amazon Data Service",
+      "category": "eCommerce",
+      "description": "Amazon data service",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real-Time Product Search",
+      "category": "eCommerce",
+      "description": "Product search API",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Taobao DataHub",
+      "category": "eCommerce",
+      "description": "Taobao product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Taobao advanced",
+      "category": "eCommerce",
+      "description": "Advanced Taobao API",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "1688 Product",
+      "category": "eCommerce",
+      "description": "1688.com product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Vinted",
+      "category": "eCommerce",
+      "description": "Vinted marketplace data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AliExpress Business API",
+      "category": "eCommerce",
+      "description": "AliExpress business data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Alibaba DataHub",
+      "category": "eCommerce",
+      "description": "Alibaba product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IHerb Product Data Api",
+      "category": "eCommerce",
+      "description": "iHerb product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Walmart Data",
+      "category": "eCommerce",
+      "description": "Walmart product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Realtime Amazon Data",
+      "category": "eCommerce",
+      "description": "Real-time Amazon data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "1688 DataHub",
+      "category": "eCommerce",
+      "description": "1688 platform data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Asos",
+      "category": "eCommerce",
+      "description": "ASOS fashion data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Amazon Pricing and Product Info",
+      "category": "eCommerce",
+      "description": "Amazon pricing data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shein Scraper API",
+      "category": "eCommerce",
+      "description": "Shein product scraping",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Lazada API",
+      "category": "eCommerce",
+      "description": "Lazada marketplace data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "eBay Average Selling Price",
+      "category": "eCommerce",
+      "description": "eBay price analytics",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Taobao API",
+      "category": "eCommerce",
+      "description": "Taobao API wrapper",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rocket League",
+      "category": "Gaming",
+      "description": "Rocket League game stats",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ID Game Checker",
+      "category": "Gaming",
+      "description": "Game ID verification",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Check ID Game",
+      "category": "Gaming",
+      "description": "Game ID lookup",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Marvel Snap API",
+      "category": "Gaming",
+      "description": "Marvel Snap game data",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "OpenCritic API",
+      "category": "Gaming",
+      "description": "Game reviews and ratings",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Who Wants to Be a Millionaire",
+      "category": "Gaming",
+      "description": "Trivia quiz game API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ludo King Api Room Code",
+      "category": "Gaming",
+      "description": "Ludo King room codes",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "LAE - Loter\u00edas",
+      "category": "Gaming",
+      "description": "Spanish lottery data",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Wordle API",
+      "category": "Gaming",
+      "description": "Wordle game API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ESportApi",
+      "category": "Gaming",
+      "description": "eSports data API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Api Checker Developer",
+      "category": "Gaming",
+      "description": "Game API checker",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SUDOKU All-Purpose PRO",
+      "category": "Gaming",
+      "description": "Sudoku game API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "CS2 matches and tournaments",
+      "category": "Gaming",
+      "description": "CS2 esports data",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Chess Puzzles",
+      "category": "Gaming",
+      "description": "Chess puzzle API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Poker Odds Calculator",
+      "category": "Gaming",
+      "description": "Poker odds API",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Pictionary Charades Word Generator",
+      "category": "Gaming",
+      "description": "Word game generator",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Football Manager API",
+      "category": "Gaming",
+      "description": "Football Manager game data",
+      "baseUrl": "https://rapidapi.com/search/Gaming?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "meteostat",
+      "category": "Weather",
+      "description": "Historical weather data",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Open Weather",
+      "category": "Weather",
+      "description": "OpenWeatherMap API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ski Resort Conditions",
+      "category": "Weather",
+      "description": "Ski resort weather",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AI Weather by Meteosource",
+      "category": "Weather",
+      "description": "AI-powered weather",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Snow Day Probability API",
+      "category": "Weather",
+      "description": "Snow day predictions",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Weather API - By Any City",
+      "category": "Weather",
+      "description": "City weather API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Yahoo Weather",
+      "category": "Weather",
+      "description": "Yahoo Weather data",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ZeroPanel",
+      "category": "Weather",
+      "description": "Weather dashboard API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Easy Weather",
+      "category": "Weather",
+      "description": "Simple weather API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Weather",
+      "category": "Weather",
+      "description": "Basic weather API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WeatherAPI.com",
+      "category": "Weather",
+      "description": "WeatherAPI service",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sea Surface Temperature",
+      "category": "Weather",
+      "description": "Ocean temperature data",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Moon Phases API",
+      "category": "Weather",
+      "description": "Moon phase data",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sunrise Sunset Times",
+      "category": "Weather",
+      "description": "Sun times API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Koppen Climate Classification",
+      "category": "Weather",
+      "description": "Climate classification",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tides",
+      "category": "Weather",
+      "description": "Tide data API",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NOAA Tides",
+      "category": "Weather",
+      "description": "NOAA tide data",
+      "baseUrl": "https://rapidapi.com/search/Weather?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Songstats",
+      "category": "Music",
+      "description": "Music streaming stats",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Spotify Track Streams / Playback Count",
+      "category": "Music",
+      "description": "Spotify stream counts",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shazam Core",
+      "category": "Music",
+      "description": "Shazam music recognition core",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Spotify Scraper",
+      "category": "Music",
+      "description": "Spotify data scraping",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Genius - Song Lyrics",
+      "category": "Music",
+      "description": "Song lyrics from Genius",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SONOTELLER.AI",
+      "category": "Music",
+      "description": "AI music analysis",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shazam Song Recognition API",
+      "category": "Music",
+      "description": "Shazam song ID",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Playlistcheck",
+      "category": "Music",
+      "description": "Playlist analysis",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Billboard-API",
+      "category": "Music",
+      "description": "Billboard charts data",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Spotify Statistics and Stream Count",
+      "category": "Music",
+      "description": "Spotify analytics",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Radio World",
+      "category": "Music",
+      "description": "75,000+ worldwide FM radio stations",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Concerts - Artists Events Tracker",
+      "category": "Music",
+      "description": "Concert and event tracking",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Musixmatch Lyrics Songs",
+      "category": "Music",
+      "description": "Musixmatch lyrics",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Billboard Charts API",
+      "category": "Music",
+      "description": "Billboard chart data",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SoundCloud Scraper",
+      "category": "Music",
+      "description": "SoundCloud data scraping",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shazam API free",
+      "category": "Music",
+      "description": "Free Shazam API",
+      "baseUrl": "https://rapidapi.com/search/Music?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Realty in US",
+      "category": "Business",
+      "description": "US real estate data",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Yelp Business API",
+      "category": "Business",
+      "description": "Yelp business data",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Idealista",
+      "category": "Business",
+      "description": "Real estate listings",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Zoopla",
+      "category": "Business",
+      "description": "UK property data",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "German Company Data",
+      "category": "Business",
+      "description": "German business registry",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Website ContactCrawler",
+      "category": "Business",
+      "description": "Website contact extraction",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Crunchbase Real-Time Data",
+      "category": "Business",
+      "description": "Real-time Crunchbase data",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "GST Insights API",
+      "category": "Business",
+      "description": "GST tax insights",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "USPTO Trademark",
+      "category": "Business",
+      "description": "US trademark search",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Realty in CA",
+      "category": "Business",
+      "description": "Canadian real estate",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Realty in AU",
+      "category": "Business",
+      "description": "Australian real estate",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Website Scraper API",
+      "category": "Business",
+      "description": "Web scraping API",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "vehicle database",
+      "category": "Business",
+      "description": "Vehicle database",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MyMemory - Translation Memory",
+      "category": "Business",
+      "description": "Translation memory",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "FatturaCheck",
+      "category": "Business",
+      "description": "Invoice verification",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Fotocasa",
+      "category": "Business",
+      "description": "Spanish real estate",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Get List of Companies",
+      "category": "Business",
+      "description": "Company listings",
+      "baseUrl": "https://rapidapi.com/search/Business?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "boundaries-io",
+      "category": "Location",
+      "description": "Geographic boundaries",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Map Places (New V2)",
+      "category": "Location",
+      "description": "Google Places API v2",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Map Places",
+      "category": "Location",
+      "description": "Google Places API",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "RedLine Zipcode",
+      "category": "Location",
+      "description": "Zipcode lookup",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IP Geo Location",
+      "category": "Location",
+      "description": "IP geolocation",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "URL Shortener Service",
+      "category": "Location",
+      "description": "URL shortening",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Country State City - Search REST API",
+      "category": "Location",
+      "description": "Location search API",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Maps Geocoding",
+      "category": "Location",
+      "description": "Geocoding API",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NAVITIME Geocoding",
+      "category": "Location",
+      "description": "Navitime geocoding",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IsItWater.com",
+      "category": "Location",
+      "description": "Water detection API",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Place Autocomplete",
+      "category": "Location",
+      "description": "Place autocomplete",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "World Geo Data",
+      "category": "Location",
+      "description": "World geographic data",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Population Inside Radius",
+      "category": "Location",
+      "description": "Population data by radius",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Driving Distance Calculator",
+      "category": "Location",
+      "description": "Distance calculation",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Spott",
+      "category": "Location",
+      "description": "Location spotting",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IP Location",
+      "category": "Location",
+      "description": "IP location",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "India Pincode",
+      "category": "Location",
+      "description": "India pincode lookup",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "World Time by Based API",
+      "category": "Location",
+      "description": "World time zones",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "UK Postcodes Inside Radius",
+      "category": "Location",
+      "description": "UK postcode radius search",
+      "baseUrl": "https://rapidapi.com/search/Location?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SMS Verify",
+      "category": "SMS",
+      "description": "SMS verification",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Virtual Number",
+      "category": "SMS",
+      "description": "Virtual phone numbers",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SpewHub",
+      "category": "SMS",
+      "description": "SMS service hub",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Telesign SMS Verify",
+      "category": "SMS",
+      "description": "Telesign SMS verification",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TextFlow SMS API",
+      "category": "SMS",
+      "description": "TextFlow SMS service",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "PhoneNumberValidateFree",
+      "category": "SMS",
+      "description": "Phone validation",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Whatsapp Checker PRO",
+      "category": "SMS",
+      "description": "WhatsApp number checker",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Microsoft Authenticator",
+      "category": "SMS",
+      "description": "MS Authenticator API",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Textnow one day",
+      "category": "SMS",
+      "description": "TextNow service",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "sms77io",
+      "category": "SMS",
+      "description": "SMS77 API",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WhatSMS",
+      "category": "SMS",
+      "description": "WhatsApp SMS service",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "D7 Verify",
+      "category": "SMS",
+      "description": "D7 verification",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Easy Authenticator",
+      "category": "SMS",
+      "description": "Easy auth service",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Otp sms verification",
+      "category": "SMS",
+      "description": "OTP verification",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Send SMS",
+      "category": "SMS",
+      "description": "SMS sending API",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "upi SMS",
+      "category": "SMS",
+      "description": "UPI SMS service",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "GetItSMS WhatsApp APIs",
+      "category": "SMS",
+      "description": "WhatsApp APIs",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "EasySendSMS",
+      "category": "SMS",
+      "description": "Easy SMS sending",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rapid SMS API",
+      "category": "SMS",
+      "description": "Rapid SMS API",
+      "baseUrl": "https://rapidapi.com/search/SMS?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Facebook Scraper",
+      "category": "Social",
+      "description": "Facebook data scraping",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram Looter",
+      "category": "Social",
+      "description": "Instagram data extraction",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram Scraper Stable API",
+      "category": "Social",
+      "description": "Stable Instagram scraper",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "FlashAPI",
+      "category": "Social",
+      "description": "Flash social API",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram Statistics API",
+      "category": "Social",
+      "description": "Instagram analytics",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TwttrAPI",
+      "category": "Social",
+      "description": "Twitter API wrapper",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Facebook Pages Scraper",
+      "category": "Social",
+      "description": "Facebook pages scraping",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tiktok Scraper",
+      "category": "Social",
+      "description": "TikTok scraping",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tiktok video no watermark",
+      "category": "Social",
+      "description": "TikTok video download",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Youtube V2",
+      "category": "Social",
+      "description": "YouTube API v2",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ScrapTik",
+      "category": "Social",
+      "description": "TikTok scraper",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TokApi - mobile version",
+      "category": "Social",
+      "description": "TikTok mobile API",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram best experience",
+      "category": "Social",
+      "description": "Premium Instagram API",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Xiaohongshu All API",
+      "category": "Social",
+      "description": "Xiaohongshu/RED API",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram Scraper",
+      "category": "Social",
+      "description": "Instagram scraping",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Social Premium API",
+      "category": "Social",
+      "description": "Premium social media API",
+      "baseUrl": "https://rapidapi.com/search/Social?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ADSBexchange.com",
+      "category": "Transportation",
+      "description": "ADS-B flight tracking",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TrackingPackage",
+      "category": "Transportation",
+      "description": "Package tracking",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Car API",
+      "category": "Transportation",
+      "description": "Car data API",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tripadvisor COM",
+      "category": "Transportation",
+      "description": "Tripadvisor travel data",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Waze",
+      "category": "Transportation",
+      "description": "Waze traffic data",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "RTO Vehicle Details",
+      "category": "Transportation",
+      "description": "Vehicle registration data",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Flight Radar",
+      "category": "Transportation",
+      "description": "Flight tracking",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NAVITIME Route(totalnavi)",
+      "category": "Transportation",
+      "description": "Navitime routing",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Waze API",
+      "category": "Transportation",
+      "description": "Waze API",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Travel Advisor",
+      "category": "Transportation",
+      "description": "Travel advisory",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Travel Hacking Tool",
+      "category": "Transportation",
+      "description": "Travel optimization",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NAVITIME Transport",
+      "category": "Transportation",
+      "description": "Navitime transport",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TimeTable Lookup",
+      "category": "Transportation",
+      "description": "Transport timetables",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NAVITIME Route(car)",
+      "category": "Transportation",
+      "description": "Car routing",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Informazioni Targhe",
+      "category": "Transportation",
+      "description": "License plate info",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Cheap Tracking Status",
+      "category": "Transportation",
+      "description": "Cheap tracking",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Cars Database with Image",
+      "category": "Transportation",
+      "description": "Car database",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NAVITIME Reachable",
+      "category": "Transportation",
+      "description": "Reachability analysis",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "CIS Automotive",
+      "category": "Transportation",
+      "description": "Automotive data",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Vin Lookup",
+      "category": "Transportation",
+      "description": "VIN lookup",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Supply Chain Optimizer",
+      "category": "Transportation",
+      "description": "Supply chain optimization",
+      "baseUrl": "https://rapidapi.com/search/Transportation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Paraphrasing and Rewriter API",
+      "category": "Text Analysis",
+      "description": "Text paraphrasing and rewriting",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Paraphrase Genius",
+      "category": "Text Analysis",
+      "description": "Paraphrasing tool",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rewriter/Paraphraser/Text Changer",
+      "category": "Text Analysis",
+      "description": "Multi-language text changer",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Lingua Robot",
+      "category": "Text Analysis",
+      "description": "Language processing robot",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TextGears",
+      "category": "Text Analysis",
+      "description": "Text analysis tools",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Plagiarism Source Checker",
+      "category": "Text Analysis",
+      "description": "Plagiarism detection with source links",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Article Scraper",
+      "category": "Text Analysis",
+      "description": "Article extraction",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Text-Processing",
+      "category": "Text Analysis",
+      "description": "Text processing API",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rapid Translate Multi Traduction",
+      "category": "Text Analysis",
+      "description": "Multi-language translation",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Grammar and Spellcheck",
+      "category": "Text Analysis",
+      "description": "Grammar checking",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "GrammarBot",
+      "category": "Text Analysis",
+      "description": "Grammar bot API",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Text Diff",
+      "category": "Text Analysis",
+      "description": "Text comparison",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Keyword Suggestion",
+      "category": "Text Analysis",
+      "description": "Keyword suggestions",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Job Opening Analyzer",
+      "category": "Text Analysis",
+      "description": "Job posting analysis",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "URL Expander",
+      "category": "Text Analysis",
+      "description": "URL expansion",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "GrammarBot Neural",
+      "category": "Text Analysis",
+      "description": "Neural grammar bot",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sentiment Analysis",
+      "category": "Text Analysis",
+      "description": "Text sentiment analysis",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Emotion Analysis",
+      "category": "Text Analysis",
+      "description": "Emotion detection",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bionic Reading",
+      "category": "Text Analysis",
+      "description": "Bionic reading conversion",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "JSpell Checker",
+      "category": "Text Analysis",
+      "description": "Spell checking",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Word Dictionary",
+      "category": "Text Analysis",
+      "description": "Dictionary API",
+      "baseUrl": "https://rapidapi.com/search/Text Analysis?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Gmailnator",
+      "category": "Email",
+      "description": "Gmail temp mail generator",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YouTube Channel Email Contact Finder",
+      "category": "Email",
+      "description": "YouTube email finder",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Instagram Email Contact Finder",
+      "category": "Email",
+      "description": "Instagram email finder",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Validect - Email Verification",
+      "category": "Email",
+      "description": "Email verification",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TikTok Email Contact Finder",
+      "category": "Email",
+      "description": "TikTok email finder",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "inboxes.com",
+      "category": "Email",
+      "description": "Inbox management",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Temp Gmail API",
+      "category": "Email",
+      "description": "Temporary Gmail API",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Temp Mail API",
+      "category": "Email",
+      "description": "Temporary email API",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MailOK - Email Validation",
+      "category": "Email",
+      "description": "Email validation",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Send Bulk Emails",
+      "category": "Email",
+      "description": "Bulk email sending",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Pro Email Finder",
+      "category": "Email",
+      "description": "Professional email finder",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Company Contact Scraper",
+      "category": "Email",
+      "description": "Company contact extraction",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Temp Gmail",
+      "category": "Email",
+      "description": "Temporary Gmail",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "One-Time Temp Email",
+      "category": "Email",
+      "description": "One-time temporary email",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Temporary Email Service",
+      "category": "Email",
+      "description": "Temporary email service",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Domain DNS and Mail Security Checker",
+      "category": "Email",
+      "description": "DNS and mail security",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Real Time Email Verification API",
+      "category": "Email",
+      "description": "Real-time email verification",
+      "baseUrl": "https://rapidapi.com/search/Email?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Plagiarism Checker and Auto Citation Generator",
+      "category": "Education",
+      "description": "Plagiarism and citation",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Scholar",
+      "category": "Education",
+      "description": "Google Scholar API",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Photomath",
+      "category": "Education",
+      "description": "Math solving with photos",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "TED Talks API",
+      "category": "Education",
+      "description": "TED Talks data",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Tafqit",
+      "category": "Education",
+      "description": "Number to words conversion",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Math Equations API",
+      "category": "Education",
+      "description": "Math equation solving",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "thefluentme",
+      "category": "Education",
+      "description": "Language learning",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Urban Dictionary",
+      "category": "Education",
+      "description": "Urban Dictionary API",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Udemy Paid Courses for Free API",
+      "category": "Education",
+      "description": "Free Udemy courses",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Random Words",
+      "category": "Education",
+      "description": "Random word generator",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bhagavad Gita",
+      "category": "Education",
+      "description": "Bhagavad Gita API",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Numbers",
+      "category": "Education",
+      "description": "Number facts API",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Learn Japanese kanji",
+      "category": "Education",
+      "description": "Japanese kanji learning",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "University/College List and Rankings",
+      "category": "Education",
+      "description": "University rankings",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Collection for Coursera Courses",
+      "category": "Education",
+      "description": "Coursera courses",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Dr Almotawa Quotes",
+      "category": "Education",
+      "description": "Educational quotes",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sith Translator",
+      "category": "Education",
+      "description": "Star Wars translator",
+      "baseUrl": "https://rapidapi.com/search/Education?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Streaming Availability",
+      "category": "Movies",
+      "description": "Movie streaming availability",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movies Ratings",
+      "category": "Movies",
+      "description": "Movie ratings",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "RottenTomato",
+      "category": "Movies",
+      "description": "Rotten Tomatoes data",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movie Database API",
+      "category": "Movies",
+      "description": "Movie database",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Anime DB",
+      "category": "Movies",
+      "description": "Anime database",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ai Movie Recommender",
+      "category": "Movies",
+      "description": "AI movie recommendations",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "OTT details",
+      "category": "Movies",
+      "description": "OTT platform details",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Where can I watch",
+      "category": "Movies",
+      "description": "Movie availability checker",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movie and TV shows Quotes",
+      "category": "Movies",
+      "description": "TV and movie quotes",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Netflix Movies and TV Shows API",
+      "category": "Movies",
+      "description": "Netflix content API",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movie TV music search and download",
+      "category": "Movies",
+      "description": "Media search and download",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Advanced Movie Search",
+      "category": "Movies",
+      "description": "Advanced movie search",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Movies Tv Shows Database",
+      "category": "Movies",
+      "description": "Movies and TV database",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IMDB Top 1000",
+      "category": "Movies",
+      "description": "IMDb top 1000 movies",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MoviesDatabase",
+      "category": "Movies",
+      "description": "Movies database API",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MoviesVerse",
+      "category": "Movies",
+      "description": "Movies universe API",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Netflix",
+      "category": "Movies",
+      "description": "Netflix API",
+      "baseUrl": "https://rapidapi.com/search/Movies?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "JSearch",
+      "category": "Jobs",
+      "description": "Job search API",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Active Jobs DB",
+      "category": "Jobs",
+      "description": "Active jobs database",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "LinkedIn Job Search API",
+      "category": "Jobs",
+      "description": "LinkedIn job search",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Jobs API",
+      "category": "Jobs",
+      "description": "General jobs API",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Glassdoor Real-Time",
+      "category": "Jobs",
+      "description": "Glassdoor data",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "indeed",
+      "category": "Jobs",
+      "description": "Indeed job listings",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "JOBS SEARCH API",
+      "category": "Jobs",
+      "description": "Job search API",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Job Postings RSS Feed",
+      "category": "Jobs",
+      "description": "Job postings feed",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "LinkedIn Jobs API",
+      "category": "Jobs",
+      "description": "LinkedIn jobs API",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Internships API",
+      "category": "Jobs",
+      "description": "Internship listings",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Job Posting Feed API",
+      "category": "Jobs",
+      "description": "Job posting feed",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Indeed Scraper API",
+      "category": "Jobs",
+      "description": "Indeed scraping",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ResumeOptimizerPro",
+      "category": "Jobs",
+      "description": "Resume optimization",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Daily International Job Postings",
+      "category": "Jobs",
+      "description": "International job postings",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "UK Right to Work Sharecode Checker",
+      "category": "Jobs",
+      "description": "UK work permit checker",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Remote Jobs",
+      "category": "Jobs",
+      "description": "Remote job listings",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Indeed Jobs API - Sweden",
+      "category": "Jobs",
+      "description": "Swedish Indeed jobs",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "faang.watch API",
+      "category": "Jobs",
+      "description": "FAANG job tracker",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Apijob",
+      "category": "Jobs",
+      "description": "Job searching API",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Upwork Jobs",
+      "category": "Jobs",
+      "description": "Upwork job listings",
+      "baseUrl": "https://rapidapi.com/search/Jobs?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Crypto Market Data",
+      "category": "Finance",
+      "description": "Cryptocurrency market data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "CoinGecko",
+      "category": "Finance",
+      "description": "CoinGecko crypto data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "CoinMarketCap",
+      "category": "Finance",
+      "description": "CoinMarketCap data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Binance API",
+      "category": "Finance",
+      "description": "Binance exchange API",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Coinbase API",
+      "category": "Finance",
+      "description": "Coinbase exchange API",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Blockchain Info",
+      "category": "Finance",
+      "description": "Blockchain information",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NFT Data",
+      "category": "Finance",
+      "description": "NFT marketplace data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DeFi API",
+      "category": "Finance",
+      "description": "DeFi protocol data",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Stripe API Wrapper",
+      "category": "Finance",
+      "description": "Stripe payment wrapper",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "PayPal API",
+      "category": "Finance",
+      "description": "PayPal integration",
+      "baseUrl": "https://rapidapi.com/search/Finance?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shopify Products",
+      "category": "eCommerce",
+      "description": "Shopify product data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WooCommerce API",
+      "category": "eCommerce",
+      "description": "WooCommerce integration",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Magento API",
+      "category": "eCommerce",
+      "description": "Magento store data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "BigCommerce API",
+      "category": "eCommerce",
+      "description": "BigCommerce data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Printful API",
+      "category": "eCommerce",
+      "description": "Print-on-demand API",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Wish Products",
+      "category": "eCommerce",
+      "description": "Wish.com products",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Mercado Libre",
+      "category": "eCommerce",
+      "description": "MercadoLibre data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Rakuten API",
+      "category": "eCommerce",
+      "description": "Rakuten marketplace",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Zalando API",
+      "category": "eCommerce",
+      "description": "Zalando fashion data",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ASOS API",
+      "category": "eCommerce",
+      "description": "ASOS fashion API",
+      "baseUrl": "https://rapidapi.com/search/eCommerce?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "PDF Generator",
+      "category": "Tools",
+      "description": "PDF generation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Screenshot API",
+      "category": "Tools",
+      "description": "Website screenshots",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Image Compression",
+      "category": "Tools",
+      "description": "Image compression",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Video Converter",
+      "category": "Tools",
+      "description": "Video conversion",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Audio Transcription",
+      "category": "Tools",
+      "description": "Audio to text",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "OCR API",
+      "category": "Tools",
+      "description": "Optical character recognition",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Barcode Generator",
+      "category": "Tools",
+      "description": "Barcode generation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Hash Generator",
+      "category": "Tools",
+      "description": "Hash generation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Password Generator",
+      "category": "Tools",
+      "description": "Password generation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Color Palette Generator",
+      "category": "Tools",
+      "description": "Color palette generation",
+      "baseUrl": "https://rapidapi.com/search/Tools?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Fitness Calculator",
+      "category": "Health",
+      "description": "Fitness calculations",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Workout Planner",
+      "category": "Health",
+      "description": "Workout planning",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Calorie Counter",
+      "category": "Health",
+      "description": "Calorie counting",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Exercise Database",
+      "category": "Health",
+      "description": "Exercise database",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Meditation Timer",
+      "category": "Health",
+      "description": "Meditation timing",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sleep Tracker",
+      "category": "Health",
+      "description": "Sleep tracking",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "BMI Calculator",
+      "category": "Health",
+      "description": "BMI calculation",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Heart Rate Monitor",
+      "category": "Health",
+      "description": "Heart rate data",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Step Counter",
+      "category": "Health",
+      "description": "Step counting",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Water Intake Tracker",
+      "category": "Health",
+      "description": "Water intake tracking",
+      "baseUrl": "https://rapidapi.com/search/Health?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "NASA API",
+      "category": "Science",
+      "description": "NASA data",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SpaceX API",
+      "category": "Science",
+      "description": "SpaceX launch data",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Periodic Table",
+      "category": "Science",
+      "description": "Chemical elements",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Math API",
+      "category": "Science",
+      "description": "Mathematical operations",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Physics Constants",
+      "category": "Science",
+      "description": "Physical constants",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Astronomy API",
+      "category": "Science",
+      "description": "Astronomical data",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DNA Sequence API",
+      "category": "Science",
+      "description": "DNA sequences",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Chemistry API",
+      "category": "Science",
+      "description": "Chemical compounds",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Earth Science API",
+      "category": "Science",
+      "description": "Earth science data",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Climate Data API",
+      "category": "Science",
+      "description": "Climate data",
+      "baseUrl": "https://rapidapi.com/search/Science?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "VirusTotal API",
+      "category": "Cybersecurity",
+      "description": "Malware analysis",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "IP Reputation Check",
+      "category": "Cybersecurity",
+      "description": "IP reputation",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SSL Certificate Checker",
+      "category": "Cybersecurity",
+      "description": "SSL verification",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Domain Blacklist Check",
+      "category": "Cybersecurity",
+      "description": "Domain blacklist",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Phishing URL Detector",
+      "category": "Cybersecurity",
+      "description": "Phishing detection",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Password Strength API",
+      "category": "Cybersecurity",
+      "description": "Password strength check",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Breach Database Check",
+      "category": "Cybersecurity",
+      "description": "Data breach check",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WHOIS Lookup",
+      "category": "Cybersecurity",
+      "description": "Domain WHOIS data",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "VPN Detection API",
+      "category": "Cybersecurity",
+      "description": "VPN detection",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Bot Detection API",
+      "category": "Cybersecurity",
+      "description": "Bot detection",
+      "baseUrl": "https://rapidapi.com/search/Cybersecurity?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Encryption API",
+      "category": "Cryptography",
+      "description": "Data encryption",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Decryption Service",
+      "category": "Cryptography",
+      "description": "Data decryption",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "JWT Validator",
+      "category": "Cryptography",
+      "description": "JWT validation",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "OAuth Token Generator",
+      "category": "Cryptography",
+      "description": "OAuth tokens",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "RSA Key Generator",
+      "category": "Cryptography",
+      "description": "RSA key generation",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AES Encryption",
+      "category": "Cryptography",
+      "description": "AES encryption",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SHA256 Hash",
+      "category": "Cryptography",
+      "description": "SHA256 hashing",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MD5 Hash Generator",
+      "category": "Cryptography",
+      "description": "MD5 hashing",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Base64 Encoder",
+      "category": "Cryptography",
+      "description": "Base64 encoding",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "UUID Generator",
+      "category": "Cryptography",
+      "description": "UUID generation",
+      "baseUrl": "https://rapidapi.com/search/Cryptography?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Twilio SMS",
+      "category": "Communication",
+      "description": "Twilio SMS API",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "SendGrid Email",
+      "category": "Communication",
+      "description": "SendGrid email",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Mailgun API",
+      "category": "Communication",
+      "description": "Mailgun email",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Slack API",
+      "category": "Communication",
+      "description": "Slack integration",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Discord API",
+      "category": "Communication",
+      "description": "Discord bots",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Telegram Bot API",
+      "category": "Communication",
+      "description": "Telegram bots",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "WhatsApp Business API",
+      "category": "Communication",
+      "description": "WhatsApp Business",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Push Notification API",
+      "category": "Communication",
+      "description": "Push notifications",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Voice Call API",
+      "category": "Communication",
+      "description": "Voice calls",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Video Conferencing API",
+      "category": "Communication",
+      "description": "Video conferencing",
+      "baseUrl": "https://rapidapi.com/search/Communication?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Face Detection API",
+      "category": "Visual Recognition",
+      "description": "Face detection",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Object Recognition",
+      "category": "Visual Recognition",
+      "description": "Object recognition",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Image Classification",
+      "category": "Visual Recognition",
+      "description": "Image classification",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Scene Recognition",
+      "category": "Visual Recognition",
+      "description": "Scene detection",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Logo Detection",
+      "category": "Visual Recognition",
+      "description": "Logo detection",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Text Recognition (OCR)",
+      "category": "Visual Recognition",
+      "description": "OCR API",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Barcode Scanner API",
+      "category": "Visual Recognition",
+      "description": "Barcode scanning",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "License Plate Reader",
+      "category": "Visual Recognition",
+      "description": "License plate OCR",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Age Estimation API",
+      "category": "Visual Recognition",
+      "description": "Age estimation",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Emotion Detection API",
+      "category": "Visual Recognition",
+      "description": "Emotion detection",
+      "baseUrl": "https://rapidapi.com/search/Visual Recognition?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Firebase API",
+      "category": "Database",
+      "description": "Firebase database",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "MongoDB Atlas API",
+      "category": "Database",
+      "description": "MongoDB Atlas",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Airtable API",
+      "category": "Database",
+      "description": "Airtable database",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Notion API",
+      "category": "Database",
+      "description": "Notion integration",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Supabase API",
+      "category": "Database",
+      "description": "Supabase database",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Redis Cloud API",
+      "category": "Database",
+      "description": "Redis cloud",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "PostgreSQL API",
+      "category": "Database",
+      "description": "PostgreSQL integration",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DynamoDB API",
+      "category": "Database",
+      "description": "DynamoDB integration",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Elasticsearch API",
+      "category": "Database",
+      "description": "Elasticsearch",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "GraphQL API",
+      "category": "Database",
+      "description": "GraphQL endpoint",
+      "baseUrl": "https://rapidapi.com/search/Database?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "YouTube Thumbnail",
+      "category": "Media",
+      "description": "YouTube thumbnails",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Video Encoding API",
+      "category": "Media",
+      "description": "Video encoding",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Audio Processing",
+      "category": "Media",
+      "description": "Audio processing",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Image Hosting API",
+      "category": "Media",
+      "description": "Image hosting",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "CDN API",
+      "category": "Media",
+      "description": "Content delivery",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Video Streaming API",
+      "category": "Media",
+      "description": "Video streaming",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Podcast API",
+      "category": "Media",
+      "description": "Podcast data",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Radio Station API",
+      "category": "Media",
+      "description": "Radio stations",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "E-book API",
+      "category": "Media",
+      "description": "E-book data",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Stock Photos API",
+      "category": "Media",
+      "description": "Stock photos",
+      "baseUrl": "https://rapidapi.com/search/Media?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Google Translate API",
+      "category": "Translation",
+      "description": "Google translation",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DeepL API",
+      "category": "Translation",
+      "description": "DeepL translation",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Microsoft Translator",
+      "category": "Translation",
+      "description": "Microsoft translation",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Amazon Translate",
+      "category": "Translation",
+      "description": "Amazon translation",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Yandex Translate",
+      "category": "Translation",
+      "description": "Yandex translation",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Language Detection",
+      "category": "Translation",
+      "description": "Language detection",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Text to Speech",
+      "category": "Translation",
+      "description": "TTS API",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Speech to Text",
+      "category": "Translation",
+      "description": "STT API",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Pronunciation API",
+      "category": "Translation",
+      "description": "Pronunciation guide",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Dictionary API",
+      "category": "Translation",
+      "description": "Dictionary lookup",
+      "baseUrl": "https://rapidapi.com/search/Translation?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "UPS Tracking API",
+      "category": "Logistics",
+      "description": "UPS package tracking",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "FedEx API",
+      "category": "Logistics",
+      "description": "FedEx shipping",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "DHL API",
+      "category": "Logistics",
+      "description": "DHL tracking",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "USPS API",
+      "category": "Logistics",
+      "description": "USPS tracking",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Shippo API",
+      "category": "Logistics",
+      "description": "Shippo shipping",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "EasyPost API",
+      "category": "Logistics",
+      "description": "EasyPost shipping",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "ShipEngine API",
+      "category": "Logistics",
+      "description": "ShipEngine",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "AfterShip API",
+      "category": "Logistics",
+      "description": "AfterShip tracking",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Route Optimization",
+      "category": "Logistics",
+      "description": "Route optimization",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Warehouse API",
+      "category": "Logistics",
+      "description": "Warehouse management",
+      "baseUrl": "https://rapidapi.com/search/Logistics?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Eventbrite API",
+      "category": "Events",
+      "description": "Eventbrite events",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Meetup API",
+      "category": "Events",
+      "description": "Meetup events",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Ticketmaster API",
+      "category": "Events",
+      "description": "Ticketmaster events",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Calendar API",
+      "category": "Events",
+      "description": "Calendar integration",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Holiday API",
+      "category": "Events",
+      "description": "Holiday data",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Conference API",
+      "category": "Events",
+      "description": "Conference data",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Webinar API",
+      "category": "Events",
+      "description": "Webinar integration",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Birthday API",
+      "category": "Events",
+      "description": "Birthday reminders",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Anniversary API",
+      "category": "Events",
+      "description": "Anniversary tracker",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    },
+    {
+      "name": "Sports Events API",
+      "category": "Events",
+      "description": "Sports events",
+      "baseUrl": "https://rapidapi.com/search/Events?sortBy=ByRelevance",
+      "source": "rapidapi",
+      "pricing": "varies"
+    }
+  ]
+}

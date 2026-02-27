@@ -4,7 +4,7 @@ import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
-  Play, ChevronRight, Star, Users, Cpu, Activity, Copy, FileText,
+  Play, ChevronRight, ChevronDown, Star, Users, Cpu, Activity, Copy, FileText,
   Menu, X
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
@@ -13,9 +13,9 @@ import { HeroTabs } from "@/components/HeroTabs";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
-  { number: statsData.categoryCount.toString(), label: "Categories", live: true },
-  { number: "<200 ms", label: "Response Time", live: false },
-  { number: "24/7", label: "Live Registry", live: false },
+  { number: "865", label: "Open APIs", live: true },
+  { number: "11", label: "Direct Call", live: true },
+  { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
 const trustedBy = [
@@ -35,12 +35,12 @@ const howItWorks = [
     icon: Search,
     codeJsx: (
       <>
-        <span className="text-gray-500">{"// Agent needs to send SMS in Sweden"}</span>{"\n"}
-        <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
-        {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"sms"</span>,{"\n"}
-        {"  "}<span className="text-red-400">region</span>: <span className="text-green-400">"sweden"</span>,{"\n"}
-        {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"€0.10/sms"</span>{"\n"}
-        {"}"})
+        <span className="text-gray-500">{"// User prompt to agent:"}</span>{"\n"}
+        <span className="text-green-400">"Generate a photorealistic image</span>{"\n"}
+        <span className="text-green-400">of a sunset over mountains"</span>{"\n"}
+        {"\n"}
+        <span className="text-gray-500">{"// Agent uses discover_apis tool"}</span>{"\n"}
+        <span className="text-gray-500">{"// query: \"image generation\""}</span>
       </>
     ),
   },
@@ -54,10 +54,10 @@ const howItWorks = [
         <span className="text-gray-500">{"// Structured response"}</span>{"\n"}
         {"{"}{"\n"}
         {"  "}<span className="text-red-400">"matches"</span>: [{"\n"}
-        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"46elks"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"€0.05"</span>{" },"}{"\n"}
-        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"Twilio"</span>, <span className="text-red-400">"price"</span>: <span className="text-yellow-400">"€0.08"</span>{" }"}{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"Replicate"</span>, <span className="text-red-400">"models"</span>: <span className="text-yellow-400">"1000+"</span>{" },"}{"\n"}
+        {"    "}{"{ "}<span className="text-red-400">"name"</span>: <span className="text-green-400">"OpenRouter"</span>, <span className="text-red-400">"models"</span>: <span className="text-yellow-400">"100+"</span>{" }"}{"\n"}
         {"  "}],{"\n"}
-        {"  "}<span className="text-red-400">"bestMatch"</span>: <span className="text-green-400">"46elks"</span>{"\n"}
+        {"  "}<span className="text-red-400">"bestMatch"</span>: <span className="text-green-400">"Replicate"</span>{"\n"}
         {"}"}
       </>
     ),
@@ -65,16 +65,17 @@ const howItWorks = [
   {
     step: "3",
     title: "Agent Integrates",
-    description: "Full specs, auth details, endpoints. Everything to start building.",
+    description: "Full specs, auth details, endpoints. Or use Direct Call — no keys needed.",
     icon: Rocket,
     codeJsx: (
       <>
-        <span className="text-gray-500">{"// Get full API spec"}</span>{"\n"}
-        <span className="text-purple-400">const</span> <span className="text-blue-400">spec</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
-        {"  "}<span className="text-red-400">action</span>: <span className="text-green-400">"get_spec"</span>,{"\n"}
-        {"  "}<span className="text-red-400">api</span>: <span className="text-green-400">"46elks"</span>{"\n"}
-        {"}"}){"\n"}
-        <span className="text-gray-500">{"// → docs, auth, endpoints, examples"}</span>
+        <span className="text-gray-500">{"// Agent uses call_api tool"}</span>{"\n"}
+        {"{"}{"\n"}
+        {"  "}<span className="text-red-400">"provider"</span>: <span className="text-green-400">"replicate"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"action"</span>: <span className="text-green-400">"flux-schnell"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"params"</span>: {"{ "}<span className="text-red-400">"prompt"</span>: <span className="text-green-400">"..."</span>{" }"}{"\n"}
+        {"}"}{"\n"}
+        <span className="text-gray-500">{"// → image URL, no API key needed"}</span>
       </>
     ),
   },
@@ -107,7 +108,7 @@ const providerBenefits = [
   {
     icon: Users,
     title: "Reach AI Agents",
-    description: "Get discovered by thousands of autonomous agents looking for APIs like yours.",
+    description: "Get discovered by AI agents searching for APIs like yours.",
   },
   {
     icon: Globe,
@@ -140,23 +141,42 @@ const terminalLines = [
 ];
 
 const directCallProviders = [
-  { name: "46elks", desc: "SMS (Sweden)" },
-  { name: "Twilio", desc: "SMS (Global)" },
-  { name: "Resend", desc: "Email" },
-  { name: "Brave Search", desc: "Web search" },
+  { name: "Replicate", desc: "1000+ ML models" },
   { name: "OpenRouter", desc: "100+ LLMs" },
-  { name: "ElevenLabs", desc: "Text-to-speech" },
   { name: "Firecrawl", desc: "Web scraping" },
+  { name: "E2B", desc: "Code sandbox" },
   { name: "GitHub", desc: "Repos & Issues" },
-  { name: "Replicate", desc: "1000s of ML models" },
+  { name: "ElevenLabs", desc: "Text-to-speech" },
+  { name: "Brave Search", desc: "Web search" },
+  { name: "Resend", desc: "Email" },
+  { name: "46elks", desc: "SMS (Nordic)" },
 ];
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
+  const [showContextCopied, setShowContextCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
+  const [showDirectCallModal, setShowDirectCallModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const directCallProviders = [
+    { name: "Replicate", desc: "Whisper, Stable Diffusion, 1000+ ML models", category: "AI & LLM" },
+    { name: "OpenRouter", desc: "GPT-4, Claude, Llama, 100+ LLMs", category: "AI & LLM" },
+    { name: "ElevenLabs", desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
+    { name: "46elks", desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
+    { name: "Twilio", desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
+    { name: "Resend", desc: "Modern email API for developers", category: "Email" },
+    { name: "Brave Search", desc: "Privacy-focused web search", category: "Search" },
+    { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
+    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "AI & LLM" },
+    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Other" },
+    { name: "CoinGecko", desc: "Crypto prices and market data", category: "Crypto" },
+  ];
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('npx @nordsym/apiclaw');
@@ -164,9 +184,51 @@ export default function Home() {
     setTimeout(() => setShowCopied(false), 2000);
   };
 
+  const copyContextToClipboard = () => {
+    const context = `APIClaw is the API layer for AI agents. It's an MCP server with ${statsData.apiCount.toLocaleString()}+ APIs.
+
+Your agent can use these tools:
+• discover_apis - Search APIs by capability (not keywords)
+• get_api_details - Get full specs, pricing, and metadata
+• call_api - Direct Call: use APIs without managing keys
+• list_connected - See 11 available providers (Replicate, OpenRouter, ElevenLabs, etc.)
+
+Install: npx @nordsym/apiclaw
+Docs: https://apiclaw.nordsym.com/docs
+Website: https://apiclaw.nordsym.com`;
+    navigator.clipboard.writeText(context);
+    setShowContextCopied(true);
+    setTimeout(() => setShowContextCopied(false), 2500);
+  };
+
+  const submitWaitlist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail || waitlistStatus === "loading") return;
+    
+    setWaitlistStatus("loading");
+    try {
+      const res = await fetch("https://adventurous-avocet-799.convex.cloud/api/mutation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "waitlist:join",
+          args: { email: waitlistEmail, type: "provider", source: "landing" }
+        })
+      });
+      if (res.ok) {
+        setWaitlistStatus("success");
+        setWaitlistEmail("");
+      } else {
+        setWaitlistStatus("error");
+      }
+    } catch {
+      setWaitlistStatus("error");
+    }
+  };
+
   // Scroll-based active section detection using Intersection Observer
   useEffect(() => {
-    const sections = ["how-it-works", "for-agents", "for-providers", "pricing"];
+    const sections = ["how-it-works", "for-agents", "for-providers", "get-started", "faq"];
     
     const observerOptions = {
       root: null,
@@ -241,10 +303,22 @@ export default function Home() {
               For Providers
             </a>
             <a 
-              href="#pricing" 
-              className={`transition ${activeSection === "pricing" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+              href="/docs" 
+              className="transition hover:text-text-primary"
             >
-              Pricing
+              Docs
+            </a>
+            <a 
+              href="/earn" 
+              className="transition hover:text-text-primary"
+            >
+              Earn
+            </a>
+            <a 
+              href="#faq" 
+              className={`transition ${activeSection === "faq" ? "text-accent font-medium" : "hover:text-text-primary"}`}
+            >
+              FAQ
             </a>
           </nav>
           
@@ -320,11 +394,18 @@ export default function Home() {
                 For Providers
               </a>
               <a 
-                href="#pricing" 
+                href="#get-started" 
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
-                Pricing
+                Get Started
+              </a>
+              <a 
+                href="#faq" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-muted hover:text-text-primary transition"
+              >
+                FAQ
               </a>
               <div className="border-t border-border pt-3 mt-1 flex flex-col space-y-3">
                 <a
@@ -355,7 +436,7 @@ export default function Home() {
         <div className="hero-glow" />
         
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-6">
@@ -366,7 +447,7 @@ export default function Home() {
                   onClick={() => setShowProvidersModal(true)}
                   className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />Direct Call: SMS, Email, Search, AI & more</span>
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />Direct Call: AI Models, Web Scraping, Code Execution & more</span>
                 </button>
               </div>
               
@@ -380,10 +461,32 @@ export default function Home() {
                 Find, evaluate, and integrate APIs in milliseconds.
               </p>
               
-              <p className="text-text-muted mb-8 max-w-lg mx-auto lg:mx-0">
+              <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
                 Structured data. Ranked results. Sub-200ms responses.
                 Built for the agentic era.
               </p>
+
+              {/* Copy Context Button */}
+              <button
+                onClick={copyContextToClipboard}
+                className="group relative inline-flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-white font-bold rounded-2xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02]"
+              >
+                <Sparkles className="w-6 h-6" />
+                <span className="flex flex-col items-start">
+                  <span className="text-base">{showContextCopied ? "Copied!" : "Explain to your AI"}</span>
+                  <span className="text-xs opacity-80 font-normal">Copy context for your agent</span>
+                </span>
+                {showContextCopied ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <Copy className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                )}
+                {showContextCopied && (
+                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-lg">
+                    ✓ Paste this to your AI agent!
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Right: HeroTabs */}
@@ -397,7 +500,11 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
-              <div key={i} className="stat-card relative">
+              <div 
+                key={i} 
+                className={`stat-card relative ${stat.label === "Direct Call" ? "cursor-pointer hover:border-accent/50 transition-colors" : ""}`}
+                onClick={stat.label === "Direct Call" ? () => setShowDirectCallModal(true) : undefined}
+              >
                 {stat.live && (
                   <div className="absolute top-2 right-2 flex items-center gap-1">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -406,11 +513,41 @@ export default function Home() {
                 )}
                 <div className="stat-number">{stat.number}</div>
                 <div className="stat-label">{stat.label}</div>
+                {stat.label === "Direct Call" && (
+                  <div className="text-xs text-text-muted mt-1">Click to see all →</div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Direct Call Modal */}
+      {showDirectCallModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDirectCallModal(false)}>
+          <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">⚡ Direct Call Providers</h3>
+              <button onClick={() => setShowDirectCallModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-text-muted mb-4">These APIs work through APIClaw's proxy. Your agent calls them without needing API keys.</p>
+            <div className="space-y-3">
+              {directCallProviders.map((provider, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                  <div>
+                    <div className="font-medium">{provider.name}</div>
+                    <div className="text-sm text-text-muted">{provider.desc}</div>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent">{provider.category}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-text-muted mt-4 text-center">New providers added weekly</p>
+          </div>
+        </div>
+      )}
 
       {/* Before/After */}
       <section className="py-12 px-6">
@@ -454,7 +591,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span>Direct Call: SMS, Email, AI, and more</span>
+                  <span>Direct Call: AI, Scraping, Code & more</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
@@ -464,9 +601,40 @@ export default function Home() {
             </div>
           </div>
           <p className="text-center text-sm text-text-muted mt-8">
-            <Rocket className="w-4 h-4 inline mr-1" />
-            New Direct Call providers added weekly
+            <Sparkles className="w-4 h-4 inline mr-1" />
+            API providers: White-glove onboarding available. Limited spots.
           </p>
+          
+          {/* Waitlist Form */}
+          <div className="max-w-md mx-auto mt-6">
+            {waitlistStatus === "success" ? (
+              <div className="flex items-center justify-center gap-2 text-green-500 bg-green-500/10 rounded-xl px-4 py-3">
+                <Check className="w-5 h-5" />
+                <span>You're on the list! We'll reach out soon.</span>
+              </div>
+            ) : (
+              <form onSubmit={submitWaitlist} className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={waitlistEmail}
+                  onChange={(e) => setWaitlistEmail(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={waitlistStatus === "loading"}
+                  className="px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {waitlistStatus === "loading" ? "..." : "Join Waitlist"}
+                </button>
+              </form>
+            )}
+            {waitlistStatus === "error" && (
+              <p className="text-red-500 text-sm text-center mt-2">Something went wrong. Try again.</p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -530,13 +698,13 @@ export default function Home() {
       <section id="how-it-works" className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="section-label">HOW IT WORKS</span>
+            <span className="section-label">DIRECT CALL</span>
             <h2 className="text-3xl md:text-5xl font-bold mt-4 tracking-tight">
-              Three steps. That's it.
+              Three steps. No API keys.
             </h2>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
-              Your agent asks for a capability, APIClaw finds the best API, 
-              and returns everything needed to integrate.
+              Your agent asks, APIClaw matches, and calls the API directly — 
+              no keys needed.
             </p>
           </div>
 
@@ -614,33 +782,27 @@ export default function Home() {
 
             <div className="code-preview">
               <div className="code-preview-header">
-                agent.ts
+                mcp-config.json
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm">
-                  <span className="text-gray-500">{"// Your agent needs to send a notification"}</span>{"\n"}
-                  <span className="text-purple-400">const</span> <span className="text-blue-400">result</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
-                  {"  "}<span className="text-red-400">capability</span>: <span className="text-green-400">"push_notification"</span>,{"\n"}
-                  {"  "}<span className="text-red-400">platforms</span>: [<span className="text-green-400">"ios"</span>, <span className="text-green-400">"android"</span>],{"\n"}
-                  {"  "}<span className="text-red-400">maxPrice</span>: <span className="text-green-400">"$0.001/msg"</span>{"\n"}
-                  {"}"});{"\n"}
+                  <span className="text-gray-500">{"// Add to your MCP settings"}</span>{"\n"}
+                  {"{"}{"\n"}
+                  {"  "}<span className="text-red-400">"mcpServers"</span>: {"{"}{"\n"}
+                  {"    "}<span className="text-red-400">"apiclaw"</span>: {"{"}{"\n"}
+                  {"      "}<span className="text-red-400">"command"</span>: <span className="text-green-400">"npx"</span>,{"\n"}
+                  {"      "}<span className="text-red-400">"args"</span>: [<span className="text-green-400">"@nordsym/apiclaw"</span>]{"\n"}
+                  {"    "}{"}"}{"\n"}
+                  {"  "}{"}"}{"\n"}
+                  {"}"}{"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// APIClaw returns ranked matches"}</span>{"\n"}
-                  <span className="text-blue-400">console</span>.<span className="text-yellow-400">log</span>(<span className="text-blue-400">result</span>.<span className="text-red-400">matches</span>);{"\n"}
-                  <span className="text-gray-500">{"// ["}</span>{"\n"}
-                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"OneSignal"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"$0.0005"</span>{" }"}</span>{"\n"}
-                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"Firebase"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"free"</span>{" }"}</span>{"\n"}
-                  <span className="text-gray-500">{"//   { "}<span className="text-red-400">name</span>: <span className="text-green-400">"Pusher"</span>, <span className="text-red-400">price</span>: <span className="text-yellow-400">"$0.001"</span>{" }"}</span>{"\n"}
-                  <span className="text-gray-500">{"// ]"}</span>{"\n"}
+                  <span className="text-gray-500">{"// That's it. Your agent now has access to:"}</span>{"\n"}
+                  <span className="text-gray-500">{"// • discover_apis  - Find APIs by capability"}</span>{"\n"}
+                  <span className="text-gray-500">{"// • get_api_details - Full specs & pricing"}</span>{"\n"}
+                  <span className="text-gray-500">{"// • call_api - Direct Call (no keys needed)"}</span>{"\n"}
+                  <span className="text-gray-500">{"// • list_connected - See available providers"}</span>{"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// Get full spec for the best match"}</span>{"\n"}
-                  <span className="text-purple-400">const</span> <span className="text-blue-400">spec</span> = <span className="text-purple-400">await</span> <span className="text-blue-400">mcp</span>.<span className="text-yellow-400">call</span>(<span className="text-green-400">"apiclaw"</span>, {"{"}{"\n"}
-                  {"  "}<span className="text-red-400">action</span>: <span className="text-green-400">"get_spec"</span>,{"\n"}
-                  {"  "}<span className="text-red-400">api</span>: <span className="text-blue-400">result</span>.<span className="text-red-400">bestMatch</span>{"\n"}
-                  {"}"});{"\n"}
-                  {"\n"}
-                  <span className="text-gray-500">{"// spec includes: auth, endpoints, examples, rate limits"}</span>{"\n"}
-                  <span className="text-gray-500">{"// Your agent can now integrate dynamically! 🚀"}</span>
+                  <span className="text-gray-500">{"// Works with Claude, Cursor, and any MCP client 🦞"}</span>
                 </pre>
               </div>
             </div>
@@ -735,30 +897,27 @@ export default function Home() {
 
       <div className="divider" />
 
-      {/* Pricing */}
-      <section id="pricing" className="py-24 px-6 bg-surface/30">
+      {/* Get Started */}
+      <section id="get-started" className="py-24 px-6 bg-surface/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <span className="section-label">PRICING</span>
+            <span className="section-label">GET STARTED</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight">
               Simple. Free. Forever.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              API discovery should be free. We're building the infrastructure for agent commerce.
+              API discovery should be free. We're building the API layer for AI agents.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Free tier */}
+            {/* For Agents */}
             <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-8 relative glow">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
-                Available Now
+                Live Now
               </div>
-              <h3 className="text-2xl font-bold mb-2">Discovery</h3>
-              <p className="text-text-secondary mb-6">Full API discovery and evaluation</p>
-              <div className="text-5xl font-black mb-6">
-                $0<span className="text-lg text-text-muted font-normal">/forever</span>
-              </div>
+              <h3 className="text-2xl font-bold mb-2">For Agents</h3>
+              <p className="text-text-secondary mb-8">Discovery + Direct Call</p>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
@@ -766,7 +925,11 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Full pricing & feature comparison
+                  Direct Call: Use APIs without keys
+                </li>
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  10+ providers (AI Models, Scraping, Code, Search)
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
@@ -774,105 +937,110 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  MCP integration
-                </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
-                  Unlimited queries
+                  MCP native
                 </li>
               </ul>
-              <a href="https://github.com/nordsym/apiclaw" className="btn-primary w-full justify-center">
+              <a href="/docs" className="btn-primary w-full justify-center">
                 Get Started Free
               </a>
             </div>
 
-            {/* Coming soon tier */}
-            <div className="rounded-2xl bg-surface-elevated border border-border p-8 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-surface border border-border text-text-muted text-xs font-bold tracking-wide rounded-full uppercase">
-                Coming Q2 2026
+            {/* For Providers */}
+            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-8 relative glow">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
+                Live Now
               </div>
-              <h3 className="text-2xl font-bold mb-2">Provisioning</h3>
-              <p className="text-text-secondary mb-6">Agent-native credential management</p>
-              <div className="text-3xl font-bold mb-2 text-text-muted">
-                Free Beta
-              </div>
-              <p className="text-sm text-text-muted mb-4">Early adopters get extended free access</p>
+              <h3 className="text-2xl font-bold mb-2">For Providers</h3>
+              <p className="text-text-secondary mb-8">Get discovered by AI agents</p>
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-text-muted">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  OAuth broker for major APIs
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  Get discovered by AI agents
                 </li>
-                <li className="flex items-center gap-3 text-text-muted">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  Instant API key provisioning
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  Become a Direct Call partner
                 </li>
-                <li className="flex items-center gap-3 text-text-muted">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  Usage tracking & analytics
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  Self-service onboarding
                 </li>
-                <li className="flex items-center gap-3 text-text-muted">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  Agent-native payments
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  Analytics & usage insights
                 </li>
-                <li className="flex items-center gap-3 text-text-muted">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  Unified billing
+                <li className="flex items-center gap-3 text-text-secondary">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                  Zero integration work
                 </li>
               </ul>
-              <a 
-                href="https://t.me/Symbot_apiclaw_bot?start=waitlist" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary w-full justify-center hover:bg-surface-elevated transition-colors"
-              >
-                Join Waitlist
+              <a href="/providers/dashboard" className="btn-primary w-full justify-center">
+                Add Your API
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section id="contact" className="py-24 px-6">
+      <div className="divider" />
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
-          <div className="gradient-border p-12 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-accent/20 flex items-center justify-center text-4xl mx-auto mb-6 logo-float">
-              🦞
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-              Ready to go agent-native?
+          <div className="text-center mb-16">
+            <span className="section-label">FAQ</span>
+            <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight">
+              Common Questions
             </h2>
-            <p className="text-text-secondary text-lg mb-8 max-w-lg mx-auto">
-              The API layer for AI agents.
-              Get started in under a minute.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={copyToClipboard}
-                className="btn-primary group relative"
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is APIClaw?",
+                a: `APIClaw is the API layer for AI agents. Your agent queries by capability ("I need image generation"), gets ranked matches with metadata and pricing, and can call APIs directly through us — no keys needed.`
+              },
+              {
+                q: "How does Direct Call work?",
+                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 10+ providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
+              },
+              {
+                q: "How are API credentials secured?",
+                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Direct Call requests are proxied server-side — your credentials never touch the agent. We take security seriously."
+              },
+              {
+                q: "What does it cost?",
+                a: `Search ${statsData.apiCount.toLocaleString()}+ APIs free forever. Direct Call is free during beta; pay-per-use pricing coming later. For providers, listing your API is always free.`
+              },
+              {
+                q: "How do I add my API?",
+                a: "Go to the Provider Dashboard, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a Direct Call partner? Set that up in the dashboard too."
+              },
+              {
+                q: "What's MCP?",
+                a: "MCP (Model Context Protocol) is the open standard for connecting AI agents to external tools. APIClaw is an MCP server — add one line to your config and your agent can discover and call any API in our registry. Works with Claude Desktop, Cursor, and any MCP-compatible client."
+              }
+            ].map((faq, i) => (
+              <div 
+                key={i} 
+                className="rounded-2xl bg-surface-elevated border border-border overflow-hidden"
               >
-                {showCopied ? (
-                  <Check className="w-5 h-5 text-green-400" />
-                ) : (
-                  <Copy className="w-5 h-5" />
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full p-6 flex items-center justify-between text-left hover:bg-surface/50 transition-colors"
+                >
+                  <h3 className="font-bold text-lg">{faq.q}</h3>
+                  <ChevronDown 
+                    className={`w-5 h-5 text-text-muted transition-transform ${openFaq === i ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-6">
+                    <p className="text-text-secondary leading-relaxed">{faq.a}</p>
+                  </div>
                 )}
-                <code className="font-mono">npx @nordsym/apiclaw</code>
-                {showCopied && (
-                  <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-3 py-1 rounded-lg whitespace-nowrap">
-                    Copied! Run in terminal
-                  </span>
-                )}
-              </button>
-              <a
-                href="https://github.com/nordsym/apiclaw"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary"
-              >
-                <Star className="w-5 h-5" />
-                Star on GitHub
-              </a>
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -890,7 +1058,7 @@ export default function Home() {
                 <span className="font-bold text-xl tracking-tight">APIClaw</span>
               </div>
               <p className="text-text-muted mb-6 max-w-sm leading-relaxed">
-                The API discovery layer for autonomous agents. 
+                The API layer for AI agents. 
                 Find, evaluate, and integrate APIs in milliseconds.
               </p>
               <div className="flex items-center gap-3">
@@ -921,7 +1089,8 @@ export default function Home() {
                 <li><a href="#for-agents" className="hover:text-text-primary transition">For Agents</a></li>
                 <li><a href="#for-providers" className="hover:text-text-primary transition">For Providers</a></li>
                 <li><a href="/providers/dashboard" className="hover:text-text-primary transition">Provider Dashboard</a></li>
-                <li><a href="#pricing" className="hover:text-text-primary transition">Pricing</a></li>
+                <li><a href="#get-started" className="hover:text-text-primary transition">Get Started</a></li>
+                <li><a href="#faq" className="hover:text-text-primary transition">FAQ</a></li>
                 <li><a href="/docs" className="hover:text-text-primary transition">Documentation</a></li>
               </ul>
             </div>
@@ -938,7 +1107,7 @@ export default function Home() {
 
           <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-text-muted text-sm">
-              © 2026 NordSym. Building infrastructure for agent commerce.
+              © 2026 NordSym. Get in front of every AI agent. White-glove onboarding available.
             </p>
             <div className="flex items-center gap-4">
               <div className="badge">
@@ -1008,7 +1177,7 @@ export default function Home() {
             
             <div className="p-6 border-t border-border bg-surface/50">
               <p className="text-sm text-text-secondary mb-4 text-center">
-                Want your API here? Get discovered by thousands of AI agents.
+                Want your API here? Get discovered by AI agents worldwide.
               </p>
               <a
                 href="https://nordsym.github.io/NordSym-Scheduler/"

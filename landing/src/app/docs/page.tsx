@@ -35,8 +35,9 @@ export default function DocsPage() {
           </Link>
           <nav className="flex items-center gap-4 md:gap-6">
             <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Home</Link>
-            <Link href="/providers" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Providers</Link>
-            <Link href="/earn" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Earn Credits</Link>
+            <span className="hidden md:block text-[var(--accent)] font-medium text-sm md:text-base">Docs</span>
+            <Link href="/providers/dashboard" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Providers</Link>
+            <Link href="/earn" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Earn</Link>
             <a 
               href="https://github.com/nordsym/apiclaw" 
               target="_blank"
@@ -192,7 +193,7 @@ export default function DocsPage() {
             {/* discover_apis */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">discover_apis</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Search 16,000+ APIs using natural language.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Search 5,600+ APIs using natural language.</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{\n'}
@@ -263,7 +264,7 @@ export default function DocsPage() {
             {/* list_categories */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">list_categories</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Browse all API categories (23 main categories).</p>
+              <p className="text-[var(--text-secondary)] mb-4">Browse all API categories (30 main categories).</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm text-[var(--text-primary)]">list_categories()</code>
               </pre>
@@ -310,7 +311,7 @@ export default function DocsPage() {
               </li>
               <li>
                 <strong>Email:</strong>{' '}
-                <a href="mailto:gustav@nordsym.com" className="text-[var(--accent)] hover:underline">gustav@nordsym.com</a>
+                <a href="mailto:symbot@nordsym.com" className="text-[var(--accent)] hover:underline">symbot@nordsym.com</a>
               </li>
             </ul>
           </div>

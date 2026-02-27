@@ -61,6 +61,93 @@ export const saveDirectCallConfig = mutation({
 });
 
 /**
+ * Save Direct Call config with token auth (used by frontend)
+ */
+export const saveConfig = mutation({
+  args: {
+    token: v.string(),
+    config: v.object({
+      apiId: v.string(),
+      baseUrl: v.string(),
+      authType: v.string(),
+      authHeader: v.string(),
+      authPrefix: v.string(),
+      masterApiKey: v.optional(v.string()),
+      rateLimitPerUser: v.number(),
+      rateLimitPerDay: v.number(),
+      pricePerRequest: v.number(),
+      status: v.string(),
+      allowCustomerKeys: v.optional(v.boolean()),
+      requireCustomerKeys: v.optional(v.boolean()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    // Verify session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const now = Date.now();
+    const { config } = args;
+
+    // Check if config already exists for this API
+    const existing = await ctx.db
+      .query("providerDirectCall")
+      .filter((q) => q.eq(q.field("apiId"), config.apiId as any))
+      .first();
+
+    if (existing) {
+      // Update existing
+      const updateData: Record<string, unknown> = {
+        baseUrl: config.baseUrl,
+        authType: config.authType,
+        authHeader: config.authHeader,
+        authPrefix: config.authPrefix,
+        rateLimitPerUser: config.rateLimitPerUser,
+        rateLimitPerDay: config.rateLimitPerDay,
+        pricePerRequest: config.pricePerRequest,
+        status: config.status,
+        allowCustomerKeys: config.allowCustomerKeys ?? true,
+        requireCustomerKeys: config.requireCustomerKeys ?? false,
+        updatedAt: now,
+      };
+
+      // Only update master key if provided (not empty)
+      if (config.masterApiKey) {
+        updateData.encryptedMasterKey = config.masterApiKey; // In prod: encrypt this
+      }
+
+      await ctx.db.patch(existing._id, updateData);
+      return existing._id;
+    }
+
+    // Create new config
+    return await ctx.db.insert("providerDirectCall", {
+      providerId: session.providerId,
+      apiId: config.apiId as any,
+      baseUrl: config.baseUrl,
+      authType: config.authType,
+      authHeader: config.authHeader,
+      authPrefix: config.authPrefix,
+      encryptedMasterKey: config.masterApiKey || "",
+      rateLimitPerUser: config.rateLimitPerUser,
+      rateLimitPerDay: config.rateLimitPerDay,
+      pricePerRequest: config.pricePerRequest,
+      status: config.status as "draft" | "testing" | "live",
+      allowCustomerKeys: config.allowCustomerKeys ?? true,
+      requireCustomerKeys: config.requireCustomerKeys ?? false,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+/**
  * Create/update an action for a Direct Call config
  */
 export const saveAction = mutation({
@@ -211,12 +298,12 @@ export const getDirectCallConfigById = query({
  */
 export const getDirectCallConfigByApiId = query({
   args: {
-    apiId: v.id("providerAPIs"),
+    apiId: v.string(), // Accept string since that's what frontend passes
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("providerDirectCall")
-      .withIndex("by_apiId", (q) => q.eq("apiId", args.apiId))
+      .filter((q) => q.eq(q.field("apiId"), args.apiId as any))
       .first();
   },
 });
@@ -263,6 +350,16 @@ export const getActionById = query({
   },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
+  },
+});
+
+/**
+ * DEBUG: Get all Direct Call configs
+ */
+export const getAllConfigs = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("providerDirectCall").collect();
   },
 });
 

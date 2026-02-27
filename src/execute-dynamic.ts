@@ -19,6 +19,9 @@ export interface ProviderDirectCallConfig {
   rateLimitPerDay: number;
   pricePerRequest: number;
   status: 'draft' | 'testing' | 'live';
+  // Customer key passthrough settings
+  allowCustomerKeys?: boolean; // Allow agents to pass their own API key (default: true)
+  requireCustomerKeys?: boolean; // Require customer key, no master key fallback (default: false)
 }
 
 export interface ActionParam {
@@ -430,10 +433,22 @@ export async function executeDynamicAction(
   let apiKey: string;
   let usingCustomerKey = false;
   
-  if (customerKey) {
+  // Check if provider requires customer keys (like CoAccept)
+  const requiresCustomerKey = config.requireCustomerKeys === true;
+  const allowsCustomerKey = config.allowCustomerKeys !== false; // Default true
+  
+  if (customerKey && allowsCustomerKey) {
     // Customer provided their own key - use it, skip usage tracking
     apiKey = customerKey;
     usingCustomerKey = true;
+  } else if (requiresCustomerKey) {
+    // Provider requires customer key but none provided
+    return { 
+      success: false, 
+      provider: providerId, 
+      action: actionName,
+      error: 'This provider requires your own API key. Pass it via customer_key parameter.' 
+    };
   } else if (config.encryptedMasterKey) {
     // Use provider's master key - track usage for billing
     try {
@@ -453,7 +468,7 @@ export async function executeDynamicAction(
       success: false, 
       provider: providerId, 
       action: actionName,
-      error: 'No API key available. Provide your own key via environment variable or contact provider.' 
+      error: 'No API key available. Provide your own key via customer_key parameter.' 
     };
   }
   

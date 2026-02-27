@@ -62,7 +62,18 @@ export const registerProvider = mutation({
       discoveryCount: 0,
     });
 
-    return { providerId, apiId };
+    // Create session for auto-login after registration
+    const sessionToken = generateToken();
+    const sessionExpiresAt = now + 30 * 24 * 60 * 60 * 1000; // 30 days
+
+    await ctx.db.insert("sessions", {
+      providerId,
+      token: sessionToken,
+      expiresAt: sessionExpiresAt,
+      createdAt: now,
+    });
+
+    return { providerId, apiId, sessionToken };
   },
 });
 
@@ -313,6 +324,238 @@ export const getSession = query({
 // ============================================
 // DASHBOARD ANALYTICS
 // ============================================
+
+// Get single API by ID
+export const getApiById = query({
+  args: { apiId: v.string() },
+  handler: async (ctx, args) => {
+    // Try to get by document ID
+    try {
+      const api = await ctx.db.get(args.apiId as any);
+      if (api) {
+        // Check if it has Direct Call configured
+        const directCall = await ctx.db
+          .query("providerDirectCall")
+          .filter((q) => q.eq(q.field("apiId"), args.apiId))
+          .first();
+        return { ...api, hasDirectCall: !!directCall, directCallStatus: directCall?.status };
+      }
+    } catch {
+      // Not a valid ID format
+    }
+    return null;
+  },
+});
+
+// Get provider APIs with Direct Call status
+export const getProviderAPIsWithStatus = query({
+  args: { providerId: v.string() },
+  handler: async (ctx, args) => {
+    const apis = await ctx.db
+      .query("providerAPIs")
+      .filter((q) => q.eq(q.field("providerId"), args.providerId as any))
+      .collect();
+    
+    // Add Direct Call status to each API
+    const apisWithStatus = await Promise.all(
+      apis.map(async (api) => {
+        const directCall = await ctx.db
+          .query("providerDirectCall")
+          .filter((q) => q.eq(q.field("apiId"), api._id))
+          .first();
+        return {
+          ...api,
+          hasDirectCall: !!directCall,
+          directCallStatus: directCall?.status,
+        };
+      })
+    );
+    
+    return apisWithStatus;
+  },
+});
+
+// DEBUG: Delete API
+export const debugDeleteAPI = mutation({
+  args: { apiId: v.string() },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.apiId as any);
+    return { deleted: true };
+  },
+});
+
+// Add API for logged-in provider (used by register page)
+export const addAPI = mutation({
+  args: {
+    token: v.string(),
+    api: v.object({
+      name: v.string(),
+      description: v.string(),
+      category: v.string(),
+      openApiUrl: v.optional(v.string()),
+      docsUrl: v.optional(v.string()),
+      pricingModel: v.string(),
+      pricingNotes: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    // Verify session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    const now = Date.now();
+    const apiId = await ctx.db.insert("providerAPIs", {
+      providerId: session.providerId,
+      name: args.api.name,
+      description: args.api.description,
+      category: args.api.category,
+      openApiUrl: args.api.openApiUrl,
+      docsUrl: args.api.docsUrl,
+      pricingModel: args.api.pricingModel,
+      pricingNotes: args.api.pricingNotes,
+      status: "approved",
+      createdAt: now,
+      approvedAt: now,
+      discoveryCount: 0,
+    });
+
+    return { apiId, success: true };
+  },
+});
+
+// Delete API for logged-in provider
+export const deleteAPI = mutation({
+  args: {
+    token: v.string(),
+    apiId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify session
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      throw new Error("Invalid or expired session");
+    }
+
+    // Get the API and verify ownership
+    const api = await ctx.db.get(args.apiId as any);
+    if (!api || (api as any).providerId !== session.providerId) {
+      throw new Error("API not found or unauthorized");
+    }
+
+    // Delete the API
+    await ctx.db.delete(args.apiId as any);
+
+    // Also delete any Direct Call config
+    const directCallConfig = await ctx.db
+      .query("providerDirectCall")
+      .filter((q) => q.eq(q.field("apiId"), args.apiId))
+      .first();
+    if (directCallConfig) {
+      await ctx.db.delete(directCallConfig._id);
+    }
+
+    return { deleted: true };
+  },
+});
+
+// DEBUG: Update provider name
+export const debugUpdateProvider = mutation({
+  args: { 
+    providerId: v.string(),
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const updates: any = {};
+    if (args.name) updates.name = args.name;
+    await ctx.db.patch(args.providerId as any, updates);
+    return { updated: true };
+  },
+});
+
+// DEBUG: Add API for provider (seeding)
+export const debugAddAPI = mutation({
+  args: {
+    providerId: v.string(),
+    name: v.string(),
+    description: v.string(),
+    category: v.string(),
+    docsUrl: v.optional(v.string()),
+    pricingModel: v.string(),
+    pricingNotes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    return await ctx.db.insert("providerAPIs", {
+      providerId: args.providerId as any,
+      name: args.name,
+      description: args.description,
+      category: args.category,
+      docsUrl: args.docsUrl,
+      pricingModel: args.pricingModel,
+      pricingNotes: args.pricingNotes,
+      status: "approved",
+      createdAt: now,
+      approvedAt: now,
+      discoveryCount: 0,
+    });
+  },
+});
+
+// DEBUG: Delete provider and all related data
+export const debugDeleteProvider = mutation({
+  args: { providerId: v.string() },
+  handler: async (ctx, args) => {
+    const providerId = args.providerId as any;
+    
+    // Delete sessions
+    const sessions = await ctx.db.query("sessions").filter(q => q.eq(q.field("providerId"), providerId)).collect();
+    for (const s of sessions) await ctx.db.delete(s._id);
+    
+    // Delete APIs
+    const apis = await ctx.db.query("providerAPIs").filter(q => q.eq(q.field("providerId"), providerId)).collect();
+    for (const a of apis) await ctx.db.delete(a._id);
+    
+    // Delete direct call configs
+    const configs = await ctx.db.query("providerDirectCall").filter(q => q.eq(q.field("providerId"), providerId)).collect();
+    for (const c of configs) {
+      // Delete actions for this config
+      const actions = await ctx.db.query("providerActions").filter(q => q.eq(q.field("directCallId"), c._id)).collect();
+      for (const act of actions) await ctx.db.delete(act._id);
+      await ctx.db.delete(c._id);
+    }
+    
+    // Delete provider
+    await ctx.db.delete(providerId);
+    
+    return { deleted: true };
+  },
+});
+
+// DEBUG: List all sessions
+export const debugListSessions = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("sessions").collect();
+  },
+});
+
+// DEBUG: List all providers
+export const debugListProviders = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("providers").collect();
+  },
+});
 
 export const getAnalytics = query({
   args: {

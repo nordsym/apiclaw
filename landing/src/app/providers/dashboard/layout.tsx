@@ -28,9 +28,9 @@ interface NavItem {
 }
 
 const mainNavItems: NavItem[] = [
-  { label: "Overview", href: "/providers/dashboard", icon: Home, exact: true },
-  { label: "APIs", href: "/providers/dashboard", icon: Zap }, // Tab in main dashboard
-  { label: "Earnings", href: "/providers/dashboard", icon: CreditCard }, // Tab in main dashboard
+  { label: "Overview", href: "/providers/dashboard?tab=overview", icon: Home },
+  { label: "APIs", href: "/providers/dashboard?tab=apis", icon: Zap },
+  { label: "Analytics", href: "/providers/dashboard?tab=analytics", icon: BarChart3 },
 ];
 
 export default function DashboardLayout({
@@ -161,18 +161,21 @@ export default function DashboardLayout({
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
-            <Link
-              href="/providers/dashboard"
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                pathname === "/providers/dashboard"
-                  ? "bg-accent text-white"
-                  : "text-text-secondary hover:bg-surface hover:text-text-primary"
-              }`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <Home className="w-5 h-5" />
-              <span>Dashboard</span>
-            </Link>
+            {mainNavItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                  (item.exact ? pathname === item.href : pathname.startsWith(item.href.split('?')[0])) && !isApiDetailPage
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:bg-surface hover:text-text-primary"
+                }`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </Link>
+            ))}
 
             {isApiDetailPage && (
               <>

@@ -1,0 +1,653 @@
+[
+  {
+    "name": "API Gr\u00e1tis",
+    "description": "Multiples services and public APIs",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://apigratis.com.br/"
+  },
+  {
+    "name": "ApicAgent",
+    "description": "Extract device details from user-agent",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.apicagent.com"
+  },
+  {
+    "name": "Base API",
+    "description": "Building quick backends",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://www.base-api.io/"
+  },
+  {
+    "name": "Blague.xyz",
+    "description": "Biggest FR jokes API",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://blague.xyz/"
+  },
+  {
+    "name": "Blitapp",
+    "description": "Schedule screenshots to cloud",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://blitapp.com/api/"
+  },
+  {
+    "name": "Blynk-Cloud",
+    "description": "Control IoT Devices from Blynk",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://blynk.io/"
+  },
+  {
+    "name": "Browshot",
+    "description": "Screenshots of web pages",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://browshot.com/"
+  },
+  {
+    "name": "Changelogs.md",
+    "description": "Changelog metadata from open source",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://changelogs.md"
+  },
+  {
+    "name": "Ciprand",
+    "description": "Secure random string generator",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://github.com/polarspetroll/ciprand"
+  },
+  {
+    "name": "CodeX Compiler",
+    "description": "Online Compiler for Various Languages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://github.com/Jaagrav/CodeX"
+  },
+  {
+    "name": "Contentful Images",
+    "description": "Retrieve and transform images",
+    "category": "Images",
+    "authType": "apiKey",
+    "baseUrl": "https://www.contentful.com/"
+  },
+  {
+    "name": "CORS Proxy",
+    "description": "Get around CORS errors",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://github.com/burhanuday/cors-proxy"
+  },
+  {
+    "name": "Databricks API",
+    "description": "Manage Databricks resources",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.databricks.com/"
+  },
+  {
+    "name": "DigitalOcean Status",
+    "description": "Status of DigitalOcean services",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://status.digitalocean.com/"
+  },
+  {
+    "name": "DomainDb Info",
+    "description": "Domain name search",
+    "category": "Business",
+    "authType": "none",
+    "baseUrl": "https://api.domainsdb.info/"
+  },
+  {
+    "name": "ExtendsClass JSON Storage",
+    "description": "Simple JSON store API",
+    "category": "Storage",
+    "authType": "none",
+    "baseUrl": "https://extendsclass.com/"
+  },
+  {
+    "name": "GeekFlare",
+    "description": "Website testing and monitoring",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://apidocs.geekflare.com/"
+  },
+  {
+    "name": "GETPing",
+    "description": "Email notification with GET request",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://www.getping.info"
+  },
+  {
+    "name": "Ghost CMS",
+    "description": "Get Published content",
+    "category": "Content",
+    "authType": "apiKey",
+    "baseUrl": "https://ghost.org/"
+  },
+  {
+    "name": "Glitterly",
+    "description": "Image generation API",
+    "category": "Images",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.glitterly.app"
+  },
+  {
+    "name": "Google Keep",
+    "description": "Read, write Google Keep notes",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/keep/"
+  },
+  {
+    "name": "Google Slides API",
+    "description": "Read, write Google Slides",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/slides/api/"
+  },
+  {
+    "name": "Gorest",
+    "description": "Online REST API for Testing",
+    "category": "Testing",
+    "authType": "oauth",
+    "baseUrl": "https://gorest.co.in/"
+  },
+  {
+    "name": "host-t.com",
+    "description": "Basic DNS query via HTTP GET",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://host-t.com"
+  },
+  {
+    "name": "HTTP2.Pro",
+    "description": "Test HTTP/2 protocol support",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://http2.pro/"
+  },
+  {
+    "name": "import.io",
+    "description": "Retrieve structured data from websites",
+    "category": "Data",
+    "authType": "apiKey",
+    "baseUrl": "https://www.import.io/"
+  },
+  {
+    "name": "ip-fast.com",
+    "description": "IP address, country and city",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://ip-fast.com/"
+  },
+  {
+    "name": "ipfind.io",
+    "description": "Geographic location of IP",
+    "category": "Geolocation",
+    "authType": "apiKey",
+    "baseUrl": "https://ipfind.io"
+  },
+  {
+    "name": "JSON 2 JSONP",
+    "description": "Convert JSON to JSONP",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://json2jsonp.com/"
+  },
+  {
+    "name": "License-API",
+    "description": "REST API for choosealicense.com",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://github.com/cmccandless/license-api"
+  },
+  {
+    "name": "Logs.to",
+    "description": "Generate logs",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://logs.to/"
+  },
+  {
+    "name": "Lua Decompiler",
+    "description": "Online Lua 5.1 Decompiler",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://lua-decompiler.ferib.dev/"
+  },
+  {
+    "name": "MAC address lookup",
+    "description": "Retrieve vendor from MAC",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://macaddress.io/"
+  },
+  {
+    "name": "Micro DB",
+    "description": "Simple database service",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://m3o.com/db"
+  },
+  {
+    "name": "MicroENV",
+    "description": "Fake REST API for developers",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://microenv.com/"
+  },
+  {
+    "name": "MY IP API",
+    "description": "Get IP address information",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.myip.com/api-docs/"
+  },
+  {
+    "name": "OpenAPIHub",
+    "description": "All-in-one API Platform",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://hub.openapihub.com/"
+  },
+  {
+    "name": "OpenGraphr",
+    "description": "Retrieve Open Graph data",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://opengraphr.com/"
+  },
+  {
+    "name": "oyyi",
+    "description": "Fake Data and conversion APIs",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://oyyi.xyz/"
+  },
+  {
+    "name": "PageCDN",
+    "description": "Public API for js/css/font libraries",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://pagecdn.com/"
+  },
+  {
+    "name": "ProxyKingdom",
+    "description": "Rotating Proxy API",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://proxykingdom.com"
+  },
+  {
+    "name": "Pusher Beams",
+    "description": "Push notifications for Android/iOS",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://pusher.com/beams"
+  },
+  {
+    "name": "QR code qrtag",
+    "description": "Create QR code and URL shortener",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.qrtag.net/api/"
+  },
+  {
+    "name": "QR code goqr",
+    "description": "Generate and decode QR codes",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "http://goqr.me/api/"
+  },
+  {
+    "name": "Qrcode Monkey",
+    "description": "Custom QR codes",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://www.qrcode-monkey.com/"
+  },
+  {
+    "name": "Random Stuff API",
+    "description": "AI Response, jokes, memes",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://api-docs.pgamerx.com/"
+  },
+  {
+    "name": "Rejax",
+    "description": "Reverse AJAX service",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://rejax.io/"
+  },
+  {
+    "name": "RSS feed to JSON",
+    "description": "Returns RSS feed in JSON",
+    "category": "Utilities",
+    "authType": "none",
+    "baseUrl": "https://rss-to-json-serverless-api.vercel.app"
+  },
+  {
+    "name": "scraperBox",
+    "description": "Undetectable web scraping",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://scraperbox.com/"
+  },
+  {
+    "name": "ScrapingDog",
+    "description": "Proxy API for Web scraping",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://www.scrapingdog.com/"
+  },
+  {
+    "name": "Serialif Color",
+    "description": "Color conversion and contrast",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://color.serialif.com/"
+  },
+  {
+    "name": "Sheetsu",
+    "description": "Google sheets integration",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://sheetsu.com/"
+  },
+  {
+    "name": "SHOUTCLOUD",
+    "description": "ALL-CAPS AS A SERVICE",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "http://shoutcloud.io/"
+  },
+  {
+    "name": "Sonar",
+    "description": "DNS Enumeration API",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://github.com/Cgboal/SonarSearch"
+  },
+  {
+    "name": "Supportivekoala",
+    "description": "Autogenerate images",
+    "category": "Images",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.supportivekoala.com/"
+  },
+  {
+    "name": "Tyk",
+    "description": "API management platform",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://tyk.io/"
+  },
+  {
+    "name": "Wandbox",
+    "description": "Code compiler for 35+ languages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://wandbox.org/"
+  },
+  {
+    "name": "Chinese Text Project",
+    "description": "Pre-modern Chinese texts library",
+    "category": "Reference",
+    "authType": "none",
+    "baseUrl": "https://ctext.org/"
+  },
+  {
+    "name": "Indonesia Dictionary",
+    "description": "Indonesia dictionary",
+    "category": "Reference",
+    "authType": "none",
+    "baseUrl": "https://new-kbbi-api.herokuapp.com/"
+  },
+  {
+    "name": "apilayer pdflayer",
+    "description": "HTML/URL to PDF",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://pdflayer.com"
+  },
+  {
+    "name": "Cloudmersive Convert",
+    "description": "Document conversion",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudmersive.com/"
+  },
+  {
+    "name": "Mercury Parser",
+    "description": "Web parser",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://mercury.postlight.com/"
+  },
+  {
+    "name": "Podio API",
+    "description": "File sharing and productivity",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://developers.podio.com"
+  },
+  {
+    "name": "PrexView",
+    "description": "Data to PDF, HTML or Image",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://prexview.com"
+  },
+  {
+    "name": "Restpack",
+    "description": "Screenshot and PDF APIs",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://restpack.io/"
+  },
+  {
+    "name": "Smart Image Enhancement",
+    "description": "Image upscaling API",
+    "category": "Images",
+    "authType": "apiKey",
+    "baseUrl": "https://apilayer.com/"
+  },
+  {
+    "name": "Zube API",
+    "description": "Project management",
+    "category": "Documents",
+    "authType": "oauth",
+    "baseUrl": "https://zube.io/docs/api"
+  },
+  {
+    "name": "apilayer mailboxlayer",
+    "description": "Email address validation",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://mailboxlayer.com"
+  },
+  {
+    "name": "Cloudmersive Validate",
+    "description": "Validate emails and phones",
+    "category": "Validation",
+    "authType": "apiKey",
+    "baseUrl": "https://cloudmersive.com/validate-api"
+  },
+  {
+    "name": "EVA",
+    "description": "Validate email addresses",
+    "category": "Email",
+    "authType": "none",
+    "baseUrl": "https://eva.pingutil.com/"
+  },
+  {
+    "name": "Sendinblue API",
+    "description": "Marketing and transactional email",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.sendinblue.com/"
+  },
+  {
+    "name": "Verifier",
+    "description": "Verify emails are real",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://verifier.meetchopra.com/"
+  },
+  {
+    "name": "Meme Maker",
+    "description": "REST API for memes",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://mememaker.github.io/"
+  },
+  {
+    "name": "NaMoMemes",
+    "description": "Memes on Narendra Modi",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com/theIYD/NaMoMemes"
+  },
+  {
+    "name": "CO2 Offset",
+    "description": "Calculate carbon footprint",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://co2offset.io/"
+  },
+  {
+    "name": "Danish Energi Data",
+    "description": "Open energy data from Denmark",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://www.energidataservice.dk/"
+  },
+  {
+    "name": "Gr\u00fcnstromIndex",
+    "description": "Green Power Index for Germany",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://gruenstromindex.de/"
+  },
+  {
+    "name": "Luchtmeetnet",
+    "description": "Air quality for Netherlands",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://api-docs.luchtmeetnet.nl/"
+  },
+  {
+    "name": "National Grid ESO",
+    "description": "GB Electricity System data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://data.nationalgrideso.com/"
+  },
+  {
+    "name": "PM2.5 Portal",
+    "description": "Low-cost PM2.5 sensor data",
+    "category": "Environment",
+    "authType": "none",
+    "baseUrl": "https://pm25.lass-net.org/"
+  },
+  {
+    "name": "PM25.in",
+    "description": "Air quality of China",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "http://www.pm25.in/"
+  },
+  {
+    "name": "Srp Energy",
+    "description": "Hourly energy usage report",
+    "category": "Environment",
+    "authType": "apiKey",
+    "baseUrl": "https://srpenergy-api-client-python.readthedocs.io/"
+  },
+  {
+    "name": "Aletheia",
+    "description": "Insider trading data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://aletheiaapi.com/"
+  },
+  {
+    "name": "Alpaca",
+    "description": "Realtime stock data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://alpaca.markets/"
+  },
+  {
+    "name": "apilayer marketstack",
+    "description": "Real-Time Market Data API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://marketstack.com/"
+  },
+  {
+    "name": "Boleto.Cloud",
+    "description": "Generate boletos in Brazil",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://boleto.cloud/"
+  },
+  {
+    "name": "FRED API",
+    "description": "Federal Reserve economic data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://fred.stlouisfed.org/"
+  },
+  {
+    "name": "Front Accounting APIs",
+    "description": "Multilingual accounting software",
+    "category": "Finance",
+    "authType": "oauth",
+    "baseUrl": "https://frontaccounting.com/"
+  },
+  {
+    "name": "IG API",
+    "description": "Spreadbetting and CFD Market Data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://labs.ig.com/"
+  },
+  {
+    "name": "Mono API",
+    "description": "Connect bank accounts in Africa",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://mono.co/"
+  },
+  {
+    "name": "Moov API",
+    "description": "Send, receive, store money",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.moov.io/"
+  },
+  {
+    "name": "Real Time Finance",
+    "description": "Websocket for stock data",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com/Real-time-finance/"
+  },
+  {
+    "name": "StockData",
+    "description": "Real-Time Market Data API",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://www.stockdata.org"
+  }
+]

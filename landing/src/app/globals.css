@@ -471,36 +471,37 @@ input[type="email"]::placeholder {
 
 /* Code preview */
 .code-preview {
-  background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(180deg, #0f1419 0%, #080b0e 100%);
+  border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 14px;
   overflow: hidden;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   box-shadow: 
-    0 0 40px rgba(239, 68, 68, 0.25),
-    0 0 80px rgba(239, 68, 68, 0.1),
+    0 0 40px rgba(0, 212, 255, 0.15),
+    0 0 80px rgba(0, 212, 255, 0.05),
     0 8px 32px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
 }
 
 .code-preview:hover {
-  border-color: rgba(239, 68, 68, 0.5);
-  transform: translateY(-4px);
+  border-color: rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px);
   box-shadow: 
-    0 0 60px rgba(239, 68, 68, 0.35),
-    0 0 100px rgba(239, 68, 68, 0.15),
+    0 0 60px rgba(0, 212, 255, 0.25),
+    0 0 100px rgba(0, 212, 255, 0.1),
     0 16px 48px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .code-preview-header {
   padding: 10px 16px;
-  background: #141414;
-  border-bottom: 1px solid #262626;
-  color: #737373;
+  background: rgba(0, 212, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  color: #00D4FF;
   font-size: 12px;
+  font-weight: 500;
 }
 
 .code-preview-body {
@@ -514,10 +515,10 @@ input[type="email"]::placeholder {
 }
 
 .code-comment { color: #6b7280; }
-.code-string { color: #fbbf24; }
-.code-keyword { color: #f472b6; }
-.code-function { color: #60a5fa; }
-.code-property { color: #34d399; }
+.code-string { color: #00D4FF; }
+.code-keyword { color: #9370DB; }
+.code-function { color: #FF8C00; }
+.code-property { color: #00D4FF; }
 
 /* Logo animation */
 .logo-float {

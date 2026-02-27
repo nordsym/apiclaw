@@ -1,0 +1,982 @@
+[
+  {
+    "name": "FedEx API",
+    "description": "Shipping and tracking",
+    "category": "Shipping",
+    "authType": "oauth",
+    "baseUrl": "https://developer.fedex.com/api/en-us/home.html"
+  },
+  {
+    "name": "UPS API",
+    "description": "Shipping services",
+    "category": "Shipping",
+    "authType": "oauth",
+    "baseUrl": "https://developer.ups.com/"
+  },
+  {
+    "name": "USPS API",
+    "description": "US postal services",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.usps.com/business/web-tools-apis/"
+  },
+  {
+    "name": "DHL API",
+    "description": "Express shipping",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.dhl.com/"
+  },
+  {
+    "name": "Royal Mail API",
+    "description": "UK postal services",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.royalmail.net/"
+  },
+  {
+    "name": "Canada Post API",
+    "description": "Canadian postal",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.canadapost-postescanada.ca/cpc/en/business/shipping/find-rates-shipping-options/developer-program.page"
+  },
+  {
+    "name": "Australia Post API",
+    "description": "Australian postal",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.auspost.com.au/"
+  },
+  {
+    "name": "Shippo API",
+    "description": "Multi-carrier shipping",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://goshippo.com/docs/"
+  },
+  {
+    "name": "EasyPost API",
+    "description": "Shipping aggregator",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.easypost.com/docs/api"
+  },
+  {
+    "name": "ShipStation API",
+    "description": "Order fulfillment",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.shipstation.com/docs/api/"
+  },
+  {
+    "name": "ShipEngine API",
+    "description": "Multi-carrier platform",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://shipengine.github.io/shipengine-openapi/"
+  },
+  {
+    "name": "Shipwire API",
+    "description": "Fulfillment services",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.shipwire.com/w/developers/"
+  },
+  {
+    "name": "ShipBob API",
+    "description": "Ecommerce fulfillment",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.shipbob.com/"
+  },
+  {
+    "name": "Deliverr API",
+    "description": "Fast fulfillment",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://deliverr.com/"
+  },
+  {
+    "name": "AfterShip API",
+    "description": "Shipment tracking",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://www.aftership.com/docs/aftership/"
+  },
+  {
+    "name": "Shipday API",
+    "description": "Delivery management",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://shipday.com/"
+  },
+  {
+    "name": "Onfleet API",
+    "description": "Last mile delivery",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.onfleet.com/reference/overview"
+  },
+  {
+    "name": "Bringg API",
+    "description": "Delivery logistics",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.bringg.com/"
+  },
+  {
+    "name": "Circuit API",
+    "description": "Route optimization",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://circuit.getcircuit.com/api/"
+  },
+  {
+    "name": "OptimoRoute API",
+    "description": "Route planning",
+    "category": "Shipping",
+    "authType": "apiKey",
+    "baseUrl": "https://optimoroute.com/api/"
+  },
+  {
+    "name": "Segment CDP",
+    "description": "Customer data platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://segment.com/docs/connections/sources/catalog/libraries/server/http-api/"
+  },
+  {
+    "name": "mParticle API",
+    "description": "Customer data infrastructure",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.mparticle.com/developers/"
+  },
+  {
+    "name": "Rudderstack API",
+    "description": "Customer data warehouse",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://www.rudderstack.com/docs/"
+  },
+  {
+    "name": "Hightouch API",
+    "description": "Reverse ETL",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://hightouch.com/docs/api-reference"
+  },
+  {
+    "name": "Census API",
+    "description": "Operational analytics",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.getcensus.com/"
+  },
+  {
+    "name": "Lytics API",
+    "description": "Customer data platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.lytics.com/"
+  },
+  {
+    "name": "Tealium API",
+    "description": "Customer data hub",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.tealium.com/"
+  },
+  {
+    "name": "Treasure Data API",
+    "description": "Enterprise CDP",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.treasuredata.com/"
+  },
+  {
+    "name": "Amperity API",
+    "description": "Customer intelligence",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.amperity.com/"
+  },
+  {
+    "name": "BlueConic API",
+    "description": "First-party data platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://support.blueconic.com/hc/en-us/articles/115005481643-Blueconic-REST-API"
+  },
+  {
+    "name": "Twilio Engage API",
+    "description": "Customer engagement",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://www.twilio.com/docs/engage/api"
+  },
+  {
+    "name": "Braze API",
+    "description": "Customer engagement",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://www.braze.com/docs/api/basics/"
+  },
+  {
+    "name": "Iterable API",
+    "description": "Growth marketing platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://api.iterable.com/api/docs"
+  },
+  {
+    "name": "Customer.io API",
+    "description": "Messaging platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://customer.io/docs/api/"
+  },
+  {
+    "name": "Klaviyo API",
+    "description": "Email marketing platform",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.klaviyo.com/en/reference/api-overview"
+  },
+  {
+    "name": "OneSignal API",
+    "description": "Push notifications",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://documentation.onesignal.com/reference/"
+  },
+  {
+    "name": "Leanplum API",
+    "description": "Mobile engagement",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.leanplum.com/"
+  },
+  {
+    "name": "Airship API",
+    "description": "Customer engagement",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.airship.com/api/ua/"
+  },
+  {
+    "name": "Clevertap API",
+    "description": "Customer engagement",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.clevertap.com/"
+  },
+  {
+    "name": "WebEngage API",
+    "description": "Marketing automation",
+    "category": "CDP",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.webengage.com/"
+  },
+  {
+    "name": "BrowserStack API",
+    "description": "Cross-browser testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://www.browserstack.com/docs/automate/api-reference/"
+  },
+  {
+    "name": "Sauce Labs API",
+    "description": "Automated testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.saucelabs.com/dev/api/"
+  },
+  {
+    "name": "LambdaTest API",
+    "description": "Cross browser testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://www.lambdatest.com/support/api-doc/"
+  },
+  {
+    "name": "Testim API",
+    "description": "AI-powered testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://help.testim.io/docs/api-overview"
+  },
+  {
+    "name": "Katalon API",
+    "description": "Test automation",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.katalon.com/katalon-analytics/docs/api-docs.html"
+  },
+  {
+    "name": "Cypress Cloud API",
+    "description": "E2E testing dashboard",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.cypress.io/guides/cloud/introduction"
+  },
+  {
+    "name": "Playwright Test API",
+    "description": "Browser automation",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://playwright.dev/docs/api/class-playwright"
+  },
+  {
+    "name": "Appium API",
+    "description": "Mobile test automation",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://appium.io/docs/en/latest/"
+  },
+  {
+    "name": "Detox API",
+    "description": "Mobile E2E testing",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://wix.github.io/Detox/docs/introduction/getting-started"
+  },
+  {
+    "name": "Percy API",
+    "description": "Visual testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.percy.io/docs"
+  },
+  {
+    "name": "Chromatic API",
+    "description": "Visual testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://www.chromatic.com/docs/"
+  },
+  {
+    "name": "Applitools API",
+    "description": "Visual AI testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://applitools.com/docs/api/eyes-api/"
+  },
+  {
+    "name": "Mabl API",
+    "description": "AI testing platform",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://help.mabl.com/hc/en-us/articles/360038671751-mabl-API-Reference"
+  },
+  {
+    "name": "Rainforest QA API",
+    "description": "No-code testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://rainforest-qa.github.io/rainforest-api-docs/"
+  },
+  {
+    "name": "Testlio API",
+    "description": "QA as a service",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://testlio.com/"
+  },
+  {
+    "name": "Functionize API",
+    "description": "AI test automation",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://www.functionize.com/"
+  },
+  {
+    "name": "Ghost Inspector API",
+    "description": "Automated browser testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://ghostinspector.com/docs/api/"
+  },
+  {
+    "name": "Screener.io API",
+    "description": "Visual regression testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://screener.io/v2/docs"
+  },
+  {
+    "name": "Diffy API",
+    "description": "Visual regression testing",
+    "category": "Testing",
+    "authType": "apiKey",
+    "baseUrl": "https://diffy.website/"
+  },
+  {
+    "name": "BackstopJS API",
+    "description": "Visual regression testing",
+    "category": "Testing",
+    "authType": "none",
+    "baseUrl": "https://github.com/garris/BackstopJS"
+  },
+  {
+    "name": "Typeform API",
+    "description": "Conversational forms",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://developer.typeform.com/"
+  },
+  {
+    "name": "SurveyMonkey API",
+    "description": "Survey platform",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://developer.surveymonkey.com/api/v3/"
+  },
+  {
+    "name": "Google Forms API",
+    "description": "Forms and responses",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/forms/api/"
+  },
+  {
+    "name": "JotForm API",
+    "description": "Online form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://api.jotform.com/docs/"
+  },
+  {
+    "name": "Formstack API",
+    "description": "Form and workflow",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.formstack.com/"
+  },
+  {
+    "name": "Paperform API",
+    "description": "Beautiful forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://paperform.co/help/articles/webhooks-and-api/"
+  },
+  {
+    "name": "Cognito Forms API",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.cognitoforms.com/support/docs/api"
+  },
+  {
+    "name": "123FormBuilder API",
+    "description": "Form creation tool",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.123formbuilder.com/docs/api/"
+  },
+  {
+    "name": "Formsite API",
+    "description": "Online forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.formsite.com/api/"
+  },
+  {
+    "name": "Wufoo API",
+    "description": "Online forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://wufoo.github.io/docs/"
+  },
+  {
+    "name": "Qualtrics API",
+    "description": "Experience management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://api.qualtrics.com/"
+  },
+  {
+    "name": "Alchemer API",
+    "description": "Survey software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://apihelp.alchemer.com/"
+  },
+  {
+    "name": "Zoho Survey API",
+    "description": "Survey tool",
+    "category": "Forms",
+    "authType": "oauth",
+    "baseUrl": "https://www.zoho.com/survey/api/v1/"
+  },
+  {
+    "name": "QuestionPro API",
+    "description": "Survey platform",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.questionpro.com/api/"
+  },
+  {
+    "name": "Delighted API",
+    "description": "NPS surveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://delighted.com/docs/api"
+  },
+  {
+    "name": "Hotjar Feedback API",
+    "description": "User feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://help.hotjar.com/hc/en-us/articles/4405109971095-Hotjar-API"
+  },
+  {
+    "name": "Usabilla API",
+    "description": "User feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://usabilla.com/"
+  },
+  {
+    "name": "GetFeedback API",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.getfeedback.com/"
+  },
+  {
+    "name": "SurveyGizmo API",
+    "description": "Survey software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://apihelp.surveygizmo.com/"
+  },
+  {
+    "name": "Pollfish API",
+    "description": "Mobile surveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://www.pollfish.com/docs/"
+  },
+  {
+    "name": "Zapier API",
+    "description": "Workflow automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://platform.zapier.com/"
+  },
+  {
+    "name": "Make (Integromat) API",
+    "description": "Visual automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://www.make.com/en/api-documentation"
+  },
+  {
+    "name": "n8n API",
+    "description": "Workflow automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.n8n.io/api/"
+  },
+  {
+    "name": "Pipedream API",
+    "description": "Integration platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://pipedream.com/docs/api/rest/"
+  },
+  {
+    "name": "Tray.io API",
+    "description": "Integration platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://tray.io/documentation/"
+  },
+  {
+    "name": "Workato API",
+    "description": "Enterprise automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.workato.com/api/"
+  },
+  {
+    "name": "Automate.io API",
+    "description": "Cloud automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://automate.io/"
+  },
+  {
+    "name": "Parabola API",
+    "description": "Data workflow tool",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://parabola.io/"
+  },
+  {
+    "name": "Bardeen API",
+    "description": "Browser automation",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://www.bardeen.ai/"
+  },
+  {
+    "name": "Retool API",
+    "description": "Internal tool builder",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.retool.com/reference/api"
+  },
+  {
+    "name": "Appsmith API",
+    "description": "Open source Retool",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.appsmith.com/"
+  },
+  {
+    "name": "Budibase API",
+    "description": "Low-code platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.budibase.com/"
+  },
+  {
+    "name": "ToolJet API",
+    "description": "Low-code platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.tooljet.com/"
+  },
+  {
+    "name": "Airplane API",
+    "description": "Internal tools",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.airplane.dev/"
+  },
+  {
+    "name": "Superblocks API",
+    "description": "Internal apps",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.superblocks.com/"
+  },
+  {
+    "name": "Glide API",
+    "description": "No-code apps",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://www.glideapps.com/"
+  },
+  {
+    "name": "Adalo API",
+    "description": "No-code mobile apps",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://help.adalo.com/"
+  },
+  {
+    "name": "Bubble API",
+    "description": "Visual programming",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://manual.bubble.io/core-resources/api"
+  },
+  {
+    "name": "Webflow API",
+    "description": "Visual web builder",
+    "category": "Automation",
+    "authType": "oauth",
+    "baseUrl": "https://developers.webflow.com/"
+  },
+  {
+    "name": "Softr API",
+    "description": "No-code websites",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.softr.io/"
+  },
+  {
+    "name": "Yelp Fusion API",
+    "description": "Restaurant reviews",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.developer.yelp.com/docs"
+  },
+  {
+    "name": "Zomato API",
+    "description": "Restaurant discovery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.zomato.com/api"
+  },
+  {
+    "name": "OpenTable API",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.opentable.com/"
+  },
+  {
+    "name": "Resy API",
+    "description": "Restaurant booking",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://resy.com/"
+  },
+  {
+    "name": "Toast API",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://doc.toasttab.com/"
+  },
+  {
+    "name": "Square for Restaurants API",
+    "description": "Restaurant management",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://developer.squareup.com/"
+  },
+  {
+    "name": "Lightspeed Restaurant API",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://developers.lightspeedhq.com/"
+  },
+  {
+    "name": "Clover API",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://docs.clover.com/"
+  },
+  {
+    "name": "DoorDash Drive API",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.doordash.com/"
+  },
+  {
+    "name": "Uber Eats API",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://developer.uber.com/docs/eats/introduction"
+  },
+  {
+    "name": "Grubhub API",
+    "description": "Food ordering",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.grubhub.com/"
+  },
+  {
+    "name": "Postmates API",
+    "description": "Delivery platform",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://postmates.com/developer/docs"
+  },
+  {
+    "name": "Deliveroo API",
+    "description": "Food delivery UK",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.deliveroo.com/"
+  },
+  {
+    "name": "Just Eat API",
+    "description": "Food ordering",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.just-eat.com/"
+  },
+  {
+    "name": "ChowNow API",
+    "description": "Online ordering",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.chownow.com/"
+  },
+  {
+    "name": "MenuMax API",
+    "description": "Recipe management",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.menumax.com/"
+  },
+  {
+    "name": "Recipe Puppy API",
+    "description": "Recipe search",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "http://www.recipepuppy.com/about/api/"
+  },
+  {
+    "name": "TheMealDB API",
+    "description": "Meal database",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.themealdb.com/api.php"
+  },
+  {
+    "name": "TheCocktailDB API",
+    "description": "Cocktail database",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://www.thecocktaildb.com/api.php"
+  },
+  {
+    "name": "Open Brewery DB",
+    "description": "Brewery data",
+    "category": "Food",
+    "authType": "none",
+    "baseUrl": "https://www.openbrewerydb.org/documentation"
+  },
+  {
+    "name": "Firebase Cloud Messaging",
+    "description": "Push notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://firebase.google.com/docs/cloud-messaging"
+  },
+  {
+    "name": "Apple Push Notification",
+    "description": "iOS notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.apple.com/documentation/usernotifications"
+  },
+  {
+    "name": "Amazon SNS",
+    "description": "Push and SMS",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.aws.amazon.com/sns/latest/api/Welcome.html"
+  },
+  {
+    "name": "Pushover API",
+    "description": "Simple notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://pushover.net/api"
+  },
+  {
+    "name": "Pushbullet API",
+    "description": "Cross-device notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.pushbullet.com/"
+  },
+  {
+    "name": "Ntfy API",
+    "description": "Simple notifications",
+    "category": "Notifications",
+    "authType": "none",
+    "baseUrl": "https://ntfy.sh/docs/"
+  },
+  {
+    "name": "Gotify API",
+    "description": "Self-hosted notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://gotify.net/docs/"
+  },
+  {
+    "name": "Apprise API",
+    "description": "Universal notifications",
+    "category": "Notifications",
+    "authType": "none",
+    "baseUrl": "https://github.com/caronc/apprise"
+  },
+  {
+    "name": "Novu API",
+    "description": "Notification infrastructure",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.novu.co/"
+  },
+  {
+    "name": "Knock API",
+    "description": "Notification platform",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.knock.app/"
+  },
+  {
+    "name": "MagicBell API",
+    "description": "In-app notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://www.magicbell.com/docs"
+  },
+  {
+    "name": "Courier API",
+    "description": "Multi-channel notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://www.courier.com/docs/"
+  },
+  {
+    "name": "Engagespot API",
+    "description": "Notification center",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.engagespot.co/"
+  },
+  {
+    "name": "Notifee API",
+    "description": "React Native notifications",
+    "category": "Notifications",
+    "authType": "none",
+    "baseUrl": "https://notifee.app/"
+  },
+  {
+    "name": "Expo Push API",
+    "description": "Expo notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.expo.dev/push-notifications/overview/"
+  },
+  {
+    "name": "Urban Airship API",
+    "description": "Customer engagement",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.airship.com/api/ua/"
+  },
+  {
+    "name": "Catapush API",
+    "description": "Reliable messaging",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://www.catapush.com/docs"
+  },
+  {
+    "name": "Wonderpush API",
+    "description": "Push notifications",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.wonderpush.com/"
+  },
+  {
+    "name": "Pushwoosh API",
+    "description": "Multi-platform push",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.pushwoosh.com/"
+  },
+  {
+    "name": "VWO Engage API",
+    "description": "Web push",
+    "category": "Notifications",
+    "authType": "apiKey",
+    "baseUrl": "https://help.vwo.com/hc/en-us/articles/360033788953-Engage-Push-API"
+  }
+]

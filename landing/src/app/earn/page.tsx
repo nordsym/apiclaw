@@ -13,9 +13,9 @@ const EARN_CHANNELS = [
     credits: 500,
     cta: 'Star Repository',
     href: 'https://github.com/nordsym/apiclaw',
-    color: 'from-amber-500/20 to-yellow-500/10',
-    borderColor: 'hover:border-amber-500/50',
-    iconColor: 'text-amber-500',
+    color: 'from-red-500/20 to-orange-500/10',
+    borderColor: 'hover:border-red-500/50',
+    iconColor: 'text-red-500',
   },
   {
     id: 'twitter',
@@ -25,9 +25,9 @@ const EARN_CHANNELS = [
     credits: 250,
     cta: 'Follow Us',
     href: 'https://x.com/NordSym',
-    color: 'from-sky-500/20 to-sky-600/10',
-    borderColor: 'hover:border-sky-500/50',
-    iconColor: 'text-sky-500',
+    color: 'from-red-400/20 to-rose-500/10',
+    borderColor: 'hover:border-red-400/50',
+    iconColor: 'text-red-400',
   },
   {
     id: 'newsletter',
@@ -37,9 +37,9 @@ const EARN_CHANNELS = [
     credits: 100,
     cta: 'Subscribe',
     href: '#newsletter',
-    color: 'from-emerald-500/20 to-emerald-600/10',
-    borderColor: 'hover:border-emerald-500/50',
-    iconColor: 'text-emerald-500',
+    color: 'from-rose-500/20 to-red-500/10',
+    borderColor: 'hover:border-rose-500/50',
+    iconColor: 'text-rose-500',
   },
   {
     id: 'referral',
@@ -120,12 +120,15 @@ export default function EarnPage() {
             <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Home
             </Link>
-            <Link href="/docs" className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
+            <Link href="/docs" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Docs
             </Link>
-            <Link href="/providers" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
+            <Link href="/providers/dashboard" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">
               Providers
             </Link>
+            <span className="text-[var(--accent)] font-medium text-sm md:text-base">
+              Earn
+            </span>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)]/50 transition-colors"

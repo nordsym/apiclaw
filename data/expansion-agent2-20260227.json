@@ -1,0 +1,503 @@
+{
+  "version": "1.0.0",
+  "source": "Expansion Agent 2 - Awesome Lists (TonnyL, n0shake, Kikobeats)",
+  "generatedAt": "2026-02-27T08:23:50.006071",
+  "count": 33,
+  "apis": [
+    {
+      "id": "outlook-calendar-api",
+      "name": "Outlook Calendar API",
+      "description": "Microsoft calendar API",
+      "category": "Utilities",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://docs.microsoft.com/en-us/graph/api/resources/calendar",
+      "pricing": "unknown",
+      "keywords": [
+        "utilities"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "shenzhou-api",
+      "name": "Shenzhou API",
+      "description": "Chinese carsharing API",
+      "category": "Transportation",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://developer.10101111.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "transportation"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "verizon-cloud-api",
+      "name": "Verizon Cloud API",
+      "description": "Cloud storage API",
+      "category": "Utilities",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://www.verizon.com/support/verizon-cloud/",
+      "pricing": "unknown",
+      "keywords": [
+        "utilities"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "dataflow-kit-api",
+      "name": "Dataflow Kit API",
+      "description": "Web scraping API",
+      "category": "Utilities",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://github.com/slotix/dataflowkit",
+      "pricing": "unknown",
+      "keywords": [
+        "utilities"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "adidas-api",
+      "name": "Adidas API",
+      "description": "Sports and fitness API",
+      "category": "Health",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://developers.adidas.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "health"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "google-assistant-api",
+      "name": "Google Assistant API",
+      "description": "Voice assistant API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://developers.google.com/assistant",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "jd-api",
+      "name": "JD API",
+      "description": "Chinese e-commerce API",
+      "category": "Business",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://jos.jd.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "business"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "taobao-api",
+      "name": "Taobao API",
+      "description": "Chinese e-commerce API",
+      "category": "Business",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://open.taobao.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "business"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "dianping-api",
+      "name": "Dianping API",
+      "description": "Chinese restaurant API",
+      "category": "Food & Drink",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://open.dianping.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "food & drink"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "eleme-api",
+      "name": "Eleme API",
+      "description": "Chinese food delivery API",
+      "category": "Food & Drink",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://openapi.eleme.io/",
+      "pricing": "unknown",
+      "keywords": [
+        "food & drink"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "meituan-api",
+      "name": "Meituan API",
+      "description": "Chinese food delivery API",
+      "category": "Food & Drink",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://developer.waimai.meituan.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "food & drink"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "tencent-nlp-api",
+      "name": "Tencent NLP API",
+      "description": "Chinese NLP API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://cloud.tencent.com/product/nlp",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "ctrip-api",
+      "name": "ctrip API",
+      "description": "Chinese travel API",
+      "category": "Transportation",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://u.ctrip.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "transportation"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "elong-api",
+      "name": "elong API",
+      "description": "Chinese hotel API",
+      "category": "Transportation",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://open.elong.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "transportation"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "baidu-translate-api",
+      "name": "Baidu Translate API",
+      "description": "Translation API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://api.fanyi.baidu.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "iciba-api",
+      "name": "iciba API",
+      "description": "Chinese translation API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://open.iciba.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "shanbay-api",
+      "name": "Shanbay API",
+      "description": "Vocabulary API",
+      "category": "Books",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://www.shanbay.com/help/developer/",
+      "pricing": "unknown",
+      "keywords": [
+        "books"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "youdao-api",
+      "name": "Youdao API",
+      "description": "Translation API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://ai.youdao.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "iqiyi-api",
+      "name": "iqiyi API",
+      "description": "Chinese video API",
+      "category": "Entertainment",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://open.iqiyi.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "entertainment"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "letv-api",
+      "name": "LeTV API",
+      "description": "Chinese video API",
+      "category": "Entertainment",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://www.lecloud.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "entertainment"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "sohu-tv-api",
+      "name": "Sohu TV API",
+      "description": "Chinese video API",
+      "category": "Entertainment",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://lm.tv.sohu.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "entertainment"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "baidu-yuyin-api",
+      "name": "Baidu Yuyin API",
+      "description": "Chinese speech API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": false,
+      "cors": "unknown",
+      "link": "http://ai.baidu.com/tech/speech",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "caiyun-weather-api",
+      "name": "Caiyun Weather API",
+      "description": "Chinese weather API",
+      "category": "Weather",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://caiyunapp.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "weather"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "heweather-api",
+      "name": "heweather API",
+      "description": "Chinese weather API",
+      "category": "Weather",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://dev.qweather.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "weather"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "weather-unlocked-api",
+      "name": "Weather Unlocked API",
+      "description": "Weather data API",
+      "category": "Weather",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://developer.weatherunlocked.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "weather"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "seniverse-api",
+      "name": "Seniverse API",
+      "description": "Chinese weather API",
+      "category": "Weather",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://www.seniverse.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "weather"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "yandex-weather-api",
+      "name": "Yandex Weather API",
+      "description": "Weather data API",
+      "category": "Weather",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://tech.yandex.com/weather/",
+      "pricing": "unknown",
+      "keywords": [
+        "weather"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "skybiometry-api",
+      "name": "Skybiometry API",
+      "description": "Face detection API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://www.skybiometry.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "cognito-api",
+      "name": "Cognito API",
+      "description": "Identity verification API",
+      "category": "Utilities",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://cognitohq.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "utilities"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "webpurify-api",
+      "name": "WebPurify API",
+      "description": "Image moderation API",
+      "category": "AI/ML",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://www.webpurify.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "ai/ml"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "zetta-api",
+      "name": "Zetta API",
+      "description": "IoT platform API",
+      "category": "Utilities",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://github.com/zettajs/zetta",
+      "pricing": "unknown",
+      "keywords": [
+        "utilities"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "cartodb-api",
+      "name": "CartoDB API",
+      "description": "Location intelligence API",
+      "category": "Geolocation",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://carto.com/developers/",
+      "pricing": "unknown",
+      "keywords": [
+        "geolocation"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    },
+    {
+      "id": "reverb-api",
+      "name": "Reverb API",
+      "description": "Music gear marketplace API",
+      "category": "Music",
+      "auth": "unknown",
+      "https": true,
+      "cors": "unknown",
+      "link": "https://dev.reverb.com/",
+      "pricing": "unknown",
+      "keywords": [
+        "music"
+      ],
+      "source": "Expansion Agent 2 - Awesome Lists"
+    }
+  ]
+}

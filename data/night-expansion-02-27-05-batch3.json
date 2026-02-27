@@ -1,0 +1,1892 @@
+[
+  {
+    "name": "Writesonic",
+    "description": "AI writing platform",
+    "category": "AI Writing",
+    "baseUrl": "https://writesonic.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0001"
+  },
+  {
+    "name": "Jasper",
+    "description": "AI content platform",
+    "category": "AI Writing",
+    "baseUrl": "https://www.jasper.ai/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0002"
+  },
+  {
+    "name": "Copy.ai",
+    "description": "AI copywriting",
+    "category": "AI Writing",
+    "baseUrl": "https://www.copy.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0003"
+  },
+  {
+    "name": "Rytr",
+    "description": "AI writing assistant",
+    "category": "AI Writing",
+    "baseUrl": "https://rytr.me/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0004"
+  },
+  {
+    "name": "Anyword",
+    "description": "AI copywriting platform",
+    "category": "AI Writing",
+    "baseUrl": "https://anyword.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0005"
+  },
+  {
+    "name": "Wordtune",
+    "description": "AI rewriting tool",
+    "category": "AI Writing",
+    "baseUrl": "https://www.wordtune.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0006"
+  },
+  {
+    "name": "QuillBot",
+    "description": "AI paraphrasing",
+    "category": "AI Writing",
+    "baseUrl": "https://quillbot.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0007"
+  },
+  {
+    "name": "Grammarly",
+    "description": "Writing assistant",
+    "category": "AI Writing",
+    "baseUrl": "https://developer.grammarly.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0008"
+  },
+  {
+    "name": "Hemingway Editor",
+    "description": "Writing style checker",
+    "category": "AI Writing",
+    "baseUrl": "https://hemingwayapp.com/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0009"
+  },
+  {
+    "name": "ProWritingAid",
+    "description": "Writing analysis",
+    "category": "AI Writing",
+    "baseUrl": "https://prowritingaid.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0010"
+  },
+  {
+    "name": "Notion AI",
+    "description": "AI in Notion",
+    "category": "AI Productivity",
+    "baseUrl": "https://www.notion.so/product/ai",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0011"
+  },
+  {
+    "name": "Mem",
+    "description": "AI-powered notes",
+    "category": "AI Productivity",
+    "baseUrl": "https://mem.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0012"
+  },
+  {
+    "name": "Taskade",
+    "description": "AI productivity platform",
+    "category": "AI Productivity",
+    "baseUrl": "https://www.taskade.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0013"
+  },
+  {
+    "name": "Otter.ai",
+    "description": "AI meeting transcription",
+    "category": "AI Productivity",
+    "baseUrl": "https://otter.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0014"
+  },
+  {
+    "name": "Fireflies.ai",
+    "description": "AI meeting assistant",
+    "category": "AI Productivity",
+    "baseUrl": "https://fireflies.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0015"
+  },
+  {
+    "name": "tl;dv",
+    "description": "AI meeting recorder",
+    "category": "AI Productivity",
+    "baseUrl": "https://tldv.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0016"
+  },
+  {
+    "name": "Fathom",
+    "description": "AI meeting notes",
+    "category": "AI Productivity",
+    "baseUrl": "https://fathom.video/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0017"
+  },
+  {
+    "name": "Grain",
+    "description": "Video highlights",
+    "category": "AI Productivity",
+    "baseUrl": "https://grain.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0018"
+  },
+  {
+    "name": "Read AI",
+    "description": "Meeting analytics",
+    "category": "AI Productivity",
+    "baseUrl": "https://www.read.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0019"
+  },
+  {
+    "name": "Krisp",
+    "description": "AI noise cancellation",
+    "category": "AI Productivity",
+    "baseUrl": "https://krisp.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0020"
+  },
+  {
+    "name": "Reclaim.ai",
+    "description": "AI calendar assistant",
+    "category": "AI Productivity",
+    "baseUrl": "https://reclaim.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0021"
+  },
+  {
+    "name": "Motion",
+    "description": "AI calendar planner",
+    "category": "AI Productivity",
+    "baseUrl": "https://www.usemotion.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0022"
+  },
+  {
+    "name": "Clockwise",
+    "description": "AI calendar optimization",
+    "category": "AI Productivity",
+    "baseUrl": "https://www.getclockwise.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0023"
+  },
+  {
+    "name": "Cursor",
+    "description": "AI code editor",
+    "category": "AI Code",
+    "baseUrl": "https://cursor.sh/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0024"
+  },
+  {
+    "name": "Tabnine",
+    "description": "AI code completion",
+    "category": "AI Code",
+    "baseUrl": "https://www.tabnine.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0025"
+  },
+  {
+    "name": "Codeium",
+    "description": "Free AI code completion",
+    "category": "AI Code",
+    "baseUrl": "https://codeium.com/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0026"
+  },
+  {
+    "name": "Amazon CodeWhisperer",
+    "description": "AI code suggestions",
+    "category": "AI Code",
+    "baseUrl": "https://aws.amazon.com/codewhisperer/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0027"
+  },
+  {
+    "name": "Replit AI",
+    "description": "AI coding assistant",
+    "category": "AI Code",
+    "baseUrl": "https://replit.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0028"
+  },
+  {
+    "name": "Codex",
+    "description": "OpenAI code model",
+    "category": "AI Code",
+    "baseUrl": "https://openai.com/blog/openai-codex",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0029"
+  },
+  {
+    "name": "Sourcegraph Cody",
+    "description": "AI code assistant",
+    "category": "AI Code",
+    "baseUrl": "https://sourcegraph.com/cody",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0030"
+  },
+  {
+    "name": "GitHub Copilot",
+    "description": "AI pair programmer",
+    "category": "Dev Tools",
+    "baseUrl": "https://github.com/features/copilot",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0031"
+  },
+  {
+    "name": "Vercel AI SDK",
+    "description": "Build AI apps",
+    "category": "Dev Tools",
+    "baseUrl": "https://sdk.vercel.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0032"
+  },
+  {
+    "name": "LangChain",
+    "description": "LLM framework",
+    "category": "Dev Tools",
+    "baseUrl": "https://langchain.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0033"
+  },
+  {
+    "name": "LlamaIndex",
+    "description": "LLM data framework",
+    "category": "Dev Tools",
+    "baseUrl": "https://www.llamaindex.ai/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0034"
+  },
+  {
+    "name": "Semantic Kernel",
+    "description": "AI orchestration SDK",
+    "category": "Dev Tools",
+    "baseUrl": "https://github.com/microsoft/semantic-kernel",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0035"
+  },
+  {
+    "name": "AutoGen",
+    "description": "Multi-agent framework",
+    "category": "Dev Tools",
+    "baseUrl": "https://github.com/microsoft/autogen",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0036"
+  },
+  {
+    "name": "CrewAI",
+    "description": "AI agent framework",
+    "category": "Dev Tools",
+    "baseUrl": "https://www.crewai.com/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0037"
+  },
+  {
+    "name": "Haystack",
+    "description": "NLP framework",
+    "category": "Dev Tools",
+    "baseUrl": "https://haystack.deepset.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0038"
+  },
+  {
+    "name": "Ollama",
+    "description": "Run LLMs locally",
+    "category": "Dev Tools",
+    "baseUrl": "https://ollama.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0039"
+  },
+  {
+    "name": "LM Studio",
+    "description": "Local LLM GUI",
+    "category": "Dev Tools",
+    "baseUrl": "https://lmstudio.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0040"
+  },
+  {
+    "name": "GPT4All",
+    "description": "Local AI models",
+    "category": "Dev Tools",
+    "baseUrl": "https://gpt4all.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0041"
+  },
+  {
+    "name": "LocalAI",
+    "description": "Self-hosted AI",
+    "category": "Dev Tools",
+    "baseUrl": "https://localai.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0042"
+  },
+  {
+    "name": "vLLM",
+    "description": "Fast LLM serving",
+    "category": "Dev Tools",
+    "baseUrl": "https://vllm.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0043"
+  },
+  {
+    "name": "Text Generation Inference",
+    "description": "HuggingFace LLM server",
+    "category": "Dev Tools",
+    "baseUrl": "https://github.com/huggingface/text-generation-inference",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0044"
+  },
+  {
+    "name": "Ray Serve",
+    "description": "ML model serving",
+    "category": "Dev Tools",
+    "baseUrl": "https://docs.ray.io/en/latest/serve/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0045"
+  },
+  {
+    "name": "BentoML",
+    "description": "ML model serving",
+    "category": "Dev Tools",
+    "baseUrl": "https://www.bentoml.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0046"
+  },
+  {
+    "name": "MLflow",
+    "description": "ML lifecycle platform",
+    "category": "Dev Tools",
+    "baseUrl": "https://mlflow.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0047"
+  },
+  {
+    "name": "Weights & Biases",
+    "description": "ML experiment tracking",
+    "category": "Dev Tools",
+    "baseUrl": "https://wandb.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0048"
+  },
+  {
+    "name": "Neptune.ai",
+    "description": "ML metadata store",
+    "category": "Dev Tools",
+    "baseUrl": "https://neptune.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0049"
+  },
+  {
+    "name": "Comet ML",
+    "description": "ML experiment tracking",
+    "category": "Dev Tools",
+    "baseUrl": "https://www.comet.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0050"
+  },
+  {
+    "name": "DVC",
+    "description": "Data version control",
+    "category": "Dev Tools",
+    "baseUrl": "https://dvc.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0051"
+  },
+  {
+    "name": "Label Studio",
+    "description": "Data labeling platform",
+    "category": "Dev Tools",
+    "baseUrl": "https://labelstud.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0052"
+  },
+  {
+    "name": "Prodigy",
+    "description": "Data annotation tool",
+    "category": "Dev Tools",
+    "baseUrl": "https://prodi.gy/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0053"
+  },
+  {
+    "name": "Roboflow",
+    "description": "Computer vision tools",
+    "category": "Dev Tools",
+    "baseUrl": "https://roboflow.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0054"
+  },
+  {
+    "name": "Ultralytics",
+    "description": "YOLO object detection",
+    "category": "Dev Tools",
+    "baseUrl": "https://ultralytics.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0055"
+  },
+  {
+    "name": "Swish",
+    "description": "Swedish mobile payments",
+    "category": "Nordic",
+    "baseUrl": "https://developer.swish.nu/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0056"
+  },
+  {
+    "name": "BankID",
+    "description": "Swedish e-identification",
+    "category": "Nordic",
+    "baseUrl": "https://www.bankid.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0057"
+  },
+  {
+    "name": "Klarna",
+    "description": "Buy now pay later",
+    "category": "Nordic",
+    "baseUrl": "https://docs.klarna.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0058"
+  },
+  {
+    "name": "Trustly",
+    "description": "Open banking payments",
+    "category": "Nordic",
+    "baseUrl": "https://www.trustly.net/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0059"
+  },
+  {
+    "name": "Zimpler",
+    "description": "Payment solutions",
+    "category": "Nordic",
+    "baseUrl": "https://www.zimpler.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0060"
+  },
+  {
+    "name": "Qliro",
+    "description": "E-commerce payments",
+    "category": "Nordic",
+    "baseUrl": "https://www.qliro.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0061"
+  },
+  {
+    "name": "Nets",
+    "description": "Nordic payment services",
+    "category": "Nordic",
+    "baseUrl": "https://developer.nets.eu/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0062"
+  },
+  {
+    "name": "Vipps",
+    "description": "Norwegian mobile payments",
+    "category": "Nordic",
+    "baseUrl": "https://developer.vippsmobilepay.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0063"
+  },
+  {
+    "name": "MobilePay",
+    "description": "Danish mobile payments",
+    "category": "Nordic",
+    "baseUrl": "https://developer.mobilepay.dk/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0064"
+  },
+  {
+    "name": "SCB",
+    "description": "Statistics Sweden API",
+    "category": "Nordic",
+    "baseUrl": "https://www.scb.se/vara-tjanster/oppna-data/api-for-statistik/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0065"
+  },
+  {
+    "name": "Lantm\u00e4teriet",
+    "description": "Swedish mapping authority",
+    "category": "Nordic",
+    "baseUrl": "https://www.lantmateriet.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0066"
+  },
+  {
+    "name": "Hitta.se",
+    "description": "Swedish people search",
+    "category": "Nordic",
+    "baseUrl": "https://www.hitta.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0067"
+  },
+  {
+    "name": "Eniro",
+    "description": "Nordic directory",
+    "category": "Nordic",
+    "baseUrl": "https://www.eniro.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0068"
+  },
+  {
+    "name": "Trafikverket",
+    "description": "Swedish transport data",
+    "category": "Nordic",
+    "baseUrl": "https://api.trafikinfo.trafikverket.se/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0069"
+  },
+  {
+    "name": "SL",
+    "description": "Stockholm public transport",
+    "category": "Nordic",
+    "baseUrl": "https://www.trafiklab.se/api/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0070"
+  },
+  {
+    "name": "V\u00e4sttrafik",
+    "description": "West Sweden transport",
+    "category": "Nordic",
+    "baseUrl": "https://developer.vasttrafik.se/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0071"
+  },
+  {
+    "name": "Sk\u00e5netrafiken",
+    "description": "Scania transport",
+    "category": "Nordic",
+    "baseUrl": "https://www.trafiklab.se/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0072"
+  },
+  {
+    "name": "Ruter",
+    "description": "Oslo public transport",
+    "category": "Nordic",
+    "baseUrl": "https://rfruter.atlassian.net/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0073"
+  },
+  {
+    "name": "HSL",
+    "description": "Helsinki transport",
+    "category": "Nordic",
+    "baseUrl": "https://digitransit.fi/en/developers/apis/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0074"
+  },
+  {
+    "name": "Rejseplanen",
+    "description": "Danish transport",
+    "category": "Nordic",
+    "baseUrl": "https://www.rejseplanen.dk/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0075"
+  },
+  {
+    "name": "Bolagsverket",
+    "description": "Swedish company register",
+    "category": "Nordic",
+    "baseUrl": "https://bolagsverket.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0076"
+  },
+  {
+    "name": "Allabolag",
+    "description": "Swedish business data",
+    "category": "Nordic",
+    "baseUrl": "https://www.allabolag.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0077"
+  },
+  {
+    "name": "Bisnode",
+    "description": "Nordic business data",
+    "category": "Nordic",
+    "baseUrl": "https://www.bisnode.se/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0078"
+  },
+  {
+    "name": "UC",
+    "description": "Swedish credit data",
+    "category": "Nordic",
+    "baseUrl": "https://www.uc.se/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0079"
+  },
+  {
+    "name": "Creditsafe",
+    "description": "Nordic credit reports",
+    "category": "Nordic",
+    "baseUrl": "https://www.creditsafe.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0080"
+  },
+  {
+    "name": "SMHI",
+    "description": "Swedish weather data",
+    "category": "Nordic",
+    "baseUrl": "https://opendata.smhi.se/apidocs/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0081"
+  },
+  {
+    "name": "YR",
+    "description": "Norwegian weather",
+    "category": "Nordic",
+    "baseUrl": "https://api.met.no/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0082"
+  },
+  {
+    "name": "DMI",
+    "description": "Danish weather",
+    "category": "Nordic",
+    "baseUrl": "https://www.dmi.dk/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0083"
+  },
+  {
+    "name": "FMI",
+    "description": "Finnish weather",
+    "category": "Nordic",
+    "baseUrl": "https://en.ilmatieteenlaitos.fi/open-data",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0084"
+  },
+  {
+    "name": "Prisjakt",
+    "description": "Nordic price comparison",
+    "category": "Nordic",
+    "baseUrl": "https://www.prisjakt.nu/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0085"
+  },
+  {
+    "name": "QR Code API",
+    "description": "Generate QR codes",
+    "category": "Utilities",
+    "baseUrl": "https://goqr.me/api/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0086"
+  },
+  {
+    "name": "QRCode Monkey",
+    "description": "Custom QR codes",
+    "category": "Utilities",
+    "baseUrl": "https://www.qrcode-monkey.com/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0087"
+  },
+  {
+    "name": "Barcode Generator",
+    "description": "Generate barcodes",
+    "category": "Utilities",
+    "baseUrl": "https://barcode.tec-it.com/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0088"
+  },
+  {
+    "name": "Short.io",
+    "description": "URL shortener API",
+    "category": "Utilities",
+    "baseUrl": "https://short.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0089"
+  },
+  {
+    "name": "Bitly",
+    "description": "URL shortening",
+    "category": "Utilities",
+    "baseUrl": "https://dev.bitly.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0090"
+  },
+  {
+    "name": "Rebrandly",
+    "description": "Branded links",
+    "category": "Utilities",
+    "baseUrl": "https://developers.rebrandly.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0091"
+  },
+  {
+    "name": "TinyURL",
+    "description": "URL shortening",
+    "category": "Utilities",
+    "baseUrl": "https://tinyurl.com/app/dev",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0092"
+  },
+  {
+    "name": "IP Geolocation",
+    "description": "IP address lookup",
+    "category": "Utilities",
+    "baseUrl": "https://ip-api.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0093"
+  },
+  {
+    "name": "Abstract IP",
+    "description": "IP geolocation",
+    "category": "Utilities",
+    "baseUrl": "https://www.abstractapi.com/ip-geolocation-api",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0094"
+  },
+  {
+    "name": "Country.is",
+    "description": "Country from IP",
+    "category": "Utilities",
+    "baseUrl": "https://country.is/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0095"
+  },
+  {
+    "name": "RestCountries",
+    "description": "Country data",
+    "category": "Utilities",
+    "baseUrl": "https://restcountries.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0096"
+  },
+  {
+    "name": "Countries GraphQL",
+    "description": "Country data GraphQL",
+    "category": "Utilities",
+    "baseUrl": "https://countries.trevorblades.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0097"
+  },
+  {
+    "name": "Nationalize.io",
+    "description": "Name nationality",
+    "category": "Utilities",
+    "baseUrl": "https://nationalize.io/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0098"
+  },
+  {
+    "name": "Genderize.io",
+    "description": "Gender from name",
+    "category": "Utilities",
+    "baseUrl": "https://genderize.io/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0099"
+  },
+  {
+    "name": "Agify.io",
+    "description": "Age from name",
+    "category": "Utilities",
+    "baseUrl": "https://agify.io/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0100"
+  },
+  {
+    "name": "Lorem Ipsum",
+    "description": "Placeholder text",
+    "category": "Utilities",
+    "baseUrl": "https://loremipsum.io/api/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0101"
+  },
+  {
+    "name": "Bacon Ipsum",
+    "description": "Meat placeholder text",
+    "category": "Utilities",
+    "baseUrl": "https://baconipsum.com/api/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0102"
+  },
+  {
+    "name": "Random User",
+    "description": "Fake user data",
+    "category": "Utilities",
+    "baseUrl": "https://randomuser.me/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0103"
+  },
+  {
+    "name": "Faker API",
+    "description": "Fake data generator",
+    "category": "Utilities",
+    "baseUrl": "https://fakerapi.it/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0104"
+  },
+  {
+    "name": "Mockaroo",
+    "description": "Test data generator",
+    "category": "Utilities",
+    "baseUrl": "https://www.mockaroo.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0105"
+  },
+  {
+    "name": "JSONPlaceholder",
+    "description": "Fake REST API",
+    "category": "Utilities",
+    "baseUrl": "https://jsonplaceholder.typicode.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0106"
+  },
+  {
+    "name": "ReqRes",
+    "description": "Test REST API",
+    "category": "Utilities",
+    "baseUrl": "https://reqres.in/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0107"
+  },
+  {
+    "name": "HTTPBin",
+    "description": "HTTP request testing",
+    "category": "Utilities",
+    "baseUrl": "https://httpbin.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0108"
+  },
+  {
+    "name": "Postman Echo",
+    "description": "API testing",
+    "category": "Utilities",
+    "baseUrl": "https://www.postman-echo.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0109"
+  },
+  {
+    "name": "WorldTimeAPI",
+    "description": "World time zones",
+    "category": "Utilities",
+    "baseUrl": "https://worldtimeapi.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0110"
+  },
+  {
+    "name": "TimeZoneDB",
+    "description": "Time zone database",
+    "category": "Utilities",
+    "baseUrl": "https://timezonedb.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0111"
+  },
+  {
+    "name": "Holidays API",
+    "description": "Public holidays data",
+    "category": "Utilities",
+    "baseUrl": "https://date.nager.at/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0112"
+  },
+  {
+    "name": "Calendarific",
+    "description": "Holiday API",
+    "category": "Utilities",
+    "baseUrl": "https://calendarific.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0113"
+  },
+  {
+    "name": "Abstract Holidays",
+    "description": "Public holidays",
+    "category": "Utilities",
+    "baseUrl": "https://www.abstractapi.com/holidays-api",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0114"
+  },
+  {
+    "name": "UUID Generator",
+    "description": "Generate UUIDs",
+    "category": "Utilities",
+    "baseUrl": "https://www.uuidtools.com/api",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0115"
+  },
+  {
+    "name": "Khan Academy",
+    "description": "Educational content",
+    "category": "Education",
+    "baseUrl": "https://www.khanacademy.org/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0116"
+  },
+  {
+    "name": "Coursera",
+    "description": "Online courses",
+    "category": "Education",
+    "baseUrl": "https://www.coursera.org/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0117"
+  },
+  {
+    "name": "Udemy",
+    "description": "Online learning",
+    "category": "Education",
+    "baseUrl": "https://www.udemy.com/developers/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0118"
+  },
+  {
+    "name": "edX",
+    "description": "Online education",
+    "category": "Education",
+    "baseUrl": "https://www.edx.org/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0119"
+  },
+  {
+    "name": "Skillshare",
+    "description": "Creative learning",
+    "category": "Education",
+    "baseUrl": "https://www.skillshare.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0120"
+  },
+  {
+    "name": "LinkedIn Learning",
+    "description": "Professional learning",
+    "category": "Education",
+    "baseUrl": "https://www.linkedin.com/learning/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0121"
+  },
+  {
+    "name": "Pluralsight",
+    "description": "Tech learning",
+    "category": "Education",
+    "baseUrl": "https://www.pluralsight.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0122"
+  },
+  {
+    "name": "Codecademy",
+    "description": "Learn to code",
+    "category": "Education",
+    "baseUrl": "https://www.codecademy.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0123"
+  },
+  {
+    "name": "freeCodeCamp",
+    "description": "Free coding courses",
+    "category": "Education",
+    "baseUrl": "https://www.freecodecamp.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0124"
+  },
+  {
+    "name": "Treehouse",
+    "description": "Tech education",
+    "category": "Education",
+    "baseUrl": "https://teamtreehouse.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0125"
+  },
+  {
+    "name": "Duolingo",
+    "description": "Language learning",
+    "category": "Education",
+    "baseUrl": "https://www.duolingo.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0126"
+  },
+  {
+    "name": "Babbel",
+    "description": "Language courses",
+    "category": "Education",
+    "baseUrl": "https://www.babbel.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0127"
+  },
+  {
+    "name": "Rosetta Stone",
+    "description": "Language learning",
+    "category": "Education",
+    "baseUrl": "https://www.rosettastone.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0128"
+  },
+  {
+    "name": "Busuu",
+    "description": "Language learning",
+    "category": "Education",
+    "baseUrl": "https://www.busuu.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0129"
+  },
+  {
+    "name": "Memrise",
+    "description": "Vocabulary learning",
+    "category": "Education",
+    "baseUrl": "https://www.memrise.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0130"
+  },
+  {
+    "name": "Anki",
+    "description": "Flashcard system",
+    "category": "Education",
+    "baseUrl": "https://apps.ankiweb.net/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0131"
+  },
+  {
+    "name": "Quizlet",
+    "description": "Study tools",
+    "category": "Education",
+    "baseUrl": "https://quizlet.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0132"
+  },
+  {
+    "name": "Brainscape",
+    "description": "Adaptive flashcards",
+    "category": "Education",
+    "baseUrl": "https://www.brainscape.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0133"
+  },
+  {
+    "name": "Open Library",
+    "description": "Book metadata",
+    "category": "Education",
+    "baseUrl": "https://openlibrary.org/developers/api",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0134"
+  },
+  {
+    "name": "Google Books",
+    "description": "Book search API",
+    "category": "Education",
+    "baseUrl": "https://developers.google.com/books",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0135"
+  },
+  {
+    "name": "Fitbit",
+    "description": "Fitness tracking API",
+    "category": "Health",
+    "baseUrl": "https://dev.fitbit.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0136"
+  },
+  {
+    "name": "Strava",
+    "description": "Athletic social network",
+    "category": "Health",
+    "baseUrl": "https://developers.strava.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0137"
+  },
+  {
+    "name": "Garmin",
+    "description": "Fitness devices API",
+    "category": "Health",
+    "baseUrl": "https://developer.garmin.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0138"
+  },
+  {
+    "name": "Apple HealthKit",
+    "description": "Health data on iOS",
+    "category": "Health",
+    "baseUrl": "https://developer.apple.com/healthkit/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0139"
+  },
+  {
+    "name": "Google Fit",
+    "description": "Fitness data API",
+    "category": "Health",
+    "baseUrl": "https://developers.google.com/fit",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0140"
+  },
+  {
+    "name": "Oura Ring",
+    "description": "Sleep and activity tracking",
+    "category": "Health",
+    "baseUrl": "https://cloud.ouraring.com/docs/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0141"
+  },
+  {
+    "name": "Whoop",
+    "description": "Performance tracking",
+    "category": "Health",
+    "baseUrl": "https://developer.whoop.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0142"
+  },
+  {
+    "name": "Withings",
+    "description": "Health devices API",
+    "category": "Health",
+    "baseUrl": "https://developer.withings.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0143"
+  },
+  {
+    "name": "MyFitnessPal",
+    "description": "Nutrition tracking",
+    "category": "Health",
+    "baseUrl": "https://www.myfitnesspal.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0144"
+  },
+  {
+    "name": "Nutritionix",
+    "description": "Nutrition database",
+    "category": "Health",
+    "baseUrl": "https://www.nutritionix.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0145"
+  },
+  {
+    "name": "Edamam",
+    "description": "Nutrition data API",
+    "category": "Health",
+    "baseUrl": "https://developer.edamam.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0146"
+  },
+  {
+    "name": "Spoonacular",
+    "description": "Food and recipe API",
+    "category": "Health",
+    "baseUrl": "https://spoonacular.com/food-api",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0147"
+  },
+  {
+    "name": "TheMealDB",
+    "description": "Meal database",
+    "category": "Health",
+    "baseUrl": "https://www.themealdb.com/api.php",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0148"
+  },
+  {
+    "name": "TheCocktailDB",
+    "description": "Cocktail recipes",
+    "category": "Health",
+    "baseUrl": "https://www.thecocktaildb.com/api.php",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0149"
+  },
+  {
+    "name": "Open Food Facts",
+    "description": "Food product database",
+    "category": "Health",
+    "baseUrl": "https://world.openfoodfacts.org/data",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0150"
+  },
+  {
+    "name": "USDA FoodData",
+    "description": "US food database",
+    "category": "Health",
+    "baseUrl": "https://fdc.nal.usda.gov/api-guide.html",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0151"
+  },
+  {
+    "name": "Peloton",
+    "description": "Fitness platform",
+    "category": "Health",
+    "baseUrl": "https://www.onepeloton.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0152"
+  },
+  {
+    "name": "Headspace",
+    "description": "Meditation app",
+    "category": "Health",
+    "baseUrl": "https://www.headspace.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0153"
+  },
+  {
+    "name": "Calm",
+    "description": "Sleep and meditation",
+    "category": "Health",
+    "baseUrl": "https://www.calm.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0154"
+  },
+  {
+    "name": "Noom",
+    "description": "Weight loss app",
+    "category": "Health",
+    "baseUrl": "https://www.noom.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0155"
+  },
+  {
+    "name": "Zillow",
+    "description": "US real estate data",
+    "category": "Real Estate",
+    "baseUrl": "https://www.zillow.com/howto/api/APIOverview.htm",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0156"
+  },
+  {
+    "name": "Realtor.com",
+    "description": "Property listings",
+    "category": "Real Estate",
+    "baseUrl": "https://www.realtor.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0157"
+  },
+  {
+    "name": "Redfin",
+    "description": "Real estate brokerage",
+    "category": "Real Estate",
+    "baseUrl": "https://www.redfin.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0158"
+  },
+  {
+    "name": "Trulia",
+    "description": "Real estate search",
+    "category": "Real Estate",
+    "baseUrl": "https://www.trulia.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0159"
+  },
+  {
+    "name": "Apartments.com",
+    "description": "Rental listings",
+    "category": "Real Estate",
+    "baseUrl": "https://www.apartments.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0160"
+  },
+  {
+    "name": "Hemnet",
+    "description": "Swedish property listings",
+    "category": "Real Estate",
+    "baseUrl": "https://www.hemnet.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0161"
+  },
+  {
+    "name": "Booli",
+    "description": "Swedish property data",
+    "category": "Real Estate",
+    "baseUrl": "https://www.booli.se/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0162"
+  },
+  {
+    "name": "Finn.no",
+    "description": "Norwegian classifieds",
+    "category": "Real Estate",
+    "baseUrl": "https://www.finn.no/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0163"
+  },
+  {
+    "name": "Boliga",
+    "description": "Danish property data",
+    "category": "Real Estate",
+    "baseUrl": "https://www.boliga.dk/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0164"
+  },
+  {
+    "name": "Rightmove",
+    "description": "UK property portal",
+    "category": "Real Estate",
+    "baseUrl": "https://www.rightmove.co.uk/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0165"
+  },
+  {
+    "name": "Zoopla",
+    "description": "UK property search",
+    "category": "Real Estate",
+    "baseUrl": "https://www.zoopla.co.uk/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0166"
+  },
+  {
+    "name": "Immobilienscout24",
+    "description": "German property portal",
+    "category": "Real Estate",
+    "baseUrl": "https://www.immobilienscout24.de/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0167"
+  },
+  {
+    "name": "Idealista",
+    "description": "Spanish property portal",
+    "category": "Real Estate",
+    "baseUrl": "https://www.idealista.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0168"
+  },
+  {
+    "name": "SeLoger",
+    "description": "French property portal",
+    "category": "Real Estate",
+    "baseUrl": "https://www.seloger.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0169"
+  },
+  {
+    "name": "Domain",
+    "description": "Australian property",
+    "category": "Real Estate",
+    "baseUrl": "https://developer.domain.com.au/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0170"
+  },
+  {
+    "name": "Booking.com",
+    "description": "Hotel booking",
+    "category": "Travel",
+    "baseUrl": "https://developers.booking.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0171"
+  },
+  {
+    "name": "Expedia",
+    "description": "Travel booking",
+    "category": "Travel",
+    "baseUrl": "https://developer.expediagroup.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0172"
+  },
+  {
+    "name": "Airbnb",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "baseUrl": "https://www.airbnb.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0173"
+  },
+  {
+    "name": "VRBO",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "baseUrl": "https://www.vrbo.com/",
+    "authType": "oauth",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0174"
+  },
+  {
+    "name": "Tripadvisor",
+    "description": "Travel reviews",
+    "category": "Travel",
+    "baseUrl": "https://www.tripadvisor.com/developers",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0175"
+  },
+  {
+    "name": "Skyscanner",
+    "description": "Flight search",
+    "category": "Travel",
+    "baseUrl": "https://partners.skyscanner.net/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0176"
+  },
+  {
+    "name": "Kayak",
+    "description": "Travel search",
+    "category": "Travel",
+    "baseUrl": "https://www.kayak.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0177"
+  },
+  {
+    "name": "Google Flights",
+    "description": "Flight search",
+    "category": "Travel",
+    "baseUrl": "https://developers.google.com/travel",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0178"
+  },
+  {
+    "name": "Amadeus",
+    "description": "Travel technology",
+    "category": "Travel",
+    "baseUrl": "https://developers.amadeus.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0179"
+  },
+  {
+    "name": "Sabre",
+    "description": "Travel distribution",
+    "category": "Travel",
+    "baseUrl": "https://developer.sabre.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0180"
+  },
+  {
+    "name": "Travelport",
+    "description": "Travel commerce",
+    "category": "Travel",
+    "baseUrl": "https://www.travelport.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-b3-0181"
+  },
+  {
+    "name": "FlightAware",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "baseUrl": "https://flightaware.com/commercial/flightxml/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0182"
+  },
+  {
+    "name": "AviationStack",
+    "description": "Flight data API",
+    "category": "Travel",
+    "baseUrl": "https://aviationstack.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0183"
+  },
+  {
+    "name": "OpenFlights",
+    "description": "Airport and airline data",
+    "category": "Travel",
+    "baseUrl": "https://openflights.org/data.html",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-b3-0184"
+  },
+  {
+    "name": "SeatGuru",
+    "description": "Seat information",
+    "category": "Travel",
+    "baseUrl": "https://www.seatguru.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0185"
+  },
+  {
+    "name": "Rome2rio",
+    "description": "Multi-modal travel",
+    "category": "Travel",
+    "baseUrl": "https://www.rome2rio.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0186"
+  },
+  {
+    "name": "Uber",
+    "description": "Ride-hailing API",
+    "category": "Travel",
+    "baseUrl": "https://developer.uber.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0187"
+  },
+  {
+    "name": "Lyft",
+    "description": "Ride-sharing API",
+    "category": "Travel",
+    "baseUrl": "https://developer.lyft.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0188"
+  },
+  {
+    "name": "Bolt",
+    "description": "Ride-hailing Europe",
+    "category": "Travel",
+    "baseUrl": "https://bolt.eu/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0189"
+  },
+  {
+    "name": "Lime",
+    "description": "Micromobility",
+    "category": "Travel",
+    "baseUrl": "https://www.li.me/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0190"
+  },
+  {
+    "name": "SmartThings",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "baseUrl": "https://developer.smartthings.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0191"
+  },
+  {
+    "name": "Home Assistant",
+    "description": "Open source automation",
+    "category": "IoT",
+    "baseUrl": "https://developers.home-assistant.io/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0192"
+  },
+  {
+    "name": "Philips Hue",
+    "description": "Smart lighting",
+    "category": "IoT",
+    "baseUrl": "https://developers.meethue.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0193"
+  },
+  {
+    "name": "LIFX",
+    "description": "Smart lights API",
+    "category": "IoT",
+    "baseUrl": "https://api.developer.lifx.com/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-b3-0194"
+  },
+  {
+    "name": "Nest",
+    "description": "Smart home devices",
+    "category": "IoT",
+    "baseUrl": "https://developers.google.com/nest",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0195"
+  },
+  {
+    "name": "Ring",
+    "description": "Smart security",
+    "category": "IoT",
+    "baseUrl": "https://ring.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0196"
+  },
+  {
+    "name": "Arlo",
+    "description": "Security cameras",
+    "category": "IoT",
+    "baseUrl": "https://www.arlo.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0197"
+  },
+  {
+    "name": "Ecobee",
+    "description": "Smart thermostats",
+    "category": "IoT",
+    "baseUrl": "https://www.ecobee.com/developers/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0198"
+  },
+  {
+    "name": "Honeywell Home",
+    "description": "Smart home devices",
+    "category": "IoT",
+    "baseUrl": "https://developer.honeywellhome.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0199"
+  },
+  {
+    "name": "August",
+    "description": "Smart locks",
+    "category": "IoT",
+    "baseUrl": "https://august.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0200"
+  },
+  {
+    "name": "Yale",
+    "description": "Smart locks",
+    "category": "IoT",
+    "baseUrl": "https://www.yalehome.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0201"
+  },
+  {
+    "name": "Sonos",
+    "description": "Smart speakers",
+    "category": "IoT",
+    "baseUrl": "https://developer.sonos.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0202"
+  },
+  {
+    "name": "Bose",
+    "description": "Audio devices",
+    "category": "IoT",
+    "baseUrl": "https://developer.bose.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0203"
+  },
+  {
+    "name": "iRobot",
+    "description": "Robot vacuums",
+    "category": "IoT",
+    "baseUrl": "https://www.irobot.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0204"
+  },
+  {
+    "name": "Roborock",
+    "description": "Robot vacuums",
+    "category": "IoT",
+    "baseUrl": "https://www.roborock.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-b3-0205"
+  },
+  {
+    "name": "Tuya",
+    "description": "IoT platform",
+    "category": "IoT",
+    "baseUrl": "https://developer.tuya.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0206"
+  },
+  {
+    "name": "Particle",
+    "description": "IoT device platform",
+    "category": "IoT",
+    "baseUrl": "https://www.particle.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0207"
+  },
+  {
+    "name": "Arduino Cloud",
+    "description": "IoT platform",
+    "category": "IoT",
+    "baseUrl": "https://cloud.arduino.cc/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0208"
+  },
+  {
+    "name": "Blynk",
+    "description": "IoT platform",
+    "category": "IoT",
+    "baseUrl": "https://blynk.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0209"
+  },
+  {
+    "name": "Adafruit IO",
+    "description": "IoT cloud service",
+    "category": "IoT",
+    "baseUrl": "https://io.adafruit.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-b3-0210"
+  }
+]

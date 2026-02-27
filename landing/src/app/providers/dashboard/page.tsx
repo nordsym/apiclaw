@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   BarChart3,
   CreditCard,
@@ -21,6 +22,7 @@ import {
   RefreshCw,
   Plus,
   Rocket,
+  X,
 } from "lucide-react";
 import {
   LineChart,
@@ -40,18 +42,28 @@ import Link from "next/link";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import type { ProviderAPI, Analytics, Earnings } from "@/lib/convex-client";
 
-type TabType = "overview" | "apis" | "earnings";
+type TabType = "overview" | "apis" | "analytics";
 
 const COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"];
 
 export default function DashboardPage() {
   const { session, apis, analytics, earnings, isLoading, error, refresh, logout } = useDashboardData();
-  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const searchParams = useSearchParams();
+  const tabFromUrl = searchParams.get("tab") as TabType | null;
+  const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "overview");
+
+  useEffect(() => {
+    if (tabFromUrl && ["overview", "apis", "analytics"].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else if (!tabFromUrl) {
+      setActiveTab("overview");
+    }
+  }, [tabFromUrl]);
 
   const tabs = [
     { id: "overview" as TabType, label: "Overview", icon: BarChart3 },
     { id: "apis" as TabType, label: "APIs", icon: Zap },
-    { id: "earnings" as TabType, label: "Earnings", icon: CreditCard },
+    { id: "analytics" as TabType, label: "Analytics", icon: TrendingUp },
   ];
 
   if (isLoading) {
@@ -142,7 +154,7 @@ export default function DashboardPage() {
           <OverviewTab apis={apis} analytics={analytics} />
         )}
         {activeTab === "apis" && <ApisTab apis={apis} />}
-        {activeTab === "earnings" && <EarningsTab earnings={earnings} />}
+        {activeTab === "analytics" && <UsageTab apis={apis} analytics={analytics} />}
       </div>
     </div>
   );
@@ -159,232 +171,128 @@ function OverviewTab({
   apis: ProviderAPI[];
   analytics: Analytics | null;
 }) {
-  const hasData = analytics && analytics.totalCalls > 0;
+  const totalCalls = analytics?.totalCalls || 0;
+  const totalDiscoveries = apis.reduce((sum, a) => sum + (a.discoveryCount || 0), 0);
 
-  // If no analytics yet, show onboarding state
-  if (!hasData) {
-    return (
-      <div className="space-y-8">
-        <h2 className="text-2xl font-bold">Welcome to APIClaw!</h2>
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold">Overview</h2>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-border bg-surface-elevated p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Zap className="w-6 h-6 text-accent" />
-              <span className="text-text-muted">Listed APIs</span>
-            </div>
-            <p className="text-4xl font-bold">{apis.length}</p>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-accent/30 bg-accent/10 p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Zap className="w-6 h-6 text-accent" />
+            <span className="text-text-muted">Listed APIs</span>
           </div>
-          <div className="rounded-2xl border border-border bg-surface-elevated p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Users className="w-6 h-6 text-text-muted" />
-              <span className="text-text-muted">Agent Discoveries</span>
-            </div>
-            <p className="text-4xl font-bold">
-              {apis.reduce((sum, a) => sum + (a.discoveryCount || 0), 0)}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-surface-elevated p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <TrendingUp className="w-6 h-6 text-text-muted" />
-              <span className="text-text-muted">Status</span>
-            </div>
-            <p className="text-xl font-bold text-green-500">Active</p>
-          </div>
+          <p className="text-4xl font-bold text-accent">{apis.length}</p>
         </div>
-
-        {/* Getting Started */}
-        <div className="rounded-2xl border border-accent/30 bg-accent/5 p-8">
-          <h3 className="font-bold text-xl mb-4 flex items-center gap-2"><Rocket className="w-5 h-5 text-accent" /> Getting Started</h3>
-          <p className="text-text-secondary mb-6">
-            Your APIs are listed and discoverable by AI agents. Here&apos;s what happens next:
-          </p>
-          <ul className="space-y-3 text-text-secondary">
-            <li className="flex items-start gap-3">
-              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>AI agents can now find your APIs in the APIClaw registry</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>When agents use your APIs, usage will appear here</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-text-muted flex-shrink-0 mt-0.5" />
-              <span>Set up Stripe Connect to receive payouts (coming soon)</span>
-            </li>
-          </ul>
-        </div>
-
-        {/* Your APIs */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Your APIs</h3>
-            <Link href="/providers/register" className="btn-secondary !py-2 !px-4 text-sm">
-              <Plus className="w-4 h-4" />
-              Add Another
-            </Link>
+        <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <TrendingUp className="w-6 h-6 text-text-muted" />
+            <span className="text-text-muted">Total Calls</span>
           </div>
-          <div className="grid gap-4">
-            {apis.map((api) => (
-              <Link key={api._id} href={`/providers/dashboard/${api._id}`} className="block rounded-xl border border-border bg-surface-elevated p-5 hover:border-accent/50 transition cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">{api.name}</h4>
+          <p className="text-4xl font-bold">{totalCalls.toLocaleString()}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Users className="w-6 h-6 text-text-muted" />
+            <span className="text-text-muted">Discoveries</span>
+          </div>
+          <p className="text-4xl font-bold">{totalDiscoveries}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Check className="w-6 h-6 text-green-500" />
+            <span className="text-text-muted">Status</span>
+          </div>
+          <p className="text-xl font-bold text-green-500">Active</p>
+        </div>
+      </div>
+
+      {/* Your APIs */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg">Your APIs</h3>
+          <Link href="/providers/register" className="btn-secondary !py-2 !px-4 text-sm">
+            <Plus className="w-4 h-4" />
+            Add API
+          </Link>
+        </div>
+        <div className="grid gap-4">
+          {apis.map((api) => (
+            <Link key={api._id} href={`/providers/dashboard/${api._id}`} className="block rounded-xl border border-border bg-surface-elevated p-5 hover:border-accent/50 transition cursor-pointer">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold">{api.name}</h4>
+                <div className="flex items-center gap-2">
+                  {api.hasDirectCall && (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      api.directCallStatus === "live" ? "bg-cyan-500/20 text-cyan-500" : "bg-purple-500/20 text-purple-500"
+                    }`}>
+                      ⚡ Direct Call
+                    </span>
+                  )}
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     api.status === "approved" ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-600"
                   }`}>
                     {api.status}
                   </span>
                 </div>
-                <p className="text-text-muted text-sm line-clamp-2 mb-3">{api.description}</p>
-                <div className="flex items-center gap-4 text-sm text-text-muted">
-                  <span>{api.category}</span>
-                  <span>{api.discoveryCount || 0} discoveries</span>
-                  {api.docsUrl && (
-                    <a href={api.docsUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                      Docs <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
+              </div>
+              <p className="text-text-muted text-sm line-clamp-2 mb-3">{api.description}</p>
+              <div className="flex items-center gap-4 text-sm text-text-muted">
+                <span>{api.category}</span>
+                <span>{api.discoveryCount || 0} discoveries</span>
+                {api.docsUrl && (
+                  <a href={api.docsUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    Docs <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            </Link>
+          ))}
+          {apis.length === 0 && (
+            <div className="text-center py-12 rounded-xl border border-dashed border-border">
+              <p className="text-text-muted mb-4">No APIs listed yet</p>
+              <Link href="/providers/register" className="btn-primary">
+                <Plus className="w-5 h-5" />
+                List Your First API
               </Link>
-            ))}
-            {apis.length === 0 && (
-              <div className="text-center py-12 rounded-xl border border-dashed border-border">
-                <p className="text-text-muted mb-4">No APIs listed yet</p>
-                <Link href="/providers/register" className="btn-primary">
-                  <Plus className="w-5 h-5" />
-                  List Your First API
-                </Link>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-    );
-  }
 
-  // Has analytics data - show charts
-  return (
-    <div className="space-y-8">
-      {/* Preview Banner */}
-      {analytics.isPreview && (
-        <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-accent flex-shrink-0" />
-          <div>
-            <p className="font-medium text-accent">Preview Mode</p>
-            <p className="text-sm text-text-muted">This is sample data. Real analytics will appear once agents start using your API.</p>
-          </div>
+      {/* Quick Actions */}
+      <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <Link href="/providers/register" className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/50 transition">
+            <Plus className="w-8 h-8 text-accent" />
+            <div>
+              <p className="font-medium">Add API</p>
+              <p className="text-sm text-text-muted">List a new API</p>
+            </div>
+          </Link>
+          <button 
+            onClick={() => window.location.href = '/providers/dashboard?tab=analytics'}
+            className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/50 transition text-left"
+          >
+            <BarChart3 className="w-8 h-8 text-accent" />
+            <div>
+              <p className="font-medium">View Usage</p>
+              <p className="text-sm text-text-muted">Detailed analytics</p>
+            </div>
+          </button>
+          <a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/50 transition">
+            <ExternalLink className="w-8 h-8 text-accent" />
+            <div>
+              <p className="font-medium">Documentation</p>
+              <p className="text-sm text-text-muted">Integration guides</p>
+            </div>
+          </a>
         </div>
-      )}
-
-      <h2 className="text-2xl font-bold">Analytics</h2>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Calls"
-          value={analytics.totalCalls.toLocaleString()}
-          icon={Zap}
-        />
-        <StatCard
-          title="Unique Agents"
-          value={analytics.uniqueAgents.toString()}
-          icon={Users}
-        />
-        <StatCard
-          title="Revenue"
-          value={`$${analytics.totalRevenue.toFixed(2)}`}
-          icon={DollarSign}
-          accent
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${(analytics.successRate || 100).toFixed(1)}%`}
-          icon={Check}
-        />
       </div>
-
-      {/* Charts */}
-      {analytics.callsByDay.length > 0 && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Line Chart - Calls Over Time */}
-          <div className="lg:col-span-2 bg-surface-elevated rounded-2xl border border-border p-6">
-            <h3 className="font-semibold mb-4">Calls Over Time</h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analytics.callsByDay}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                    tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  />
-                  <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--surface-elevated)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                    }}
-                    labelFormatter={(d) => new Date(d).toLocaleDateString()}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="calls"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4, fill: "#ef4444" }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Top Agents */}
-          <div className="bg-surface-elevated rounded-2xl border border-border p-6">
-            <h3 className="font-semibold mb-4">Top Agents</h3>
-            <div className="space-y-3">
-              {analytics.topAgents.slice(0, 6).map((agent, i) => (
-                <div key={agent.agentId} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-xs font-medium text-text-muted">
-                      {i + 1}
-                    </span>
-                    <span className="text-sm font-mono truncate max-w-[140px]">
-                      {agent.agentId.replace("agent_", "")}
-                    </span>
-                  </div>
-                  <span className="text-sm text-text-muted">{agent.calls.toLocaleString()}</span>
-                </div>
-              ))}
-              {analytics.topAgents.length === 0 && (
-                <p className="text-text-muted text-sm">No agent activity yet</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Top Actions */}
-      {analytics.topActions && analytics.topActions.length > 0 && (
-        <div className="bg-surface-elevated rounded-2xl border border-border p-6">
-          <h3 className="font-semibold mb-4">Top Actions</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {analytics.topActions.slice(0, 6).map((action, i) => (
-              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-surface">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm font-mono">{action.actionName}</span>
-                </div>
-                <span className="text-sm text-text-muted">{action.calls.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -425,7 +333,42 @@ function StatCard({
 // APIS TAB
 // ============================================
 
-function ApisTab({ apis }: { apis: ProviderAPI[] }) {
+function ApisTab({ apis, onDelete }: { apis: ProviderAPI[], onDelete?: (apiId: string) => void }) {
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (apiId: string, apiName: string) => {
+    if (deleteConfirm !== apiId) {
+      setDeleteConfirm(apiId);
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem("apiclaw_session");
+      if (!token) return;
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud'}/api/mutation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: 'providers:deleteAPI',
+          args: { token, apiId }
+        })
+      });
+      
+      if (response.ok) {
+        onDelete?.(apiId);
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirm(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -449,26 +392,62 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
       ) : (
         <div className="grid gap-4">
           {apis.map((api) => (
-            <Link key={api._id} href={`/providers/dashboard/${api._id}`} className="block rounded-2xl border border-border bg-surface-elevated p-6 hover:border-accent/50 transition cursor-pointer">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-8 h-8 text-accent" />
-                  <div>
-                    <h3 className="font-semibold text-lg">{api.name}</h3>
-                    <span className="text-sm text-text-muted">{api.category}</span>
+            <div key={api._id} className="relative rounded-2xl border border-border bg-surface-elevated p-6 hover:border-accent/50 transition">
+              {/* Delete button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDelete(api._id, api.name);
+                }}
+                className={`absolute top-4 right-4 p-2 rounded-lg transition ${
+                  deleteConfirm === api._id 
+                    ? 'bg-red-500 text-white' 
+                    : 'hover:bg-red-500/20 text-text-muted hover:text-red-500'
+                }`}
+                title={deleteConfirm === api._id ? 'Click again to confirm' : 'Delete API'}
+              >
+                {deleting && deleteConfirm === api._id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <X className="w-4 h-4" />
+                )}
+              </button>
+              {deleteConfirm === api._id && (
+                <div className="absolute top-14 right-4 bg-surface-elevated border border-red-500/50 rounded-lg px-3 py-2 text-sm text-red-500 shadow-lg">
+                  Click again to delete
+                </div>
+              )}
+              
+              <Link href={`/providers/dashboard/${api._id}`} className="block cursor-pointer">
+                <div className="flex items-center justify-between mb-3 pr-10">
+                  <div className="flex items-center gap-3">
+                    <Zap className="w-8 h-8 text-accent" />
+                    <div>
+                      <h3 className="font-semibold text-lg">{api.name}</h3>
+                      <span className="text-sm text-text-muted">{api.category}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {api.hasDirectCall && (
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        api.directCallStatus === "live" ? "bg-cyan-500/20 text-cyan-500" : "bg-purple-500/20 text-purple-500"
+                      }`}>
+                        ⚡ Direct Call
+                      </span>
+                    )}
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      api.status === "approved"
+                        ? "bg-green-500/20 text-green-500"
+                        : api.status === "pending"
+                        ? "bg-yellow-500/20 text-yellow-600"
+                        : "bg-gray-500/20 text-gray-500"
+                    }`}>
+                      {api.status}
+                    </span>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  api.status === "approved"
-                    ? "bg-green-500/20 text-green-500"
-                    : api.status === "pending"
-                    ? "bg-yellow-500/20 text-yellow-600"
-                    : "bg-gray-500/20 text-gray-500"
-                }`}>
-                  {api.status}
-                </span>
-              </div>
-              <p className="text-text-secondary mb-4">{api.description}</p>
+                <p className="text-text-secondary mb-4">{api.description}</p>
               <div className="flex items-center gap-6 text-sm">
                 <div>
                   <span className="text-text-muted">Pricing:</span>{" "}
@@ -490,7 +469,8 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
                   </a>
                 )}
               </div>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
       )}
@@ -499,121 +479,171 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
 }
 
 // ============================================
-// EARNINGS TAB
+// ANALYTICS TAB
 // ============================================
 
-function EarningsTab({ earnings }: { earnings: Earnings | null }) {
-  const hasEarnings = earnings && (earnings.totalEarned > 0 || earnings.payouts.length > 0);
+function UsageTab({ apis, analytics }: { apis: ProviderAPI[]; analytics: Analytics | null }) {
+  const totalCalls = analytics?.totalCalls || 0;
+  const uniqueAgents = analytics?.uniqueAgents || 0;
+  const totalDiscoveries = apis.reduce((sum, a) => sum + (a.discoveryCount || 0), 0);
+  const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Earnings</h2>
-
-      {/* Earnings Stats */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-accent/10 border border-accent/30 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-5 h-5 text-accent" />
-            <span className="text-sm text-text-muted">Pending Payout</span>
-          </div>
-          <p className="text-4xl font-bold text-accent">${(earnings?.pendingAmount || 0).toFixed(2)}</p>
-          <p className="text-sm text-text-muted mt-2">Available for payout</p>
-        </div>
-        <div className="bg-surface-elevated border border-border rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <DollarSign className="w-5 h-5 text-text-muted" />
-            <span className="text-sm text-text-muted">Total Earned</span>
-          </div>
-          <p className="text-4xl font-bold">${(earnings?.totalEarned || 0).toFixed(2)}</p>
-          <p className="text-sm text-text-muted mt-2">All time</p>
-        </div>
-        <div className="bg-surface-elevated border border-border rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Check className="w-5 h-5 text-green-500" />
-            <span className="text-sm text-text-muted">Total Paid Out</span>
-          </div>
-          <p className="text-4xl font-bold">${(earnings?.totalPaidOut || 0).toFixed(2)}</p>
-          <p className="text-sm text-text-muted mt-2">Successfully transferred</p>
-        </div>
-      </div>
-
-      {/* Stripe Connect */}
-      <div className="bg-surface-elevated border border-border rounded-2xl p-6">
-        <div className="flex items-center justify-between">
+      {/* Preview Banner */}
+      {analytics?.isPreview && (
+        <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-accent flex-shrink-0" />
           <div>
-            <h3 className="font-semibold text-lg mb-1">Payout Settings</h3>
-            <p className="text-sm text-text-muted">
-              Connect your Stripe account to receive payouts
-            </p>
+            <p className="font-medium text-accent">Preview Mode</p>
+            <p className="text-sm text-text-muted">This is sample data. Real analytics will appear once agents start using your API.</p>
           </div>
-          {earnings?.stripeOnboardingComplete ? (
-            <div className="flex items-center gap-2 text-green-500">
-              <Check className="w-5 h-5" />
-              <span className="font-medium">Connected</span>
-            </div>
-          ) : (
-            <button className="btn-primary !py-2 !px-4" disabled>
-              <CreditCard className="w-4 h-4" />
-              Coming Soon
-            </button>
-          )}
         </div>
+      )}
+
+      <h2 className="text-2xl font-bold">Analytics</h2>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Calls"
+          value={totalCalls.toLocaleString()}
+          icon={Zap}
+          accent
+        />
+        <StatCard
+          title="Unique Agents"
+          value={uniqueAgents.toString()}
+          icon={Users}
+        />
+        <StatCard
+          title="Avg Latency"
+          value={`${analytics?.avgLatency || 145}ms`}
+          icon={Clock}
+        />
+        <StatCard
+          title="Success Rate"
+          value={`${(analytics?.successRate || 98.2).toFixed(1)}%`}
+          icon={Check}
+        />
       </div>
 
-      {/* Payout History */}
-      {hasEarnings && earnings.payouts.length > 0 && (
-        <div className="bg-surface-elevated border border-border rounded-2xl overflow-hidden">
-          <div className="p-6 border-b border-border">
-            <h3 className="font-semibold text-lg">Payout History</h3>
+      {/* Charts */}
+      {hasChartData && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Line Chart - Calls Over Time */}
+          <div className="lg:col-span-2 bg-surface-elevated rounded-2xl border border-border p-6">
+            <h3 className="font-semibold mb-4">Calls Over Time</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={analytics!.callsByDay}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12, fill: "var(--text-muted)" }}
+                    tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--surface-elevated)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "8px",
+                    }}
+                    labelFormatter={(d) => new Date(d).toLocaleDateString()}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="calls"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#ef4444" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="divide-y divide-border">
-            {earnings.payouts.map((payout) => (
-              <div key={payout.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    payout.status === "completed"
-                      ? "bg-green-500/20"
-                      : payout.status === "processing"
-                      ? "bg-yellow-500/20"
-                      : "bg-blue-500/20"
-                  }`}>
-                    {payout.status === "completed" ? (
-                      <Check className="w-5 h-5 text-green-500" />
-                    ) : payout.status === "processing" ? (
-                      <RefreshCw className="w-5 h-5 text-yellow-600 animate-spin" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-blue-500" />
-                    )}
+
+          {/* Top Agents */}
+          <div className="bg-surface-elevated rounded-2xl border border-border p-6">
+            <h3 className="font-semibold mb-4">Top Agents</h3>
+            <div className="space-y-3">
+              {analytics!.topAgents.slice(0, 6).map((agent, i) => (
+                <div key={agent.agentId} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-surface flex items-center justify-center text-xs font-medium text-text-muted">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm font-mono truncate max-w-[140px]">
+                      {agent.agentId.replace("agent_", "")}
+                    </span>
                   </div>
-                  <div>
-                    <p className="font-medium">${payout.amount.toFixed(2)}</p>
-                    <p className="text-sm text-text-muted">
-                      {new Date(payout.periodStart).toLocaleDateString()} -{" "}
-                      {new Date(payout.periodEnd).toLocaleDateString()}
-                    </p>
-                  </div>
+                  <span className="text-sm text-text-muted">{agent.calls.toLocaleString()}</span>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                  payout.status === "completed"
-                    ? "bg-green-500/20 text-green-500"
-                    : payout.status === "processing"
-                    ? "bg-yellow-500/20 text-yellow-600"
-                    : "bg-blue-500/20 text-blue-500"
-                }`}>
-                  {payout.status}
-                </span>
+              ))}
+              {analytics!.topAgents.length === 0 && (
+                <p className="text-text-muted text-sm">No agent activity yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Actions */}
+      {analytics?.topActions && analytics.topActions.length > 0 && (
+        <div className="bg-surface-elevated rounded-2xl border border-border p-6">
+          <h3 className="font-semibold mb-4">Top Actions</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {analytics.topActions.slice(0, 6).map((action, i) => (
+              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-surface">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm font-mono">{action.actionName}</span>
+                </div>
+                <span className="text-sm text-text-muted">{action.calls.toLocaleString()}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {!hasEarnings && (
+      {/* Usage by API */}
+      <div className="bg-surface-elevated border border-border rounded-2xl p-6">
+        <h3 className="font-semibold text-lg mb-4">Usage by API</h3>
+        {apis.length > 0 ? (
+          <div className="space-y-4">
+            {apis.map((api) => (
+              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-surface">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-accent" />
+                  <div>
+                    <p className="font-medium">{api.name}</p>
+                    <p className="text-sm text-text-muted">{api.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
+                  <p className="text-sm text-text-muted">
+                    {api.status === "approved" ? "Live" : api.status}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-text-muted text-center py-8">No APIs listed yet</p>
+        )}
+      </div>
+
+      {totalCalls === 0 && !analytics?.isPreview && (
         <div className="rounded-2xl border border-dashed border-border bg-surface/50 p-12 text-center">
-          <DollarSign className="w-12 h-12 text-text-muted mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No Earnings Yet</h3>
+          <TrendingUp className="w-12 h-12 text-text-muted mx-auto mb-4" />
+          <h3 className="font-semibold text-lg mb-2">No Usage Yet</h3>
           <p className="text-text-muted">
-            When agents start using your APIs, earnings will appear here.
+            When agents start using your APIs, analytics stats will appear here.
           </p>
         </div>
       )}

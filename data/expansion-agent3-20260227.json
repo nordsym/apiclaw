@@ -1,0 +1,1602 @@
+{
+  "metadata": {
+    "agent": "expansion-agent3",
+    "generatedAt": "2026-02-27T07:18:00Z",
+    "focusCategories": [
+      "Sports",
+      "Industry",
+      "Food",
+      "IoT",
+      "AR/VR",
+      "Events",
+      "Nordic"
+    ],
+    "totalApis": 198
+  },
+  "apis": [
+    {
+      "name": "API-Sports Football",
+      "description": "Football/Soccer data API with leagues, teams, players, fixtures, standings",
+      "category": "Sports",
+      "baseUrl": "https://api-football-v1.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/football/v3"
+    },
+    {
+      "name": "API-Sports Basketball",
+      "description": "Basketball data API with NBA, EuroLeague and international leagues",
+      "category": "Sports",
+      "baseUrl": "https://api-basketball.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/basketball/v1"
+    },
+    {
+      "name": "API-Sports Baseball",
+      "description": "Baseball data API with MLB standings, games, and player stats",
+      "category": "Sports",
+      "baseUrl": "https://api-baseball.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/baseball/v1"
+    },
+    {
+      "name": "API-Sports Hockey",
+      "description": "Hockey data API with NHL and international leagues",
+      "category": "Sports",
+      "baseUrl": "https://api-hockey.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/hockey/v1"
+    },
+    {
+      "name": "API-Sports Formula-1",
+      "description": "Formula 1 racing data with drivers, teams, circuits, and race results",
+      "category": "Sports",
+      "baseUrl": "https://api-formula-1.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/formula-1/v1"
+    },
+    {
+      "name": "API-Sports NFL",
+      "description": "NFL American Football data API with teams, players, games",
+      "category": "Sports",
+      "baseUrl": "https://api-american-football.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/american-football/v1"
+    },
+    {
+      "name": "API-Sports Rugby",
+      "description": "Rugby data API with international and club competitions",
+      "category": "Sports",
+      "baseUrl": "https://api-rugby.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/rugby/v1"
+    },
+    {
+      "name": "API-Sports Handball",
+      "description": "Handball data API with European and international leagues",
+      "category": "Sports",
+      "baseUrl": "https://api-handball.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/handball/v1"
+    },
+    {
+      "name": "API-Sports Volleyball",
+      "description": "Volleyball data API with standings and game results",
+      "category": "Sports",
+      "baseUrl": "https://api-volleyball.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/volleyball/v1"
+    },
+    {
+      "name": "API-Sports AFL",
+      "description": "Australian Football League data API",
+      "category": "Sports",
+      "baseUrl": "https://api-afl.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://api-sports.io/documentation/afl/v1"
+    },
+    {
+      "name": "TheSportsDB",
+      "description": "Open sports database with teams, players, events and live scores",
+      "category": "Sports",
+      "baseUrl": "https://www.thesportsdb.com/api/v1/json",
+      "authType": "apiKey",
+      "docsUrl": "https://www.thesportsdb.com/api.php"
+    },
+    {
+      "name": "Sportsipy",
+      "description": "Free Python sports API for MLB, NBA, NFL, NHL, NCAAB, NCAAF",
+      "category": "Sports",
+      "baseUrl": "https://github.com/roclark/sportsipy",
+      "authType": "none",
+      "docsUrl": "https://sportsipy.readthedocs.io/"
+    },
+    {
+      "name": "Pro Sports API",
+      "description": "Real-time sports data APIs for developers and analysts",
+      "category": "Sports",
+      "baseUrl": "https://prosportsapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://prosportsapi.com/docs"
+    },
+    {
+      "name": "Football Database",
+      "description": "Football leagues database 2024/2025 season in JSON format",
+      "category": "Sports",
+      "baseUrl": "https://github.com/oritzio/football-database",
+      "authType": "none",
+      "docsUrl": "https://github.com/oritzio/football-database"
+    },
+    {
+      "name": "Kooora Unofficial API",
+      "description": "Unofficial API for kooora.com Arabic sports site",
+      "category": "Sports",
+      "baseUrl": "https://github.com/n-eq/kooora-unofficial-api",
+      "authType": "none",
+      "docsUrl": "https://github.com/n-eq/kooora-unofficial-api"
+    },
+    {
+      "name": "Slash Golf API",
+      "description": "Golf data API with courses and player statistics",
+      "category": "Sports",
+      "baseUrl": "https://api.slashgolf.com",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/slashgolf/slashgolf"
+    },
+    {
+      "name": "Transfermarkt API",
+      "description": "Unofficial Transfermarkt API for football player transfers and valuations",
+      "category": "Sports",
+      "baseUrl": "https://transfermarkt-api.vercel.app",
+      "authType": "none",
+      "docsUrl": "https://github.com/ethemdemirkaya/transfermarkt-api-guide"
+    },
+    {
+      "name": "Resolve Team",
+      "description": "Sports team name identification with fuzzy search",
+      "category": "Sports",
+      "baseUrl": "https://github.com/fearandesire/resolve-team",
+      "authType": "none",
+      "docsUrl": "https://github.com/fearandesire/resolve-team"
+    },
+    {
+      "name": "StatLine",
+      "description": "Advanced weighted player scoring and analytics API",
+      "category": "Sports",
+      "baseUrl": "https://github.com/amillolive/StatLine",
+      "authType": "none",
+      "docsUrl": "https://github.com/amillolive/StatLine"
+    },
+    {
+      "name": "Sportscaster API",
+      "description": "One-stop API solution for sports data",
+      "category": "Sports",
+      "baseUrl": "https://github.com/roysti10/sportscaster",
+      "authType": "none",
+      "docsUrl": "https://github.com/roysti10/sportscaster"
+    },
+    {
+      "name": "OurHub Racing API",
+      "description": "Real-time UK & Irish horse racing API with AI predictions",
+      "category": "Sports",
+      "baseUrl": "https://github.com/TamB10/ourhub-racing-api",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/TamB10/ourhub-racing-api"
+    },
+    {
+      "name": "iCast Sports Backend",
+      "description": "GraphQL sports prediction and fantasy sports API",
+      "category": "Sports",
+      "baseUrl": "https://github.com/anton-karlovskiy/icast-backend",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/anton-karlovskiy/icast-backend"
+    },
+    {
+      "name": "Sportz WebSockets",
+      "description": "Real-time live sports broadcast engine with WebSockets",
+      "category": "Sports",
+      "baseUrl": "https://github.com/WilliamRossCrane/sportz-websockets",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/WilliamRossCrane/sportz-websockets"
+    },
+    {
+      "name": "Spoonacular",
+      "description": "Food parsing, matching, recipes, and meal planning API",
+      "category": "Food",
+      "baseUrl": "https://api.spoonacular.com",
+      "authType": "apiKey",
+      "docsUrl": "https://spoonacular.com/food-api/docs"
+    },
+    {
+      "name": "Edamam Nutrition",
+      "description": "Nutrition Analysis API for food and recipes",
+      "category": "Food",
+      "baseUrl": "https://api.edamam.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.edamam.com/"
+    },
+    {
+      "name": "Edamam Recipe Search",
+      "description": "Recipe Search API with nutrition information",
+      "category": "Food",
+      "baseUrl": "https://api.edamam.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.edamam.com/edamam-docs-recipe-api"
+    },
+    {
+      "name": "Open Food Facts",
+      "description": "Open database of food products with nutrition data",
+      "category": "Food",
+      "baseUrl": "https://world.openfoodfacts.org/api",
+      "authType": "none",
+      "docsUrl": "https://openfoodfacts.github.io/openfoodfacts-server/api/"
+    },
+    {
+      "name": "FDA Food",
+      "description": "FDA product recalls and food enforcement data",
+      "category": "Food",
+      "baseUrl": "https://api.fda.gov",
+      "authType": "none",
+      "docsUrl": "https://open.fda.gov/apis/food/"
+    },
+    {
+      "name": "TheCocktailDB",
+      "description": "Cocktail recipes database API",
+      "category": "Food",
+      "baseUrl": "https://www.thecocktaildb.com/api/json/v1",
+      "authType": "apiKey",
+      "docsUrl": "https://www.thecocktaildb.com/api.php"
+    },
+    {
+      "name": "TheMealDB",
+      "description": "Meal recipes database API",
+      "category": "Food",
+      "baseUrl": "https://www.themealdb.com/api/json/v1",
+      "authType": "apiKey",
+      "docsUrl": "https://www.themealdb.com/api.php"
+    },
+    {
+      "name": "Open Brewery DB",
+      "description": "Breweries, cideries and craft beer bottle shops database",
+      "category": "Food",
+      "baseUrl": "https://api.openbrewerydb.org",
+      "authType": "none",
+      "docsUrl": "https://www.openbrewerydb.org/documentation"
+    },
+    {
+      "name": "PunkAPI",
+      "description": "BrewDog beer recipes API",
+      "category": "Food",
+      "baseUrl": "https://api.punkapi.com/v2",
+      "authType": "none",
+      "docsUrl": "https://punkapi.com/documentation/v2"
+    },
+    {
+      "name": "Fruityvice",
+      "description": "Data about all kinds of fruit with nutrition info",
+      "category": "Food",
+      "baseUrl": "https://www.fruityvice.com/api",
+      "authType": "none",
+      "docsUrl": "https://www.fruityvice.com/"
+    },
+    {
+      "name": "Kroger",
+      "description": "Supermarket data API for products and locations",
+      "category": "Food",
+      "baseUrl": "https://api.kroger.com/v1",
+      "authType": "OAuth",
+      "docsUrl": "https://developer.kroger.com/reference"
+    },
+    {
+      "name": "TacoFancy API",
+      "description": "Community-driven taco recipe database",
+      "category": "Food",
+      "baseUrl": "https://github.com/evz/tacofancy-api",
+      "authType": "none",
+      "docsUrl": "https://github.com/evz/tacofancy-api"
+    },
+    {
+      "name": "Tasty API",
+      "description": "Recipe, plan, and ingredients data from Tasty",
+      "category": "Food",
+      "baseUrl": "https://tasty.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://rapidapi.com/apidojo/api/tasty"
+    },
+    {
+      "name": "Zestful",
+      "description": "Parse recipe ingredients API",
+      "category": "Food",
+      "baseUrl": "https://zestfuldata.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://zestfuldata.com/"
+    },
+    {
+      "name": "WhiskyHunter",
+      "description": "Online whisky auctions statistical data",
+      "category": "Food",
+      "baseUrl": "https://whiskyhunter.net/api",
+      "authType": "none",
+      "docsUrl": "https://whiskyhunter.net/api/"
+    },
+    {
+      "name": "Chomp",
+      "description": "Grocery products and foods nutrition data",
+      "category": "Food",
+      "baseUrl": "https://chompthis.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://chompthis.com/api/"
+    },
+    {
+      "name": "FatSecret",
+      "description": "Nutrition database and calorie counter API",
+      "category": "Food",
+      "baseUrl": "https://platform.fatsecret.com/rest",
+      "authType": "OAuth",
+      "docsUrl": "https://platform.fatsecret.com/api/"
+    },
+    {
+      "name": "NutritionX",
+      "description": "Natural language nutrition database API",
+      "category": "Food",
+      "baseUrl": "https://trackapi.nutritionix.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.nutritionix.com/business/api"
+    },
+    {
+      "name": "RecipePuppy",
+      "description": "Recipe search API with over a million recipes",
+      "category": "Food",
+      "baseUrl": "http://www.recipepuppy.com/api",
+      "authType": "none",
+      "docsUrl": "http://www.recipepuppy.com/about/api/"
+    },
+    {
+      "name": "Untappd",
+      "description": "Social beer sharing and discovery API",
+      "category": "Food",
+      "baseUrl": "https://api.untappd.com/v4",
+      "authType": "OAuth",
+      "docsUrl": "https://untappd.com/api/docs"
+    },
+    {
+      "name": "Systembolaget",
+      "description": "Swedish government liquor store product API",
+      "category": "Food",
+      "baseUrl": "https://api-extern.systembolaget.se",
+      "authType": "apiKey",
+      "docsUrl": "https://api-portal.systembolaget.se/"
+    },
+    {
+      "name": "Foodish",
+      "description": "Random pictures of food dishes API",
+      "category": "Food",
+      "baseUrl": "https://foodish-api.herokuapp.com",
+      "authType": "none",
+      "docsUrl": "https://github.com/surhud004/Foodish"
+    },
+    {
+      "name": "Coffee API",
+      "description": "Random pictures of coffee API",
+      "category": "Food",
+      "baseUrl": "https://coffee.alexflipnote.dev",
+      "authType": "none",
+      "docsUrl": "https://coffee.alexflipnote.dev/"
+    },
+    {
+      "name": "LCBO API",
+      "description": "Liquor Control Board of Ontario alcohol data",
+      "category": "Food",
+      "baseUrl": "https://lcboapi.com/products",
+      "authType": "apiKey",
+      "docsUrl": "https://lcboapi.com/"
+    },
+    {
+      "name": "Node Deliveroo",
+      "description": "Unofficial Node API for Deliveroo food delivery",
+      "category": "Food",
+      "baseUrl": "https://github.com/jzarca01/node-deliveroo",
+      "authType": "none",
+      "docsUrl": "https://github.com/jzarca01/node-deliveroo"
+    },
+    {
+      "name": "Node UberEats",
+      "description": "Work in progress API wrapper for UberEats",
+      "category": "Food",
+      "baseUrl": "https://github.com/jzarca01/node-ubereats",
+      "authType": "none",
+      "docsUrl": "https://github.com/jzarca01/node-ubereats"
+    },
+    {
+      "name": "Fit-n-Bites API",
+      "description": "Light-weight RESTful API for nutrition facts of common foods",
+      "category": "Food",
+      "baseUrl": "https://github.com/topics/food-api",
+      "authType": "none",
+      "docsUrl": "https://github.com/topics/food-api"
+    },
+    {
+      "name": "Besin API (Turkish)",
+      "description": "Turkish open RESTful API for food nutrition values",
+      "category": "Food",
+      "baseUrl": "https://github.com/topics/food-database",
+      "authType": "none",
+      "docsUrl": "https://github.com/topics/food-database"
+    },
+    {
+      "name": "i4things Node API",
+      "description": "IoT Node/Device API for LoRa or WiFi/Ethernet data",
+      "category": "IoT",
+      "baseUrl": "https://github.com/i4things/NodeAPI",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/i4things/NodeAPI"
+    },
+    {
+      "name": "Instathings Gate",
+      "description": "Free and open edge computing gateway",
+      "category": "IoT",
+      "baseUrl": "https://github.com/Instathings/gate",
+      "authType": "none",
+      "docsUrl": "https://github.com/Instathings/gate"
+    },
+    {
+      "name": "ESP8266 Sensors API",
+      "description": "Sensor readings as a simple JSON API",
+      "category": "IoT",
+      "baseUrl": "https://github.com/wouterds/esp8266-nodemcu-sensors",
+      "authType": "none",
+      "docsUrl": "https://github.com/wouterds/esp8266-nodemcu-sensors"
+    },
+    {
+      "name": "SciFy-IoT",
+      "description": "Cloud IoT platform with Arduino library for ESP32/ESP8266",
+      "category": "IoT",
+      "baseUrl": "https://github.com/AlphaNodesDev/SciFy-Iot",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/AlphaNodesDev/SciFy-Iot"
+    },
+    {
+      "name": "IoTApp API",
+      "description": "Easy API for rapid prototyping of IoT powered apps",
+      "category": "IoT",
+      "baseUrl": "https://github.com/FlynnDerek/iotapp-api",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/FlynnDerek/iotapp-api"
+    },
+    {
+      "name": "AIRVD IoT API",
+      "description": "REST APIs for CRUD operations for IoT devices",
+      "category": "IoT",
+      "baseUrl": "https://github.com/alpha74/airvd",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/alpha74/airvd"
+    },
+    {
+      "name": "ThingsBoard REST Client",
+      "description": "Client library for ThingsBoard IoT platform API",
+      "category": "IoT",
+      "baseUrl": "https://github.com/JoooHannesk/tbrestclientlib",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/JoooHannesk/tbrestclientlib"
+    },
+    {
+      "name": "Blynk IoT",
+      "description": "Control IoT Devices from Blynk IoT Cloud",
+      "category": "IoT",
+      "baseUrl": "https://blynk.cloud",
+      "authType": "apiKey",
+      "docsUrl": "https://blynkapi.docs.apiary.io/"
+    },
+    {
+      "name": "Home Assistant",
+      "description": "Open source home automation API",
+      "category": "IoT",
+      "baseUrl": "https://homeassistant.local:8123/api",
+      "authType": "apiKey",
+      "docsUrl": "https://developers.home-assistant.io/docs/api/rest/"
+    },
+    {
+      "name": "Particle Cloud",
+      "description": "IoT device cloud platform API",
+      "category": "IoT",
+      "baseUrl": "https://api.particle.io/v1",
+      "authType": "OAuth",
+      "docsUrl": "https://docs.particle.io/reference/cloud-apis/api/"
+    },
+    {
+      "name": "Tuya Smart",
+      "description": "Smart home IoT platform API",
+      "category": "IoT",
+      "baseUrl": "https://openapi.tuyaus.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.tuya.com/en/docs/iot"
+    },
+    {
+      "name": "SmartThings",
+      "description": "Samsung SmartThings IoT platform API",
+      "category": "IoT",
+      "baseUrl": "https://api.smartthings.com/v1",
+      "authType": "OAuth",
+      "docsUrl": "https://developer.smartthings.com/docs/api/public/"
+    },
+    {
+      "name": "IFTTT Webhooks",
+      "description": "If This Then That automation webhooks",
+      "category": "IoT",
+      "baseUrl": "https://maker.ifttt.com/trigger",
+      "authType": "apiKey",
+      "docsUrl": "https://ifttt.com/maker_webhooks"
+    },
+    {
+      "name": "ThingSpeak",
+      "description": "IoT analytics platform API",
+      "category": "IoT",
+      "baseUrl": "https://api.thingspeak.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.mathworks.com/help/thingspeak/rest-api.html"
+    },
+    {
+      "name": "Adafruit IO",
+      "description": "Cloud service for IoT data logging",
+      "category": "IoT",
+      "baseUrl": "https://io.adafruit.com/api/v2",
+      "authType": "apiKey",
+      "docsUrl": "https://io.adafruit.com/api/docs/"
+    },
+    {
+      "name": "Losant",
+      "description": "Enterprise IoT platform API",
+      "category": "IoT",
+      "baseUrl": "https://api.losant.com",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.losant.com/rest-api/overview/"
+    },
+    {
+      "name": "AWS IoT",
+      "description": "Amazon Web Services IoT platform API",
+      "category": "IoT",
+      "baseUrl": "https://iot.amazonaws.com",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.aws.amazon.com/iot/latest/apireference/"
+    },
+    {
+      "name": "Google Cloud IoT",
+      "description": "Google Cloud Platform IoT Core API",
+      "category": "IoT",
+      "baseUrl": "https://cloudiot.googleapis.com/v1",
+      "authType": "OAuth",
+      "docsUrl": "https://cloud.google.com/iot/docs/reference/rest"
+    },
+    {
+      "name": "Azure IoT Hub",
+      "description": "Microsoft Azure IoT Hub REST API",
+      "category": "IoT",
+      "baseUrl": "https://{iot-hub-name}.azure-devices.net",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.microsoft.com/en-us/rest/api/iothub/"
+    },
+    {
+      "name": "ARCore",
+      "description": "Google's AR SDK for Android and cross-platform",
+      "category": "AR/VR",
+      "baseUrl": "https://developers.google.com/ar",
+      "authType": "none",
+      "docsUrl": "https://developers.google.com/ar/develop"
+    },
+    {
+      "name": "ARKit",
+      "description": "Apple's AR framework for iOS devices",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.apple.com/augmented-reality/arkit",
+      "authType": "none",
+      "docsUrl": "https://developer.apple.com/documentation/arkit"
+    },
+    {
+      "name": "RealityKit",
+      "description": "Apple's 3D content rendering for AR apps",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.apple.com/documentation/realitykit",
+      "authType": "none",
+      "docsUrl": "https://developer.apple.com/documentation/realitykit"
+    },
+    {
+      "name": "Vuforia",
+      "description": "Comprehensive AR platform for enterprise and developers",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.vuforia.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.vuforia.com/library/"
+    },
+    {
+      "name": "8th Wall",
+      "description": "Web-based AR development platform",
+      "category": "AR/VR",
+      "baseUrl": "https://www.8thwall.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.8thwall.com/docs/"
+    },
+    {
+      "name": "Spark AR",
+      "description": "Meta's AR creation platform for Facebook and Instagram",
+      "category": "AR/VR",
+      "baseUrl": "https://sparkar.facebook.com",
+      "authType": "apiKey",
+      "docsUrl": "https://sparkar.facebook.com/ar-studio/learn/"
+    },
+    {
+      "name": "Snap Lens Studio",
+      "description": "Snapchat AR experiences development SDK",
+      "category": "AR/VR",
+      "baseUrl": "https://ar.snap.com",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.snap.com/lens-studio/"
+    },
+    {
+      "name": "Lightship ARDK",
+      "description": "Niantic's AR SDK with depth, physics, and occlusion",
+      "category": "AR/VR",
+      "baseUrl": "https://lightship.dev",
+      "authType": "apiKey",
+      "docsUrl": "https://lightship.dev/docs/"
+    },
+    {
+      "name": "Unity XR",
+      "description": "Unity XR Interaction Toolkit for VR/AR",
+      "category": "AR/VR",
+      "baseUrl": "https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit",
+      "authType": "none",
+      "docsUrl": "https://docs.unity3d.com/Manual/XR.html"
+    },
+    {
+      "name": "SteamVR",
+      "description": "Valve's VR SDK for PC VR development",
+      "category": "AR/VR",
+      "baseUrl": "https://github.com/ValveSoftware/steamvr_unity_plugin",
+      "authType": "none",
+      "docsUrl": "https://github.com/ValveSoftware/steamvr_unity_plugin"
+    },
+    {
+      "name": "OpenVR",
+      "description": "Open source VR SDK from Valve",
+      "category": "AR/VR",
+      "baseUrl": "https://github.com/ValveSoftware/openvr",
+      "authType": "none",
+      "docsUrl": "https://github.com/ValveSoftware/openvr/wiki"
+    },
+    {
+      "name": "OpenXR",
+      "description": "Khronos Group open standard for VR/AR",
+      "category": "AR/VR",
+      "baseUrl": "https://www.khronos.org/openxr",
+      "authType": "none",
+      "docsUrl": "https://www.khronos.org/openxr/"
+    },
+    {
+      "name": "Meta XR SDK",
+      "description": "Meta Quest VR development SDK",
+      "category": "AR/VR",
+      "baseUrl": "https://developers.meta.com/horizon",
+      "authType": "apiKey",
+      "docsUrl": "https://developers.meta.com/horizon/documentation"
+    },
+    {
+      "name": "WebXR",
+      "description": "Web standard for VR/AR in browsers",
+      "category": "AR/VR",
+      "baseUrl": "https://immersiveweb.dev",
+      "authType": "none",
+      "docsUrl": "https://immersiveweb.dev/"
+    },
+    {
+      "name": "A-Frame",
+      "description": "Web framework for building VR experiences",
+      "category": "AR/VR",
+      "baseUrl": "https://aframe.io",
+      "authType": "none",
+      "docsUrl": "https://aframe.io/docs/"
+    },
+    {
+      "name": "Babylon.js",
+      "description": "Powerful web rendering engine for 3D/VR/AR",
+      "category": "AR/VR",
+      "baseUrl": "https://www.babylonjs.com",
+      "authType": "none",
+      "docsUrl": "https://doc.babylonjs.com/"
+    },
+    {
+      "name": "Three.js",
+      "description": "JavaScript 3D library with VR support",
+      "category": "AR/VR",
+      "baseUrl": "https://threejs.org",
+      "authType": "none",
+      "docsUrl": "https://threejs.org/docs/"
+    },
+    {
+      "name": "Microsoft MRTK",
+      "description": "Mixed Reality Toolkit for HoloLens",
+      "category": "AR/VR",
+      "baseUrl": "https://github.com/microsoft/MixedRealityToolkit-Unity",
+      "authType": "none",
+      "docsUrl": "https://docs.microsoft.com/en-us/windows/mixed-reality/mrtk-unity/"
+    },
+    {
+      "name": "Apple Vision Pro SDK",
+      "description": "visionOS development SDK",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.apple.com/visionos",
+      "authType": "none",
+      "docsUrl": "https://developer.apple.com/visionos/"
+    },
+    {
+      "name": "XReal NRSDK",
+      "description": "Framework for AR glasses on Android",
+      "category": "AR/VR",
+      "baseUrl": "https://developer.xreal.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.xreal.com/"
+    },
+    {
+      "name": "Ultraleap Tracking",
+      "description": "Hand tracking API for VR/AR",
+      "category": "AR/VR",
+      "baseUrl": "https://www.ultraleap.com/tracking",
+      "authType": "none",
+      "docsUrl": "https://docs.ultraleap.com/"
+    },
+    {
+      "name": "AUKI Labs",
+      "description": "Peer-to-peer AR positioning framework",
+      "category": "AR/VR",
+      "baseUrl": "https://www.aukilabs.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.aukilabs.com/developers"
+    },
+    {
+      "name": "Ticketmaster Discovery API",
+      "description": "Search events, venues, and attractions",
+      "category": "Events",
+      "baseUrl": "https://app.ticketmaster.com/discovery/v2",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/"
+    },
+    {
+      "name": "Eventbrite",
+      "description": "Event management and ticketing platform API",
+      "category": "Events",
+      "baseUrl": "https://www.eventbriteapi.com/v3",
+      "authType": "OAuth",
+      "docsUrl": "https://www.eventbrite.com/platform/api"
+    },
+    {
+      "name": "SeatGeek",
+      "description": "Search events, venues and performers API",
+      "category": "Events",
+      "baseUrl": "https://api.seatgeek.com/2",
+      "authType": "apiKey",
+      "docsUrl": "https://platform.seatgeek.com/"
+    },
+    {
+      "name": "Zendesk Events API",
+      "description": "Build timeline of customer interactions",
+      "category": "Events",
+      "baseUrl": "https://developer.zendesk.com/api-reference/ticketing",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.zendesk.com/api-reference/ticketing/users/events-api/"
+    },
+    {
+      "name": "EventBookings API",
+      "description": "Event management API for bookings",
+      "category": "Events",
+      "baseUrl": "https://api.eventbookings.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developers.eventbookings.com/"
+    },
+    {
+      "name": "The Events Calendar API",
+      "description": "WordPress events REST API",
+      "category": "Events",
+      "baseUrl": "/wp-json/tribe/events/v1",
+      "authType": "none",
+      "docsUrl": "https://theeventscalendar.com/knowledgebase/event-ticket-rest-api-basics/"
+    },
+    {
+      "name": "Hi.Events",
+      "description": "Open-source event management and ticket selling",
+      "category": "Events",
+      "baseUrl": "https://github.com/HiEventsDev/Hi.Events",
+      "authType": "apiKey",
+      "docsUrl": "https://github.com/HiEventsDev/Hi.Events"
+    },
+    {
+      "name": "Google Events API (HasData)",
+      "description": "Extract Google Events data in real-time",
+      "category": "Events",
+      "baseUrl": "https://hasdata.com/apis/google-events-api",
+      "authType": "apiKey",
+      "docsUrl": "https://hasdata.com/apis/google-events-api"
+    },
+    {
+      "name": "TicketsData",
+      "description": "Ticketmaster seatmaps, prices and availability",
+      "category": "Events",
+      "baseUrl": "https://ticketsdata.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://ticketsdata.com/"
+    },
+    {
+      "name": "Meetup API",
+      "description": "Local community events and groups",
+      "category": "Events",
+      "baseUrl": "https://api.meetup.com",
+      "authType": "OAuth",
+      "docsUrl": "https://www.meetup.com/api/"
+    },
+    {
+      "name": "Eventful API",
+      "description": "Local events, concerts, festivals search",
+      "category": "Events",
+      "baseUrl": "http://api.eventful.com",
+      "authType": "apiKey",
+      "docsUrl": "http://api.eventful.com/docs"
+    },
+    {
+      "name": "Songkick API",
+      "description": "Concert and live music events API",
+      "category": "Events",
+      "baseUrl": "https://api.songkick.com/api/3.0",
+      "authType": "apiKey",
+      "docsUrl": "https://www.songkick.com/developer"
+    },
+    {
+      "name": "PredictHQ",
+      "description": "Events intelligence and demand forecasting",
+      "category": "Events",
+      "baseUrl": "https://api.predicthq.com/v1",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.predicthq.com/"
+    },
+    {
+      "name": "StubHub API",
+      "description": "Ticket marketplace API",
+      "category": "Events",
+      "baseUrl": "https://api.stubhub.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.stubhub.com/"
+    },
+    {
+      "name": "Bandsintown API",
+      "description": "Concert and tour dates for artists",
+      "category": "Events",
+      "baseUrl": "https://rest.bandsintown.com",
+      "authType": "apiKey",
+      "docsUrl": "https://artists.bandsintown.com/support/api-installation"
+    },
+    {
+      "name": "Calendarific",
+      "description": "Worldwide holidays API for 230+ countries",
+      "category": "Events",
+      "baseUrl": "https://calendarific.com/api/v2",
+      "authType": "apiKey",
+      "docsUrl": "https://calendarific.com/api-documentation"
+    },
+    {
+      "name": "Public Holidays API",
+      "description": "National, regional, and religious holidays",
+      "category": "Events",
+      "baseUrl": "https://www.abstractapi.com/api/holidays",
+      "authType": "apiKey",
+      "docsUrl": "https://www.abstractapi.com/api/holidays-api"
+    },
+    {
+      "name": "Nager.Date",
+      "description": "Public holidays for 90+ countries",
+      "category": "Events",
+      "baseUrl": "https://date.nager.at/api",
+      "authType": "none",
+      "docsUrl": "https://date.nager.at/"
+    },
+    {
+      "name": "Statistics Sweden (SCB)",
+      "description": "Swedish government statistics open data API",
+      "category": "Nordic",
+      "baseUrl": "https://api.scb.se/OV0104/v1/doris/en/ssd",
+      "authType": "none",
+      "docsUrl": "https://www.scb.se/en/services/open-data-api/"
+    },
+    {
+      "name": "Sveriges Dataportal",
+      "description": "Swedish open government data portal API",
+      "category": "Nordic",
+      "baseUrl": "https://www.dataportal.se/api",
+      "authType": "none",
+      "docsUrl": "https://www.dataportal.se/en/data-apis"
+    },
+    {
+      "name": "Arbetsförmedlingen",
+      "description": "Swedish Employment Agency open data API",
+      "category": "Nordic",
+      "baseUrl": "https://jobtechdev.se/api",
+      "authType": "apiKey",
+      "docsUrl": "https://arbetsformedlingen.se/other-languages/english-engelska/about-the-website/apis-and-open-data"
+    },
+    {
+      "name": "Trafikverket",
+      "description": "Swedish Transport Administration API",
+      "category": "Nordic",
+      "baseUrl": "https://api.trafikinfo.trafikverket.se/v2/data.json",
+      "authType": "apiKey",
+      "docsUrl": "https://www.trafikverket.se/tjanster/Oppna_data/"
+    },
+    {
+      "name": "SMHI Open Data",
+      "description": "Swedish Meteorological and Hydrological Institute API",
+      "category": "Nordic",
+      "baseUrl": "https://opendata-download-metobs.smhi.se/api",
+      "authType": "none",
+      "docsUrl": "https://www.smhi.se/data/oppna-data/meteorologiska-data"
+    },
+    {
+      "name": "Riksdagen Open Data",
+      "description": "Swedish Parliament open data API",
+      "category": "Nordic",
+      "baseUrl": "https://data.riksdagen.se",
+      "authType": "none",
+      "docsUrl": "https://data.riksdagen.se/"
+    },
+    {
+      "name": "Skatteverket",
+      "description": "Swedish Tax Agency API services",
+      "category": "Nordic",
+      "baseUrl": "https://www.skatteverket.se/apier",
+      "authType": "apiKey",
+      "docsUrl": "https://www.skatteverket.se/foretagochorganisationer/apier.4.7a7c5f011590f6a5b1a8e12.html"
+    },
+    {
+      "name": "Lantmäteriet",
+      "description": "Swedish mapping, cadastral and land registry API",
+      "category": "Nordic",
+      "baseUrl": "https://api.lantmateriet.se",
+      "authType": "apiKey",
+      "docsUrl": "https://www.lantmateriet.se/sv/geodata/geodatatjanster/"
+    },
+    {
+      "name": "data.norge.no",
+      "description": "Norwegian open data portal",
+      "category": "Nordic",
+      "baseUrl": "https://data.norge.no/api",
+      "authType": "none",
+      "docsUrl": "https://data.norge.no/"
+    },
+    {
+      "name": "SSB Norway",
+      "description": "Statistics Norway open data API",
+      "category": "Nordic",
+      "baseUrl": "https://data.ssb.no/api/v0",
+      "authType": "none",
+      "docsUrl": "https://www.ssb.no/omssb/tjenester-og-verktoy/api"
+    },
+    {
+      "name": "Entur",
+      "description": "Norwegian public transport API",
+      "category": "Nordic",
+      "baseUrl": "https://api.entur.io",
+      "authType": "none",
+      "docsUrl": "https://developer.entur.org/"
+    },
+    {
+      "name": "Yr.no",
+      "description": "Norwegian weather API from NRK and MET",
+      "category": "Nordic",
+      "baseUrl": "https://api.met.no/weatherapi",
+      "authType": "none",
+      "docsUrl": "https://developer.yr.no/"
+    },
+    {
+      "name": "MET Norway",
+      "description": "Norwegian Meteorological Institute API",
+      "category": "Nordic",
+      "baseUrl": "https://api.met.no",
+      "authType": "none",
+      "docsUrl": "https://api.met.no/"
+    },
+    {
+      "name": "Brreg",
+      "description": "Norwegian Company Registry API",
+      "category": "Nordic",
+      "baseUrl": "https://data.brreg.no",
+      "authType": "none",
+      "docsUrl": "https://data.brreg.no/"
+    },
+    {
+      "name": "DSB Statistics Denmark",
+      "description": "Danish statistics open data API",
+      "category": "Nordic",
+      "baseUrl": "https://api.statbank.dk/v1",
+      "authType": "none",
+      "docsUrl": "https://www.dst.dk/en/Statistik/brug-telefonerne/api"
+    },
+    {
+      "name": "data.gov.dk",
+      "description": "Danish open government data portal",
+      "category": "Nordic",
+      "baseUrl": "https://data.gov.dk/api",
+      "authType": "none",
+      "docsUrl": "https://data.gov.dk/"
+    },
+    {
+      "name": "Rejseplanen",
+      "description": "Danish public transport API",
+      "category": "Nordic",
+      "baseUrl": "https://www.rejseplanen.dk/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.rejseplanen.dk/labs/"
+    },
+    {
+      "name": "DMI (Danish Meteorological)",
+      "description": "Danish weather and climate data API",
+      "category": "Nordic",
+      "baseUrl": "https://dmigw.govcloud.dk",
+      "authType": "apiKey",
+      "docsUrl": "https://opendatadocs.dmi.govcloud.dk/"
+    },
+    {
+      "name": "CVR Denmark",
+      "description": "Danish Central Business Register API",
+      "category": "Nordic",
+      "baseUrl": "https://cvrapi.dk/api",
+      "authType": "apiKey",
+      "docsUrl": "https://cvrapi.dk/"
+    },
+    {
+      "name": "Statistics Finland",
+      "description": "Finnish open statistics API",
+      "category": "Nordic",
+      "baseUrl": "https://statfin.stat.fi:443/PxWeb/api/v1/en/StatFin",
+      "authType": "none",
+      "docsUrl": "https://www.stat.fi/org/avoindata/api_en.html"
+    },
+    {
+      "name": "Digitransit Finland",
+      "description": "Finnish public transport API",
+      "category": "Nordic",
+      "baseUrl": "https://api.digitransit.fi",
+      "authType": "apiKey",
+      "docsUrl": "https://digitransit.fi/en/developers/"
+    },
+    {
+      "name": "FMI Open Data",
+      "description": "Finnish Meteorological Institute API",
+      "category": "Nordic",
+      "baseUrl": "https://opendata.fmi.fi/wfs",
+      "authType": "apiKey",
+      "docsUrl": "https://en.ilmatieteenlaitos.fi/open-data"
+    },
+    {
+      "name": "PRH Finland",
+      "description": "Finnish Patent and Registration Office API",
+      "category": "Nordic",
+      "baseUrl": "https://avoindata.prh.fi/opendata/",
+      "authType": "none",
+      "docsUrl": "https://avoindata.prh.fi/"
+    },
+    {
+      "name": "Reykjavik Open Data",
+      "description": "Icelandic capital city open data",
+      "category": "Nordic",
+      "baseUrl": "https://opingogn.is/api",
+      "authType": "none",
+      "docsUrl": "https://opingogn.is/"
+    },
+    {
+      "name": "SL Realtime",
+      "description": "Stockholm public transport real-time API",
+      "category": "Nordic",
+      "baseUrl": "https://api.sl.se/api2",
+      "authType": "apiKey",
+      "docsUrl": "https://www.sl.se/sv/info/oppna-data/"
+    },
+    {
+      "name": "Open Automation Software",
+      "description": "MES and industrial automation API",
+      "category": "Industry",
+      "baseUrl": "https://openautomationsoftware.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://openautomationsoftware.com/"
+    },
+    {
+      "name": "Siemens SCADA",
+      "description": "Siemens SIMATIC SCADA systems API",
+      "category": "Industry",
+      "baseUrl": "https://www.siemens.com/industrial-api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.siemens.com/en-us/products/scada/"
+    },
+    {
+      "name": "PTC ThingWorx",
+      "description": "Industrial IoT platform API",
+      "category": "Industry",
+      "baseUrl": "https://developer.thingworx.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.thingworx.com/en"
+    },
+    {
+      "name": "Rockwell FactoryTalk",
+      "description": "Industrial automation and analytics API",
+      "category": "Industry",
+      "baseUrl": "https://www.rockwellautomation.com/factorytalk",
+      "authType": "apiKey",
+      "docsUrl": "https://www.rockwellautomation.com/"
+    },
+    {
+      "name": "Honeywell Forge",
+      "description": "Industrial IoT and analytics platform",
+      "category": "Industry",
+      "baseUrl": "https://forge.honeywell.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.honeywell.com/us/en/honeywell-forge"
+    },
+    {
+      "name": "GE Digital",
+      "description": "Industrial software and IoT solutions",
+      "category": "Industry",
+      "baseUrl": "https://www.ge.com/digital/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.ge.com/digital/applications"
+    },
+    {
+      "name": "OSIsoft PI",
+      "description": "Industrial data infrastructure API",
+      "category": "Industry",
+      "baseUrl": "https://pisquare.osisoft.com",
+      "authType": "apiKey",
+      "docsUrl": "https://osisoft.com/pi-system"
+    },
+    {
+      "name": "Emerson DeltaV",
+      "description": "Process automation system API",
+      "category": "Industry",
+      "baseUrl": "https://www.emerson.com/deltav-api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.emerson.com/en-us/automation/deltav"
+    },
+    {
+      "name": "ABB Ability",
+      "description": "Digital industrial platform API",
+      "category": "Industry",
+      "baseUrl": "https://ability.abb.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://new.abb.com/abb-ability"
+    },
+    {
+      "name": "Schneider EcoStruxure",
+      "description": "IoT-enabled architecture for industry",
+      "category": "Industry",
+      "baseUrl": "https://ecostruxure.schneider-electric.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.se.com/ww/en/work/campaign/innovation/overview.jsp"
+    },
+    {
+      "name": "OPC UA",
+      "description": "Open platform communications unified architecture",
+      "category": "Industry",
+      "baseUrl": "https://opcfoundation.org/developer-tools/",
+      "authType": "none",
+      "docsUrl": "https://opcfoundation.org/"
+    },
+    {
+      "name": "MQTT",
+      "description": "Machine-to-machine IoT connectivity protocol",
+      "category": "Industry",
+      "baseUrl": "mqtt://broker.hivemq.com",
+      "authType": "none",
+      "docsUrl": "https://mqtt.org/"
+    },
+    {
+      "name": "Node-RED",
+      "description": "Flow-based programming for IoT",
+      "category": "Industry",
+      "baseUrl": "https://nodered.org",
+      "authType": "none",
+      "docsUrl": "https://nodered.org/docs/"
+    },
+    {
+      "name": "Kepware KEPServerEX",
+      "description": "Industrial connectivity platform",
+      "category": "Industry",
+      "baseUrl": "https://www.kepware.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.kepware.com/en-us/products/kepserverex/"
+    },
+    {
+      "name": "InfluxDB Industrial",
+      "description": "Time series database for industrial IoT",
+      "category": "Industry",
+      "baseUrl": "https://cloud2.influxdata.com/api/v2",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.influxdata.com/influxdb/"
+    },
+    {
+      "name": "Ignition by Inductive Automation",
+      "description": "Industrial automation platform",
+      "category": "Industry",
+      "baseUrl": "https://inductiveautomation.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.inductiveautomation.com/"
+    },
+    {
+      "name": "Tulip",
+      "description": "Frontline operations platform for manufacturing",
+      "category": "Industry",
+      "baseUrl": "https://tulip.co/api",
+      "authType": "apiKey",
+      "docsUrl": "https://tulip.co/"
+    },
+    {
+      "name": "Aveva",
+      "description": "Industrial software for engineering and operations",
+      "category": "Industry",
+      "baseUrl": "https://www.aveva.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.aveva.com/"
+    },
+    {
+      "name": "Uptake",
+      "description": "Industrial AI and analytics platform",
+      "category": "Industry",
+      "baseUrl": "https://www.uptake.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.uptake.com/"
+    },
+    {
+      "name": "Sight Machine",
+      "description": "Manufacturing analytics platform",
+      "category": "Industry",
+      "baseUrl": "https://sightmachine.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://sightmachine.com/"
+    },
+    {
+      "name": "Rockwell Plex",
+      "description": "Smart manufacturing platform API",
+      "category": "Industry",
+      "baseUrl": "https://www.plex.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.plex.com/"
+    },
+    {
+      "name": "ESPN",
+      "description": "Sports scores, news, and data",
+      "category": "Sports",
+      "baseUrl": "https://site.api.espn.com/apis/site/v2/sports",
+      "authType": "none",
+      "docsUrl": "https://www.espn.com/"
+    },
+    {
+      "name": "NBA API",
+      "description": "NBA basketball statistics and data",
+      "category": "Sports",
+      "baseUrl": "https://stats.nba.com/stats",
+      "authType": "none",
+      "docsUrl": "https://github.com/swar/nba_api"
+    },
+    {
+      "name": "MLB StatsAPI",
+      "description": "Major League Baseball statistics",
+      "category": "Sports",
+      "baseUrl": "https://statsapi.mlb.com/api",
+      "authType": "none",
+      "docsUrl": "https://appac.github.io/mlb-data-api-docs/"
+    },
+    {
+      "name": "NHL API",
+      "description": "National Hockey League data API",
+      "category": "Sports",
+      "baseUrl": "https://api-web.nhle.com/v1",
+      "authType": "none",
+      "docsUrl": "https://github.com/Zmalski/NHL-API-Reference"
+    },
+    {
+      "name": "Football-Data.org",
+      "description": "RESTful football data with free tier",
+      "category": "Sports",
+      "baseUrl": "https://api.football-data.org/v4",
+      "authType": "apiKey",
+      "docsUrl": "https://www.football-data.org/documentation/quickstart"
+    },
+    {
+      "name": "Ergast F1",
+      "description": "Historical Formula 1 data API",
+      "category": "Sports",
+      "baseUrl": "https://ergast.com/api/f1",
+      "authType": "none",
+      "docsUrl": "https://ergast.com/mrd/"
+    },
+    {
+      "name": "UFC API",
+      "description": "Ultimate Fighting Championship data",
+      "category": "Sports",
+      "baseUrl": "https://ufc-data-api.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://rapidapi.com/simchamo/api/ufc-data"
+    },
+    {
+      "name": "CricAPI",
+      "description": "Cricket scores and statistics API",
+      "category": "Sports",
+      "baseUrl": "https://cricapi.com/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.cricapi.com/"
+    },
+    {
+      "name": "Strava API",
+      "description": "Fitness activity tracking API",
+      "category": "Sports",
+      "baseUrl": "https://www.strava.com/api/v3",
+      "authType": "OAuth",
+      "docsUrl": "https://developers.strava.com/"
+    },
+    {
+      "name": "Fitbit API",
+      "description": "Health and fitness data API",
+      "category": "Sports",
+      "baseUrl": "https://api.fitbit.com",
+      "authType": "OAuth",
+      "docsUrl": "https://dev.fitbit.com/build/reference/web-api/"
+    },
+    {
+      "name": "Runkeeper API",
+      "description": "Running and fitness tracking API",
+      "category": "Sports",
+      "baseUrl": "https://runkeeper.com/apps/api",
+      "authType": "OAuth",
+      "docsUrl": "https://runkeeper.com/developer/healthgraph/overview"
+    },
+    {
+      "name": "OpenLigaDB",
+      "description": "German football Bundesliga data",
+      "category": "Sports",
+      "baseUrl": "https://api.openligadb.de",
+      "authType": "none",
+      "docsUrl": "https://www.openligadb.de/"
+    },
+    {
+      "name": "Balldontlie",
+      "description": "Free NBA API with no authentication",
+      "category": "Sports",
+      "baseUrl": "https://api.balldontlie.io/v1",
+      "authType": "none",
+      "docsUrl": "https://www.balldontlie.io/"
+    },
+    {
+      "name": "RapidAPI Sports",
+      "description": "Collection of sports APIs on RapidAPI",
+      "category": "Sports",
+      "baseUrl": "https://rapidapi.com/collection/sports",
+      "authType": "apiKey",
+      "docsUrl": "https://rapidapi.com/collection/sports"
+    },
+    {
+      "name": "Odds API",
+      "description": "Sports betting odds aggregator",
+      "category": "Sports",
+      "baseUrl": "https://api.the-odds-api.com/v4",
+      "authType": "apiKey",
+      "docsUrl": "https://the-odds-api.com/liveapi/guides/v4/"
+    },
+    {
+      "name": "SofaScore",
+      "description": "Live scores and sports statistics",
+      "category": "Sports",
+      "baseUrl": "https://api.sofascore.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.sofascore.com/"
+    },
+    {
+      "name": "FlashScore",
+      "description": "Live sports scores and results",
+      "category": "Sports",
+      "baseUrl": "https://flashscore.p.rapidapi.com",
+      "authType": "apiKey",
+      "docsUrl": "https://rapidapi.com/nttr/api/flashscore"
+    },
+    {
+      "name": "Sportradar",
+      "description": "Comprehensive sports data provider",
+      "category": "Sports",
+      "baseUrl": "https://api.sportradar.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.sportradar.com/"
+    },
+    {
+      "name": "OpenWeatherMap",
+      "description": "Weather data including forecasts and historical",
+      "category": "Nordic",
+      "baseUrl": "https://api.openweathermap.org/data/2.5",
+      "authType": "apiKey",
+      "docsUrl": "https://openweathermap.org/api"
+    },
+    {
+      "name": "Postnord API",
+      "description": "Nordic postal and logistics services",
+      "category": "Nordic",
+      "baseUrl": "https://api2.postnord.com",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.postnord.com/"
+    },
+    {
+      "name": "Klarna Checkout",
+      "description": "Swedish payment service API",
+      "category": "Nordic",
+      "baseUrl": "https://api.klarna.com",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.klarna.com/"
+    },
+    {
+      "name": "Swish API",
+      "description": "Swedish mobile payment API",
+      "category": "Nordic",
+      "baseUrl": "https://mss.cpc.getswish.net",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.swish.nu/"
+    },
+    {
+      "name": "Vipps API",
+      "description": "Norwegian mobile payment API",
+      "category": "Nordic",
+      "baseUrl": "https://api.vipps.no",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.vippsmobilepay.com/"
+    },
+    {
+      "name": "MobilePay API",
+      "description": "Danish mobile payment API",
+      "category": "Nordic",
+      "baseUrl": "https://api.mobilepay.dk",
+      "authType": "apiKey",
+      "docsUrl": "https://developer.vippsmobilepay.com/"
+    },
+    {
+      "name": "BankID Sweden",
+      "description": "Swedish electronic identification",
+      "category": "Nordic",
+      "baseUrl": "https://appapi2.bankid.com",
+      "authType": "apiKey",
+      "docsUrl": "https://www.bankid.com/utvecklare/rp-info"
+    },
+    {
+      "name": "BankID Norway",
+      "description": "Norwegian electronic identification",
+      "category": "Nordic",
+      "baseUrl": "https://ra-preprod.bankidapis.no",
+      "authType": "apiKey",
+      "docsUrl": "https://www.bankid.no/bedrift/kom-i-gang/"
+    },
+    {
+      "name": "NemID/MitID",
+      "description": "Danish digital identity API",
+      "category": "Nordic",
+      "baseUrl": "https://devportal.mitid.dk",
+      "authType": "apiKey",
+      "docsUrl": "https://www.mitid.dk/en-gb/"
+    },
+    {
+      "name": "Bolagsverket",
+      "description": "Swedish Companies Registration Office API",
+      "category": "Nordic",
+      "baseUrl": "https://bolagsverket.se/apier",
+      "authType": "apiKey",
+      "docsUrl": "https://bolagsverket.se/"
+    },
+    {
+      "name": "Vero Finland",
+      "description": "Finnish Tax Administration API",
+      "category": "Nordic",
+      "baseUrl": "https://www.vero.fi/api",
+      "authType": "apiKey",
+      "docsUrl": "https://www.vero.fi/en/"
+    },
+    {
+      "name": "Västtrafik",
+      "description": "West Sweden public transport API",
+      "category": "Nordic",
+      "baseUrl": "https://api.vasttrafik.se",
+      "authType": "OAuth",
+      "docsUrl": "https://developer.vasttrafik.se/"
+    },
+    {
+      "name": "Ruter",
+      "description": "Oslo public transport API",
+      "category": "Nordic",
+      "baseUrl": "https://api.entur.io/journey-planner",
+      "authType": "none",
+      "docsUrl": "https://developer.entur.org/"
+    },
+    {
+      "name": "HSL Helsinki",
+      "description": "Helsinki regional transport API",
+      "category": "Nordic",
+      "baseUrl": "https://api.digitransit.fi/routing/v1",
+      "authType": "apiKey",
+      "docsUrl": "https://digitransit.fi/en/developers/"
+    },
+    {
+      "name": "Modbus TCP",
+      "description": "Industrial communication protocol",
+      "category": "Industry",
+      "baseUrl": "tcp://localhost:502",
+      "authType": "none",
+      "docsUrl": "https://modbus.org/"
+    },
+    {
+      "name": "BACnet",
+      "description": "Building automation and control networks",
+      "category": "Industry",
+      "baseUrl": "http://www.bacnet.org",
+      "authType": "none",
+      "docsUrl": "http://www.bacnet.org/"
+    },
+    {
+      "name": "KNX",
+      "description": "Building automation standard",
+      "category": "Industry",
+      "baseUrl": "https://www.knx.org",
+      "authType": "none",
+      "docsUrl": "https://www.knx.org/"
+    },
+    {
+      "name": "LonWorks",
+      "description": "Networking platform for industrial control",
+      "category": "Industry",
+      "baseUrl": "https://www.echelon.com",
+      "authType": "none",
+      "docsUrl": "https://www.echelon.com/"
+    },
+    {
+      "name": "Euromap 77",
+      "description": "OPC UA for plastics and rubber machinery",
+      "category": "Industry",
+      "baseUrl": "https://www.euromap.org/euromap77",
+      "authType": "none",
+      "docsUrl": "https://www.euromap.org/"
+    },
+    {
+      "name": "umati",
+      "description": "Universal machine technology interface",
+      "category": "Industry",
+      "baseUrl": "https://umati.org",
+      "authType": "none",
+      "docsUrl": "https://umati.org/"
+    },
+    {
+      "name": "MTConnect",
+      "description": "Manufacturing technology standard",
+      "category": "Industry",
+      "baseUrl": "https://www.mtconnect.org",
+      "authType": "none",
+      "docsUrl": "https://www.mtconnect.org/"
+    },
+    {
+      "name": "PackML",
+      "description": "Packaging machine language standard",
+      "category": "Industry",
+      "baseUrl": "https://www.omac.org/packml",
+      "authType": "none",
+      "docsUrl": "https://www.omac.org/"
+    },
+    {
+      "name": "ISA-95",
+      "description": "Enterprise-control system integration",
+      "category": "Industry",
+      "baseUrl": "https://www.isa.org/isa95",
+      "authType": "none",
+      "docsUrl": "https://www.isa.org/"
+    },
+    {
+      "name": "SAP Manufacturing",
+      "description": "SAP Digital Manufacturing Cloud API",
+      "category": "Industry",
+      "baseUrl": "https://api.sap.com/package/SAPDigitalManufacturing",
+      "authType": "apiKey",
+      "docsUrl": "https://api.sap.com/"
+    }
+  ]
+}

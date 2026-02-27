@@ -1,0 +1,3062 @@
+[
+  {
+    "name": "Postman",
+    "description": "API development platform for testing and documentation",
+    "category": "Development",
+    "baseUrl": "https://www.postman.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0001"
+  },
+  {
+    "name": "Insomnia",
+    "description": "REST API client for debugging and testing",
+    "category": "Development",
+    "baseUrl": "https://insomnia.rest/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0002"
+  },
+  {
+    "name": "Hoppscotch",
+    "description": "Open source API development ecosystem",
+    "category": "Development",
+    "baseUrl": "https://hoppscotch.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0003"
+  },
+  {
+    "name": "RapidAPI",
+    "description": "World's largest API marketplace",
+    "category": "Development",
+    "baseUrl": "https://rapidapi.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0004"
+  },
+  {
+    "name": "Swagger",
+    "description": "API documentation and design tools",
+    "category": "Development",
+    "baseUrl": "https://swagger.io/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-0005"
+  },
+  {
+    "name": "OpenAPI Generator",
+    "description": "Generate API client libraries from OpenAPI specs",
+    "category": "Development",
+    "baseUrl": "https://openapi-generator.tech/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0006"
+  },
+  {
+    "name": "Stoplight",
+    "description": "API design, documentation and governance platform",
+    "category": "Development",
+    "baseUrl": "https://stoplight.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0007"
+  },
+  {
+    "name": "ReadMe",
+    "description": "API documentation and developer hub platform",
+    "category": "Development",
+    "baseUrl": "https://readme.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0008"
+  },
+  {
+    "name": "Treblle",
+    "description": "API intelligence and monitoring platform",
+    "category": "Development",
+    "baseUrl": "https://treblle.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0009"
+  },
+  {
+    "name": "Mockoon",
+    "description": "Create mock APIs in seconds",
+    "category": "Development",
+    "baseUrl": "https://mockoon.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0010"
+  },
+  {
+    "name": "Prism",
+    "description": "API mock server and validation proxy",
+    "category": "Development",
+    "baseUrl": "https://stoplight.io/prism/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0011"
+  },
+  {
+    "name": "WireMock",
+    "description": "Flexible API mocking and stubbing tool",
+    "category": "Development",
+    "baseUrl": "https://wiremock.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0012"
+  },
+  {
+    "name": "JSON Server",
+    "description": "Get a full fake REST API with zero coding",
+    "category": "Development",
+    "baseUrl": "https://github.com/typicode/json-server",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0013"
+  },
+  {
+    "name": "Mirage JS",
+    "description": "API mocking library for frontend development",
+    "category": "Development",
+    "baseUrl": "https://miragejs.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0014"
+  },
+  {
+    "name": "MSW",
+    "description": "Mock Service Worker for API mocking",
+    "category": "Development",
+    "baseUrl": "https://mswjs.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0015"
+  },
+  {
+    "name": "Nock",
+    "description": "HTTP server mocking for Node.js",
+    "category": "Development",
+    "baseUrl": "https://github.com/nock/nock",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0016"
+  },
+  {
+    "name": "Polly.JS",
+    "description": "Record, replay, and stub HTTP interactions",
+    "category": "Development",
+    "baseUrl": "https://netflix.github.io/pollyjs/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0017"
+  },
+  {
+    "name": "VCR.py",
+    "description": "Record and replay HTTP interactions for Python",
+    "category": "Development",
+    "baseUrl": "https://vcrpy.readthedocs.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0018"
+  },
+  {
+    "name": "Beeceptor",
+    "description": "Mock REST APIs with zero coding",
+    "category": "Development",
+    "baseUrl": "https://beeceptor.com/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-0019"
+  },
+  {
+    "name": "Mocky",
+    "description": "Generate custom HTTP responses for testing",
+    "category": "Development",
+    "baseUrl": "https://www.mocky.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0020"
+  },
+  {
+    "name": "Anthropic Claude",
+    "description": "Claude AI assistant API",
+    "category": "AI & ML",
+    "baseUrl": "https://api.anthropic.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0021"
+  },
+  {
+    "name": "Google Gemini",
+    "description": "Google's multimodal AI model API",
+    "category": "AI & ML",
+    "baseUrl": "https://ai.google.dev/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0022"
+  },
+  {
+    "name": "Mistral AI",
+    "description": "Open-weight large language models",
+    "category": "AI & ML",
+    "baseUrl": "https://mistral.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0023"
+  },
+  {
+    "name": "Cohere",
+    "description": "Enterprise NLP platform",
+    "category": "AI & ML",
+    "baseUrl": "https://cohere.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0024"
+  },
+  {
+    "name": "AI21 Labs",
+    "description": "Jurassic language models API",
+    "category": "AI & ML",
+    "baseUrl": "https://www.ai21.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0025"
+  },
+  {
+    "name": "Groq",
+    "description": "Ultra-fast AI inference API",
+    "category": "AI & ML",
+    "baseUrl": "https://groq.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0026"
+  },
+  {
+    "name": "Together AI",
+    "description": "Open-source AI models API",
+    "category": "AI & ML",
+    "baseUrl": "https://together.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0027"
+  },
+  {
+    "name": "Fireworks AI",
+    "description": "Fast and cost-effective AI inference",
+    "category": "AI & ML",
+    "baseUrl": "https://fireworks.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0028"
+  },
+  {
+    "name": "Perplexity AI",
+    "description": "AI-powered search and answer engine",
+    "category": "AI & ML",
+    "baseUrl": "https://www.perplexity.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0029"
+  },
+  {
+    "name": "Cerebras",
+    "description": "High-performance AI compute API",
+    "category": "AI & ML",
+    "baseUrl": "https://cerebras.ai/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0030"
+  },
+  {
+    "name": "Anyscale",
+    "description": "Scalable AI infrastructure",
+    "category": "AI & ML",
+    "baseUrl": "https://anyscale.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0031"
+  },
+  {
+    "name": "Modal",
+    "description": "Serverless platform for AI/ML",
+    "category": "AI & ML",
+    "baseUrl": "https://modal.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0032"
+  },
+  {
+    "name": "Replicate",
+    "description": "Run ML models in the cloud",
+    "category": "AI & ML",
+    "baseUrl": "https://replicate.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0033"
+  },
+  {
+    "name": "Hugging Face Inference",
+    "description": "Deploy and run ML models",
+    "category": "AI & ML",
+    "baseUrl": "https://huggingface.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0034"
+  },
+  {
+    "name": "AWS Bedrock",
+    "description": "Foundation models via AWS",
+    "category": "AI & ML",
+    "baseUrl": "https://aws.amazon.com/bedrock/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0035"
+  },
+  {
+    "name": "Azure OpenAI",
+    "description": "OpenAI models via Azure",
+    "category": "AI & ML",
+    "baseUrl": "https://azure.microsoft.com/products/ai-services/openai-service",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0036"
+  },
+  {
+    "name": "Vertex AI",
+    "description": "Google Cloud AI platform",
+    "category": "AI & ML",
+    "baseUrl": "https://cloud.google.com/vertex-ai",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0037"
+  },
+  {
+    "name": "SambaNova",
+    "description": "Enterprise generative AI platform",
+    "category": "AI & ML",
+    "baseUrl": "https://sambanova.ai/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0038"
+  },
+  {
+    "name": "OctoAI",
+    "description": "Efficient AI model deployment",
+    "category": "AI & ML",
+    "baseUrl": "https://octo.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0039"
+  },
+  {
+    "name": "Lepton AI",
+    "description": "AI-native cloud platform",
+    "category": "AI & ML",
+    "baseUrl": "https://lepton.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0040"
+  },
+  {
+    "name": "Midjourney API",
+    "description": "AI image generation via Discord",
+    "category": "AI Image",
+    "baseUrl": "https://www.midjourney.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0041"
+  },
+  {
+    "name": "Stability AI",
+    "description": "Stable Diffusion API",
+    "category": "AI Image",
+    "baseUrl": "https://stability.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0042"
+  },
+  {
+    "name": "DALL-E API",
+    "description": "OpenAI image generation",
+    "category": "AI Image",
+    "baseUrl": "https://openai.com/dall-e-3",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0043"
+  },
+  {
+    "name": "Leonardo.AI",
+    "description": "AI art and asset generation",
+    "category": "AI Image",
+    "baseUrl": "https://leonardo.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0044"
+  },
+  {
+    "name": "Ideogram",
+    "description": "AI image generation with text rendering",
+    "category": "AI Image",
+    "baseUrl": "https://ideogram.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0045"
+  },
+  {
+    "name": "Flux AI",
+    "description": "Black Forest Labs image model",
+    "category": "AI Image",
+    "baseUrl": "https://blackforestlabs.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0046"
+  },
+  {
+    "name": "Clipdrop",
+    "description": "AI-powered image editing tools",
+    "category": "AI Image",
+    "baseUrl": "https://clipdrop.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0047"
+  },
+  {
+    "name": "Remove.bg",
+    "description": "AI background removal API",
+    "category": "AI Image",
+    "baseUrl": "https://www.remove.bg/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0048"
+  },
+  {
+    "name": "PhotoRoom",
+    "description": "AI photo editing and background removal",
+    "category": "AI Image",
+    "baseUrl": "https://www.photoroom.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0049"
+  },
+  {
+    "name": "Luma AI",
+    "description": "3D capture and NeRF API",
+    "category": "AI Image",
+    "baseUrl": "https://lumalabs.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0050"
+  },
+  {
+    "name": "RunwayML",
+    "description": "AI video generation and editing",
+    "category": "AI Video",
+    "baseUrl": "https://runwayml.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0051"
+  },
+  {
+    "name": "Pika Labs",
+    "description": "AI video generation",
+    "category": "AI Video",
+    "baseUrl": "https://pika.art/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0052"
+  },
+  {
+    "name": "HeyGen",
+    "description": "AI avatar video generation",
+    "category": "AI Video",
+    "baseUrl": "https://www.heygen.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0053"
+  },
+  {
+    "name": "Synthesia",
+    "description": "AI video creation with avatars",
+    "category": "AI Video",
+    "baseUrl": "https://www.synthesia.io/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0054"
+  },
+  {
+    "name": "D-ID",
+    "description": "Digital people video API",
+    "category": "AI Video",
+    "baseUrl": "https://www.d-id.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0055"
+  },
+  {
+    "name": "Colossyan",
+    "description": "AI video creator for learning",
+    "category": "AI Video",
+    "baseUrl": "https://www.colossyan.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0056"
+  },
+  {
+    "name": "Pictory",
+    "description": "AI video creation from text",
+    "category": "AI Video",
+    "baseUrl": "https://pictory.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0057"
+  },
+  {
+    "name": "InVideo AI",
+    "description": "AI-powered video editor",
+    "category": "AI Video",
+    "baseUrl": "https://invideo.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0058"
+  },
+  {
+    "name": "Kapwing",
+    "description": "AI video editing platform",
+    "category": "AI Video",
+    "baseUrl": "https://www.kapwing.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0059"
+  },
+  {
+    "name": "Descript",
+    "description": "AI video and podcast editing",
+    "category": "AI Video",
+    "baseUrl": "https://www.descript.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0060"
+  },
+  {
+    "name": "ElevenLabs",
+    "description": "AI voice synthesis and cloning",
+    "category": "AI Voice",
+    "baseUrl": "https://elevenlabs.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0061"
+  },
+  {
+    "name": "PlayHT",
+    "description": "AI voice generation API",
+    "category": "AI Voice",
+    "baseUrl": "https://play.ht/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0062"
+  },
+  {
+    "name": "Murf AI",
+    "description": "AI voice over studio",
+    "category": "AI Voice",
+    "baseUrl": "https://murf.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0063"
+  },
+  {
+    "name": "Resemble AI",
+    "description": "AI voice cloning and synthesis",
+    "category": "AI Voice",
+    "baseUrl": "https://www.resemble.ai/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0064"
+  },
+  {
+    "name": "WellSaid Labs",
+    "description": "Enterprise AI voice platform",
+    "category": "AI Voice",
+    "baseUrl": "https://wellsaidlabs.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0065"
+  },
+  {
+    "name": "Speechify",
+    "description": "Text-to-speech API",
+    "category": "AI Voice",
+    "baseUrl": "https://speechify.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0066"
+  },
+  {
+    "name": "Coqui TTS",
+    "description": "Open-source text-to-speech",
+    "category": "AI Voice",
+    "baseUrl": "https://coqui.ai/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0067"
+  },
+  {
+    "name": "Tortoise TTS",
+    "description": "Multi-voice text-to-speech",
+    "category": "AI Voice",
+    "baseUrl": "https://github.com/neonbjb/tortoise-tts",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0068"
+  },
+  {
+    "name": "XTTS",
+    "description": "Coqui's multilingual TTS model",
+    "category": "AI Voice",
+    "baseUrl": "https://github.com/coqui-ai/TTS",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0069"
+  },
+  {
+    "name": "Bark",
+    "description": "Suno's text-to-audio model",
+    "category": "AI Voice",
+    "baseUrl": "https://github.com/suno-ai/bark",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0070"
+  },
+  {
+    "name": "Suno AI",
+    "description": "AI music generation",
+    "category": "AI Music",
+    "baseUrl": "https://suno.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0071"
+  },
+  {
+    "name": "Udio",
+    "description": "AI music creation platform",
+    "category": "AI Music",
+    "baseUrl": "https://www.udio.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0072"
+  },
+  {
+    "name": "AIVA",
+    "description": "AI composer for soundtracks",
+    "category": "AI Music",
+    "baseUrl": "https://www.aiva.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0073"
+  },
+  {
+    "name": "Soundraw",
+    "description": "AI music generator for creators",
+    "category": "AI Music",
+    "baseUrl": "https://soundraw.io/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0074"
+  },
+  {
+    "name": "Mubert",
+    "description": "AI-generated royalty-free music",
+    "category": "AI Music",
+    "baseUrl": "https://mubert.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0075"
+  },
+  {
+    "name": "Boomy",
+    "description": "Create and monetize AI music",
+    "category": "AI Music",
+    "baseUrl": "https://boomy.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0076"
+  },
+  {
+    "name": "Loudly",
+    "description": "AI music generation platform",
+    "category": "AI Music",
+    "baseUrl": "https://www.loudly.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0077"
+  },
+  {
+    "name": "Deepgram",
+    "description": "Speech recognition API",
+    "category": "Speech Recognition",
+    "baseUrl": "https://deepgram.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0078"
+  },
+  {
+    "name": "Assembly AI",
+    "description": "Speech-to-text and audio intelligence",
+    "category": "Speech Recognition",
+    "baseUrl": "https://www.assemblyai.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0079"
+  },
+  {
+    "name": "Rev AI",
+    "description": "Speech recognition API",
+    "category": "Speech Recognition",
+    "baseUrl": "https://www.rev.ai/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0080"
+  },
+  {
+    "name": "Zapier",
+    "description": "Connect apps and automate workflows",
+    "category": "Automation",
+    "baseUrl": "https://zapier.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0081"
+  },
+  {
+    "name": "Make",
+    "description": "Visual automation platform",
+    "category": "Automation",
+    "baseUrl": "https://www.make.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0082"
+  },
+  {
+    "name": "n8n",
+    "description": "Open-source workflow automation",
+    "category": "Automation",
+    "baseUrl": "https://n8n.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0083"
+  },
+  {
+    "name": "Pipedream",
+    "description": "Developer-first automation platform",
+    "category": "Automation",
+    "baseUrl": "https://pipedream.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0084"
+  },
+  {
+    "name": "Activepieces",
+    "description": "Open-source automation tool",
+    "category": "Automation",
+    "baseUrl": "https://www.activepieces.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0085"
+  },
+  {
+    "name": "Windmill",
+    "description": "Developer platform for scripts and workflows",
+    "category": "Automation",
+    "baseUrl": "https://windmill.dev/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0086"
+  },
+  {
+    "name": "Temporal",
+    "description": "Durable execution platform",
+    "category": "Automation",
+    "baseUrl": "https://temporal.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0087"
+  },
+  {
+    "name": "Inngest",
+    "description": "Event-driven background jobs",
+    "category": "Automation",
+    "baseUrl": "https://inngest.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0088"
+  },
+  {
+    "name": "Trigger.dev",
+    "description": "Background jobs for developers",
+    "category": "Automation",
+    "baseUrl": "https://trigger.dev/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0089"
+  },
+  {
+    "name": "Defer",
+    "description": "Background jobs for Node.js",
+    "category": "Automation",
+    "baseUrl": "https://defer.run/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0090"
+  },
+  {
+    "name": "Prefect",
+    "description": "Modern workflow orchestration",
+    "category": "Automation",
+    "baseUrl": "https://www.prefect.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0091"
+  },
+  {
+    "name": "Dagster",
+    "description": "Data orchestration platform",
+    "category": "Automation",
+    "baseUrl": "https://dagster.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0092"
+  },
+  {
+    "name": "Apache Airflow",
+    "description": "Platform for workflow scheduling",
+    "category": "Automation",
+    "baseUrl": "https://airflow.apache.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0093"
+  },
+  {
+    "name": "Kestra",
+    "description": "Event-driven orchestration platform",
+    "category": "Automation",
+    "baseUrl": "https://kestra.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0094"
+  },
+  {
+    "name": "Camunda",
+    "description": "Process orchestration platform",
+    "category": "Automation",
+    "baseUrl": "https://camunda.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0095"
+  },
+  {
+    "name": "Supabase",
+    "description": "Open source Firebase alternative",
+    "category": "Database",
+    "baseUrl": "https://supabase.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0096"
+  },
+  {
+    "name": "PlanetScale",
+    "description": "Serverless MySQL platform",
+    "category": "Database",
+    "baseUrl": "https://planetscale.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0097"
+  },
+  {
+    "name": "Neon",
+    "description": "Serverless Postgres",
+    "category": "Database",
+    "baseUrl": "https://neon.tech/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0098"
+  },
+  {
+    "name": "Turso",
+    "description": "SQLite for the edge",
+    "category": "Database",
+    "baseUrl": "https://turso.tech/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0099"
+  },
+  {
+    "name": "Upstash",
+    "description": "Serverless Redis and Kafka",
+    "category": "Database",
+    "baseUrl": "https://upstash.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0100"
+  },
+  {
+    "name": "Convex",
+    "description": "Backend application platform",
+    "category": "Database",
+    "baseUrl": "https://convex.dev/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0101"
+  },
+  {
+    "name": "Xata",
+    "description": "Serverless database platform",
+    "category": "Database",
+    "baseUrl": "https://xata.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0102"
+  },
+  {
+    "name": "CockroachDB",
+    "description": "Distributed SQL database",
+    "category": "Database",
+    "baseUrl": "https://www.cockroachlabs.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0103"
+  },
+  {
+    "name": "Fauna",
+    "description": "Distributed document-relational database",
+    "category": "Database",
+    "baseUrl": "https://fauna.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0104"
+  },
+  {
+    "name": "Hasura",
+    "description": "GraphQL engine for databases",
+    "category": "Database",
+    "baseUrl": "https://hasura.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0105"
+  },
+  {
+    "name": "Prisma",
+    "description": "Next-generation ORM",
+    "category": "Database",
+    "baseUrl": "https://www.prisma.io/",
+    "authType": "none",
+    "pricing": "freemium",
+    "id": "api-05-27-0106"
+  },
+  {
+    "name": "Drizzle",
+    "description": "TypeScript ORM",
+    "category": "Database",
+    "baseUrl": "https://orm.drizzle.team/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0107"
+  },
+  {
+    "name": "EdgeDB",
+    "description": "Graph-relational database",
+    "category": "Database",
+    "baseUrl": "https://www.edgedb.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0108"
+  },
+  {
+    "name": "SurrealDB",
+    "description": "Multi-model database",
+    "category": "Database",
+    "baseUrl": "https://surrealdb.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0109"
+  },
+  {
+    "name": "Dolt",
+    "description": "Git for data",
+    "category": "Database",
+    "baseUrl": "https://www.dolthub.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0110"
+  },
+  {
+    "name": "Twilio",
+    "description": "Cloud communications platform",
+    "category": "Communication",
+    "baseUrl": "https://www.twilio.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0111"
+  },
+  {
+    "name": "SendGrid",
+    "description": "Email delivery service",
+    "category": "Communication",
+    "baseUrl": "https://sendgrid.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0112"
+  },
+  {
+    "name": "Mailgun",
+    "description": "Email API service",
+    "category": "Communication",
+    "baseUrl": "https://www.mailgun.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0113"
+  },
+  {
+    "name": "Resend",
+    "description": "Email API for developers",
+    "category": "Communication",
+    "baseUrl": "https://resend.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0114"
+  },
+  {
+    "name": "Postmark",
+    "description": "Transactional email service",
+    "category": "Communication",
+    "baseUrl": "https://postmarkapp.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0115"
+  },
+  {
+    "name": "Amazon SES",
+    "description": "Email sending service",
+    "category": "Communication",
+    "baseUrl": "https://aws.amazon.com/ses/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0116"
+  },
+  {
+    "name": "Plivo",
+    "description": "Voice and SMS APIs",
+    "category": "Communication",
+    "baseUrl": "https://www.plivo.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0117"
+  },
+  {
+    "name": "Vonage",
+    "description": "Communications APIs",
+    "category": "Communication",
+    "baseUrl": "https://developer.vonage.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0118"
+  },
+  {
+    "name": "MessageBird",
+    "description": "Omnichannel communication platform",
+    "category": "Communication",
+    "baseUrl": "https://messagebird.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0119"
+  },
+  {
+    "name": "Telnyx",
+    "description": "Voice, messaging and networking",
+    "category": "Communication",
+    "baseUrl": "https://telnyx.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0120"
+  },
+  {
+    "name": "Sinch",
+    "description": "Cloud communications platform",
+    "category": "Communication",
+    "baseUrl": "https://www.sinch.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0121"
+  },
+  {
+    "name": "Bandwidth",
+    "description": "Enterprise communications APIs",
+    "category": "Communication",
+    "baseUrl": "https://www.bandwidth.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0122"
+  },
+  {
+    "name": "46elks",
+    "description": "Swedish SMS and voice API",
+    "category": "Communication",
+    "baseUrl": "https://46elks.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0123"
+  },
+  {
+    "name": "Infobip",
+    "description": "Global cloud communications",
+    "category": "Communication",
+    "baseUrl": "https://www.infobip.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0124"
+  },
+  {
+    "name": "Clickatell",
+    "description": "Mobile messaging solutions",
+    "category": "Communication",
+    "baseUrl": "https://www.clickatell.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0125"
+  },
+  {
+    "name": "Auth0",
+    "description": "Identity platform",
+    "category": "Authentication",
+    "baseUrl": "https://auth0.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0126"
+  },
+  {
+    "name": "Clerk",
+    "description": "Complete user management",
+    "category": "Authentication",
+    "baseUrl": "https://clerk.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0127"
+  },
+  {
+    "name": "Supabase Auth",
+    "description": "Open source authentication",
+    "category": "Authentication",
+    "baseUrl": "https://supabase.com/auth",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0128"
+  },
+  {
+    "name": "Firebase Auth",
+    "description": "Google authentication service",
+    "category": "Authentication",
+    "baseUrl": "https://firebase.google.com/products/auth",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0129"
+  },
+  {
+    "name": "WorkOS",
+    "description": "Enterprise authentication",
+    "category": "Authentication",
+    "baseUrl": "https://workos.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0130"
+  },
+  {
+    "name": "Stytch",
+    "description": "Authentication infrastructure",
+    "category": "Authentication",
+    "baseUrl": "https://stytch.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0131"
+  },
+  {
+    "name": "FusionAuth",
+    "description": "Auth built for devs",
+    "category": "Authentication",
+    "baseUrl": "https://fusionauth.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0132"
+  },
+  {
+    "name": "Keycloak",
+    "description": "Open source identity management",
+    "category": "Authentication",
+    "baseUrl": "https://www.keycloak.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0133"
+  },
+  {
+    "name": "Ory",
+    "description": "Open source identity infrastructure",
+    "category": "Authentication",
+    "baseUrl": "https://www.ory.sh/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0134"
+  },
+  {
+    "name": "Okta",
+    "description": "Enterprise identity platform",
+    "category": "Authentication",
+    "baseUrl": "https://www.okta.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0135"
+  },
+  {
+    "name": "OneLogin",
+    "description": "Identity and access management",
+    "category": "Authentication",
+    "baseUrl": "https://www.onelogin.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0136"
+  },
+  {
+    "name": "Descope",
+    "description": "Drag and drop authentication",
+    "category": "Authentication",
+    "baseUrl": "https://www.descope.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0137"
+  },
+  {
+    "name": "Hanko",
+    "description": "Open source authentication",
+    "category": "Authentication",
+    "baseUrl": "https://www.hanko.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0138"
+  },
+  {
+    "name": "PropelAuth",
+    "description": "B2B authentication platform",
+    "category": "Authentication",
+    "baseUrl": "https://www.propelauth.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0139"
+  },
+  {
+    "name": "Kinde",
+    "description": "Authentication for modern apps",
+    "category": "Authentication",
+    "baseUrl": "https://kinde.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0140"
+  },
+  {
+    "name": "Stripe",
+    "description": "Payment processing platform",
+    "category": "Payments",
+    "baseUrl": "https://stripe.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0141"
+  },
+  {
+    "name": "PayPal",
+    "description": "Online payment system",
+    "category": "Payments",
+    "baseUrl": "https://developer.paypal.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0142"
+  },
+  {
+    "name": "Square",
+    "description": "Payment and commerce platform",
+    "category": "Payments",
+    "baseUrl": "https://developer.squareup.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0143"
+  },
+  {
+    "name": "Adyen",
+    "description": "Global payment platform",
+    "category": "Payments",
+    "baseUrl": "https://www.adyen.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0144"
+  },
+  {
+    "name": "Braintree",
+    "description": "Payment gateway",
+    "category": "Payments",
+    "baseUrl": "https://www.braintreepayments.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0145"
+  },
+  {
+    "name": "Paddle",
+    "description": "SaaS payment infrastructure",
+    "category": "Payments",
+    "baseUrl": "https://paddle.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0146"
+  },
+  {
+    "name": "LemonSqueezy",
+    "description": "Payment platform for digital products",
+    "category": "Payments",
+    "baseUrl": "https://www.lemonsqueezy.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0147"
+  },
+  {
+    "name": "Gumroad",
+    "description": "Sell digital products",
+    "category": "Payments",
+    "baseUrl": "https://gumroad.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0148"
+  },
+  {
+    "name": "Wise",
+    "description": "International money transfers",
+    "category": "Payments",
+    "baseUrl": "https://wise.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0149"
+  },
+  {
+    "name": "Plaid",
+    "description": "Financial data API",
+    "category": "Fintech",
+    "baseUrl": "https://plaid.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0150"
+  },
+  {
+    "name": "Yodlee",
+    "description": "Financial data aggregation",
+    "category": "Fintech",
+    "baseUrl": "https://www.yodlee.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0151"
+  },
+  {
+    "name": "MX",
+    "description": "Financial data platform",
+    "category": "Fintech",
+    "baseUrl": "https://www.mx.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0152"
+  },
+  {
+    "name": "Finicity",
+    "description": "Financial data and insights",
+    "category": "Fintech",
+    "baseUrl": "https://www.finicity.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0153"
+  },
+  {
+    "name": "Tink",
+    "description": "Open banking platform",
+    "category": "Fintech",
+    "baseUrl": "https://tink.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0154"
+  },
+  {
+    "name": "Nordigen",
+    "description": "Free open banking API",
+    "category": "Fintech",
+    "baseUrl": "https://nordigen.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0155"
+  },
+  {
+    "name": "Algolia",
+    "description": "Search and discovery platform",
+    "category": "Search",
+    "baseUrl": "https://www.algolia.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0156"
+  },
+  {
+    "name": "Typesense",
+    "description": "Open source search engine",
+    "category": "Search",
+    "baseUrl": "https://typesense.org/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0157"
+  },
+  {
+    "name": "Meilisearch",
+    "description": "Fast and relevant search engine",
+    "category": "Search",
+    "baseUrl": "https://www.meilisearch.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0158"
+  },
+  {
+    "name": "Elastic",
+    "description": "Search and analytics platform",
+    "category": "Search",
+    "baseUrl": "https://www.elastic.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0159"
+  },
+  {
+    "name": "OpenSearch",
+    "description": "Open source search and analytics",
+    "category": "Search",
+    "baseUrl": "https://opensearch.org/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0160"
+  },
+  {
+    "name": "Pinecone",
+    "description": "Vector database for AI",
+    "category": "Vector DB",
+    "baseUrl": "https://www.pinecone.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0161"
+  },
+  {
+    "name": "Weaviate",
+    "description": "Open source vector database",
+    "category": "Vector DB",
+    "baseUrl": "https://weaviate.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0162"
+  },
+  {
+    "name": "Qdrant",
+    "description": "Vector similarity search engine",
+    "category": "Vector DB",
+    "baseUrl": "https://qdrant.tech/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0163"
+  },
+  {
+    "name": "Chroma",
+    "description": "AI-native embedding database",
+    "category": "Vector DB",
+    "baseUrl": "https://www.trychroma.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0164"
+  },
+  {
+    "name": "Milvus",
+    "description": "Open source vector database",
+    "category": "Vector DB",
+    "baseUrl": "https://milvus.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0165"
+  },
+  {
+    "name": "Brave Search",
+    "description": "Independent search engine API",
+    "category": "Search",
+    "baseUrl": "https://search.brave.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0166"
+  },
+  {
+    "name": "SerpApi",
+    "description": "Search engine results API",
+    "category": "Search",
+    "baseUrl": "https://serpapi.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0167"
+  },
+  {
+    "name": "ScrapingBee",
+    "description": "Web scraping API",
+    "category": "Data",
+    "baseUrl": "https://www.scrapingbee.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0168"
+  },
+  {
+    "name": "Browserless",
+    "description": "Headless browser automation",
+    "category": "Data",
+    "baseUrl": "https://www.browserless.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0169"
+  },
+  {
+    "name": "Apify",
+    "description": "Web scraping and automation",
+    "category": "Data",
+    "baseUrl": "https://apify.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0170"
+  },
+  {
+    "name": "Shopify",
+    "description": "E-commerce platform API",
+    "category": "E-commerce",
+    "baseUrl": "https://shopify.dev/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0171"
+  },
+  {
+    "name": "WooCommerce",
+    "description": "WordPress e-commerce plugin API",
+    "category": "E-commerce",
+    "baseUrl": "https://woocommerce.github.io/woocommerce-rest-api-docs/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0172"
+  },
+  {
+    "name": "BigCommerce",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "baseUrl": "https://developer.bigcommerce.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0173"
+  },
+  {
+    "name": "Magento",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "baseUrl": "https://devdocs.magento.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0174"
+  },
+  {
+    "name": "Medusa",
+    "description": "Open source e-commerce platform",
+    "category": "E-commerce",
+    "baseUrl": "https://medusajs.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0175"
+  },
+  {
+    "name": "Saleor",
+    "description": "GraphQL e-commerce platform",
+    "category": "E-commerce",
+    "baseUrl": "https://saleor.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0176"
+  },
+  {
+    "name": "Vendure",
+    "description": "Headless e-commerce framework",
+    "category": "E-commerce",
+    "baseUrl": "https://www.vendure.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0177"
+  },
+  {
+    "name": "Commerce.js",
+    "description": "Headless commerce backend",
+    "category": "E-commerce",
+    "baseUrl": "https://commercejs.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0178"
+  },
+  {
+    "name": "Snipcart",
+    "description": "Shopping cart platform",
+    "category": "E-commerce",
+    "baseUrl": "https://snipcart.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0179"
+  },
+  {
+    "name": "Crystallize",
+    "description": "PIM and e-commerce API",
+    "category": "E-commerce",
+    "baseUrl": "https://crystallize.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0180"
+  },
+  {
+    "name": "Ecwid",
+    "description": "E-commerce widgets",
+    "category": "E-commerce",
+    "baseUrl": "https://www.ecwid.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0181"
+  },
+  {
+    "name": "Printful",
+    "description": "Print-on-demand API",
+    "category": "E-commerce",
+    "baseUrl": "https://www.printful.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0182"
+  },
+  {
+    "name": "Printify",
+    "description": "Print-on-demand platform",
+    "category": "E-commerce",
+    "baseUrl": "https://printify.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0183"
+  },
+  {
+    "name": "Gooten",
+    "description": "On-demand production",
+    "category": "E-commerce",
+    "baseUrl": "https://www.gooten.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0184"
+  },
+  {
+    "name": "Gelato",
+    "description": "Global print-on-demand",
+    "category": "E-commerce",
+    "baseUrl": "https://www.gelato.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0185"
+  },
+  {
+    "name": "Datadog",
+    "description": "Monitoring and analytics platform",
+    "category": "Monitoring",
+    "baseUrl": "https://www.datadoghq.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0186"
+  },
+  {
+    "name": "New Relic",
+    "description": "Observability platform",
+    "category": "Monitoring",
+    "baseUrl": "https://newrelic.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0187"
+  },
+  {
+    "name": "Sentry",
+    "description": "Error monitoring and performance",
+    "category": "Monitoring",
+    "baseUrl": "https://sentry.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0188"
+  },
+  {
+    "name": "LogRocket",
+    "description": "Session replay and analytics",
+    "category": "Monitoring",
+    "baseUrl": "https://logrocket.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0189"
+  },
+  {
+    "name": "Mixpanel",
+    "description": "Product analytics platform",
+    "category": "Analytics",
+    "baseUrl": "https://mixpanel.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0190"
+  },
+  {
+    "name": "Amplitude",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "baseUrl": "https://amplitude.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0191"
+  },
+  {
+    "name": "Heap",
+    "description": "Digital insights platform",
+    "category": "Analytics",
+    "baseUrl": "https://heap.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0192"
+  },
+  {
+    "name": "PostHog",
+    "description": "Open source product analytics",
+    "category": "Analytics",
+    "baseUrl": "https://posthog.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0193"
+  },
+  {
+    "name": "Plausible",
+    "description": "Privacy-focused analytics",
+    "category": "Analytics",
+    "baseUrl": "https://plausible.io/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0194"
+  },
+  {
+    "name": "Fathom",
+    "description": "Simple website analytics",
+    "category": "Analytics",
+    "baseUrl": "https://usefathom.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0195"
+  },
+  {
+    "name": "Umami",
+    "description": "Open source analytics",
+    "category": "Analytics",
+    "baseUrl": "https://umami.is/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0196"
+  },
+  {
+    "name": "Splitbee",
+    "description": "Analytics and A/B testing",
+    "category": "Analytics",
+    "baseUrl": "https://splitbee.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0197"
+  },
+  {
+    "name": "Grafana",
+    "description": "Observability platform",
+    "category": "Monitoring",
+    "baseUrl": "https://grafana.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0198"
+  },
+  {
+    "name": "Prometheus",
+    "description": "Monitoring system and time series DB",
+    "category": "Monitoring",
+    "baseUrl": "https://prometheus.io/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0199"
+  },
+  {
+    "name": "InfluxDB",
+    "description": "Time series database",
+    "category": "Monitoring",
+    "baseUrl": "https://www.influxdata.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0200"
+  },
+  {
+    "name": "Contentful",
+    "description": "Headless CMS platform",
+    "category": "CMS",
+    "baseUrl": "https://www.contentful.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0201"
+  },
+  {
+    "name": "Sanity",
+    "description": "Structured content platform",
+    "category": "CMS",
+    "baseUrl": "https://www.sanity.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0202"
+  },
+  {
+    "name": "Strapi",
+    "description": "Open source headless CMS",
+    "category": "CMS",
+    "baseUrl": "https://strapi.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0203"
+  },
+  {
+    "name": "Directus",
+    "description": "Open data platform",
+    "category": "CMS",
+    "baseUrl": "https://directus.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0204"
+  },
+  {
+    "name": "Payload",
+    "description": "Headless CMS and app framework",
+    "category": "CMS",
+    "baseUrl": "https://payloadcms.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0205"
+  },
+  {
+    "name": "Ghost",
+    "description": "Professional publishing platform",
+    "category": "CMS",
+    "baseUrl": "https://ghost.org/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0206"
+  },
+  {
+    "name": "Keystatic",
+    "description": "Git-based CMS",
+    "category": "CMS",
+    "baseUrl": "https://keystatic.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0207"
+  },
+  {
+    "name": "Tina",
+    "description": "Git-backed CMS",
+    "category": "CMS",
+    "baseUrl": "https://tina.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0208"
+  },
+  {
+    "name": "Hygraph",
+    "description": "Federated content platform",
+    "category": "CMS",
+    "baseUrl": "https://hygraph.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0209"
+  },
+  {
+    "name": "Storyblok",
+    "description": "Headless CMS with visual editor",
+    "category": "CMS",
+    "baseUrl": "https://www.storyblok.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0210"
+  },
+  {
+    "name": "DatoCMS",
+    "description": "Headless CMS for teams",
+    "category": "CMS",
+    "baseUrl": "https://www.datocms.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0211"
+  },
+  {
+    "name": "Prismic",
+    "description": "Headless website builder",
+    "category": "CMS",
+    "baseUrl": "https://prismic.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0212"
+  },
+  {
+    "name": "Builder.io",
+    "description": "Visual development platform",
+    "category": "CMS",
+    "baseUrl": "https://www.builder.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0213"
+  },
+  {
+    "name": "Webflow",
+    "description": "Visual web development",
+    "category": "CMS",
+    "baseUrl": "https://webflow.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0214"
+  },
+  {
+    "name": "Framer",
+    "description": "Web design and publishing",
+    "category": "CMS",
+    "baseUrl": "https://www.framer.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0215"
+  },
+  {
+    "name": "AWS",
+    "description": "Amazon Web Services cloud platform",
+    "category": "Cloud",
+    "baseUrl": "https://aws.amazon.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0216"
+  },
+  {
+    "name": "Google Cloud",
+    "description": "Google Cloud Platform",
+    "category": "Cloud",
+    "baseUrl": "https://cloud.google.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0217"
+  },
+  {
+    "name": "Azure",
+    "description": "Microsoft Azure cloud",
+    "category": "Cloud",
+    "baseUrl": "https://azure.microsoft.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0218"
+  },
+  {
+    "name": "DigitalOcean",
+    "description": "Cloud infrastructure provider",
+    "category": "Cloud",
+    "baseUrl": "https://www.digitalocean.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0219"
+  },
+  {
+    "name": "Linode",
+    "description": "Cloud computing platform",
+    "category": "Cloud",
+    "baseUrl": "https://www.linode.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0220"
+  },
+  {
+    "name": "Vultr",
+    "description": "Cloud infrastructure",
+    "category": "Cloud",
+    "baseUrl": "https://www.vultr.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0221"
+  },
+  {
+    "name": "Hetzner",
+    "description": "European cloud provider",
+    "category": "Cloud",
+    "baseUrl": "https://www.hetzner.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0222"
+  },
+  {
+    "name": "Vercel",
+    "description": "Frontend cloud platform",
+    "category": "Cloud",
+    "baseUrl": "https://vercel.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0223"
+  },
+  {
+    "name": "Netlify",
+    "description": "Web development platform",
+    "category": "Cloud",
+    "baseUrl": "https://www.netlify.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0224"
+  },
+  {
+    "name": "Cloudflare",
+    "description": "CDN and security platform",
+    "category": "Cloud",
+    "baseUrl": "https://www.cloudflare.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0225"
+  },
+  {
+    "name": "Railway",
+    "description": "Deploy apps in seconds",
+    "category": "Cloud",
+    "baseUrl": "https://railway.app/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0226"
+  },
+  {
+    "name": "Render",
+    "description": "Cloud application platform",
+    "category": "Cloud",
+    "baseUrl": "https://render.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0227"
+  },
+  {
+    "name": "Fly.io",
+    "description": "Run apps close to users",
+    "category": "Cloud",
+    "baseUrl": "https://fly.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0228"
+  },
+  {
+    "name": "Koyeb",
+    "description": "Serverless platform",
+    "category": "Cloud",
+    "baseUrl": "https://www.koyeb.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0229"
+  },
+  {
+    "name": "Deno Deploy",
+    "description": "Serverless JavaScript platform",
+    "category": "Cloud",
+    "baseUrl": "https://deno.com/deploy",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0230"
+  },
+  {
+    "name": "OneSignal",
+    "description": "Push notification service",
+    "category": "Notifications",
+    "baseUrl": "https://onesignal.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0231"
+  },
+  {
+    "name": "Firebase Cloud Messaging",
+    "description": "Cross-platform messaging",
+    "category": "Notifications",
+    "baseUrl": "https://firebase.google.com/products/cloud-messaging",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0232"
+  },
+  {
+    "name": "Pusher",
+    "description": "Real-time communication APIs",
+    "category": "Notifications",
+    "baseUrl": "https://pusher.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0233"
+  },
+  {
+    "name": "Ably",
+    "description": "Real-time messaging platform",
+    "category": "Notifications",
+    "baseUrl": "https://ably.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0234"
+  },
+  {
+    "name": "PubNub",
+    "description": "Real-time communication API",
+    "category": "Notifications",
+    "baseUrl": "https://www.pubnub.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0235"
+  },
+  {
+    "name": "Novu",
+    "description": "Open source notification infrastructure",
+    "category": "Notifications",
+    "baseUrl": "https://novu.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0236"
+  },
+  {
+    "name": "Knock",
+    "description": "Notification infrastructure",
+    "category": "Notifications",
+    "baseUrl": "https://knock.app/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0237"
+  },
+  {
+    "name": "Courier",
+    "description": "Multi-channel notifications",
+    "category": "Notifications",
+    "baseUrl": "https://www.courier.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0238"
+  },
+  {
+    "name": "Engagespot",
+    "description": "Notification platform",
+    "category": "Notifications",
+    "baseUrl": "https://engagespot.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0239"
+  },
+  {
+    "name": "MagicBell",
+    "description": "Embeddable notification inbox",
+    "category": "Notifications",
+    "baseUrl": "https://www.magicbell.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0240"
+  },
+  {
+    "name": "PDFShift",
+    "description": "HTML to PDF conversion",
+    "category": "Documents",
+    "baseUrl": "https://pdfshift.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0241"
+  },
+  {
+    "name": "DocRaptor",
+    "description": "HTML to PDF/Excel API",
+    "category": "Documents",
+    "baseUrl": "https://docraptor.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0242"
+  },
+  {
+    "name": "PDF.co",
+    "description": "PDF generation and processing",
+    "category": "Documents",
+    "baseUrl": "https://pdf.co/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0243"
+  },
+  {
+    "name": "Anvil",
+    "description": "PDF generation and e-signatures",
+    "category": "Documents",
+    "baseUrl": "https://www.useanvil.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0244"
+  },
+  {
+    "name": "PSPDFKit",
+    "description": "PDF SDK and API",
+    "category": "Documents",
+    "baseUrl": "https://pspdfkit.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0245"
+  },
+  {
+    "name": "PDFTron",
+    "description": "Document processing SDK",
+    "category": "Documents",
+    "baseUrl": "https://www.pdftron.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0246"
+  },
+  {
+    "name": "API2PDF",
+    "description": "PDF generation API",
+    "category": "Documents",
+    "baseUrl": "https://www.api2pdf.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0247"
+  },
+  {
+    "name": "ConvertAPI",
+    "description": "File conversion API",
+    "category": "Documents",
+    "baseUrl": "https://www.convertapi.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0248"
+  },
+  {
+    "name": "CloudConvert",
+    "description": "File conversion service",
+    "category": "Documents",
+    "baseUrl": "https://cloudconvert.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0249"
+  },
+  {
+    "name": "Zamzar",
+    "description": "Online file conversion",
+    "category": "Documents",
+    "baseUrl": "https://www.zamzar.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0250"
+  },
+  {
+    "name": "Calendly",
+    "description": "Scheduling automation",
+    "category": "Scheduling",
+    "baseUrl": "https://developer.calendly.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0251"
+  },
+  {
+    "name": "Cal.com",
+    "description": "Open source scheduling",
+    "category": "Scheduling",
+    "baseUrl": "https://cal.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0252"
+  },
+  {
+    "name": "Savvycal",
+    "description": "Scheduling that puts people first",
+    "category": "Scheduling",
+    "baseUrl": "https://savvycal.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0253"
+  },
+  {
+    "name": "Doodle",
+    "description": "Group scheduling tool",
+    "category": "Scheduling",
+    "baseUrl": "https://doodle.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0254"
+  },
+  {
+    "name": "Acuity",
+    "description": "Online appointment scheduling",
+    "category": "Scheduling",
+    "baseUrl": "https://acuityscheduling.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0255"
+  },
+  {
+    "name": "Setmore",
+    "description": "Free appointment scheduling",
+    "category": "Scheduling",
+    "baseUrl": "https://www.setmore.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0256"
+  },
+  {
+    "name": "SimplyBook.me",
+    "description": "Online booking system",
+    "category": "Scheduling",
+    "baseUrl": "https://simplybook.me/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0257"
+  },
+  {
+    "name": "Cronofy",
+    "description": "Calendar integration API",
+    "category": "Scheduling",
+    "baseUrl": "https://www.cronofy.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0258"
+  },
+  {
+    "name": "Nylas Calendar",
+    "description": "Universal calendar API",
+    "category": "Scheduling",
+    "baseUrl": "https://www.nylas.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0259"
+  },
+  {
+    "name": "TimeKit",
+    "description": "Scheduling infrastructure",
+    "category": "Scheduling",
+    "baseUrl": "https://www.timekit.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0260"
+  },
+  {
+    "name": "Google Maps",
+    "description": "Mapping and location services",
+    "category": "Maps",
+    "baseUrl": "https://developers.google.com/maps",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0261"
+  },
+  {
+    "name": "Mapbox",
+    "description": "Custom maps and location",
+    "category": "Maps",
+    "baseUrl": "https://www.mapbox.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0262"
+  },
+  {
+    "name": "HERE",
+    "description": "Location platform",
+    "category": "Maps",
+    "baseUrl": "https://developer.here.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0263"
+  },
+  {
+    "name": "OpenStreetMap",
+    "description": "Open source maps",
+    "category": "Maps",
+    "baseUrl": "https://www.openstreetmap.org/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0264"
+  },
+  {
+    "name": "TomTom",
+    "description": "Maps and traffic data",
+    "category": "Maps",
+    "baseUrl": "https://developer.tomtom.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0265"
+  },
+  {
+    "name": "Leaflet",
+    "description": "Open source JS map library",
+    "category": "Maps",
+    "baseUrl": "https://leafletjs.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0266"
+  },
+  {
+    "name": "IPInfo",
+    "description": "IP geolocation API",
+    "category": "Geolocation",
+    "baseUrl": "https://ipinfo.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0267"
+  },
+  {
+    "name": "IP-API",
+    "description": "Free IP geolocation",
+    "category": "Geolocation",
+    "baseUrl": "https://ip-api.com/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0268"
+  },
+  {
+    "name": "MaxMind",
+    "description": "IP intelligence and fraud prevention",
+    "category": "Geolocation",
+    "baseUrl": "https://www.maxmind.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0269"
+  },
+  {
+    "name": "IPStack",
+    "description": "IP geolocation API",
+    "category": "Geolocation",
+    "baseUrl": "https://ipstack.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0270"
+  },
+  {
+    "name": "OpenWeatherMap",
+    "description": "Weather data API",
+    "category": "Weather",
+    "baseUrl": "https://openweathermap.org/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0271"
+  },
+  {
+    "name": "Weather API",
+    "description": "Global weather data",
+    "category": "Weather",
+    "baseUrl": "https://www.weatherapi.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0272"
+  },
+  {
+    "name": "Tomorrow.io",
+    "description": "Weather intelligence platform",
+    "category": "Weather",
+    "baseUrl": "https://www.tomorrow.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0273"
+  },
+  {
+    "name": "Visual Crossing",
+    "description": "Weather data service",
+    "category": "Weather",
+    "baseUrl": "https://www.visualcrossing.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0274"
+  },
+  {
+    "name": "Weatherbit",
+    "description": "Weather data API",
+    "category": "Weather",
+    "baseUrl": "https://www.weatherbit.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0275"
+  },
+  {
+    "name": "Meteomatics",
+    "description": "Weather data API",
+    "category": "Weather",
+    "baseUrl": "https://www.meteomatics.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0276"
+  },
+  {
+    "name": "SMHI",
+    "description": "Swedish weather data",
+    "category": "Weather",
+    "baseUrl": "https://opendata.smhi.se/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0277"
+  },
+  {
+    "name": "Yr.no",
+    "description": "Norwegian weather data",
+    "category": "Weather",
+    "baseUrl": "https://api.met.no/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0278"
+  },
+  {
+    "name": "AQICN",
+    "description": "Air quality data",
+    "category": "Environment",
+    "baseUrl": "https://aqicn.org/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0279"
+  },
+  {
+    "name": "IQAir",
+    "description": "Air quality monitoring",
+    "category": "Environment",
+    "baseUrl": "https://www.iqair.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0280"
+  },
+  {
+    "name": "DeepL",
+    "description": "Neural machine translation",
+    "category": "Translation",
+    "baseUrl": "https://www.deepl.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0281"
+  },
+  {
+    "name": "Google Translate",
+    "description": "Translation API",
+    "category": "Translation",
+    "baseUrl": "https://cloud.google.com/translate",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0282"
+  },
+  {
+    "name": "Microsoft Translator",
+    "description": "Translation service",
+    "category": "Translation",
+    "baseUrl": "https://www.microsoft.com/translator/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0283"
+  },
+  {
+    "name": "Amazon Translate",
+    "description": "Neural machine translation",
+    "category": "Translation",
+    "baseUrl": "https://aws.amazon.com/translate/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0284"
+  },
+  {
+    "name": "LibreTranslate",
+    "description": "Open source translation",
+    "category": "Translation",
+    "baseUrl": "https://libretranslate.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0285"
+  },
+  {
+    "name": "Lingva",
+    "description": "Google Translate alternative",
+    "category": "Translation",
+    "baseUrl": "https://lingva.ml/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0286"
+  },
+  {
+    "name": "MyMemory",
+    "description": "Translation memory",
+    "category": "Translation",
+    "baseUrl": "https://mymemory.translated.net/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0287"
+  },
+  {
+    "name": "Yandex Translate",
+    "description": "Translation service",
+    "category": "Translation",
+    "baseUrl": "https://translate.yandex.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0288"
+  },
+  {
+    "name": "Papago",
+    "description": "Naver translation API",
+    "category": "Translation",
+    "baseUrl": "https://papago.naver.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0289"
+  },
+  {
+    "name": "Lingvanex",
+    "description": "Translation API",
+    "category": "Translation",
+    "baseUrl": "https://lingvanex.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0290"
+  },
+  {
+    "name": "Twitter/X API",
+    "description": "X platform API",
+    "category": "Social",
+    "baseUrl": "https://developer.x.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-0291"
+  },
+  {
+    "name": "Facebook Graph API",
+    "description": "Facebook platform API",
+    "category": "Social",
+    "baseUrl": "https://developers.facebook.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0292"
+  },
+  {
+    "name": "Instagram Graph API",
+    "description": "Instagram platform API",
+    "category": "Social",
+    "baseUrl": "https://developers.facebook.com/docs/instagram-api",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0293"
+  },
+  {
+    "name": "LinkedIn API",
+    "description": "LinkedIn platform API",
+    "category": "Social",
+    "baseUrl": "https://developer.linkedin.com/",
+    "authType": "oauth",
+    "pricing": "freemium",
+    "id": "api-05-27-0294"
+  },
+  {
+    "name": "TikTok API",
+    "description": "TikTok platform API",
+    "category": "Social",
+    "baseUrl": "https://developers.tiktok.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0295"
+  },
+  {
+    "name": "YouTube Data API",
+    "description": "YouTube platform API",
+    "category": "Social",
+    "baseUrl": "https://developers.google.com/youtube",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0296"
+  },
+  {
+    "name": "Reddit API",
+    "description": "Reddit platform API",
+    "category": "Social",
+    "baseUrl": "https://www.reddit.com/dev/api/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0297"
+  },
+  {
+    "name": "Discord API",
+    "description": "Discord platform API",
+    "category": "Social",
+    "baseUrl": "https://discord.com/developers",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0298"
+  },
+  {
+    "name": "Slack API",
+    "description": "Slack platform API",
+    "category": "Social",
+    "baseUrl": "https://api.slack.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0299"
+  },
+  {
+    "name": "Telegram Bot API",
+    "description": "Telegram bot platform",
+    "category": "Social",
+    "baseUrl": "https://core.telegram.org/bots/api",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0300"
+  },
+  {
+    "name": "WhatsApp Business API",
+    "description": "WhatsApp business platform",
+    "category": "Social",
+    "baseUrl": "https://business.whatsapp.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0301"
+  },
+  {
+    "name": "Mastodon API",
+    "description": "Decentralized social network",
+    "category": "Social",
+    "baseUrl": "https://docs.joinmastodon.org/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0302"
+  },
+  {
+    "name": "Bluesky API",
+    "description": "AT Protocol social network",
+    "category": "Social",
+    "baseUrl": "https://bsky.social/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0303"
+  },
+  {
+    "name": "Threads API",
+    "description": "Meta Threads platform",
+    "category": "Social",
+    "baseUrl": "https://developers.facebook.com/docs/threads",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0304"
+  },
+  {
+    "name": "Pinterest API",
+    "description": "Pinterest platform API",
+    "category": "Social",
+    "baseUrl": "https://developers.pinterest.com/",
+    "authType": "oauth",
+    "pricing": "free",
+    "id": "api-05-27-0305"
+  },
+  {
+    "name": "Alchemy",
+    "description": "Web3 development platform",
+    "category": "Web3",
+    "baseUrl": "https://www.alchemy.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0306"
+  },
+  {
+    "name": "Infura",
+    "description": "Ethereum API and IPFS",
+    "category": "Web3",
+    "baseUrl": "https://infura.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0307"
+  },
+  {
+    "name": "QuickNode",
+    "description": "Blockchain infrastructure",
+    "category": "Web3",
+    "baseUrl": "https://www.quicknode.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0308"
+  },
+  {
+    "name": "Moralis",
+    "description": "Web3 data platform",
+    "category": "Web3",
+    "baseUrl": "https://moralis.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0309"
+  },
+  {
+    "name": "Thirdweb",
+    "description": "Web3 development SDK",
+    "category": "Web3",
+    "baseUrl": "https://thirdweb.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0310"
+  },
+  {
+    "name": "OpenSea",
+    "description": "NFT marketplace API",
+    "category": "Web3",
+    "baseUrl": "https://docs.opensea.io/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0311"
+  },
+  {
+    "name": "Rarible",
+    "description": "NFT protocol API",
+    "category": "Web3",
+    "baseUrl": "https://rarible.org/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0312"
+  },
+  {
+    "name": "CoinGecko",
+    "description": "Cryptocurrency data API",
+    "category": "Crypto",
+    "baseUrl": "https://www.coingecko.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0313"
+  },
+  {
+    "name": "CoinMarketCap",
+    "description": "Crypto market data",
+    "category": "Crypto",
+    "baseUrl": "https://coinmarketcap.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0314"
+  },
+  {
+    "name": "CryptoCompare",
+    "description": "Cryptocurrency data",
+    "category": "Crypto",
+    "baseUrl": "https://www.cryptocompare.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0315"
+  },
+  {
+    "name": "Binance API",
+    "description": "Cryptocurrency exchange",
+    "category": "Crypto",
+    "baseUrl": "https://www.binance.com/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0316"
+  },
+  {
+    "name": "Coinbase API",
+    "description": "Crypto exchange and wallet",
+    "category": "Crypto",
+    "baseUrl": "https://www.coinbase.com/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0317"
+  },
+  {
+    "name": "Kraken API",
+    "description": "Cryptocurrency exchange",
+    "category": "Crypto",
+    "baseUrl": "https://www.kraken.com/",
+    "authType": "apiKey",
+    "pricing": "free",
+    "id": "api-05-27-0318"
+  },
+  {
+    "name": "Etherscan",
+    "description": "Ethereum blockchain explorer",
+    "category": "Web3",
+    "baseUrl": "https://etherscan.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0319"
+  },
+  {
+    "name": "Polygonscan",
+    "description": "Polygon blockchain explorer",
+    "category": "Web3",
+    "baseUrl": "https://polygonscan.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0320"
+  },
+  {
+    "name": "BrowserStack",
+    "description": "Cross-browser testing platform",
+    "category": "Testing",
+    "baseUrl": "https://www.browserstack.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0321"
+  },
+  {
+    "name": "Sauce Labs",
+    "description": "Continuous testing platform",
+    "category": "Testing",
+    "baseUrl": "https://saucelabs.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0322"
+  },
+  {
+    "name": "LambdaTest",
+    "description": "Cross-browser testing cloud",
+    "category": "Testing",
+    "baseUrl": "https://www.lambdatest.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0323"
+  },
+  {
+    "name": "Cypress Cloud",
+    "description": "Test runner and dashboard",
+    "category": "Testing",
+    "baseUrl": "https://www.cypress.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0324"
+  },
+  {
+    "name": "Playwright",
+    "description": "End-to-end testing framework",
+    "category": "Testing",
+    "baseUrl": "https://playwright.dev/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0325"
+  },
+  {
+    "name": "Puppeteer",
+    "description": "Chrome automation library",
+    "category": "Testing",
+    "baseUrl": "https://pptr.dev/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0326"
+  },
+  {
+    "name": "Selenium",
+    "description": "Browser automation framework",
+    "category": "Testing",
+    "baseUrl": "https://www.selenium.dev/",
+    "authType": "none",
+    "pricing": "free",
+    "id": "api-05-27-0327"
+  },
+  {
+    "name": "TestRail",
+    "description": "Test case management",
+    "category": "Testing",
+    "baseUrl": "https://www.testrail.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0328"
+  },
+  {
+    "name": "Qase",
+    "description": "Test management platform",
+    "category": "Testing",
+    "baseUrl": "https://qase.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0329"
+  },
+  {
+    "name": "Testim",
+    "description": "AI-powered testing",
+    "category": "Testing",
+    "baseUrl": "https://www.testim.io/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0330"
+  },
+  {
+    "name": "AWS S3",
+    "description": "Cloud object storage",
+    "category": "Storage",
+    "baseUrl": "https://aws.amazon.com/s3/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0331"
+  },
+  {
+    "name": "Google Cloud Storage",
+    "description": "Object storage service",
+    "category": "Storage",
+    "baseUrl": "https://cloud.google.com/storage",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0332"
+  },
+  {
+    "name": "Azure Blob Storage",
+    "description": "Microsoft cloud storage",
+    "category": "Storage",
+    "baseUrl": "https://azure.microsoft.com/products/storage/blobs",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0333"
+  },
+  {
+    "name": "Cloudinary",
+    "description": "Image and video management",
+    "category": "Storage",
+    "baseUrl": "https://cloudinary.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0334"
+  },
+  {
+    "name": "Imgix",
+    "description": "Image processing and CDN",
+    "category": "Storage",
+    "baseUrl": "https://imgix.com/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0335"
+  },
+  {
+    "name": "Uploadcare",
+    "description": "File uploading and processing",
+    "category": "Storage",
+    "baseUrl": "https://uploadcare.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0336"
+  },
+  {
+    "name": "Filestack",
+    "description": "File handling API",
+    "category": "Storage",
+    "baseUrl": "https://www.filestack.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0337"
+  },
+  {
+    "name": "Uploadthing",
+    "description": "File uploads for Next.js",
+    "category": "Storage",
+    "baseUrl": "https://uploadthing.com/",
+    "authType": "apiKey",
+    "pricing": "freemium",
+    "id": "api-05-27-0338"
+  },
+  {
+    "name": "Bunny.net",
+    "description": "CDN and storage",
+    "category": "Storage",
+    "baseUrl": "https://bunny.net/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0339"
+  },
+  {
+    "name": "Backblaze B2",
+    "description": "Affordable cloud storage",
+    "category": "Storage",
+    "baseUrl": "https://www.backblaze.com/b2/",
+    "authType": "apiKey",
+    "pricing": "paid",
+    "id": "api-05-27-0340"
+  }
+]

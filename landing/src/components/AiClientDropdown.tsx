@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-export type AiClient = "claude" | "chatgpt" | "cursor" | "cline" | "other";
+export type AiClient = "chatgpt" | "other";
 
 interface AiClientOption {
   value: AiClient;
@@ -14,30 +14,15 @@ interface AiClientOption {
 
 const clients: AiClientOption[] = [
   {
-    value: "claude",
-    label: "Claude Desktop",
-    configPath: "~/Library/Application Support/Claude/claude_desktop_config.json",
+    value: "other",
+    label: "Claude, Cursor, Cline & others",
+    configPath: "Add to your MCP config file",
   },
   {
     value: "chatgpt",
     label: "ChatGPT",
-    configPath: "Settings → Connections → Add MCP Server",
+    configPath: "Settings → Connections → Add MCP",
     isGui: true,
-  },
-  {
-    value: "cursor",
-    label: "Cursor",
-    configPath: "~/.cursor/mcp.json",
-  },
-  {
-    value: "cline",
-    label: "Cline",
-    configPath: "~/.cline/mcp_config.json",
-  },
-  {
-    value: "other",
-    label: "Other",
-    configPath: "See documentation",
   },
 ];
 

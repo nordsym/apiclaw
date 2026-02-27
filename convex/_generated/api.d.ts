@@ -17,6 +17,7 @@ import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
 import type * as telemetry from "../telemetry.js";
 import type * as usage from "../usage.js";
+import type * as waitlist from "../waitlist.js";
 
 import type {
   ApiFromModules,
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   ratelimit: typeof ratelimit;
   telemetry: typeof telemetry;
   usage: typeof usage;
+  waitlist: typeof waitlist;
 }>;
 
 /**

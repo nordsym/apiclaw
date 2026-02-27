@@ -7,24 +7,34 @@ import { ConfigHelperModal } from "./ConfigHelperModal";
 
 export function HeroTabs() {
   const [activeTab, setActiveTab] = useState<"connect" | "add">("connect");
-  const [selectedClient, setSelectedClient] = useState<AiClient>("claude");
+  const [selectedClient, setSelectedClient] = useState<AiClient>("other");
   const [showConfigHelper, setShowConfigHelper] = useState(false);
   const [copiedConfig, setCopiedConfig] = useState(false);
   const [copiedTerminal, setCopiedTerminal] = useState(false);
 
-  const configSnippet = `{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
+  // Config snippets
+  const jsonConfig = JSON.stringify({
+    mcpServers: {
+      apiclaw: {
+        command: "npx",
+        args: ["@nordsym/apiclaw"]
+      }
     }
-  }
-}`;
+  }, null, 2);
+  
+  const chatGptInstructions = `1. Open ChatGPT Settings
+2. Go to Connections → Add MCP Server
+3. Enter:
+   • Name: apiclaw
+   • Command: npx @nordsym/apiclaw
+4. Save and restart ChatGPT`;
+
+  const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
   const terminalCommand = "npx @nordsym/apiclaw";
 
   const copyConfig = () => {
-    navigator.clipboard.writeText(configSnippet);
+    navigator.clipboard.writeText(configSnippetJson);
     setCopiedConfig(true);
     setTimeout(() => setCopiedConfig(false), 2000);
   };
@@ -76,22 +86,15 @@ export function HeroTabs() {
 
               {/* Config Snippet */}
               <div>
-                <label className="block text-sm text-text-muted mb-2">Add to your config:</label>
+                <label className="block text-sm text-text-muted mb-2">
+                  {clientConfig.isGui ? "Setup instructions:" : "Add to your config:"}
+                </label>
                 <div className="code-preview">
                   <div className="code-preview-header">
-                    {clientConfig.isGui ? "MCP Server Config" : clientConfig.configPath.split("/").pop()}
+                    {clientConfig.isGui ? "Instructions" : clientConfig.configPath.split("/").pop()}
                   </div>
                   <div className="code-preview-body">
-                    <pre className="text-sm whitespace-pre-wrap">
-                      <span className="text-gray-500">{"{"}</span>{"\n"}
-                      {"  "}<span className="text-red-400">"mcpServers"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
-                      {"    "}<span className="text-red-400">"apiclaw"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
-                      {"      "}<span className="text-red-400">"command"</span>: <span className="text-green-400">"npx"</span>,{"\n"}
-                      {"      "}<span className="text-red-400">"args"</span>: [<span className="text-green-400">"@nordsym/apiclaw"</span>]{"\n"}
-                      {"    "}<span className="text-gray-500">{"}"}</span>{"\n"}
-                      {"  "}<span className="text-gray-500">{"}"}</span>{"\n"}
-                      <span className="text-gray-500">{"}"}</span>
-                    </pre>
+                    <pre className="text-sm whitespace-pre-wrap text-text-secondary">{configSnippetJson}</pre>
                   </div>
                 </div>
                 
@@ -127,10 +130,13 @@ export function HeroTabs() {
                     </pre>
                   </div>
                 </div>
-                <button onClick={copyTerminal} className="btn-ghost !py-2 !px-4 text-sm mt-3">
-                  {copiedTerminal ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {copiedTerminal ? "Copied!" : "Copy"}
-                </button>
+                <div className="flex items-center gap-3 mt-3">
+                  <button onClick={copyTerminal} className="btn-ghost !py-2 !px-4 text-sm">
+                    {copiedTerminal ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copiedTerminal ? "Copied!" : "Copy"}
+                  </button>
+                  <span className="text-xs text-text-muted">← Run in terminal to test</span>
+                </div>
               </div>
             </div>
           )}

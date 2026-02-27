@@ -1,0 +1,408 @@
+[
+  {
+    "name": "Liveblocks",
+    "description": "Collaborative features",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://liveblocks.io"
+  },
+  {
+    "name": "Partykit",
+    "description": "Realtime collaboration",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://partykit.io"
+  },
+  {
+    "name": "Y.js",
+    "description": "CRDT framework",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://yjs.dev"
+  },
+  {
+    "name": "Automerge",
+    "description": "CRDT library",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://automerge.org"
+  },
+  {
+    "name": "Electric SQL",
+    "description": "Local-first sync",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://electric-sql.com"
+  },
+  {
+    "name": "PowerSync",
+    "description": "Local-first database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://powersync.com"
+  },
+  {
+    "name": "Replicache",
+    "description": "Realtime sync",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://replicache.dev"
+  },
+  {
+    "name": "Triplit",
+    "description": "Local-first database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://triplit.dev"
+  },
+  {
+    "name": "Socket.Dev",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://socket.dev"
+  },
+  {
+    "name": "Snyk Container",
+    "description": "Container security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://snyk.io"
+  },
+  {
+    "name": "Syft",
+    "description": "SBOM generator",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://anchore.com"
+  },
+  {
+    "name": "Cosign",
+    "description": "Container signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://sigstore.dev"
+  },
+  {
+    "name": "Notation",
+    "description": "Artifact signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://notaryproject.dev"
+  },
+  {
+    "name": "Sigstore",
+    "description": "Software signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://sigstore.dev"
+  },
+  {
+    "name": "SLSA",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://slsa.dev"
+  },
+  {
+    "name": "Scorecard",
+    "description": "Security health",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://securityscorecards.dev"
+  },
+  {
+    "name": "AllStar",
+    "description": "Security policies",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://openssf.org"
+  },
+  {
+    "name": "Renovate",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://renovatebot.com"
+  },
+  {
+    "name": "WhiteSource Renovate",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://renovate.whitesourcesoftware.com"
+  },
+  {
+    "name": "FOSSA",
+    "description": "License compliance",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fossa.com"
+  },
+  {
+    "name": "Lakera",
+    "description": "AI security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://lakera.ai"
+  },
+  {
+    "name": "Rebuff",
+    "description": "Prompt injection detection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://rebuff.ai"
+  },
+  {
+    "name": "Pangea",
+    "description": "Security services",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://pangea.cloud"
+  },
+  {
+    "name": "Piiano",
+    "description": "Privacy vault",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://piiano.com"
+  },
+  {
+    "name": "Skyflow",
+    "description": "Data privacy vault",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://skyflow.com"
+  },
+  {
+    "name": "Very Good Security",
+    "description": "Data security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://verygoodsecurity.com"
+  },
+  {
+    "name": "Evervault",
+    "description": "Encryption platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://evervault.com"
+  },
+  {
+    "name": "IronCore Labs",
+    "description": "Data privacy",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://ironcorelabs.com"
+  },
+  {
+    "name": "Anjuna",
+    "description": "Confidential computing",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://anjuna.io"
+  },
+  {
+    "name": "Fortanix",
+    "description": "Data security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fortanix.com"
+  },
+  {
+    "name": "Thales CipherTrust",
+    "description": "Data protection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://cpl.thalesgroup.com"
+  },
+  {
+    "name": "Virtru",
+    "description": "Data protection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://virtru.com"
+  },
+  {
+    "name": "PreVeil",
+    "description": "End-to-end encryption",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://preveil.com"
+  },
+  {
+    "name": "SpiderOak",
+    "description": "Secure cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://spideroak.com"
+  },
+  {
+    "name": "Tresorit",
+    "description": "Secure collaboration",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tresorit.com"
+  },
+  {
+    "name": "Internxt",
+    "description": "Private cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://internxt.com"
+  },
+  {
+    "name": "Filen",
+    "description": "Encrypted cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://filen.io"
+  },
+  {
+    "name": "Proton Drive",
+    "description": "Encrypted storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://proton.me"
+  },
+  {
+    "name": "Skiff",
+    "description": "Private workspace",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://skiff.com"
+  },
+  {
+    "name": "Tuta",
+    "description": "Encrypted email",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tuta.com"
+  },
+  {
+    "name": "ProtonMail",
+    "description": "Encrypted email",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://proton.me"
+  },
+  {
+    "name": "Standard Notes",
+    "description": "Encrypted notes",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://standardnotes.com"
+  },
+  {
+    "name": "Notesnook",
+    "description": "Private notes",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://notesnook.com"
+  },
+  {
+    "name": "Joplin",
+    "description": "Note taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://joplinapp.org"
+  },
+  {
+    "name": "Simplenote",
+    "description": "Note app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://simplenote.com"
+  },
+  {
+    "name": "Bear",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://bear.app"
+  },
+  {
+    "name": "Ulysses",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://ulysses.app"
+  },
+  {
+    "name": "iA Writer",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://ia.net"
+  },
+  {
+    "name": "Byword",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://bywordapp.com"
+  },
+  {
+    "name": "Typora",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://typora.io"
+  },
+  {
+    "name": "Mark Text",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://marktext.app"
+  },
+  {
+    "name": "Zettlr",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://zettlr.com"
+  },
+  {
+    "name": "Ghostwriter",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://ghostwriter.kde.org"
+  },
+  {
+    "name": "QOwnNotes",
+    "description": "Note taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://qownnotes.org"
+  },
+  {
+    "name": "Trilium",
+    "description": "Knowledge base",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://github.com/zadam/trilium"
+  },
+  {
+    "name": "Dendron",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://dendron.so"
+  },
+  {
+    "name": "Foam",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://foambubble.github.io"
+  },
+  {
+    "name": "SilverBullet",
+    "description": "Note-taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://silverbullet.md"
+  }
+]

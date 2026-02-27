@@ -62,6 +62,7 @@ export default function RegisterPage() {
   const [isComplete, setIsComplete] = useState(false);
   const [parseStatus, setParseStatus] = useState<'idle' | 'parsing' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
     providerName: "",
@@ -75,6 +76,29 @@ export default function RegisterPage() {
     pricingModel: "freemium",
     pricingNotes: "",
   });
+
+  // Check if user is logged in and pre-fill provider info
+  useEffect(() => {
+    const token = localStorage.getItem('apiclaw_session');
+    const providerData = localStorage.getItem('apiclaw_provider');
+    
+    if (token && providerData) {
+      try {
+        const provider = JSON.parse(providerData);
+        setFormData(prev => ({
+          ...prev,
+          providerName: provider.name || prev.providerName,
+          email: provider.email || prev.email,
+          website: provider.website || prev.website,
+        }));
+        setIsLoggedIn(true);
+        // Skip to step 2 if logged in
+        setStep(2);
+      } catch {
+        // Invalid provider data, continue as guest
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
@@ -175,8 +199,41 @@ export default function RegisterPage() {
     setError(null);
     
     try {
-      // Submit to Convex
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud'}/api/mutation`, {
+      const token = localStorage.getItem('apiclaw_session');
+      
+      // If logged in, add API to existing account
+      if (token && isLoggedIn) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud'}/api/mutation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            path: 'providers:addAPI',
+            args: {
+              token,
+              api: {
+                name: formData.apiName,
+                description: formData.description,
+                category: formData.category,
+                openApiUrl: formData.openApiUrl || undefined,
+                docsUrl: formData.docsUrl || undefined,
+                pricingModel: formData.pricingModel,
+                pricingNotes: formData.pricingNotes || undefined,
+              }
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to add API');
+        }
+        
+        setIsComplete(true);
+        return;
+      }
+      
+      // Submit to Convex (new provider)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud'}/api/mutation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -203,6 +260,12 @@ export default function RegisterPage() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Submission failed');
+      }
+
+      // Parse response and save session token for auto-login
+      const result = await response.json();
+      if (result.value?.sessionToken) {
+        localStorage.setItem('apiclaw_session', result.value.sessionToken);
       }
 
       // Send confirmation email via Symbot SMTP
@@ -300,6 +363,11 @@ export default function RegisterPage() {
             <span className="font-bold text-lg tracking-tight">APIClaw</span>
           </Link>
           <div className="flex items-center gap-3">
+            {isLoggedIn && (
+              <span className="text-sm text-text-muted hidden sm:block">
+                Logged in as <strong className="text-text-primary">{formData.providerName}</strong>
+              </span>
+            )}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-[var(--surface)] transition"
@@ -307,14 +375,23 @@ export default function RegisterPage() {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <a
-              href="https://github.com/nordsym/apiclaw"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary !py-2 !px-4 text-sm"
-            >
-              <Github className="w-4 h-4" />
-            </a>
+            {isLoggedIn ? (
+              <Link
+                href="/providers/dashboard"
+                className="btn-secondary !py-2 !px-4 text-sm"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <a
+                href="https://github.com/nordsym/apiclaw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary !py-2 !px-4 text-sm"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+            )}
           </div>
         </div>
       </header>

@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "source": "API Expansion Agent 1 - Public API Lists",
+  "sources_scraped": [
+    "https://github.com/public-apis/public-apis",
+    "https://github.com/n0shake/Public-APIs",
+    "https://api.apis.guru/v2/list.json"
+  ],
+  "generatedAt": "2026-02-27",
+  "existingCount": 13878,
+  "newCount": 10,
+  "apis": [
+    {
+      "name": "Bhagavad Gita 2",
+      "description": "Bhagavad Gita API",
+      "category": "Content",
+      "baseUrl": "https://bhagavadgita.io/api",
+      "authType": "OAuth",
+      "docsUrl": "https://bhagavadgita.io/api"
+    },
+    {
+      "name": "Non-Working Days 2",
+      "description": "Working days Russia API",
+      "category": "Utilities",
+      "baseUrl": "https://isdayoff.ru",
+      "authType": "None",
+      "docsUrl": "https://isdayoff.ru"
+    },
+    {
+      "name": "Microsoft Bing Ads",
+      "description": "Advertising technologies API",
+      "category": "Marketing",
+      "baseUrl": "https://msdn.microsoft.com/en-us/library/bing-ads-api.aspx",
+      "authType": "apiKey",
+      "docsUrl": "https://msdn.microsoft.com/en-us/library/bing-ads-api.aspx"
+    },
+    {
+      "name": "Stakdek QR Generator",
+      "description": "QR code generator using Python",
+      "category": "Utilities",
+      "baseUrl": "https://api.stakdek.de/blog?id=1006",
+      "authType": "None",
+      "docsUrl": "https://api.stakdek.de/blog?id=1006"
+    },
+    {
+      "name": "Google Fonts Developer API",
+      "description": "Google Fonts metadata API",
+      "category": "Development",
+      "baseUrl": "https://developers.google.com/fonts/",
+      "authType": "apiKey",
+      "docsUrl": "https://developers.google.com/fonts/"
+    },
+    {
+      "name": "Google Identity Toolkit API",
+      "description": "Federated login and identity API",
+      "category": "Security",
+      "baseUrl": "https://developers.google.com/identity/",
+      "authType": "apiKey",
+      "docsUrl": "https://developers.google.com/identity/"
+    },
+    {
+      "name": "OpenLigaDB API",
+      "description": "German football/soccer league data",
+      "category": "Sports",
+      "baseUrl": "https://www.openligadb.de/",
+      "authType": "None",
+      "docsUrl": "https://www.openligadb.de/"
+    },
+    {
+      "name": "Datto Autotask PSA",
+      "description": "Professional services automation REST API",
+      "category": "Business",
+      "baseUrl": "https://webservices5.autotask.net/ATServicesRest/swagger/docs/v1",
+      "authType": "apiKey",
+      "docsUrl": "https://webservices5.autotask.net/ATServicesRest/swagger/docs/v1"
+    },
+    {
+      "name": "logoraisr",
+      "description": "Logo enhancement and processing API",
+      "category": "Media",
+      "baseUrl": "https://docs.logoraisr.com/swagger.json",
+      "authType": "apiKey",
+      "docsUrl": "https://docs.logoraisr.com/swagger.json"
+    },
+    {
+      "name": "text2data",
+      "description": "Text analytics and sentiment analysis API",
+      "category": "AI",
+      "baseUrl": "http://api.text2data.org/swagger/docs/v3.4",
+      "authType": "apiKey",
+      "docsUrl": "http://api.text2data.org/swagger/docs/v3.4"
+    }
+  ]
+}

@@ -1,0 +1,2549 @@
+[
+  {
+    "name": "PayByFace",
+    "description": "Biometric face templates with tokenized card payments",
+    "category": "Payments",
+    "baseUrl": "https://api.paybyface.com",
+    "docsUrl": "https://docs.paybyface.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745885"
+  },
+  {
+    "name": "PayPay Open Payment",
+    "description": "Wallet payments, pre-authorization and capture flows",
+    "category": "Payments",
+    "baseUrl": "https://api.paypayopenpayment.com",
+    "docsUrl": "https://docs.paypayopenpayment.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745897"
+  },
+  {
+    "name": "SeerBit",
+    "description": "Secure payment integration",
+    "category": "Payments",
+    "baseUrl": "https://api.seerbit.com",
+    "docsUrl": "https://docs.seerbit.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745900"
+  },
+  {
+    "name": "Poool",
+    "description": "Dynamic paywall for content monetization",
+    "category": "Payments",
+    "baseUrl": "https://api.poool.com",
+    "docsUrl": "https://docs.poool.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745902"
+  },
+  {
+    "name": "UnivaPay",
+    "description": "Single charge and recurrent payments",
+    "category": "Payments",
+    "baseUrl": "https://api.univapay.com",
+    "docsUrl": "https://docs.univapay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745905"
+  },
+  {
+    "name": "Mobbex",
+    "description": "Argentina payments platform with QR features",
+    "category": "Payments",
+    "baseUrl": "https://api.mobbex.com",
+    "docsUrl": "https://docs.mobbex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745907"
+  },
+  {
+    "name": "RocketGate",
+    "description": "E-commerce gateway with recurring billing",
+    "category": "Payments",
+    "baseUrl": "https://api.rocketgate.com",
+    "docsUrl": "https://docs.rocketgate.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745910"
+  },
+  {
+    "name": "VaroPago",
+    "description": "LATAM online payment platform",
+    "category": "Payments",
+    "baseUrl": "https://api.varopago.com",
+    "docsUrl": "https://docs.varopago.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745912"
+  },
+  {
+    "name": "Green Money",
+    "description": "ACH payments and electronic checks",
+    "category": "Payments",
+    "baseUrl": "https://api.greenmoney.com",
+    "docsUrl": "https://docs.greenmoney.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745915"
+  },
+  {
+    "name": "Bleumi Pay",
+    "description": "Digital currency payments with blockchain",
+    "category": "Payments",
+    "baseUrl": "https://api.bleumipay.com",
+    "docsUrl": "https://docs.bleumipay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745917"
+  },
+  {
+    "name": "Rapyd",
+    "description": "Global fintech-as-a-service platform",
+    "category": "Payments",
+    "baseUrl": "https://api.rapyd.com",
+    "docsUrl": "https://docs.rapyd.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745919"
+  },
+  {
+    "name": "OpenPayd",
+    "description": "Full payment lifecycle management",
+    "category": "Payments",
+    "baseUrl": "https://api.openpayd.com",
+    "docsUrl": "https://docs.openpayd.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745922"
+  },
+  {
+    "name": "Postpay",
+    "description": "Installment payment via GraphQL",
+    "category": "Payments",
+    "baseUrl": "https://api.postpay.com",
+    "docsUrl": "https://docs.postpay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745926"
+  },
+  {
+    "name": "Payone",
+    "description": "Multi-method payment processing",
+    "category": "Payments",
+    "baseUrl": "https://api.payone.com",
+    "docsUrl": "https://docs.payone.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745928"
+  },
+  {
+    "name": "Xendit",
+    "description": "SE Asia payments and invoicing",
+    "category": "Payments",
+    "baseUrl": "https://api.xendit.com",
+    "docsUrl": "https://docs.xendit.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745930"
+  },
+  {
+    "name": "Checkout.com",
+    "description": "Payment processing platform",
+    "category": "Payments",
+    "baseUrl": "https://api.checkoutcom.com",
+    "docsUrl": "https://docs.checkoutcom.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745934"
+  },
+  {
+    "name": "GoCardless",
+    "description": "Direct debit payments",
+    "category": "Payments",
+    "baseUrl": "https://api.gocardless.com",
+    "docsUrl": "https://docs.gocardless.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745936"
+  },
+  {
+    "name": "Payoneer",
+    "description": "Cross-border payments",
+    "category": "Payments",
+    "baseUrl": "https://api.payoneer.com",
+    "docsUrl": "https://docs.payoneer.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745938"
+  },
+  {
+    "name": "Paysafe",
+    "description": "Payment processing solutions",
+    "category": "Payments",
+    "baseUrl": "https://api.paysafe.com",
+    "docsUrl": "https://docs.paysafe.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745940"
+  },
+  {
+    "name": "Revolut Business",
+    "description": "Business banking and payments",
+    "category": "Payments",
+    "baseUrl": "https://api.revolutbusiness.com",
+    "docsUrl": "https://docs.revolutbusiness.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745943"
+  },
+  {
+    "name": "Wise (TransferWise)",
+    "description": "International money transfers",
+    "category": "Payments",
+    "baseUrl": "https://api.wise(transferwise).com",
+    "docsUrl": "https://docs.wise(transferwise).com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745946"
+  },
+  {
+    "name": "Paystack",
+    "description": "African payment processing",
+    "category": "Payments",
+    "baseUrl": "https://api.paystack.com",
+    "docsUrl": "https://docs.paystack.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745949"
+  },
+  {
+    "name": "Flutterwave",
+    "description": "African payments infrastructure",
+    "category": "Payments",
+    "baseUrl": "https://api.flutterwave.com",
+    "docsUrl": "https://docs.flutterwave.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745951"
+  },
+  {
+    "name": "2Checkout",
+    "description": "Global digital commerce",
+    "category": "Payments",
+    "baseUrl": "https://api.2checkout.com",
+    "docsUrl": "https://docs.2checkout.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745953"
+  },
+  {
+    "name": "FastSpring",
+    "description": "E-commerce payment platform",
+    "category": "Payments",
+    "baseUrl": "https://api.fastspring.com",
+    "docsUrl": "https://docs.fastspring.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745956"
+  },
+  {
+    "name": "IntegraPay",
+    "description": "BPAY and invoicing services",
+    "category": "Payments",
+    "baseUrl": "https://api.integrapay.com",
+    "docsUrl": "https://docs.integrapay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745958"
+  },
+  {
+    "name": "accept.blue",
+    "description": "Credit card and e-check gateway",
+    "category": "Payments",
+    "baseUrl": "https://api.acceptblue.com",
+    "docsUrl": "https://docs.acceptblue.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745961"
+  },
+  {
+    "name": "CyberSource",
+    "description": "Visa payment management",
+    "category": "Payments",
+    "baseUrl": "https://api.cybersource.com",
+    "docsUrl": "https://docs.cybersource.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745963"
+  },
+  {
+    "name": "Instamojo",
+    "description": "Indian payment gateway",
+    "category": "Payments",
+    "baseUrl": "https://api.instamojo.com",
+    "docsUrl": "https://docs.instamojo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745965"
+  },
+  {
+    "name": "Basware Network",
+    "description": "B2B payment network",
+    "category": "Payments",
+    "baseUrl": "https://api.baswarenetwork.com",
+    "docsUrl": "https://docs.baswarenetwork.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745968"
+  },
+  {
+    "name": "Dwolla",
+    "description": "ACH payment platform",
+    "category": "Payments",
+    "baseUrl": "https://api.dwolla.com",
+    "docsUrl": "https://docs.dwolla.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745970"
+  },
+  {
+    "name": "WePay",
+    "description": "Integrated payments platform",
+    "category": "Payments",
+    "baseUrl": "https://api.wepay.com",
+    "docsUrl": "https://docs.wepay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745972"
+  },
+  {
+    "name": "BlueSnap",
+    "description": "Global payments",
+    "category": "Payments",
+    "baseUrl": "https://api.bluesnap.com",
+    "docsUrl": "https://docs.bluesnap.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745974"
+  },
+  {
+    "name": "Opayo (Sage Pay)",
+    "description": "UK payment gateway",
+    "category": "Payments",
+    "baseUrl": "https://api.opayo(sagepay).com",
+    "docsUrl": "https://docs.opayo(sagepay).com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745977"
+  },
+  {
+    "name": "Worldpay",
+    "description": "Global payment processing",
+    "category": "Payments",
+    "baseUrl": "https://api.worldpay.com",
+    "docsUrl": "https://docs.worldpay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745979"
+  },
+  {
+    "name": "Global Payments",
+    "description": "Enterprise payments",
+    "category": "Payments",
+    "baseUrl": "https://api.globalpayments.com",
+    "docsUrl": "https://docs.globalpayments.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745982"
+  },
+  {
+    "name": "Fiserv",
+    "description": "Financial services tech",
+    "category": "Payments",
+    "baseUrl": "https://api.fiserv.com",
+    "docsUrl": "https://docs.fiserv.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745984"
+  },
+  {
+    "name": "Eway",
+    "description": "Australian payments",
+    "category": "Payments",
+    "baseUrl": "https://api.eway.com",
+    "docsUrl": "https://docs.eway.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745986"
+  },
+  {
+    "name": "Pin Payments",
+    "description": "Australian credit card processing",
+    "category": "Payments",
+    "baseUrl": "https://api.pinpayments.com",
+    "docsUrl": "https://docs.pinpayments.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745990"
+  },
+  {
+    "name": "Windcave",
+    "description": "NZ/AU payments",
+    "category": "Payments",
+    "baseUrl": "https://api.windcave.com",
+    "docsUrl": "https://docs.windcave.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745992"
+  },
+  {
+    "name": "SmartCredit.io",
+    "description": "Credit as a Service",
+    "category": "Financial",
+    "baseUrl": "https://api.smartcreditio.com",
+    "docsUrl": "https://docs.smartcreditio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745995"
+  },
+  {
+    "name": "Mboum",
+    "description": "Real-time stock data",
+    "category": "Financial",
+    "baseUrl": "https://api.mboum.com",
+    "docsUrl": "https://docs.mboum.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745997"
+  },
+  {
+    "name": "SWOP",
+    "description": "Currency conversion",
+    "category": "Financial",
+    "baseUrl": "https://api.swop.com",
+    "docsUrl": "https://docs.swop.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.745999"
+  },
+  {
+    "name": "MX Platform",
+    "description": "Financial aggregation with AI",
+    "category": "Financial",
+    "baseUrl": "https://api.mxplatform.com",
+    "docsUrl": "https://docs.mxplatform.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746002"
+  },
+  {
+    "name": "TrafficLight",
+    "description": "Company payment risk analysis",
+    "category": "Financial",
+    "baseUrl": "https://api.trafficlight.com",
+    "docsUrl": "https://docs.trafficlight.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746004"
+  },
+  {
+    "name": "IBANfox",
+    "description": "IBAN validation",
+    "category": "Financial",
+    "baseUrl": "https://api.ibanfox.com",
+    "docsUrl": "https://docs.ibanfox.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746006"
+  },
+  {
+    "name": "Marketstack",
+    "description": "Stock market data",
+    "category": "Financial",
+    "baseUrl": "https://api.marketstack.com",
+    "docsUrl": "https://docs.marketstack.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746008"
+  },
+  {
+    "name": "Barchart",
+    "description": "Market alerts and data",
+    "category": "Financial",
+    "baseUrl": "https://api.barchart.com",
+    "docsUrl": "https://docs.barchart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746010"
+  },
+  {
+    "name": "FactSet",
+    "description": "Performance analytics",
+    "category": "Financial",
+    "baseUrl": "https://api.factset.com",
+    "docsUrl": "https://docs.factset.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746013"
+  },
+  {
+    "name": "Bud",
+    "description": "Open banking insights",
+    "category": "Financial",
+    "baseUrl": "https://api.bud.com",
+    "docsUrl": "https://docs.bud.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746015"
+  },
+  {
+    "name": "Open Exchange Rates",
+    "description": "Currency rates",
+    "category": "Financial",
+    "baseUrl": "https://api.openexchangerates.com",
+    "docsUrl": "https://docs.openexchangerates.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746019"
+  },
+  {
+    "name": "Fixer.io",
+    "description": "Exchange rates",
+    "category": "Financial",
+    "baseUrl": "https://api.fixerio.com",
+    "docsUrl": "https://docs.fixerio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746021"
+  },
+  {
+    "name": "CurrencyLayer",
+    "description": "Currency API",
+    "category": "Financial",
+    "baseUrl": "https://api.currencylayer.com",
+    "docsUrl": "https://docs.currencylayer.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746023"
+  },
+  {
+    "name": "ExchangeRate-API",
+    "description": "Currency conversion",
+    "category": "Financial",
+    "baseUrl": "https://api.exchangerateapi.com",
+    "docsUrl": "https://docs.exchangerateapi.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746026"
+  },
+  {
+    "name": "Xignite",
+    "description": "Market data cloud",
+    "category": "Financial",
+    "baseUrl": "https://api.xignite.com",
+    "docsUrl": "https://docs.xignite.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746028"
+  },
+  {
+    "name": "Refinitiv",
+    "description": "Financial market data",
+    "category": "Financial",
+    "baseUrl": "https://api.refinitiv.com",
+    "docsUrl": "https://docs.refinitiv.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746031"
+  },
+  {
+    "name": "Morningstar",
+    "description": "Investment research",
+    "category": "Financial",
+    "baseUrl": "https://api.morningstar.com",
+    "docsUrl": "https://docs.morningstar.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746034"
+  },
+  {
+    "name": "SEC EDGAR",
+    "description": "SEC filings database",
+    "category": "Financial",
+    "baseUrl": "https://api.secedgar.com",
+    "docsUrl": "https://docs.secedgar.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746037"
+  },
+  {
+    "name": "World Bank",
+    "description": "Development data",
+    "category": "Financial",
+    "baseUrl": "https://api.worldbank.com",
+    "docsUrl": "https://docs.worldbank.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746040"
+  },
+  {
+    "name": "Akoya",
+    "description": "Consumer financial data",
+    "category": "Financial",
+    "baseUrl": "https://api.akoya.com",
+    "docsUrl": "https://docs.akoya.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746042"
+  },
+  {
+    "name": "Envestnet",
+    "description": "Wealth data",
+    "category": "Financial",
+    "baseUrl": "https://api.envestnet.com",
+    "docsUrl": "https://docs.envestnet.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746044"
+  },
+  {
+    "name": "Tradier",
+    "description": "Brokerage API",
+    "category": "Financial",
+    "baseUrl": "https://api.tradier.com",
+    "docsUrl": "https://docs.tradier.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746046"
+  },
+  {
+    "name": "Ally Invest",
+    "description": "Trading API",
+    "category": "Financial",
+    "baseUrl": "https://api.allyinvest.com",
+    "docsUrl": "https://docs.allyinvest.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746050"
+  },
+  {
+    "name": "eToro",
+    "description": "Social trading",
+    "category": "Financial",
+    "baseUrl": "https://api.etoro.com",
+    "docsUrl": "https://docs.etoro.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746052"
+  },
+  {
+    "name": "Dapi",
+    "description": "Unified open banking",
+    "category": "Banking",
+    "baseUrl": "https://api.dapi.com",
+    "docsUrl": "https://docs.dapi.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746054"
+  },
+  {
+    "name": "Deutsche Bank",
+    "description": "Cash account opening",
+    "category": "Banking",
+    "baseUrl": "https://api.deutschebank.com",
+    "docsUrl": "https://docs.deutschebank.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746057"
+  },
+  {
+    "name": "Open Bank",
+    "description": "Asia neobanking",
+    "category": "Banking",
+    "baseUrl": "https://api.openbank.com",
+    "docsUrl": "https://docs.openbank.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746059"
+  },
+  {
+    "name": "Shine.fr",
+    "description": "French neobank",
+    "category": "Banking",
+    "baseUrl": "https://api.shinefr.com",
+    "docsUrl": "https://docs.shinefr.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746061"
+  },
+  {
+    "name": "Up",
+    "description": "Australian banking",
+    "category": "Banking",
+    "baseUrl": "https://api.up.com",
+    "docsUrl": "https://docs.up.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746064"
+  },
+  {
+    "name": "Algoan",
+    "description": "Banking analytics",
+    "category": "Banking",
+    "baseUrl": "https://api.algoan.com",
+    "docsUrl": "https://docs.algoan.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746066"
+  },
+  {
+    "name": "Green Dot",
+    "description": "Banking and wallet",
+    "category": "Banking",
+    "baseUrl": "https://api.greendot.com",
+    "docsUrl": "https://docs.greendot.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746068"
+  },
+  {
+    "name": "Wultra NextStep",
+    "description": "Fintech authentication",
+    "category": "Banking",
+    "baseUrl": "https://api.wultranextstep.com",
+    "docsUrl": "https://docs.wultranextstep.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746071"
+  },
+  {
+    "name": "Upstart",
+    "description": "AI credit decisions",
+    "category": "Banking",
+    "baseUrl": "https://api.upstart.com",
+    "docsUrl": "https://docs.upstart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746073"
+  },
+  {
+    "name": "Finastra",
+    "description": "Banking software APIs",
+    "category": "Banking",
+    "baseUrl": "https://api.finastra.com",
+    "docsUrl": "https://docs.finastra.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746075"
+  },
+  {
+    "name": "TrueLayer",
+    "description": "Open banking API",
+    "category": "Banking",
+    "baseUrl": "https://api.truelayer.com",
+    "docsUrl": "https://docs.truelayer.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746078"
+  },
+  {
+    "name": "Yapily",
+    "description": "European connectivity",
+    "category": "Banking",
+    "baseUrl": "https://api.yapily.com",
+    "docsUrl": "https://docs.yapily.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746080"
+  },
+  {
+    "name": "Salt Edge",
+    "description": "Open banking solutions",
+    "category": "Banking",
+    "baseUrl": "https://api.saltedge.com",
+    "docsUrl": "https://docs.saltedge.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746082"
+  },
+  {
+    "name": "Belvo",
+    "description": "LATAM open banking",
+    "category": "Banking",
+    "baseUrl": "https://api.belvo.com",
+    "docsUrl": "https://docs.belvo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746085"
+  },
+  {
+    "name": "Mono",
+    "description": "African banking API",
+    "category": "Banking",
+    "baseUrl": "https://api.mono.com",
+    "docsUrl": "https://docs.mono.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746087"
+  },
+  {
+    "name": "Stitch",
+    "description": "African financial data",
+    "category": "Banking",
+    "baseUrl": "https://api.stitch.com",
+    "docsUrl": "https://docs.stitch.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746089"
+  },
+  {
+    "name": "Flinks",
+    "description": "Canadian banking data",
+    "category": "Banking",
+    "baseUrl": "https://api.flinks.com",
+    "docsUrl": "https://docs.flinks.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746091"
+  },
+  {
+    "name": "Basiq",
+    "description": "Australian open banking",
+    "category": "Banking",
+    "baseUrl": "https://api.basiq.com",
+    "docsUrl": "https://docs.basiq.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746094"
+  },
+  {
+    "name": "Frollo",
+    "description": "Australian fintech API",
+    "category": "Banking",
+    "baseUrl": "https://api.frollo.com",
+    "docsUrl": "https://docs.frollo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746096"
+  },
+  {
+    "name": "Brankas",
+    "description": "SE Asia banking API",
+    "category": "Banking",
+    "baseUrl": "https://api.brankas.com",
+    "docsUrl": "https://docs.brankas.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746098"
+  },
+  {
+    "name": "Brick",
+    "description": "SE Asia financial data",
+    "category": "Banking",
+    "baseUrl": "https://api.brick.com",
+    "docsUrl": "https://docs.brick.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746100"
+  },
+  {
+    "name": "Finverse",
+    "description": "Asia open finance",
+    "category": "Banking",
+    "baseUrl": "https://api.finverse.com",
+    "docsUrl": "https://docs.finverse.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746104"
+  },
+  {
+    "name": "Token.io",
+    "description": "Open banking platform",
+    "category": "Banking",
+    "baseUrl": "https://api.tokenio.com",
+    "docsUrl": "https://docs.tokenio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746106"
+  },
+  {
+    "name": "Railsbank",
+    "description": "Banking-as-a-service",
+    "category": "Banking",
+    "baseUrl": "https://api.railsbank.com",
+    "docsUrl": "https://docs.railsbank.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746108"
+  },
+  {
+    "name": "Synapse",
+    "description": "Banking infrastructure",
+    "category": "Banking",
+    "baseUrl": "https://api.synapse.com",
+    "docsUrl": "https://docs.synapse.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746110"
+  },
+  {
+    "name": "Galileo",
+    "description": "Card issuing platform",
+    "category": "Banking",
+    "baseUrl": "https://api.galileo.com",
+    "docsUrl": "https://docs.galileo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746113"
+  },
+  {
+    "name": "Marqeta",
+    "description": "Card issuing API",
+    "category": "Banking",
+    "baseUrl": "https://api.marqeta.com",
+    "docsUrl": "https://docs.marqeta.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746115"
+  },
+  {
+    "name": "TikApi",
+    "description": "Unofficial TikTok API",
+    "category": "Social",
+    "baseUrl": "https://api.tikapi.com",
+    "docsUrl": "https://docs.tikapi.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746117"
+  },
+  {
+    "name": "HypeAuditor",
+    "description": "Influencer analytics",
+    "category": "Social",
+    "baseUrl": "https://api.hypeauditor.com",
+    "docsUrl": "https://docs.hypeauditor.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746119"
+  },
+  {
+    "name": "LunarCRUSH",
+    "description": "Crypto social analytics",
+    "category": "Social",
+    "baseUrl": "https://api.lunarcrush.com",
+    "docsUrl": "https://docs.lunarcrush.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746122"
+  },
+  {
+    "name": "True Social Metrics",
+    "description": "Social media insights",
+    "category": "Social",
+    "baseUrl": "https://api.truesocialmetrics.com",
+    "docsUrl": "https://docs.truesocialmetrics.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746125"
+  },
+  {
+    "name": "InstaFeed",
+    "description": "Instagram content",
+    "category": "Social",
+    "baseUrl": "https://api.instafeed.com",
+    "docsUrl": "https://docs.instafeed.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746127"
+  },
+  {
+    "name": "Bannerbear",
+    "description": "Social image generation",
+    "category": "Social",
+    "baseUrl": "https://api.bannerbear.com",
+    "docsUrl": "https://docs.bannerbear.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746129"
+  },
+  {
+    "name": "Datashake",
+    "description": "Review extraction",
+    "category": "Social",
+    "baseUrl": "https://api.datashake.com",
+    "docsUrl": "https://docs.datashake.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746131"
+  },
+  {
+    "name": "Peekalink",
+    "description": "Link previews",
+    "category": "Social",
+    "baseUrl": "https://api.peekalink.com",
+    "docsUrl": "https://docs.peekalink.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746133"
+  },
+  {
+    "name": "Reddit",
+    "description": "Social news",
+    "category": "Social",
+    "baseUrl": "https://api.reddit.com",
+    "docsUrl": "https://docs.reddit.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746135"
+  },
+  {
+    "name": "Pinterest",
+    "description": "Visual discovery",
+    "category": "Social",
+    "baseUrl": "https://api.pinterest.com",
+    "docsUrl": "https://docs.pinterest.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746137"
+  },
+  {
+    "name": "Tumblr",
+    "description": "Microblogging",
+    "category": "Social",
+    "baseUrl": "https://api.tumblr.com",
+    "docsUrl": "https://docs.tumblr.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746140"
+  },
+  {
+    "name": "Snapchat",
+    "description": "Multimedia messaging",
+    "category": "Social",
+    "baseUrl": "https://api.snapchat.com",
+    "docsUrl": "https://docs.snapchat.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746142"
+  },
+  {
+    "name": "Mastodon",
+    "description": "Decentralized social",
+    "category": "Social",
+    "baseUrl": "https://api.mastodon.com",
+    "docsUrl": "https://docs.mastodon.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746144"
+  },
+  {
+    "name": "Bluesky",
+    "description": "Decentralized social",
+    "category": "Social",
+    "baseUrl": "https://api.bluesky.com",
+    "docsUrl": "https://docs.bluesky.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746146"
+  },
+  {
+    "name": "Threads",
+    "description": "Meta text social",
+    "category": "Social",
+    "baseUrl": "https://api.threads.com",
+    "docsUrl": "https://docs.threads.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746148"
+  },
+  {
+    "name": "WeChat",
+    "description": "Chinese platform",
+    "category": "Social",
+    "baseUrl": "https://api.wechat.com",
+    "docsUrl": "https://docs.wechat.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746152"
+  },
+  {
+    "name": "Line",
+    "description": "Japanese messaging",
+    "category": "Social",
+    "baseUrl": "https://api.line.com",
+    "docsUrl": "https://docs.line.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746155"
+  },
+  {
+    "name": "Kakao",
+    "description": "Korean platform",
+    "category": "Social",
+    "baseUrl": "https://api.kakao.com",
+    "docsUrl": "https://docs.kakao.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746157"
+  },
+  {
+    "name": "VKontakte",
+    "description": "Russian social",
+    "category": "Social",
+    "baseUrl": "https://api.vkontakte.com",
+    "docsUrl": "https://docs.vkontakte.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746160"
+  },
+  {
+    "name": "Buffer",
+    "description": "Social scheduling",
+    "category": "Social",
+    "baseUrl": "https://api.buffer.com",
+    "docsUrl": "https://docs.buffer.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746162"
+  },
+  {
+    "name": "Hootsuite",
+    "description": "Social management",
+    "category": "Social",
+    "baseUrl": "https://api.hootsuite.com",
+    "docsUrl": "https://docs.hootsuite.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746164"
+  },
+  {
+    "name": "Sprout Social",
+    "description": "Social management",
+    "category": "Social",
+    "baseUrl": "https://api.sproutsocial.com",
+    "docsUrl": "https://docs.sproutsocial.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746167"
+  },
+  {
+    "name": "Later",
+    "description": "Instagram scheduling",
+    "category": "Social",
+    "baseUrl": "https://api.later.com",
+    "docsUrl": "https://docs.later.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746169"
+  },
+  {
+    "name": "Socialbakers",
+    "description": "Social analytics",
+    "category": "Social",
+    "baseUrl": "https://api.socialbakers.com",
+    "docsUrl": "https://docs.socialbakers.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746171"
+  },
+  {
+    "name": "Sprinklr",
+    "description": "Social management",
+    "category": "Social",
+    "baseUrl": "https://api.sprinklr.com",
+    "docsUrl": "https://docs.sprinklr.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746174"
+  },
+  {
+    "name": "Brandwatch",
+    "description": "Social listening",
+    "category": "Social",
+    "baseUrl": "https://api.brandwatch.com",
+    "docsUrl": "https://docs.brandwatch.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746176"
+  },
+  {
+    "name": "Mention",
+    "description": "Social monitoring",
+    "category": "Social",
+    "baseUrl": "https://api.mention.com",
+    "docsUrl": "https://docs.mention.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746178"
+  },
+  {
+    "name": "Talkwalker",
+    "description": "Social analytics",
+    "category": "Social",
+    "baseUrl": "https://api.talkwalker.com",
+    "docsUrl": "https://docs.talkwalker.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746181"
+  },
+  {
+    "name": "Meltwater",
+    "description": "Media intelligence",
+    "category": "Social",
+    "baseUrl": "https://api.meltwater.com",
+    "docsUrl": "https://docs.meltwater.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746183"
+  },
+  {
+    "name": "Route Mobile WhatsApp",
+    "description": "WhatsApp Business",
+    "category": "Messaging",
+    "baseUrl": "https://api.routemobilewhatsapp.com",
+    "docsUrl": "https://docs.routemobilewhatsapp.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746185"
+  },
+  {
+    "name": "Respond.io",
+    "description": "Multi-channel messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.respondio.com",
+    "docsUrl": "https://docs.respondio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746188"
+  },
+  {
+    "name": "Channelize",
+    "description": "In-app messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.channelize.com",
+    "docsUrl": "https://docs.channelize.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746190"
+  },
+  {
+    "name": "ChatShipper",
+    "description": "Contact center messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.chatshipper.com",
+    "docsUrl": "https://docs.chatshipper.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746192"
+  },
+  {
+    "name": "FreeClimb",
+    "description": "Voice and SMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.freeclimb.com",
+    "docsUrl": "https://docs.freeclimb.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746195"
+  },
+  {
+    "name": "smsmode",
+    "description": "SMS services",
+    "category": "Messaging",
+    "baseUrl": "https://api.smsmode.com",
+    "docsUrl": "https://docs.smsmode.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746197"
+  },
+  {
+    "name": "Messente",
+    "description": "Global SMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.messente.com",
+    "docsUrl": "https://docs.messente.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746199"
+  },
+  {
+    "name": "D7SMS",
+    "description": "Worldwide SMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.d7sms.com",
+    "docsUrl": "https://docs.d7sms.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746202"
+  },
+  {
+    "name": "Telegram Bot",
+    "description": "Telegram messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.telegrambot.com",
+    "docsUrl": "https://docs.telegrambot.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746204"
+  },
+  {
+    "name": "WhatsApp Business",
+    "description": "WhatsApp API",
+    "category": "Messaging",
+    "baseUrl": "https://api.whatsappbusiness.com",
+    "docsUrl": "https://docs.whatsappbusiness.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746209"
+  },
+  {
+    "name": "Viber",
+    "description": "Messaging and calls",
+    "category": "Messaging",
+    "baseUrl": "https://api.viber.com",
+    "docsUrl": "https://docs.viber.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746211"
+  },
+  {
+    "name": "CM.com",
+    "description": "Mobile messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.cmcom.com",
+    "docsUrl": "https://docs.cmcom.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746214"
+  },
+  {
+    "name": "TextMagic",
+    "description": "SMS gateway",
+    "category": "Messaging",
+    "baseUrl": "https://api.textmagic.com",
+    "docsUrl": "https://docs.textmagic.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746216"
+  },
+  {
+    "name": "ClickSend",
+    "description": "SMS and MMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.clicksend.com",
+    "docsUrl": "https://docs.clicksend.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746219"
+  },
+  {
+    "name": "Plivo SMS",
+    "description": "SMS API",
+    "category": "Messaging",
+    "baseUrl": "https://api.plivosms.com",
+    "docsUrl": "https://docs.plivosms.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746221"
+  },
+  {
+    "name": "Vonage Messages",
+    "description": "Omnichannel messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.vonagemessages.com",
+    "docsUrl": "https://docs.vonagemessages.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746224"
+  },
+  {
+    "name": "Bandwidth Messaging",
+    "description": "SMS/MMS API",
+    "category": "Messaging",
+    "baseUrl": "https://api.bandwidthmessaging.com",
+    "docsUrl": "https://docs.bandwidthmessaging.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746226"
+  },
+  {
+    "name": "OpenMarket",
+    "description": "Enterprise messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.openmarket.com",
+    "docsUrl": "https://docs.openmarket.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746228"
+  },
+  {
+    "name": "Kaleyra",
+    "description": "CPaaS messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.kaleyra.com",
+    "docsUrl": "https://docs.kaleyra.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746230"
+  },
+  {
+    "name": "Tyntec",
+    "description": "CPaaS platform",
+    "category": "Messaging",
+    "baseUrl": "https://api.tyntec.com",
+    "docsUrl": "https://docs.tyntec.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746233"
+  },
+  {
+    "name": "Apifonica",
+    "description": "Voice and SMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.apifonica.com",
+    "docsUrl": "https://docs.apifonica.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746235"
+  },
+  {
+    "name": "Mitto",
+    "description": "A2P messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.mitto.com",
+    "docsUrl": "https://docs.mitto.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746237"
+  },
+  {
+    "name": "Soprano",
+    "description": "Enterprise messaging",
+    "category": "Messaging",
+    "baseUrl": "https://api.soprano.com",
+    "docsUrl": "https://docs.soprano.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746239"
+  },
+  {
+    "name": "Esendex",
+    "description": "Business SMS",
+    "category": "Messaging",
+    "baseUrl": "https://api.esendex.com",
+    "docsUrl": "https://docs.esendex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746241"
+  },
+  {
+    "name": "SimpleTexting",
+    "description": "SMS marketing",
+    "category": "Messaging",
+    "baseUrl": "https://api.simpletexting.com",
+    "docsUrl": "https://docs.simpletexting.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746244"
+  },
+  {
+    "name": "Amazon Selling Partner",
+    "description": "Amazon marketplace",
+    "category": "eCommerce",
+    "baseUrl": "https://api.amazonsellingpartner.com",
+    "docsUrl": "https://docs.amazonsellingpartner.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746247"
+  },
+  {
+    "name": "Revery AI",
+    "description": "Virtual dressing room",
+    "category": "eCommerce",
+    "baseUrl": "https://api.reveryai.com",
+    "docsUrl": "https://docs.reveryai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746249"
+  },
+  {
+    "name": "Lykdat",
+    "description": "Visual fashion search",
+    "category": "eCommerce",
+    "baseUrl": "https://api.lykdat.com",
+    "docsUrl": "https://docs.lykdat.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746251"
+  },
+  {
+    "name": "DataSpark",
+    "description": "Walmart estimator",
+    "category": "eCommerce",
+    "baseUrl": "https://api.dataspark.com",
+    "docsUrl": "https://docs.dataspark.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746253"
+  },
+  {
+    "name": "Fleetbase",
+    "description": "API logistics",
+    "category": "eCommerce",
+    "baseUrl": "https://api.fleetbase.com",
+    "docsUrl": "https://docs.fleetbase.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746256"
+  },
+  {
+    "name": "ClickFunnels",
+    "description": "Sales funnels",
+    "category": "eCommerce",
+    "baseUrl": "https://api.clickfunnels.com",
+    "docsUrl": "https://docs.clickfunnels.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746258"
+  },
+  {
+    "name": "Commerce7",
+    "description": "Winery commerce",
+    "category": "eCommerce",
+    "baseUrl": "https://api.commerce7.com",
+    "docsUrl": "https://docs.commerce7.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746265"
+  },
+  {
+    "name": "PrestaShop",
+    "description": "Open source e-commerce",
+    "category": "eCommerce",
+    "baseUrl": "https://api.prestashop.com",
+    "docsUrl": "https://docs.prestashop.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746267"
+  },
+  {
+    "name": "Etsy",
+    "description": "Handmade marketplace",
+    "category": "eCommerce",
+    "baseUrl": "https://api.etsy.com",
+    "docsUrl": "https://docs.etsy.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746270"
+  },
+  {
+    "name": "eBay",
+    "description": "Online marketplace",
+    "category": "eCommerce",
+    "baseUrl": "https://api.ebay.com",
+    "docsUrl": "https://docs.ebay.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746272"
+  },
+  {
+    "name": "Walmart",
+    "description": "Retail marketplace",
+    "category": "eCommerce",
+    "baseUrl": "https://api.walmart.com",
+    "docsUrl": "https://docs.walmart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746274"
+  },
+  {
+    "name": "Best Buy",
+    "description": "Electronics retailer",
+    "category": "eCommerce",
+    "baseUrl": "https://api.bestbuy.com",
+    "docsUrl": "https://docs.bestbuy.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746276"
+  },
+  {
+    "name": "Alibaba",
+    "description": "Chinese e-commerce",
+    "category": "eCommerce",
+    "baseUrl": "https://api.alibaba.com",
+    "docsUrl": "https://docs.alibaba.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746279"
+  },
+  {
+    "name": "AliExpress",
+    "description": "International marketplace",
+    "category": "eCommerce",
+    "baseUrl": "https://api.aliexpress.com",
+    "docsUrl": "https://docs.aliexpress.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746281"
+  },
+  {
+    "name": "Wish",
+    "description": "Mobile shopping",
+    "category": "eCommerce",
+    "baseUrl": "https://api.wish.com",
+    "docsUrl": "https://docs.wish.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746283"
+  },
+  {
+    "name": "Selz",
+    "description": "Sell anywhere",
+    "category": "eCommerce",
+    "baseUrl": "https://api.selz.com",
+    "docsUrl": "https://docs.selz.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746286"
+  },
+  {
+    "name": "Volusion",
+    "description": "E-commerce builder",
+    "category": "eCommerce",
+    "baseUrl": "https://api.volusion.com",
+    "docsUrl": "https://docs.volusion.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746288"
+  },
+  {
+    "name": "3dcart",
+    "description": "Online store",
+    "category": "eCommerce",
+    "baseUrl": "https://api.3dcart.com",
+    "docsUrl": "https://docs.3dcart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746291"
+  },
+  {
+    "name": "OpenCart",
+    "description": "Shopping cart",
+    "category": "eCommerce",
+    "baseUrl": "https://api.opencart.com",
+    "docsUrl": "https://docs.opencart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746293"
+  },
+  {
+    "name": "X-Cart",
+    "description": "E-commerce software",
+    "category": "eCommerce",
+    "baseUrl": "https://api.xcart.com",
+    "docsUrl": "https://docs.xcart.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746295"
+  },
+  {
+    "name": "Wix Stores",
+    "description": "Wix e-commerce",
+    "category": "eCommerce",
+    "baseUrl": "https://api.wixstores.com",
+    "docsUrl": "https://docs.wixstores.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746298"
+  },
+  {
+    "name": "Squarespace Commerce",
+    "description": "Squarespace stores",
+    "category": "eCommerce",
+    "baseUrl": "https://api.squarespacecommerce.com",
+    "docsUrl": "https://docs.squarespacecommerce.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746300"
+  },
+  {
+    "name": "Weebly Commerce",
+    "description": "Weebly stores",
+    "category": "eCommerce",
+    "baseUrl": "https://api.weeblycommerce.com",
+    "docsUrl": "https://docs.weeblycommerce.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746303"
+  },
+  {
+    "name": "Lightspeed",
+    "description": "Retail POS",
+    "category": "eCommerce",
+    "baseUrl": "https://api.lightspeed.com",
+    "docsUrl": "https://docs.lightspeed.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746305"
+  },
+  {
+    "name": "Vend",
+    "description": "Retail software",
+    "category": "eCommerce",
+    "baseUrl": "https://api.vend.com",
+    "docsUrl": "https://docs.vend.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746307"
+  },
+  {
+    "name": "Clover",
+    "description": "POS system",
+    "category": "eCommerce",
+    "baseUrl": "https://api.clover.com",
+    "docsUrl": "https://docs.clover.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746309"
+  },
+  {
+    "name": "Toast",
+    "description": "Restaurant POS",
+    "category": "eCommerce",
+    "baseUrl": "https://api.toast.com",
+    "docsUrl": "https://docs.toast.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746312"
+  },
+  {
+    "name": "Revel",
+    "description": "iPad POS",
+    "category": "eCommerce",
+    "baseUrl": "https://api.revel.com",
+    "docsUrl": "https://docs.revel.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746314"
+  },
+  {
+    "name": "Heartland Retail",
+    "description": "Retail management",
+    "category": "eCommerce",
+    "baseUrl": "https://api.heartlandretail.com",
+    "docsUrl": "https://docs.heartlandretail.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746316"
+  },
+  {
+    "name": "Cin7",
+    "description": "Inventory management",
+    "category": "eCommerce",
+    "baseUrl": "https://api.cin7.com",
+    "docsUrl": "https://docs.cin7.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746319"
+  },
+  {
+    "name": "TradeGecko",
+    "description": "Inventory management",
+    "category": "eCommerce",
+    "baseUrl": "https://api.tradegecko.com",
+    "docsUrl": "https://docs.tradegecko.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746323"
+  },
+  {
+    "name": "Ordoro",
+    "description": "Shipping for e-commerce",
+    "category": "eCommerce",
+    "baseUrl": "https://api.ordoro.com",
+    "docsUrl": "https://docs.ordoro.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746325"
+  },
+  {
+    "name": "Zabo",
+    "description": "Crypto account connection",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.zabo.com",
+    "docsUrl": "https://docs.zabo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746327"
+  },
+  {
+    "name": "Chaingateway.io",
+    "description": "ERC20 and Ethereum",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.chaingatewayio.com",
+    "docsUrl": "https://docs.chaingatewayio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746330"
+  },
+  {
+    "name": "Binance",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.binance.com",
+    "docsUrl": "https://docs.binance.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746333"
+  },
+  {
+    "name": "Kraken",
+    "description": "Crypto trading",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.kraken.com",
+    "docsUrl": "https://docs.kraken.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746335"
+  },
+  {
+    "name": "Coinbase",
+    "description": "Crypto platform",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.coinbase.com",
+    "docsUrl": "https://docs.coinbase.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746337"
+  },
+  {
+    "name": "MoonDEX",
+    "description": "Crypto market data",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.moondex.com",
+    "docsUrl": "https://docs.moondex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746339"
+  },
+  {
+    "name": "CryptoMood",
+    "description": "Crypto sentiment",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.cryptomood.com",
+    "docsUrl": "https://docs.cryptomood.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746342"
+  },
+  {
+    "name": "DeCurret",
+    "description": "Japanese exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.decurret.com",
+    "docsUrl": "https://docs.decurret.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746344"
+  },
+  {
+    "name": "CryptoMarket",
+    "description": "Crypto trading",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.cryptomarket.com",
+    "docsUrl": "https://docs.cryptomarket.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746346"
+  },
+  {
+    "name": "CryptoMeter",
+    "description": "Crypto indicators",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.cryptometer.com",
+    "docsUrl": "https://docs.cryptometer.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746348"
+  },
+  {
+    "name": "Blockchain.com",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.blockchaincom.com",
+    "docsUrl": "https://docs.blockchaincom.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746351"
+  },
+  {
+    "name": "FTX (Legacy)",
+    "description": "Crypto trading",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.ftx(legacy).com",
+    "docsUrl": "https://docs.ftx(legacy).com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746353"
+  },
+  {
+    "name": "KuCoin",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.kucoin.com",
+    "docsUrl": "https://docs.kucoin.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746355"
+  },
+  {
+    "name": "Bitfinex",
+    "description": "Crypto trading",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.bitfinex.com",
+    "docsUrl": "https://docs.bitfinex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746358"
+  },
+  {
+    "name": "Huobi",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.huobi.com",
+    "docsUrl": "https://docs.huobi.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746360"
+  },
+  {
+    "name": "OKX",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.okx.com",
+    "docsUrl": "https://docs.okx.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746362"
+  },
+  {
+    "name": "Bybit",
+    "description": "Crypto derivatives",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.bybit.com",
+    "docsUrl": "https://docs.bybit.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746364"
+  },
+  {
+    "name": "Gate.io",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.gateio.com",
+    "docsUrl": "https://docs.gateio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746369"
+  },
+  {
+    "name": "Bittrex",
+    "description": "Crypto trading",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.bittrex.com",
+    "docsUrl": "https://docs.bittrex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746371"
+  },
+  {
+    "name": "Poloniex",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.poloniex.com",
+    "docsUrl": "https://docs.poloniex.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746373"
+  },
+  {
+    "name": "Gemini",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.gemini.com",
+    "docsUrl": "https://docs.gemini.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746375"
+  },
+  {
+    "name": "Bitstamp",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.bitstamp.com",
+    "docsUrl": "https://docs.bitstamp.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746378"
+  },
+  {
+    "name": "Crypto.com",
+    "description": "Crypto platform",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.cryptocom.com",
+    "docsUrl": "https://docs.cryptocom.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746380"
+  },
+  {
+    "name": "Uniswap",
+    "description": "DEX protocol",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.uniswap.com",
+    "docsUrl": "https://docs.uniswap.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746382"
+  },
+  {
+    "name": "PancakeSwap",
+    "description": "BSC DEX",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.pancakeswap.com",
+    "docsUrl": "https://docs.pancakeswap.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746385"
+  },
+  {
+    "name": "Aave",
+    "description": "DeFi lending",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.aave.com",
+    "docsUrl": "https://docs.aave.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746387"
+  },
+  {
+    "name": "Compound",
+    "description": "DeFi protocol",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.compound.com",
+    "docsUrl": "https://docs.compound.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746389"
+  },
+  {
+    "name": "MakerDAO",
+    "description": "DAI stablecoin",
+    "category": "Cryptocurrency",
+    "baseUrl": "https://api.makerdao.com",
+    "docsUrl": "https://docs.makerdao.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746391"
+  },
+  {
+    "name": "Skrapp",
+    "description": "Email finding",
+    "category": "Email",
+    "baseUrl": "https://api.skrapp.com",
+    "docsUrl": "https://docs.skrapp.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746393"
+  },
+  {
+    "name": "Coresender",
+    "description": "Transactional email",
+    "category": "Email",
+    "baseUrl": "https://api.coresender.com",
+    "docsUrl": "https://docs.coresender.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746396"
+  },
+  {
+    "name": "Return Path",
+    "description": "Email deliverability",
+    "category": "Email",
+    "baseUrl": "https://api.returnpath.com",
+    "docsUrl": "https://docs.returnpath.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746398"
+  },
+  {
+    "name": "Verimail",
+    "description": "Email verification",
+    "category": "Email",
+    "baseUrl": "https://api.verimail.com",
+    "docsUrl": "https://docs.verimail.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746400"
+  },
+  {
+    "name": "Nylas",
+    "description": "Email sync",
+    "category": "Email",
+    "baseUrl": "https://api.nylas.com",
+    "docsUrl": "https://docs.nylas.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746402"
+  },
+  {
+    "name": "SparkPost",
+    "description": "Email delivery",
+    "category": "Email",
+    "baseUrl": "https://api.sparkpost.com",
+    "docsUrl": "https://docs.sparkpost.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746406"
+  },
+  {
+    "name": "Sendinblue",
+    "description": "Email marketing",
+    "category": "Email",
+    "baseUrl": "https://api.sendinblue.com",
+    "docsUrl": "https://docs.sendinblue.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746408"
+  },
+  {
+    "name": "Mailjet",
+    "description": "Email platform",
+    "category": "Email",
+    "baseUrl": "https://api.mailjet.com",
+    "docsUrl": "https://docs.mailjet.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746410"
+  },
+  {
+    "name": "Elastic Email",
+    "description": "Email API",
+    "category": "Email",
+    "baseUrl": "https://api.elasticemail.com",
+    "docsUrl": "https://docs.elasticemail.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746412"
+  },
+  {
+    "name": "Mailtrap",
+    "description": "Email testing",
+    "category": "Email",
+    "baseUrl": "https://api.mailtrap.com",
+    "docsUrl": "https://docs.mailtrap.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746415"
+  },
+  {
+    "name": "Clearbit Prospector",
+    "description": "Email finding",
+    "category": "Email",
+    "baseUrl": "https://api.clearbitprospector.com",
+    "docsUrl": "https://docs.clearbitprospector.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746418"
+  },
+  {
+    "name": "ZeroBounce",
+    "description": "Email validation",
+    "category": "Email",
+    "baseUrl": "https://api.zerobounce.com",
+    "docsUrl": "https://docs.zerobounce.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746420"
+  },
+  {
+    "name": "NeverBounce",
+    "description": "Email verification",
+    "category": "Email",
+    "baseUrl": "https://api.neverbounce.com",
+    "docsUrl": "https://docs.neverbounce.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746422"
+  },
+  {
+    "name": "EmailListVerify",
+    "description": "List cleaning",
+    "category": "Email",
+    "baseUrl": "https://api.emaillistverify.com",
+    "docsUrl": "https://docs.emaillistverify.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746425"
+  },
+  {
+    "name": "BriteVerify",
+    "description": "Email verification",
+    "category": "Email",
+    "baseUrl": "https://api.briteverify.com",
+    "docsUrl": "https://docs.briteverify.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746427"
+  },
+  {
+    "name": "OpenAI",
+    "description": "GPT models",
+    "category": "AI/ML",
+    "baseUrl": "https://api.openai.com",
+    "docsUrl": "https://docs.openai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746433"
+  },
+  {
+    "name": "Hugging Face",
+    "description": "ML model hub",
+    "category": "AI/ML",
+    "baseUrl": "https://api.huggingface.com",
+    "docsUrl": "https://docs.huggingface.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746436"
+  },
+  {
+    "name": "AssemblyAI",
+    "description": "Speech-to-text",
+    "category": "AI/ML",
+    "baseUrl": "https://api.assemblyai.com",
+    "docsUrl": "https://docs.assemblyai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746439"
+  },
+  {
+    "name": "Play.ht",
+    "description": "Text-to-speech",
+    "category": "AI/ML",
+    "baseUrl": "https://api.playht.com",
+    "docsUrl": "https://docs.playht.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746442"
+  },
+  {
+    "name": "Clarifai",
+    "description": "Computer vision",
+    "category": "AI/ML",
+    "baseUrl": "https://api.clarifai.com",
+    "docsUrl": "https://docs.clarifai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746446"
+  },
+  {
+    "name": "Scale AI",
+    "description": "Data labeling",
+    "category": "AI/ML",
+    "baseUrl": "https://api.scaleai.com",
+    "docsUrl": "https://docs.scaleai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746448"
+  },
+  {
+    "name": "Labelbox",
+    "description": "Data labeling",
+    "category": "AI/ML",
+    "baseUrl": "https://api.labelbox.com",
+    "docsUrl": "https://docs.labelbox.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746450"
+  },
+  {
+    "name": "V7 Labs",
+    "description": "Auto-labeling",
+    "category": "AI/ML",
+    "baseUrl": "https://api.v7labs.com",
+    "docsUrl": "https://docs.v7labs.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746453"
+  },
+  {
+    "name": "Supervisely",
+    "description": "Computer vision",
+    "category": "AI/ML",
+    "baseUrl": "https://api.supervisely.com",
+    "docsUrl": "https://docs.supervisely.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746455"
+  },
+  {
+    "name": "Hasty.ai",
+    "description": "Vision AI",
+    "category": "AI/ML",
+    "baseUrl": "https://api.hastyai.com",
+    "docsUrl": "https://docs.hastyai.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746457"
+  },
+  {
+    "name": "GitHub",
+    "description": "Code hosting",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.github.com",
+    "docsUrl": "https://docs.github.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746460"
+  },
+  {
+    "name": "GitLab",
+    "description": "DevOps platform",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.gitlab.com",
+    "docsUrl": "https://docs.gitlab.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746462"
+  },
+  {
+    "name": "Bitbucket",
+    "description": "Git hosting",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.bitbucket.com",
+    "docsUrl": "https://docs.bitbucket.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746464"
+  },
+  {
+    "name": "Confluence",
+    "description": "Documentation",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.confluence.com",
+    "docsUrl": "https://docs.confluence.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746467"
+  },
+  {
+    "name": "CircleCI",
+    "description": "CI/CD",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.circleci.com",
+    "docsUrl": "https://docs.circleci.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746469"
+  },
+  {
+    "name": "Travis CI",
+    "description": "CI/CD",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.travisci.com",
+    "docsUrl": "https://docs.travisci.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746472"
+  },
+  {
+    "name": "PagerDuty",
+    "description": "Incident management",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.pagerduty.com",
+    "docsUrl": "https://docs.pagerduty.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746475"
+  },
+  {
+    "name": "LaunchDarkly",
+    "description": "Feature flags",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.launchdarkly.com",
+    "docsUrl": "https://docs.launchdarkly.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746477"
+  },
+  {
+    "name": "Fastly",
+    "description": "Edge cloud",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.fastly.com",
+    "docsUrl": "https://docs.fastly.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746480"
+  },
+  {
+    "name": "Elasticsearch",
+    "description": "Search engine",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.elasticsearch.com",
+    "docsUrl": "https://docs.elasticsearch.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746483"
+  },
+  {
+    "name": "Firebase",
+    "description": "App platform",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.firebase.com",
+    "docsUrl": "https://docs.firebase.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746486"
+  },
+  {
+    "name": "Appwrite",
+    "description": "Open backend",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.appwrite.com",
+    "docsUrl": "https://docs.appwrite.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746488"
+  },
+  {
+    "name": "MongoDB Atlas",
+    "description": "Cloud MongoDB",
+    "category": "Developer Tools",
+    "baseUrl": "https://api.mongodbatlas.com",
+    "docsUrl": "https://docs.mongodbatlas.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746491"
+  },
+  {
+    "name": "Google Analytics",
+    "description": "Web analytics",
+    "category": "Analytics",
+    "baseUrl": "https://api.googleanalytics.com",
+    "docsUrl": "https://docs.googleanalytics.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746494"
+  },
+  {
+    "name": "Segment",
+    "description": "Customer data",
+    "category": "Analytics",
+    "baseUrl": "https://api.segment.com",
+    "docsUrl": "https://docs.segment.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746497"
+  },
+  {
+    "name": "Smartlook",
+    "description": "Analytics and replay",
+    "category": "Analytics",
+    "baseUrl": "https://api.smartlook.com",
+    "docsUrl": "https://docs.smartlook.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746500"
+  },
+  {
+    "name": "Mouseflow",
+    "description": "User recording",
+    "category": "Analytics",
+    "baseUrl": "https://api.mouseflow.com",
+    "docsUrl": "https://docs.mouseflow.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746503"
+  },
+  {
+    "name": "Matomo",
+    "description": "Open source analytics",
+    "category": "Analytics",
+    "baseUrl": "https://api.matomo.com",
+    "docsUrl": "https://docs.matomo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746506"
+  },
+  {
+    "name": "Countly",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "baseUrl": "https://api.countly.com",
+    "docsUrl": "https://docs.countly.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746508"
+  },
+  {
+    "name": "Pendo",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "baseUrl": "https://api.pendo.com",
+    "docsUrl": "https://docs.pendo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746511"
+  },
+  {
+    "name": "Appcues",
+    "description": "User onboarding",
+    "category": "Analytics",
+    "baseUrl": "https://api.appcues.com",
+    "docsUrl": "https://docs.appcues.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746513"
+  },
+  {
+    "name": "Whatfix",
+    "description": "Digital adoption",
+    "category": "Analytics",
+    "baseUrl": "https://api.whatfix.com",
+    "docsUrl": "https://docs.whatfix.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746515"
+  },
+  {
+    "name": "Close CRM",
+    "description": "Sales engagement",
+    "category": "CRM",
+    "baseUrl": "https://api.closecrm.com",
+    "docsUrl": "https://docs.closecrm.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746518"
+  },
+  {
+    "name": "Copper CRM",
+    "description": "Google CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.coppercrm.com",
+    "docsUrl": "https://docs.coppercrm.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746521"
+  },
+  {
+    "name": "Insightly",
+    "description": "CRM and projects",
+    "category": "CRM",
+    "baseUrl": "https://api.insightly.com",
+    "docsUrl": "https://docs.insightly.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746523"
+  },
+  {
+    "name": "Capsule CRM",
+    "description": "Simple CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.capsulecrm.com",
+    "docsUrl": "https://docs.capsulecrm.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746525"
+  },
+  {
+    "name": "Nimble",
+    "description": "Social CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.nimble.com",
+    "docsUrl": "https://docs.nimble.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746528"
+  },
+  {
+    "name": "Vtiger",
+    "description": "Open source CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.vtiger.com",
+    "docsUrl": "https://docs.vtiger.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746530"
+  },
+  {
+    "name": "SugarCRM",
+    "description": "Enterprise CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.sugarcrm.com",
+    "docsUrl": "https://docs.sugarcrm.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746532"
+  },
+  {
+    "name": "Zendesk Sell",
+    "description": "Sales CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.zendesksell.com",
+    "docsUrl": "https://docs.zendesksell.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746535"
+  },
+  {
+    "name": "Nutshell",
+    "description": "Sales automation",
+    "category": "CRM",
+    "baseUrl": "https://api.nutshell.com",
+    "docsUrl": "https://docs.nutshell.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746537"
+  },
+  {
+    "name": "Keap",
+    "description": "CRM automation",
+    "category": "CRM",
+    "baseUrl": "https://api.keap.com",
+    "docsUrl": "https://docs.keap.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746539"
+  },
+  {
+    "name": "Drip",
+    "description": "Ecommerce CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.drip.com",
+    "docsUrl": "https://docs.drip.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746542"
+  },
+  {
+    "name": "Ontraport",
+    "description": "Business automation",
+    "category": "CRM",
+    "baseUrl": "https://api.ontraport.com",
+    "docsUrl": "https://docs.ontraport.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746544"
+  },
+  {
+    "name": "SharpSpring",
+    "description": "Marketing automation",
+    "category": "CRM",
+    "baseUrl": "https://api.sharpspring.com",
+    "docsUrl": "https://docs.sharpspring.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746546"
+  },
+  {
+    "name": "Agile CRM",
+    "description": "All-in-one CRM",
+    "category": "CRM",
+    "baseUrl": "https://api.agilecrm.com",
+    "docsUrl": "https://docs.agilecrm.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746548"
+  },
+  {
+    "name": "ShipEngine",
+    "description": "Multi-carrier shipping",
+    "category": "Shipping",
+    "baseUrl": "https://api.shipengine.com",
+    "docsUrl": "https://docs.shipengine.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746550"
+  },
+  {
+    "name": "Olark",
+    "description": "Live chat",
+    "category": "Chat",
+    "baseUrl": "https://api.olark.com",
+    "docsUrl": "https://docs.olark.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746555"
+  },
+  {
+    "name": "Twilio Verify",
+    "description": "Phone verification",
+    "category": "Verification",
+    "baseUrl": "https://api.twilioverify.com",
+    "docsUrl": "https://docs.twilioverify.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746558"
+  },
+  {
+    "name": "Onfido",
+    "description": "Identity verification",
+    "category": "Verification",
+    "baseUrl": "https://api.onfido.com",
+    "docsUrl": "https://docs.onfido.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746560"
+  },
+  {
+    "name": "Jumio",
+    "description": "ID verification",
+    "category": "Verification",
+    "baseUrl": "https://api.jumio.com",
+    "docsUrl": "https://docs.jumio.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746563"
+  },
+  {
+    "name": "Persona",
+    "description": "Identity infrastructure",
+    "category": "Verification",
+    "baseUrl": "https://api.persona.com",
+    "docsUrl": "https://docs.persona.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746565"
+  },
+  {
+    "name": "Veriff",
+    "description": "Identity verification",
+    "category": "Verification",
+    "baseUrl": "https://api.veriff.com",
+    "docsUrl": "https://docs.veriff.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746568"
+  },
+  {
+    "name": "Sumsub",
+    "description": "KYC/AML",
+    "category": "Verification",
+    "baseUrl": "https://api.sumsub.com",
+    "docsUrl": "https://docs.sumsub.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746571"
+  },
+  {
+    "name": "Stripe Identity",
+    "description": "Identity verification",
+    "category": "Verification",
+    "baseUrl": "https://api.stripeidentity.com",
+    "docsUrl": "https://docs.stripeidentity.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746573"
+  },
+  {
+    "name": "IDnow",
+    "description": "Identity platform",
+    "category": "Verification",
+    "baseUrl": "https://api.idnow.com",
+    "docsUrl": "https://docs.idnow.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746575"
+  },
+  {
+    "name": "Shufti Pro",
+    "description": "KYC verification",
+    "category": "Verification",
+    "baseUrl": "https://api.shuftipro.com",
+    "docsUrl": "https://docs.shuftipro.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746578"
+  },
+  {
+    "name": "Trulioo",
+    "description": "Global identity",
+    "category": "Verification",
+    "baseUrl": "https://api.trulioo.com",
+    "docsUrl": "https://docs.trulioo.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746580"
+  },
+  {
+    "name": "Mux",
+    "description": "Video infrastructure",
+    "category": "Media",
+    "baseUrl": "https://api.mux.com",
+    "docsUrl": "https://docs.mux.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746583"
+  },
+  {
+    "name": "Giphy",
+    "description": "GIF platform",
+    "category": "Media",
+    "baseUrl": "https://api.giphy.com",
+    "docsUrl": "https://docs.giphy.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746585"
+  },
+  {
+    "name": "Unsplash",
+    "description": "Free photos",
+    "category": "Media",
+    "baseUrl": "https://api.unsplash.com",
+    "docsUrl": "https://docs.unsplash.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746588"
+  },
+  {
+    "name": "Pexels",
+    "description": "Free media",
+    "category": "Media",
+    "baseUrl": "https://api.pexels.com",
+    "docsUrl": "https://docs.pexels.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746590"
+  },
+  {
+    "name": "Adobe Sign",
+    "description": "Enterprise signatures",
+    "category": "Electronic Signature",
+    "baseUrl": "https://api.adobesign.com",
+    "docsUrl": "https://docs.adobesign.com",
+    "source": "programmableweb_archive",
+    "addedAt": "2026-02-27T08:33:16.746593"
+  }
+]

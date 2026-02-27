@@ -1,0 +1,3146 @@
+[
+  {
+    "id": "acgclub",
+    "name": "AcgClub",
+    "description": "ACG-related aggregation services",
+    "category": "Entertainment",
+    "link": "https://github.com/Rabtman/AcgClub/wiki/",
+    "auth": "None"
+  },
+  {
+    "id": "anilist",
+    "name": "AniList",
+    "description": "Access to 500k+ anime and manga entries",
+    "category": "Entertainment",
+    "link": "https://github.com/AniList/ApiV2-GraphQL-Docs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "kitsu",
+    "name": "Kitsu",
+    "description": "Modern anime discovery platform",
+    "category": "Entertainment",
+    "link": "https://kitsu.docs.apiary.io/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "hitokoto",
+    "name": "hitokoto",
+    "description": "One-word service from anime",
+    "category": "Entertainment",
+    "link": "https://hitokoto.cn/api",
+    "auth": "None"
+  },
+  {
+    "id": "blogger",
+    "name": "Blogger",
+    "description": "Create and manage blog posts",
+    "category": "Content",
+    "link": "https://developers.google.com/blogger/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "medium",
+    "name": "Medium",
+    "description": "Access Medium.com data",
+    "category": "Content",
+    "link": "https://github.com/Medium/medium-api-docs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "weebly-cloud",
+    "name": "Weebly Cloud",
+    "description": "Website builder API",
+    "category": "Development",
+    "link": "https://cloud-developer.weebly.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wordpress",
+    "name": "WordPress",
+    "description": "WordPress APIs",
+    "category": "Content",
+    "link": "https://codex.wordpress.org/WordPress_APIs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "telegraph",
+    "name": "Telegraph",
+    "description": "Telegram's publishing service",
+    "category": "Content",
+    "link": "http://telegra.ph/api",
+    "auth": "None"
+  },
+  {
+    "id": "an-api-of-ice-and-fire",
+    "name": "An API Of Ice And Fire",
+    "description": "Game of Thrones universe data",
+    "category": "Entertainment",
+    "link": "https://anapioficeandfire.com/",
+    "auth": "None"
+  },
+  {
+    "id": "open-library-books",
+    "name": "Open Library Books",
+    "description": "Open editable library catalog",
+    "category": "Books",
+    "link": "https://openlibrary.org/developers/api",
+    "auth": "None"
+  },
+  {
+    "id": "nypl-digital-collections",
+    "name": "NYPL Digital Collections",
+    "description": "New York Public Library digital collections",
+    "category": "Books",
+    "link": "http://api.repo.nypl.org/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bookshare",
+    "name": "Bookshare",
+    "description": "Books for print disabilities",
+    "category": "Books",
+    "link": "http://developer.bookshare.org/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "airtable",
+    "name": "Airtable",
+    "description": "Database and spreadsheet hybrid",
+    "category": "Business",
+    "link": "https://airtable.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "buffer",
+    "name": "Buffer",
+    "description": "Social media management",
+    "category": "Social",
+    "link": "https://buffer.com/developers/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "concur-labs",
+    "name": "Concur Labs",
+    "description": "Travel and expense management",
+    "category": "Business",
+    "link": "https://developer.concur.com/api-reference/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "jotform",
+    "name": "JotForm",
+    "description": "Form builder API",
+    "category": "Business",
+    "link": "http://api.jotform.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "quip",
+    "name": "Quip",
+    "description": "Collaborative documents",
+    "category": "Business",
+    "link": "https://quip.com/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "salesforce",
+    "name": "Salesforce",
+    "description": "CRM platform API",
+    "category": "Business",
+    "link": "https://developer.salesforce.com/page/Salesforce_APIs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "square",
+    "name": "Square",
+    "description": "Payment processing",
+    "category": "Finance",
+    "link": "https://connect.squareup.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-calendar",
+    "name": "Google Calendar",
+    "description": "Calendar integration",
+    "category": "Productivity",
+    "link": "https://developers.google.com/google-apps/calendar/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "outlook-calendar",
+    "name": "Outlook Calendar",
+    "description": "Microsoft calendar API",
+    "category": "Productivity",
+    "link": "https://docs.microsoft.com/en-us/graph/api/resources/calendar",
+    "auth": "OAuth"
+  },
+  {
+    "id": "lyft",
+    "name": "Lyft",
+    "description": "Rideshare API",
+    "category": "Transportation",
+    "link": "https://www.lyft.com/developers",
+    "auth": "OAuth"
+  },
+  {
+    "id": "uber",
+    "name": "Uber",
+    "description": "Rideshare and delivery API",
+    "category": "Transportation",
+    "link": "https://developer.uber.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-cloud-platform",
+    "name": "Google Cloud Platform",
+    "description": "Google cloud services",
+    "category": "Cloud",
+    "link": "https://cloud.google.com/apis/docs/overview",
+    "auth": "OAuth"
+  },
+  {
+    "id": "oracle-cloud",
+    "name": "Oracle Cloud",
+    "description": "Oracle cloud infrastructure",
+    "category": "Cloud",
+    "link": "https://cloud.oracle.com/home",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tencent-cloud",
+    "name": "Tencent Cloud",
+    "description": "Tencent cloud services",
+    "category": "Cloud",
+    "link": "https://cloud.tencent.com/document/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "amazon-cloud-drive",
+    "name": "Amazon Cloud Drive",
+    "description": "Amazon cloud storage",
+    "category": "Cloud",
+    "link": "https://developer.amazon.com/amazon-drive",
+    "auth": "OAuth"
+  },
+  {
+    "id": "box",
+    "name": "Box",
+    "description": "Enterprise file sharing",
+    "category": "Cloud",
+    "link": "https://developer.box.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "digital-ocean-spaces",
+    "name": "Digital Ocean Spaces",
+    "description": "Object storage",
+    "category": "Cloud",
+    "link": "https://developers.digitalocean.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "document-cloud",
+    "name": "Document Cloud",
+    "description": "Document storage and analysis",
+    "category": "Documents",
+    "link": "http://www.documentcloud.org/help/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dropbox",
+    "name": "Dropbox",
+    "description": "Cloud file storage",
+    "category": "Cloud",
+    "link": "https://www.dropbox.com/developers",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-drive",
+    "name": "Google Drive",
+    "description": "Google cloud storage",
+    "category": "Cloud",
+    "link": "https://developers.google.com/drive/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "onedrive",
+    "name": "OneDrive",
+    "description": "Microsoft cloud storage",
+    "category": "Cloud",
+    "link": "https://dev.onedrive.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "aramex",
+    "name": "Aramex",
+    "description": "Global shipping provider",
+    "category": "Shipping",
+    "link": "https://www.aramex.com/developers/aramex-apis",
+    "auth": "apiKey"
+  },
+  {
+    "id": "canada-post",
+    "name": "Canada Post",
+    "description": "Canadian postal service",
+    "category": "Shipping",
+    "link": "http://www.canadapost.ca/cpo/mc/business/productsservices/developers/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dhl",
+    "name": "DHL",
+    "description": "DHL shipping services",
+    "category": "Shipping",
+    "link": "http://www.dhl-usa.com/en/express/resource_center/integrated_shipping_solutions.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fedex",
+    "name": "FedEx",
+    "description": "FedEx shipping integration",
+    "category": "Shipping",
+    "link": "https://www.fedex.com/us/developer/web-services/index.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ups",
+    "name": "UPS",
+    "description": "UPS shipping functionalities",
+    "category": "Shipping",
+    "link": "http://www.ups.com/content/us/en/resources/techsupport/developercenter.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dribbble",
+    "name": "Dribbble",
+    "description": "Designer portfolio platform",
+    "category": "Design",
+    "link": "http://developer.dribbble.com/v1/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "behance",
+    "name": "Behance",
+    "description": "Creative portfolio platform",
+    "category": "Design",
+    "link": "https://www.behance.net/dev/api/endpoints/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "deviantart",
+    "name": "deviantART",
+    "description": "Art community platform",
+    "category": "Art",
+    "link": "https://www.deviantart.com/developers/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "artik-cloud",
+    "name": "ARTIK Cloud",
+    "description": "IoT cloud platform",
+    "category": "IoT",
+    "link": "https://developer.artik.cloud/documentation/api-reference/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "at-t-m2x",
+    "name": "AT&T M2X",
+    "description": "IoT time-series data",
+    "category": "IoT",
+    "link": "https://m2x.att.com/developer/documentation/v2/overview",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bitbucket",
+    "name": "Bitbucket",
+    "description": "Git repository hosting",
+    "category": "Development",
+    "link": "https://developer.atlassian.com/cloud/bitbucket/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "bitly",
+    "name": "bitly",
+    "description": "URL shortening",
+    "category": "Tools",
+    "link": "https://dev.bitly.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "buddy",
+    "name": "Buddy",
+    "description": "CI/CD platform",
+    "category": "Development",
+    "link": "https://buddy.works/api/reference/getting-started/overview",
+    "auth": "OAuth"
+  },
+  {
+    "id": "circleci",
+    "name": "CircleCI",
+    "description": "CI/CD platform",
+    "category": "Development",
+    "link": "https://circleci.com/docs/api/v1-reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "github",
+    "name": "GitHub",
+    "description": "Software development platform",
+    "category": "Development",
+    "link": "https://developer.github.com/v3/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "gitlab",
+    "name": "GitLab",
+    "description": "DevOps platform",
+    "category": "Development",
+    "link": "https://docs.gitlab.com/ee/api/README.html",
+    "auth": "OAuth"
+  },
+  {
+    "id": "gitter",
+    "name": "Gitter",
+    "description": "Chat for GitHub",
+    "category": "Communication",
+    "link": "https://developer.gitter.im/docs/welcome",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-play-developer",
+    "name": "Google Play Developer",
+    "description": "Android app publishing",
+    "category": "Development",
+    "link": "https://developers.google.com/android-publisher/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "ipinfo-io",
+    "name": "IPInfo.io",
+    "description": "IP geolocation",
+    "category": "Tools",
+    "link": "https://ipinfo.io/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "openhab",
+    "name": "openHAB",
+    "description": "Home automation",
+    "category": "IoT",
+    "link": "https://github.com/openhab/openhab1-addons/wiki/REST-API",
+    "auth": "None"
+  },
+  {
+    "id": "particle",
+    "name": "Particle",
+    "description": "IoT platform",
+    "category": "IoT",
+    "link": "https://docs.particle.io/reference/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "proxycrawl",
+    "name": "ProxyCrawl",
+    "description": "Web scraping proxy",
+    "category": "Tools",
+    "link": "https://proxycrawl.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "qr-code-generator",
+    "name": "QR Code Generator",
+    "description": "Generate QR codes",
+    "category": "Tools",
+    "link": "http://goqr.me/api/",
+    "auth": "None"
+  },
+  {
+    "id": "scraper-api",
+    "name": "Scraper API",
+    "description": "Web scraping service",
+    "category": "Tools",
+    "link": "https://www.scraperapi.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "stackexchange",
+    "name": "StackExchange",
+    "description": "Q&A network",
+    "category": "Development",
+    "link": "https://api.stackexchange.com/docs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "travisci",
+    "name": "TravisCI",
+    "description": "CI platform",
+    "category": "Development",
+    "link": "https://docs.travis-ci.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "w3c",
+    "name": "W3C",
+    "description": "Web standards data",
+    "category": "Development",
+    "link": "https://github.com/w3c/w3c-api",
+    "auth": "None"
+  },
+  {
+    "id": "zenhub",
+    "name": "ZenHub",
+    "description": "Project management for GitHub",
+    "category": "Development",
+    "link": "https://github.com/ZenHubIO/API",
+    "auth": "apiKey"
+  },
+  {
+    "id": "context-io",
+    "name": "Context.IO",
+    "description": "Email data API",
+    "category": "Email",
+    "link": "http://context.io/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "inbox-by-nylas",
+    "name": "Inbox by Nylas",
+    "description": "Email infrastructure",
+    "category": "Email",
+    "link": "https://www.nylas.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "mandrill",
+    "name": "Mandrill",
+    "description": "Transactional email",
+    "category": "Email",
+    "link": "https://mandrillapp.com/api/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "outlook-mail",
+    "name": "Outlook Mail",
+    "description": "Microsoft email API",
+    "category": "Email",
+    "link": "https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview",
+    "auth": "OAuth"
+  },
+  {
+    "id": "fitbit",
+    "name": "Fitbit",
+    "description": "Fitness tracker data",
+    "category": "Health",
+    "link": "https://dev.fitbit.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "jawbone-up",
+    "name": "Jawbone UP",
+    "description": "Activity tracking",
+    "category": "Health",
+    "link": "https://jawbone.com/up/developer",
+    "auth": "OAuth"
+  },
+  {
+    "id": "misfit",
+    "name": "Misfit",
+    "description": "Wearable activity tracking",
+    "category": "Health",
+    "link": "https://build.misfit.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "nike",
+    "name": "Nike+",
+    "description": "Nike fitness data",
+    "category": "Health",
+    "link": "https://developer.nike.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "strava",
+    "name": "Strava",
+    "description": "Athletic activities",
+    "category": "Sports",
+    "link": "https://strava.github.io/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "withings",
+    "name": "Withings",
+    "description": "Health device data",
+    "category": "Health",
+    "link": "http://www.withings.com/us/en/developers",
+    "auth": "OAuth"
+  },
+  {
+    "id": "1forge",
+    "name": "1Forge",
+    "description": "Forex and crypto quotes",
+    "category": "Finance",
+    "link": "https://1forge.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "eve-online",
+    "name": "EVE Online",
+    "description": "EVE Online game data",
+    "category": "Games",
+    "link": "https://developers.eveonline.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "facebook-games",
+    "name": "Facebook Games",
+    "description": "Facebook gaming services",
+    "category": "Games",
+    "link": "https://developers.facebook.com/docs/games",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-play-games",
+    "name": "Google Play Games",
+    "description": "Google gaming services",
+    "category": "Games",
+    "link": "https://developers.google.com/games/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "steam-web-api",
+    "name": "Steam Web API",
+    "description": "Steam game data",
+    "category": "Games",
+    "link": "https://steamcommunity.com/dev",
+    "auth": "apiKey"
+  },
+  {
+    "id": "guild-wars-2",
+    "name": "Guild Wars 2",
+    "description": "Guild Wars 2 game data",
+    "category": "Games",
+    "link": "https://wiki.guildwars2.com/wiki/API:Main",
+    "auth": "None"
+  },
+  {
+    "id": "automatic",
+    "name": "Automatic",
+    "description": "Connected car platform",
+    "category": "IoT",
+    "link": "https://developer.automatic.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "amazon-alexa",
+    "name": "Amazon Alexa",
+    "description": "Voice assistant API",
+    "category": "IoT",
+    "link": "https://developer.amazon.com/alexa",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-assistant",
+    "name": "Google Assistant",
+    "description": "Google voice assistant",
+    "category": "IoT",
+    "link": "https://developers.google.com/actions/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "home8",
+    "name": "Home8",
+    "description": "Smart home security",
+    "category": "IoT",
+    "link": "https://developer.home8systems.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "homey",
+    "name": "Homey",
+    "description": "Smart home hub",
+    "category": "IoT",
+    "link": "https://developers.athom.com/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "lifx",
+    "name": "LIFX",
+    "description": "Smart lighting",
+    "category": "IoT",
+    "link": "https://api.developer.lifx.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "philips-hue",
+    "name": "Philips Hue",
+    "description": "Smart lighting system",
+    "category": "IoT",
+    "link": "https://developers.meethue.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "smartthings",
+    "name": "SmartThings",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "link": "https://developer-preview.smartthings.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "yeelight",
+    "name": "Yeelight",
+    "description": "Smart LED products",
+    "category": "IoT",
+    "link": "http://www.yeelight.com/en_US/developer",
+    "auth": "None"
+  },
+  {
+    "id": "amazon-ml",
+    "name": "Amazon ML",
+    "description": "AWS machine learning",
+    "category": "AI",
+    "link": "https://aws.amazon.com/machine-learning/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bigml",
+    "name": "BigML",
+    "description": "ML platform",
+    "category": "AI",
+    "link": "https://bigml.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "diffbot",
+    "name": "Diffbot",
+    "description": "AI data extraction",
+    "category": "AI",
+    "link": "https://www.diffbot.com/dev/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-cloud-prediction",
+    "name": "Google Cloud Prediction",
+    "description": "ML prediction API",
+    "category": "AI",
+    "link": "https://cloud.google.com/prediction/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "ibm-watson",
+    "name": "IBM Watson",
+    "description": "AI and ML services",
+    "category": "AI",
+    "link": "https://developer.ibm.com/watson/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "azure-ml",
+    "name": "Azure ML",
+    "description": "Microsoft ML platform",
+    "category": "AI",
+    "link": "https://azure.microsoft.com/en-us/services/cognitive-services/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-maps",
+    "name": "Google Maps",
+    "description": "Google mapping services",
+    "category": "Maps",
+    "link": "https://developers.google.com/maps/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cisco-spark",
+    "name": "Cisco Spark",
+    "description": "Team collaboration",
+    "category": "Communication",
+    "link": "https://developer.ciscospark.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "fleep",
+    "name": "Fleep",
+    "description": "Team messaging",
+    "category": "Communication",
+    "link": "https://fleep.io/fleepapi/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "groupme",
+    "name": "GroupMe",
+    "description": "Group messaging",
+    "category": "Communication",
+    "link": "https://dev.groupme.com/docs/v3",
+    "auth": "apiKey"
+  },
+  {
+    "id": "line",
+    "name": "LINE",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "link": "https://developers.line.me/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "messagebird",
+    "name": "MessageBird",
+    "description": "SMS and voice",
+    "category": "Communication",
+    "link": "https://developers.messagebird.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "slack",
+    "name": "Slack",
+    "description": "Team collaboration",
+    "category": "Communication",
+    "link": "https://api.slack.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "telegram",
+    "name": "Telegram",
+    "description": "Messaging platform",
+    "category": "Communication",
+    "link": "https://core.telegram.org/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "deezer",
+    "name": "Deezer",
+    "description": "Music streaming",
+    "category": "Music",
+    "link": "https://developers.deezer.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "musicgraph",
+    "name": "MusicGraph",
+    "description": "Music knowledge engine",
+    "category": "Music",
+    "link": "https://developer.musicgraph.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "spotify",
+    "name": "Spotify",
+    "description": "Music streaming",
+    "category": "Music",
+    "link": "https://developer.spotify.com/web-api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "feedly",
+    "name": "feedly",
+    "description": "RSS aggregator",
+    "category": "News",
+    "link": "https://developer.feedly.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "genius",
+    "name": "Genius",
+    "description": "Song lyrics and annotations",
+    "category": "Music",
+    "link": "https://docs.genius.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "goodreads",
+    "name": "goodreads",
+    "description": "Book reviews",
+    "category": "Books",
+    "link": "https://www.goodreads.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hackernews",
+    "name": "HackerNews",
+    "description": "Tech news",
+    "category": "News",
+    "link": "https://github.com/HackerNews/API",
+    "auth": "None"
+  },
+  {
+    "id": "instapaper",
+    "name": "Instapaper",
+    "description": "Read later service",
+    "category": "Productivity",
+    "link": "https://www.instapaper.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pocket",
+    "name": "Pocket",
+    "description": "Save for later",
+    "category": "Productivity",
+    "link": "https://getpocket.com/developer/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "product-hunt",
+    "name": "Product Hunt",
+    "description": "Product discovery",
+    "category": "Technology",
+    "link": "https://api.producthunt.com/v1/docs",
+    "auth": "OAuth"
+  },
+  {
+    "id": "ny-times",
+    "name": "NY Times",
+    "description": "News articles",
+    "category": "News",
+    "link": "https://developer.nytimes.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "usa-today",
+    "name": "USA TODAY",
+    "description": "News API",
+    "category": "News",
+    "link": "https://developer.usatoday.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "evernote",
+    "name": "Evernote",
+    "description": "Note taking",
+    "category": "Productivity",
+    "link": "https://dev.evernote.com/doc/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "onenote",
+    "name": "OneNote",
+    "description": "Microsoft notes",
+    "category": "Productivity",
+    "link": "https://docs.microsoft.com/en-us/graph/api/resources/onenote-api-overview",
+    "auth": "OAuth"
+  },
+  {
+    "id": "paypal",
+    "name": "PayPal",
+    "description": "Online payments",
+    "category": "Finance",
+    "link": "https://developer.paypal.com/docs/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "paymill",
+    "name": "Paymill",
+    "description": "Payment gateway",
+    "category": "Finance",
+    "link": "https://developers.paymill.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wepay",
+    "name": "WePay",
+    "description": "Payment platform",
+    "category": "Finance",
+    "link": "https://www.wepay.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "500px",
+    "name": "500px",
+    "description": "Photography community",
+    "category": "Photography",
+    "link": "https://github.com/500px/api-documentation",
+    "auth": "OAuth"
+  },
+  {
+    "id": "giphy",
+    "name": "Giphy",
+    "description": "GIF library",
+    "category": "Media",
+    "link": "https://developers.giphy.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "imgur",
+    "name": "Imgur",
+    "description": "Image hosting",
+    "category": "Media",
+    "link": "https://api.imgur.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pixabay",
+    "name": "Pixabay",
+    "description": "Free stock photos",
+    "category": "Photography",
+    "link": "https://pixabay.com/api/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "unsplash",
+    "name": "Unsplash",
+    "description": "High-quality photos",
+    "category": "Photography",
+    "link": "https://unsplash.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "yelp",
+    "name": "Yelp",
+    "description": "Local business reviews",
+    "category": "Places",
+    "link": "https://www.yelp.com/developers/documentation/v2/overview",
+    "auth": "OAuth"
+  },
+  {
+    "id": "zomato",
+    "name": "Zomato",
+    "description": "Restaurant information",
+    "category": "Food",
+    "link": "https://developers.zomato.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "disqus",
+    "name": "Disqus",
+    "description": "Comment platform",
+    "category": "Social",
+    "link": "https://disqus.com/api/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "facebook",
+    "name": "Facebook",
+    "description": "Social network",
+    "category": "Social",
+    "link": "https://developers.facebook.com/docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "flickr",
+    "name": "Flickr",
+    "description": "Photo sharing",
+    "category": "Photography",
+    "link": "https://www.flickr.com/services/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "foursquare",
+    "name": "Foursquare",
+    "description": "Location platform",
+    "category": "Places",
+    "link": "https://developer.foursquare.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "instagram",
+    "name": "Instagram",
+    "description": "Photo sharing",
+    "category": "Social",
+    "link": "https://www.instagram.com/developer/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "linkedin",
+    "name": "LinkedIn",
+    "description": "Professional network",
+    "category": "Social",
+    "link": "https://developer.linkedin.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pinterest",
+    "name": "Pinterest",
+    "description": "Visual discovery",
+    "category": "Social",
+    "link": "https://developers.pinterest.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "reddit",
+    "name": "Reddit",
+    "description": "Social news",
+    "category": "Social",
+    "link": "https://www.reddit.com/dev/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "tumblr",
+    "name": "Tumblr",
+    "description": "Microblogging",
+    "category": "Social",
+    "link": "https://www.tumblr.com/docs/en/api/v2",
+    "auth": "OAuth"
+  },
+  {
+    "id": "twitter",
+    "name": "Twitter",
+    "description": "Social network",
+    "category": "Social",
+    "link": "https://dev.twitter.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "amazon-product-advertising",
+    "name": "Amazon Product Advertising",
+    "description": "Amazon product data",
+    "category": "E-commerce",
+    "link": "https://affiliate-program.amazon.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "best-buy",
+    "name": "Best Buy",
+    "description": "Electronics retailer",
+    "category": "E-commerce",
+    "link": "https://developer.bestbuy.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ebay",
+    "name": "eBay",
+    "description": "Online marketplace",
+    "category": "E-commerce",
+    "link": "https://go.developer.ebay.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "home-depot",
+    "name": "Home Depot",
+    "description": "Home improvement retailer",
+    "category": "E-commerce",
+    "link": "https://developer.homedepot.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "semantics3",
+    "name": "Semantics3",
+    "description": "Product data API",
+    "category": "E-commerce",
+    "link": "http://docs.semantics3.com/reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "asana",
+    "name": "Asana",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://asana.com/guide/help/api/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "join-me",
+    "name": "join.me",
+    "description": "Online meetings",
+    "category": "Communication",
+    "link": "https://developer.join.me/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "teambition",
+    "name": "Teambition",
+    "description": "Project collaboration",
+    "category": "Productivity",
+    "link": "https://www.teambition.com/developer/open-platform",
+    "auth": "OAuth"
+  },
+  {
+    "id": "trello",
+    "name": "Trello",
+    "description": "Project management",
+    "category": "Productivity",
+    "link": "https://developers.trello.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "text-analytics-api",
+    "name": "Text Analytics API",
+    "description": "Microsoft NLP",
+    "category": "AI",
+    "link": "https://azure.microsoft.com/en-us/services/cognitive-services/text-analytics/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "watson-nlu",
+    "name": "Watson NLU",
+    "description": "IBM NLP",
+    "category": "AI",
+    "link": "https://cloud.ibm.com/docs/natural-language-understanding",
+    "auth": "apiKey"
+  },
+  {
+    "id": "beeminder",
+    "name": "Beeminder",
+    "description": "Goal tracking",
+    "category": "Productivity",
+    "link": "https://www.beeminder.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "todoist",
+    "name": "Todoist",
+    "description": "Task management",
+    "category": "Productivity",
+    "link": "https://developer.todoist.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "toodledo",
+    "name": "Toodledo",
+    "description": "Task management",
+    "category": "Productivity",
+    "link": "https://api.toodledo.com/3/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-translate",
+    "name": "Google Translate",
+    "description": "Translation service",
+    "category": "Language",
+    "link": "https://cloud.google.com/translate/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "microsoft-translator",
+    "name": "Microsoft Translator",
+    "description": "Translation service",
+    "category": "Language",
+    "link": "https://www.microsoft.com/en-us/translator/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "oxford-dictionaries",
+    "name": "Oxford Dictionaries",
+    "description": "Dictionary API",
+    "category": "Language",
+    "link": "https://developer.oxforddictionaries.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "yandex-translate",
+    "name": "Yandex Translate",
+    "description": "Translation service",
+    "category": "Language",
+    "link": "https://tech.yandex.com/translate/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dailymotion",
+    "name": "Dailymotion",
+    "description": "Video platform",
+    "category": "Video",
+    "link": "https://developer.dailymotion.com/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "rotten-tomatoes",
+    "name": "Rotten Tomatoes",
+    "description": "Movie reviews",
+    "category": "Entertainment",
+    "link": "https://developer.fandango.com/Rotten_Tomatoes",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tmdb",
+    "name": "TMDB",
+    "description": "Movie database",
+    "category": "Entertainment",
+    "link": "https://developers.themoviedb.org",
+    "auth": "apiKey"
+  },
+  {
+    "id": "tvmaze",
+    "name": "TVmaze",
+    "description": "TV show database",
+    "category": "Entertainment",
+    "link": "https://www.tvmaze.com/api",
+    "auth": "None"
+  },
+  {
+    "id": "vimeo",
+    "name": "Vimeo",
+    "description": "Video platform",
+    "category": "Video",
+    "link": "https://developer.vimeo.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "description": "Video platform",
+    "category": "Video",
+    "link": "https://developers.google.com/youtube/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "cloud-speech-api",
+    "name": "Cloud Speech API",
+    "description": "Google speech recognition",
+    "category": "AI",
+    "link": "https://cloud.google.com/speech/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cloud-vision-api",
+    "name": "Cloud Vision API",
+    "description": "Google image analysis",
+    "category": "AI",
+    "link": "https://cloud.google.com/vision/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "computer-vision-api",
+    "name": "Computer Vision API",
+    "description": "Microsoft image analysis",
+    "category": "AI",
+    "link": "https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "face",
+    "name": "Face++",
+    "description": "Face recognition",
+    "category": "AI",
+    "link": "https://www.faceplusplus.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "watson-visual-recognition",
+    "name": "Watson Visual Recognition",
+    "description": "IBM image analysis",
+    "category": "AI",
+    "link": "https://cloud.ibm.com/catalog/services/visual-recognition",
+    "auth": "apiKey"
+  },
+  {
+    "id": "aeris-weather",
+    "name": "Aeris Weather",
+    "description": "Weather API",
+    "category": "Weather",
+    "link": "http://www.aerisweather.com/develop/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "weather-underground",
+    "name": "Weather Underground",
+    "description": "Weather data",
+    "category": "Weather",
+    "link": "https://www.wunderground.com/weather/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "yahoo-weather",
+    "name": "Yahoo Weather",
+    "description": "Weather data",
+    "category": "Weather",
+    "link": "https://developer.yahoo.com/weather/",
+    "auth": "None"
+  },
+  {
+    "id": "amazon-mobile-ads",
+    "name": "Amazon Mobile Ads",
+    "description": "Mobile ad monetization",
+    "category": "Advertising",
+    "link": "https://developer.amazon.com/mobile-ads",
+    "auth": "apiKey"
+  },
+  {
+    "id": "facebook-marketing-api",
+    "name": "Facebook Marketing API",
+    "description": "Ad campaign management",
+    "category": "Marketing",
+    "link": "https://developers.facebook.com/docs/marketing-apis",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-adsense",
+    "name": "Google AdSense",
+    "description": "Website monetization",
+    "category": "Advertising",
+    "link": "https://developers.google.com/adsense/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-adwords",
+    "name": "Google AdWords",
+    "description": "Ad campaign management",
+    "category": "Advertising",
+    "link": "https://developers.google.com/adwords/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "kevel-ad-apis",
+    "name": "Kevel Ad APIs",
+    "description": "Build your own ad server",
+    "category": "Advertising",
+    "link": "https://dev.kevel.co",
+    "auth": "apiKey"
+  },
+  {
+    "id": "microsoft-ads",
+    "name": "Microsoft Ads",
+    "description": "Bing advertising",
+    "category": "Advertising",
+    "link": "https://docs.microsoft.com/en-us/advertising/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "amazon-mobile-analytics",
+    "name": "Amazon Mobile Analytics",
+    "description": "App usage analytics",
+    "category": "Analytics",
+    "link": "https://aws.amazon.com/documentation/mobileanalytics/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clicky",
+    "name": "Clicky",
+    "description": "Website traffic analytics",
+    "category": "Analytics",
+    "link": "https://clicky.com/help/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ditchcarbon",
+    "name": "DitchCarbon",
+    "description": "Carbon emissions data",
+    "category": "Environment",
+    "link": "https://docs.ditchcarbon.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "matomo",
+    "name": "Matomo",
+    "description": "Web analytics platform",
+    "category": "Analytics",
+    "link": "https://matomo.org/docs/analytics-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mixpanel",
+    "name": "MixPanel",
+    "description": "Product analytics",
+    "category": "Analytics",
+    "link": "https://developer.mixpanel.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "open-web-analytics",
+    "name": "Open Web Analytics",
+    "description": "Open source analytics",
+    "category": "Analytics",
+    "link": "https://github.com/padams/Open-Web-Analytics/wiki/Data-Access-API",
+    "auth": "None"
+  },
+  {
+    "id": "ticksel",
+    "name": "Ticksel",
+    "description": "Human-friendly analytics",
+    "category": "Analytics",
+    "link": "https://ticksel.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "woopra",
+    "name": "Woopra",
+    "description": "Real-time analytics",
+    "category": "Analytics",
+    "link": "https://www.woopra.com/docs/developer/analytics-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "zoho-reports",
+    "name": "Zoho Reports",
+    "description": "BI and reporting",
+    "category": "Analytics",
+    "link": "https://www.zoho.com/analytics/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vuforia",
+    "name": "Vuforia",
+    "description": "AR development SDK",
+    "category": "AR/VR",
+    "link": "https://library.vuforia.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wikitude",
+    "name": "Wikitude",
+    "description": "AR solutions",
+    "category": "AR/VR",
+    "link": "http://www.wikitude.com/download/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dynamic-qr-code",
+    "name": "Dynamic QR Code",
+    "description": "QR code generation",
+    "category": "Tools",
+    "link": "https://rapidapi.com/qr-code-dynamic-and-static1/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-barcode",
+    "name": "Google Barcode",
+    "description": "Barcode detection",
+    "category": "Tools",
+    "link": "https://developers.google.com/vision/barcodes-overview",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ean-search",
+    "name": "EAN-Search",
+    "description": "Product barcode lookup",
+    "category": "E-commerce",
+    "link": "https://www.ean-search.org/ean-database-api.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-charts",
+    "name": "Google Charts",
+    "description": "Data visualization",
+    "category": "Analytics",
+    "link": "https://developers.google.com/chart/",
+    "auth": "None"
+  },
+  {
+    "id": "mongodb",
+    "name": "MongoDB",
+    "description": "NoSQL database",
+    "category": "Database",
+    "link": "https://www.mongodb.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "linkeddata-center",
+    "name": "LinkedData Center",
+    "description": "RDF graph database",
+    "category": "Database",
+    "link": "http://linkeddata.center/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "bitcoin",
+    "name": "Bitcoin",
+    "description": "Bitcoin development",
+    "category": "Cryptocurrency",
+    "link": "https://developer.bitcoin.org/",
+    "auth": "None"
+  },
+  {
+    "id": "bitcoincharts",
+    "name": "Bitcoincharts",
+    "description": "Bitcoin market data",
+    "category": "Cryptocurrency",
+    "link": "https://bitcoincharts.com/about/markets-api/",
+    "auth": "None"
+  },
+  {
+    "id": "bitpay",
+    "name": "BitPay",
+    "description": "Bitcoin payments",
+    "category": "Cryptocurrency",
+    "link": "https://bitpay.com/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "block",
+    "name": "Block",
+    "description": "Crypto wallet",
+    "category": "Cryptocurrency",
+    "link": "https://block.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "blockcypher",
+    "name": "BlockCypher",
+    "description": "Blockchain infrastructure",
+    "category": "Cryptocurrency",
+    "link": "https://www.blockcypher.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "blockfacts",
+    "name": "BlockFacts",
+    "description": "Digital asset data",
+    "category": "Cryptocurrency",
+    "link": "https://blockfacts.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "coinbase",
+    "name": "Coinbase",
+    "description": "Cryptocurrency exchange",
+    "category": "Cryptocurrency",
+    "link": "https://developers.coinbase.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "coindesk",
+    "name": "CoinDesk",
+    "description": "Bitcoin Price Index",
+    "category": "Cryptocurrency",
+    "link": "http://www.coindesk.com/api/",
+    "auth": "None"
+  },
+  {
+    "id": "coinlore",
+    "name": "Coinlore",
+    "description": "Crypto tick data",
+    "category": "Cryptocurrency",
+    "link": "https://www.coinlore.com/cryptocurrency-data-api",
+    "auth": "None"
+  },
+  {
+    "id": "cryptonator",
+    "name": "Cryptonator",
+    "description": "Exchange rates",
+    "category": "Cryptocurrency",
+    "link": "https://www.cryptonator.com/api/",
+    "auth": "None"
+  },
+  {
+    "id": "coinigy",
+    "name": "Coinigy",
+    "description": "Trading platform",
+    "category": "Cryptocurrency",
+    "link": "https://coinigy.docs.apiary.io",
+    "auth": "apiKey"
+  },
+  {
+    "id": "covalent",
+    "name": "Covalent",
+    "description": "Blockchain data",
+    "category": "Cryptocurrency",
+    "link": "https://www.covalenthq.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "poloniex",
+    "name": "Poloniex",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "link": "https://poloniex.com/support/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "shapeshift",
+    "name": "ShapeShift",
+    "description": "Crypto exchange",
+    "category": "Cryptocurrency",
+    "link": "https://shapeshift.io/",
+    "auth": "None"
+  },
+  {
+    "id": "technical-analysis",
+    "name": "Technical Analysis",
+    "description": "Crypto technical analysis",
+    "category": "Cryptocurrency",
+    "link": "https://technical-analysis-api.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "calendarindex",
+    "name": "CalendarIndex",
+    "description": "Holidays and working days",
+    "category": "Productivity",
+    "link": "https://www.calendarindex.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "digidates",
+    "name": "DigiDates",
+    "description": "Date calculations",
+    "category": "Tools",
+    "link": "https://digidates.de/en/",
+    "auth": "None"
+  },
+  {
+    "id": "openholidays",
+    "name": "OpenHolidays",
+    "description": "European holidays",
+    "category": "Productivity",
+    "link": "https://www.openholidaysapi.org/",
+    "auth": "None"
+  },
+  {
+    "id": "anti-captcha",
+    "name": "Anti-Captcha",
+    "description": "Captcha solving",
+    "category": "Tools",
+    "link": "https://anti-captcha.com/apidoc",
+    "auth": "apiKey"
+  },
+  {
+    "id": "recaptcha",
+    "name": "reCAPTCHA",
+    "description": "Spam protection",
+    "category": "Security",
+    "link": "https://developers.google.com/recaptcha/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "facebook-check-in",
+    "name": "Facebook Check-In",
+    "description": "Location check-ins",
+    "category": "Social",
+    "link": "https://developers.facebook.com/docs/graph-api/reference/checkin",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-places",
+    "name": "Google Places",
+    "description": "Places database",
+    "category": "Places",
+    "link": "https://developers.google.com/places/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "foursquare-check-in",
+    "name": "Foursquare Check-In",
+    "description": "Location check-ins",
+    "category": "Places",
+    "link": "https://developer.foursquare.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "commerce-layer",
+    "name": "Commerce Layer",
+    "description": "Headless commerce",
+    "category": "E-commerce",
+    "link": "https://docs.commercelayer.io/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "envoice",
+    "name": "envoice",
+    "description": "Invoicing API",
+    "category": "Finance",
+    "link": "https://www.envoice.in/reference/api/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "koomalooma",
+    "name": "koomalooma",
+    "description": "Loyalty program",
+    "category": "E-commerce",
+    "link": "http://business.koomalooma.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "moltin",
+    "name": "Moltin",
+    "description": "E-commerce API",
+    "category": "E-commerce",
+    "link": "https://www.moltin.com/developers",
+    "auth": "OAuth"
+  },
+  {
+    "id": "stripe",
+    "name": "Stripe",
+    "description": "Payment processing",
+    "category": "Finance",
+    "link": "https://stripe.com/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "braintree",
+    "name": "Braintree",
+    "description": "Payment platform",
+    "category": "Finance",
+    "link": "https://developers.braintreepayments.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "africa-s-talking",
+    "name": "Africa's Talking",
+    "description": "African telco services",
+    "category": "Communication",
+    "link": "https://africastalking.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ip1sms",
+    "name": "iP1sms",
+    "description": "SMS worldwide",
+    "category": "Communication",
+    "link": "https://www.ip1sms.com/en/developer/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "eqivo",
+    "name": "Eqivo",
+    "description": "Programmable voice",
+    "category": "Communication",
+    "link": "https://eqivo.org",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mailgun",
+    "name": "MailGun",
+    "description": "Transactional email",
+    "category": "Email",
+    "link": "https://mailgun.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nexmo",
+    "name": "Nexmo",
+    "description": "SMS and voice",
+    "category": "Communication",
+    "link": "https://developer.nexmo.com",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sakari",
+    "name": "Sakari",
+    "description": "SMS API",
+    "category": "Communication",
+    "link": "https://developer.sakari.io",
+    "auth": "apiKey"
+  },
+  {
+    "id": "telnyx",
+    "name": "Telnyx",
+    "description": "Communications platform",
+    "category": "Communication",
+    "link": "https://developers.telnyx.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "the-sms-works",
+    "name": "The SMS Works",
+    "description": "SMS API",
+    "category": "Communication",
+    "link": "https://thesmsworks.co.uk/sms-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "twilio",
+    "name": "Twilio",
+    "description": "Communications APIs",
+    "category": "Communication",
+    "link": "https://www.twilio.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fruits-api",
+    "name": "Fruits API",
+    "description": "Fruit tree data",
+    "category": "Food",
+    "link": "https://github.com/Franqsanz/fruits-api",
+    "auth": "None"
+  },
+  {
+    "id": "jokes-api",
+    "name": "Jokes API",
+    "description": "Jokes database",
+    "category": "Entertainment",
+    "link": "https://jokes.one/api/joke/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "perfect-tense",
+    "name": "Perfect Tense",
+    "description": "Grammar checking",
+    "category": "Language",
+    "link": "https://www.perfecttense.com/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "random-data-generator",
+    "name": "Random Data Generator",
+    "description": "Generate test data",
+    "category": "Tools",
+    "link": "https://randommer.io/randommer-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "random-facts",
+    "name": "Random Facts",
+    "description": "Random facts",
+    "category": "Entertainment",
+    "link": "https://fungenerators.com/api/facts/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "today-in-history",
+    "name": "Today in History",
+    "description": "Historical events",
+    "category": "Education",
+    "link": "https://history.muffinlabs.com/",
+    "auth": "None"
+  },
+  {
+    "id": "exchangeratesapi",
+    "name": "ExchangeRatesAPI",
+    "description": "Foreign exchange",
+    "category": "Finance",
+    "link": "https://exchangeratesapi.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fixer-io",
+    "name": "Fixer.io",
+    "description": "Exchange rates",
+    "category": "Finance",
+    "link": "http://fixer.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pexels",
+    "name": "Pexels",
+    "description": "Stock photos",
+    "category": "Photography",
+    "link": "https://www.pexels.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "agarathi",
+    "name": "Agarathi",
+    "description": "Tamil dictionary",
+    "category": "Language",
+    "link": "https://agarathi.com/api/dictionary",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cambridge-dictionaries",
+    "name": "Cambridge Dictionaries",
+    "description": "Dictionary API",
+    "category": "Language",
+    "link": "http://dictionary.cambridge.org/license.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "free-dictionary",
+    "name": "Free Dictionary",
+    "description": "Word definitions",
+    "category": "Language",
+    "link": "https://dictionaryapi.dev/",
+    "auth": "None"
+  },
+  {
+    "id": "wiktionary",
+    "name": "Wiktionary",
+    "description": "Multilingual dictionary",
+    "category": "Language",
+    "link": "https://en.wiktionary.org/w/api.php",
+    "auth": "None"
+  },
+  {
+    "id": "bob-s-burgers-api",
+    "name": "Bob's Burgers API",
+    "description": "TV show data",
+    "category": "Entertainment",
+    "link": "https://www.bobsburgersapi.com/documentation",
+    "auth": "None"
+  },
+  {
+    "id": "breaking-bad-api",
+    "name": "Breaking Bad API",
+    "description": "TV show data",
+    "category": "Entertainment",
+    "link": "https://breakingbadapi.com/documentation",
+    "auth": "None"
+  },
+  {
+    "id": "cat-as-a-service",
+    "name": "Cat as a Service",
+    "description": "Cat images",
+    "category": "Entertainment",
+    "link": "https://cataas.com/",
+    "auth": "None"
+  },
+  {
+    "id": "danbooru",
+    "name": "Danbooru",
+    "description": "Image board",
+    "category": "Entertainment",
+    "link": "https://danbooru.donmai.us/posts?tags=help%3Aapi",
+    "auth": "apiKey"
+  },
+  {
+    "id": "dune-api",
+    "name": "Dune API",
+    "description": "Dune universe data",
+    "category": "Entertainment",
+    "link": "https://github.com/ywalia01/dune-api",
+    "auth": "None"
+  },
+  {
+    "id": "final-space-api",
+    "name": "Final Space API",
+    "description": "TV show data",
+    "category": "Entertainment",
+    "link": "https://finalspaceapi.com/docs/",
+    "auth": "None"
+  },
+  {
+    "id": "fun-translations",
+    "name": "Fun Translations",
+    "description": "Language translations",
+    "category": "Entertainment",
+    "link": "https://funtranslations.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "lord-of-the-rings-api",
+    "name": "Lord of the Rings API",
+    "description": "LOTR data",
+    "category": "Entertainment",
+    "link": "https://the-one-api.dev/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "marvel",
+    "name": "Marvel",
+    "description": "Marvel comics data",
+    "category": "Entertainment",
+    "link": "https://developer.marvel.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "jikan",
+    "name": "Jikan",
+    "description": "My Anime List unofficial",
+    "category": "Entertainment",
+    "link": "https://jikan.moe/",
+    "auth": "None"
+  },
+  {
+    "id": "owen-wilson-wow",
+    "name": "Owen Wilson Wow",
+    "description": "Movie quotes",
+    "category": "Entertainment",
+    "link": "https://owen-wilson-wow-api.onrender.com/",
+    "auth": "None"
+  },
+  {
+    "id": "pokeapi",
+    "name": "PokeAPI",
+    "description": "Pokemon data",
+    "category": "Games",
+    "link": "https://pokeapi.co/",
+    "auth": "None"
+  },
+  {
+    "id": "riddles-api",
+    "name": "Riddles API",
+    "description": "Random riddles",
+    "category": "Entertainment",
+    "link": "https://riddles-api.vercel.app/",
+    "auth": "None"
+  },
+  {
+    "id": "stapi",
+    "name": "STAPI",
+    "description": "Star Trek data",
+    "category": "Entertainment",
+    "link": "https://stapi.co/api-documentation",
+    "auth": "None"
+  },
+  {
+    "id": "swapi",
+    "name": "SWAPI",
+    "description": "Star Wars data",
+    "category": "Entertainment",
+    "link": "https://www.swapi.tech/",
+    "auth": "None"
+  },
+  {
+    "id": "studio-ghibli",
+    "name": "Studio Ghibli",
+    "description": "Ghibli films data",
+    "category": "Entertainment",
+    "link": "https://ghibliapi.vercel.app/",
+    "auth": "None"
+  },
+  {
+    "id": "picatic",
+    "name": "Picatic",
+    "description": "Event ticketing",
+    "category": "Events",
+    "link": "http://developer.picatic.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "kairos",
+    "name": "Kairos",
+    "description": "Face recognition",
+    "category": "AI",
+    "link": "https://www.kairos.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "amazon-s3",
+    "name": "Amazon S3",
+    "description": "Cloud storage",
+    "category": "Cloud",
+    "link": "https://aws.amazon.com/s3/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cloudinary",
+    "name": "Cloudinary",
+    "description": "Image and video management",
+    "category": "Media",
+    "link": "http://cloudinary.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "microsoft-graph",
+    "name": "Microsoft Graph",
+    "description": "Microsoft cloud files",
+    "category": "Cloud",
+    "link": "https://graph.microsoft.io/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "pdf-blocks",
+    "name": "PDF Blocks",
+    "description": "PDF manipulation",
+    "category": "Documents",
+    "link": "https://www.pdfblocks.com/docs/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "signnow",
+    "name": "SignNow",
+    "description": "eSignature API",
+    "category": "Documents",
+    "link": "https://docs.signnow.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "smash",
+    "name": "Smash",
+    "description": "Large file upload",
+    "category": "Cloud",
+    "link": "https://api.fromsmash.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vector-express",
+    "name": "Vector Express",
+    "description": "Vector file processing",
+    "category": "Design",
+    "link": "https://github.com/smidyo/vectorexpress-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "vertopal",
+    "name": "Vertopal",
+    "description": "File conversion",
+    "category": "Tools",
+    "link": "https://www.vertopal.com/en/developer/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "atom-finance",
+    "name": "Atom Finance",
+    "description": "Market and earnings data",
+    "category": "Finance",
+    "link": "https://docs.atom.finance/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ibanapi",
+    "name": "IBANAPI",
+    "description": "IBAN validation",
+    "category": "Finance",
+    "link": "https://ibanapi.com/get-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "parqet-logo-api",
+    "name": "Parqet Logo API",
+    "description": "Company logos",
+    "category": "Finance",
+    "link": "https://developers.parqet.com/docs/assets/logos",
+    "auth": "None"
+  },
+  {
+    "id": "healthgraph",
+    "name": "HealthGraph",
+    "description": "RunKeeper data",
+    "category": "Health",
+    "link": "https://runkeeper.com/developer/healthgraph/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "vegancheck",
+    "name": "VeganCheck",
+    "description": "Product vegan check",
+    "category": "Food",
+    "link": "https://jokenetwork.de/vegancheck-api",
+    "auth": "None"
+  },
+  {
+    "id": "google-bigquery",
+    "name": "Google BigQuery",
+    "description": "Data analytics",
+    "category": "Analytics",
+    "link": "https://cloud.google.com/bigquery/docs/reference/rest/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-classroom",
+    "name": "Google Classroom",
+    "description": "Education platform",
+    "category": "Education",
+    "link": "https://developers.google.com/classroom/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-custom-search",
+    "name": "Google Custom Search",
+    "description": "Search API",
+    "category": "Search",
+    "link": "https://developers.google.com/custom-search/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "google-fitness",
+    "name": "Google Fitness",
+    "description": "Fitness data",
+    "category": "Health",
+    "link": "https://developers.google.com/fit/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-genomics",
+    "name": "Google Genomics",
+    "description": "Genomics data",
+    "category": "Science",
+    "link": "https://cloud.google.com/genomics/reference/rest/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-identity",
+    "name": "Google Identity",
+    "description": "Authentication",
+    "category": "Security",
+    "link": "https://developers.google.com/identity/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "google-monitoring",
+    "name": "Google Monitoring",
+    "description": "Cloud monitoring",
+    "category": "DevOps",
+    "link": "https://cloud.google.com/monitoring/api/v3/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "blockscore",
+    "name": "BlockScore",
+    "description": "Identity verification",
+    "category": "Security",
+    "link": "https://docs.blockscore.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cognito",
+    "name": "Cognito",
+    "description": "Identity verification",
+    "category": "Security",
+    "link": "https://cognitohq.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "uk-government",
+    "name": "UK Government",
+    "description": "UK government APIs",
+    "category": "Government",
+    "link": "https://www.api.gov.uk/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "eu-open-data",
+    "name": "EU Open Data",
+    "description": "European Union data",
+    "category": "Government",
+    "link": "https://data.europa.eu/en",
+    "auth": "None"
+  },
+  {
+    "id": "un-data",
+    "name": "UN Data",
+    "description": "United Nations data",
+    "category": "Government",
+    "link": "http://data.un.org/",
+    "auth": "None"
+  },
+  {
+    "id": "census-bureau",
+    "name": "Census Bureau",
+    "description": "US census data",
+    "category": "Government",
+    "link": "https://www.census.gov/data/developers/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fda",
+    "name": "FDA",
+    "description": "US drug and food data",
+    "category": "Healthcare",
+    "link": "https://open.fda.gov/",
+    "auth": "None"
+  },
+  {
+    "id": "cdc",
+    "name": "CDC",
+    "description": "Health statistics",
+    "category": "Healthcare",
+    "link": "https://www.cdc.gov/apis.html",
+    "auth": "None"
+  },
+  {
+    "id": "data-gov-uk",
+    "name": "Data.gov.uk",
+    "description": "UK open data",
+    "category": "Government",
+    "link": "https://data.gov.uk/",
+    "auth": "None"
+  },
+  {
+    "id": "nasa-apis",
+    "name": "NASA APIs",
+    "description": "Space and astronomy data",
+    "category": "Science",
+    "link": "https://api.nasa.gov/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "spacex",
+    "name": "SpaceX",
+    "description": "SpaceX launch data",
+    "category": "Science",
+    "link": "https://github.com/r-spacex/SpaceX-API",
+    "auth": "None"
+  },
+  {
+    "id": "pubmed",
+    "name": "PubMed",
+    "description": "Medical literature",
+    "category": "Healthcare",
+    "link": "https://www.ncbi.nlm.nih.gov/home/develop/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "arxiv",
+    "name": "arXiv",
+    "description": "Scientific papers",
+    "category": "Science",
+    "link": "https://arxiv.org/help/api/",
+    "auth": "None"
+  },
+  {
+    "id": "cern-open-data",
+    "name": "CERN Open Data",
+    "description": "Particle physics data",
+    "category": "Science",
+    "link": "http://opendata.cern.ch/",
+    "auth": "None"
+  },
+  {
+    "id": "inaturalist",
+    "name": "iNaturalist",
+    "description": "Nature observations",
+    "category": "Science",
+    "link": "https://www.inaturalist.org/pages/api+reference",
+    "auth": "OAuth"
+  },
+  {
+    "id": "usgs",
+    "name": "USGS",
+    "description": "Geological data",
+    "category": "Science",
+    "link": "https://www.usgs.gov/products/data-and-tools/apis",
+    "auth": "None"
+  },
+  {
+    "id": "noaa",
+    "name": "NOAA",
+    "description": "Weather and ocean data",
+    "category": "Weather",
+    "link": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2",
+    "auth": "apiKey"
+  },
+  {
+    "id": "khan-academy",
+    "name": "Khan Academy",
+    "description": "Educational content",
+    "category": "Education",
+    "link": "https://github.com/Khan/khan-api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "coursera",
+    "name": "Coursera",
+    "description": "Online courses",
+    "category": "Education",
+    "link": "https://building.coursera.org/developer/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "edx",
+    "name": "edX",
+    "description": "Online learning",
+    "category": "Education",
+    "link": "https://github.com/edx/course-discovery",
+    "auth": "OAuth"
+  },
+  {
+    "id": "open-trivia-db",
+    "name": "Open Trivia DB",
+    "description": "Trivia questions",
+    "category": "Education",
+    "link": "https://opentdb.com/api_config.php",
+    "auth": "None"
+  },
+  {
+    "id": "wolfram-alpha",
+    "name": "Wolfram Alpha",
+    "description": "Computational knowledge",
+    "category": "Education",
+    "link": "https://products.wolframalpha.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "quizapi",
+    "name": "QuizAPI",
+    "description": "Programming quizzes",
+    "category": "Education",
+    "link": "https://quizapi.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "uclassify",
+    "name": "uClassify",
+    "description": "Text classification",
+    "category": "AI",
+    "link": "https://www.uclassify.com/docs/restapi",
+    "auth": "apiKey"
+  },
+  {
+    "id": "espn",
+    "name": "ESPN",
+    "description": "Sports data and news",
+    "category": "Sports",
+    "link": "http://www.espn.com/apis/devcenter/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "football-data-org",
+    "name": "Football-Data.org",
+    "description": "Football statistics",
+    "category": "Sports",
+    "link": "https://www.football-data.org/documentation/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nba",
+    "name": "NBA",
+    "description": "Basketball statistics",
+    "category": "Sports",
+    "link": "https://www.nba.com/stats/",
+    "auth": "None"
+  },
+  {
+    "id": "nhl",
+    "name": "NHL",
+    "description": "Hockey statistics",
+    "category": "Sports",
+    "link": "https://gitlab.com/dword4/nhlapi",
+    "auth": "None"
+  },
+  {
+    "id": "mlb",
+    "name": "MLB",
+    "description": "Baseball statistics",
+    "category": "Sports",
+    "link": "http://lookup-service-prod.mlb.com/",
+    "auth": "None"
+  },
+  {
+    "id": "api-football",
+    "name": "API-Football",
+    "description": "Football data",
+    "category": "Sports",
+    "link": "https://www.api-football.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ergast-f1",
+    "name": "Ergast F1",
+    "description": "Formula 1 data",
+    "category": "Sports",
+    "link": "http://ergast.com/mrd/",
+    "auth": "None"
+  },
+  {
+    "id": "balldontlie",
+    "name": "Balldontlie",
+    "description": "NBA statistics",
+    "category": "Sports",
+    "link": "https://www.balldontlie.io/",
+    "auth": "None"
+  },
+  {
+    "id": "edamam",
+    "name": "Edamam",
+    "description": "Nutrition data",
+    "category": "Food",
+    "link": "https://developer.edamam.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "usda-fooddata",
+    "name": "USDA FoodData",
+    "description": "Food composition data",
+    "category": "Food",
+    "link": "https://fdc.nal.usda.gov/api-guide.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "amadeus",
+    "name": "Amadeus",
+    "description": "Travel booking",
+    "category": "Travel",
+    "link": "https://developers.amadeus.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "skyscanner",
+    "name": "Skyscanner",
+    "description": "Flight search",
+    "category": "Travel",
+    "link": "https://developers.skyscanner.net/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "booking-com",
+    "name": "Booking.com",
+    "description": "Hotel booking",
+    "category": "Travel",
+    "link": "https://developers.booking.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "tripadvisor",
+    "name": "Tripadvisor",
+    "description": "Travel reviews",
+    "category": "Travel",
+    "link": "https://www.tripadvisor.com/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "airvisual",
+    "name": "AirVisual",
+    "description": "Air quality data",
+    "category": "Environment",
+    "link": "https://www.iqair.com/air-pollution-data-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ip-geolocation",
+    "name": "IP Geolocation",
+    "description": "IP location lookup",
+    "category": "Geography",
+    "link": "https://ipgeolocation.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "timezonedb",
+    "name": "TimeZoneDB",
+    "description": "Time zone data",
+    "category": "Tools",
+    "link": "https://timezonedb.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "airports",
+    "name": "Airports",
+    "description": "Airport data",
+    "category": "Travel",
+    "link": "https://airport-info.p.rapidapi.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "abstract-api",
+    "name": "Abstract API",
+    "description": "Various utility APIs",
+    "category": "Tools",
+    "link": "https://www.abstractapi.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "screenshotapi",
+    "name": "ScreenshotAPI",
+    "description": "Website screenshots",
+    "category": "Tools",
+    "link": "https://screenshotapi.net/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "haveibeenpwned",
+    "name": "Haveibeenpwned",
+    "description": "Data breach check",
+    "category": "Security",
+    "link": "https://haveibeenpwned.com/API/v3",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ipstack",
+    "name": "IPStack",
+    "description": "IP lookup",
+    "category": "Tools",
+    "link": "https://ipstack.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "useragent",
+    "name": "UserAgent",
+    "description": "Browser user agent",
+    "category": "Tools",
+    "link": "https://useragent.api.io/",
+    "auth": "None"
+  },
+  {
+    "id": "zerobounce",
+    "name": "ZeroBounce",
+    "description": "Email validation",
+    "category": "Email",
+    "link": "https://www.zerobounce.net/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hunter-io",
+    "name": "Hunter.io",
+    "description": "Email finder",
+    "category": "Email",
+    "link": "https://hunter.io/api-documentation/v2",
+    "auth": "apiKey"
+  },
+  {
+    "id": "zillow",
+    "name": "Zillow",
+    "description": "Real estate data",
+    "category": "Real Estate",
+    "link": "https://www.zillow.com/howto/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "realtor-com",
+    "name": "Realtor.com",
+    "description": "Property listings",
+    "category": "Real Estate",
+    "link": "https://www.realtor.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "redfin",
+    "name": "Redfin",
+    "description": "Real estate search",
+    "category": "Real Estate",
+    "link": "https://www.redfin.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "estated",
+    "name": "Estated",
+    "description": "Property data",
+    "category": "Real Estate",
+    "link": "https://estated.com/developers/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "breezometer",
+    "name": "Breezometer",
+    "description": "Air quality and pollen",
+    "category": "Environment",
+    "link": "https://docs.breezometer.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ambeedata",
+    "name": "AmbeeData",
+    "description": "Environmental data",
+    "category": "Environment",
+    "link": "https://docs.ambeedata.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "courtlistener",
+    "name": "CourtListener",
+    "description": "Legal database",
+    "category": "Legal",
+    "link": "https://www.courtlistener.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "open-states",
+    "name": "Open States",
+    "description": "State legislation",
+    "category": "Government",
+    "link": "https://docs.openstates.org/api-v3/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "congress-gov",
+    "name": "Congress.gov",
+    "description": "US Congress data",
+    "category": "Government",
+    "link": "https://api.congress.gov/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nhtsa",
+    "name": "NHTSA",
+    "description": "Vehicle safety data",
+    "category": "Automotive",
+    "link": "https://vpic.nhtsa.dot.gov/api/",
+    "auth": "None"
+  },
+  {
+    "id": "carquery",
+    "name": "CarQuery",
+    "description": "Car database",
+    "category": "Automotive",
+    "link": "http://www.carqueryapi.com/documentation/",
+    "auth": "None"
+  },
+  {
+    "id": "vin-decoder",
+    "name": "VIN Decoder",
+    "description": "Vehicle identification",
+    "category": "Automotive",
+    "link": "https://vpic.nhtsa.dot.gov/api/",
+    "auth": "None"
+  },
+  {
+    "id": "fueleconomy-gov",
+    "name": "FuelEconomy.gov",
+    "description": "Fuel economy data",
+    "category": "Automotive",
+    "link": "https://www.fueleconomy.gov/feg/ws/",
+    "auth": "None"
+  },
+  {
+    "id": "petfinder",
+    "name": "Petfinder",
+    "description": "Pet adoption",
+    "category": "Animals",
+    "link": "https://www.petfinder.com/developers/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "dog-ceo",
+    "name": "Dog CEO",
+    "description": "Dog images",
+    "category": "Animals",
+    "link": "https://dog.ceo/dog-api/",
+    "auth": "None"
+  },
+  {
+    "id": "httpcat",
+    "name": "HTTPCat",
+    "description": "HTTP status cats",
+    "category": "Animals",
+    "link": "https://http.cat/",
+    "auth": "None"
+  },
+  {
+    "id": "httpdog",
+    "name": "HTTPDog",
+    "description": "HTTP status dogs",
+    "category": "Animals",
+    "link": "https://http.dog/",
+    "auth": "None"
+  },
+  {
+    "id": "jsonplaceholder",
+    "name": "JSONPlaceholder",
+    "description": "Fake REST API",
+    "category": "Testing",
+    "link": "https://jsonplaceholder.typicode.com/",
+    "auth": "None"
+  },
+  {
+    "id": "randomuser",
+    "name": "RandomUser",
+    "description": "Random user generator",
+    "category": "Testing",
+    "link": "https://randomuser.me/",
+    "auth": "None"
+  },
+  {
+    "id": "placeholder-com",
+    "name": "Placeholder.com",
+    "description": "Placeholder images",
+    "category": "Design",
+    "link": "https://placeholder.com/",
+    "auth": "None"
+  },
+  {
+    "id": "fakestoreapi",
+    "name": "FakeStoreAPI",
+    "description": "E-commerce test data",
+    "category": "Testing",
+    "link": "https://fakestoreapi.com/",
+    "auth": "None"
+  },
+  {
+    "id": "mockapi",
+    "name": "MockAPI",
+    "description": "Mock API generator",
+    "category": "Testing",
+    "link": "https://mockapi.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "mockaroo",
+    "name": "Mockaroo",
+    "description": "Test data generator",
+    "category": "Testing",
+    "link": "https://www.mockaroo.com/api/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "faker",
+    "name": "Faker",
+    "description": "Fake data generation",
+    "category": "Testing",
+    "link": "https://fakerapi.it/",
+    "auth": "None"
+  },
+  {
+    "id": "dummyjson",
+    "name": "DummyJSON",
+    "description": "Test JSON data",
+    "category": "Testing",
+    "link": "https://dummyjson.com/",
+    "auth": "None"
+  },
+  {
+    "id": "shopify",
+    "name": "Shopify",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "link": "https://shopify.dev/docs/admin-api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "woocommerce",
+    "name": "WooCommerce",
+    "description": "WordPress e-commerce",
+    "category": "E-commerce",
+    "link": "https://woocommerce.github.io/woocommerce-rest-api-docs/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "bigcommerce",
+    "name": "BigCommerce",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "link": "https://developer.bigcommerce.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "magento",
+    "name": "Magento",
+    "description": "E-commerce platform",
+    "category": "E-commerce",
+    "link": "https://devdocs.magento.com/guides/v2.4/rest/bk-rest.html",
+    "auth": "OAuth"
+  },
+  {
+    "id": "saleor",
+    "name": "Saleor",
+    "description": "Headless commerce",
+    "category": "E-commerce",
+    "link": "https://docs.saleor.io/docs/3.x/api-reference/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "prestashop",
+    "name": "PrestaShop",
+    "description": "E-commerce solution",
+    "category": "E-commerce",
+    "link": "https://devdocs.prestashop.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pushover",
+    "name": "Pushover",
+    "description": "Push notifications",
+    "category": "Communication",
+    "link": "https://pushover.net/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "pushbullet",
+    "name": "Pushbullet",
+    "description": "Push notifications",
+    "category": "Communication",
+    "link": "https://docs.pushbullet.com/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "firebase-cloud-messaging",
+    "name": "Firebase Cloud Messaging",
+    "description": "Cross-platform messaging",
+    "category": "Communication",
+    "link": "https://firebase.google.com/docs/cloud-messaging",
+    "auth": "apiKey"
+  },
+  {
+    "id": "postmark",
+    "name": "Postmark",
+    "description": "Transactional email",
+    "category": "Email",
+    "link": "https://postmarkapp.com/developer",
+    "auth": "apiKey"
+  },
+  {
+    "id": "amazon-ses",
+    "name": "Amazon SES",
+    "description": "Email service",
+    "category": "Email",
+    "link": "https://docs.aws.amazon.com/ses/latest/DeveloperGuide/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sparkpost",
+    "name": "SparkPost",
+    "description": "Email delivery",
+    "category": "Email",
+    "link": "https://developers.sparkpost.com/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "auth0",
+    "name": "Auth0",
+    "description": "Identity platform",
+    "category": "Security",
+    "link": "https://auth0.com/docs/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "okta",
+    "name": "Okta",
+    "description": "Identity management",
+    "category": "Security",
+    "link": "https://developer.okta.com/docs/reference/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "firebase-auth",
+    "name": "Firebase Auth",
+    "description": "Authentication service",
+    "category": "Security",
+    "link": "https://firebase.google.com/docs/auth",
+    "auth": "apiKey"
+  },
+  {
+    "id": "clerk",
+    "name": "Clerk",
+    "description": "User management",
+    "category": "Security",
+    "link": "https://clerk.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "supabase-auth",
+    "name": "Supabase Auth",
+    "description": "Authentication",
+    "category": "Security",
+    "link": "https://supabase.com/docs/guides/auth",
+    "auth": "apiKey"
+  },
+  {
+    "id": "contentful",
+    "name": "Contentful",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://www.contentful.com/developers/docs/references/content-delivery-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "strapi",
+    "name": "Strapi",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "sanity",
+    "name": "Sanity",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://www.sanity.io/docs/http-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "ghost",
+    "name": "Ghost",
+    "description": "Publishing platform",
+    "category": "Content",
+    "link": "https://ghost.org/docs/content-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "prismic",
+    "name": "Prismic",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://prismic.io/docs/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "datocms",
+    "name": "DatoCMS",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://www.datocms.com/docs/content-delivery-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cosmic",
+    "name": "Cosmic",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://docs.cosmicjs.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "directus",
+    "name": "Directus",
+    "description": "Headless CMS",
+    "category": "Content",
+    "link": "https://docs.directus.io/reference/introduction.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "algolia",
+    "name": "Algolia",
+    "description": "Search as a service",
+    "category": "Search",
+    "link": "https://www.algolia.com/doc/api-reference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "elasticsearch",
+    "name": "Elasticsearch",
+    "description": "Search engine",
+    "category": "Search",
+    "link": "https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html",
+    "auth": "apiKey"
+  },
+  {
+    "id": "meilisearch",
+    "name": "MeiliSearch",
+    "description": "Search engine",
+    "category": "Search",
+    "link": "https://docs.meilisearch.com/reference/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "typesense",
+    "name": "Typesense",
+    "description": "Search engine",
+    "category": "Search",
+    "link": "https://typesense.org/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "duckduckgo",
+    "name": "DuckDuckGo",
+    "description": "Instant answers",
+    "category": "Search",
+    "link": "https://duckduckgo.com/api",
+    "auth": "None"
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI",
+    "description": "AI models",
+    "category": "AI",
+    "link": "https://platform.openai.com/docs/api-reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "description": "Claude AI",
+    "category": "AI",
+    "link": "https://docs.anthropic.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hugging-face",
+    "name": "Hugging Face",
+    "description": "ML models",
+    "category": "AI",
+    "link": "https://huggingface.co/docs/api-inference/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "replicate",
+    "name": "Replicate",
+    "description": "ML model hosting",
+    "category": "AI",
+    "link": "https://replicate.com/docs",
+    "auth": "apiKey"
+  },
+  {
+    "id": "stability-ai",
+    "name": "Stability AI",
+    "description": "Image generation",
+    "category": "AI",
+    "link": "https://platform.stability.ai/docs/api-reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "cohere",
+    "name": "Cohere",
+    "description": "NLP models",
+    "category": "AI",
+    "link": "https://docs.cohere.com/reference/about",
+    "auth": "apiKey"
+  },
+  {
+    "id": "deepl",
+    "name": "DeepL",
+    "description": "Translation",
+    "category": "Language",
+    "link": "https://www.deepl.com/docs-api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "assembly-ai",
+    "name": "Assembly AI",
+    "description": "Speech to text",
+    "category": "AI",
+    "link": "https://www.assemblyai.com/docs/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "elevenlabs",
+    "name": "ElevenLabs",
+    "description": "Text to speech",
+    "category": "AI",
+    "link": "https://docs.elevenlabs.io/api-reference",
+    "auth": "apiKey"
+  },
+  {
+    "id": "runpod",
+    "name": "RunPod",
+    "description": "GPU cloud",
+    "category": "AI",
+    "link": "https://docs.runpod.io/",
+    "auth": "apiKey"
+  }
+]

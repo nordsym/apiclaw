@@ -1,0 +1,7282 @@
+[
+  {
+    "name": "Google Gemini",
+    "description": "Google's multimodal AI model",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ai.google.dev"
+  },
+  {
+    "name": "Hugging Face Inference",
+    "description": "Run ML models via API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://huggingface.co"
+  },
+  {
+    "name": "Modal",
+    "description": "Serverless functions for ML",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://modal.com"
+  },
+  {
+    "name": "Banana",
+    "description": "Serverless GPU inference",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://banana.dev"
+  },
+  {
+    "name": "Cerebrium",
+    "description": "ML model deployment platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cerebrium.ai"
+  },
+  {
+    "name": "Baseten",
+    "description": "ML model serving infrastructure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://baseten.co"
+  },
+  {
+    "name": "OctoML",
+    "description": "ML model optimization and deployment",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://octoml.ai"
+  },
+  {
+    "name": "Anyscale",
+    "description": "Ray-based ML platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://anyscale.com"
+  },
+  {
+    "name": "AWS SageMaker",
+    "description": "Build and deploy ML models",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/sagemaker"
+  },
+  {
+    "name": "Azure OpenAI",
+    "description": "OpenAI models on Azure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Google Vertex AI",
+    "description": "Google Cloud ML platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/vertex-ai"
+  },
+  {
+    "name": "Speechmatics",
+    "description": "Speech recognition technology",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://speechmatics.com"
+  },
+  {
+    "name": "Sonix",
+    "description": "Automated transcription",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://sonix.ai"
+  },
+  {
+    "name": "Descript",
+    "description": "Audio/video editing with AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://descript.com"
+  },
+  {
+    "name": "Luma AI",
+    "description": "3D capture and reconstruction",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lumalabs.ai"
+  },
+  {
+    "name": "Microsoft Computer Vision",
+    "description": "Image analysis and OCR",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "Scale AI",
+    "description": "Data labeling and AI infrastructure",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://scale.com"
+  },
+  {
+    "name": "Labelbox",
+    "description": "Data labeling platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://labelbox.com"
+  },
+  {
+    "name": "Snorkel AI",
+    "description": "Data-centric AI platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://snorkel.ai"
+  },
+  {
+    "name": "Weights & Biases",
+    "description": "ML experiment tracking",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://wandb.ai"
+  },
+  {
+    "name": "Neptune.ai",
+    "description": "ML experiment tracking",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://neptune.ai"
+  },
+  {
+    "name": "Comet ML",
+    "description": "ML experiment management",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://comet.ml"
+  },
+  {
+    "name": "MLflow",
+    "description": "ML lifecycle management",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://mlflow.org"
+  },
+  {
+    "name": "Kubeflow",
+    "description": "ML on Kubernetes",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://kubeflow.org"
+  },
+  {
+    "name": "Seldon",
+    "description": "ML model deployment",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://seldon.io"
+  },
+  {
+    "name": "BentoML",
+    "description": "ML model serving",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://bentoml.com"
+  },
+  {
+    "name": "Valohai",
+    "description": "MLOps platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://valohai.com"
+  },
+  {
+    "name": "Determined AI",
+    "description": "ML training platform",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://determined.ai"
+  },
+  {
+    "name": "Paperspace",
+    "description": "GPU cloud for ML",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://paperspace.com"
+  },
+  {
+    "name": "Lambda Labs",
+    "description": "GPU cloud for deep learning",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lambdalabs.com"
+  },
+  {
+    "name": "Cloudflare Workers",
+    "description": "Serverless execution environment",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://workers.cloudflare.com"
+  },
+  {
+    "name": "AWS Lambda",
+    "description": "Serverless compute",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/lambda"
+  },
+  {
+    "name": "Google Cloud Functions",
+    "description": "Serverless functions",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/functions"
+  },
+  {
+    "name": "Turso",
+    "description": "SQLite at the edge",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://turso.tech"
+  },
+  {
+    "name": "Convex",
+    "description": "Reactive backend platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://convex.dev"
+  },
+  {
+    "name": "Xata",
+    "description": "Serverless database platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://xata.io"
+  },
+  {
+    "name": "CockroachDB",
+    "description": "Distributed SQL database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cockroachlabs.com"
+  },
+  {
+    "name": "MongoDB Atlas",
+    "description": "Cloud database service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://mongodb.com/atlas"
+  },
+  {
+    "name": "Aiven",
+    "description": "Open source data infrastructure",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aiven.io"
+  },
+  {
+    "name": "Redis Cloud",
+    "description": "Redis database as a service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://redis.com"
+  },
+  {
+    "name": "Milvus",
+    "description": "Vector database for AI",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://milvus.io"
+  },
+  {
+    "name": "Chroma",
+    "description": "AI-native embedding database",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://trychroma.com"
+  },
+  {
+    "name": "Split.io",
+    "description": "Feature flags and experiments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://split.io"
+  },
+  {
+    "name": "Prometheus",
+    "description": "Monitoring system",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://prometheus.io"
+  },
+  {
+    "name": "Honeycomb",
+    "description": "Observability for distributed systems",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://honeycomb.io"
+  },
+  {
+    "name": "Axiom",
+    "description": "Log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://axiom.co"
+  },
+  {
+    "name": "Logflare",
+    "description": "Log management for Elixir",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://logflare.app"
+  },
+  {
+    "name": "Papertrail",
+    "description": "Cloud-hosted log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://papertrailapp.com"
+  },
+  {
+    "name": "Logtail",
+    "description": "Log management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://logtail.com"
+  },
+  {
+    "name": "VictorOps",
+    "description": "Incident management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://victorops.com"
+  },
+  {
+    "name": "Resend",
+    "description": "Email API for developers",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://resend.com"
+  },
+  {
+    "name": "Loops",
+    "description": "Email for SaaS",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://loops.so"
+  },
+  {
+    "name": "Brevo",
+    "description": "Email and SMS marketing platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://brevo.com"
+  },
+  {
+    "name": "Mailchimp Transactional",
+    "description": "Transactional email API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://mailchimp.com"
+  },
+  {
+    "name": "Chatwoot",
+    "description": "Open-source customer engagement",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://chatwoot.com"
+  },
+  {
+    "name": "WhatsApp Business",
+    "description": "WhatsApp messaging for businesses",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://business.whatsapp.com"
+  },
+  {
+    "name": "Facebook Messenger",
+    "description": "Messenger bot platform",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.facebook.com"
+  },
+  {
+    "name": "46elks",
+    "description": "SMS and voice API for Sweden",
+    "category": "Communication",
+    "authType": "basic",
+    "baseUrl": "https://46elks.com"
+  },
+  {
+    "name": "Pusher",
+    "description": "Realtime communication APIs",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://pusher.com"
+  },
+  {
+    "name": "Ably",
+    "description": "Realtime messaging infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://ably.com"
+  },
+  {
+    "name": "Socket.io",
+    "description": "Realtime bidirectional communication",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://socket.io"
+  },
+  {
+    "name": "100ms",
+    "description": "Video conferencing infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://100ms.live"
+  },
+  {
+    "name": "Jitsi",
+    "description": "Open source video conferencing",
+    "category": "Communication",
+    "authType": "none",
+    "baseUrl": "https://jitsi.org"
+  },
+  {
+    "name": "Stream",
+    "description": "Chat and activity feeds",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://getstream.io"
+  },
+  {
+    "name": "SendBird",
+    "description": "Chat and messaging API",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://sendbird.com"
+  },
+  {
+    "name": "CometChat",
+    "description": "In-app chat SDK",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://cometchat.com"
+  },
+  {
+    "name": "TalkJS",
+    "description": "Chat API and SDK",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://talkjs.com"
+  },
+  {
+    "name": "Novu",
+    "description": "Open source notification infrastructure",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://novu.co"
+  },
+  {
+    "name": "Lemon Squeezy",
+    "description": "Payments for digital products",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://lemonsqueezy.com"
+  },
+  {
+    "name": "Zuora",
+    "description": "Subscription management platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://zuora.com"
+  },
+  {
+    "name": "RevenueCat",
+    "description": "In-app subscriptions",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://revenuecat.com"
+  },
+  {
+    "name": "Adapty",
+    "description": "In-app subscriptions for mobile",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://adapty.io"
+  },
+  {
+    "name": "Superwall",
+    "description": "Paywall infrastructure",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://superwall.com"
+  },
+  {
+    "name": "Klarna",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://klarna.com"
+  },
+  {
+    "name": "Affirm",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://affirm.com"
+  },
+  {
+    "name": "Afterpay",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://afterpay.com"
+  },
+  {
+    "name": "Sezzle",
+    "description": "Buy now pay later",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://sezzle.com"
+  },
+  {
+    "name": "Wise",
+    "description": "International money transfer",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://wise.com"
+  },
+  {
+    "name": "Revolut Business",
+    "description": "Business financial platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://revolut.com"
+  },
+  {
+    "name": "Mercury",
+    "description": "Banking for startups",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://mercury.com"
+  },
+  {
+    "name": "Dwolla",
+    "description": "ACH payment API",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://dwolla.com"
+  },
+  {
+    "name": "Modern Treasury",
+    "description": "Payment operations",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://moderntreasury.com"
+  },
+  {
+    "name": "Increase",
+    "description": "Banking APIs",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://increase.com"
+  },
+  {
+    "name": "Unit",
+    "description": "Banking-as-a-service",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://unit.co"
+  },
+  {
+    "name": "Bond",
+    "description": "Embedded finance platform",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://bond.tech"
+  },
+  {
+    "name": "Treasury Prime",
+    "description": "Banking infrastructure",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://treasuryprime.com"
+  },
+  {
+    "name": "Medusa",
+    "description": "Open source e-commerce",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://medusajs.com"
+  },
+  {
+    "name": "Commerce.js",
+    "description": "Headless e-commerce API",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://commercejs.com"
+  },
+  {
+    "name": "Snipcart",
+    "description": "Shopping cart platform",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://snipcart.com"
+  },
+  {
+    "name": "Crystallize",
+    "description": "Product information management",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://crystallize.com"
+  },
+  {
+    "name": "Orderdesk",
+    "description": "Order management",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://orderdesk.com"
+  },
+  {
+    "name": "Google Analytics 4",
+    "description": "Website analytics",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://analytics.google.com"
+  },
+  {
+    "name": "Fathom",
+    "description": "Privacy-focused website analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://usefathom.com"
+  },
+  {
+    "name": "Simple Analytics",
+    "description": "Privacy-friendly analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://simpleanalytics.com"
+  },
+  {
+    "name": "Umami",
+    "description": "Open source website analytics",
+    "category": "Analytics",
+    "authType": "none",
+    "baseUrl": "https://umami.is"
+  },
+  {
+    "name": "Jitsu",
+    "description": "Open source data collection",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://jitsu.com"
+  },
+  {
+    "name": "Snowplow",
+    "description": "Behavioral data platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://snowplow.io"
+  },
+  {
+    "name": "Dbt",
+    "description": "Data transformation",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://getdbt.com"
+  },
+  {
+    "name": "Seamless.AI",
+    "description": "Sales leads platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://seamless.ai"
+  },
+  {
+    "name": "Smartlook",
+    "description": "Qualitative analytics",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://smartlook.com"
+  },
+  {
+    "name": "Mouseflow",
+    "description": "Session replay and heatmaps",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://mouseflow.com"
+  },
+  {
+    "name": "CrazyEgg",
+    "description": "Heatmaps and A/B testing",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://crazyegg.com"
+  },
+  {
+    "name": "Hygraph",
+    "description": "Federated content platform",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://hygraph.com"
+  },
+  {
+    "name": "Builder.io",
+    "description": "Visual headless CMS",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://builder.io"
+  },
+  {
+    "name": "Payload CMS",
+    "description": "Headless CMS and application framework",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://payloadcms.com"
+  },
+  {
+    "name": "Framer",
+    "description": "Design and publish websites",
+    "category": "CMS",
+    "authType": "apiKey",
+    "baseUrl": "https://framer.com"
+  },
+  {
+    "name": "Bunny Stream",
+    "description": "Video hosting and streaming",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://bunny.net"
+  },
+  {
+    "name": "Bitmovin",
+    "description": "Video streaming technology",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://bitmovin.com"
+  },
+  {
+    "name": "Shutterstock",
+    "description": "Stock photography",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://shutterstock.com"
+  },
+  {
+    "name": "Adobe Stock",
+    "description": "Stock media assets",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://stock.adobe.com"
+  },
+  {
+    "name": "iStock",
+    "description": "Stock photos and media",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://istockphoto.com"
+  },
+  {
+    "name": "Tenor",
+    "description": "GIF search API",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://tenor.com"
+  },
+  {
+    "name": "Lottie Files",
+    "description": "Lottie animations library",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://lottiefiles.com"
+  },
+  {
+    "name": "Flaticon",
+    "description": "Free vector icons",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://flaticon.com"
+  },
+  {
+    "name": "The Noun Project",
+    "description": "Icons and photos",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://thenounproject.com"
+  },
+  {
+    "name": "RemoveBG",
+    "description": "Remove image backgrounds",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://remove.bg"
+  },
+  {
+    "name": "Unscreen",
+    "description": "Remove video backgrounds",
+    "category": "Media",
+    "authType": "apiKey",
+    "baseUrl": "https://unscreen.com"
+  },
+  {
+    "name": "Magic",
+    "description": "Passwordless login",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://magic.link"
+  },
+  {
+    "name": "Passage",
+    "description": "Passwordless authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://passage.id"
+  },
+  {
+    "name": "Descope",
+    "description": "Customer authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://descope.com"
+  },
+  {
+    "name": "FusionAuth",
+    "description": "Customer identity platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fusionauth.io"
+  },
+  {
+    "name": "Ory",
+    "description": "Open source identity platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://ory.sh"
+  },
+  {
+    "name": "Keycloak",
+    "description": "Open source IAM",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://keycloak.org"
+  },
+  {
+    "name": "SuperTokens",
+    "description": "Open source auth",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://supertokens.com"
+  },
+  {
+    "name": "Hanko",
+    "description": "Passkey authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://hanko.io"
+  },
+  {
+    "name": "PropelAuth",
+    "description": "B2B authentication",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://propelauth.com"
+  },
+  {
+    "name": "Kinde",
+    "description": "Auth for modern applications",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://kinde.com"
+  },
+  {
+    "name": "Checkmarx",
+    "description": "Application security testing",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://checkmarx.com"
+  },
+  {
+    "name": "Veracode",
+    "description": "Application security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://veracode.com"
+  },
+  {
+    "name": "WhiteSource",
+    "description": "Open source security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://whitesourcesoftware.com"
+  },
+  {
+    "name": "GitHub Security",
+    "description": "Security features in GitHub",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "GitLab Security",
+    "description": "Security scanning",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://gitlab.com"
+  },
+  {
+    "name": "Dependabot",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://github.com/dependabot"
+  },
+  {
+    "name": "Socket",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://socket.dev"
+  },
+  {
+    "name": "Aqua Security",
+    "description": "Container security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://aquasec.com"
+  },
+  {
+    "name": "Trivy",
+    "description": "Vulnerability scanner",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://trivy.dev"
+  },
+  {
+    "name": "Grype",
+    "description": "Vulnerability scanner",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://anchore.com"
+  },
+  {
+    "name": "Falco",
+    "description": "Runtime security",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://falco.org"
+  },
+  {
+    "name": "Vault",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://vaultproject.io"
+  },
+  {
+    "name": "Doppler",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://doppler.com"
+  },
+  {
+    "name": "1Password Secrets",
+    "description": "Secrets automation",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://1password.com"
+  },
+  {
+    "name": "Infisical",
+    "description": "Open source secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://infisical.com"
+  },
+  {
+    "name": "AWS Secrets Manager",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com"
+  },
+  {
+    "name": "Google Secret Manager",
+    "description": "Secrets management",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com"
+  },
+  {
+    "name": "CrowdStrike",
+    "description": "Endpoint security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://crowdstrike.com"
+  },
+  {
+    "name": "Carbon Black",
+    "description": "Endpoint security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://carbonblack.com"
+  },
+  {
+    "name": "SentinelOne",
+    "description": "Autonomous security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://sentinelone.com"
+  },
+  {
+    "name": "Things",
+    "description": "Task manager for Apple",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://culturedcode.com"
+  },
+  {
+    "name": "SavvyCal",
+    "description": "Scheduling made easy",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://savvycal.com"
+  },
+  {
+    "name": "Zoom",
+    "description": "Video communications",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://zoom.us"
+  },
+  {
+    "name": "Google Meet",
+    "description": "Video meetings",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://meet.google.com"
+  },
+  {
+    "name": "Microsoft Teams",
+    "description": "Collaboration platform",
+    "category": "Productivity",
+    "authType": "oauth",
+    "baseUrl": "https://teams.microsoft.com"
+  },
+  {
+    "name": "Webex",
+    "description": "Video conferencing",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://webex.com"
+  },
+  {
+    "name": "Loom",
+    "description": "Video messaging",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://loom.com"
+  },
+  {
+    "name": "Vidyard",
+    "description": "Video hosting for business",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://vidyard.com"
+  },
+  {
+    "name": "Figma",
+    "description": "Design tool",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://figma.com"
+  },
+  {
+    "name": "Canva",
+    "description": "Design platform",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://canva.com"
+  },
+  {
+    "name": "Pitch",
+    "description": "Presentation software",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://pitch.com"
+  },
+  {
+    "name": "Miro",
+    "description": "Collaborative whiteboard",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://miro.com"
+  },
+  {
+    "name": "FigJam",
+    "description": "Whiteboard by Figma",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://figma.com/figjam"
+  },
+  {
+    "name": "Excalidraw",
+    "description": "Virtual whiteboard",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://excalidraw.com"
+  },
+  {
+    "name": "Whereby Embedded",
+    "description": "Video meeting APIs",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://whereby.com"
+  },
+  {
+    "name": "ConvertKit",
+    "description": "Email marketing for creators",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://convertkit.com"
+  },
+  {
+    "name": "Beehiiv",
+    "description": "Newsletter platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://beehiiv.com"
+  },
+  {
+    "name": "Substack",
+    "description": "Newsletter platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://substack.com"
+  },
+  {
+    "name": "Buttondown",
+    "description": "Newsletter tool",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://buttondown.email"
+  },
+  {
+    "name": "Sitebulb",
+    "description": "Website auditing tool",
+    "category": "Marketing",
+    "authType": "none",
+    "baseUrl": "https://sitebulb.com"
+  },
+  {
+    "name": "LinkResearchTools",
+    "description": "Backlink analysis",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://linkresearchtools.com"
+  },
+  {
+    "name": "Bing Webmaster Tools",
+    "description": "Bing search performance",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://bing.com/webmasters"
+  },
+  {
+    "name": "Google Ads",
+    "description": "Advertising platform",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.google.com"
+  },
+  {
+    "name": "Meta Ads",
+    "description": "Facebook and Instagram ads",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://business.facebook.com"
+  },
+  {
+    "name": "LinkedIn Ads",
+    "description": "Professional advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://business.linkedin.com"
+  },
+  {
+    "name": "Twitter Ads",
+    "description": "Twitter advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.twitter.com"
+  },
+  {
+    "name": "TikTok Ads",
+    "description": "TikTok advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.tiktok.com"
+  },
+  {
+    "name": "Pinterest Ads",
+    "description": "Pinterest advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.pinterest.com"
+  },
+  {
+    "name": "Snapchat Ads",
+    "description": "Snapchat advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://forbusiness.snapchat.com"
+  },
+  {
+    "name": "Reddit Ads",
+    "description": "Reddit advertising",
+    "category": "Marketing",
+    "authType": "oauth",
+    "baseUrl": "https://ads.reddit.com"
+  },
+  {
+    "name": "Taboola",
+    "description": "Content discovery platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://taboola.com"
+  },
+  {
+    "name": "Outbrain",
+    "description": "Content recommendation",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://outbrain.com"
+  },
+  {
+    "name": "Criteo",
+    "description": "Advertising platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://criteo.com"
+  },
+  {
+    "name": "AppsFlyer",
+    "description": "Mobile attribution",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://appsflyer.com"
+  },
+  {
+    "name": "Adjust",
+    "description": "Mobile analytics",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://adjust.com"
+  },
+  {
+    "name": "Branch",
+    "description": "Mobile linking platform",
+    "category": "Marketing",
+    "authType": "apiKey",
+    "baseUrl": "https://branch.io"
+  },
+  {
+    "name": "Pirate Weather",
+    "description": "Weather forecasting",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://pirateweather.net"
+  },
+  {
+    "name": "YouTube Data",
+    "description": "YouTube video data",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://youtube.com"
+  },
+  {
+    "name": "JustWatch",
+    "description": "Streaming availability",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://justwatch.com"
+  },
+  {
+    "name": "Twitter API",
+    "description": "Twitter data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://twitter.com"
+  },
+  {
+    "name": "Facebook Graph",
+    "description": "Facebook data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://facebook.com"
+  },
+  {
+    "name": "Instagram Graph",
+    "description": "Instagram data",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://instagram.com"
+  },
+  {
+    "name": "Bluesky",
+    "description": "Decentralized social network",
+    "category": "Social",
+    "authType": "apiKey",
+    "baseUrl": "https://bsky.app"
+  },
+  {
+    "name": "Threads",
+    "description": "Text-based social media",
+    "category": "Social",
+    "authType": "oauth",
+    "baseUrl": "https://threads.net"
+  },
+  {
+    "name": "npm",
+    "description": "Node package manager",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://npmjs.com"
+  },
+  {
+    "name": "PyPI",
+    "description": "Python package index",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://pypi.org"
+  },
+  {
+    "name": "Maven Central",
+    "description": "Java packages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://maven.org"
+  },
+  {
+    "name": "NuGet",
+    "description": ".NET packages",
+    "category": "Development",
+    "authType": "none",
+    "baseUrl": "https://nuget.org"
+  },
+  {
+    "name": "Quay.io",
+    "description": "Container registry",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://quay.io"
+  },
+  {
+    "name": "Microsoft Azure",
+    "description": "Cloud services",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com"
+  },
+  {
+    "name": "OVH",
+    "description": "Cloud provider",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://ovh.com"
+  },
+  {
+    "name": "Scaleway",
+    "description": "Cloud provider",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://scaleway.com"
+  },
+  {
+    "name": "UpCloud",
+    "description": "Cloud infrastructure",
+    "category": "Cloud",
+    "authType": "apiKey",
+    "baseUrl": "https://upcloud.com"
+  },
+  {
+    "name": "Temporal",
+    "description": "Workflow orchestration",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://temporal.io"
+  },
+  {
+    "name": "Celigo",
+    "description": "Integration platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://celigo.com"
+  },
+  {
+    "name": "Airplane",
+    "description": "Internal tools platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://airplane.dev"
+  },
+  {
+    "name": "Superblocks",
+    "description": "Internal apps builder",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://superblocks.com"
+  },
+  {
+    "name": "PostgREST",
+    "description": "REST API for PostgreSQL",
+    "category": "Automation",
+    "authType": "none",
+    "baseUrl": "https://postgrest.org"
+  },
+  {
+    "name": "Pocketbase",
+    "description": "Backend in a single file",
+    "category": "Automation",
+    "authType": "none",
+    "baseUrl": "https://pocketbase.io"
+  },
+  {
+    "name": "Appwrite",
+    "description": "Backend server",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://appwrite.io"
+  },
+  {
+    "name": "Nhost",
+    "description": "Backend platform",
+    "category": "Automation",
+    "authType": "apiKey",
+    "baseUrl": "https://nhost.io"
+  },
+  {
+    "name": "BioThings",
+    "description": "Biological data APIs",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://biothings.io"
+  },
+  {
+    "name": "ChEMBL",
+    "description": "Chemical database",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://chembl.org"
+  },
+  {
+    "name": "UniProt",
+    "description": "Protein sequence database",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://uniprot.org"
+  },
+  {
+    "name": "OMIM",
+    "description": "Human genes and genetic conditions",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://omim.org"
+  },
+  {
+    "name": "HealthData.gov",
+    "description": "US health data",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://healthdata.gov"
+  },
+  {
+    "name": "WHO",
+    "description": "World Health Organization data",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://who.int"
+  },
+  {
+    "name": "Medicare",
+    "description": "Medicare data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://medicare.gov"
+  },
+  {
+    "name": "Teladoc",
+    "description": "Telehealth platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://teladoc.com"
+  },
+  {
+    "name": "Amwell",
+    "description": "Telehealth services",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://amwell.com"
+  },
+  {
+    "name": "Doxy.me",
+    "description": "Telemedicine platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://doxy.me"
+  },
+  {
+    "name": "Redox",
+    "description": "Healthcare data integration",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://redoxengine.com"
+  },
+  {
+    "name": "Health Gorilla",
+    "description": "Healthcare data network",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://healthgorilla.com"
+  },
+  {
+    "name": "Particle Health",
+    "description": "Patient health data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://particlehealth.com"
+  },
+  {
+    "name": "1upHealth",
+    "description": "FHIR data platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://1up.health"
+  },
+  {
+    "name": "Flexpa",
+    "description": "Healthcare payments data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://flexpa.com"
+  },
+  {
+    "name": "Ribbon Health",
+    "description": "Healthcare provider data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://ribbonhealth.com"
+  },
+  {
+    "name": "Eligible",
+    "description": "Healthcare eligibility",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://eligible.com"
+  },
+  {
+    "name": "Waystar",
+    "description": "Revenue cycle management",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://waystar.com"
+  },
+  {
+    "name": "Change Healthcare",
+    "description": "Healthcare technology",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://changehealthcare.com"
+  },
+  {
+    "name": "Athenahealth",
+    "description": "Healthcare network",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://athenahealth.com"
+  },
+  {
+    "name": "Epic",
+    "description": "Healthcare software",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://epic.com"
+  },
+  {
+    "name": "Cerner",
+    "description": "Healthcare IT",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://cerner.com"
+  },
+  {
+    "name": "Allscripts",
+    "description": "Healthcare IT solutions",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://allscripts.com"
+  },
+  {
+    "name": "eClinicalWorks",
+    "description": "EHR and practice management",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://eclinicalworks.com"
+  },
+  {
+    "name": "Harvard Caselaw",
+    "description": "US caselaw database",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://case.law"
+  },
+  {
+    "name": "Comply Advantage",
+    "description": "AML compliance",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://complyadvantage.com"
+  },
+  {
+    "name": "Trulioo",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://trulioo.com"
+  },
+  {
+    "name": "Onfido",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://onfido.com"
+  },
+  {
+    "name": "Veriff",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://veriff.com"
+  },
+  {
+    "name": "Jumio",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://jumio.com"
+  },
+  {
+    "name": "Persona",
+    "description": "Identity platform",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://withpersona.com"
+  },
+  {
+    "name": "Checkr",
+    "description": "Background checks",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://checkr.com"
+  },
+  {
+    "name": "GoodHire",
+    "description": "Employment screening",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://goodhire.com"
+  },
+  {
+    "name": "Sterling",
+    "description": "Background screening",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://sterlingcheck.com"
+  },
+  {
+    "name": "Alloy",
+    "description": "Identity decisioning",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://alloy.com"
+  },
+  {
+    "name": "Middesk",
+    "description": "Business verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://middesk.com"
+  },
+  {
+    "name": "Socure",
+    "description": "Digital identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://socure.com"
+  },
+  {
+    "name": "Sentilink",
+    "description": "Identity fraud prevention",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://sentilink.com"
+  },
+  {
+    "name": "Tessera",
+    "description": "Corporate intelligence",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://tessera.co"
+  },
+  {
+    "name": "Lexis Nexis",
+    "description": "Legal research",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://lexisnexis.com"
+  },
+  {
+    "name": "Westlaw",
+    "description": "Legal research",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://westlaw.com"
+  },
+  {
+    "name": "MyCase",
+    "description": "Legal case management",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://mycase.com"
+  },
+  {
+    "name": "Rocket Lawyer",
+    "description": "Legal services",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://rocketlawyer.com"
+  },
+  {
+    "name": "LegalZoom",
+    "description": "Legal services",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://legalzoom.com"
+  },
+  {
+    "name": "DocuLaw",
+    "description": "Legal document automation",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://doculaw.com"
+  },
+  {
+    "name": "Contract Express",
+    "description": "Contract automation",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://contractexpress.com"
+  },
+  {
+    "name": "Trulia",
+    "description": "Real estate marketplace",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://trulia.com"
+  },
+  {
+    "name": "HouseCanary",
+    "description": "Real estate analytics",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://housecanary.com"
+  },
+  {
+    "name": "Attom Data",
+    "description": "Property data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://attomdata.com"
+  },
+  {
+    "name": "CoreLogic",
+    "description": "Property data and analytics",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://corelogic.com"
+  },
+  {
+    "name": "Reonomy",
+    "description": "Commercial real estate data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://reonomy.com"
+  },
+  {
+    "name": "Yardi",
+    "description": "Property management",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://yardi.com"
+  },
+  {
+    "name": "AppFolio",
+    "description": "Property management software",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://appfolio.com"
+  },
+  {
+    "name": "Buildium",
+    "description": "Property management",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://buildium.com"
+  },
+  {
+    "name": "Entrata",
+    "description": "Property management platform",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://entrata.com"
+  },
+  {
+    "name": "RealPage",
+    "description": "Real estate tech",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://realpage.com"
+  },
+  {
+    "name": "CoStar",
+    "description": "Commercial real estate data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://costar.com"
+  },
+  {
+    "name": "LoopNet",
+    "description": "Commercial listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://loopnet.com"
+  },
+  {
+    "name": "Apartments.com",
+    "description": "Apartment listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://apartments.com"
+  },
+  {
+    "name": "Zumper",
+    "description": "Rental marketplace",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://zumper.com"
+  },
+  {
+    "name": "RentCafe",
+    "description": "Property marketing",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://rentcafe.com"
+  },
+  {
+    "name": "Walk Score",
+    "description": "Walkability data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://walkscore.com"
+  },
+  {
+    "name": "GreatSchools",
+    "description": "School ratings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://greatschools.org"
+  },
+  {
+    "name": "Parcl",
+    "description": "Real estate price feeds",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://parcl.co"
+  },
+  {
+    "name": "Udemy",
+    "description": "Online learning platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://udemy.com"
+  },
+  {
+    "name": "Skillshare",
+    "description": "Creative classes",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://skillshare.com"
+  },
+  {
+    "name": "LinkedIn Learning",
+    "description": "Professional courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://linkedin.com/learning"
+  },
+  {
+    "name": "Pluralsight",
+    "description": "Tech skills platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://pluralsight.com"
+  },
+  {
+    "name": "Codecademy",
+    "description": "Coding courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://codecademy.com"
+  },
+  {
+    "name": "Treehouse",
+    "description": "Tech education",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://teamtreehouse.com"
+  },
+  {
+    "name": "Udacity",
+    "description": "Tech nanodegrees",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://udacity.com"
+  },
+  {
+    "name": "DataCamp",
+    "description": "Data science courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://datacamp.com"
+  },
+  {
+    "name": "Brilliant",
+    "description": "Interactive learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://brilliant.org"
+  },
+  {
+    "name": "MasterClass",
+    "description": "Expert-taught classes",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://masterclass.com"
+  },
+  {
+    "name": "Duolingo",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://duolingo.com"
+  },
+  {
+    "name": "Babbel",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://babbel.com"
+  },
+  {
+    "name": "Busuu",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://busuu.com"
+  },
+  {
+    "name": "Memrise",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://memrise.com"
+  },
+  {
+    "name": "Rosetta Stone",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://rosettastone.com"
+  },
+  {
+    "name": "Quizlet",
+    "description": "Study tools",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://quizlet.com"
+  },
+  {
+    "name": "Anki",
+    "description": "Flashcard learning",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://ankiweb.net"
+  },
+  {
+    "name": "Brainscape",
+    "description": "Smart flashcards",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://brainscape.com"
+  },
+  {
+    "name": "Chegg",
+    "description": "Study resources",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://chegg.com"
+  },
+  {
+    "name": "Course Hero",
+    "description": "Study resources",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://coursehero.com"
+  },
+  {
+    "name": "Grammarly",
+    "description": "Writing assistant",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://grammarly.com"
+  },
+  {
+    "name": "ProWritingAid",
+    "description": "Writing software",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://prowritingaid.com"
+  },
+  {
+    "name": "Hemingway Editor",
+    "description": "Writing tool",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://hemingwayapp.com"
+  },
+  {
+    "name": "Turnitin",
+    "description": "Plagiarism detection",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://turnitin.com"
+  },
+  {
+    "name": "Canvas LMS",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://instructure.com"
+  },
+  {
+    "name": "Blackboard",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://blackboard.com"
+  },
+  {
+    "name": "Moodle",
+    "description": "Open source LMS",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://moodle.org"
+  },
+  {
+    "name": "Schoology",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://schoology.com"
+  },
+  {
+    "name": "ClassDojo",
+    "description": "Classroom management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://classdojo.com"
+  },
+  {
+    "name": "Seesaw",
+    "description": "Student portfolios",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://web.seesaw.me"
+  },
+  {
+    "name": "Kahoot",
+    "description": "Game-based learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://kahoot.com"
+  },
+  {
+    "name": "Nearpod",
+    "description": "Interactive lessons",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://nearpod.com"
+  },
+  {
+    "name": "Arduino Cloud",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://create.arduino.cc"
+  },
+  {
+    "name": "Losant",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://losant.com"
+  },
+  {
+    "name": "ThingsBoard",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://thingsboard.io"
+  },
+  {
+    "name": "Blynk",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://blynk.io"
+  },
+  {
+    "name": "Cayenne",
+    "description": "IoT project builder",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://mydevices.com"
+  },
+  {
+    "name": "Ubidots",
+    "description": "IoT data analytics",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ubidots.com"
+  },
+  {
+    "name": "AWS IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/iot"
+  },
+  {
+    "name": "Azure IoT",
+    "description": "IoT services",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com/iot"
+  },
+  {
+    "name": "Google Cloud IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/iot"
+  },
+  {
+    "name": "IBM Watson IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ibm.com/watson-iot"
+  },
+  {
+    "name": "Samsung SmartThings",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://smartthings.developer.samsung.com"
+  },
+  {
+    "name": "Apple HomeKit",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.apple.com/homekit"
+  },
+  {
+    "name": "Google Home",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/assistant"
+  },
+  {
+    "name": "Nanoleaf",
+    "description": "Smart lighting",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://nanoleaf.me"
+  },
+  {
+    "name": "Nest",
+    "description": "Smart home devices",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/nest"
+  },
+  {
+    "name": "Ecobee",
+    "description": "Smart thermostats",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ecobee.com"
+  },
+  {
+    "name": "Ring",
+    "description": "Home security",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ring.com"
+  },
+  {
+    "name": "Arlo",
+    "description": "Smart security",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://arlo.com"
+  },
+  {
+    "name": "Wyze",
+    "description": "Smart home products",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://wyze.com"
+  },
+  {
+    "name": "Tuya",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://tuya.com"
+  },
+  {
+    "name": "eWeLink",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ewelink.cc"
+  },
+  {
+    "name": "Home Assistant",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://home-assistant.io"
+  },
+  {
+    "name": "Hubitat",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://hubitat.com"
+  },
+  {
+    "name": "Domoticz",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://domoticz.com"
+  },
+  {
+    "name": "Zigbee",
+    "description": "IoT protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://zigbeealliance.org"
+  },
+  {
+    "name": "Z-Wave",
+    "description": "Smart home protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://z-wavealliance.org"
+  },
+  {
+    "name": "Matter",
+    "description": "Smart home standard",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://buildwithmatter.com"
+  },
+  {
+    "name": "Thread",
+    "description": "IoT protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://threadgroup.org"
+  },
+  {
+    "name": "LoRaWAN",
+    "description": "IoT network protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://lora-alliance.org"
+  },
+  {
+    "name": "Sigfox",
+    "description": "IoT connectivity",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://sigfox.com"
+  },
+  {
+    "name": "Workday",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://workday.com"
+  },
+  {
+    "name": "Paylocity",
+    "description": "Payroll and HR",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paylocity.com"
+  },
+  {
+    "name": "Paycom",
+    "description": "HR and payroll",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paycom.com"
+  },
+  {
+    "name": "ADP",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://adp.com"
+  },
+  {
+    "name": "Paychex",
+    "description": "Payroll services",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paychex.com"
+  },
+  {
+    "name": "Ceridian Dayforce",
+    "description": "HCM platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ceridian.com"
+  },
+  {
+    "name": "UKG",
+    "description": "HR solutions",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ukg.com"
+  },
+  {
+    "name": "SAP SuccessFactors",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://sap.com"
+  },
+  {
+    "name": "Oracle HCM",
+    "description": "HR cloud",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://oracle.com"
+  },
+  {
+    "name": "Ashby",
+    "description": "Recruiting platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ashbyhq.com"
+  },
+  {
+    "name": "JazzHR",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://jazzhr.com"
+  },
+  {
+    "name": "iCIMS",
+    "description": "Talent acquisition",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://icims.com"
+  },
+  {
+    "name": "SmartRecruiters",
+    "description": "Hiring platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://smartrecruiters.com"
+  },
+  {
+    "name": "Jobvite",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://jobvite.com"
+  },
+  {
+    "name": "Breezy HR",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://breezy.hr"
+  },
+  {
+    "name": "Recruitee",
+    "description": "Recruiting platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://recruitee.com"
+  },
+  {
+    "name": "Teamtailor",
+    "description": "Employer branding",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://teamtailor.com"
+  },
+  {
+    "name": "Deel",
+    "description": "Global HR",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://deel.com"
+  },
+  {
+    "name": "Remote",
+    "description": "Global HR platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://remote.com"
+  },
+  {
+    "name": "Oyster HR",
+    "description": "Global employment",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://oysterhr.com"
+  },
+  {
+    "name": "Papaya Global",
+    "description": "Global payroll",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://papayaglobal.com"
+  },
+  {
+    "name": "Velocity Global",
+    "description": "Global expansion",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://velocityglobal.com"
+  },
+  {
+    "name": "Factorial",
+    "description": "HR software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://factorialhr.com"
+  },
+  {
+    "name": "Charlie HR",
+    "description": "HR software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://charliehr.com"
+  },
+  {
+    "name": "Humaans",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://humaans.io"
+  },
+  {
+    "name": "Lattice",
+    "description": "People management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://lattice.com"
+  },
+  {
+    "name": "15Five",
+    "description": "Performance management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://15five.com"
+  },
+  {
+    "name": "Culture Amp",
+    "description": "Employee experience",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://cultureamp.com"
+  },
+  {
+    "name": "Leapsome",
+    "description": "People enablement",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://leapsome.com"
+  },
+  {
+    "name": "Epic Games",
+    "description": "Epic Games services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://epicgames.com"
+  },
+  {
+    "name": "PlayStation Network",
+    "description": "PlayStation services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playstation.com"
+  },
+  {
+    "name": "Xbox Live",
+    "description": "Xbox services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://xbox.com"
+  },
+  {
+    "name": "Nintendo",
+    "description": "Nintendo services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://nintendo.com"
+  },
+  {
+    "name": "GOG Galaxy",
+    "description": "GOG platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://gog.com"
+  },
+  {
+    "name": "Discord",
+    "description": "Gaming communication",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://discord.com"
+  },
+  {
+    "name": "Overwolf",
+    "description": "In-game overlay platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://overwolf.com"
+  },
+  {
+    "name": "OpenDota",
+    "description": "Dota 2 statistics",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://opendota.com"
+  },
+  {
+    "name": "Fortnite Tracker",
+    "description": "Fortnite statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://fortnitetracker.com"
+  },
+  {
+    "name": "Call of Duty",
+    "description": "COD API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://callofduty.com"
+  },
+  {
+    "name": "Apex Legends",
+    "description": "Apex statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://apexlegends.com"
+  },
+  {
+    "name": "Valorant",
+    "description": "Valorant API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playvalorant.com"
+  },
+  {
+    "name": "Counter-Strike",
+    "description": "CS:GO statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://counter-strike.net"
+  },
+  {
+    "name": "Rocket League",
+    "description": "Rocket League API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://rocketleague.com"
+  },
+  {
+    "name": "FIFA",
+    "description": "FIFA API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://fifa.com"
+  },
+  {
+    "name": "NBA 2K",
+    "description": "NBA 2K API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://nba.2k.com"
+  },
+  {
+    "name": "Madden NFL",
+    "description": "Madden API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ea.com/madden"
+  },
+  {
+    "name": "Pokemon",
+    "description": "Pokemon API",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://pokeapi.co"
+  },
+  {
+    "name": "Yu-Gi-Oh",
+    "description": "YuGiOh card data",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://ygoprodeck.com"
+  },
+  {
+    "name": "Blizzard",
+    "description": "Blizzard games API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://blizzard.com"
+  },
+  {
+    "name": "Bungie",
+    "description": "Destiny API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://bungie.net"
+  },
+  {
+    "name": "Ubisoft",
+    "description": "Ubisoft services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ubisoft.com"
+  },
+  {
+    "name": "Electronic Arts",
+    "description": "EA services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ea.com"
+  },
+  {
+    "name": "Unity",
+    "description": "Game development platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://unity.com"
+  },
+  {
+    "name": "Unreal Engine",
+    "description": "Game engine",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://unrealengine.com"
+  },
+  {
+    "name": "Godot",
+    "description": "Open source game engine",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://godotengine.org"
+  },
+  {
+    "name": "PlayFab",
+    "description": "Game backend",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playfab.com"
+  },
+  {
+    "name": "GameSparks",
+    "description": "Game backend",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://gamesparks.com"
+  },
+  {
+    "name": "Photon",
+    "description": "Multiplayer platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://photonengine.com"
+  },
+  {
+    "name": "Mirror Networking",
+    "description": "Unity networking",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://mirror-networking.com"
+  },
+  {
+    "name": "Faceit",
+    "description": "Esports platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://faceit.com"
+  },
+  {
+    "name": "ESL",
+    "description": "Esports league",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://esl.com"
+  },
+  {
+    "name": "Ethereum",
+    "description": "Ethereum blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://ethereum.org"
+  },
+  {
+    "name": "Solana",
+    "description": "Solana blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://solana.com"
+  },
+  {
+    "name": "Avalanche",
+    "description": "Avalanche network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://avax.network"
+  },
+  {
+    "name": "Arbitrum",
+    "description": "Arbitrum L2",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://arbitrum.io"
+  },
+  {
+    "name": "Optimism",
+    "description": "Optimism L2",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://optimism.io"
+  },
+  {
+    "name": "Base",
+    "description": "Base L2 by Coinbase",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://base.org"
+  },
+  {
+    "name": "BNB Chain",
+    "description": "Binance Smart Chain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://bnbchain.org"
+  },
+  {
+    "name": "Fantom",
+    "description": "Fantom network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://fantom.foundation"
+  },
+  {
+    "name": "Near",
+    "description": "Near Protocol",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://near.org"
+  },
+  {
+    "name": "Cosmos",
+    "description": "Cosmos network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://cosmos.network"
+  },
+  {
+    "name": "Polkadot",
+    "description": "Polkadot network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://polkadot.network"
+  },
+  {
+    "name": "Cardano",
+    "description": "Cardano blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://cardano.org"
+  },
+  {
+    "name": "Aptos",
+    "description": "Aptos blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://aptoslabs.com"
+  },
+  {
+    "name": "Sui",
+    "description": "Sui blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://sui.io"
+  },
+  {
+    "name": "Thirdweb",
+    "description": "Web3 development",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://thirdweb.com"
+  },
+  {
+    "name": "Dune Analytics",
+    "description": "Blockchain analytics",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://dune.com"
+  },
+  {
+    "name": "Nansen",
+    "description": "Blockchain analytics",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://nansen.ai"
+  },
+  {
+    "name": "Flipside",
+    "description": "Blockchain data",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://flipsidecrypto.com"
+  },
+  {
+    "name": "DeFiLlama",
+    "description": "DeFi data",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://defillama.com"
+  },
+  {
+    "name": "Blur",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://blur.io"
+  },
+  {
+    "name": "Magic Eden",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://magiceden.io"
+  },
+  {
+    "name": "Rarible",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://rarible.com"
+  },
+  {
+    "name": "Foundation",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://foundation.app"
+  },
+  {
+    "name": "Zora",
+    "description": "NFT protocol",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://zora.co"
+  },
+  {
+    "name": "Manifold",
+    "description": "NFT creation",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://manifold.xyz"
+  },
+  {
+    "name": "Reservoir",
+    "description": "NFT infrastructure",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://reservoir.tools"
+  },
+  {
+    "name": "SimpleHash",
+    "description": "NFT data",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://simplehash.com"
+  },
+  {
+    "name": "Center",
+    "description": "NFT infrastructure",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://center.app"
+  },
+  {
+    "name": "Uniswap",
+    "description": "DEX protocol",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://uniswap.org"
+  },
+  {
+    "name": "SushiSwap",
+    "description": "DEX protocol",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://sushi.com"
+  },
+  {
+    "name": "Curve",
+    "description": "DEX for stablecoins",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://curve.fi"
+  },
+  {
+    "name": "Aave",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://aave.com"
+  },
+  {
+    "name": "Compound",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://compound.finance"
+  },
+  {
+    "name": "MakerDAO",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://makerdao.com"
+  },
+  {
+    "name": "Lido",
+    "description": "Liquid staking",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://lido.fi"
+  },
+  {
+    "name": "Rocket Pool",
+    "description": "Decentralized staking",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://rocketpool.net"
+  },
+  {
+    "name": "WalletConnect",
+    "description": "Wallet connection",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://walletconnect.com"
+  },
+  {
+    "name": "Web3Modal",
+    "description": "Wallet connection UI",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://web3modal.com"
+  },
+  {
+    "name": "Privy",
+    "description": "Web3 authentication",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://privy.io"
+  },
+  {
+    "name": "La Poste",
+    "description": "French postal",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://laposte.fr"
+  },
+  {
+    "name": "Amazon Shipping",
+    "description": "Amazon logistics",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://services.amazon.com"
+  },
+  {
+    "name": "Stamps.com",
+    "description": "Shipping software",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://stamps.com"
+  },
+  {
+    "name": "Route",
+    "description": "Package tracking",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://route.com"
+  },
+  {
+    "name": "Narvar",
+    "description": "Post-purchase experience",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://narvar.com"
+  },
+  {
+    "name": "Flexport",
+    "description": "Freight forwarding",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://flexport.com"
+  },
+  {
+    "name": "project44",
+    "description": "Supply chain visibility",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://project44.com"
+  },
+  {
+    "name": "FourKites",
+    "description": "Supply chain visibility",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://fourkites.com"
+  },
+  {
+    "name": "SportsData.io",
+    "description": "Sports statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://sportsdata.io"
+  },
+  {
+    "name": "SportRadar",
+    "description": "Sports data",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://sportradar.com"
+  },
+  {
+    "name": "The Sports DB",
+    "description": "Sports database",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://thesportsdb.com"
+  },
+  {
+    "name": "MLB Stats",
+    "description": "Baseball statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mlb.com"
+  },
+  {
+    "name": "UFC Stats",
+    "description": "MMA statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://ufc.com"
+  },
+  {
+    "name": "F1 Data",
+    "description": "Formula 1 data",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://formula1.com"
+  },
+  {
+    "name": "Cricket API",
+    "description": "Cricket statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://cricapi.com"
+  },
+  {
+    "name": "Tennis Live Data",
+    "description": "Tennis statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://tennislivedata.com"
+  },
+  {
+    "name": "Golf Leaderboard",
+    "description": "Golf statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://pgatour.com"
+  },
+  {
+    "name": "Garmin",
+    "description": "Fitness devices",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://garmin.com"
+  },
+  {
+    "name": "Whoop",
+    "description": "Fitness tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://whoop.com"
+  },
+  {
+    "name": "Oura",
+    "description": "Sleep and fitness",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://ouraring.com"
+  },
+  {
+    "name": "MyFitnessPal",
+    "description": "Nutrition tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://myfitnesspal.com"
+  },
+  {
+    "name": "Apple Health",
+    "description": "Health data",
+    "category": "Sports",
+    "authType": "oauth",
+    "baseUrl": "https://apple.com/health"
+  },
+  {
+    "name": "Google Fit",
+    "description": "Fitness platform",
+    "category": "Sports",
+    "authType": "oauth",
+    "baseUrl": "https://google.com/fit"
+  },
+  {
+    "name": "Samsung Health",
+    "description": "Health platform",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://samsung.com/health"
+  },
+  {
+    "name": "Peloton",
+    "description": "Fitness platform",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://onepeloton.com"
+  },
+  {
+    "name": "Mirror",
+    "description": "Home fitness",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mirror.co"
+  },
+  {
+    "name": "Tonal",
+    "description": "Smart home gym",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://tonal.com"
+  },
+  {
+    "name": "Zwift",
+    "description": "Virtual cycling",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://zwift.com"
+  },
+  {
+    "name": "TrainerRoad",
+    "description": "Cycling training",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://trainerroad.com"
+  },
+  {
+    "name": "Wahoo",
+    "description": "Cycling tech",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://wahoofitness.com"
+  },
+  {
+    "name": "Runkeeper",
+    "description": "Running tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://runkeeper.com"
+  },
+  {
+    "name": "Nike Run Club",
+    "description": "Running app",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://nike.com"
+  },
+  {
+    "name": "Adidas Running",
+    "description": "Running app",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://adidas.com"
+  },
+  {
+    "name": "MapMyRun",
+    "description": "Running tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mapmyrun.com"
+  },
+  {
+    "name": "AllTrails",
+    "description": "Trail guides",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://alltrails.com"
+  },
+  {
+    "name": "Komoot",
+    "description": "Route planning",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://komoot.com"
+  },
+  {
+    "name": "Canadian Open Data",
+    "description": "Canadian government data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://open.canada.ca"
+  },
+  {
+    "name": "Australian Open Data",
+    "description": "Australian government data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://data.gov.au"
+  },
+  {
+    "name": "US Census",
+    "description": "US Census Bureau data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://census.gov"
+  },
+  {
+    "name": "Bureau of Labor Statistics",
+    "description": "US labor statistics",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://bls.gov"
+  },
+  {
+    "name": "FAA",
+    "description": "Aviation data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://faa.gov"
+  },
+  {
+    "name": "FBI Crime Data",
+    "description": "Crime statistics",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://fbi.gov"
+  },
+  {
+    "name": "IRS",
+    "description": "Tax data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://irs.gov"
+  },
+  {
+    "name": "Social Security",
+    "description": "Social security data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://ssa.gov"
+  },
+  {
+    "name": "Veterans Affairs",
+    "description": "VA data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://va.gov"
+  },
+  {
+    "name": "IMF",
+    "description": "International monetary data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://imf.org"
+  },
+  {
+    "name": "OECD",
+    "description": "Economic data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://oecd.org"
+  },
+  {
+    "name": "Eurostat",
+    "description": "European statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ec.europa.eu/eurostat"
+  },
+  {
+    "name": "ONS UK",
+    "description": "UK national statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ons.gov.uk"
+  },
+  {
+    "name": "INSEE France",
+    "description": "French statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://insee.fr"
+  },
+  {
+    "name": "Destatis Germany",
+    "description": "German statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://destatis.de"
+  },
+  {
+    "name": "Statistics Sweden",
+    "description": "Swedish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://scb.se"
+  },
+  {
+    "name": "Statistics Norway",
+    "description": "Norwegian statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ssb.no"
+  },
+  {
+    "name": "Statistics Denmark",
+    "description": "Danish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://dst.dk"
+  },
+  {
+    "name": "Statistics Finland",
+    "description": "Finnish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stat.fi"
+  },
+  {
+    "name": "CBR Russia",
+    "description": "Central Bank of Russia",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://cbr.ru"
+  },
+  {
+    "name": "NBS China",
+    "description": "National Bureau of Statistics China",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stats.gov.cn"
+  },
+  {
+    "name": "Japan Statistics",
+    "description": "Japanese statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stat.go.jp"
+  },
+  {
+    "name": "Korean Statistics",
+    "description": "Korean statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://kostat.go.kr"
+  },
+  {
+    "name": "Australian Bureau of Statistics",
+    "description": "Australian statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://abs.gov.au"
+  },
+  {
+    "name": "Kayak",
+    "description": "Travel search",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://kayak.com"
+  },
+  {
+    "name": "Expedia",
+    "description": "Travel booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://expedia.com"
+  },
+  {
+    "name": "Hotels.com",
+    "description": "Hotel booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://hotels.com"
+  },
+  {
+    "name": "Airbnb",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://airbnb.com"
+  },
+  {
+    "name": "VRBO",
+    "description": "Vacation rentals",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://vrbo.com"
+  },
+  {
+    "name": "Yelp Fusion",
+    "description": "Local business reviews",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://yelp.com"
+  },
+  {
+    "name": "Google Flights",
+    "description": "Flight search",
+    "category": "Travel",
+    "authType": "oauth",
+    "baseUrl": "https://google.com/flights"
+  },
+  {
+    "name": "Kiwi.com",
+    "description": "Flight booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://kiwi.com"
+  },
+  {
+    "name": "Rome2Rio",
+    "description": "Travel routing",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://rome2rio.com"
+  },
+  {
+    "name": "Sabre",
+    "description": "Travel distribution",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sabre.com"
+  },
+  {
+    "name": "Travelport",
+    "description": "Travel commerce",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://travelport.com"
+  },
+  {
+    "name": "Grab",
+    "description": "Ride-hailing Asia",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://grab.com"
+  },
+  {
+    "name": "Bolt",
+    "description": "Ride-hailing Europe",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bolt.eu"
+  },
+  {
+    "name": "Ola",
+    "description": "Ride-hailing India",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://olacabs.com"
+  },
+  {
+    "name": "DiDi",
+    "description": "Ride-hailing China",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://didiglobal.com"
+  },
+  {
+    "name": "Lime",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://lime.com"
+  },
+  {
+    "name": "Bird",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bird.co"
+  },
+  {
+    "name": "Spin",
+    "description": "Micromobility",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://spin.app"
+  },
+  {
+    "name": "Voi",
+    "description": "Electric scooters",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://voiscooters.com"
+  },
+  {
+    "name": "Tier",
+    "description": "Micromobility",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://tier.app"
+  },
+  {
+    "name": "Nextbike",
+    "description": "Bike sharing",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://nextbike.de"
+  },
+  {
+    "name": "Citybikes",
+    "description": "Bike sharing API",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://citybik.es"
+  },
+  {
+    "name": "FlightAware",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://flightaware.com"
+  },
+  {
+    "name": "FlightRadar24",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://flightradar24.com"
+  },
+  {
+    "name": "OpenSky",
+    "description": "Flight tracking",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://opensky-network.org"
+  },
+  {
+    "name": "Aviation Edge",
+    "description": "Aviation data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://aviationedge.com"
+  },
+  {
+    "name": "AeroDataBox",
+    "description": "Aviation data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://aerodatabox.com"
+  },
+  {
+    "name": "Transitland",
+    "description": "Transit data",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://transit.land"
+  },
+  {
+    "name": "OpenTripPlanner",
+    "description": "Trip planning",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://opentripplanner.org"
+  },
+  {
+    "name": "OSRM",
+    "description": "Routing engine",
+    "category": "Travel",
+    "authType": "none",
+    "baseUrl": "https://osrm.org"
+  },
+  {
+    "name": "Graphhopper",
+    "description": "Route optimization",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://graphhopper.com"
+  },
+  {
+    "name": "Mapbox Directions",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://mapbox.com"
+  },
+  {
+    "name": "Here Routing",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://here.com"
+  },
+  {
+    "name": "TomTom Routing",
+    "description": "Navigation",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://tomtom.com"
+  },
+  {
+    "name": "Waze",
+    "description": "Traffic data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://waze.com"
+  },
+  {
+    "name": "Inrix",
+    "description": "Traffic data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://inrix.com"
+  },
+  {
+    "name": "National Rail UK",
+    "description": "UK train data",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://nationalrail.co.uk"
+  },
+  {
+    "name": "Deutsche Bahn",
+    "description": "German trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://bahn.de"
+  },
+  {
+    "name": "SNCF",
+    "description": "French trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sncf.com"
+  },
+  {
+    "name": "Amtrak",
+    "description": "US trains",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://amtrak.com"
+  },
+  {
+    "name": "Trainline",
+    "description": "Train booking",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://trainline.com"
+  },
+  {
+    "name": "OpenTable",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://opentable.com"
+  },
+  {
+    "name": "Resy",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://resy.com"
+  },
+  {
+    "name": "Tock",
+    "description": "Restaurant reservations",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://exploretock.com"
+  },
+  {
+    "name": "SevenRooms",
+    "description": "Restaurant management",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://sevenrooms.com"
+  },
+  {
+    "name": "Toast",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://toasttab.com"
+  },
+  {
+    "name": "Square for Restaurants",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://squareup.com"
+  },
+  {
+    "name": "Lightspeed Restaurant",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://lightspeedhq.com"
+  },
+  {
+    "name": "Clover",
+    "description": "Restaurant POS",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://clover.com"
+  },
+  {
+    "name": "DoorDash",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://doordash.com"
+  },
+  {
+    "name": "Uber Eats",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "oauth",
+    "baseUrl": "https://ubereats.com"
+  },
+  {
+    "name": "Grubhub",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://grubhub.com"
+  },
+  {
+    "name": "Postmates",
+    "description": "Delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://postmates.com"
+  },
+  {
+    "name": "Deliveroo",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://deliveroo.com"
+  },
+  {
+    "name": "Just Eat",
+    "description": "Food delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://justeat.com"
+  },
+  {
+    "name": "Glovo",
+    "description": "Delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://glovoapp.com"
+  },
+  {
+    "name": "Rappi",
+    "description": "Delivery Latin America",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://rappi.com"
+  },
+  {
+    "name": "iFood",
+    "description": "Food delivery Brazil",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://ifood.com.br"
+  },
+  {
+    "name": "Menulog",
+    "description": "Food delivery Australia",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://menulog.com.au"
+  },
+  {
+    "name": "Swiggy",
+    "description": "Food delivery India",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://swiggy.com"
+  },
+  {
+    "name": "Zomato Delivery",
+    "description": "Food delivery India",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://zomato.com"
+  },
+  {
+    "name": "Meituan",
+    "description": "Food delivery China",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://meituan.com"
+  },
+  {
+    "name": "Ele.me",
+    "description": "Food delivery China",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://ele.me"
+  },
+  {
+    "name": "Instacart",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://instacart.com"
+  },
+  {
+    "name": "Shipt",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://shipt.com"
+  },
+  {
+    "name": "Gopuff",
+    "description": "Instant delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://gopuff.com"
+  },
+  {
+    "name": "Gorillas",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://gorillas.io"
+  },
+  {
+    "name": "Getir",
+    "description": "Quick delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://getir.com"
+  },
+  {
+    "name": "Flink",
+    "description": "Grocery delivery",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://goflink.com"
+  },
+  {
+    "name": "FatSecret",
+    "description": "Nutrition data",
+    "category": "Food",
+    "authType": "apiKey",
+    "baseUrl": "https://fatsecret.com"
+  },
+  {
+    "name": "Tesla",
+    "description": "Tesla vehicle API",
+    "category": "Automotive",
+    "authType": "oauth",
+    "baseUrl": "https://tesla.com"
+  },
+  {
+    "name": "Ford",
+    "description": "Ford vehicle services",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://ford.com"
+  },
+  {
+    "name": "GM",
+    "description": "General Motors API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://gm.com"
+  },
+  {
+    "name": "BMW",
+    "description": "BMW Connected Drive",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://bmw.com"
+  },
+  {
+    "name": "Mercedes-Benz",
+    "description": "Mercedes API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://mercedes-benz.com"
+  },
+  {
+    "name": "Audi",
+    "description": "Audi Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://audi.com"
+  },
+  {
+    "name": "Volkswagen",
+    "description": "VW API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://volkswagen.com"
+  },
+  {
+    "name": "Porsche",
+    "description": "Porsche Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://porsche.com"
+  },
+  {
+    "name": "Volvo",
+    "description": "Volvo On Call",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://volvo.com"
+  },
+  {
+    "name": "Toyota",
+    "description": "Toyota Connected",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://toyota.com"
+  },
+  {
+    "name": "Honda",
+    "description": "HondaLink",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://honda.com"
+  },
+  {
+    "name": "Nissan",
+    "description": "NissanConnect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://nissan.com"
+  },
+  {
+    "name": "Hyundai",
+    "description": "Hyundai BlueLink",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://hyundai.com"
+  },
+  {
+    "name": "Kia",
+    "description": "Kia Connect",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://kia.com"
+  },
+  {
+    "name": "Rivian",
+    "description": "Rivian API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://rivian.com"
+  },
+  {
+    "name": "Lucid",
+    "description": "Lucid Motors API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://lucidmotors.com"
+  },
+  {
+    "name": "Polestar",
+    "description": "Polestar API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://polestar.com"
+  },
+  {
+    "name": "Smartcar",
+    "description": "Connected car API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://smartcar.com"
+  },
+  {
+    "name": "Otonomo",
+    "description": "Car data platform",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://otonomo.io"
+  },
+  {
+    "name": "High Mobility",
+    "description": "Car data API",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://high-mobility.com"
+  },
+  {
+    "name": "CARFAX",
+    "description": "Vehicle history",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://carfax.com"
+  },
+  {
+    "name": "AutoCheck",
+    "description": "Vehicle history",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://autocheck.com"
+  },
+  {
+    "name": "KBB",
+    "description": "Kelley Blue Book",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://kbb.com"
+  },
+  {
+    "name": "VinAudit",
+    "description": "VIN lookup",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://vinaudit.com"
+  },
+  {
+    "name": "CarMD",
+    "description": "Vehicle diagnostics",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://carmd.com"
+  },
+  {
+    "name": "Geotab",
+    "description": "Fleet telematics",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://geotab.com"
+  },
+  {
+    "name": "Samsara",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://samsara.com"
+  },
+  {
+    "name": "Verizon Connect",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://verizonconnect.com"
+  },
+  {
+    "name": "KeepTruckin",
+    "description": "Fleet management",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://keeptruckin.com"
+  },
+  {
+    "name": "ChargePoint",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://chargepoint.com"
+  },
+  {
+    "name": "EVgo",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://evgo.com"
+  },
+  {
+    "name": "Electrify America",
+    "description": "EV charging",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://electrifyamerica.com"
+  },
+  {
+    "name": "IONITY",
+    "description": "EV charging Europe",
+    "category": "Automotive",
+    "authType": "apiKey",
+    "baseUrl": "https://ionity.eu"
+  },
+  {
+    "name": "Lemonade",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://lemonade.com"
+  },
+  {
+    "name": "Root",
+    "description": "Auto insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://root.com"
+  },
+  {
+    "name": "Hippo",
+    "description": "Home insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://hippo.com"
+  },
+  {
+    "name": "Metromile",
+    "description": "Pay-per-mile insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://metromile.com"
+  },
+  {
+    "name": "Next Insurance",
+    "description": "Small business insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://nextinsurance.com"
+  },
+  {
+    "name": "Bold Penguin",
+    "description": "Commercial insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://boldpenguin.com"
+  },
+  {
+    "name": "Newfront",
+    "description": "Insurance broker",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://newfront.com"
+  },
+  {
+    "name": "Vouch",
+    "description": "Startup insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://vouch.us"
+  },
+  {
+    "name": "Embroker",
+    "description": "Business insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://embroker.com"
+  },
+  {
+    "name": "Pie Insurance",
+    "description": "Workers comp",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://pieinsurance.com"
+  },
+  {
+    "name": "Coalition",
+    "description": "Cyber insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://coalitioninc.com"
+  },
+  {
+    "name": "At-Bay",
+    "description": "Cyber insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://at-bay.com"
+  },
+  {
+    "name": "Corvus",
+    "description": "Commercial insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://corvusinsurance.com"
+  },
+  {
+    "name": "Clearcover",
+    "description": "Car insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://clearcover.com"
+  },
+  {
+    "name": "Jerry",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://getjerry.com"
+  },
+  {
+    "name": "Policygenius",
+    "description": "Insurance marketplace",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://policygenius.com"
+  },
+  {
+    "name": "Insurify",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://insurify.com"
+  },
+  {
+    "name": "Gabi",
+    "description": "Insurance comparison",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://gabi.com"
+  },
+  {
+    "name": "Cover Genius",
+    "description": "Insurance infrastructure",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://covergenius.com"
+  },
+  {
+    "name": "Sure",
+    "description": "Embedded insurance",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://sureapp.com"
+  },
+  {
+    "name": "Boost",
+    "description": "Insurance infrastructure",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://boostinsurance.com"
+  },
+  {
+    "name": "Socotra",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://socotra.com"
+  },
+  {
+    "name": "Majesco",
+    "description": "Insurance software",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://majesco.com"
+  },
+  {
+    "name": "Guidewire",
+    "description": "Insurance platform",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://guidewire.com"
+  },
+  {
+    "name": "Duck Creek",
+    "description": "Insurance solutions",
+    "category": "Insurance",
+    "authType": "apiKey",
+    "baseUrl": "https://duckcreek.com"
+  },
+  {
+    "name": "Procore",
+    "description": "Construction management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://procore.com"
+  },
+  {
+    "name": "PlanGrid",
+    "description": "Construction drawings",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://plangrid.com"
+  },
+  {
+    "name": "Buildertrend",
+    "description": "Construction software",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://buildertrend.com"
+  },
+  {
+    "name": "CoConstruct",
+    "description": "Construction management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://coconstruct.com"
+  },
+  {
+    "name": "Houzz",
+    "description": "Home design",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://houzz.com"
+  },
+  {
+    "name": "BuildZoom",
+    "description": "Contractor data",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://buildzoom.com"
+  },
+  {
+    "name": "Autodesk BIM 360",
+    "description": "BIM platform",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://autodesk.com"
+  },
+  {
+    "name": "Trimble Connect",
+    "description": "Construction collaboration",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://trimble.com"
+  },
+  {
+    "name": "Bluebeam",
+    "description": "PDF markup",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://bluebeam.com"
+  },
+  {
+    "name": "eSUB",
+    "description": "Subcontractor management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://esub.com"
+  },
+  {
+    "name": "Sage 300",
+    "description": "Construction accounting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://sage.com"
+  },
+  {
+    "name": "Viewpoint",
+    "description": "Construction software",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://viewpoint.com"
+  },
+  {
+    "name": "Jonas Construction",
+    "description": "ERP for construction",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://jonas-construction.com"
+  },
+  {
+    "name": "Foundation Software",
+    "description": "Construction accounting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://foundationsoft.com"
+  },
+  {
+    "name": "CMiC",
+    "description": "Construction ERP",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://cmic.ca"
+  },
+  {
+    "name": "Fieldwire",
+    "description": "Field management",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://fieldwire.com"
+  },
+  {
+    "name": "Raken",
+    "description": "Daily reporting",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://rakenapp.com"
+  },
+  {
+    "name": "busybusy",
+    "description": "Time tracking",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://busybusy.com"
+  },
+  {
+    "name": "Bridgit",
+    "description": "Workforce planning",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://gobridgit.com"
+  },
+  {
+    "name": "OpenSpace",
+    "description": "360 photo documentation",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://openspace.ai"
+  },
+  {
+    "name": "Matterport",
+    "description": "3D capture",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://matterport.com"
+  },
+  {
+    "name": "DroneDeploy",
+    "description": "Drone mapping",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://dronedeploy.com"
+  },
+  {
+    "name": "Skydio",
+    "description": "Autonomous drones",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://skydio.com"
+  },
+  {
+    "name": "StructionSite",
+    "description": "Construction documentation",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://structionsite.com"
+  },
+  {
+    "name": "Join.Build",
+    "description": "Construction coordination",
+    "category": "Construction",
+    "authType": "apiKey",
+    "baseUrl": "https://join.build"
+  },
+  {
+    "name": "Climate FieldView",
+    "description": "Digital farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://climate.com"
+  },
+  {
+    "name": "John Deere",
+    "description": "Agricultural equipment",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://deere.com"
+  },
+  {
+    "name": "Trimble Agriculture",
+    "description": "Precision ag",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agriculture.trimble.com"
+  },
+  {
+    "name": "AGCO",
+    "description": "Farm equipment",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agcocorp.com"
+  },
+  {
+    "name": "CNH Industrial",
+    "description": "Agricultural machinery",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cnhindustrial.com"
+  },
+  {
+    "name": "Farmers Edge",
+    "description": "Digital farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://farmersedge.ca"
+  },
+  {
+    "name": "Granular",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://granular.ag"
+  },
+  {
+    "name": "FarmLogs",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://farmlogs.com"
+  },
+  {
+    "name": "Conservis",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://conservis.ag"
+  },
+  {
+    "name": "Agrivi",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agrivi.com"
+  },
+  {
+    "name": "Cropio",
+    "description": "Satellite monitoring",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cropio.com"
+  },
+  {
+    "name": "OneSoil",
+    "description": "Precision farming",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://onesoil.ai"
+  },
+  {
+    "name": "Arable",
+    "description": "Agricultural IoT",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://arable.com"
+  },
+  {
+    "name": "Davis Instruments",
+    "description": "Weather stations",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://davisinstruments.com"
+  },
+  {
+    "name": "Semios",
+    "description": "Pest management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://semios.com"
+  },
+  {
+    "name": "Agworld",
+    "description": "Farm management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agworld.com"
+  },
+  {
+    "name": "AgriWebb",
+    "description": "Livestock management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agriwebb.com"
+  },
+  {
+    "name": "CattleMax",
+    "description": "Cattle management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://cattlemax.com"
+  },
+  {
+    "name": "Feedlot Manager",
+    "description": "Feedlot management",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://feedlotmanager.com"
+  },
+  {
+    "name": "USDA NASS",
+    "description": "Agricultural statistics",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://nass.usda.gov"
+  },
+  {
+    "name": "FAO",
+    "description": "Food and agriculture data",
+    "category": "Agriculture",
+    "authType": "none",
+    "baseUrl": "https://fao.org"
+  },
+  {
+    "name": "Open Ag Data",
+    "description": "Agricultural open data",
+    "category": "Agriculture",
+    "authType": "none",
+    "baseUrl": "https://openag.io"
+  },
+  {
+    "name": "Gro Intelligence",
+    "description": "Agricultural data",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://gro-intelligence.com"
+  },
+  {
+    "name": "Agronod",
+    "description": "Agricultural API",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://agronod.com"
+  },
+  {
+    "name": "Sentera",
+    "description": "Drone analytics",
+    "category": "Agriculture",
+    "authType": "apiKey",
+    "baseUrl": "https://sentera.com"
+  },
+  {
+    "name": "Utility API",
+    "description": "Utility data access",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://utilityapi.com"
+  },
+  {
+    "name": "Arcadia",
+    "description": "Utility data platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://arcadia.com"
+  },
+  {
+    "name": "Pelm",
+    "description": "Utility data access",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://pelm.com"
+  },
+  {
+    "name": "Urjanet",
+    "description": "Utility bill data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://urjanet.com"
+  },
+  {
+    "name": "WattTime",
+    "description": "Electricity emissions",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://watttime.org"
+  },
+  {
+    "name": "Electricity Maps",
+    "description": "Carbon intensity",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://electricitymaps.com"
+  },
+  {
+    "name": "Open Power System Data",
+    "description": "Power system data",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://open-power-system-data.org"
+  },
+  {
+    "name": "ENTSO-E",
+    "description": "European power data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://entsoe.eu"
+  },
+  {
+    "name": "EIA",
+    "description": "US Energy Information",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://eia.gov"
+  },
+  {
+    "name": "IEA",
+    "description": "International Energy Agency",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://iea.org"
+  },
+  {
+    "name": "IRENA",
+    "description": "Renewable energy",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://irena.org"
+  },
+  {
+    "name": "NREL",
+    "description": "Renewable energy data",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://nrel.gov"
+  },
+  {
+    "name": "SolarEdge",
+    "description": "Solar monitoring",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://solaredge.com"
+  },
+  {
+    "name": "Enphase",
+    "description": "Solar systems",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://enphase.com"
+  },
+  {
+    "name": "SunPower",
+    "description": "Solar energy",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://sunpower.com"
+  },
+  {
+    "name": "Tesla Energy",
+    "description": "Energy products",
+    "category": "Energy",
+    "authType": "oauth",
+    "baseUrl": "https://tesla.com"
+  },
+  {
+    "name": "Sense",
+    "description": "Home energy monitor",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://sense.com"
+  },
+  {
+    "name": "Emporia",
+    "description": "Energy monitoring",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://emporiaenergy.com"
+  },
+  {
+    "name": "Honeywell Home",
+    "description": "Smart thermostats",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://honeywellhome.com"
+  },
+  {
+    "name": "tado",
+    "description": "Smart climate",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://tado.com"
+  },
+  {
+    "name": "Netatmo",
+    "description": "Smart home devices",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://netatmo.com"
+  },
+  {
+    "name": "EnergyStar",
+    "description": "Energy efficiency",
+    "category": "Energy",
+    "authType": "none",
+    "baseUrl": "https://energystar.gov"
+  },
+  {
+    "name": "GridX",
+    "description": "Smart grid platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://gridx.de"
+  },
+  {
+    "name": "AutoGrid",
+    "description": "Energy platform",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://auto-grid.com"
+  },
+  {
+    "name": "Stem",
+    "description": "Energy storage",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://stem.com"
+  },
+  {
+    "name": "Fluence",
+    "description": "Energy storage",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://fluenceenergy.com"
+  },
+  {
+    "name": "Form Energy",
+    "description": "Iron-air batteries",
+    "category": "Energy",
+    "authType": "apiKey",
+    "baseUrl": "https://formenergy.com"
+  },
+  {
+    "name": "StubHub",
+    "description": "Ticket resale",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://stubhub.com"
+  },
+  {
+    "name": "Vivid Seats",
+    "description": "Ticket marketplace",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://vividseats.com"
+  },
+  {
+    "name": "AXS",
+    "description": "Event tickets",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://axs.com"
+  },
+  {
+    "name": "Dice",
+    "description": "Event discovery",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://dice.fm"
+  },
+  {
+    "name": "Resident Advisor",
+    "description": "Electronic music events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://ra.co"
+  },
+  {
+    "name": "Cvent",
+    "description": "Event management",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://cvent.com"
+  },
+  {
+    "name": "Airmeet",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://airmeet.com"
+  },
+  {
+    "name": "Run The World",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://runtheworld.today"
+  },
+  {
+    "name": "Whova",
+    "description": "Event app",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://whova.com"
+  },
+  {
+    "name": "Swapcard",
+    "description": "Event app",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://swapcard.com"
+  },
+  {
+    "name": "Grip",
+    "description": "Event networking",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://grip.events"
+  },
+  {
+    "name": "Brella",
+    "description": "Event networking",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://brella.io"
+  },
+  {
+    "name": "Sched",
+    "description": "Event scheduling",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://sched.com"
+  },
+  {
+    "name": "Accelevents",
+    "description": "Event platform",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://accelevents.com"
+  },
+  {
+    "name": "vFairs",
+    "description": "Virtual events",
+    "category": "Events",
+    "authType": "apiKey",
+    "baseUrl": "https://vfairs.com"
+  },
+  {
+    "name": "Charity Navigator",
+    "description": "Charity ratings",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://charitynavigator.org"
+  },
+  {
+    "name": "GuideStar",
+    "description": "Nonprofit data",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://guidestar.org"
+  },
+  {
+    "name": "GlobalGiving",
+    "description": "Crowdfunding for nonprofits",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://globalgiving.org"
+  },
+  {
+    "name": "GoFundMe Charity",
+    "description": "Charity fundraising",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://gofundme.com"
+  },
+  {
+    "name": "Network for Good",
+    "description": "Donation processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://networkforgood.com"
+  },
+  {
+    "name": "Bloomerang",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://bloomerang.co"
+  },
+  {
+    "name": "Blackbaud",
+    "description": "Nonprofit software",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://blackbaud.com"
+  },
+  {
+    "name": "Little Green Light",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://littlegreenlight.com"
+  },
+  {
+    "name": "Salesforce Nonprofit",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://salesforce.org"
+  },
+  {
+    "name": "Kindful",
+    "description": "Donor management",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://kindful.com"
+  },
+  {
+    "name": "NeonCRM",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://neonone.com"
+  },
+  {
+    "name": "Virtuous",
+    "description": "Nonprofit CRM",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://virtuous.org"
+  },
+  {
+    "name": "Classy",
+    "description": "Fundraising platform",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://classy.org"
+  },
+  {
+    "name": "OneCause",
+    "description": "Fundraising events",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://onecause.com"
+  },
+  {
+    "name": "GiveWP",
+    "description": "WordPress donations",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://givewp.com"
+  },
+  {
+    "name": "Donorbox",
+    "description": "Online donations",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://donorbox.org"
+  },
+  {
+    "name": "Stripe for Nonprofits",
+    "description": "Payment processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://stripe.com"
+  },
+  {
+    "name": "PayPal Giving Fund",
+    "description": "Donation processing",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://paypal.com"
+  },
+  {
+    "name": "Benevity",
+    "description": "Corporate giving",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://benevity.com"
+  },
+  {
+    "name": "YourCause",
+    "description": "Employee giving",
+    "category": "Non-Profit",
+    "authType": "apiKey",
+    "baseUrl": "https://yourcause.com"
+  },
+  {
+    "name": "ESA",
+    "description": "European Space Agency",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://esa.int"
+  },
+  {
+    "name": "Open Notify",
+    "description": "ISS location",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://open-notify.org"
+  },
+  {
+    "name": "N2YO",
+    "description": "Satellite tracking",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://n2yo.com"
+  },
+  {
+    "name": "Launch Library",
+    "description": "Space launches",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://thespacedevs.com"
+  },
+  {
+    "name": "Ocean Biogeographic",
+    "description": "Marine biodiversity",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://obis.org"
+  },
+  {
+    "name": "World Flora Online",
+    "description": "Plant data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://worldfloraonline.org"
+  },
+  {
+    "name": "NCBI",
+    "description": "Genomic data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ncbi.nlm.nih.gov"
+  },
+  {
+    "name": "Ensembl",
+    "description": "Genome browser",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ensembl.org"
+  },
+  {
+    "name": "PDB",
+    "description": "Protein structures",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://rcsb.org"
+  },
+  {
+    "name": "ChEBI",
+    "description": "Chemical entities",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://ebi.ac.uk/chebi"
+  },
+  {
+    "name": "PubChem",
+    "description": "Chemical data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://pubchem.ncbi.nlm.nih.gov"
+  },
+  {
+    "name": "Semantic Scholar",
+    "description": "Research papers",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://semanticscholar.org"
+  },
+  {
+    "name": "CrossRef",
+    "description": "Research metadata",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://crossref.org"
+  },
+  {
+    "name": "OpenCitations",
+    "description": "Citation data",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://opencitations.net"
+  },
+  {
+    "name": "ORCID",
+    "description": "Researcher identifiers",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://orcid.org"
+  },
+  {
+    "name": "Dimensions",
+    "description": "Research data",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://dimensions.ai"
+  },
+  {
+    "name": "Altmetric",
+    "description": "Research impact",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://altmetric.com"
+  },
+  {
+    "name": "NOAA Climate",
+    "description": "Climate data",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://ncdc.noaa.gov"
+  },
+  {
+    "name": "Copernicus",
+    "description": "Earth observation",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://copernicus.eu"
+  },
+  {
+    "name": "Sentinel Hub",
+    "description": "Satellite imagery",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://sentinel-hub.com"
+  },
+  {
+    "name": "Planet Labs",
+    "description": "Earth imaging",
+    "category": "Science",
+    "authType": "apiKey",
+    "baseUrl": "https://planet.com"
+  },
+  {
+    "name": "OpenAI Assistants",
+    "description": "AI assistant threads",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://platform.openai.com"
+  },
+  {
+    "name": "Claude Messages",
+    "description": "Claude conversation API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://anthropic.com"
+  },
+  {
+    "name": "Gemini Pro",
+    "description": "Google's advanced AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ai.google.dev"
+  },
+  {
+    "name": "Llama.cpp",
+    "description": "Local LLM inference",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://github.com/ggerganov/llama.cpp"
+  },
+  {
+    "name": "Ollama",
+    "description": "Run LLMs locally",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://ollama.ai"
+  },
+  {
+    "name": "LocalAI",
+    "description": "Self-hosted AI",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://localai.io"
+  },
+  {
+    "name": "LM Studio",
+    "description": "Local LLM platform",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://lmstudio.ai"
+  },
+  {
+    "name": "Jan AI",
+    "description": "Local AI assistant",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://jan.ai"
+  },
+  {
+    "name": "Poe",
+    "description": "AI chatbot platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://poe.com"
+  },
+  {
+    "name": "Character.AI",
+    "description": "AI characters",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://character.ai"
+  },
+  {
+    "name": "Inflection Pi",
+    "description": "Personal AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://inflection.ai"
+  },
+  {
+    "name": "Cohere Embed",
+    "description": "Text embeddings",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cohere.ai"
+  },
+  {
+    "name": "Voyage AI",
+    "description": "Embeddings API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://voyageai.com"
+  },
+  {
+    "name": "Jina Embeddings",
+    "description": "Neural search",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://jina.ai"
+  },
+  {
+    "name": "Nomic Embed",
+    "description": "Open embeddings",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://nomic.ai"
+  },
+  {
+    "name": "LangChain",
+    "description": "LLM framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://langchain.com"
+  },
+  {
+    "name": "LlamaIndex",
+    "description": "Data framework for LLMs",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://llamaindex.ai"
+  },
+  {
+    "name": "Haystack",
+    "description": "NLP framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://haystack.deepset.ai"
+  },
+  {
+    "name": "Semantic Kernel",
+    "description": "AI orchestration",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://github.com/microsoft/semantic-kernel"
+  },
+  {
+    "name": "AutoGen",
+    "description": "Multi-agent AI",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://microsoft.github.io/autogen"
+  },
+  {
+    "name": "CrewAI",
+    "description": "AI agent framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://crewai.com"
+  },
+  {
+    "name": "Fixie",
+    "description": "AI agents",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://fixie.ai"
+  },
+  {
+    "name": "Dust",
+    "description": "AI workflows",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://dust.tt"
+  },
+  {
+    "name": "Vellum",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://vellum.ai"
+  },
+  {
+    "name": "Promptflow",
+    "description": "LLM orchestration",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://microsoft.github.io/promptflow"
+  },
+  {
+    "name": "Langfuse",
+    "description": "LLM observability",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://langfuse.com"
+  },
+  {
+    "name": "Helicone",
+    "description": "LLM observability",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://helicone.ai"
+  },
+  {
+    "name": "Braintrust",
+    "description": "LLM evaluation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://braintrustdata.com"
+  },
+  {
+    "name": "Humanloop",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://humanloop.com"
+  },
+  {
+    "name": "Parea AI",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://parea.ai"
+  },
+  {
+    "name": "Suno",
+    "description": "AI music generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://suno.ai"
+  },
+  {
+    "name": "Udio",
+    "description": "AI music creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://udio.com"
+  },
+  {
+    "name": "Mubert",
+    "description": "AI music",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://mubert.com"
+  },
+  {
+    "name": "AIVA",
+    "description": "AI composer",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aiva.ai"
+  },
+  {
+    "name": "Soundraw",
+    "description": "AI music generator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://soundraw.io"
+  },
+  {
+    "name": "Beatoven",
+    "description": "AI music for video",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://beatoven.ai"
+  },
+  {
+    "name": "HeyGen",
+    "description": "AI video avatars",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://heygen.com"
+  },
+  {
+    "name": "Synthesia",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://synthesia.io"
+  },
+  {
+    "name": "D-ID",
+    "description": "AI video creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://d-id.com"
+  },
+  {
+    "name": "Colossyan",
+    "description": "AI video maker",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://colossyan.com"
+  },
+  {
+    "name": "Elai",
+    "description": "AI video generator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://elai.io"
+  },
+  {
+    "name": "Hour One",
+    "description": "AI video creator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://hourone.ai"
+  },
+  {
+    "name": "Pika Labs",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://pika.art"
+  },
+  {
+    "name": "Runway Gen",
+    "description": "AI video tools",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://runwayml.com"
+  },
+  {
+    "name": "Kaiber",
+    "description": "AI video creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://kaiber.ai"
+  },
+  {
+    "name": "Luma Dream Machine",
+    "description": "AI video",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lumalabs.ai"
+  },
+  {
+    "name": "Kling AI",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://kling.ai"
+  },
+  {
+    "name": "Playground AI",
+    "description": "AI image editor",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://playground.com"
+  },
+  {
+    "name": "Swish",
+    "description": "Swedish mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://swish.nu"
+  },
+  {
+    "name": "Klarna SE",
+    "description": "Buy now pay later Sweden",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://klarna.com"
+  },
+  {
+    "name": "Billogram",
+    "description": "Swedish invoicing",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://billogram.com"
+  },
+  {
+    "name": "Fortnox",
+    "description": "Swedish business software",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://fortnox.se"
+  },
+  {
+    "name": "Visma",
+    "description": "Nordic business software",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://visma.com"
+  },
+  {
+    "name": "Bokio",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://bokio.se"
+  },
+  {
+    "name": "Specter",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://specter.se"
+  },
+  {
+    "name": "PE Accounting",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://accounting.pe"
+  },
+  {
+    "name": "SCB",
+    "description": "Statistics Sweden",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://scb.se"
+  },
+  {
+    "name": "Bolagsverket",
+    "description": "Swedish company registry",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://bolagsverket.se"
+  },
+  {
+    "name": "Skatteverket",
+    "description": "Swedish tax authority",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://skatteverket.se"
+  },
+  {
+    "name": "Trafikverket",
+    "description": "Swedish transport admin",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://trafikverket.se"
+  },
+  {
+    "name": "SL",
+    "description": "Stockholm public transport",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sl.se"
+  },
+  {
+    "name": "Västtrafik",
+    "description": "Gothenburg transit",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://vasttrafik.se"
+  },
+  {
+    "name": "Skånetrafiken",
+    "description": "Skåne transit",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://skanetrafiken.se"
+  },
+  {
+    "name": "SMHI",
+    "description": "Swedish meteorology",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://smhi.se"
+  },
+  {
+    "name": "Postnord SE",
+    "description": "Swedish postal",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://postnord.se"
+  },
+  {
+    "name": "DHL Sweden",
+    "description": "DHL Sweden",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://dhl.se"
+  },
+  {
+    "name": "Bring",
+    "description": "Nordic logistics",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://bring.se"
+  },
+  {
+    "name": "MobilePay",
+    "description": "Danish mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://mobilepay.dk"
+  },
+  {
+    "name": "Vipps",
+    "description": "Norwegian mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://vipps.no"
+  },
+  {
+    "name": "Norwegian Bank ID",
+    "description": "Norwegian identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://bankid.no"
+  },
+  {
+    "name": "Swedish BankID",
+    "description": "Swedish identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://bankid.com"
+  },
+  {
+    "name": "Danish MitID",
+    "description": "Danish identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://mitid.dk"
+  },
+  {
+    "name": "Finnish Banking",
+    "description": "Finnish bank auth",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tupas.fi"
+  },
+  {
+    "name": "Digipost",
+    "description": "Norwegian digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://digipost.no"
+  },
+  {
+    "name": "e-Boks",
+    "description": "Danish digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://e-boks.dk"
+  },
+  {
+    "name": "Kivra",
+    "description": "Swedish digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://kivra.se"
+  },
+  {
+    "name": "Nordea Open Banking",
+    "description": "Nordic banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://nordea.com"
+  },
+  {
+    "name": "SEB Open Banking",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://seb.se"
+  },
+  {
+    "name": "Handelsbanken API",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://handelsbanken.se"
+  },
+  {
+    "name": "Swedbank Open",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://swedbank.se"
+  },
+  {
+    "name": "Danske Bank API",
+    "description": "Danish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://danskebank.dk"
+  },
+  {
+    "name": "DNB Open",
+    "description": "Norwegian banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://dnb.no"
+  },
+  {
+    "name": "Prisjakt",
+    "description": "Swedish price comparison",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://prisjakt.nu"
+  },
+  {
+    "name": "Pricerunner",
+    "description": "Nordic price comparison",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://pricerunner.com"
+  },
+  {
+    "name": "CDON",
+    "description": "Nordic marketplace",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://cdon.com"
+  },
+  {
+    "name": "Komplett",
+    "description": "Nordic electronics",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://komplett.se"
+  },
+  {
+    "name": "NetOnNet",
+    "description": "Swedish electronics",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://netonnet.se"
+  },
+  {
+    "name": "Hemnet",
+    "description": "Swedish property listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://hemnet.se"
+  },
+  {
+    "name": "Pulumi",
+    "description": "Infrastructure as code",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pulumi.com"
+  },
+  {
+    "name": "Terraform Cloud",
+    "description": "Infrastructure management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://terraform.io"
+  },
+  {
+    "name": "Ansible Tower",
+    "description": "IT automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://ansible.com"
+  },
+  {
+    "name": "Chef",
+    "description": "Infrastructure automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://chef.io"
+  },
+  {
+    "name": "Puppet",
+    "description": "IT automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://puppet.com"
+  },
+  {
+    "name": "SaltStack",
+    "description": "Configuration management",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://saltproject.io"
+  },
+  {
+    "name": "Spacelift",
+    "description": "Infrastructure management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://spacelift.io"
+  },
+  {
+    "name": "env0",
+    "description": "IaC automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://env0.com"
+  },
+  {
+    "name": "Scalr",
+    "description": "Terraform management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://scalr.com"
+  },
+  {
+    "name": "Atlantis",
+    "description": "Terraform PR automation",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://runatlantis.io"
+  },
+  {
+    "name": "Argo CD",
+    "description": "GitOps for Kubernetes",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://argoproj.github.io"
+  },
+  {
+    "name": "Flux",
+    "description": "GitOps toolkit",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://fluxcd.io"
+  },
+  {
+    "name": "Rancher",
+    "description": "Kubernetes management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://rancher.com"
+  },
+  {
+    "name": "Portainer",
+    "description": "Container management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://portainer.io"
+  },
+  {
+    "name": "Lens",
+    "description": "Kubernetes IDE",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://k8slens.dev"
+  },
+  {
+    "name": "Komodor",
+    "description": "Kubernetes troubleshooting",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://komodor.com"
+  },
+  {
+    "name": "Kubecost",
+    "description": "Kubernetes cost monitoring",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://kubecost.com"
+  },
+  {
+    "name": "Kube-bench",
+    "description": "Kubernetes security",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://aquasec.com"
+  },
+  {
+    "name": "Kubescape",
+    "description": "Kubernetes security",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://kubescape.io"
+  },
+  {
+    "name": "Crossplane",
+    "description": "Cloud infrastructure",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://crossplane.io"
+  },
+  {
+    "name": "Backstage",
+    "description": "Developer portal",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://backstage.io"
+  },
+  {
+    "name": "Port",
+    "description": "Internal developer portal",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://getport.io"
+  },
+  {
+    "name": "OpsLevel",
+    "description": "Service catalog",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://opslevel.com"
+  },
+  {
+    "name": "Cortex",
+    "description": "Service catalog",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cortex.io"
+  },
+  {
+    "name": "Roadie",
+    "description": "Backstage as a service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://roadie.io"
+  },
+  {
+    "name": "Sleuth",
+    "description": "DORA metrics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sleuth.io"
+  },
+  {
+    "name": "Jellyfish",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://jellyfish.co"
+  },
+  {
+    "name": "Swarmia",
+    "description": "Engineering insights",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://swarmia.com"
+  },
+  {
+    "name": "Pluralsight Flow",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pluralsight.com"
+  },
+  {
+    "name": "Allstacks",
+    "description": "Engineering intelligence",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://allstacks.com"
+  },
+  {
+    "name": "Faros AI",
+    "description": "Engineering operations",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://faros.ai"
+  },
+  {
+    "name": "Athenian",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://athenian.co"
+  },
+  {
+    "name": "Waydev",
+    "description": "Git analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://waydev.co"
+  },
+  {
+    "name": "GitClear",
+    "description": "Code analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://gitclear.com"
+  },
+  {
+    "name": "CodeClimate",
+    "description": "Code quality",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codeclimate.com"
+  },
+  {
+    "name": "Codacy",
+    "description": "Automated code review",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codacy.com"
+  },
+  {
+    "name": "DeepSource",
+    "description": "Code health",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://deepsource.io"
+  },
+  {
+    "name": "Sourcegraph",
+    "description": "Code search",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sourcegraph.com"
+  },
+  {
+    "name": "Tabnine",
+    "description": "AI code completion",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://tabnine.com"
+  },
+  {
+    "name": "Codeium",
+    "description": "AI code completion",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codeium.com"
+  },
+  {
+    "name": "Cursor",
+    "description": "AI-first code editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cursor.com"
+  },
+  {
+    "name": "Cody",
+    "description": "AI coding assistant",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sourcegraph.com/cody"
+  },
+  {
+    "name": "Amazon CodeWhisperer",
+    "description": "AI code suggestions",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/codewhisperer"
+  },
+  {
+    "name": "Replit Ghostwriter",
+    "description": "AI in Replit",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://replit.com"
+  },
+  {
+    "name": "Continue",
+    "description": "Open source AI coding",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://continue.dev"
+  },
+  {
+    "name": "Phind",
+    "description": "AI for developers",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://phind.com"
+  },
+  {
+    "name": "Pieces",
+    "description": "AI workflow copilot",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pieces.app"
+  },
+  {
+    "name": "Stoplight",
+    "description": "API design platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://stoplight.io"
+  },
+  {
+    "name": "SwaggerHub",
+    "description": "API development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://swagger.io"
+  },
+  {
+    "name": "Insomnia",
+    "description": "API client",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://insomnia.rest"
+  },
+  {
+    "name": "Hoppscotch",
+    "description": "Open source API client",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://hoppscotch.io"
+  },
+  {
+    "name": "Kong",
+    "description": "API gateway",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://konghq.com"
+  },
+  {
+    "name": "Notion SDK",
+    "description": "Notion integration",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://notion.so"
+  },
+  {
+    "name": "Fibery",
+    "description": "Work management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://fibery.io"
+  },
+  {
+    "name": "Craft",
+    "description": "Document editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://craft.do"
+  },
+  {
+    "name": "Obsidian Publish",
+    "description": "Note publishing",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://obsidian.md"
+  },
+  {
+    "name": "Logseq",
+    "description": "Knowledge base",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://logseq.com"
+  },
+  {
+    "name": "Roam Research",
+    "description": "Note-taking",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://roamresearch.com"
+  },
+  {
+    "name": "Mem",
+    "description": "AI-powered notes",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://mem.ai"
+  },
+  {
+    "name": "Reflect",
+    "description": "Networked notes",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://reflect.app"
+  },
+  {
+    "name": "Capacities",
+    "description": "Personal knowledge",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://capacities.io"
+  },
+  {
+    "name": "Tana",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://tana.inc"
+  },
+  {
+    "name": "Anytype",
+    "description": "Local-first tool",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://anytype.io"
+  },
+  {
+    "name": "AppFlowy",
+    "description": "Open source Notion",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://appflowy.io"
+  },
+  {
+    "name": "Plane",
+    "description": "Open source project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://plane.so"
+  },
+  {
+    "name": "Focalboard",
+    "description": "Open source project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://focalboard.com"
+  },
+  {
+    "name": "Taiga",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://taiga.io"
+  },
+  {
+    "name": "OpenProject",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://openproject.org"
+  },
+  {
+    "name": "Redmine",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://redmine.org"
+  },
+  {
+    "name": "Phabricator",
+    "description": "Code review platform",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://phacility.com"
+  },
+  {
+    "name": "Gitea",
+    "description": "Git hosting",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://gitea.io"
+  },
+  {
+    "name": "Gogs",
+    "description": "Git service",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://gogs.io"
+  },
+  {
+    "name": "Codeberg",
+    "description": "Git hosting",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://codeberg.org"
+  },
+  {
+    "name": "Radicle",
+    "description": "P2P Git",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://radicle.xyz"
+  },
+  {
+    "name": "Forgejo",
+    "description": "Git forge",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://forgejo.org"
+  },
+  {
+    "name": "Coolify",
+    "description": "Self-hosting platform",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://coolify.io"
+  },
+  {
+    "name": "CapRover",
+    "description": "PaaS on your server",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://caprover.com"
+  },
+  {
+    "name": "Dokku",
+    "description": "Docker-powered PaaS",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://dokku.com"
+  },
+  {
+    "name": "Deta",
+    "description": "Cloud for developers",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://deta.space"
+  },
+  {
+    "name": "Val Town",
+    "description": "Social website builder",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://val.town"
+  },
+  {
+    "name": "Glitch",
+    "description": "Collaborative coding",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://glitch.com"
+  },
+  {
+    "name": "CodeSandbox",
+    "description": "Online IDE",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codesandbox.io"
+  },
+  {
+    "name": "StackBlitz",
+    "description": "Instant dev environments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://stackblitz.com"
+  },
+  {
+    "name": "Gitpod",
+    "description": "Cloud development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://gitpod.io"
+  },
+  {
+    "name": "GitHub Codespaces",
+    "description": "Cloud dev environments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Coder",
+    "description": "Remote development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://coder.com"
+  },
+  {
+    "name": "JetBrains Space",
+    "description": "Team collaboration",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://jetbrains.com/space"
+  },
+  {
+    "name": "Devpod",
+    "description": "Dev environments",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://devpod.sh"
+  },
+  {
+    "name": "Zed",
+    "description": "Code editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://zed.dev"
+  },
+  {
+    "name": "Lapce",
+    "description": "Lightning-fast editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://lapce.dev"
+  },
+  {
+    "name": "Helix",
+    "description": "Post-modern editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://helix-editor.com"
+  },
+  {
+    "name": "Neovim",
+    "description": "Vim fork",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://neovim.io"
+  },
+  {
+    "name": "Kakoune",
+    "description": "Modal editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://kakoune.org"
+  },
+  {
+    "name": "Nova",
+    "description": "Mac code editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://nova.app"
+  },
+  {
+    "name": "BBEdit",
+    "description": "Mac text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://barebones.com"
+  },
+  {
+    "name": "Sublime Text",
+    "description": "Text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sublimetext.com"
+  },
+  {
+    "name": "Atom",
+    "description": "Hackable editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://atom.io"
+  },
+  {
+    "name": "Brackets",
+    "description": "Adobe editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://brackets.io"
+  },
+  {
+    "name": "TextMate",
+    "description": "Mac editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://macromates.com"
+  },
+  {
+    "name": "UltraEdit",
+    "description": "Text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://ultraedit.com"
+  },
+  {
+    "name": "Fillout",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://fillout.com"
+  },
+  {
+    "name": "123FormBuilder",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://123formbuilder.com"
+  },
+  {
+    "name": "Feathery",
+    "description": "Product-quality forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://feathery.io"
+  },
+  {
+    "name": "Reform",
+    "description": "Survey builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://reform.app"
+  },
+  {
+    "name": "Tripetto",
+    "description": "Conversational forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://tripetto.com"
+  },
+  {
+    "name": "Alchemer",
+    "description": "Survey software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://alchemer.com"
+  },
+  {
+    "name": "Delighted",
+    "description": "NPS surveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://delighted.com"
+  },
+  {
+    "name": "Medallia",
+    "description": "Customer experience",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://medallia.com"
+  },
+  {
+    "name": "GetFeedback",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://getfeedback.com"
+  },
+  {
+    "name": "AskNicely",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://asknicely.com"
+  },
+  {
+    "name": "Retently",
+    "description": "NPS platform",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://retently.com"
+  },
+  {
+    "name": "Promoter.io",
+    "description": "NPS software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://promoter.io"
+  },
+  {
+    "name": "Wootric",
+    "description": "Customer happiness",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://wootric.com"
+  },
+  {
+    "name": "Satismeter",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://satismeter.com"
+  },
+  {
+    "name": "Refiner",
+    "description": "Microsurveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://refiner.io"
+  },
+  {
+    "name": "Sprig",
+    "description": "Product research",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://sprig.com"
+  },
+  {
+    "name": "Userpilot",
+    "description": "Product growth",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://userpilot.com"
+  },
+  {
+    "name": "Appcues",
+    "description": "Product-led growth",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://appcues.com"
+  },
+  {
+    "name": "WalkMe",
+    "description": "Digital adoption",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://walkme.com"
+  },
+  {
+    "name": "Whatfix",
+    "description": "Digital adoption",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://whatfix.com"
+  },
+  {
+    "name": "Intercom Tours",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://intercom.com"
+  },
+  {
+    "name": "Chameleon",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://trychameleon.com"
+  },
+  {
+    "name": "Userflow",
+    "description": "User onboarding",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://userflow.com"
+  },
+  {
+    "name": "Lou",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://lou.ai"
+  },
+  {
+    "name": "Intro.js",
+    "description": "User onboarding",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://introjs.com"
+  },
+  {
+    "name": "Shepherd.js",
+    "description": "Tour library",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://shepherdjs.dev"
+  },
+  {
+    "name": "Driver.js",
+    "description": "Highlighting library",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://driverjs.com"
+  },
+  {
+    "name": "Announcify",
+    "description": "Announcements",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://announcify.app"
+  },
+  {
+    "name": "Beamer",
+    "description": "Changelog announcements",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://getbeamer.com"
+  },
+  {
+    "name": "Headway",
+    "description": "Changelog platform",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://headwayapp.co"
+  },
+  {
+    "name": "Released",
+    "description": "Changelog",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://released.so"
+  },
+  {
+    "name": "LaunchNotes",
+    "description": "Release communication",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://launchnotes.com"
+  },
+  {
+    "name": "Canny",
+    "description": "Feature requests",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://canny.io"
+  },
+  {
+    "name": "Upvoty",
+    "description": "Feature voting",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://upvoty.com"
+  },
+  {
+    "name": "Productboard",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://productboard.com"
+  },
+  {
+    "name": "Aha!",
+    "description": "Product roadmap",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://aha.io"
+  },
+  {
+    "name": "Roadmunk",
+    "description": "Roadmap software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://roadmunk.com"
+  },
+  {
+    "name": "Airfocus",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://airfocus.com"
+  },
+  {
+    "name": "Craft.io",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://craft.io"
+  },
+  {
+    "name": "Liveblocks",
+    "description": "Collaborative features",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://liveblocks.io"
+  },
+  {
+    "name": "Partykit",
+    "description": "Realtime collaboration",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://partykit.io"
+  },
+  {
+    "name": "Y.js",
+    "description": "CRDT framework",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://yjs.dev"
+  },
+  {
+    "name": "Automerge",
+    "description": "CRDT library",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://automerge.org"
+  },
+  {
+    "name": "Electric SQL",
+    "description": "Local-first sync",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://electric-sql.com"
+  },
+  {
+    "name": "PowerSync",
+    "description": "Local-first database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://powersync.com"
+  },
+  {
+    "name": "Replicache",
+    "description": "Realtime sync",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://replicache.dev"
+  },
+  {
+    "name": "Triplit",
+    "description": "Local-first database",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://triplit.dev"
+  },
+  {
+    "name": "Socket.Dev",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://socket.dev"
+  },
+  {
+    "name": "Snyk Container",
+    "description": "Container security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://snyk.io"
+  },
+  {
+    "name": "Syft",
+    "description": "SBOM generator",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://anchore.com"
+  },
+  {
+    "name": "Cosign",
+    "description": "Container signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://sigstore.dev"
+  },
+  {
+    "name": "Notation",
+    "description": "Artifact signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://notaryproject.dev"
+  },
+  {
+    "name": "Sigstore",
+    "description": "Software signing",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://sigstore.dev"
+  },
+  {
+    "name": "SLSA",
+    "description": "Supply chain security",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://slsa.dev"
+  },
+  {
+    "name": "Scorecard",
+    "description": "Security health",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://securityscorecards.dev"
+  },
+  {
+    "name": "AllStar",
+    "description": "Security policies",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://openssf.org"
+  },
+  {
+    "name": "Renovate",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "none",
+    "baseUrl": "https://renovatebot.com"
+  },
+  {
+    "name": "WhiteSource Renovate",
+    "description": "Dependency updates",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://renovate.whitesourcesoftware.com"
+  },
+  {
+    "name": "FOSSA",
+    "description": "License compliance",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fossa.com"
+  },
+  {
+    "name": "Lakera",
+    "description": "AI security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://lakera.ai"
+  },
+  {
+    "name": "Rebuff",
+    "description": "Prompt injection detection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://rebuff.ai"
+  },
+  {
+    "name": "Pangea",
+    "description": "Security services",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://pangea.cloud"
+  },
+  {
+    "name": "Piiano",
+    "description": "Privacy vault",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://piiano.com"
+  },
+  {
+    "name": "Skyflow",
+    "description": "Data privacy vault",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://skyflow.com"
+  },
+  {
+    "name": "Very Good Security",
+    "description": "Data security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://verygoodsecurity.com"
+  },
+  {
+    "name": "Evervault",
+    "description": "Encryption platform",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://evervault.com"
+  },
+  {
+    "name": "IronCore Labs",
+    "description": "Data privacy",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://ironcorelabs.com"
+  },
+  {
+    "name": "Anjuna",
+    "description": "Confidential computing",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://anjuna.io"
+  },
+  {
+    "name": "Fortanix",
+    "description": "Data security",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://fortanix.com"
+  },
+  {
+    "name": "Thales CipherTrust",
+    "description": "Data protection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://cpl.thalesgroup.com"
+  },
+  {
+    "name": "Virtru",
+    "description": "Data protection",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://virtru.com"
+  },
+  {
+    "name": "PreVeil",
+    "description": "End-to-end encryption",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://preveil.com"
+  },
+  {
+    "name": "SpiderOak",
+    "description": "Secure cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://spideroak.com"
+  },
+  {
+    "name": "Tresorit",
+    "description": "Secure collaboration",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tresorit.com"
+  },
+  {
+    "name": "Internxt",
+    "description": "Private cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://internxt.com"
+  },
+  {
+    "name": "Filen",
+    "description": "Encrypted cloud storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://filen.io"
+  },
+  {
+    "name": "Proton Drive",
+    "description": "Encrypted storage",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://proton.me"
+  },
+  {
+    "name": "Skiff",
+    "description": "Private workspace",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://skiff.com"
+  },
+  {
+    "name": "Tuta",
+    "description": "Encrypted email",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tuta.com"
+  },
+  {
+    "name": "ProtonMail",
+    "description": "Encrypted email",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://proton.me"
+  },
+  {
+    "name": "Standard Notes",
+    "description": "Encrypted notes",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://standardnotes.com"
+  },
+  {
+    "name": "Notesnook",
+    "description": "Private notes",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://notesnook.com"
+  },
+  {
+    "name": "Joplin",
+    "description": "Note taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://joplinapp.org"
+  },
+  {
+    "name": "Simplenote",
+    "description": "Note app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://simplenote.com"
+  },
+  {
+    "name": "Bear",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://bear.app"
+  },
+  {
+    "name": "Ulysses",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://ulysses.app"
+  },
+  {
+    "name": "iA Writer",
+    "description": "Writing app",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://ia.net"
+  },
+  {
+    "name": "Byword",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://bywordapp.com"
+  },
+  {
+    "name": "Typora",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://typora.io"
+  },
+  {
+    "name": "Mark Text",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://marktext.app"
+  },
+  {
+    "name": "Zettlr",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://zettlr.com"
+  },
+  {
+    "name": "Ghostwriter",
+    "description": "Markdown editor",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://ghostwriter.kde.org"
+  },
+  {
+    "name": "QOwnNotes",
+    "description": "Note taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://qownnotes.org"
+  },
+  {
+    "name": "Trilium",
+    "description": "Knowledge base",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://github.com/zadam/trilium"
+  },
+  {
+    "name": "Dendron",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://dendron.so"
+  },
+  {
+    "name": "Foam",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://foambubble.github.io"
+  },
+  {
+    "name": "SilverBullet",
+    "description": "Note-taking",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://silverbullet.md"
+  }
+]

@@ -1,0 +1,1591 @@
+[
+  {
+    "name": "OpenAI Assistants",
+    "description": "AI assistant threads",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://platform.openai.com"
+  },
+  {
+    "name": "Claude Messages",
+    "description": "Claude conversation API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://anthropic.com"
+  },
+  {
+    "name": "Gemini Pro",
+    "description": "Google's advanced AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://ai.google.dev"
+  },
+  {
+    "name": "Llama.cpp",
+    "description": "Local LLM inference",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://github.com/ggerganov/llama.cpp"
+  },
+  {
+    "name": "Ollama",
+    "description": "Run LLMs locally",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://ollama.ai"
+  },
+  {
+    "name": "LocalAI",
+    "description": "Self-hosted AI",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://localai.io"
+  },
+  {
+    "name": "LM Studio",
+    "description": "Local LLM platform",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://lmstudio.ai"
+  },
+  {
+    "name": "Jan AI",
+    "description": "Local AI assistant",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://jan.ai"
+  },
+  {
+    "name": "Poe",
+    "description": "AI chatbot platform",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://poe.com"
+  },
+  {
+    "name": "Character.AI",
+    "description": "AI characters",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://character.ai"
+  },
+  {
+    "name": "Inflection Pi",
+    "description": "Personal AI",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://inflection.ai"
+  },
+  {
+    "name": "Cohere Embed",
+    "description": "Text embeddings",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://cohere.ai"
+  },
+  {
+    "name": "Voyage AI",
+    "description": "Embeddings API",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://voyageai.com"
+  },
+  {
+    "name": "Jina Embeddings",
+    "description": "Neural search",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://jina.ai"
+  },
+  {
+    "name": "Nomic Embed",
+    "description": "Open embeddings",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://nomic.ai"
+  },
+  {
+    "name": "LangChain",
+    "description": "LLM framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://langchain.com"
+  },
+  {
+    "name": "LlamaIndex",
+    "description": "Data framework for LLMs",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://llamaindex.ai"
+  },
+  {
+    "name": "Haystack",
+    "description": "NLP framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://haystack.deepset.ai"
+  },
+  {
+    "name": "Semantic Kernel",
+    "description": "AI orchestration",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://github.com/microsoft/semantic-kernel"
+  },
+  {
+    "name": "AutoGen",
+    "description": "Multi-agent AI",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://microsoft.github.io/autogen"
+  },
+  {
+    "name": "CrewAI",
+    "description": "AI agent framework",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://crewai.com"
+  },
+  {
+    "name": "Fixie",
+    "description": "AI agents",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://fixie.ai"
+  },
+  {
+    "name": "Dust",
+    "description": "AI workflows",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://dust.tt"
+  },
+  {
+    "name": "Vellum",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://vellum.ai"
+  },
+  {
+    "name": "Promptflow",
+    "description": "LLM orchestration",
+    "category": "AI/ML",
+    "authType": "none",
+    "baseUrl": "https://microsoft.github.io/promptflow"
+  },
+  {
+    "name": "Langfuse",
+    "description": "LLM observability",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://langfuse.com"
+  },
+  {
+    "name": "Helicone",
+    "description": "LLM observability",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://helicone.ai"
+  },
+  {
+    "name": "Braintrust",
+    "description": "LLM evaluation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://braintrustdata.com"
+  },
+  {
+    "name": "Humanloop",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://humanloop.com"
+  },
+  {
+    "name": "Parea AI",
+    "description": "LLM development",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://parea.ai"
+  },
+  {
+    "name": "Suno",
+    "description": "AI music generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://suno.ai"
+  },
+  {
+    "name": "Udio",
+    "description": "AI music creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://udio.com"
+  },
+  {
+    "name": "Mubert",
+    "description": "AI music",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://mubert.com"
+  },
+  {
+    "name": "AIVA",
+    "description": "AI composer",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://aiva.ai"
+  },
+  {
+    "name": "Soundraw",
+    "description": "AI music generator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://soundraw.io"
+  },
+  {
+    "name": "Beatoven",
+    "description": "AI music for video",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://beatoven.ai"
+  },
+  {
+    "name": "HeyGen",
+    "description": "AI video avatars",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://heygen.com"
+  },
+  {
+    "name": "Synthesia",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://synthesia.io"
+  },
+  {
+    "name": "D-ID",
+    "description": "AI video creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://d-id.com"
+  },
+  {
+    "name": "Colossyan",
+    "description": "AI video maker",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://colossyan.com"
+  },
+  {
+    "name": "Elai",
+    "description": "AI video generator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://elai.io"
+  },
+  {
+    "name": "Hour One",
+    "description": "AI video creator",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://hourone.ai"
+  },
+  {
+    "name": "Pika Labs",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://pika.art"
+  },
+  {
+    "name": "Runway Gen",
+    "description": "AI video tools",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://runwayml.com"
+  },
+  {
+    "name": "Kaiber",
+    "description": "AI video creation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://kaiber.ai"
+  },
+  {
+    "name": "Luma Dream Machine",
+    "description": "AI video",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://lumalabs.ai"
+  },
+  {
+    "name": "Kling AI",
+    "description": "AI video generation",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://kling.ai"
+  },
+  {
+    "name": "Playground AI",
+    "description": "AI image editor",
+    "category": "AI/ML",
+    "authType": "apiKey",
+    "baseUrl": "https://playground.com"
+  },
+  {
+    "name": "Swish",
+    "description": "Swedish mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://swish.nu"
+  },
+  {
+    "name": "Klarna SE",
+    "description": "Buy now pay later Sweden",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://klarna.com"
+  },
+  {
+    "name": "Billogram",
+    "description": "Swedish invoicing",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://billogram.com"
+  },
+  {
+    "name": "Fortnox",
+    "description": "Swedish business software",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://fortnox.se"
+  },
+  {
+    "name": "Visma",
+    "description": "Nordic business software",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://visma.com"
+  },
+  {
+    "name": "Bokio",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://bokio.se"
+  },
+  {
+    "name": "Specter",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://specter.se"
+  },
+  {
+    "name": "PE Accounting",
+    "description": "Swedish accounting",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://accounting.pe"
+  },
+  {
+    "name": "SCB",
+    "description": "Statistics Sweden",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://scb.se"
+  },
+  {
+    "name": "Bolagsverket",
+    "description": "Swedish company registry",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://bolagsverket.se"
+  },
+  {
+    "name": "Skatteverket",
+    "description": "Swedish tax authority",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://skatteverket.se"
+  },
+  {
+    "name": "Trafikverket",
+    "description": "Swedish transport admin",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://trafikverket.se"
+  },
+  {
+    "name": "SL",
+    "description": "Stockholm public transport",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://sl.se"
+  },
+  {
+    "name": "V\u00e4sttrafik",
+    "description": "Gothenburg transit",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://vasttrafik.se"
+  },
+  {
+    "name": "Sk\u00e5netrafiken",
+    "description": "Sk\u00e5ne transit",
+    "category": "Travel",
+    "authType": "apiKey",
+    "baseUrl": "https://skanetrafiken.se"
+  },
+  {
+    "name": "SMHI",
+    "description": "Swedish meteorology",
+    "category": "Weather",
+    "authType": "apiKey",
+    "baseUrl": "https://smhi.se"
+  },
+  {
+    "name": "Postnord SE",
+    "description": "Swedish postal",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://postnord.se"
+  },
+  {
+    "name": "DHL Sweden",
+    "description": "DHL Sweden",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://dhl.se"
+  },
+  {
+    "name": "Bring",
+    "description": "Nordic logistics",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://bring.se"
+  },
+  {
+    "name": "MobilePay",
+    "description": "Danish mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://mobilepay.dk"
+  },
+  {
+    "name": "Vipps",
+    "description": "Norwegian mobile payments",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://vipps.no"
+  },
+  {
+    "name": "Norwegian Bank ID",
+    "description": "Norwegian identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://bankid.no"
+  },
+  {
+    "name": "Swedish BankID",
+    "description": "Swedish identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://bankid.com"
+  },
+  {
+    "name": "Danish MitID",
+    "description": "Danish identity",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://mitid.dk"
+  },
+  {
+    "name": "Finnish Banking",
+    "description": "Finnish bank auth",
+    "category": "Security",
+    "authType": "apiKey",
+    "baseUrl": "https://tupas.fi"
+  },
+  {
+    "name": "Digipost",
+    "description": "Norwegian digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://digipost.no"
+  },
+  {
+    "name": "e-Boks",
+    "description": "Danish digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://e-boks.dk"
+  },
+  {
+    "name": "Kivra",
+    "description": "Swedish digital mail",
+    "category": "Communication",
+    "authType": "apiKey",
+    "baseUrl": "https://kivra.se"
+  },
+  {
+    "name": "Nordea Open Banking",
+    "description": "Nordic banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://nordea.com"
+  },
+  {
+    "name": "SEB Open Banking",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://seb.se"
+  },
+  {
+    "name": "Handelsbanken API",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://handelsbanken.se"
+  },
+  {
+    "name": "Swedbank Open",
+    "description": "Swedish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://swedbank.se"
+  },
+  {
+    "name": "Danske Bank API",
+    "description": "Danish banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://danskebank.dk"
+  },
+  {
+    "name": "DNB Open",
+    "description": "Norwegian banking",
+    "category": "Payments",
+    "authType": "apiKey",
+    "baseUrl": "https://dnb.no"
+  },
+  {
+    "name": "Prisjakt",
+    "description": "Swedish price comparison",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://prisjakt.nu"
+  },
+  {
+    "name": "Pricerunner",
+    "description": "Nordic price comparison",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://pricerunner.com"
+  },
+  {
+    "name": "CDON",
+    "description": "Nordic marketplace",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://cdon.com"
+  },
+  {
+    "name": "Komplett",
+    "description": "Nordic electronics",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://komplett.se"
+  },
+  {
+    "name": "NetOnNet",
+    "description": "Swedish electronics",
+    "category": "E-commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://netonnet.se"
+  },
+  {
+    "name": "Hemnet",
+    "description": "Swedish property listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://hemnet.se"
+  },
+  {
+    "name": "Pulumi",
+    "description": "Infrastructure as code",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pulumi.com"
+  },
+  {
+    "name": "Terraform Cloud",
+    "description": "Infrastructure management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://terraform.io"
+  },
+  {
+    "name": "Ansible Tower",
+    "description": "IT automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://ansible.com"
+  },
+  {
+    "name": "Chef",
+    "description": "Infrastructure automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://chef.io"
+  },
+  {
+    "name": "Puppet",
+    "description": "IT automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://puppet.com"
+  },
+  {
+    "name": "SaltStack",
+    "description": "Configuration management",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://saltproject.io"
+  },
+  {
+    "name": "Spacelift",
+    "description": "Infrastructure management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://spacelift.io"
+  },
+  {
+    "name": "env0",
+    "description": "IaC automation",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://env0.com"
+  },
+  {
+    "name": "Scalr",
+    "description": "Terraform management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://scalr.com"
+  },
+  {
+    "name": "Atlantis",
+    "description": "Terraform PR automation",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://runatlantis.io"
+  },
+  {
+    "name": "Argo CD",
+    "description": "GitOps for Kubernetes",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://argoproj.github.io"
+  },
+  {
+    "name": "Flux",
+    "description": "GitOps toolkit",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://fluxcd.io"
+  },
+  {
+    "name": "Rancher",
+    "description": "Kubernetes management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://rancher.com"
+  },
+  {
+    "name": "Portainer",
+    "description": "Container management",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://portainer.io"
+  },
+  {
+    "name": "Lens",
+    "description": "Kubernetes IDE",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://k8slens.dev"
+  },
+  {
+    "name": "Komodor",
+    "description": "Kubernetes troubleshooting",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://komodor.com"
+  },
+  {
+    "name": "Kubecost",
+    "description": "Kubernetes cost monitoring",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://kubecost.com"
+  },
+  {
+    "name": "Kube-bench",
+    "description": "Kubernetes security",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://aquasec.com"
+  },
+  {
+    "name": "Kubescape",
+    "description": "Kubernetes security",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://kubescape.io"
+  },
+  {
+    "name": "Crossplane",
+    "description": "Cloud infrastructure",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://crossplane.io"
+  },
+  {
+    "name": "Backstage",
+    "description": "Developer portal",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://backstage.io"
+  },
+  {
+    "name": "Port",
+    "description": "Internal developer portal",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://getport.io"
+  },
+  {
+    "name": "OpsLevel",
+    "description": "Service catalog",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://opslevel.com"
+  },
+  {
+    "name": "Cortex",
+    "description": "Service catalog",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cortex.io"
+  },
+  {
+    "name": "Roadie",
+    "description": "Backstage as a service",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://roadie.io"
+  },
+  {
+    "name": "Sleuth",
+    "description": "DORA metrics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sleuth.io"
+  },
+  {
+    "name": "Jellyfish",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://jellyfish.co"
+  },
+  {
+    "name": "Swarmia",
+    "description": "Engineering insights",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://swarmia.com"
+  },
+  {
+    "name": "Pluralsight Flow",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pluralsight.com"
+  },
+  {
+    "name": "Allstacks",
+    "description": "Engineering intelligence",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://allstacks.com"
+  },
+  {
+    "name": "Faros AI",
+    "description": "Engineering operations",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://faros.ai"
+  },
+  {
+    "name": "Athenian",
+    "description": "Engineering analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://athenian.co"
+  },
+  {
+    "name": "Waydev",
+    "description": "Git analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://waydev.co"
+  },
+  {
+    "name": "GitClear",
+    "description": "Code analytics",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://gitclear.com"
+  },
+  {
+    "name": "CodeClimate",
+    "description": "Code quality",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codeclimate.com"
+  },
+  {
+    "name": "Codacy",
+    "description": "Automated code review",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codacy.com"
+  },
+  {
+    "name": "DeepSource",
+    "description": "Code health",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://deepsource.io"
+  },
+  {
+    "name": "Sourcegraph",
+    "description": "Code search",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sourcegraph.com"
+  },
+  {
+    "name": "Tabnine",
+    "description": "AI code completion",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://tabnine.com"
+  },
+  {
+    "name": "Codeium",
+    "description": "AI code completion",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codeium.com"
+  },
+  {
+    "name": "Cursor",
+    "description": "AI-first code editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://cursor.com"
+  },
+  {
+    "name": "Cody",
+    "description": "AI coding assistant",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sourcegraph.com/cody"
+  },
+  {
+    "name": "Amazon CodeWhisperer",
+    "description": "AI code suggestions",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/codewhisperer"
+  },
+  {
+    "name": "Replit Ghostwriter",
+    "description": "AI in Replit",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://replit.com"
+  },
+  {
+    "name": "Continue",
+    "description": "Open source AI coding",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://continue.dev"
+  },
+  {
+    "name": "Phind",
+    "description": "AI for developers",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://phind.com"
+  },
+  {
+    "name": "Pieces",
+    "description": "AI workflow copilot",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://pieces.app"
+  },
+  {
+    "name": "Stoplight",
+    "description": "API design platform",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://stoplight.io"
+  },
+  {
+    "name": "SwaggerHub",
+    "description": "API development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://swagger.io"
+  },
+  {
+    "name": "Insomnia",
+    "description": "API client",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://insomnia.rest"
+  },
+  {
+    "name": "Hoppscotch",
+    "description": "Open source API client",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://hoppscotch.io"
+  },
+  {
+    "name": "Kong",
+    "description": "API gateway",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://konghq.com"
+  },
+  {
+    "name": "Notion SDK",
+    "description": "Notion integration",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://notion.so"
+  },
+  {
+    "name": "Fibery",
+    "description": "Work management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://fibery.io"
+  },
+  {
+    "name": "Craft",
+    "description": "Document editor",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://craft.do"
+  },
+  {
+    "name": "Obsidian Publish",
+    "description": "Note publishing",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://obsidian.md"
+  },
+  {
+    "name": "Logseq",
+    "description": "Knowledge base",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://logseq.com"
+  },
+  {
+    "name": "Roam Research",
+    "description": "Note-taking",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://roamresearch.com"
+  },
+  {
+    "name": "Mem",
+    "description": "AI-powered notes",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://mem.ai"
+  },
+  {
+    "name": "Reflect",
+    "description": "Networked notes",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://reflect.app"
+  },
+  {
+    "name": "Capacities",
+    "description": "Personal knowledge",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://capacities.io"
+  },
+  {
+    "name": "Tana",
+    "description": "Knowledge management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://tana.inc"
+  },
+  {
+    "name": "Anytype",
+    "description": "Local-first tool",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://anytype.io"
+  },
+  {
+    "name": "AppFlowy",
+    "description": "Open source Notion",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://appflowy.io"
+  },
+  {
+    "name": "Plane",
+    "description": "Open source project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://plane.so"
+  },
+  {
+    "name": "Focalboard",
+    "description": "Open source project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://focalboard.com"
+  },
+  {
+    "name": "Taiga",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://taiga.io"
+  },
+  {
+    "name": "OpenProject",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "apiKey",
+    "baseUrl": "https://openproject.org"
+  },
+  {
+    "name": "Redmine",
+    "description": "Project management",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://redmine.org"
+  },
+  {
+    "name": "Phabricator",
+    "description": "Code review platform",
+    "category": "Productivity",
+    "authType": "none",
+    "baseUrl": "https://phacility.com"
+  },
+  {
+    "name": "Gitea",
+    "description": "Git hosting",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://gitea.io"
+  },
+  {
+    "name": "Gogs",
+    "description": "Git service",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://gogs.io"
+  },
+  {
+    "name": "Codeberg",
+    "description": "Git hosting",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://codeberg.org"
+  },
+  {
+    "name": "Radicle",
+    "description": "P2P Git",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://radicle.xyz"
+  },
+  {
+    "name": "Forgejo",
+    "description": "Git forge",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://forgejo.org"
+  },
+  {
+    "name": "Coolify",
+    "description": "Self-hosting platform",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://coolify.io"
+  },
+  {
+    "name": "CapRover",
+    "description": "PaaS on your server",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://caprover.com"
+  },
+  {
+    "name": "Dokku",
+    "description": "Docker-powered PaaS",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://dokku.com"
+  },
+  {
+    "name": "Deta",
+    "description": "Cloud for developers",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://deta.space"
+  },
+  {
+    "name": "Val Town",
+    "description": "Social website builder",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://val.town"
+  },
+  {
+    "name": "Glitch",
+    "description": "Collaborative coding",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://glitch.com"
+  },
+  {
+    "name": "CodeSandbox",
+    "description": "Online IDE",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://codesandbox.io"
+  },
+  {
+    "name": "StackBlitz",
+    "description": "Instant dev environments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://stackblitz.com"
+  },
+  {
+    "name": "Gitpod",
+    "description": "Cloud development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://gitpod.io"
+  },
+  {
+    "name": "GitHub Codespaces",
+    "description": "Cloud dev environments",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com"
+  },
+  {
+    "name": "Coder",
+    "description": "Remote development",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://coder.com"
+  },
+  {
+    "name": "JetBrains Space",
+    "description": "Team collaboration",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://jetbrains.com/space"
+  },
+  {
+    "name": "Devpod",
+    "description": "Dev environments",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://devpod.sh"
+  },
+  {
+    "name": "Zed",
+    "description": "Code editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://zed.dev"
+  },
+  {
+    "name": "Lapce",
+    "description": "Lightning-fast editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://lapce.dev"
+  },
+  {
+    "name": "Helix",
+    "description": "Post-modern editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://helix-editor.com"
+  },
+  {
+    "name": "Neovim",
+    "description": "Vim fork",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://neovim.io"
+  },
+  {
+    "name": "Kakoune",
+    "description": "Modal editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://kakoune.org"
+  },
+  {
+    "name": "Nova",
+    "description": "Mac code editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://nova.app"
+  },
+  {
+    "name": "BBEdit",
+    "description": "Mac text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://barebones.com"
+  },
+  {
+    "name": "Sublime Text",
+    "description": "Text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://sublimetext.com"
+  },
+  {
+    "name": "Atom",
+    "description": "Hackable editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://atom.io"
+  },
+  {
+    "name": "Brackets",
+    "description": "Adobe editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://brackets.io"
+  },
+  {
+    "name": "TextMate",
+    "description": "Mac editor",
+    "category": "DevTools",
+    "authType": "none",
+    "baseUrl": "https://macromates.com"
+  },
+  {
+    "name": "UltraEdit",
+    "description": "Text editor",
+    "category": "DevTools",
+    "authType": "apiKey",
+    "baseUrl": "https://ultraedit.com"
+  },
+  {
+    "name": "Fillout",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://fillout.com"
+  },
+  {
+    "name": "123FormBuilder",
+    "description": "Form builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://123formbuilder.com"
+  },
+  {
+    "name": "Feathery",
+    "description": "Product-quality forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://feathery.io"
+  },
+  {
+    "name": "Reform",
+    "description": "Survey builder",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://reform.app"
+  },
+  {
+    "name": "Tripetto",
+    "description": "Conversational forms",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://tripetto.com"
+  },
+  {
+    "name": "Alchemer",
+    "description": "Survey software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://alchemer.com"
+  },
+  {
+    "name": "Delighted",
+    "description": "NPS surveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://delighted.com"
+  },
+  {
+    "name": "Medallia",
+    "description": "Customer experience",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://medallia.com"
+  },
+  {
+    "name": "GetFeedback",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://getfeedback.com"
+  },
+  {
+    "name": "AskNicely",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://asknicely.com"
+  },
+  {
+    "name": "Retently",
+    "description": "NPS platform",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://retently.com"
+  },
+  {
+    "name": "Promoter.io",
+    "description": "NPS software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://promoter.io"
+  },
+  {
+    "name": "Wootric",
+    "description": "Customer happiness",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://wootric.com"
+  },
+  {
+    "name": "Satismeter",
+    "description": "Customer feedback",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://satismeter.com"
+  },
+  {
+    "name": "Refiner",
+    "description": "Microsurveys",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://refiner.io"
+  },
+  {
+    "name": "Sprig",
+    "description": "Product research",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://sprig.com"
+  },
+  {
+    "name": "Userpilot",
+    "description": "Product growth",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://userpilot.com"
+  },
+  {
+    "name": "Appcues",
+    "description": "Product-led growth",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://appcues.com"
+  },
+  {
+    "name": "WalkMe",
+    "description": "Digital adoption",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://walkme.com"
+  },
+  {
+    "name": "Whatfix",
+    "description": "Digital adoption",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://whatfix.com"
+  },
+  {
+    "name": "Intercom Tours",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://intercom.com"
+  },
+  {
+    "name": "Chameleon",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://trychameleon.com"
+  },
+  {
+    "name": "Userflow",
+    "description": "User onboarding",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://userflow.com"
+  },
+  {
+    "name": "Lou",
+    "description": "Product tours",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://lou.ai"
+  },
+  {
+    "name": "Intro.js",
+    "description": "User onboarding",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://introjs.com"
+  },
+  {
+    "name": "Shepherd.js",
+    "description": "Tour library",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://shepherdjs.dev"
+  },
+  {
+    "name": "Driver.js",
+    "description": "Highlighting library",
+    "category": "Forms",
+    "authType": "none",
+    "baseUrl": "https://driverjs.com"
+  },
+  {
+    "name": "Announcify",
+    "description": "Announcements",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://announcify.app"
+  },
+  {
+    "name": "Beamer",
+    "description": "Changelog announcements",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://getbeamer.com"
+  },
+  {
+    "name": "Headway",
+    "description": "Changelog platform",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://headwayapp.co"
+  },
+  {
+    "name": "Released",
+    "description": "Changelog",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://released.so"
+  },
+  {
+    "name": "LaunchNotes",
+    "description": "Release communication",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://launchnotes.com"
+  },
+  {
+    "name": "Canny",
+    "description": "Feature requests",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://canny.io"
+  },
+  {
+    "name": "Upvoty",
+    "description": "Feature voting",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://upvoty.com"
+  },
+  {
+    "name": "Productboard",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://productboard.com"
+  },
+  {
+    "name": "Aha!",
+    "description": "Product roadmap",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://aha.io"
+  },
+  {
+    "name": "Roadmunk",
+    "description": "Roadmap software",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://roadmunk.com"
+  },
+  {
+    "name": "Airfocus",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://airfocus.com"
+  },
+  {
+    "name": "Craft.io",
+    "description": "Product management",
+    "category": "Forms",
+    "authType": "apiKey",
+    "baseUrl": "https://craft.io"
+  }
+]

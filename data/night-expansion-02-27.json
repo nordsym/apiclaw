@@ -1,0 +1,723 @@
+[
+  {
+    "name": "Google AdWords API",
+    "description": "Manage Google AdWords campaigns programmatically",
+    "category": "Advertising",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/adwords/api/"
+  },
+  {
+    "name": "Microsoft Bing Ads API",
+    "description": "Programmatic access to advertising technologies",
+    "category": "Advertising",
+    "authType": "apiKey",
+    "baseUrl": "https://learn.microsoft.com/en-us/advertising/"
+  },
+  {
+    "name": "DitchCarbon API",
+    "description": "Company and product carbon emissions disclosures",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.ditchcarbon.com/"
+  },
+  {
+    "name": "Matomo Analytics",
+    "description": "All-in-one premium web analytics platform",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://matomo.org/docs/analytics-api/"
+  },
+  {
+    "name": "Zoho Reports API",
+    "description": "Build reporting and analytical capabilities",
+    "category": "Analytics",
+    "authType": "apiKey",
+    "baseUrl": "https://www.zoho.com/analytics/"
+  },
+  {
+    "name": "QR Code API FunGenerators",
+    "description": "Create QR code images or read existing images",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://fungenerators.com/api/qrcode/"
+  },
+  {
+    "name": "OpenQR Generator API",
+    "description": "Static and Dynamic QR code generator",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.openqr.io/"
+  },
+  {
+    "name": "Bitcoin Developer",
+    "description": "Resources and reference material for Bitcoin developers",
+    "category": "Cryptocurrency",
+    "authType": "none",
+    "baseUrl": "https://developer.bitcoin.org/"
+  },
+  {
+    "name": "Block.io",
+    "description": "Versatile and secure wallet for all coins",
+    "category": "Cryptocurrency",
+    "authType": "apiKey",
+    "baseUrl": "https://block.io/"
+  },
+  {
+    "name": "BlockFacts.io",
+    "description": "Digital asset data with REST and WebSocket support",
+    "category": "Cryptocurrency",
+    "authType": "apiKey",
+    "baseUrl": "https://blockfacts.io/"
+  },
+  {
+    "name": "PENDAX SDK",
+    "description": "SDK for Trading on FTX, OKX, Bybit and more",
+    "category": "Cryptocurrency",
+    "authType": "apiKey",
+    "baseUrl": "https://github.com/CompendiumFi/PENDAX-SDK"
+  },
+  {
+    "name": "DigiDates API",
+    "description": "REST API for date and time calculations",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "https://digidates.de/en/"
+  },
+  {
+    "name": "OpenHolidays API",
+    "description": "Public and school holidays for European countries",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "https://www.openholidaysapi.org/"
+  },
+  {
+    "name": "Repetiti",
+    "description": "3D Printer Management Service API",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.repetiti.com"
+  },
+  {
+    "name": "Yellow Pages API",
+    "description": "Business data for any city in the US",
+    "category": "Business",
+    "authType": "none",
+    "baseUrl": "https://github.com/Hrushi11/Yellow-Pages-End-API"
+  },
+  {
+    "name": "Bible API wldeh",
+    "description": "Support for 200+ Bible translations",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://github.com/wldeh/bible-api"
+  },
+  {
+    "name": "Bible API",
+    "description": "JSON API for public domain Bible translations",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://bible-api.com/"
+  },
+  {
+    "name": "Jokes One API",
+    "description": "Full featured Jokes API",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://jokes.one/api/joke/"
+  },
+  {
+    "name": "Random Facts API",
+    "description": "Random Facts API",
+    "category": "Content",
+    "authType": "apiKey",
+    "baseUrl": "https://fungenerators.com/api/facts/"
+  },
+  {
+    "name": "SLF German Database",
+    "description": "German city, country, river database",
+    "category": "Data",
+    "authType": "none",
+    "baseUrl": "https://github.com/slftool/slftool.github.io"
+  },
+  {
+    "name": "1Forge Currency",
+    "description": "Real-time forex and crypto quotes",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://1forge.com/"
+  },
+  {
+    "name": "ExchangeRatesAPI.io",
+    "description": "Foreign exchange rates with conversion",
+    "category": "Finance",
+    "authType": "apiKey",
+    "baseUrl": "https://exchangeratesapi.io/"
+  },
+  {
+    "name": "OpenRates",
+    "description": "Live exchange rates and currency conversion",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://openrates.io/"
+  },
+  {
+    "name": "Datamuse API",
+    "description": "Word-finding query engine",
+    "category": "Reference",
+    "authType": "none",
+    "baseUrl": "https://www.datamuse.com/api/"
+  },
+  {
+    "name": "Merriam-Webster API",
+    "description": "Dictionary and thesaurus content",
+    "category": "Reference",
+    "authType": "apiKey",
+    "baseUrl": "https://dictionaryapi.com/"
+  },
+  {
+    "name": "Oxford Dictionary API",
+    "description": "Access to Oxford Dictionary services",
+    "category": "Reference",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.oxforddictionaries.com/"
+  },
+  {
+    "name": "Comichron Data",
+    "description": "Comic sales data API",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://github.com/comichron-data/api"
+  },
+  {
+    "name": "Fun Translations API",
+    "description": "Translate to 50+ languages from TV/Movies",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://funtranslations.com/api/"
+  },
+  {
+    "name": "Nick Cannon Baby API",
+    "description": "Nick Cannon's children data",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://nick-cannon-baby-api.onrender.com/"
+  },
+  {
+    "name": "Owen Wilson Wow API",
+    "description": "Owen Wilson wow exclamations in movies",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://owen-wilson-wow-api.onrender.com/"
+  },
+  {
+    "name": "Rick and Morty API",
+    "description": "All Rick and Morty information",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://rickandmortyapi.com/"
+  },
+  {
+    "name": "STAPI Star Trek",
+    "description": "Star Trek API",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://stapi.co/"
+  },
+  {
+    "name": "SWAPI Star Wars",
+    "description": "All things Star Wars",
+    "category": "Entertainment",
+    "authType": "none",
+    "baseUrl": "https://www.swapi.tech/"
+  },
+  {
+    "name": "StockX API",
+    "description": "150k+ sneakers and fashion products",
+    "category": "Commerce",
+    "authType": "apiKey",
+    "baseUrl": "https://stockx.vlour.me/"
+  },
+  {
+    "name": "TCGdex Pok\u00e9mon",
+    "description": "Multilanguage Pok\u00e9mon TCG Database",
+    "category": "Games",
+    "authType": "none",
+    "baseUrl": "https://www.tcgdex.dev/"
+  },
+  {
+    "name": "DigitalOcean Spaces",
+    "description": "Easy object storage with simple pricing",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://www.digitalocean.com/products/spaces"
+  },
+  {
+    "name": "Microsoft Graph OneDrive",
+    "description": "Access OneDrive files and photos",
+    "category": "Storage",
+    "authType": "oauth",
+    "baseUrl": "https://graph.microsoft.com/"
+  },
+  {
+    "name": "SignNow eSign API",
+    "description": "Embed eSignature workflows in apps",
+    "category": "Documents",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.signnow.com/"
+  },
+  {
+    "name": "Smash Upload",
+    "description": "API for uploading large files",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://api.fromsmash.com/"
+  },
+  {
+    "name": "Vertopal Converter",
+    "description": "Convert files to various formats",
+    "category": "Utilities",
+    "authType": "apiKey",
+    "baseUrl": "https://www.vertopal.com/"
+  },
+  {
+    "name": "Bank of Canada",
+    "description": "Daily exchange rates and statistics",
+    "category": "Finance",
+    "authType": "none",
+    "baseUrl": "https://www.bankofcanada.ca/rates/"
+  },
+  {
+    "name": "FitBit API",
+    "description": "Access Fitbit activity tracker data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://dev.fitbit.com/"
+  },
+  {
+    "name": "HealthGraph RunKeeper",
+    "description": "RunKeeper's Health Graph data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://runkeeper.com/developer/"
+  },
+  {
+    "name": "Strava API",
+    "description": "Athletes, activities and segments data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developers.strava.com/"
+  },
+  {
+    "name": "Withings API",
+    "description": "Withings activity tracker data",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developer.withings.com/"
+  },
+  {
+    "name": "Google Books API",
+    "description": "Search for books and manage library",
+    "category": "Books",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/books/"
+  },
+  {
+    "name": "Google Classroom API",
+    "description": "Google Classroom API",
+    "category": "Education",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/classroom/"
+  },
+  {
+    "name": "Google Fit API",
+    "description": "Google Fitness API",
+    "category": "Health",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/fit/"
+  },
+  {
+    "name": "Google Fonts API",
+    "description": "Add fonts to web pages",
+    "category": "Design",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/fonts/"
+  },
+  {
+    "name": "Google Identity Toolkit",
+    "description": "Federated login implementation",
+    "category": "Authentication",
+    "authType": "apiKey",
+    "baseUrl": "https://developers.google.com/identity/"
+  },
+  {
+    "name": "Google Cloud Monitoring",
+    "description": "Access Google Cloud monitoring data",
+    "category": "Analytics",
+    "authType": "oauth",
+    "baseUrl": "https://cloud.google.com/monitoring/"
+  },
+  {
+    "name": "Cognito Identity",
+    "description": "Verify and retrieve identity information",
+    "category": "Identity",
+    "authType": "apiKey",
+    "baseUrl": "https://cognitohq.com/"
+  },
+  {
+    "name": "WebPurify",
+    "description": "Live image moderation by humans",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://www.webpurify.com/"
+  },
+  {
+    "name": "Temboo SDK",
+    "description": "Layer on top of third-party APIs",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://temboo.com/"
+  },
+  {
+    "name": "Zetta",
+    "description": "Open source IoT platform on Node.js",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://www.zettajs.org/"
+  },
+  {
+    "name": "GitHub Authentication",
+    "description": "GitHub's Authentication API",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://docs.github.com/en/developers"
+  },
+  {
+    "name": "Instagram Login",
+    "description": "Instagram's OAuth API",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developers.facebook.com/docs/instagram-api/"
+  },
+  {
+    "name": "LinkedIn Sign In",
+    "description": "Sign in with professional identity",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.linkedin.com/"
+  },
+  {
+    "name": "PayPal Login",
+    "description": "Sign in with PayPal credentials",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.paypal.com/"
+  },
+  {
+    "name": "Salesforce Auth",
+    "description": "OAuth protocol for Salesforce users",
+    "category": "Authentication",
+    "authType": "oauth",
+    "baseUrl": "https://developer.salesforce.com/"
+  },
+  {
+    "name": "Amazon ML API",
+    "description": "Amazon Machine Learning API",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/machine-learning/"
+  },
+  {
+    "name": "AYLIEN Text Analysis",
+    "description": "NLP and Machine Learning tools",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://aylien.com/"
+  },
+  {
+    "name": "Google Cloud ML",
+    "description": "Cloud-based machine learning tools",
+    "category": "AI",
+    "authType": "oauth",
+    "baseUrl": "https://cloud.google.com/ai-platform/"
+  },
+  {
+    "name": "Unplugg Forecasting",
+    "description": "Automated Forecasting API for timeseries",
+    "category": "AI",
+    "authType": "apiKey",
+    "baseUrl": "https://unplu.gg/"
+  },
+  {
+    "name": "Amazon Maps API",
+    "description": "Interactive 3D maps for Fire devices",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.amazon.com/maps"
+  },
+  {
+    "name": "Daum Maps",
+    "description": "Multiple APIs for Korean maps",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://apis.map.daum.net/"
+  },
+  {
+    "name": "Scribble Maps",
+    "description": "Interactive map builder",
+    "category": "Maps",
+    "authType": "apiKey",
+    "baseUrl": "https://www.scribblemaps.com/"
+  },
+  {
+    "name": "Newton Math API",
+    "description": "API for Arithmetic and Symbolic Math",
+    "category": "Science",
+    "authType": "none",
+    "baseUrl": "https://newton.vercel.app/"
+  },
+  {
+    "name": "The Cat API",
+    "description": "Pictures of cats from Tumblr",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://thecatapi.com/"
+  },
+  {
+    "name": "Movebank",
+    "description": "Movement and Migration data of animals",
+    "category": "Animals",
+    "authType": "none",
+    "baseUrl": "https://github.com/movebank/movebank-api-doc"
+  },
+  {
+    "name": "The Dog API",
+    "description": "Dogs pictures and info",
+    "category": "Animals",
+    "authType": "apiKey",
+    "baseUrl": "https://thedogapi.com/"
+  },
+  {
+    "name": "Mangapi",
+    "description": "Translate manga pages between languages",
+    "category": "Entertainment",
+    "authType": "apiKey",
+    "baseUrl": "https://rapidapi.com/"
+  },
+  {
+    "name": "Metropolitan Museum",
+    "description": "Met Museum of Art API",
+    "category": "Design",
+    "authType": "none",
+    "baseUrl": "https://metmuseum.github.io/"
+  },
+  {
+    "name": "Steem",
+    "description": "Blockchain-based social media",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://developers.steem.io/"
+  },
+  {
+    "name": "Walltime",
+    "description": "Walltime's market info",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://walltime.info/"
+  },
+  {
+    "name": "Bhagavad Gita telugu",
+    "description": "Bhagavad Gita in telugu and odia",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://gita-api.vercel.app"
+  },
+  {
+    "name": "Ganjoor",
+    "description": "Classic Persian poetry works",
+    "category": "Books",
+    "authType": "oauth",
+    "baseUrl": "https://api.ganjoor.net"
+  },
+  {
+    "name": "GurbaniNow",
+    "description": "Fast Gurbani RESTful API",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://github.com/GurbaniNow/api"
+  },
+  {
+    "name": "Penguin Publishing",
+    "description": "Books and covers data",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://www.penguinrandomhouse.com/"
+  },
+  {
+    "name": "Quran-api",
+    "description": "Quran with 400+ translations",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://github.com/fawazahmed0/quran-api"
+  },
+  {
+    "name": "Rig Veda",
+    "description": "Gods, poets and verse meters",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://aninditabasu.github.io/indica/"
+  },
+  {
+    "name": "Thirukkural",
+    "description": "Thirukkural poems and explanation",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://api-thirukkural.web.app/"
+  },
+  {
+    "name": "Wolne Lektury",
+    "description": "Polish e-books information",
+    "category": "Books",
+    "authType": "none",
+    "baseUrl": "https://wolnelektury.pl/api/"
+  },
+  {
+    "name": "Mailjet",
+    "description": "Marketing email with MJML templates",
+    "category": "Email",
+    "authType": "apiKey",
+    "baseUrl": "https://www.mailjet.com/"
+  },
+  {
+    "name": "Markerapi",
+    "description": "Trademark Search",
+    "category": "Business",
+    "authType": "none",
+    "baseUrl": "https://markerapi.com"
+  },
+  {
+    "name": "SwiftKanban",
+    "description": "Kanban software API",
+    "category": "Business",
+    "authType": "apiKey",
+    "baseUrl": "https://www.digite.com/"
+  },
+  {
+    "name": "Tenders Hungary",
+    "description": "Procurement data for Hungary",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://tenders.guru/hu/api"
+  },
+  {
+    "name": "Tenders Poland",
+    "description": "Procurement data for Poland",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://tenders.guru/pl/api"
+  },
+  {
+    "name": "Tenders Romania",
+    "description": "Procurement data for Romania",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://tenders.guru/ro/api"
+  },
+  {
+    "name": "Tenders Spain",
+    "description": "Procurement data for Spain",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://tenders.guru/es/api"
+  },
+  {
+    "name": "Tenders Ukraine",
+    "description": "Procurement data for Ukraine",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://tenders.guru/ua/api"
+  },
+  {
+    "name": "Czech Namedays",
+    "description": "Nameday date lookup",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "https://svatky.adresa.info"
+  },
+  {
+    "name": "Holidays API",
+    "description": "Historical holiday data",
+    "category": "Calendar",
+    "authType": "apiKey",
+    "baseUrl": "https://holidayapi.com/"
+  },
+  {
+    "name": "LectServe",
+    "description": "Protestant liturgical calendar",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "http://www.lectserve.com"
+  },
+  {
+    "name": "Non-Working Days ICS",
+    "description": "ICS files for non working days",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "https://github.com/gadael/icsdb"
+  },
+  {
+    "name": "Russian Calendar",
+    "description": "Check Russian holidays",
+    "category": "Calendar",
+    "authType": "none",
+    "baseUrl": "https://github.com/egno/work-calendar"
+  },
+  {
+    "name": "AnonFiles",
+    "description": "Upload files anonymously",
+    "category": "Storage",
+    "authType": "none",
+    "baseUrl": "https://anonfiles.com/"
+  },
+  {
+    "name": "BayFiles",
+    "description": "Upload and share files",
+    "category": "Storage",
+    "authType": "none",
+    "baseUrl": "https://bayfiles.com/"
+  },
+  {
+    "name": "ddownload",
+    "description": "File Sharing and Storage",
+    "category": "Storage",
+    "authType": "apiKey",
+    "baseUrl": "https://ddownload.com/"
+  },
+  {
+    "name": "The Null Pointer",
+    "description": "File hosting and URL shortening",
+    "category": "Storage",
+    "authType": "none",
+    "baseUrl": "https://0x0.st"
+  },
+  {
+    "name": "Azure DevOps Health",
+    "description": "Azure resource health",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.microsoft.com/en-us/rest/api/resourcehealth"
+  },
+  {
+    "name": "Buddy CI/CD",
+    "description": "Continuous integration and delivery",
+    "category": "Development",
+    "authType": "oauth",
+    "baseUrl": "https://buddy.works/"
+  },
+  {
+    "name": "Codeship",
+    "description": "Continuous Integration Platform",
+    "category": "Development",
+    "authType": "apiKey",
+    "baseUrl": "https://docs.cloudbees.com/docs/cloudbees-codeship/"
+  }
+]

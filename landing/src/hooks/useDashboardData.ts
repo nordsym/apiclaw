@@ -13,6 +13,47 @@ import {
   type Earnings,
 } from "@/lib/convex-client";
 
+// Generate sample preview data for the dashboard
+function generatePreviewAnalytics(): Analytics {
+  const today = new Date();
+  const callsByDay = [];
+  
+  // Generate 14 days of sample data
+  for (let i = 13; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const calls = Math.floor(Math.random() * 40) + 20 + Math.sin(i * 0.5) * 15;
+    callsByDay.push({
+      date: date.toISOString().split('T')[0],
+      calls,
+      revenue: 0,
+    });
+  }
+
+  return {
+    totalCalls: 847,
+    uniqueAgents: 23,
+    totalRevenue: 0,
+    successRate: 98.2,
+    avgLatency: 145,
+    callsByDay,
+    topAgents: [
+      { agentId: "demo_1", calls: 234 },
+      { agentId: "demo_2", calls: 189 },
+      { agentId: "demo_3", calls: 156 },
+      { agentId: "demo_4", calls: 98 },
+      { agentId: "demo_5", calls: 67 },
+    ],
+    topActions: [
+      { actionName: "send_message", calls: 412 },
+      { actionName: "get_status", calls: 289 },
+      { actionName: "create_invoice", calls: 146 },
+    ],
+    apis: [],
+    isPreview: true,
+  };
+}
+
 interface DashboardData {
   session: ProviderSession | null;
   apis: ProviderAPI[];
@@ -57,6 +98,12 @@ export function useDashboardData(): DashboardData {
       }
 
       setSession(sessionData);
+      
+      // Update localStorage with current provider info
+      localStorage.setItem("apiclaw_provider", JSON.stringify({
+        name: sessionData.name,
+        email: sessionData.email
+      }));
 
       // Load all dashboard data in parallel
       const [apisData, analyticsData, earningsData] = await Promise.all([
@@ -66,7 +113,12 @@ export function useDashboardData(): DashboardData {
       ]);
 
       setApis(apisData || []);
-      setAnalytics(analyticsData);
+      // If no real analytics, show preview data
+      if (!analyticsData || analyticsData.totalCalls === 0) {
+        setAnalytics(generatePreviewAnalytics());
+      } else {
+        setAnalytics(analyticsData);
+      }
       setEarnings(earningsData);
     } catch (err) {
       console.error("Dashboard load error:", err);

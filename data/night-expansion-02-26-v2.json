@@ -1,0 +1,330 @@
+[
+  {
+    "id": "openfda-drug-labels",
+    "name": "openFDA Drug Labels",
+    "description": "Drug labeling information",
+    "category": "Healthcare",
+    "link": "https://open.fda.gov/apis/drug/label/",
+    "auth": "None"
+  },
+  {
+    "id": "human-protein-atlas",
+    "name": "Human Protein Atlas",
+    "description": "Human proteome data",
+    "category": "Science",
+    "link": "https://www.proteinatlas.org/about/help/dataaccess",
+    "auth": "None"
+  },
+  {
+    "id": "bioportal",
+    "name": "BioPortal",
+    "description": "Biomedical ontologies",
+    "category": "Science",
+    "link": "http://data.bioontology.org/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nasa-mars-rover-photos",
+    "name": "NASA Mars Rover Photos",
+    "description": "Mars rover imagery",
+    "category": "Science",
+    "link": "https://api.nasa.gov/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "nasa-exoplanet-archive",
+    "name": "NASA Exoplanet Archive",
+    "description": "Exoplanet data",
+    "category": "Science",
+    "link": "https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html",
+    "auth": "None"
+  },
+  {
+    "id": "astrobin",
+    "name": "AstroBin",
+    "description": "Astrophotography community",
+    "category": "Science",
+    "link": "https://www.astrobin.com/help/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "open-trivia-database",
+    "name": "Open Trivia Database",
+    "description": "Trivia questions",
+    "category": "Entertainment",
+    "link": "https://opentdb.com/api_config.php",
+    "auth": "None"
+  },
+  {
+    "id": "agify",
+    "name": "Agify",
+    "description": "Age prediction from name",
+    "category": "Data",
+    "link": "https://agify.io/",
+    "auth": "None"
+  },
+  {
+    "id": "genderize",
+    "name": "Genderize",
+    "description": "Gender prediction from name",
+    "category": "Data",
+    "link": "https://genderize.io/",
+    "auth": "None"
+  },
+  {
+    "id": "nationalize",
+    "name": "Nationalize",
+    "description": "Nationality prediction from name",
+    "category": "Data",
+    "link": "https://nationalize.io/",
+    "auth": "None"
+  },
+  {
+    "id": "university-domains",
+    "name": "University Domains",
+    "description": "University domains worldwide",
+    "category": "Education",
+    "link": "https://github.com/Hipo/university-domains-list",
+    "auth": "None"
+  },
+  {
+    "id": "edamam-food",
+    "name": "Edamam Food",
+    "description": "Nutrition analysis",
+    "category": "Food",
+    "link": "https://developer.edamam.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "usgs-earthquake-hazards",
+    "name": "USGS Earthquake Hazards",
+    "description": "Real-time earthquakes",
+    "category": "Environment",
+    "link": "https://earthquake.usgs.gov/fdsnws/event/1/",
+    "auth": "None"
+  },
+  {
+    "id": "global-fishing-watch",
+    "name": "Global Fishing Watch",
+    "description": "Fishing activity data",
+    "category": "Environment",
+    "link": "https://globalfishingwatch.org/our-apis/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "oceancurrent",
+    "name": "OceanCurrent",
+    "description": "Ocean temperature data",
+    "category": "Environment",
+    "link": "https://imos.org.au/facilities/oceandata",
+    "auth": "None"
+  },
+  {
+    "id": "sunrisesunset-io",
+    "name": "SunriseSunset.io",
+    "description": "Sun position and times",
+    "category": "Environment",
+    "link": "https://sunrisesunset.io/api/",
+    "auth": "None"
+  },
+  {
+    "id": "uv-index",
+    "name": "UV Index",
+    "description": "UV radiation data",
+    "category": "Environment",
+    "link": "https://www.openuv.io/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "fullcontact",
+    "name": "FullContact",
+    "description": "Identity resolution API",
+    "category": "Business",
+    "link": "https://docs.fullcontact.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "abstract-company-enrichment",
+    "name": "Abstract Company Enrichment",
+    "description": "Company data lookup",
+    "category": "Business",
+    "link": "https://www.abstractapi.com/api/company-enrichment",
+    "auth": "apiKey"
+  },
+  {
+    "id": "rocketreach",
+    "name": "RocketReach",
+    "description": "Professional contact data",
+    "category": "Business",
+    "link": "https://rocketreach.co/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "angellist",
+    "name": "AngelList",
+    "description": "Startup ecosystem data",
+    "category": "Business",
+    "link": "https://angel.co/api",
+    "auth": "OAuth"
+  },
+  {
+    "id": "reed-co-uk",
+    "name": "Reed.co.uk",
+    "description": "UK job listings",
+    "category": "Jobs",
+    "link": "https://www.reed.co.uk/developers",
+    "auth": "apiKey"
+  },
+  {
+    "id": "remotive",
+    "name": "Remotive",
+    "description": "Remote jobs",
+    "category": "Jobs",
+    "link": "https://remotive.io/api-documentation",
+    "auth": "None"
+  },
+  {
+    "id": "working-nomads",
+    "name": "Working Nomads",
+    "description": "Remote job listings",
+    "category": "Jobs",
+    "link": "https://www.workingnomads.co/api/exposed_jobs/",
+    "auth": "None"
+  },
+  {
+    "id": "jsearch",
+    "name": "JSearch",
+    "description": "Job listings API",
+    "category": "Jobs",
+    "link": "https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch",
+    "auth": "apiKey"
+  },
+  {
+    "id": "api-nba",
+    "name": "API-NBA",
+    "description": "NBA statistics",
+    "category": "Sports",
+    "link": "https://www.api-basketball.com/documentation",
+    "auth": "apiKey"
+  },
+  {
+    "id": "wger-workout-manager",
+    "name": "Wger Workout Manager",
+    "description": "Workout and exercise data",
+    "category": "Sports",
+    "link": "https://wger.de/en/software/api",
+    "auth": "None"
+  },
+  {
+    "id": "matrix",
+    "name": "Matrix",
+    "description": "Decentralized communication",
+    "category": "Communication",
+    "link": "https://matrix.org/docs/api/",
+    "auth": "OAuth"
+  },
+  {
+    "id": "line-messaging",
+    "name": "LINE Messaging",
+    "description": "LINE messenger API",
+    "category": "Communication",
+    "link": "https://developers.line.biz/en/docs/messaging-api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "packagist",
+    "name": "Packagist",
+    "description": "PHP package data",
+    "category": "Development",
+    "link": "https://packagist.org/apidoc",
+    "auth": "None"
+  },
+  {
+    "id": "rubygems",
+    "name": "RubyGems",
+    "description": "Ruby gems data",
+    "category": "Development",
+    "link": "https://guides.rubygems.org/rubygems-org-api/",
+    "auth": "None"
+  },
+  {
+    "id": "crates-io",
+    "name": "Crates.io",
+    "description": "Rust packages",
+    "category": "Development",
+    "link": "https://crates.io/data-access",
+    "auth": "None"
+  },
+  {
+    "id": "libraries-io",
+    "name": "Libraries.io",
+    "description": "Package monitoring",
+    "category": "Development",
+    "link": "https://libraries.io/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "snyk-vulnerability-db",
+    "name": "Snyk Vulnerability DB",
+    "description": "Security vulnerabilities",
+    "category": "Security",
+    "link": "https://snyk.io/api/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "hytale-api",
+    "name": "Hytale API",
+    "description": "Hytale game news",
+    "category": "Games",
+    "link": "https://hytale-api.com/",
+    "auth": "None"
+  },
+  {
+    "id": "osrs-api",
+    "name": "OSRS API",
+    "description": "Old School RuneScape",
+    "category": "Games",
+    "link": "https://oldschool.runescape.wiki/w/API",
+    "auth": "None"
+  },
+  {
+    "id": "pok-mon-tcg-api",
+    "name": "Pok\u00e9mon TCG API",
+    "description": "Pok\u00e9mon Trading Card Game",
+    "category": "Games",
+    "link": "https://pokemontcg.io/",
+    "auth": "None"
+  },
+  {
+    "id": "yu-gi-oh-api",
+    "name": "Yu-Gi-Oh! API",
+    "description": "Yu-Gi-Oh! card database",
+    "category": "Games",
+    "link": "https://db.ygoprodeck.com/api-guide/",
+    "auth": "None"
+  },
+  {
+    "id": "rentberry",
+    "name": "Rentberry",
+    "description": "Rental property data",
+    "category": "Real Estate",
+    "link": "https://rentberry.com/api",
+    "auth": "apiKey"
+  },
+  {
+    "id": "whoisxml",
+    "name": "WhoisXML",
+    "description": "Domain WHOIS data",
+    "category": "Utilities",
+    "link": "https://www.whoisxmlapi.com/",
+    "auth": "apiKey"
+  },
+  {
+    "id": "url-shortener-api",
+    "name": "URL Shortener API",
+    "description": "Shorten URLs",
+    "category": "Utilities",
+    "link": "https://t.ly/docs",
+    "auth": "apiKey"
+  }
+]

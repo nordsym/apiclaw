@@ -1,0 +1,2004 @@
+[
+  {
+    "name": "BioThings",
+    "description": "Biological data APIs",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://biothings.io"
+  },
+  {
+    "name": "ChEMBL",
+    "description": "Chemical database",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://chembl.org"
+  },
+  {
+    "name": "UniProt",
+    "description": "Protein sequence database",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://uniprot.org"
+  },
+  {
+    "name": "OMIM",
+    "description": "Human genes and genetic conditions",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://omim.org"
+  },
+  {
+    "name": "HealthData.gov",
+    "description": "US health data",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://healthdata.gov"
+  },
+  {
+    "name": "WHO",
+    "description": "World Health Organization data",
+    "category": "Healthcare",
+    "authType": "none",
+    "baseUrl": "https://who.int"
+  },
+  {
+    "name": "Medicare",
+    "description": "Medicare data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://medicare.gov"
+  },
+  {
+    "name": "Teladoc",
+    "description": "Telehealth platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://teladoc.com"
+  },
+  {
+    "name": "Amwell",
+    "description": "Telehealth services",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://amwell.com"
+  },
+  {
+    "name": "Doxy.me",
+    "description": "Telemedicine platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://doxy.me"
+  },
+  {
+    "name": "Redox",
+    "description": "Healthcare data integration",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://redoxengine.com"
+  },
+  {
+    "name": "Health Gorilla",
+    "description": "Healthcare data network",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://healthgorilla.com"
+  },
+  {
+    "name": "Particle Health",
+    "description": "Patient health data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://particlehealth.com"
+  },
+  {
+    "name": "1upHealth",
+    "description": "FHIR data platform",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://1up.health"
+  },
+  {
+    "name": "Flexpa",
+    "description": "Healthcare payments data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://flexpa.com"
+  },
+  {
+    "name": "Ribbon Health",
+    "description": "Healthcare provider data",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://ribbonhealth.com"
+  },
+  {
+    "name": "Eligible",
+    "description": "Healthcare eligibility",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://eligible.com"
+  },
+  {
+    "name": "Waystar",
+    "description": "Revenue cycle management",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://waystar.com"
+  },
+  {
+    "name": "Change Healthcare",
+    "description": "Healthcare technology",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://changehealthcare.com"
+  },
+  {
+    "name": "Athenahealth",
+    "description": "Healthcare network",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://athenahealth.com"
+  },
+  {
+    "name": "Epic",
+    "description": "Healthcare software",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://epic.com"
+  },
+  {
+    "name": "Cerner",
+    "description": "Healthcare IT",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://cerner.com"
+  },
+  {
+    "name": "Allscripts",
+    "description": "Healthcare IT solutions",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://allscripts.com"
+  },
+  {
+    "name": "eClinicalWorks",
+    "description": "EHR and practice management",
+    "category": "Healthcare",
+    "authType": "apiKey",
+    "baseUrl": "https://eclinicalworks.com"
+  },
+  {
+    "name": "Harvard Caselaw",
+    "description": "US caselaw database",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://case.law"
+  },
+  {
+    "name": "Comply Advantage",
+    "description": "AML compliance",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://complyadvantage.com"
+  },
+  {
+    "name": "Trulioo",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://trulioo.com"
+  },
+  {
+    "name": "Onfido",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://onfido.com"
+  },
+  {
+    "name": "Veriff",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://veriff.com"
+  },
+  {
+    "name": "Jumio",
+    "description": "Identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://jumio.com"
+  },
+  {
+    "name": "Persona",
+    "description": "Identity platform",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://withpersona.com"
+  },
+  {
+    "name": "Checkr",
+    "description": "Background checks",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://checkr.com"
+  },
+  {
+    "name": "GoodHire",
+    "description": "Employment screening",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://goodhire.com"
+  },
+  {
+    "name": "Sterling",
+    "description": "Background screening",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://sterlingcheck.com"
+  },
+  {
+    "name": "Alloy",
+    "description": "Identity decisioning",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://alloy.com"
+  },
+  {
+    "name": "Middesk",
+    "description": "Business verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://middesk.com"
+  },
+  {
+    "name": "Socure",
+    "description": "Digital identity verification",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://socure.com"
+  },
+  {
+    "name": "Sentilink",
+    "description": "Identity fraud prevention",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://sentilink.com"
+  },
+  {
+    "name": "Tessera",
+    "description": "Corporate intelligence",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://tessera.co"
+  },
+  {
+    "name": "Lexis Nexis",
+    "description": "Legal research",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://lexisnexis.com"
+  },
+  {
+    "name": "Westlaw",
+    "description": "Legal research",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://westlaw.com"
+  },
+  {
+    "name": "MyCase",
+    "description": "Legal case management",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://mycase.com"
+  },
+  {
+    "name": "Rocket Lawyer",
+    "description": "Legal services",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://rocketlawyer.com"
+  },
+  {
+    "name": "LegalZoom",
+    "description": "Legal services",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://legalzoom.com"
+  },
+  {
+    "name": "DocuLaw",
+    "description": "Legal document automation",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://doculaw.com"
+  },
+  {
+    "name": "Contract Express",
+    "description": "Contract automation",
+    "category": "Legal",
+    "authType": "apiKey",
+    "baseUrl": "https://contractexpress.com"
+  },
+  {
+    "name": "Trulia",
+    "description": "Real estate marketplace",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://trulia.com"
+  },
+  {
+    "name": "HouseCanary",
+    "description": "Real estate analytics",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://housecanary.com"
+  },
+  {
+    "name": "Attom Data",
+    "description": "Property data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://attomdata.com"
+  },
+  {
+    "name": "CoreLogic",
+    "description": "Property data and analytics",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://corelogic.com"
+  },
+  {
+    "name": "Reonomy",
+    "description": "Commercial real estate data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://reonomy.com"
+  },
+  {
+    "name": "Yardi",
+    "description": "Property management",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://yardi.com"
+  },
+  {
+    "name": "AppFolio",
+    "description": "Property management software",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://appfolio.com"
+  },
+  {
+    "name": "Buildium",
+    "description": "Property management",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://buildium.com"
+  },
+  {
+    "name": "Entrata",
+    "description": "Property management platform",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://entrata.com"
+  },
+  {
+    "name": "RealPage",
+    "description": "Real estate tech",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://realpage.com"
+  },
+  {
+    "name": "CoStar",
+    "description": "Commercial real estate data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://costar.com"
+  },
+  {
+    "name": "LoopNet",
+    "description": "Commercial listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://loopnet.com"
+  },
+  {
+    "name": "Apartments.com",
+    "description": "Apartment listings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://apartments.com"
+  },
+  {
+    "name": "Zumper",
+    "description": "Rental marketplace",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://zumper.com"
+  },
+  {
+    "name": "RentCafe",
+    "description": "Property marketing",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://rentcafe.com"
+  },
+  {
+    "name": "Walk Score",
+    "description": "Walkability data",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://walkscore.com"
+  },
+  {
+    "name": "GreatSchools",
+    "description": "School ratings",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://greatschools.org"
+  },
+  {
+    "name": "Parcl",
+    "description": "Real estate price feeds",
+    "category": "Real Estate",
+    "authType": "apiKey",
+    "baseUrl": "https://parcl.co"
+  },
+  {
+    "name": "Udemy",
+    "description": "Online learning platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://udemy.com"
+  },
+  {
+    "name": "Skillshare",
+    "description": "Creative classes",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://skillshare.com"
+  },
+  {
+    "name": "LinkedIn Learning",
+    "description": "Professional courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://linkedin.com/learning"
+  },
+  {
+    "name": "Pluralsight",
+    "description": "Tech skills platform",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://pluralsight.com"
+  },
+  {
+    "name": "Codecademy",
+    "description": "Coding courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://codecademy.com"
+  },
+  {
+    "name": "Treehouse",
+    "description": "Tech education",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://teamtreehouse.com"
+  },
+  {
+    "name": "Udacity",
+    "description": "Tech nanodegrees",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://udacity.com"
+  },
+  {
+    "name": "DataCamp",
+    "description": "Data science courses",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://datacamp.com"
+  },
+  {
+    "name": "Brilliant",
+    "description": "Interactive learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://brilliant.org"
+  },
+  {
+    "name": "MasterClass",
+    "description": "Expert-taught classes",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://masterclass.com"
+  },
+  {
+    "name": "Duolingo",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://duolingo.com"
+  },
+  {
+    "name": "Babbel",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://babbel.com"
+  },
+  {
+    "name": "Busuu",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://busuu.com"
+  },
+  {
+    "name": "Memrise",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://memrise.com"
+  },
+  {
+    "name": "Rosetta Stone",
+    "description": "Language learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://rosettastone.com"
+  },
+  {
+    "name": "Quizlet",
+    "description": "Study tools",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://quizlet.com"
+  },
+  {
+    "name": "Anki",
+    "description": "Flashcard learning",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://ankiweb.net"
+  },
+  {
+    "name": "Brainscape",
+    "description": "Smart flashcards",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://brainscape.com"
+  },
+  {
+    "name": "Chegg",
+    "description": "Study resources",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://chegg.com"
+  },
+  {
+    "name": "Course Hero",
+    "description": "Study resources",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://coursehero.com"
+  },
+  {
+    "name": "Grammarly",
+    "description": "Writing assistant",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://grammarly.com"
+  },
+  {
+    "name": "ProWritingAid",
+    "description": "Writing software",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://prowritingaid.com"
+  },
+  {
+    "name": "Hemingway Editor",
+    "description": "Writing tool",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://hemingwayapp.com"
+  },
+  {
+    "name": "Turnitin",
+    "description": "Plagiarism detection",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://turnitin.com"
+  },
+  {
+    "name": "Canvas LMS",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://instructure.com"
+  },
+  {
+    "name": "Blackboard",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://blackboard.com"
+  },
+  {
+    "name": "Moodle",
+    "description": "Open source LMS",
+    "category": "Education",
+    "authType": "none",
+    "baseUrl": "https://moodle.org"
+  },
+  {
+    "name": "Schoology",
+    "description": "Learning management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://schoology.com"
+  },
+  {
+    "name": "ClassDojo",
+    "description": "Classroom management",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://classdojo.com"
+  },
+  {
+    "name": "Seesaw",
+    "description": "Student portfolios",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://web.seesaw.me"
+  },
+  {
+    "name": "Kahoot",
+    "description": "Game-based learning",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://kahoot.com"
+  },
+  {
+    "name": "Nearpod",
+    "description": "Interactive lessons",
+    "category": "Education",
+    "authType": "apiKey",
+    "baseUrl": "https://nearpod.com"
+  },
+  {
+    "name": "Arduino Cloud",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://create.arduino.cc"
+  },
+  {
+    "name": "Losant",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://losant.com"
+  },
+  {
+    "name": "ThingsBoard",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://thingsboard.io"
+  },
+  {
+    "name": "Blynk",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://blynk.io"
+  },
+  {
+    "name": "Cayenne",
+    "description": "IoT project builder",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://mydevices.com"
+  },
+  {
+    "name": "Ubidots",
+    "description": "IoT data analytics",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ubidots.com"
+  },
+  {
+    "name": "AWS IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://aws.amazon.com/iot"
+  },
+  {
+    "name": "Azure IoT",
+    "description": "IoT services",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://azure.microsoft.com/iot"
+  },
+  {
+    "name": "Google Cloud IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://cloud.google.com/iot"
+  },
+  {
+    "name": "IBM Watson IoT",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ibm.com/watson-iot"
+  },
+  {
+    "name": "Samsung SmartThings",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://smartthings.developer.samsung.com"
+  },
+  {
+    "name": "Apple HomeKit",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://developer.apple.com/homekit"
+  },
+  {
+    "name": "Google Home",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/assistant"
+  },
+  {
+    "name": "Nanoleaf",
+    "description": "Smart lighting",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://nanoleaf.me"
+  },
+  {
+    "name": "Nest",
+    "description": "Smart home devices",
+    "category": "IoT",
+    "authType": "oauth",
+    "baseUrl": "https://developers.google.com/nest"
+  },
+  {
+    "name": "Ecobee",
+    "description": "Smart thermostats",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ecobee.com"
+  },
+  {
+    "name": "Ring",
+    "description": "Home security",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ring.com"
+  },
+  {
+    "name": "Arlo",
+    "description": "Smart security",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://arlo.com"
+  },
+  {
+    "name": "Wyze",
+    "description": "Smart home products",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://wyze.com"
+  },
+  {
+    "name": "Tuya",
+    "description": "IoT platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://tuya.com"
+  },
+  {
+    "name": "eWeLink",
+    "description": "Smart home platform",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://ewelink.cc"
+  },
+  {
+    "name": "Home Assistant",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://home-assistant.io"
+  },
+  {
+    "name": "Hubitat",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://hubitat.com"
+  },
+  {
+    "name": "Domoticz",
+    "description": "Home automation",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://domoticz.com"
+  },
+  {
+    "name": "Zigbee",
+    "description": "IoT protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://zigbeealliance.org"
+  },
+  {
+    "name": "Z-Wave",
+    "description": "Smart home protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://z-wavealliance.org"
+  },
+  {
+    "name": "Matter",
+    "description": "Smart home standard",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://buildwithmatter.com"
+  },
+  {
+    "name": "Thread",
+    "description": "IoT protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://threadgroup.org"
+  },
+  {
+    "name": "LoRaWAN",
+    "description": "IoT network protocol",
+    "category": "IoT",
+    "authType": "none",
+    "baseUrl": "https://lora-alliance.org"
+  },
+  {
+    "name": "Sigfox",
+    "description": "IoT connectivity",
+    "category": "IoT",
+    "authType": "apiKey",
+    "baseUrl": "https://sigfox.com"
+  },
+  {
+    "name": "Workday",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://workday.com"
+  },
+  {
+    "name": "Paylocity",
+    "description": "Payroll and HR",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paylocity.com"
+  },
+  {
+    "name": "Paycom",
+    "description": "HR and payroll",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paycom.com"
+  },
+  {
+    "name": "ADP",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://adp.com"
+  },
+  {
+    "name": "Paychex",
+    "description": "Payroll services",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://paychex.com"
+  },
+  {
+    "name": "Ceridian Dayforce",
+    "description": "HCM platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ceridian.com"
+  },
+  {
+    "name": "UKG",
+    "description": "HR solutions",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ukg.com"
+  },
+  {
+    "name": "SAP SuccessFactors",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://sap.com"
+  },
+  {
+    "name": "Oracle HCM",
+    "description": "HR cloud",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://oracle.com"
+  },
+  {
+    "name": "Ashby",
+    "description": "Recruiting platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://ashbyhq.com"
+  },
+  {
+    "name": "JazzHR",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://jazzhr.com"
+  },
+  {
+    "name": "iCIMS",
+    "description": "Talent acquisition",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://icims.com"
+  },
+  {
+    "name": "SmartRecruiters",
+    "description": "Hiring platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://smartrecruiters.com"
+  },
+  {
+    "name": "Jobvite",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://jobvite.com"
+  },
+  {
+    "name": "Breezy HR",
+    "description": "Recruiting software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://breezy.hr"
+  },
+  {
+    "name": "Recruitee",
+    "description": "Recruiting platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://recruitee.com"
+  },
+  {
+    "name": "Teamtailor",
+    "description": "Employer branding",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://teamtailor.com"
+  },
+  {
+    "name": "Deel",
+    "description": "Global HR",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://deel.com"
+  },
+  {
+    "name": "Remote",
+    "description": "Global HR platform",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://remote.com"
+  },
+  {
+    "name": "Oyster HR",
+    "description": "Global employment",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://oysterhr.com"
+  },
+  {
+    "name": "Papaya Global",
+    "description": "Global payroll",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://papayaglobal.com"
+  },
+  {
+    "name": "Velocity Global",
+    "description": "Global expansion",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://velocityglobal.com"
+  },
+  {
+    "name": "Factorial",
+    "description": "HR software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://factorialhr.com"
+  },
+  {
+    "name": "Charlie HR",
+    "description": "HR software",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://charliehr.com"
+  },
+  {
+    "name": "Humaans",
+    "description": "HR management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://humaans.io"
+  },
+  {
+    "name": "Lattice",
+    "description": "People management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://lattice.com"
+  },
+  {
+    "name": "15Five",
+    "description": "Performance management",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://15five.com"
+  },
+  {
+    "name": "Culture Amp",
+    "description": "Employee experience",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://cultureamp.com"
+  },
+  {
+    "name": "Leapsome",
+    "description": "People enablement",
+    "category": "HR",
+    "authType": "apiKey",
+    "baseUrl": "https://leapsome.com"
+  },
+  {
+    "name": "Epic Games",
+    "description": "Epic Games services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://epicgames.com"
+  },
+  {
+    "name": "PlayStation Network",
+    "description": "PlayStation services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playstation.com"
+  },
+  {
+    "name": "Xbox Live",
+    "description": "Xbox services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://xbox.com"
+  },
+  {
+    "name": "Nintendo",
+    "description": "Nintendo services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://nintendo.com"
+  },
+  {
+    "name": "GOG Galaxy",
+    "description": "GOG platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://gog.com"
+  },
+  {
+    "name": "Discord",
+    "description": "Gaming communication",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://discord.com"
+  },
+  {
+    "name": "Overwolf",
+    "description": "In-game overlay platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://overwolf.com"
+  },
+  {
+    "name": "OpenDota",
+    "description": "Dota 2 statistics",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://opendota.com"
+  },
+  {
+    "name": "Fortnite Tracker",
+    "description": "Fortnite statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://fortnitetracker.com"
+  },
+  {
+    "name": "Call of Duty",
+    "description": "COD API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://callofduty.com"
+  },
+  {
+    "name": "Apex Legends",
+    "description": "Apex statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://apexlegends.com"
+  },
+  {
+    "name": "Valorant",
+    "description": "Valorant API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playvalorant.com"
+  },
+  {
+    "name": "Counter-Strike",
+    "description": "CS:GO statistics",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://counter-strike.net"
+  },
+  {
+    "name": "Rocket League",
+    "description": "Rocket League API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://rocketleague.com"
+  },
+  {
+    "name": "FIFA",
+    "description": "FIFA API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://fifa.com"
+  },
+  {
+    "name": "NBA 2K",
+    "description": "NBA 2K API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://nba.2k.com"
+  },
+  {
+    "name": "Madden NFL",
+    "description": "Madden API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ea.com/madden"
+  },
+  {
+    "name": "Pokemon",
+    "description": "Pokemon API",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://pokeapi.co"
+  },
+  {
+    "name": "Yu-Gi-Oh",
+    "description": "YuGiOh card data",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://ygoprodeck.com"
+  },
+  {
+    "name": "Blizzard",
+    "description": "Blizzard games API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://blizzard.com"
+  },
+  {
+    "name": "Bungie",
+    "description": "Destiny API",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://bungie.net"
+  },
+  {
+    "name": "Ubisoft",
+    "description": "Ubisoft services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ubisoft.com"
+  },
+  {
+    "name": "Electronic Arts",
+    "description": "EA services",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://ea.com"
+  },
+  {
+    "name": "Unity",
+    "description": "Game development platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://unity.com"
+  },
+  {
+    "name": "Unreal Engine",
+    "description": "Game engine",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://unrealengine.com"
+  },
+  {
+    "name": "Godot",
+    "description": "Open source game engine",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://godotengine.org"
+  },
+  {
+    "name": "PlayFab",
+    "description": "Game backend",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://playfab.com"
+  },
+  {
+    "name": "GameSparks",
+    "description": "Game backend",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://gamesparks.com"
+  },
+  {
+    "name": "Photon",
+    "description": "Multiplayer platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://photonengine.com"
+  },
+  {
+    "name": "Mirror Networking",
+    "description": "Unity networking",
+    "category": "Gaming",
+    "authType": "none",
+    "baseUrl": "https://mirror-networking.com"
+  },
+  {
+    "name": "Faceit",
+    "description": "Esports platform",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://faceit.com"
+  },
+  {
+    "name": "ESL",
+    "description": "Esports league",
+    "category": "Gaming",
+    "authType": "apiKey",
+    "baseUrl": "https://esl.com"
+  },
+  {
+    "name": "Ethereum",
+    "description": "Ethereum blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://ethereum.org"
+  },
+  {
+    "name": "Solana",
+    "description": "Solana blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://solana.com"
+  },
+  {
+    "name": "Avalanche",
+    "description": "Avalanche network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://avax.network"
+  },
+  {
+    "name": "Arbitrum",
+    "description": "Arbitrum L2",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://arbitrum.io"
+  },
+  {
+    "name": "Optimism",
+    "description": "Optimism L2",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://optimism.io"
+  },
+  {
+    "name": "Base",
+    "description": "Base L2 by Coinbase",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://base.org"
+  },
+  {
+    "name": "BNB Chain",
+    "description": "Binance Smart Chain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://bnbchain.org"
+  },
+  {
+    "name": "Fantom",
+    "description": "Fantom network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://fantom.foundation"
+  },
+  {
+    "name": "Near",
+    "description": "Near Protocol",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://near.org"
+  },
+  {
+    "name": "Cosmos",
+    "description": "Cosmos network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://cosmos.network"
+  },
+  {
+    "name": "Polkadot",
+    "description": "Polkadot network",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://polkadot.network"
+  },
+  {
+    "name": "Cardano",
+    "description": "Cardano blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://cardano.org"
+  },
+  {
+    "name": "Aptos",
+    "description": "Aptos blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://aptoslabs.com"
+  },
+  {
+    "name": "Sui",
+    "description": "Sui blockchain",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://sui.io"
+  },
+  {
+    "name": "Thirdweb",
+    "description": "Web3 development",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://thirdweb.com"
+  },
+  {
+    "name": "Dune Analytics",
+    "description": "Blockchain analytics",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://dune.com"
+  },
+  {
+    "name": "Nansen",
+    "description": "Blockchain analytics",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://nansen.ai"
+  },
+  {
+    "name": "Flipside",
+    "description": "Blockchain data",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://flipsidecrypto.com"
+  },
+  {
+    "name": "DeFiLlama",
+    "description": "DeFi data",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://defillama.com"
+  },
+  {
+    "name": "Blur",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://blur.io"
+  },
+  {
+    "name": "Magic Eden",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://magiceden.io"
+  },
+  {
+    "name": "Rarible",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://rarible.com"
+  },
+  {
+    "name": "Foundation",
+    "description": "NFT marketplace",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://foundation.app"
+  },
+  {
+    "name": "Zora",
+    "description": "NFT protocol",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://zora.co"
+  },
+  {
+    "name": "Manifold",
+    "description": "NFT creation",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://manifold.xyz"
+  },
+  {
+    "name": "Reservoir",
+    "description": "NFT infrastructure",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://reservoir.tools"
+  },
+  {
+    "name": "SimpleHash",
+    "description": "NFT data",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://simplehash.com"
+  },
+  {
+    "name": "Center",
+    "description": "NFT infrastructure",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://center.app"
+  },
+  {
+    "name": "Uniswap",
+    "description": "DEX protocol",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://uniswap.org"
+  },
+  {
+    "name": "SushiSwap",
+    "description": "DEX protocol",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://sushi.com"
+  },
+  {
+    "name": "Curve",
+    "description": "DEX for stablecoins",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://curve.fi"
+  },
+  {
+    "name": "Aave",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://aave.com"
+  },
+  {
+    "name": "Compound",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://compound.finance"
+  },
+  {
+    "name": "MakerDAO",
+    "description": "DeFi lending",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://makerdao.com"
+  },
+  {
+    "name": "Lido",
+    "description": "Liquid staking",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://lido.fi"
+  },
+  {
+    "name": "Rocket Pool",
+    "description": "Decentralized staking",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://rocketpool.net"
+  },
+  {
+    "name": "WalletConnect",
+    "description": "Wallet connection",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://walletconnect.com"
+  },
+  {
+    "name": "Web3Modal",
+    "description": "Wallet connection UI",
+    "category": "Blockchain",
+    "authType": "none",
+    "baseUrl": "https://web3modal.com"
+  },
+  {
+    "name": "Privy",
+    "description": "Web3 authentication",
+    "category": "Blockchain",
+    "authType": "apiKey",
+    "baseUrl": "https://privy.io"
+  },
+  {
+    "name": "La Poste",
+    "description": "French postal",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://laposte.fr"
+  },
+  {
+    "name": "Amazon Shipping",
+    "description": "Amazon logistics",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://services.amazon.com"
+  },
+  {
+    "name": "Stamps.com",
+    "description": "Shipping software",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://stamps.com"
+  },
+  {
+    "name": "Route",
+    "description": "Package tracking",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://route.com"
+  },
+  {
+    "name": "Narvar",
+    "description": "Post-purchase experience",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://narvar.com"
+  },
+  {
+    "name": "Flexport",
+    "description": "Freight forwarding",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://flexport.com"
+  },
+  {
+    "name": "project44",
+    "description": "Supply chain visibility",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://project44.com"
+  },
+  {
+    "name": "FourKites",
+    "description": "Supply chain visibility",
+    "category": "Logistics",
+    "authType": "apiKey",
+    "baseUrl": "https://fourkites.com"
+  },
+  {
+    "name": "SportsData.io",
+    "description": "Sports statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://sportsdata.io"
+  },
+  {
+    "name": "SportRadar",
+    "description": "Sports data",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://sportradar.com"
+  },
+  {
+    "name": "The Sports DB",
+    "description": "Sports database",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://thesportsdb.com"
+  },
+  {
+    "name": "MLB Stats",
+    "description": "Baseball statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mlb.com"
+  },
+  {
+    "name": "UFC Stats",
+    "description": "MMA statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://ufc.com"
+  },
+  {
+    "name": "F1 Data",
+    "description": "Formula 1 data",
+    "category": "Sports",
+    "authType": "none",
+    "baseUrl": "https://formula1.com"
+  },
+  {
+    "name": "Cricket API",
+    "description": "Cricket statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://cricapi.com"
+  },
+  {
+    "name": "Tennis Live Data",
+    "description": "Tennis statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://tennislivedata.com"
+  },
+  {
+    "name": "Golf Leaderboard",
+    "description": "Golf statistics",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://pgatour.com"
+  },
+  {
+    "name": "Garmin",
+    "description": "Fitness devices",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://garmin.com"
+  },
+  {
+    "name": "Whoop",
+    "description": "Fitness tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://whoop.com"
+  },
+  {
+    "name": "Oura",
+    "description": "Sleep and fitness",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://ouraring.com"
+  },
+  {
+    "name": "MyFitnessPal",
+    "description": "Nutrition tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://myfitnesspal.com"
+  },
+  {
+    "name": "Apple Health",
+    "description": "Health data",
+    "category": "Sports",
+    "authType": "oauth",
+    "baseUrl": "https://apple.com/health"
+  },
+  {
+    "name": "Google Fit",
+    "description": "Fitness platform",
+    "category": "Sports",
+    "authType": "oauth",
+    "baseUrl": "https://google.com/fit"
+  },
+  {
+    "name": "Samsung Health",
+    "description": "Health platform",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://samsung.com/health"
+  },
+  {
+    "name": "Peloton",
+    "description": "Fitness platform",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://onepeloton.com"
+  },
+  {
+    "name": "Mirror",
+    "description": "Home fitness",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mirror.co"
+  },
+  {
+    "name": "Tonal",
+    "description": "Smart home gym",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://tonal.com"
+  },
+  {
+    "name": "Zwift",
+    "description": "Virtual cycling",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://zwift.com"
+  },
+  {
+    "name": "TrainerRoad",
+    "description": "Cycling training",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://trainerroad.com"
+  },
+  {
+    "name": "Wahoo",
+    "description": "Cycling tech",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://wahoofitness.com"
+  },
+  {
+    "name": "Runkeeper",
+    "description": "Running tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://runkeeper.com"
+  },
+  {
+    "name": "Nike Run Club",
+    "description": "Running app",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://nike.com"
+  },
+  {
+    "name": "Adidas Running",
+    "description": "Running app",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://adidas.com"
+  },
+  {
+    "name": "MapMyRun",
+    "description": "Running tracking",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://mapmyrun.com"
+  },
+  {
+    "name": "AllTrails",
+    "description": "Trail guides",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://alltrails.com"
+  },
+  {
+    "name": "Komoot",
+    "description": "Route planning",
+    "category": "Sports",
+    "authType": "apiKey",
+    "baseUrl": "https://komoot.com"
+  },
+  {
+    "name": "Canadian Open Data",
+    "description": "Canadian government data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://open.canada.ca"
+  },
+  {
+    "name": "Australian Open Data",
+    "description": "Australian government data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://data.gov.au"
+  },
+  {
+    "name": "US Census",
+    "description": "US Census Bureau data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://census.gov"
+  },
+  {
+    "name": "Bureau of Labor Statistics",
+    "description": "US labor statistics",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://bls.gov"
+  },
+  {
+    "name": "FAA",
+    "description": "Aviation data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://faa.gov"
+  },
+  {
+    "name": "FBI Crime Data",
+    "description": "Crime statistics",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://fbi.gov"
+  },
+  {
+    "name": "IRS",
+    "description": "Tax data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://irs.gov"
+  },
+  {
+    "name": "Social Security",
+    "description": "Social security data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://ssa.gov"
+  },
+  {
+    "name": "Veterans Affairs",
+    "description": "VA data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://va.gov"
+  },
+  {
+    "name": "IMF",
+    "description": "International monetary data",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://imf.org"
+  },
+  {
+    "name": "OECD",
+    "description": "Economic data",
+    "category": "Government",
+    "authType": "apiKey",
+    "baseUrl": "https://oecd.org"
+  },
+  {
+    "name": "Eurostat",
+    "description": "European statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ec.europa.eu/eurostat"
+  },
+  {
+    "name": "ONS UK",
+    "description": "UK national statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ons.gov.uk"
+  },
+  {
+    "name": "INSEE France",
+    "description": "French statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://insee.fr"
+  },
+  {
+    "name": "Destatis Germany",
+    "description": "German statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://destatis.de"
+  },
+  {
+    "name": "Statistics Sweden",
+    "description": "Swedish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://scb.se"
+  },
+  {
+    "name": "Statistics Norway",
+    "description": "Norwegian statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://ssb.no"
+  },
+  {
+    "name": "Statistics Denmark",
+    "description": "Danish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://dst.dk"
+  },
+  {
+    "name": "Statistics Finland",
+    "description": "Finnish statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stat.fi"
+  },
+  {
+    "name": "CBR Russia",
+    "description": "Central Bank of Russia",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://cbr.ru"
+  },
+  {
+    "name": "NBS China",
+    "description": "National Bureau of Statistics China",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stats.gov.cn"
+  },
+  {
+    "name": "Japan Statistics",
+    "description": "Japanese statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://stat.go.jp"
+  },
+  {
+    "name": "Korean Statistics",
+    "description": "Korean statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://kostat.go.kr"
+  },
+  {
+    "name": "Australian Bureau of Statistics",
+    "description": "Australian statistics",
+    "category": "Government",
+    "authType": "none",
+    "baseUrl": "https://abs.gov.au"
+  }
+]

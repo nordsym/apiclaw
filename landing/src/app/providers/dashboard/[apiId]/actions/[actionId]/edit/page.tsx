@@ -38,7 +38,7 @@ interface ActionFormData {
   enabled: boolean;
 }
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.site';
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 const PARAM_TYPES = ["string", "number", "boolean", "object"] as const;

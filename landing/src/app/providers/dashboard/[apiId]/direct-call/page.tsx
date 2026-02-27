@@ -36,6 +36,9 @@ interface DirectCallConfig {
   rateLimitPerDay: number;
   pricePerRequest: number;
   status: "draft" | "testing" | "live";
+  // Customer key passthrough
+  allowCustomerKeys: boolean;
+  requireCustomerKeys: boolean;
 }
 
 const authTypes = [
@@ -71,6 +74,8 @@ export default function DirectCallSetupPage() {
     rateLimitPerDay: 10000,
     pricePerRequest: 1,
     status: "draft",
+    allowCustomerKeys: true,
+    requireCustomerKeys: false,
   });
 
   useEffect(() => {
@@ -203,7 +208,7 @@ export default function DirectCallSetupPage() {
         return;
       }
 
-      await convexMutation("directCall:saveDirectCallConfig", {
+      await convexMutation("directCall:saveConfig", {
         token,
         config: {
           apiId,
@@ -216,6 +221,8 @@ export default function DirectCallSetupPage() {
           rateLimitPerDay: formData.rateLimitPerDay,
           pricePerRequest: formData.pricePerRequest,
           status: formData.status,
+          allowCustomerKeys: formData.allowCustomerKeys,
+          requireCustomerKeys: formData.requireCustomerKeys,
         },
       });
 
@@ -496,6 +503,50 @@ export default function DirectCallSetupPage() {
               Max requests per day per user
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Customer Authentication */}
+      <div className="rounded-2xl border border-border bg-surface-elevated p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Key className="w-5 h-5 text-accent" />
+          <h2 className="font-semibold">Customer Authentication</h2>
+        </div>
+        <p className="text-sm text-text-muted mb-4">
+          Control how agents authenticate with your API. By default, APIClaw uses your master key. 
+          Enable customer keys to let agents pass their own API keys (useful for multi-tenant SaaS).
+        </p>
+        <div className="space-y-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.allowCustomerKeys}
+              onChange={(e) => updateField("allowCustomerKeys", e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-border text-accent focus:ring-accent"
+            />
+            <div>
+              <span className="font-medium">Allow customer keys</span>
+              <p className="text-sm text-text-muted">
+                Agents can optionally pass their own API key via <code className="text-xs bg-surface px-1 rounded">customer_key</code> parameter
+              </p>
+            </div>
+          </label>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.requireCustomerKeys}
+              onChange={(e) => updateField("requireCustomerKeys", e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-border text-accent focus:ring-accent"
+            />
+            <div>
+              <span className="font-medium">Require customer keys</span>
+              <p className="text-sm text-text-muted">
+                Agents <strong>must</strong> provide their own API key. Your master key will not be used as fallback.
+                <br />
+                <span className="text-accent">Recommended for multi-tenant SaaS where each customer has their own account.</span>
+              </p>
+            </div>
+          </label>
         </div>
       </div>
 
