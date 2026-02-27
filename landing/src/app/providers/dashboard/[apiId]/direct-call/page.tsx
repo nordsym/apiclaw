@@ -193,7 +193,7 @@ export default function DirectCallSetupPage() {
 
     // Validate required fields
     if (formData.authType !== "none" && !formData.masterApiKey && !formData._id) {
-      setError("Master API key is required for authenticated APIs");
+      setError("Service account key is required for authenticated APIs");
       return;
     }
 
@@ -435,16 +435,20 @@ export default function DirectCallSetupPage() {
                 </p>
               </div>
 
-              {/* Master API Key */}
+              {/* Service Account Key */}
               <div>
-                <label className="block text-sm font-medium mb-2">Master API Key</label>
+                <label className="block text-sm font-medium mb-2">Service Account Key</label>
+                <p className="text-xs text-text-muted mb-3">
+                  The API key APIClaw uses to make requests on behalf of your users. 
+                  This is typically a privileged key from your provider dashboard.
+                </p>
                 <div className="relative">
                   <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                   <input
                     type={showApiKey ? "text" : "password"}
                     value={formData.masterApiKey}
                     onChange={(e) => updateField("masterApiKey", e.target.value)}
-                    placeholder={formData._id ? "••••••••••••••••" : "Enter your API key"}
+                    placeholder={formData._id ? "••••••••••••••••" : "Enter your service account key"}
                     className="w-full pl-12 pr-12 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none transition"
                   />
                   <button
@@ -458,7 +462,7 @@ export default function DirectCallSetupPage() {
                 <div className="mt-2 flex items-start gap-2 text-xs text-text-muted">
                   <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>
-                    Your API key is encrypted with AES-256-GCM before storage. 
+                    Your key is encrypted with AES-256-GCM before storage. 
                     {formData._id && " Leave blank to keep the existing key."}
                   </span>
                 </div>
@@ -513,7 +517,7 @@ export default function DirectCallSetupPage() {
           <h2 className="font-semibold">Customer Authentication</h2>
         </div>
         <p className="text-sm text-text-muted mb-4">
-          Control how agents authenticate with your API. By default, APIClaw uses your master key. 
+          Control how agents authenticate with your API. By default, APIClaw uses your service account key. 
           Enable customer keys to let agents pass their own API keys (useful for multi-tenant SaaS).
         </p>
         <div className="space-y-4">
@@ -541,7 +545,7 @@ export default function DirectCallSetupPage() {
             <div>
               <span className="font-medium">Require customer keys</span>
               <p className="text-sm text-text-muted">
-                Agents <strong>must</strong> provide their own API key. Your master key will not be used as fallback.
+                Agents <strong>must</strong> provide their own API key. Your service account key will not be used as fallback.
                 <br />
                 <span className="text-accent">Recommended for multi-tenant SaaS where each customer has their own account.</span>
               </p>
