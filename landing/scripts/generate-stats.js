@@ -80,15 +80,20 @@ const outputPath = path.join(__dirname, '../src/lib/stats.json');
 try {
   const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
   
-  // Consolidate categories using the mapping
-  const consolidatedCategories = registry.apis.map(api => categoryMap[api.category] || api.category);
-  const uniqueCategories = [...new Set(consolidatedCategories)];
+  // Consolidate categories using the mapping and count them
+  const categoryBreakdown = {};
+  registry.apis.forEach(api => {
+    const cat = categoryMap[api.category] || api.category || 'Other';
+    categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1;
+  });
+  const uniqueCategories = Object.keys(categoryBreakdown);
   
   const stats = {
     apiCount: registry.count,
     categoryCount: uniqueCategories.length,
     lastUpdated: registry.lastUpdated || new Date().toISOString().split('T')[0],
-    generatedAt: new Date().toISOString()
+    generatedAt: new Date().toISOString(),
+    categoryBreakdown: categoryBreakdown
   };
   
   // Ensure directory exists
@@ -103,10 +108,11 @@ try {
   console.error('Failed to generate stats:', err);
   // Write fallback stats
   const fallback = {
-    apiCount: 19176,
-    categoryCount: 58,
+    apiCount: 22392,
+    categoryCount: 14,
     lastUpdated: new Date().toISOString().split('T')[0],
-    generatedAt: new Date().toISOString()
+    generatedAt: new Date().toISOString(),
+    categoryBreakdown: {}
   };
   fs.writeFileSync(outputPath, JSON.stringify(fallback, null, 2));
   console.log('✓ Fallback stats written');

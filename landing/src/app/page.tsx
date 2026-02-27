@@ -159,6 +159,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
   const [showDirectCallModal, setShowDirectCallModal] = useState(false);
+  const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
@@ -502,8 +503,8 @@ Website: https://apiclaw.nordsym.com`;
             {stats.map((stat, i) => (
               <div 
                 key={i} 
-                className={`stat-card relative ${stat.label === "Direct Call" ? "cursor-pointer hover:border-accent/50 transition-colors" : ""}`}
-                onClick={stat.label === "Direct Call" ? () => setShowDirectCallModal(true) : undefined}
+                className={`stat-card relative ${(stat.label === "Direct Call" || stat.label === "Categories") ? "cursor-pointer hover:border-accent/50 transition-colors" : ""}`}
+                onClick={stat.label === "Direct Call" ? () => setShowDirectCallModal(true) : stat.label === "Categories" ? () => setShowCategoriesModal(true) : undefined}
               >
                 {stat.live && (
                   <div className="absolute top-2 right-2 flex items-center gap-1">
@@ -513,7 +514,7 @@ Website: https://apiclaw.nordsym.com`;
                 )}
                 <div className="stat-number">{stat.number}</div>
                 <div className="stat-label">{stat.label}</div>
-                {stat.label === "Direct Call" && (
+                {(stat.label === "Direct Call" || stat.label === "Categories") && (
                   <div className="text-xs text-text-muted mt-1">Click to see all →</div>
                 )}
               </div>
@@ -545,6 +546,31 @@ Website: https://apiclaw.nordsym.com`;
               ))}
             </div>
             <p className="text-sm text-text-muted mt-4 text-center">New providers added weekly</p>
+          </div>
+        </div>
+      )}
+
+      {/* Categories Modal */}
+      {showCategoriesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowCategoriesModal(false)}>
+          <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">📂 API Categories</h3>
+              <button onClick={() => setShowCategoriesModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-text-muted mb-4">{statsData.apiCount.toLocaleString()} APIs organized into {statsData.categoryCount} categories.</p>
+            <div className="space-y-2">
+              {Object.entries(statsData.categoryBreakdown || {})
+                .sort(([,a], [,b]) => (b as number) - (a as number))
+                .map(([category, count], i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                  <div className="font-medium">{category}</div>
+                  <span className="text-sm px-3 py-1 rounded-full bg-accent/20 text-accent">{(count as number).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
