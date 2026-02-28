@@ -2456,24 +2456,195 @@ function WebhooksTab() {
 // API KEYS TAB (BYOK)
 // ============================================
 
+interface ProviderKey {
+  provider: string;
+  keyHint: string;
+  isCustom: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface BYOKProvider {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+const BYOK_PROVIDERS: BYOKProvider[] = [
+  { id: "brave_search", name: "Brave Search", icon: "🔍" },
+  { id: "openrouter", name: "OpenRouter", icon: "🤖" },
+  { id: "elevenlabs", name: "ElevenLabs", icon: "🎙️" },
+  { id: "twilio", name: "Twilio", icon: "📞" },
+  { id: "resend", name: "Resend", icon: "📧" },
+  { id: "e2b", name: "E2B", icon: "💻" },
+];
+
 function ApiKeysTab() {
-  const providers = [
-    { name: "Brave Search", status: "direct", icon: "🔍" },
-    { name: "OpenRouter", status: "direct", icon: "🤖" },
-    { name: "ElevenLabs", status: "direct", icon: "🎙️" },
-    { name: "46elks", status: "direct", icon: "📱" },
-    { name: "Resend", status: "direct", icon: "📧" },
-    { name: "Twilio", status: "direct", icon: "📞" },
-    { name: "E2B", status: "direct", icon: "💻" },
-    { name: "Replicate", status: "direct", icon: "🎨" },
-  ];
+  const [keys, setKeys] = useState<ProviderKey[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<BYOKProvider | null>(null);
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Fetch keys on mount
+  useEffect(() => {
+    const fetchKeys = async () => {
+      const token = localStorage.getItem("apiclaw_workspace_session");
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "providerKeys:getKeys",
+            args: { token },
+          }),
+        });
+        const data = await res.json();
+        setKeys(data.value?.keys || data.keys || []);
+      } catch (err) {
+        console.error("Failed to fetch keys:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchKeys();
+  }, []);
+
+  const handleAddKey = async () => {
+    if (!selectedProvider || !apiKeyInput.trim()) return;
+
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    setIsSaving(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "providerKeys:addKey",
+          args: {
+            token,
+            provider: selectedProvider.id,
+            apiKey: apiKeyInput,
+          },
+        }),
+      });
+      const data = await res.json();
+
+      if (data.value?.success || data.success) {
+        // Refresh keys
+        const keysRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "providerKeys:getKeys",
+            args: { token },
+          }),
+        });
+        const keysData = await keysRes.json();
+        setKeys(keysData.value?.keys || keysData.keys || []);
+
+        setSuccessMessage(`Key saved! Using your key for ${selectedProvider.name}`);
+        setTimeout(() => setSuccessMessage(null), 3000);
+        setShowAddModal(false);
+        setApiKeyInput("");
+        setSelectedProvider(null);
+      } else {
+        setErrorMessage("Failed to save key. Please try again.");
+      }
+    } catch (err) {
+      console.error("Failed to add key:", err);
+      setErrorMessage("Failed to save key. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRemoveKey = async (providerId: string) => {
+    if (confirmRemove !== providerId) {
+      setConfirmRemove(providerId);
+      return;
+    }
+
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "providerKeys:removeKey",
+          args: { token, provider: providerId },
+        }),
+      });
+
+      setKeys(keys.filter((k) => k.provider !== providerId));
+      setConfirmRemove(null);
+      setSuccessMessage("Key removed. Back to Direct Call.");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error("Failed to remove key:", err);
+      setErrorMessage("Failed to remove key. Please try again.");
+    }
+  };
+
+  const getKeyForProvider = (providerId: string) => {
+    return keys.find((k) => k.provider === providerId);
+  };
+
+  const openAddModal = (provider: BYOKProvider) => {
+    setSelectedProvider(provider);
+    setApiKeyInput("");
+    setErrorMessage(null);
+    setShowAddModal(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">API Keys (BYOK)</h2>
-        <p className="text-[var(--text-muted)]">Bring your own keys for unlimited calls.</p>
+        <h2 className="text-2xl font-bold mb-2">API Keys</h2>
+        <p className="text-[var(--text-muted)]">
+          Direct Call works without keys. Add your own for unlimited calls and direct provider access.
+        </p>
       </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3">
+          <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+          <p className="text-green-500">{successMessage}</p>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-500">{errorMessage}</p>
+        </div>
+      )}
 
       {/* Info Banner */}
       <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
@@ -2496,39 +2667,149 @@ function ApiKeysTab() {
           <h3 className="font-semibold">Providers</h3>
         </div>
         <div className="divide-y divide-[var(--border)]">
-          {providers.map((provider) => (
-            <div key={provider.name} className="flex items-center justify-between p-4 hover:bg-[var(--surface)] transition">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{provider.icon}</span>
-                <span className="font-medium">{provider.name}</span>
+          {BYOK_PROVIDERS.map((provider) => {
+            const userKey = getKeyForProvider(provider.id);
+            const hasKey = !!userKey;
+
+            return (
+              <div
+                key={provider.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{provider.icon}</span>
+                  <span className="font-medium">{provider.name}</span>
+                </div>
+                <div className="flex items-center gap-3 ml-10 sm:ml-0">
+                  {hasKey ? (
+                    <>
+                      <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium">
+                        Your Key (•••• {userKey.keyHint})
+                      </span>
+                      <button
+                        onClick={() => openAddModal(provider)}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleRemoveKey(provider.id)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                          confirmRemove === provider.id
+                            ? "bg-red-500 text-white"
+                            : "text-red-500 hover:bg-red-500/10"
+                        }`}
+                      >
+                        {confirmRemove === provider.id ? "Confirm" : "Remove"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-sm font-medium">
+                        Direct Call
+                      </span>
+                      <button
+                        onClick={() => openAddModal(provider)}
+                        className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--surface)] hover:border-[#ef4444]/50 transition"
+                      >
+                        Add Your Key
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-sm font-medium">
-                  Direct Call
-                </span>
-                <button
-                  className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--surface)] transition opacity-50 cursor-not-allowed"
-                  disabled
-                  title="Coming soon"
-                >
-                  Add Key
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Add Custom Provider */}
-      <button
-        className="w-full rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed"
-        disabled
-        title="Coming soon"
-      >
-        <Plus className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
-        <p className="font-medium text-[var(--text-muted)]">+ Add Custom Provider</p>
-        <p className="text-sm text-[var(--text-muted)] mt-1">Connect any REST API with custom authentication</p>
-      </button>
+      {/* Add Custom Provider (placeholder) */}
+      <div className="relative group">
+        <button
+          className="w-full rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed"
+          disabled
+        >
+          <Plus className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
+          <p className="font-medium text-[var(--text-muted)]">+ Add Custom Provider</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">Connect any REST API with custom authentication</p>
+        </button>
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+          <span className="px-3 py-1.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm font-medium shadow-lg">
+            Coming soon
+          </span>
+        </div>
+      </div>
+
+      {/* Add Key Modal */}
+      {showAddModal && selectedProvider && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-3xl">{selectedProvider.icon}</span>
+              <div>
+                <h3 className="font-bold text-lg">
+                  {getKeyForProvider(selectedProvider.id) ? "Update" : "Add"} {selectedProvider.name} Key
+                </h3>
+                <p className="text-sm text-[var(--text-muted)]">
+                  Your key will be encrypted and stored securely.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">API Key</label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    placeholder="Enter your API key..."
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 pr-10"
+                    autoFocus
+                  />
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+                </div>
+              </div>
+
+              {errorMessage && (
+                <p className="text-sm text-red-500">{errorMessage}</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setApiKeyInput("");
+                    setSelectedProvider(null);
+                    setErrorMessage(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddKey}
+                  disabled={!apiKeyInput.trim() || isSaving}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Save
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

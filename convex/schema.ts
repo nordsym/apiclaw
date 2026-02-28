@@ -432,4 +432,26 @@ export default defineSchema({
     .index("by_providerId", ["providerId"])
     .index("by_userId", ["userId"])
     .index("by_timestamp", ["timestamp"]),
+
+  // ============================================
+  // BYOK - BRING YOUR OWN KEY
+  // ============================================
+
+  // User-provided API keys for providers
+  providerKeys: defineTable({
+    workspaceId: v.id("workspaces"),
+    provider: v.string(), // "brave_search", "openrouter", etc.
+    encryptedKey: v.string(), // Base64 encoded for MVP
+    keyHint: v.string(), // Last 4 chars for display
+    isCustom: v.boolean(), // true if custom provider (not built-in)
+    customConfig: v.optional(v.object({
+      baseUrl: v.string(),
+      authType: v.string(), // "bearer", "api_key", "basic"
+      authHeader: v.optional(v.string()), // e.g. "X-API-Key"
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_provider", ["workspaceId", "provider"]),
 });
