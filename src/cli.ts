@@ -83,21 +83,71 @@ async function registerOwner(email: string): Promise<void> {
   
   try {
     const fingerprint = getMachineFingerprint();
-    const result = await convex.mutation("workspaces:requestMagicLink" as any, {
-      email,
-      fingerprint,
-    }) as any;
     
-    if (result?.sent) {
+    // Use HTTP endpoint for magic link
+    const response = await fetch(`${CONVEX_URL.replace('.cloud', '.site')}/workspace/magic-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, fingerprint }),
+    });
+    
+    const result = await response.json() as { success?: boolean; token?: string; error?: string };
+    
+    if (result?.success && result?.token) {
       success(`Magic link sent to ${email}`);
       log(`\n📧 Check your email and click the link to authenticate.`);
-      log(`   Then run ${colors.cyan}status${colors.reset} to verify.\n`);
+      
+      // Start polling for verification
+      log(`\n⏳ Waiting for you to click the link...`);
+      log(`   (Press Ctrl+C to cancel)\n`);
+      
+      await pollForVerification(result.token, fingerprint);
     } else {
-      error(`Failed to send magic link: ${result?.error || 'Unknown error'}`);
+      error(`Failed: ${result?.error || 'Unknown error'}`);
     }
   } catch (err) {
     error(`Failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
+}
+
+async function pollForVerification(token: string, fingerprint: string): Promise<void> {
+  const maxAttempts = 60; // 5 minutes
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 5000)); // Poll every 5 seconds
+    
+    try {
+      const response = await fetch(`${CONVEX_URL.replace('.cloud', '.site')}/workspace/poll?token=${token}`);
+      const result = await response.json() as { 
+        verified?: boolean; 
+        sessionToken?: string; 
+        workspaceId?: string; 
+        email?: string;
+      };
+      
+      if (result?.verified && result?.sessionToken) {
+        // Save the real session
+        writeSession(
+          result.sessionToken,
+          result.workspaceId || '',
+          result.email || ''
+        );
+        
+        success(`Authenticated as ${result.email}!`);
+        
+        // Reload workspace context
+        await validateSession();
+        return;
+      }
+    } catch {
+      // Continue polling
+    }
+    
+    // Show progress dot
+    process.stdout.write('.');
+  }
+  
+  log('\n');
+  error('Verification timed out. Please try again.');
 }
 
 async function showStatus(): Promise<void> {

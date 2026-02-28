@@ -67,7 +67,7 @@ export const verifyMagicLink = mutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 1000, // 1000 free API calls
+        usageLimit: 50, // 50 free API calls
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });

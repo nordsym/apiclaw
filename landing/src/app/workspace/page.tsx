@@ -410,6 +410,12 @@ export default function WorkspacePage() {
     { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
     { id: "billing" as TabType, label: "Billing", icon: CreditCard },
   ];
+  
+  // External links for sidebar
+  const externalLinks = [
+    { label: "Earn Credits", href: "/earn", icon: Crown },
+    { label: "Documentation", href: "/docs", icon: BookOpen },
+  ];
 
   if (isLoading) {
     return (
@@ -482,11 +488,22 @@ export default function WorkspacePage() {
           <div className="px-4 py-3 border-b border-[var(--border)]">
             <p className="text-sm text-[var(--text-muted)]">Workspace</p>
             <p className="font-medium truncate">{displayEmail}</p>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-2">
               <span className="px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium capitalize">
                 {displayTier}
               </span>
+              {workspace && (
+                <span className="text-xs text-[var(--text-muted)]">
+                  {workspace.usageRemaining}/{workspace.usageLimit} calls
+                </span>
+              )}
             </div>
+            {workspace && workspace.usagePercentage > 80 && (
+              <div className="mt-2 text-xs text-yellow-500 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                Running low on calls
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
@@ -578,6 +595,21 @@ export default function WorkspacePage() {
               );
             })}
           </nav>
+
+          {/* External Links */}
+          <div className="p-4 border-t border-[var(--border)] space-y-1">
+            {externalLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
+              >
+                <link.icon className="w-5 h-5" />
+                <span>{link.label}</span>
+                <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
+              </Link>
+            ))}
+          </div>
 
           {/* Bottom section */}
           <div className="p-4 border-t border-[var(--border)] space-y-2">

@@ -78,7 +78,7 @@ function magicLinkEmailTemplate(verifyUrl: string): string {
     
     <div style="background: #fef2f2; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
       <p style="margin: 0; font-size: 14px; color: #991b1b;">
-        <strong>⚡ Free tier:</strong> 100 API calls included. No credit card required.
+        <strong>⚡ Free tier:</strong> 50 API calls included. No credit card required.
       </p>
     </div>
     

@@ -4,7 +4,7 @@ import { api } from "./_generated/api";
 
 // Tier limits
 const TIER_LIMITS: Record<string, number> = {
-  free: 100,      // 100 API calls/month
+  free: 50,      // 100 API calls/month
   pro: 10000,     // 10k API calls/month
   enterprise: -1, // unlimited
 };
