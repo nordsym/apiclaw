@@ -129,31 +129,15 @@ export const openAPIs: Record<string, OpenAPIConfig> = {
     },
   },
 
-  // Kroki - Diagrams as code (returns URL, not JSON)
+  // Kroki - Diagrams as code
   kroki: {
     name: 'Kroki',
-    description: 'Generate diagram URLs from text (Mermaid, PlantUML, GraphViz, C4)',
+    description: 'Generate diagrams from text. Supports: mermaid, d2, plantuml, graphviz, c4plantuml, blockdiag, bpmn. D2 is SVG-only.',
     baseUrl: 'https://kroki.io',
     actions: {
       render: {
-        method: 'GET',
-        path: () => '', // Custom handling
-        transform: (_, params) => {
-          const type = params.type || 'mermaid';
-          const format = params.format || 'svg';
-          const diagram = params.diagram || '';
-          
-          // Base64url encode the diagram
-          const encoded = Buffer.from(diagram).toString('base64url');
-          const url = `https://kroki.io/${type}/${format}/${encoded}`;
-          
-          return {
-            url,
-            type,
-            format,
-            note: 'Open this URL to see/download the diagram',
-          };
-        },
+        method: 'POST',
+        path: () => '', // Custom handling below
       },
     },
   },
@@ -207,7 +191,7 @@ export async function executeOpenAPI(
     // Special handling for Kroki - use POST to get actual image data
     if (providerId === 'kroki') {
       const type = params.type || 'mermaid';
-      const format = params.format || 'svg';
+      let format = params.format || 'svg';
       const diagram = params.diagram || '';
       
       if (!diagram) {
@@ -217,6 +201,11 @@ export async function executeOpenAPI(
           action,
           error: 'Missing required param: diagram',
         };
+      }
+      
+      // D2 only supports SVG
+      if (type === 'd2' && format !== 'svg') {
+        format = 'svg';
       }
       
       try {
@@ -244,9 +233,11 @@ export async function executeOpenAPI(
             provider: providerId,
             action,
             data: {
+              type,
               format: 'svg',
               content: svg,
               content_type: 'image/svg+xml',
+              supported_types: ['mermaid', 'd2', 'plantuml', 'graphviz', 'c4plantuml', 'blockdiag', 'bpmn'],
             },
           };
         } else {
@@ -257,6 +248,7 @@ export async function executeOpenAPI(
             provider: providerId,
             action,
             data: {
+              type,
               format,
               content_base64: base64,
               content_type: format === 'png' ? 'image/png' : 'application/pdf',
