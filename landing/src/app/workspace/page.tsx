@@ -49,6 +49,13 @@ import {
   MessageCircle,
   Search,
   Phone,
+  Cpu,
+  Activity,
+  Globe,
+  Database,
+  Play,
+  Star,
+  Twitter,
 } from "lucide-react";
 import {
   LineChart,
@@ -476,7 +483,7 @@ export default function WorkspacePage() {
   // Main navigation tabs
   const mainTabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
-    { id: "api-catalog" as TabType, label: "API Catalog", icon: Zap },
+    { id: "api-catalog" as TabType, label: "Direct Call", icon: Zap },
     { id: "my-agents" as TabType, label: "My Agents", icon: Users },
     { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
     { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
@@ -957,7 +964,7 @@ function OverviewTab({
       {/* Available APIs Preview */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">API Catalog</h3>
+          <h3 className="font-bold text-lg">Direct Call</h3>
           <button onClick={() => setActiveTab("api-catalog")} className="text-sm text-[#ef4444] hover:underline">
             View all {approvedApis.length} APIs
           </button>
@@ -969,7 +976,7 @@ function OverviewTab({
               className="p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
             >
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{api.icon || "🔌"}</span>
+                <Zap className="w-5 h-5 text-[#ef4444]" />
                 <p className="font-medium">{api.name}</p>
               </div>
               <p className="text-sm text-[var(--text-muted)] line-clamp-2">{api.description}</p>
@@ -1084,27 +1091,31 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
     return matchesSearch && matchesCategory;
   });
 
-  // Get icon for category
-  const getCategoryIcon = (category: string): string => {
-    const icons: Record<string, string> = {
-      "Search": "🔍",
-      "AI & LLM": "🤖",
-      "Communication": "📱",
-      "Email": "📧",
-      "Voice & Audio": "🎙️",
-      "Code Execution": "💻",
-      "Web Scraping": "🌐",
-      "Image": "🖼️",
-      "Media": "🎬",
-    };
-    return icons[category] || "🔌";
+  // Get icon component for category
+  const CategoryIcon = ({ category }: { category: string }) => {
+    const iconClass = "w-5 h-5 text-[#ef4444]";
+    switch (category) {
+      case "Search": return <Search className={iconClass} />;
+      case "AI & LLM": return <Cpu className={iconClass} />;
+      case "Communication": return <MessageSquare className={iconClass} />;
+      case "Email": return <Mail className={iconClass} />;
+      case "Voice & Audio": return <Activity className={iconClass} />;
+      case "Code Execution": return <Terminal className={iconClass} />;
+      case "Web Scraping": return <Globe className={iconClass} />;
+      case "Image": return <Sparkles className={iconClass} />;
+      case "Media": return <Play className={iconClass} />;
+      case "SMS & Messaging": return <MessageSquare className={iconClass} />;
+      case "Voice & TTS": return <Activity className={iconClass} />;
+      case "Crypto & Blockchain": return <Database className={iconClass} />;
+      default: return <Zap className={iconClass} />;
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">API Catalog</h2>
+          <h2 className="text-2xl font-bold">Direct Call</h2>
           <p className="text-[var(--text-muted)]">{apis.length} APIs available for Direct Call</p>
         </div>
       </div>
@@ -1149,7 +1160,9 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
               className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 hover:border-[#ef4444]/50 transition group"
             >
               <div className="flex items-start gap-3 mb-3">
-                <span className="text-2xl">{api.icon || getCategoryIcon(api.category)}</span>
+                <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
+                  <CategoryIcon category={api.category} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg truncate">{api.name}</h3>
                   <span className="text-sm text-[var(--text-muted)]">{api.category}</span>
@@ -3002,13 +3015,25 @@ interface BYOKProvider {
 }
 
 const BYOK_PROVIDERS: BYOKProvider[] = [
-  { id: "brave_search", name: "Brave Search", icon: "🔍" },
-  { id: "openrouter", name: "OpenRouter", icon: "🤖" },
-  { id: "elevenlabs", name: "ElevenLabs", icon: "🎙️" },
-  { id: "twilio", name: "Twilio", icon: "📞" },
-  { id: "resend", name: "Resend", icon: "📧" },
-  { id: "e2b", name: "E2B", icon: "💻" },
+  { id: "brave_search", name: "Brave Search", icon: "search" },
+  { id: "openrouter", name: "OpenRouter", icon: "cpu" },
+  { id: "elevenlabs", name: "ElevenLabs", icon: "activity" },
+  { id: "twilio", name: "Twilio", icon: "phone" },
+  { id: "resend", name: "Resend", icon: "mail" },
+  { id: "e2b", name: "E2B", icon: "terminal" },
 ];
+
+const ProviderIcon = ({ iconName, className = "w-6 h-6" }: { iconName: string; className?: string }) => {
+  switch (iconName) {
+    case "search": return <Search className={className} />;
+    case "cpu": return <Cpu className={className} />;
+    case "activity": return <Activity className={className} />;
+    case "phone": return <Phone className={className} />;
+    case "mail": return <Mail className={className} />;
+    case "terminal": return <Terminal className={className} />;
+    default: return <Zap className={className} />;
+  }
+};
 
 function ApiKeysTab() {
   const [keys, setKeys] = useState<ProviderKey[]>([]);
@@ -3202,7 +3227,9 @@ function ApiKeysTab() {
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{provider.icon}</span>
+                  <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
+                    <ProviderIcon iconName={provider.icon} className="w-5 h-5 text-[#ef4444]" />
+                  </div>
                   <span className="font-medium">{provider.name}</span>
                 </div>
                 <div className="flex items-center gap-3 ml-10 sm:ml-0">
@@ -3268,7 +3295,9 @@ function ApiKeysTab() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md p-6">
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-3xl">{selectedProvider.icon}</span>
+              <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center">
+                <ProviderIcon iconName={selectedProvider.icon} className="w-7 h-7 text-[#ef4444]" />
+              </div>
               <div>
                 <h3 className="font-bold text-lg">
                   {getKeyForProvider(selectedProvider.id) ? "Update" : "Add"} {selectedProvider.name} Key
@@ -3348,10 +3377,20 @@ function EarnTab() {
   const referralCode = "CLAW-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
   const earnChannels = [
-    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "⭐" },
-    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "𝕏" },
-    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "📧" },
+    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "star" },
+    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "twitter" },
+    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "mail" },
   ];
+
+  const EarnIcon = ({ iconName }: { iconName: string }) => {
+    const iconClass = "w-8 h-8 text-[#ef4444]";
+    switch (iconName) {
+      case "star": return <Star className={iconClass} />;
+      case "twitter": return <Twitter className={iconClass} />;
+      case "mail": return <Mail className={iconClass} />;
+      default: return <Zap className={iconClass} />;
+    }
+  };
 
   const handleCopyReferral = () => {
     navigator.clipboard.writeText("https://apiclaw.nordsym.com?ref=" + referralCode);
@@ -3375,7 +3414,9 @@ function EarnTab() {
             rel="noopener noreferrer"
             className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition group"
           >
-            <div className="text-3xl mb-3">{channel.icon}</div>
+            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-3">
+              <EarnIcon iconName={channel.icon} />
+            </div>
             <h3 className="font-semibold mb-1">{channel.title}</h3>
             <p className="text-sm text-[#ef4444] font-medium">+{channel.credits} calls</p>
           </a>
