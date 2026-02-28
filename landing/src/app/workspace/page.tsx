@@ -65,6 +65,8 @@ interface Workspace {
 interface Agent {
   id: string;
   fingerprint: string;
+  name?: string;
+  customName?: string | null;
   lastUsedAt: number;
   createdAt: number;
   isCurrent: boolean;
@@ -404,6 +406,23 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleRenameAgent = async (agentId: string, name: string) => {
+    if (!sessionToken) return;
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "workspaces:renameAgent",
+          args: { token: sessionToken, sessionId: agentId, name },
+        }),
+      });
+      setAgents(agents.map(a => a.id === agentId ? { ...a, name, customName: name } : a));
+    } catch (err) {
+      console.error("Rename error:", err);
+    }
+  };
+
   const tabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
     { id: "apis" as TabType, label: "APIs", icon: Zap },
@@ -678,7 +697,7 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "agents" && (
-            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} workspaceEmail={workspace?.email} />
+            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
           )}
           {activeTab === "usage" && (
             <UsageTab workspace={workspace} usage={usage} />
@@ -946,16 +965,22 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
 function AgentsTab({
   agents,
   onRevoke,
+  onRename,
   workspaceEmail,
+  sessionToken,
 }: {
   agents: Agent[];
   onRevoke: (agentId: string) => void;
+  onRename: (agentId: string, name: string) => void;
   workspaceEmail?: string;
+  sessionToken?: string;
 }) {
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [sendingLink, setSendingLink] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
   const [email, setEmail] = useState(workspaceEmail || "");
+  const [editingAgent, setEditingAgent] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const handleRevoke = (agentId: string) => {
     if (confirmRevoke === agentId) {
@@ -1099,15 +1124,56 @@ function AgentsTab({
                   <div className="w-12 h-12 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
                     <Users className="w-6 h-6 text-[#ef4444]" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{agent.fingerprint}</h3>
-                      {agent.isCurrent && (
-                        <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                          Current
-                        </span>
-                      )}
-                    </div>
+                  <div className="flex-1">
+                    {editingAgent === agent.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder="Agent name..."
+                          className="px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => {
+                            onRename(agent.id, editName);
+                            setEditingAgent(null);
+                          }}
+                          className="px-3 py-1 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingAgent(null)}
+                          className="px-3 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{agent.name || agent.fingerprint}</h3>
+                        <button
+                          onClick={() => {
+                            setEditingAgent(agent.id);
+                            setEditName(agent.name || agent.fingerprint || "");
+                          }}
+                          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] opacity-0 group-hover:opacity-100 transition"
+                          title="Rename"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </button>
+                        {agent.isCurrent && (
+                          <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {agent.fingerprint !== agent.name && agent.name && (
+                      <p className="text-xs text-[var(--text-muted)] mt-0.5">{agent.fingerprint}</p>
+                    )}
                     <div className="flex items-center gap-4 mt-1 text-sm text-[var(--text-muted)]">
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
@@ -1116,19 +1182,30 @@ function AgentsTab({
                     </div>
                   </div>
                 </div>
-                {!agent.isCurrent && (
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleRevoke(agent.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                      confirmRevoke === agent.id
-                        ? "bg-red-500 text-white"
-                        : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                    }`}
+                    onClick={() => {
+                      setEditingAgent(agent.id);
+                      setEditName(agent.name || agent.fingerprint || "");
+                    }}
+                    className="px-3 py-2 rounded-lg text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition"
                   >
-                    <Trash2 className="w-4 h-4 inline-block mr-1" />
-                    {confirmRevoke === agent.id ? "Confirm" : "Revoke"}
+                    Rename
                   </button>
-                )}
+                  {!agent.isCurrent && (
+                    <button
+                      onClick={() => handleRevoke(agent.id)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        confirmRevoke === agent.id
+                          ? "bg-red-500 text-white"
+                          : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                      }`}
+                    >
+                      <Trash2 className="w-4 h-4 inline-block mr-1" />
+                      {confirmRevoke === agent.id ? "Confirm" : "Revoke"}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

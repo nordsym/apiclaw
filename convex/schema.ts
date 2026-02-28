@@ -62,6 +62,7 @@ export default defineSchema({
     workspaceId: v.id("workspaces"),
     sessionToken: v.string(),
     fingerprint: v.optional(v.string()), // machine fingerprint
+    customName: v.optional(v.string()), // user-defined name
     lastUsedAt: v.number(),
     createdAt: v.number(),
   })

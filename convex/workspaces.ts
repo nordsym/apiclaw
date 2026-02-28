@@ -219,6 +219,8 @@ export const getConnectedAgents = query({
     return agentSessions.map((s) => ({
       id: s._id,
       fingerprint: s.fingerprint || "Unknown",
+      customName: s.customName || null,
+      name: s.customName || s.fingerprint || "Unknown",
       lastUsedAt: s.lastUsedAt,
       createdAt: s.createdAt,
       isCurrent: s.sessionToken === token,
@@ -254,6 +256,37 @@ export const getSessionsByEmail = query({
         lastUsedAt: s.lastUsedAt,
       })),
     };
+  },
+});
+
+// Rename an agent session
+export const renameAgent = mutation({
+  args: {
+    token: v.string(),
+    sessionId: v.id("agentSessions"),
+    name: v.string(),
+  },
+  handler: async (ctx, { token, sessionId, name }) => {
+    // Verify the requesting session
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) {
+      throw new Error("Invalid session");
+    }
+
+    // Get the session to rename
+    const targetSession = await ctx.db.get(sessionId);
+    if (!targetSession || targetSession.workspaceId !== session.workspaceId) {
+      throw new Error("Session not found or access denied");
+    }
+
+    // Update the name (stored as customName field)
+    await ctx.db.patch(sessionId, { customName: name });
+
+    return { success: true };
   },
 });
 
