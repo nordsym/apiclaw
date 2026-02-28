@@ -2308,12 +2308,167 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
 // BILLING TAB
 // ============================================
 
+interface BillingInfo {
+  plan: string;
+  tier: string;
+  usage: number;
+  currentPeriodUsage: number;
+  limit: number;
+  creditBalance: number;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  lastBillingDate?: number;
+  needsPaymentMethod: boolean;
+  invoices: Invoice[];
+}
+
+interface Invoice {
+  id: string;
+  stripeInvoiceId: string;
+  amount: number;
+  amountFormatted?: string;
+  status: string;
+  periodStart: number;
+  periodEnd: number;
+  callCount: number;
+  pdfUrl?: string;
+  createdAt: number;
+}
+
+interface PaymentMethod {
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+}
+
 function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
-  const tier = workspace?.tier || "free";
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch billing info
+  useEffect(() => {
+    const fetchBillingData = async () => {
+      if (!sessionToken || !workspace?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch billing info
+        const infoRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "billing:getInfo",
+            args: { workspaceId: workspace.id },
+          }),
+        });
+        const infoData = await infoRes.json();
+        const info = infoData.value || infoData;
+        
+        if (info && !info.error) {
+          setBillingInfo(info);
+          setInvoices(info.invoices || []);
+        }
+
+        // If user has Stripe customer, try to get payment method
+        if (info?.stripeCustomerId) {
+          try {
+            const pmRes = await fetch("/api/billing/payment-method", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token: sessionToken }),
+            });
+            const pmData = await pmRes.json();
+            if (pmData.paymentMethod) {
+              setPaymentMethod(pmData.paymentMethod);
+            }
+          } catch {
+            // Payment method fetch is optional
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch billing info:", err);
+        setError("Failed to load billing information");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBillingData();
+  }, [sessionToken, workspace?.id]);
+
+  // Open Stripe billing portal
+  const openBillingPortal = async () => {
+    if (!sessionToken) return;
+    
+    setIsLoadingPortal(true);
+    try {
+      const res = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: sessionToken }),
+      });
+      const data = await res.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError(data.error || "Failed to open billing portal");
+      }
+    } catch {
+      setError("Failed to open billing portal");
+    } finally {
+      setIsLoadingPortal(false);
+    }
+  };
+
+  const tier = billingInfo?.tier || workspace?.tier || "free";
+  const plan = billingInfo?.plan || "free";
+  const hasPaymentMethod = !!billingInfo?.stripeCustomerId;
+
+  // Calculate estimated cost
+  const FREE_CALLS = 100;
+  const COST_PER_CALL = 0.01;
+  const currentUsage = billingInfo?.currentPeriodUsage || workspace?.usageCount || 0;
+  const billableCalls = Math.max(0, currentUsage - FREE_CALLS);
+  const estimatedCost = billableCalls * COST_PER_CALL;
+
+  // Plan display names
+  const planDisplayNames: Record<string, string> = {
+    free: "Free",
+    usage_based: "Usage-Based",
+    starter: "Starter",
+    pro: "Pro",
+    scale: "Scale",
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <h2 className="text-2xl font-bold">Billing</h2>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold">Billing</h2>
+
+      {error && (
+        <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-500">{error}</p>
+        </div>
+      )}
 
       {/* Current Plan */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
@@ -2322,16 +2477,22 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
             <h3 className="font-bold text-lg">Current Plan</h3>
             <p className="text-[var(--text-muted)]">Your workspace subscription</p>
           </div>
-          <div className="px-4 py-2 rounded-full bg-[#ef4444]/20 text-[#ef4444] font-semibold capitalize">
-            {tier}
+          <div className={`px-4 py-2 rounded-full font-semibold ${
+            plan === "usage_based" 
+              ? "bg-green-500/20 text-green-500" 
+              : plan === "free" 
+                ? "bg-[var(--surface)] text-[var(--text-muted)]"
+                : "bg-[#ef4444]/20 text-[#ef4444]"
+          }`}>
+            {planDisplayNames[plan] || plan}
           </div>
         </div>
 
-        {tier === "free" ? (
+        {plan === "free" ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit.toLocaleString() || "50"} / month</span>
+              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "100"} / month</span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Support</span>
@@ -2342,11 +2503,33 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
               <span className="font-medium">Free</span>
             </div>
           </div>
+        ) : plan === "usage_based" ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">API Calls</span>
+              <span className="font-medium flex items-center gap-2">
+                Unlimited
+                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs">Active</span>
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">Free Tier</span>
+              <span className="font-medium">100 calls / month</span>
+            </div>
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">Rate</span>
+              <span className="font-medium">$0.01 / call (after free tier)</span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <span className="text-[var(--text-muted)]">Support</span>
+              <span className="font-medium">Priority</span>
+            </div>
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">10,000 / month</span>
+              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "10,000"} / month</span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Support</span>
@@ -2360,8 +2543,137 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
         )}
       </div>
 
-      {/* Upgrade CTA - Usage-Based Billing */}
-      {tier === "free" && sessionToken && (
+      {/* Usage This Month */}
+      {workspace && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg">Usage This Month</h3>
+            {plan === "usage_based" && (
+              <div className="text-right">
+                <p className="text-sm text-[var(--text-muted)]">Estimated Cost</p>
+                <p className="text-2xl font-bold text-[#ef4444]">${estimatedCost.toFixed(2)}</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden mb-4">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                plan === "usage_based" 
+                  ? "bg-green-500"
+                  : workspace.usagePercentage > 90 
+                    ? "bg-red-500" 
+                    : workspace.usagePercentage > 70 
+                      ? "bg-yellow-500" 
+                      : "bg-[#ef4444]"
+              }`}
+              style={{ width: plan === "usage_based" ? "100%" : `${Math.min(workspace.usagePercentage, 100)}%` }}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-[var(--text-muted)]">
+              {currentUsage.toLocaleString()} {plan === "usage_based" ? "calls this period" : `of ${workspace.usageLimit.toLocaleString()} calls used`}
+            </span>
+            {plan === "usage_based" ? (
+              <span className="text-green-500 font-medium">
+                {billableCalls > 0 ? `${billableCalls.toLocaleString()} billable` : "Within free tier"}
+              </span>
+            ) : (
+              <span className="text-[var(--text-muted)]">{workspace.usagePercentage.toFixed(1)}%</span>
+            )}
+          </div>
+
+          {plan === "usage_based" && (
+            <div className="mt-4 pt-4 border-t border-[var(--border)] grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold">{currentUsage.toLocaleString()}</p>
+                <p className="text-sm text-[var(--text-muted)]">Total Calls</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-500">{Math.min(currentUsage, FREE_CALLS)}</p>
+                <p className="text-sm text-[var(--text-muted)]">Free Calls</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#ef4444]">{billableCalls.toLocaleString()}</p>
+                <p className="text-sm text-[var(--text-muted)]">Billable</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Payment Method */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg">Payment Method</h3>
+          {hasPaymentMethod && (
+            <button
+              onClick={openBillingPortal}
+              disabled={isLoadingPortal}
+              className="text-sm text-[#ef4444] hover:underline flex items-center gap-1"
+            >
+              {isLoadingPortal ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  Manage
+                  <ExternalLink className="w-3 h-3" />
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {paymentMethod ? (
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-[var(--surface)]">
+            <div className="w-12 h-8 rounded bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+              <CreditCard className="w-6 h-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium capitalize">{paymentMethod.brand} •••• {paymentMethod.last4}</p>
+              <p className="text-sm text-[var(--text-muted)]">Expires {paymentMethod.expMonth}/{paymentMethod.expYear}</p>
+            </div>
+            <Check className="w-5 h-5 text-green-500" />
+          </div>
+        ) : hasPaymentMethod ? (
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-[var(--surface)]">
+            <div className="w-12 h-8 rounded bg-green-500/20 flex items-center justify-center">
+              <Check className="w-5 h-5 text-green-500" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">Payment method on file</p>
+              <p className="text-sm text-[var(--text-muted)]">Managed through Stripe</p>
+            </div>
+            <button
+              onClick={openBillingPortal}
+              disabled={isLoadingPortal}
+              className="text-sm text-[#ef4444] hover:underline"
+            >
+              View details
+            </button>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-8 h-8 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-[var(--text-muted)] mb-4">No payment method on file</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Add a payment method to unlock unlimited API calls
+            </p>
+            {sessionToken && (
+              <CheckoutButton sessionToken={sessionToken} variant="outline">
+                <CreditCard className="w-4 h-4" />
+                Add Payment Method
+              </CheckoutButton>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Upgrade CTA - Only for free tier */}
+      {plan === "free" && sessionToken && (
         <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-[#ef4444]/5 p-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center">
@@ -2406,23 +2718,101 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
         </div>
       )}
 
-      {/* Usage This Month */}
-      {workspace && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <h3 className="font-bold text-lg mb-4">Usage This Month</h3>
-          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden mb-4">
-            <div
-              className={`h-full rounded-full ${
-                workspace.usagePercentage > 90 ? "bg-red-500" :
-                workspace.usagePercentage > 70 ? "bg-yellow-500" : "bg-[#ef4444]"
-              }`}
-              style={{ width: `${Math.min(workspace.usagePercentage, 100)}%` }}
-            />
+      {/* Invoices */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-lg">Invoices</h3>
+          {invoices.length > 0 && hasPaymentMethod && (
+            <button
+              onClick={openBillingPortal}
+              disabled={isLoadingPortal}
+              className="text-sm text-[#ef4444] hover:underline flex items-center gap-1"
+            >
+              View all in Stripe
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        {invoices.length > 0 ? (
+          <div className="space-y-3">
+            {invoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--background)] flex items-center justify-center">
+                    <ScrollText className="w-5 h-5 text-[var(--text-muted)]" />
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {new Date(invoice.periodStart).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      {invoice.callCount?.toLocaleString() || 0} API calls
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="font-semibold">${(invoice.amount / 100).toFixed(2)}</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      invoice.status === "paid" 
+                        ? "bg-green-500/20 text-green-500"
+                        : invoice.status === "open" || invoice.status === "pending"
+                          ? "bg-yellow-500/20 text-yellow-500"
+                          : "bg-red-500/20 text-red-500"
+                    }`}>
+                      {invoice.status === "paid" && <Check className="w-3 h-3" />}
+                      {invoice.status === "paid" ? "Paid" : invoice.status === "open" ? "Pending" : invoice.status}
+                    </span>
+                  </div>
+                  {invoice.pdfUrl && (
+                    <a
+                      href={invoice.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-lg hover:bg-[var(--background)] transition"
+                      title="View PDF"
+                    >
+                      <ExternalLink className="w-4 h-4 text-[var(--text-muted)]" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
-            <span>{workspace.usageCount.toLocaleString()} of {workspace.usageLimit.toLocaleString()} calls used</span>
-            <span>{workspace.usagePercentage.toFixed(1)}%</span>
+        ) : (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] flex items-center justify-center mx-auto mb-4">
+              <ScrollText className="w-8 h-8 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-[var(--text-muted)] mb-2">No invoices yet</p>
+            <p className="text-sm text-[var(--text-muted)]">
+              {plan === "free" 
+                ? "Invoices will appear here once you upgrade to a paid plan"
+                : "Your first invoice will appear at the end of the billing period"}
+            </p>
           </div>
+        )}
+      </div>
+
+      {/* Credit Balance (if applicable) */}
+      {billingInfo?.creditBalance && billingInfo.creditBalance > 0 && (
+        <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+              <Crown className="w-6 h-6 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm text-green-500 font-medium">Credit Balance</p>
+              <p className="text-2xl font-bold text-green-500">${(billingInfo.creditBalance / 100).toFixed(2)}</p>
+            </div>
+          </div>
+          <p className="mt-4 text-sm text-[var(--text-muted)]">
+            This credit will be applied to your next invoice automatically.
+          </p>
         </div>
       )}
     </div>
