@@ -173,6 +173,23 @@ export const sendMagicLinkEmail = action({
     const verifyUrl = `${APP_URL}/auth/verify?token=${args.token}`;
     const html = magicLinkEmailTemplate(verifyUrl);
 
+    const textContent = `
+APIClaw - An AI Agent Wants to Connect
+
+Click the link below to verify your email and activate your APIClaw workspace.
+Your agent will be able to use APIs immediately.
+
+Verify here: ${verifyUrl}
+
+Free tier: 50 API calls included. No credit card required.
+
+This link expires in 1 hour. If you didn't request this, ignore this email.
+
+---
+APIClaw - The API Layer for AI Agents
+© ${new Date().getFullYear()} NordSym. Stockholm, Sweden.
+    `.trim();
+
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -184,6 +201,7 @@ export const sendMagicLinkEmail = action({
         to: args.email,
         subject: "🦞 An AI Agent Wants to Connect — Verify Your Email",
         html,
+        text: textContent,
       }),
     });
 
