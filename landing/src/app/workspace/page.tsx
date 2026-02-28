@@ -206,9 +206,11 @@ export default function WorkspacePage() {
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
 
-  // Handle billing return params
+  // Handle billing and portal return params
   useEffect(() => {
     const billingParam = searchParams.get("billing");
+    const portalParam = searchParams.get("portal");
+    
     if (billingParam === "success") {
       showToast("Payment method added! You now have unlimited API calls.", "success");
       // Clean up URL
@@ -219,6 +221,14 @@ export default function WorkspacePage() {
       showToast("Checkout cancelled. You can try again anytime.", "info");
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("billing");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+    
+    // Handle portal return
+    if (portalParam === "success") {
+      showToast("Billing settings updated successfully.", "success");
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("portal");
       window.history.replaceState({}, "", newUrl.toString());
     }
   }, [searchParams, showToast]);
@@ -902,7 +912,7 @@ export default function WorkspacePage() {
             <FeedbackTab />
           )}
           {activeTab === "settings" && (
-            <SettingsTab workspace={workspace} />
+            <SettingsTab workspace={workspace} sessionToken={sessionToken} />
           )}
         </div>
       </main>
@@ -4351,7 +4361,40 @@ function SettingsSection({ title, icon: Icon, children, defaultOpen = false }: S
   );
 }
 
-function SettingsTab({ workspace }: { workspace: Workspace | null }) {
+function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
+  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [portalError, setPortalError] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Open Stripe billing portal
+  const openBillingPortal = async () => {
+    if (!sessionToken) return;
+    
+    setIsLoadingPortal(true);
+    setPortalError(null);
+    
+    try {
+      const res = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: sessionToken }),
+      });
+      const data = await res.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setPortalError(data.error || "Failed to open billing portal");
+      }
+    } catch {
+      setPortalError("Failed to open billing portal");
+    } finally {
+      setIsLoadingPortal(false);
+    }
+  };
+
+  const hasStripeCustomer = workspace && (workspace as any).stripeCustomerId;
+
   return (
     <div className="space-y-6">
       <div>
@@ -4456,6 +4499,69 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
               {workspace?.tier || "Free"}
             </span>
           </div>
+        </div>
+      </SettingsSection>
+
+      <SettingsSection title="Billing" icon={CreditCard}>
+        <div className="space-y-4 pt-4">
+          {portalError && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {portalError}
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Current Plan</p>
+              <p className="text-sm text-[var(--text-muted)]">
+                {workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+              </p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              workspace?.tier === "pro" || workspace?.tier === "usage_based"
+                ? "bg-green-500/20 text-green-500"
+                : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
+            }`}>
+              {workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Active" : "Free"}
+            </span>
+          </div>
+
+          {hasStripeCustomer ? (
+            <button
+              onClick={openBillingPortal}
+              disabled={isLoadingPortal}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
+            >
+              {isLoadingPortal ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Opening Portal...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-4 h-4" />
+                  Manage Billing
+                  <ExternalLink className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/workspace?tab=billing")}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-[var(--text-primary)] font-medium hover:bg-[var(--surface)] transition"
+            >
+              <CreditCard className="w-4 h-4" />
+              Add Payment Method
+            </button>
+          )}
+          
+          <p className="text-xs text-[var(--text-muted)] text-center">
+            {hasStripeCustomer 
+              ? "Update card, view invoices, or cancel subscription via Stripe"
+              : "Add a payment method to unlock unlimited API calls"
+            }
+          </p>
         </div>
       </SettingsSection>
 

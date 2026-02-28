@@ -269,6 +269,58 @@ export const updateInvoiceStatus = mutation({
   },
 });
 
+/**
+ * Reset usage count on subscription cancellation
+ * Gives user a clean slate when downgrading to free
+ */
+export const resetUsageOnCancellation = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    await ctx.db.patch(args.workspaceId, {
+      usageCount: 0,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, previousUsage: workspace.usageCount };
+  },
+});
+
+/**
+ * Update payment method info (from webhook)
+ */
+export const updatePaymentMethodInfo = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    hasPaymentMethod: v.boolean(),
+    paymentMethodType: v.optional(v.string()),
+    cardBrand: v.optional(v.string()),
+    cardLast4: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    await ctx.db.patch(args.workspaceId, {
+      hasPaymentMethod: args.hasPaymentMethod,
+      paymentMethodType: args.paymentMethodType,
+      cardBrand: args.cardBrand,
+      cardLast4: args.cardLast4,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
 // ============================================
 // QUERIES
 // ============================================

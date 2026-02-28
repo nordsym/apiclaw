@@ -157,7 +157,7 @@ export const createPortalSession = httpAction(async (ctx, request) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: workspace.stripeCustomerId,
-      return_url: returnUrl || "https://apiclaw.nordsym.com/billing",
+      return_url: returnUrl || "https://apiclaw.com/workspace?tab=settings&portal=success",
     });
 
     return jsonResponse({
@@ -234,6 +234,18 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
       case "setup_intent.succeeded": {
         const setupIntent = event.data.object as Stripe.SetupIntent;
         await handleSetupSuccess(ctx, setupIntent);
+        break;
+      }
+
+      case "payment_method.attached": {
+        const paymentMethod = event.data.object as Stripe.PaymentMethod;
+        await handlePaymentMethodAttached(ctx, paymentMethod);
+        break;
+      }
+
+      case "payment_method.detached": {
+        const paymentMethod = event.data.object as Stripe.PaymentMethod;
+        await handlePaymentMethodDetached(ctx, paymentMethod);
         break;
       }
 
@@ -328,11 +340,16 @@ async function handleSubscriptionCanceled(
     return;
   }
 
-  // Downgrade to free
+  // Downgrade to free and reset usage
   await ctx.runMutation(api.billing.updateSubscription, {
     workspaceId: workspace._id,
     stripeSubscriptionId: undefined,
     billingPlan: "free",
+  });
+
+  // Reset usage count to 0 for clean slate on free tier
+  await ctx.runMutation(api.billing.resetUsageOnCancellation, {
+    workspaceId: workspace._id,
   });
 
   console.log(`Workspace ${workspace._id} downgraded to free (subscription canceled)`);
@@ -426,6 +443,56 @@ async function handleSetupSuccess(
     });
     console.log(`Workspace ${workspace._id} upgraded after setup intent`);
   }
+}
+
+async function handlePaymentMethodAttached(
+  ctx: any,
+  paymentMethod: Stripe.PaymentMethod
+) {
+  // Payment method attached to customer
+  const customerId =
+    typeof paymentMethod.customer === "string"
+      ? paymentMethod.customer
+      : paymentMethod.customer?.id;
+
+  if (!customerId) {
+    console.log("Payment method attached but no customer ID");
+    return;
+  }
+
+  const workspace = await ctx.runQuery(api.billing.getByStripeCustomerId, {
+    stripeCustomerId: customerId,
+  });
+
+  if (!workspace) {
+    console.log(`No workspace found for customer ${customerId}`);
+    return;
+  }
+
+  // Sync payment method info
+  await ctx.runMutation(api.billing.updatePaymentMethodInfo, {
+    workspaceId: workspace._id,
+    hasPaymentMethod: true,
+    paymentMethodType: paymentMethod.type,
+    cardBrand: paymentMethod.card?.brand,
+    cardLast4: paymentMethod.card?.last4,
+  });
+
+  console.log(`Payment method attached for workspace ${workspace._id}`);
+}
+
+async function handlePaymentMethodDetached(
+  ctx: any,
+  paymentMethod: Stripe.PaymentMethod
+) {
+  // When a payment method is detached, we need to check if customer still has payment methods
+  // Since customer info isn't available on detached event, we log it
+  console.log(`Payment method ${paymentMethod.id} detached`);
+  
+  // Note: In a production system, you might want to:
+  // 1. Query Stripe for remaining payment methods
+  // 2. If no payment methods remain, downgrade the workspace
+  // For now, we rely on subscription cancellation to handle downgrades
 }
 
 // ============================================
