@@ -99,7 +99,7 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "apis" | "analytics" | "agents" | "usage" | "billing";
+type TabType = "overview" | "apis" | "analytics" | "agents" | "usage" | "billing" | "earn" | "docs";
 
 // Generate preview analytics data for demo
 function generatePreviewAnalytics(): ProviderAnalytics {
@@ -430,12 +430,8 @@ export default function WorkspacePage() {
     { id: "agents" as TabType, label: "Agents", icon: Users },
     { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
     { id: "billing" as TabType, label: "Billing", icon: CreditCard },
-  ];
-  
-  // External links for sidebar
-  const externalLinks = [
-    { label: "Earn Credits", href: "/earn", icon: Crown },
-    { label: "Documentation", href: "/docs", icon: BookOpen },
+    { id: "earn" as TabType, label: "Earn Credits", icon: Crown },
+    { id: "docs" as TabType, label: "Docs", icon: BookOpen },
   ];
 
   if (isLoading) {
@@ -617,21 +613,6 @@ export default function WorkspacePage() {
             })}
           </nav>
 
-          {/* External Links */}
-          <div className="p-4 border-t border-[var(--border)] space-y-1">
-            {externalLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
-              >
-                <link.icon className="w-5 h-5" />
-                <span>{link.label}</span>
-                <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
-              </Link>
-            ))}
-          </div>
-
           {/* Bottom section */}
           <div className="p-4 border-t border-[var(--border)] space-y-2">
             <button
@@ -704,6 +685,12 @@ export default function WorkspacePage() {
           )}
           {activeTab === "billing" && (
             <BillingTab workspace={workspace} />
+          )}
+          {activeTab === "earn" && (
+            <EarnTab />
+          )}
+          {activeTab === "docs" && (
+            <DocsTab />
           )}
         </div>
       </main>
@@ -1826,6 +1813,181 @@ function MyAgentsAnalytics({
         ) : (
           <p className="text-[var(--text-muted)] text-center py-8">No agents connected yet</p>
         )}
+      </div>
+    </div>
+  );
+}
+
+
+// ============================================
+// EARN TAB
+// ============================================
+
+function EarnTab() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const referralCode = "CLAW-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const earnChannels = [
+    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "⭐" },
+    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "𝕏" },
+    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "📧" },
+  ];
+
+  const handleCopyReferral = () => {
+    navigator.clipboard.writeText("https://apiclaw.nordsym.com?ref=" + referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Earn Credits</h2>
+        <p className="text-[var(--text-muted)]">Complete tasks to earn free API calls. Max 50 extra calls.</p>
+      </div>
+
+      {/* Earn Channels */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {earnChannels.map((channel) => (
+          <a
+            key={channel.id}
+            href={channel.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition group"
+          >
+            <div className="text-3xl mb-3">{channel.icon}</div>
+            <h3 className="font-semibold mb-1">{channel.title}</h3>
+            <p className="text-sm text-[#ef4444] font-medium">+{channel.credits} calls</p>
+          </a>
+        ))}
+      </div>
+
+      {/* Referral */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-2">Invite Friends</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Earn 10 calls for each friend who joins.</p>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={"https://apiclaw.nordsym.com?ref=" + referralCode}
+            readOnly
+            className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
+          />
+          <button
+            onClick={handleCopyReferral}
+            className="px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+      </div>
+
+      {/* Newsletter */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-2">Newsletter (+15 calls)</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Get weekly updates, tips, and new API announcements.</p>
+        <div className="flex gap-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
+          />
+          <button
+            onClick={() => setSubscribed(true)}
+            disabled={subscribed}
+            className="px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
+          >
+            {subscribed ? "Subscribed!" : "Subscribe"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// DOCS TAB
+// ============================================
+
+function DocsTab() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Documentation</h2>
+        <p className="text-[var(--text-muted)]">Everything you need to integrate APIClaw with your AI agent.</p>
+      </div>
+
+      {/* Quick Start */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Quick Start</h3>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">1. Add to your MCP config:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm overflow-x-auto">
+{`{
+  "mcpServers": {
+    "apiclaw": {
+      "command": "npx",
+      "args": ["@nordsym/apiclaw"]
+    }
+  }
+}`}
+            </pre>
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">2. Or run directly:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw</pre>
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">3. Interactive CLI mode:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw --cli</pre>
+          </div>
+        </div>
+      </div>
+
+      {/* Available Tools */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">MCP Tools</h3>
+        <div className="space-y-3">
+          {[
+            { name: "discover_apis", desc: "Search 19,000+ APIs by capability" },
+            { name: "get_api_details", desc: "Get full details for a specific API" },
+            { name: "call_api", desc: "Execute a Direct Call API" },
+            { name: "list_connected", desc: "Show available Direct Call providers" },
+            { name: "get_categories", desc: "List all API categories" },
+            { name: "register_owner", desc: "Authenticate workspace via magic link" },
+          ].map((tool) => (
+            <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
+              <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
+              <p className="text-sm text-[var(--text-muted)]">{tool.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Direct Call Providers */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
+        <div className="grid gap-2 md:grid-cols-2">
+          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Web Scraper", "Screenshot"].map((p) => (
+            <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Links */}
+      <div className="flex gap-4">
+        <a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
+          GitHub Repository →
+        </a>
+        <a href="https://npmjs.com/package/@nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
+          NPM Package →
+        </a>
       </div>
     </div>
   );

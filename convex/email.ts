@@ -53,36 +53,23 @@ function wrapEmail(content: string): string {
   ].join('');
 }
 
-// Magic link email template - using string concat for Convex compatibility
+// Magic link email template - ultra simple for Convex
 function magicLinkEmailTemplate(verifyUrl: string): string {
-  const content = [
-    '<h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #0a0a0a; text-align: center;">',
-    'An AI Agent Wants to Connect',
-    '</h2>',
-    '<p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #525252; text-align: center;">',
-    'Click the button below to verify your email and activate your APIClaw workspace. ',
-    'Your agent will be able to use APIs immediately.',
-    '</p>',
-    '<table width="100%" cellpadding="0" cellspacing="0">',
-    '<tr>',
-    '<td align="center" style="padding: 8px 0 24px;">',
-    '<a href="' + verifyUrl + '" style="display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">',
-    'Verify Email & Activate',
-    '</a>',
-    '</td>',
-    '</tr>',
-    '</table>',
-    '<div style="background: #fef2f2; border-radius: 8px; padding: 16px; margin-bottom: 16px;">',
-    '<p style="margin: 0; font-size: 14px; color: #991b1b;">',
-    '<strong>⚡ Free tier:</strong> 50 API calls included. No credit card required.',
-    '</p>',
-    '</div>',
-    '<p style="margin: 0; font-size: 13px; color: #737373; text-align: center;">',
-    'This link expires in 1 hour. If you did not request this, ignore this email.',
-    '</p>',
-  ].join('');
-  
-  return wrapEmail(content);
+  // Simple inline HTML - no arrays, no template literals
+  var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
+  html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
+  html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
+  html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
+  html += "<tr><td style='padding:32px;text-align:center;'>";
+  html += "<div style='font-size:48px;'>🦞</div>";
+  html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw</h1>";
+  html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
+  html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
+  html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
+  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
+  html += "</td></tr></table>";
+  html += "</td></tr></table></body></html>";
+  return html;
 }
 
 // Reminder email template

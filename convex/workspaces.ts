@@ -228,6 +228,15 @@ export const getConnectedAgents = query({
   },
 });
 
+// Admin: Delete session by ID (for cleanup)
+export const adminDeleteSession = mutation({
+  args: { sessionId: v.id("agentSessions") },
+  handler: async (ctx, { sessionId }) => {
+    await ctx.db.delete(sessionId);
+    return { success: true };
+  },
+});
+
 // Debug: Get sessions by workspace email
 export const getSessionsByEmail = query({
   args: { email: v.string() },
