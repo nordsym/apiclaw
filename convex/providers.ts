@@ -829,3 +829,21 @@ function generateToken(): string {
   }
   return result;
 }
+
+// Debug: Update API name/description
+export const debugUpdateAPI = mutation({
+  args: { 
+    apiId: v.string(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    category: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const updates: any = {};
+    if (args.name) updates.name = args.name;
+    if (args.description) updates.description = args.description;
+    if (args.category) updates.category = args.category;
+    await ctx.db.patch(args.apiId as any, updates);
+    return { updated: true };
+  },
+});
