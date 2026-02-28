@@ -177,7 +177,6 @@ export default function Home() {
     { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
     { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "AI & LLM" },
     { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Other" },
-    { name: "CoinGecko", desc: "Crypto prices and market data", category: "Crypto" },
   ];
 
   const copyToClipboard = () => {
