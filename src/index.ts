@@ -41,9 +41,105 @@ import {
   validateParams 
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
+import { readSession, writeSession, clearSession, getMachineFingerprint, SessionData } from './session.js';
+import { ConvexHttpClient } from 'convex/browser';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
+
+// Convex client for workspace management
+const CONVEX_URL = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
+const convex = new ConvexHttpClient(CONVEX_URL);
+
+// Global workspace context (set on startup if session is valid)
+interface WorkspaceContext {
+  sessionToken: string;
+  workspaceId: string;
+  email: string;
+  tier: string;
+  usageRemaining: number;
+  status: string;
+}
+
+let workspaceContext: WorkspaceContext | null = null;
+
+/**
+ * Validate session on startup
+ */
+async function validateSession(): Promise<boolean> {
+  const session = readSession();
+  if (!session) {
+    console.error('[APIClaw] No session found. Use register_owner to authenticate.');
+    return false;
+  }
+  
+  try {
+    const result = await convex.query("workspaces:getWorkspaceStatus" as any, {
+      sessionToken: session.sessionToken,
+    }) as { authenticated: boolean; email?: string; status?: string; tier?: string; usageCount?: number; usageLimit?: number; usageRemaining?: number };
+    
+    if (!result.authenticated) {
+      console.error('[APIClaw] Session invalid or expired. Clearing...');
+      clearSession();
+      return false;
+    }
+    
+    if (result.status !== 'active') {
+      console.error(`[APIClaw] Workspace status: ${result.status}. Please verify your email.`);
+      return false;
+    }
+    
+    workspaceContext = {
+      sessionToken: session.sessionToken,
+      workspaceId: session.workspaceId,
+      email: result.email ?? '',
+      tier: result.tier ?? 'free',
+      usageRemaining: result.usageRemaining ?? 0,
+      status: result.status ?? 'unknown',
+    };
+    
+    console.error(`[APIClaw] ✓ Authenticated as ${result.email} (${result.tier} tier)`);
+    console.error(`[APIClaw] ✓ Usage: ${result.usageCount}/${result.usageLimit === -1 ? '∞' : result.usageLimit} calls`);
+    
+    // Touch session to update last used
+    await convex.mutation("workspaces:touchSession" as any, {
+      sessionToken: session.sessionToken,
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('[APIClaw] Error validating session:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if workspace is active and has usage remaining
+ */
+function checkWorkspaceAccess(): { allowed: boolean; error?: string } {
+  if (!workspaceContext) {
+    return { 
+      allowed: false, 
+      error: 'Not authenticated. Use register_owner to authenticate your workspace.' 
+    };
+  }
+  
+  if (workspaceContext.status !== 'active') {
+    return { 
+      allowed: false, 
+      error: `Workspace status: ${workspaceContext.status}. Please verify your email.` 
+    };
+  }
+  
+  if (workspaceContext.usageRemaining === 0) {
+    return { 
+      allowed: false, 
+      error: `Usage limit reached. Upgrade to ${workspaceContext.tier === 'free' ? 'Pro' : 'Enterprise'} for more calls.` 
+    };
+  }
+  
+  return { allowed: true };
+}
 
 /**
  * Get customer API key from environment variable
@@ -259,6 +355,39 @@ const tools: Tool[] = [
   {
     name: 'list_capabilities',
     description: 'List all available capabilities and their providers.',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  // ============================================
+  // WORKSPACE TOOLS
+  // ============================================
+  {
+    name: 'register_owner',
+    description: 'Register your email to create a workspace. This authenticates your agent with APIClaw. You will receive a magic link to verify ownership.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: 'Your email address (used for verification and account recovery)'
+        }
+      },
+      required: ['email']
+    }
+  },
+  {
+    name: 'check_workspace_status',
+    description: 'Check your workspace status, tier, and usage remaining.',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+  {
+    name: 'remind_owner',
+    description: 'Send a reminder email to verify workspace ownership (if verification is pending).',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -540,6 +669,25 @@ Docs: https://apiclaw.nordsym.com
         const params = (args?.params as Record<string, any>) || {};
         const confirmToken = args?.confirm_token as string | undefined;
         
+        // Check workspace access (skip for free/open APIs)
+        const isFreeAPI = isOpenAPI(provider);
+        if (!isFreeAPI) {
+          const access = checkWorkspaceAccess();
+          if (!access.allowed) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: access.error,
+                  hint: 'Use register_owner to authenticate your workspace.',
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+        }
+        
         const startTime = Date.now();
         let result: { success: boolean; provider: string; action: string; data?: any; error?: string; cost?: number };
         let apiType: 'direct' | 'open';
@@ -661,6 +809,20 @@ Docs: https://apiclaw.nordsym.com
           error: result.error,
         });
 
+        // Increment usage for workspace (non-free APIs only)
+        if (result.success && workspaceContext && !isFreeAPI) {
+          try {
+            const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
+              workspaceId: workspaceContext.workspaceId as any,
+            }) as { success: boolean; remaining?: number };
+            if (usageResult.success) {
+              workspaceContext.usageRemaining = usageResult.remaining ?? -1;
+            }
+          } catch (e) {
+            console.error('[APIClaw] Failed to track usage:', e);
+          }
+        }
+
         return {
           content: [
             {
@@ -774,6 +936,271 @@ Docs: https://apiclaw.nordsym.com
         };
       }
 
+      // ============================================
+      // WORKSPACE TOOLS
+      // ============================================
+      
+      case 'register_owner': {
+        const email = args?.email as string;
+        
+        if (!email || !email.includes('@')) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'Invalid email address',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        try {
+          // Check if workspace already exists
+          const existing = await convex.query("workspaces:getByEmail" as any, { email }) as { _id: string; status: string; tier: string; usageCount: number; usageLimit: number } | null;
+          
+          if (existing && existing.status === 'active') {
+            // Workspace exists and is active - create session directly
+            const fingerprint = getMachineFingerprint();
+            const sessionResult = await convex.mutation("workspaces:createAgentSession" as any, {
+              workspaceId: existing._id,
+              fingerprint,
+            }) as { success: boolean; sessionToken?: string };
+            
+            if (sessionResult.success) {
+              writeSession(sessionResult.sessionToken!, existing._id, email);
+              
+              // Update global context
+              workspaceContext = {
+                sessionToken: sessionResult.sessionToken!,
+                workspaceId: existing._id,
+                email,
+                tier: existing.tier,
+                usageRemaining: existing.usageLimit - existing.usageCount,
+                status: existing.status,
+              };
+              
+              return {
+                content: [{
+                  type: 'text',
+                  text: JSON.stringify({
+                    status: 'success',
+                    message: `Welcome back! Authenticated as ${email}`,
+                    workspace: {
+                      email,
+                      tier: existing.tier,
+                      usageCount: existing.usageCount,
+                      usageLimit: existing.usageLimit,
+                    },
+                  }, null, 2)
+                }]
+              };
+            }
+          }
+          
+          // Create workspace and magic link
+          const createResult = await convex.mutation("workspaces:createWorkspace" as any, { email }) as { success: boolean; workspaceId?: string; error?: string };
+          
+          let workspaceId: string;
+          if (createResult.success) {
+            workspaceId = createResult.workspaceId!;
+          } else if (createResult.error === 'workspace_exists') {
+            workspaceId = createResult.workspaceId!;
+          } else {
+            throw new Error(createResult.error);
+          }
+          
+          // Create magic link
+          const fingerprint = getMachineFingerprint();
+          const magicLinkResult = await convex.mutation("workspaces:createMagicLink" as any, {
+            email,
+            fingerprint,
+          }) as { token: string; expiresAt: number };
+          
+          // TODO: Agent 2 will implement actual email sending
+          // For now, return the verification link
+          const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'pending_verification',
+                message: 'Workspace created! Please verify your email.',
+                email,
+                verification_url: verifyUrl,
+                expires_in_minutes: 15,
+                next_step: 'Click the verification link, then run check_workspace_status',
+              }, null, 2)
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Registration failed',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+      }
+      
+      case 'check_workspace_status': {
+        // Check if we have a local session
+        const session = readSession();
+        
+        if (!session) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'not_authenticated',
+                message: 'No active session. Use register_owner to authenticate.',
+              }, null, 2)
+            }]
+          };
+        }
+        
+        try {
+          const result = await convex.query("workspaces:getWorkspaceStatus" as any, {
+            sessionToken: session.sessionToken,
+          }) as { authenticated: boolean; email?: string; status?: string; tier?: string; usageCount?: number; usageLimit?: number; usageRemaining?: number; hasStripe?: boolean; createdAt?: number };
+          
+          if (!result.authenticated) {
+            clearSession();
+            workspaceContext = null;
+            
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'session_expired',
+                  message: 'Session expired. Use register_owner to re-authenticate.',
+                }, null, 2)
+              }]
+            };
+          }
+          
+          // Update global context
+          workspaceContext = {
+            sessionToken: session.sessionToken,
+            workspaceId: session.workspaceId,
+            email: result.email ?? '',
+            tier: result.tier ?? 'free',
+            usageRemaining: result.usageRemaining ?? 0,
+            status: result.status ?? 'unknown',
+          };
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'success',
+                workspace: {
+                  email: result.email,
+                  status: result.status,
+                  tier: result.tier,
+                  usage: {
+                    count: result.usageCount,
+                    limit: result.usageLimit === -1 ? 'unlimited' : result.usageLimit,
+                    remaining: result.usageRemaining === -1 ? 'unlimited' : result.usageRemaining,
+                  },
+                  hasStripe: result.hasStripe,
+                  createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : undefined,
+                },
+              }, null, 2)
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Failed to check status',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+      }
+      
+      case 'remind_owner': {
+        const session = readSession();
+        
+        if (!session) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'No workspace found. Use register_owner first.',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        try {
+          // Check current status
+          const result = await convex.query("workspaces:getWorkspaceStatus" as any, {
+            sessionToken: session.sessionToken,
+          }) as { authenticated: boolean; email?: string; status?: string };
+          
+          if (result.authenticated && result.status === 'active') {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'already_verified',
+                  message: 'Workspace is already verified and active!',
+                  email: result.email,
+                }, null, 2)
+              }]
+            };
+          }
+          
+          // Create new magic link
+          const fingerprint = getMachineFingerprint();
+          const magicLinkResult = await convex.mutation("workspaces:createMagicLink" as any, {
+            email: session.email,
+            fingerprint,
+          }) as { token: string; expiresAt: number };
+          
+          // TODO: Agent 2 will implement actual email sending
+          const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'reminder_sent',
+                message: 'New verification link created.',
+                email: session.email,
+                verification_url: verifyUrl,
+                expires_in_minutes: 15,
+                note: 'Email sending will be implemented by Agent 2',
+              }, null, 2)
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Failed to send reminder',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+      }
+
       default:
         return {
           content: [
@@ -810,6 +1237,9 @@ async function main() {
   await server.connect(transport);
   trackStartup();
   
+  // Validate session on startup
+  const hasValidSession = await validateSession();
+  
   // Welcome message with onboarding
   console.error(`
 🦞 APIClaw v1.1.5 — The API Layer for AI Agents
@@ -818,15 +1248,15 @@ async function main() {
 ✓ 19,000+ APIs indexed
 ✓ 23 categories  
 ✓ 9 direct-call providers ready
+${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - use register_owner'}
 
 Quick Start:
-  discover_apis("send SMS to Sweden")
+  ${!hasValidSession ? 'register_owner({ email: "you@example.com" })  # First, authenticate\n  ' : ''}discover_apis("send SMS to Sweden")
   discover_apis("search the web")
-  discover_apis("generate speech from text")
+  call_api({ provider: "brave_search", ... })
 
 Direct Call (no API key needed):
-  get_connected_providers()
-  call_api({ provider: "brave_search", ... })
+  list_connected()
 
 Docs: https://apiclaw.nordsym.com
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -37,6 +37,49 @@ export default defineSchema({
     .index("by_purchaseId", ["purchaseId"])
     .index("by_providerId", ["providerId"]),
 
+  // ============================================
+  // WORKSPACE TABLES (MCP Agent Authentication)
+  // ============================================
+
+  // Workspaces (agent owner accounts)
+  workspaces: defineTable({
+    email: v.string(),
+    passwordHash: v.optional(v.string()),
+    status: v.string(), // "pending" | "active" | "suspended"
+    tier: v.string(), // "free" | "pro" | "enterprise"
+    usageCount: v.number(), // total API calls made
+    usageLimit: v.number(), // max API calls for tier
+    stripeCustomerId: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"])
+    .index("by_status", ["status"]),
+
+  // Agent sessions (for MCP server authentication)
+  agentSessions: defineTable({
+    workspaceId: v.id("workspaces"),
+    sessionToken: v.string(),
+    fingerprint: v.optional(v.string()), // machine fingerprint
+    lastUsedAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_sessionToken", ["sessionToken"])
+    .index("by_workspaceId", ["workspaceId"]),
+
+  // Magic links for workspace email verification
+  workspaceMagicLinks: defineTable({
+    email: v.string(),
+    token: v.string(),
+    sessionFingerprint: v.optional(v.string()),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_email", ["email"]),
+
   // Credit top-ups (from Stripe payments)
   creditTopups: defineTable({
     agentId: v.string(),

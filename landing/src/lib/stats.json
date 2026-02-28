@@ -1,22 +1,21 @@
 {
   "apiCount": 22392,
-  "categoryCount": 14,
-  "lastUpdated": "2026-02-27T12:05:00.000Z",
-  "generatedAt": "2026-02-27T12:05:00.000Z",
+  "categoryCount": 13,
+  "lastUpdated": "2026-02-27T09:10:41.344767",
+  "generatedAt": "2026-02-28T09:32:15.722Z",
   "categoryBreakdown": {
-    "Utilities": 7069,
-    "Analytics": 2600,
-    "Development": 2278,
-    "Cloud": 1463,
-    "AI & ML": 1259,
-    "Entertainment": 1212,
     "Finance": 1179,
-    "Commerce": 1151,
-    "Location": 976,
-    "Communication": 939,
+    "Auth & Security": 491,
+    "Cloud & Infrastructure": 1463,
+    "Development": 2278,
     "Business": 923,
-    "Health": 740,
-    "Security": 491,
-    "Social": 112
+    "Commerce": 1151,
+    "Utilities": 7069,
+    "AI & ML": 1259,
+    "Location & Maps": 976,
+    "Social & Communication": 1051,
+    "Data & Analytics": 2600,
+    "Entertainment": 1212,
+    "Health & Fitness": 740
   }
 }

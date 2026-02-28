@@ -608,3 +608,157 @@ http.route({
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
+
+// ==============================================
+// WORKSPACE / MAGIC LINK ENDPOINTS
+// ==============================================
+
+// Create magic link and send email
+http.route({
+  path: "/workspace/magic-link",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const body = await request.json();
+      const { email, fingerprint } = body;
+
+      if (!email || !email.includes("@")) {
+        return jsonResponse({ error: "Valid email required" }, 400);
+      }
+
+      // Create magic link
+      const result = await ctx.runMutation(api.workspaces.createMagicLink, {
+        email: email.toLowerCase(),
+        fingerprint,
+      });
+
+      // Send email
+      await ctx.runAction(api.email.sendMagicLinkEmail, {
+        email: email.toLowerCase(),
+        token: result.token,
+      });
+
+      return jsonResponse({
+        success: true,
+        token: result.token,
+        expiresAt: result.expiresAt,
+        message: "Magic link sent! Check your email.",
+      });
+    } catch (e: any) {
+      console.error("Magic link error:", e);
+      return jsonResponse({ error: e.message || "Failed to create magic link" }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/workspace/magic-link",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// Poll magic link status (for agents to check if user clicked)
+http.route({
+  path: "/workspace/poll",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const token = url.searchParams.get("token");
+
+    if (!token) {
+      return jsonResponse({ error: "token required" }, 400);
+    }
+
+    const result = await ctx.runQuery(api.workspaces.pollMagicLink, { token });
+    return jsonResponse(result);
+  }),
+});
+
+http.route({
+  path: "/workspace/poll",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// Verify session token
+http.route({
+  path: "/workspace/verify-session",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const sessionToken = url.searchParams.get("sessionToken");
+
+    if (!sessionToken) {
+      return jsonResponse({ error: "sessionToken required" }, 400);
+    }
+
+    const result = await ctx.runQuery(api.workspaces.verifySession, { sessionToken });
+    
+    if (!result) {
+      return jsonResponse({ error: "Invalid or expired session" }, 401);
+    }
+
+    return jsonResponse(result);
+  }),
+});
+
+http.route({
+  path: "/workspace/verify-session",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// Get workspace by email
+http.route({
+  path: "/workspace/by-email",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const email = url.searchParams.get("email");
+
+    if (!email) {
+      return jsonResponse({ error: "email required" }, 400);
+    }
+
+    const result = await ctx.runQuery(api.workspaces.getByEmail, { email });
+    
+    if (!result) {
+      return jsonResponse({ exists: false });
+    }
+
+    return jsonResponse({ exists: true, workspace: result });
+  }),
+});
+
+http.route({
+  path: "/workspace/by-email",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// Send reminder email
+http.route({
+  path: "/workspace/send-reminder",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const body = await request.json();
+      const { email, token } = body;
+
+      if (!email || !token) {
+        return jsonResponse({ error: "email and token required" }, 400);
+      }
+
+      await ctx.runAction(api.email.sendReminderEmail, { email, token });
+      return jsonResponse({ success: true });
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/workspace/send-reminder",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
