@@ -1253,44 +1253,104 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold">My APIs</h2>
-          <p className="text-[var(--text-muted)]">APIs you&apos;ve listed for other agents to discover and use.</p>
+          <p className="text-[var(--text-muted)]">Choose how you want AI agents to access your API.</p>
         </div>
 
-        <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
-          <Terminal className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-xl mb-2">Get Your API in Front of AI Agents</h3>
-          <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-            List your API and let AI agents discover and use it — no integration work for them.
-          </p>
-          <Link href="/providers/register" className="btn-primary">
-            <Plus className="w-5 h-5" />
-            List New API
+        {/* Three integration options */}
+        <div className="grid gap-4 md:grid-cols-3">
+          {/* Option 1: List API */}
+          <Link
+            href="/providers/register?type=list"
+            className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left"
+          >
+            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+              <Search className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
+            </div>
+            <h3 className="font-semibold text-lg mb-1">List API</h3>
+            <p className="text-[#ef4444] text-sm font-medium mb-3">Get discovered</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Appear in the APIClaw catalog. AI agents find you when searching for capabilities.
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                Free
+              </span>
+              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+            </div>
           </Link>
 
-          {/* Benefits */}
-          <div className="mt-8 pt-8 border-t border-[var(--border)] max-w-lg mx-auto">
-            <h4 className="font-medium mb-4 text-left">Why list your API?</h4>
-            <div className="space-y-3 text-left">
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Get discovered by AI agents</p>
-                  <p className="text-sm text-[var(--text-muted)]">Agents query APIClaw to find APIs matching their needs.</p>
-                </div>
+          {/* Option 2: Open API */}
+          <Link
+            href="/providers/register?type=open"
+            className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left"
+          >
+            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+              <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
+            </div>
+            <h3 className="font-semibold text-lg mb-1">Open API</h3>
+            <p className="text-[#ef4444] text-sm font-medium mb-3">Agents call directly</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Provide your public OpenAPI spec. Agents call your endpoint with their own keys.
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium">
+                Self-hosted
+              </span>
+              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+
+          {/* Option 3: Direct Call */}
+          <Link
+            href="/providers/register?type=direct"
+            className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden"
+          >
+            <div className="absolute top-3 right-3">
+              <span className="px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                Premium
+              </span>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
+              <Zap className="w-6 h-6 text-[#ef4444]" />
+            </div>
+            <h3 className="font-semibold text-lg mb-1">Direct Call</h3>
+            <p className="text-[#ef4444] text-sm font-medium mb-3">We handle keys</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              APIClaw manages authentication. Agents pay per call, you earn revenue share.
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="px-2.5 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium">
+                Revenue share
+              </span>
+              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+            </div>
+          </Link>
+        </div>
+
+        {/* Why list section */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <h4 className="font-semibold mb-4">Why list your API on APIClaw?</h4>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm">AI-native discovery</p>
+                <p className="text-xs text-[var(--text-muted)]">Agents find you when searching for capabilities.</p>
               </div>
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Direct Call = we handle keys</p>
-                  <p className="text-sm text-[var(--text-muted)]">No need for agents to manage API keys.</p>
-                </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm">Zero integration work</p>
+                <p className="text-xs text-[var(--text-muted)]">We handle auth, billing, and agent compatibility.</p>
               </div>
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Analytics on who&apos;s using your API</p>
-                  <p className="text-sm text-[var(--text-muted)]">See which agents call your API and how often.</p>
-                </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sm">Usage analytics</p>
+                <p className="text-xs text-[var(--text-muted)]">See which agents use your API and how.</p>
               </div>
             </div>
           </div>
