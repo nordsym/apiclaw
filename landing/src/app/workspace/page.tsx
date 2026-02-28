@@ -550,7 +550,13 @@ export default function WorkspacePage() {
             <ApisTab apis={providerApis} />
           )}
           {activeTab === "analytics" && (
-            <AnalyticsTab apis={providerApis} analytics={providerAnalytics} />
+            <AnalyticsTab 
+              apis={providerApis} 
+              analytics={providerAnalytics} 
+              workspace={workspace}
+              agents={agents}
+              usage={usage}
+            />
           )}
           {activeTab === "agents" && (
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} />
@@ -1170,13 +1176,70 @@ function StatCard({
 function AnalyticsTab({
   apis,
   analytics,
+  workspace,
+  agents,
+  usage,
+}: {
+  apis: ProviderAPI[];
+  analytics: ProviderAnalytics | null;
+  workspace: Workspace | null;
+  agents: Agent[];
+  usage: UsageData | null;
+}) {
+  const [activeSubtab, setActiveSubtab] = useState<"apis" | "agents">("apis");
+
+  return (
+    <div className="space-y-6">
+      {/* Subtab Navigation */}
+      <div className="flex items-center gap-1 p-1 bg-[var(--surface)] rounded-xl w-fit">
+        <button
+          onClick={() => setActiveSubtab("apis")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "apis"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <Zap className="w-4 h-4" />
+          My APIs
+        </button>
+        <button
+          onClick={() => setActiveSubtab("agents")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "agents"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          My Agents
+        </button>
+      </div>
+
+      {/* Subtab Content */}
+      {activeSubtab === "apis" && (
+        <MyAPIsAnalytics apis={apis} analytics={analytics} />
+      )}
+      {activeSubtab === "agents" && (
+        <MyAgentsAnalytics workspace={workspace} agents={agents} usage={usage} />
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// MY APIs ANALYTICS (Provider view)
+// ============================================
+
+function MyAPIsAnalytics({
+  apis,
+  analytics,
 }: {
   apis: ProviderAPI[];
   analytics: ProviderAnalytics | null;
 }) {
   const totalCalls = analytics?.totalCalls || 0;
   const uniqueAgents = analytics?.uniqueAgents || 0;
-  const totalDiscoveries = apis.reduce((sum, a) => sum + (a.discoveryCount || 0), 0);
   const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
 
   return (
@@ -1187,42 +1250,28 @@ function AnalyticsTab({
           <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
           <div>
             <p className="font-medium text-[#ef4444]">Preview Mode</p>
-            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your API.</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your APIs.</p>
           </div>
         </div>
       )}
 
-      <h2 className="text-2xl font-bold">Analytics</h2>
+      <div>
+        <h2 className="text-2xl font-bold">My APIs Analytics</h2>
+        <p className="text-[var(--text-muted)]">How other agents are using your listed APIs</p>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Calls"
-          value={totalCalls.toLocaleString()}
-          icon={Zap}
-          accent
-        />
-        <StatCard
-          title="Unique Agents"
-          value={uniqueAgents.toString()}
-          icon={Users}
-        />
-        <StatCard
-          title="Avg Latency"
-          value={`${analytics?.avgLatency || 145}ms`}
-          icon={Clock}
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${(analytics?.successRate || 98.2).toFixed(1)}%`}
-          icon={Check}
-        />
+        <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
+        <StatCard title="Unique Agents" value={uniqueAgents.toString()} icon={Users} />
+        <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
+        <StatCard title="Success Rate" value={`${(analytics?.successRate || 98.2).toFixed(1)}%`} icon={Check} />
       </div>
 
       {/* Charts */}
       {hasChartData && (
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Line Chart - Calls Over Time */}
+          {/* Line Chart */}
           <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
             <h3 className="font-semibold mb-4">Calls Over Time</h3>
             <div className="h-80">
@@ -1236,46 +1285,29 @@ function AnalyticsTab({
                   />
                   <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
                   <Tooltip
-                    contentStyle={{
-                      background: "var(--surface-elevated)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                    }}
+                    contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
                     labelFormatter={(d) => new Date(d).toLocaleDateString()}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="calls"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4, fill: "#ef4444" }}
-                  />
+                  <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Top Agents */}
+          {/* Top Agents using your APIs */}
           <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Top Agents</h3>
+            <h3 className="font-semibold mb-4">Top Consumers</h3>
             <div className="space-y-3">
               {analytics!.topAgents.slice(0, 6).map((agent, i) => (
                 <div key={agent.agentId} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">
-                      {i + 1}
-                    </span>
-                    <span className="text-sm font-mono truncate max-w-[140px]">
-                      {agent.agentId.replace("agent_", "")}
-                    </span>
+                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">{i + 1}</span>
+                    <span className="text-sm font-mono truncate max-w-[140px]">{agent.agentId.replace("agent_", "")}</span>
                   </div>
                   <span className="text-sm text-[var(--text-muted)]">{agent.calls.toLocaleString()}</span>
                 </div>
               ))}
-              {analytics!.topAgents.length === 0 && (
-                <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>
-              )}
+              {analytics!.topAgents.length === 0 && <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>}
             </div>
           </div>
         </div>
@@ -1289,9 +1321,7 @@ function AnalyticsTab({
             {analytics.topActions.slice(0, 8).map((action, i) => (
               <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">
-                    {i + 1}
-                  </span>
+                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">{i + 1}</span>
                   <span className="text-sm font-mono">{action.actionName}</span>
                 </div>
                 <span className="text-sm text-[var(--text-muted)]">{action.calls.toLocaleString()}</span>
@@ -1303,7 +1333,7 @@ function AnalyticsTab({
 
       {/* Usage by API */}
       <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
-        <h3 className="font-semibold text-lg mb-4">Usage by API</h3>
+        <h3 className="font-semibold text-lg mb-4">Performance by API</h3>
         {apis.length > 0 ? (
           <div className="space-y-4">
             {apis.map((api) => (
@@ -1317,27 +1347,169 @@ function AnalyticsTab({
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
-                  <p className="text-sm text-[var(--text-muted)]">
-                    {api.status === "approved" ? "Live" : api.status}
-                  </p>
+                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-[var(--text-muted)] text-center py-8">No APIs listed yet</p>
+          <div className="text-center py-8">
+            <p className="text-[var(--text-muted)] mb-4">No APIs listed yet</p>
+            <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
+              <Plus className="w-4 h-4" />
+              Add Your First API
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// MY AGENTS ANALYTICS (Consumer view)
+// ============================================
+
+function generateAgentPreviewData() {
+  const days = [];
+  const baseDate = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(baseDate);
+    date.setDate(date.getDate() - i);
+    days.push({
+      date: date.toISOString().split("T")[0],
+      calls: Math.floor(Math.random() * 80) + 20 + Math.floor(i * 1.5),
+    });
+  }
+  return days;
+}
+
+function MyAgentsAnalytics({
+  workspace,
+  agents,
+  usage,
+}: {
+  workspace: Workspace | null;
+  agents: Agent[];
+  usage: UsageData | null;
+}) {
+  const totalCalls = workspace?.usageCount || usage?.total || 0;
+  const hasUsageData = usage && usage.byDay && usage.byDay.length > 0;
+  const isPreview = !hasUsageData && totalCalls === 0;
+  const chartData = hasUsageData ? usage!.byDay : generateAgentPreviewData();
+
+  return (
+    <div className="space-y-8">
+      {/* Preview Banner */}
+      {isPreview && (
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+          <div>
+            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once your agents start making API calls.</p>
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-2xl font-bold">My Agents Analytics</h2>
+        <p className="text-[var(--text-muted)]">How your agents are using APIs through APIClaw</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total API Calls" value={isPreview ? "1,247" : totalCalls.toLocaleString()} icon={Zap} accent />
+        <StatCard title="Connected Agents" value={isPreview ? "3" : agents.length.toString()} icon={Users} />
+        <StatCard title="APIs Used" value={isPreview ? "8" : (usage?.byProvider.length || 0).toString()} icon={BarChart3} />
+        <StatCard 
+          title="Remaining Calls" 
+          value={isPreview ? "8,753" : (workspace?.usageRemaining || 0).toLocaleString()} 
+          icon={Shield} 
+        />
+      </div>
+
+      {/* Usage Chart */}
+      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+        <h3 className="font-semibold mb-4">Your Agents&apos; API Calls Over Time</h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
+                tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              />
+              <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+              <Tooltip
+                contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
+                labelFormatter={(d) => new Date(d).toLocaleDateString()}
+              />
+              <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* APIs Your Agents Use */}
+      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+        <h3 className="font-semibold mb-4">APIs Your Agents Use</h3>
+        {(usage?.byProvider && usage.byProvider.length > 0) || isPreview ? (
+          <div className="space-y-3">
+            {(isPreview ? [
+              { provider: "OpenRouter", calls: 523, cost: 0 },
+              { provider: "Replicate", calls: 312, cost: 0 },
+              { provider: "ElevenLabs", calls: 189, cost: 0 },
+              { provider: "Brave Search", calls: 156, cost: 0 },
+              { provider: "46elks", calls: 67, cost: 0 },
+            ] : usage!.byProvider).map((p, i) => (
+              <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">{i + 1}</span>
+                  <span className="font-medium">{p.provider}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{p.calls.toLocaleString()} calls</p>
+                  {p.cost > 0 && <p className="text-sm text-[var(--text-muted)]">${p.cost.toFixed(2)}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[var(--text-muted)] text-center py-8">No API usage data yet</p>
         )}
       </div>
 
-      {totalCalls === 0 && !analytics?.isPreview && (
-        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
-          <TrendingUp className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No Usage Yet</h3>
-          <p className="text-[var(--text-muted)]">
-            When agents start using your APIs, analytics stats will appear here.
-          </p>
-        </div>
-      )}
+      {/* Connected Agents */}
+      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+        <h3 className="font-semibold mb-4">Your Connected Agents</h3>
+        {agents.length > 0 || isPreview ? (
+          <div className="space-y-3">
+            {(isPreview ? [
+              { id: "1", fingerprint: "claude_prod_main", lastUsedAt: Date.now() - 3600000, isCurrent: true },
+              { id: "2", fingerprint: "cursor_dev_local", lastUsedAt: Date.now() - 86400000, isCurrent: false },
+              { id: "3", fingerprint: "aider_ci_runner", lastUsedAt: Date.now() - 172800000, isCurrent: false },
+            ] as Agent[] : agents).map((agent) => (
+              <div key={agent.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#ef4444]" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{agent.fingerprint}</p>
+                    <p className="text-sm text-[var(--text-muted)]">Last active: {new Date(agent.lastUsedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                {agent.isCurrent && (
+                  <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Current</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[var(--text-muted)] text-center py-8">No agents connected yet</p>
+        )}
+      </div>
     </div>
   );
 }
