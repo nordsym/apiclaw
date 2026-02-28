@@ -175,7 +175,7 @@ export default function LoginPage() {
               <div className="space-y-3 text-sm text-[var(--text-muted)]">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />
-                  <span>1,000 free API calls per month</span>
+                  <span>50 free API calls per month</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-500" />

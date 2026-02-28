@@ -1434,7 +1434,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit.toLocaleString() || "1,000"} / month</span>
+              <span className="font-medium">{workspace?.usageLimit.toLocaleString() || "50"} / month</span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Support</span>
