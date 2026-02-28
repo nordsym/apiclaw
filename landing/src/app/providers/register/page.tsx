@@ -731,7 +731,7 @@ export default function RegisterPage() {
           {/* Help text */}
           <p className="text-center text-text-muted text-sm mt-6">
             Questions?{' '}
-            <a href="mailto:gustav@nordsym.com" className="text-accent hover:underline">
+            <a href="mailto:support_apiclaw@nordsym.com" className="text-accent hover:underline">
               Contact us
             </a>
             {' '}or check the{' '}

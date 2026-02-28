@@ -169,7 +169,7 @@ export function UsageExceededBanner({
               You&apos;ve used all {usageLimit.toLocaleString()} free API calls this month.
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
-              Add a payment method to unlock unlimited usage at <span className="font-semibold text-[#ef4444]">$0.01/call</span>.
+              Add a payment method to unlock unlimited usage at <span className="font-semibold text-[#ef4444]">$0.002/call</span>.
             </p>
           </div>
         </div>

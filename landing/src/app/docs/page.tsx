@@ -311,7 +311,7 @@ export default function DocsPage() {
               </li>
               <li>
                 <strong>Email:</strong>{' '}
-                <a href="mailto:symbot@nordsym.com" className="text-[var(--accent)] hover:underline">symbot@nordsym.com</a>
+                <a href="mailto:support_apiclaw@nordsym.com" className="text-[var(--accent)] hover:underline">support_apiclaw@nordsym.com</a>
               </li>
             </ul>
           </div>

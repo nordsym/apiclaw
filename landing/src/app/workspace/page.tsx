@@ -2505,7 +2505,7 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
 
   // Calculate estimated cost
   const FREE_CALLS = 100;
-  const COST_PER_CALL = 0.01;
+  const COST_PER_CALL = 0.002;
   const currentUsage = billingInfo?.currentPeriodUsage || workspace?.usageCount || 0;
   const billableCalls = Math.max(0, currentUsage - FREE_CALLS);
   const estimatedCost = billableCalls * COST_PER_CALL;
@@ -2585,11 +2585,11 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Free Tier</span>
-              <span className="font-medium">100 calls / month</span>
+              <span className="font-medium">50 calls / month</span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Rate</span>
-              <span className="font-medium">$0.01 / call (after free tier)</span>
+              <span className="font-medium">$0.002 / call (after free tier)</span>
             </div>
             <div className="flex items-center justify-between py-3">
               <span className="text-[var(--text-muted)]">Support</span>
@@ -2753,7 +2753,7 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
             <div>
               <h3 className="font-bold text-xl mb-2">Unlock Unlimited API Calls</h3>
               <p className="text-[var(--text-muted)]">
-                Pay only for what you use. First 100 calls free every month, then just $0.01 per call.
+                Pay only for what you use. First 50 calls free every month, then just $0.002 per call.
               </p>
             </div>
           </div>
@@ -2761,11 +2761,11 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>100 free calls / month</span>
+              <span>50 free calls / month</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>$0.01 per additional call</span>
+              <span>$0.002 per additional call</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
@@ -2784,7 +2784,7 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
           </CheckoutButton>
           
           <p className="mt-4 text-sm text-[var(--text-muted)]">
-            You&apos;ll only be charged for usage beyond 100 free calls. Billed monthly.
+            You&apos;ll only be charged for usage beyond 50 free calls. Billed monthly.
           </p>
         </div>
       )}
@@ -3515,12 +3515,16 @@ interface BYOKProvider {
 }
 
 const BYOK_PROVIDERS: BYOKProvider[] = [
-  { id: "brave_search", name: "Brave Search", icon: "search" },
-  { id: "openrouter", name: "OpenRouter", icon: "cpu" },
-  { id: "elevenlabs", name: "ElevenLabs", icon: "activity" },
+  { id: "46elks", name: "46elks", icon: "phone" },
   { id: "twilio", name: "Twilio", icon: "phone" },
   { id: "resend", name: "Resend", icon: "mail" },
+  { id: "openrouter", name: "OpenRouter", icon: "cpu" },
+  { id: "elevenlabs", name: "ElevenLabs", icon: "activity" },
+  { id: "replicate", name: "Replicate", icon: "sparkles" },
+  { id: "firecrawl", name: "Firecrawl", icon: "globe" },
+  { id: "brave_search", name: "Brave Search", icon: "search" },
   { id: "e2b", name: "E2B", icon: "terminal" },
+  { id: "github", name: "GitHub", icon: "database" },
 ];
 
 const ProviderIcon = ({ iconName, className = "w-6 h-6" }: { iconName: string; className?: string }) => {
@@ -3531,6 +3535,9 @@ const ProviderIcon = ({ iconName, className = "w-6 h-6" }: { iconName: string; c
     case "phone": return <Phone className={className} />;
     case "mail": return <Mail className={className} />;
     case "terminal": return <Terminal className={className} />;
+    case "sparkles": return <Sparkles className={className} />;
+    case "globe": return <Globe className={className} />;
+    case "database": return <Database className={className} />;
     default: return <Zap className={className} />;
   }
 };
@@ -3788,6 +3795,25 @@ function ApiKeysTab() {
           <span className="px-3 py-1.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm font-medium shadow-lg">
             Coming soon
           </span>
+        </div>
+      </div>
+
+      {/* Request a Provider */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-semibold mb-1">Missing a provider?</h3>
+            <p className="text-sm text-[var(--text-muted)]">
+              Let us know which API providers you'd like to see added to Direct Call.
+            </p>
+          </div>
+          <a
+            href="mailto:support_apiclaw@nordsym.com?subject=Provider%20Request&body=Hi%20APIClaw%20team,%0A%0AI%27d%20like%20to%20request%20support%20for%20the%20following%20provider:%0A%0AProvider%20name:%20%0AWebsite:%20%0AUse%20case:%20%0A%0AThanks!"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#ef4444]/50 text-[#ef4444] font-medium hover:bg-[#ef4444]/10 transition whitespace-nowrap"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Request a Provider
+          </a>
         </div>
       </div>
 
