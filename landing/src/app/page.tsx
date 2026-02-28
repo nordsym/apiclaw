@@ -411,11 +411,11 @@ Website: https://apiclaw.nordsym.com`;
                 For API Providers
               </a>
               <a 
-                href="#get-started" 
+                href="/docs" 
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
-                Get Started
+                Docs
               </a>
               <a 
                 href="#faq" 
@@ -426,12 +426,12 @@ Website: https://apiclaw.nordsym.com`;
               </a>
               <div className="border-t border-border pt-3 mt-1 flex flex-col space-y-3">
                 <a
-                  href="/workspace?tab=my-apis"
+                  href="/workspace"
                   onClick={() => setMobileMenuOpen(false)}
                   className="py-2 text-accent font-medium flex items-center gap-2"
                 >
-                  <FileText className="w-4 h-4" />
-                  Add Your API
+                  <Zap className="w-4 h-4" />
+                  Workspace
                 </a>
                 <a
                   href="https://github.com/nordsym/apiclaw"
