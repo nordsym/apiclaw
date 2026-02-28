@@ -210,13 +210,21 @@ export default function WorkspacePage() {
       const providerData = localStorage.getItem("apiclaw_provider");
       const providerSession = localStorage.getItem("apiclaw_session");
       
-      if (!providerData || !providerSession) {
+      // Need at least the session token
+      if (!providerSession) {
         setIsProvider(false);
         return;
       }
       
-      const parsed = JSON.parse(providerData);
-      setProviderName(parsed.name || parsed.email || "Provider");
+      // Try to get provider name from stored data
+      if (providerData) {
+        try {
+          const parsed = JSON.parse(providerData);
+          setProviderName(parsed.name || parsed.email || "Provider");
+        } catch {
+          setProviderName("Provider");
+        }
+      }
       
       // Fetch provider APIs BEFORE setting isProvider
       const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
@@ -229,12 +237,22 @@ export default function WorkspacePage() {
       });
       
       const apisData = await apisRes.json();
+      console.log("Provider APIs response:", apisData);
+      
+      // Check for error response
+      if (apisData.error) {
+        console.error("Provider API error:", apisData.error);
+        setIsProvider(false);
+        return;
+      }
+      
       const apis = apisData.value || apisData || [];
       
-      // Only set as provider if we got valid data
+      // Set as provider if we got valid response (even empty array is OK)
       if (Array.isArray(apis)) {
         setProviderApis(apis);
         setIsProvider(true);
+        console.log("Provider detected, APIs:", apis.length);
         
         // Fetch provider analytics
         try {
@@ -279,10 +297,13 @@ export default function WorkspacePage() {
           await fetchWorkspaceData(token);
         }
         
-        // Check provider session
+        // Check provider session and fetch APIs
         await fetchProviderData();
         
-        // If neither, redirect to login
+        // Always ensure preview analytics exist for Analytics tab
+        setProviderAnalytics(prev => prev || generatePreviewAnalytics());
+        
+        // If neither session type, redirect to login
         if (!token && !localStorage.getItem("apiclaw_session")) {
           router.push("/login");
           return;
@@ -354,10 +375,8 @@ export default function WorkspacePage() {
 
   const tabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
-    ...(isProvider ? [
-      { id: "apis" as TabType, label: "APIs", icon: Zap },
-      { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
-    ] : []),
+    { id: "apis" as TabType, label: "APIs", icon: Zap },
+    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
     { id: "agents" as TabType, label: "Agents", icon: Users },
     { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
     { id: "billing" as TabType, label: "Billing", icon: CreditCard },
@@ -494,7 +513,7 @@ export default function WorkspacePage() {
             <button onClick={handleRefresh} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" title="Refresh">
               <RefreshCw className="w-5 h-5 text-[var(--text-muted)]" />
             </button>
-            {isProvider && activeTab === "apis" && (
+            {activeTab === "apis" && (
               <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
                 <Plus className="w-4 h-4" />
                 Add API
@@ -510,14 +529,13 @@ export default function WorkspacePage() {
               workspace={workspace}
               agents={agents}
               providerApis={providerApis}
-              isProvider={isProvider}
               setActiveTab={setActiveTab}
             />
           )}
-          {activeTab === "apis" && isProvider && (
+          {activeTab === "apis" && (
             <ApisTab apis={providerApis} />
           )}
-          {activeTab === "analytics" && isProvider && (
+          {activeTab === "analytics" && (
             <AnalyticsTab apis={providerApis} analytics={providerAnalytics} />
           )}
           {activeTab === "agents" && (
@@ -543,30 +561,26 @@ function OverviewTab({
   workspace,
   agents,
   providerApis,
-  isProvider,
   setActiveTab,
 }: {
   workspace: Workspace | null;
   agents: Agent[];
   providerApis: ProviderAPI[];
-  isProvider: boolean;
   setActiveTab: (tab: TabType) => void;
 }) {
   return (
     <div className="space-y-8">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {isProvider && (
-          <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Zap className="w-6 h-6 text-[#ef4444]" />
-              <span className="text-[var(--text-muted)]">Listed APIs</span>
-            </div>
-            <p className="text-4xl font-bold text-[#ef4444]">{providerApis.length}</p>
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Zap className="w-6 h-6 text-[#ef4444]" />
+            <span className="text-[var(--text-muted)]">Listed APIs</span>
           </div>
-        )}
+          <p className="text-4xl font-bold text-[#ef4444]">{providerApis.length}</p>
+        </div>
 
-        <div className={`rounded-2xl border ${workspace ? "border-[#ef4444]/30 bg-[#ef4444]/10" : "border-[var(--border)] bg-[var(--surface-elevated)]"} p-6`}>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-center gap-3 mb-3">
             <BarChart3 className={`w-6 h-6 ${workspace ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
             <span className="text-[var(--text-muted)]">API Calls</span>
@@ -642,7 +656,7 @@ function OverviewTab({
       )}
 
       {/* Provider APIs Preview */}
-      {isProvider && providerApis.length > 0 && (
+      {providerApis.length > 0 && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg">Your APIs</h3>
