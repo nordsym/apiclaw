@@ -216,23 +216,42 @@ export default function WorkspacePage() {
         return;
       }
       
-      // Try to get provider name from stored data
-      if (providerData) {
-        try {
-          const parsed = JSON.parse(providerData);
-          setProviderName(parsed.name || parsed.email || "Provider");
-        } catch {
-          setProviderName("Provider");
+      // First, get session to obtain providerId
+      const sessionRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "providers:getSession",
+          args: { token: providerSession },
+        }),
+      });
+      
+      const sessionData = await sessionRes.json();
+      const session = sessionData.value || sessionData;
+      
+      if (!session || !session.providerId) {
+        console.log("No valid provider session");
+        // Try stored provider data as fallback for name
+        if (providerData) {
+          try {
+            const parsed = JSON.parse(providerData);
+            setProviderName(parsed.name || parsed.email || "Provider");
+          } catch {
+            // ignore
+          }
         }
+        return;
       }
       
-      // Fetch provider APIs BEFORE setting isProvider
+      setProviderName(session.name || session.email || "Provider");
+      
+      // Now fetch provider APIs using providerId
       const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          path: "providers:getProviderAPIs",
-          args: { sessionToken: providerSession },
+          path: "providers:getProviderAPIsWithStatus",
+          args: { providerId: session.providerId },
         }),
       });
       
@@ -240,19 +259,17 @@ export default function WorkspacePage() {
       console.log("Provider APIs response:", apisData);
       
       // Check for error response
-      if (apisData.error) {
-        console.error("Provider API error:", apisData.error);
-        setIsProvider(false);
+      if (apisData.status === "error") {
+        console.error("Provider API error:", apisData.errorMessage);
         return;
       }
       
       const apis = apisData.value || apisData || [];
       
-      // Set as provider if we got valid response (even empty array is OK)
+      // Set provider APIs (even empty array is OK)
       if (Array.isArray(apis)) {
         setProviderApis(apis);
-        setIsProvider(true);
-        console.log("Provider detected, APIs:", apis.length);
+        console.log("Provider APIs loaded:", apis.length);
         
         // Fetch provider analytics
         try {
@@ -260,15 +277,15 @@ export default function WorkspacePage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              path: "providers:getProviderAnalytics",
-              args: { sessionToken: providerSession },
+              path: "providers:getAnalytics",
+              args: { token: providerSession },
             }),
           });
           
           const analyticsData = await analyticsRes.json();
           const analytics = analyticsData.value || analyticsData;
           
-          if (analytics && typeof analytics === "object") {
+          if (analytics && typeof analytics === "object" && !analytics.status) {
             setProviderAnalytics(analytics);
           } else {
             // Generate preview data if no analytics
@@ -278,12 +295,9 @@ export default function WorkspacePage() {
           // Generate preview data on error
           setProviderAnalytics(generatePreviewAnalytics());
         }
-      } else {
-        setIsProvider(false);
       }
     } catch (err) {
       console.error("Fetch provider error:", err);
-      setIsProvider(false);
     }
   }, []);
 
