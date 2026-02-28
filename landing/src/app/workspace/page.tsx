@@ -35,6 +35,15 @@ import {
   BookOpen,
   Mail,
   Send,
+  ScrollText,
+  Webhook,
+  Key,
+  MessageSquare,
+  Bell,
+  User,
+  Lock,
+  Building,
+  ChevronUp,
 } from "lucide-react";
 import {
   LineChart,
@@ -99,7 +108,7 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "apis" | "analytics" | "agents" | "usage" | "billing" | "earn" | "docs";
+type TabType = "overview" | "apis" | "analytics" | "agents" | "logs" | "usage" | "webhooks" | "api-keys" | "earn" | "docs" | "feedback" | "settings" | "billing";
 
 // Generate preview analytics data for demo
 function generatePreviewAnalytics(): ProviderAnalytics {
@@ -164,7 +173,7 @@ export default function WorkspacePage() {
   const [isProvider, setIsProvider] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["overview", "apis", "analytics", "agents", "usage", "billing"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["overview", "apis", "analytics", "agents", "logs", "usage", "webhooks", "api-keys", "earn", "docs", "feedback", "settings", "billing"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
         setAnalyticsExpanded(true);
@@ -423,16 +432,32 @@ export default function WorkspacePage() {
     }
   };
 
-  const tabs = [
+  // Main navigation tabs
+  const mainTabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
     { id: "apis" as TabType, label: "APIs", icon: Zap },
-    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
     { id: "agents" as TabType, label: "Agents", icon: Users },
+    { id: "logs" as TabType, label: "Logs", icon: ScrollText },
+    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
     { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
-    { id: "billing" as TabType, label: "Billing", icon: CreditCard },
+    { id: "webhooks" as TabType, label: "Webhooks", icon: Webhook },
+  ];
+
+  // Secondary navigation tabs
+  const secondaryTabs = [
+    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
     { id: "earn" as TabType, label: "Earn Credits", icon: Crown },
     { id: "docs" as TabType, label: "Docs", icon: BookOpen },
+    { id: "feedback" as TabType, label: "Feedback", icon: MessageSquare },
   ];
+
+  // Bottom navigation tabs (before theme/logout)
+  const bottomTabs = [
+    { id: "settings" as TabType, label: "Settings", icon: Settings },
+  ];
+
+  // All tabs for lookup
+  const tabs = [...mainTabs, ...secondaryTabs, ...bottomTabs, { id: "billing" as TabType, label: "Billing", icon: CreditCard }];
 
   if (isLoading) {
     return (
@@ -524,8 +549,9 @@ export default function WorkspacePage() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
-            {tabs.map((tab) => {
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {/* Main tabs */}
+            {mainTabs.map((tab) => {
               // Special handling for Analytics with dropdown
               if (tab.id === "analytics") {
                 return (
@@ -611,6 +637,52 @@ export default function WorkspacePage() {
                 </button>
               );
             })}
+
+            {/* Separator */}
+            <div className="border-t border-[var(--border)] my-3" />
+
+            {/* Secondary tabs */}
+            {secondaryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                  router.push(`/workspace?tab=${tab.id}`);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                  activeTab === tab.id
+                    ? "bg-[#ef4444] text-white"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+
+            {/* Separator */}
+            <div className="border-t border-[var(--border)] my-3" />
+
+            {/* Bottom tabs (Settings) */}
+            {bottomTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                  router.push(`/workspace?tab=${tab.id}`);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                  activeTab === tab.id
+                    ? "bg-[#ef4444] text-white"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </nav>
 
           {/* Bottom section */}
@@ -680,8 +752,17 @@ export default function WorkspacePage() {
           {activeTab === "agents" && (
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
           )}
+          {activeTab === "logs" && (
+            <LogsTab />
+          )}
           {activeTab === "usage" && (
             <UsageTab workspace={workspace} usage={usage} />
+          )}
+          {activeTab === "webhooks" && (
+            <WebhooksTab />
+          )}
+          {activeTab === "api-keys" && (
+            <ApiKeysTab />
           )}
           {activeTab === "billing" && (
             <BillingTab workspace={workspace} />
@@ -691,6 +772,12 @@ export default function WorkspacePage() {
           )}
           {activeTab === "docs" && (
             <DocsTab />
+          )}
+          {activeTab === "feedback" && (
+            <FeedbackTab />
+          )}
+          {activeTab === "settings" && (
+            <SettingsTab workspace={workspace} />
           )}
         </div>
       </main>
@@ -1991,6 +2078,419 @@ function DocsTab() {
         <a href="https://npmjs.com/package/@nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
           NPM Package →
         </a>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// LOGS TAB
+// ============================================
+
+function LogsTab() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Logs</h2>
+        <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
+      </div>
+
+      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+        <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+        <h3 className="font-semibold text-xl mb-2">Coming Soon</h3>
+        <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
+          API call logs, errors, and debug info will appear here. Track every request your agents make with detailed timestamps, latency, and response data.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3 text-sm text-[var(--text-muted)]">
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Request/Response Logs</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Error Tracking</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Latency Metrics</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Export to JSON/CSV</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// WEBHOOKS TAB
+// ============================================
+
+function WebhooksTab() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
+        <p className="text-[var(--text-muted)]">React to events with webhooks.</p>
+      </div>
+
+      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+        <Webhook className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+        <h3 className="font-semibold text-xl mb-2">Coming Soon</h3>
+        <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
+          Set up webhooks to receive real-time notifications when events occur. Get alerts for usage thresholds, errors, agent connections, and more.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3 text-sm text-[var(--text-muted)]">
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">usage.threshold</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">api.error</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">agent.connected</span>
+          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">agent.revoked</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// API KEYS TAB (BYOK)
+// ============================================
+
+function ApiKeysTab() {
+  const providers = [
+    { name: "Brave Search", status: "direct", icon: "🔍" },
+    { name: "OpenRouter", status: "direct", icon: "🤖" },
+    { name: "ElevenLabs", status: "direct", icon: "🎙️" },
+    { name: "46elks", status: "direct", icon: "📱" },
+    { name: "Resend", status: "direct", icon: "📧" },
+    { name: "Twilio", status: "direct", icon: "📞" },
+    { name: "E2B", status: "direct", icon: "💻" },
+    { name: "Replicate", status: "direct", icon: "🎨" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">API Keys (BYOK)</h2>
+        <p className="text-[var(--text-muted)]">Bring your own keys for unlimited calls.</p>
+      </div>
+
+      {/* Info Banner */}
+      <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
+            <Key className="w-5 h-5 text-[#ef4444]" />
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">Direct Call is Default</h3>
+            <p className="text-sm text-[var(--text-muted)]">
+              No API keys needed — APIClaw handles authentication for you. Add your own keys to bypass usage limits and route requests directly to providers.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Provider List */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+        <div className="p-4 border-b border-[var(--border)]">
+          <h3 className="font-semibold">Providers</h3>
+        </div>
+        <div className="divide-y divide-[var(--border)]">
+          {providers.map((provider) => (
+            <div key={provider.name} className="flex items-center justify-between p-4 hover:bg-[var(--surface)] transition">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{provider.icon}</span>
+                <span className="font-medium">{provider.name}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-sm font-medium">
+                  Direct Call
+                </span>
+                <button
+                  className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--surface)] transition opacity-50 cursor-not-allowed"
+                  disabled
+                  title="Coming soon"
+                >
+                  Add Key
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Add Custom Provider */}
+      <button
+        className="w-full rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed"
+        disabled
+        title="Coming soon"
+      >
+        <Plus className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
+        <p className="font-medium text-[var(--text-muted)]">+ Add Custom Provider</p>
+        <p className="text-sm text-[var(--text-muted)] mt-1">Connect any REST API with custom authentication</p>
+      </button>
+    </div>
+  );
+}
+
+// ============================================
+// FEEDBACK TAB
+// ============================================
+
+function FeedbackTab() {
+  const [feedback, setFeedback] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!feedback.trim()) return;
+    // TODO: Submit to backend
+    setSubmitted(true);
+    setFeedback("");
+    setTimeout(() => setSubmitted(false), 3000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Feedback</h2>
+        <p className="text-[var(--text-muted)]">Your feedback helps us improve APIClaw.</p>
+      </div>
+
+      {/* Feedback Form */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Share Your Thoughts</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="What's on your mind? Bug reports, feature requests, or general feedback..."
+            className="w-full h-40 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-muted)]">
+              We read every piece of feedback.
+            </p>
+            <button
+              type="submit"
+              disabled={!feedback.trim() || submitted}
+              className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
+            >
+              {submitted ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Sent!
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  Submit
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Quick Reactions */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Quick Reactions</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">How are you finding APIClaw so far?</p>
+        <div className="flex flex-wrap gap-3">
+          {["😍 Love it", "👍 It's good", "🤔 Needs work", "😕 Confused", "🐛 Found a bug"].map((reaction) => (
+            <button
+              key={reaction}
+              className="px-4 py-2 rounded-lg border border-[var(--border)] hover:border-[#ef4444]/50 hover:bg-[var(--surface)] transition text-sm"
+            >
+              {reaction}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Feature Requests Preview */}
+      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center">
+        <MessageSquare className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-3" />
+        <h3 className="font-semibold mb-1">Feature Requests</h3>
+        <p className="text-sm text-[var(--text-muted)]">
+          Public feature request board coming soon. Vote on what gets built next!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// SETTINGS TAB
+// ============================================
+
+interface SettingsSectionProps {
+  title: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}
+
+function SettingsSection({ title, icon: Icon, children, defaultOpen = false }: SettingsSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface)] transition"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--surface)] flex items-center justify-center">
+            <Icon className="w-5 h-5 text-[var(--text-muted)]" />
+          </div>
+          <span className="font-semibold">{title}</span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 text-[var(--text-muted)]" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="p-4 pt-0 border-t border-[var(--border)]">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SettingsTab({ workspace }: { workspace: Workspace | null }) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Settings</h2>
+        <p className="text-[var(--text-muted)]">Manage your account and workspace settings.</p>
+      </div>
+
+      {/* Profile Section */}
+      <SettingsSection title="Profile" icon={User} defaultOpen={true}>
+        <div className="space-y-4 pt-4">
+          <div>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Email</label>
+            <input
+              type="email"
+              value={workspace?.email || ""}
+              disabled
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Display Name</label>
+            <input
+              type="text"
+              placeholder="Your name"
+              disabled
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">Coming soon</p>
+          </div>
+        </div>
+      </SettingsSection>
+
+      {/* Security Section */}
+      <SettingsSection title="Security" icon={Lock}>
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Two-Factor Authentication</p>
+              <p className="text-sm text-[var(--text-muted)]">Add an extra layer of security</p>
+            </div>
+            <button
+              disabled
+              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium opacity-50 cursor-not-allowed"
+            >
+              Enable
+            </button>
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Active Sessions</p>
+              <p className="text-sm text-[var(--text-muted)]">Manage your active login sessions</p>
+            </div>
+            <button
+              disabled
+              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium opacity-50 cursor-not-allowed"
+            >
+              View
+            </button>
+          </div>
+        </div>
+      </SettingsSection>
+
+      {/* Notifications Section */}
+      <SettingsSection title="Notifications" icon={Bell}>
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Email Notifications</p>
+              <p className="text-sm text-[var(--text-muted)]">Usage alerts, updates, and announcements</p>
+            </div>
+            <div className="w-12 h-6 rounded-full bg-[var(--border)] relative opacity-50 cursor-not-allowed">
+              <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 left-0.5 shadow" />
+            </div>
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Usage Threshold Alerts</p>
+              <p className="text-sm text-[var(--text-muted)]">Get notified at 80% and 100% usage</p>
+            </div>
+            <div className="w-12 h-6 rounded-full bg-[var(--border)] relative opacity-50 cursor-not-allowed">
+              <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 left-0.5 shadow" />
+            </div>
+          </div>
+        </div>
+      </SettingsSection>
+
+      {/* Workspace Section */}
+      <SettingsSection title="Workspace" icon={Building}>
+        <div className="space-y-4 pt-4">
+          <div>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Workspace Name</label>
+            <input
+              type="text"
+              placeholder="My Workspace"
+              disabled
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">Coming soon</p>
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Tier</p>
+              <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
+              {workspace?.tier || "Free"}
+            </span>
+          </div>
+        </div>
+      </SettingsSection>
+
+      {/* API Tokens Section */}
+      <SettingsSection title="API Tokens" icon={Key}>
+        <div className="space-y-4 pt-4">
+          <p className="text-sm text-[var(--text-muted)]">
+            Generate API tokens for programmatic access to your workspace.
+          </p>
+          <button
+            disabled
+            className="w-full px-4 py-3 rounded-xl border border-dashed border-[var(--border)] text-sm font-medium text-[var(--text-muted)] hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Generate New Token
+          </button>
+          <p className="text-xs text-[var(--text-muted)] text-center">Coming soon</p>
+        </div>
+      </SettingsSection>
+
+      {/* Danger Zone */}
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+        <h3 className="font-semibold text-red-500 mb-2">Danger Zone</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">
+          Irreversible actions. Proceed with caution.
+        </p>
+        <button
+          disabled
+          className="px-4 py-2 rounded-lg bg-red-500/20 text-red-500 font-medium opacity-50 cursor-not-allowed"
+        >
+          Delete Workspace
+        </button>
       </div>
     </div>
   );
