@@ -310,12 +310,6 @@ Website: https://apiclaw.nordsym.com`;
               For API Providers
             </a>
             <a 
-              href="/docs" 
-              className="transition hover:text-text-primary"
-            >
-              Docs
-            </a>
-            <a 
               href="/earn" 
               className="transition hover:text-text-primary"
             >
@@ -411,11 +405,11 @@ Website: https://apiclaw.nordsym.com`;
                 For API Providers
               </a>
               <a 
-                href="/docs" 
+                href="/earn" 
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
-                Docs
+                Earn
               </a>
               <a 
                 href="#faq" 
