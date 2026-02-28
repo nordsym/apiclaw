@@ -49,13 +49,50 @@ export default defineSchema({
     tier: v.string(), // "free" | "pro" | "enterprise"
     usageCount: v.number(), // total API calls made
     usageLimit: v.number(), // max API calls for tier
+    // Stripe billing fields
     stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    billingPlan: v.optional(v.string()), // "free" | "usage_based" | "starter" | "pro" | "scale"
+    creditBalance: v.optional(v.number()), // prepaid credits in cents
+    lastBillingDate: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_email", ["email"])
     .index("by_stripeCustomerId", ["stripeCustomerId"])
+    .index("by_stripeSubscriptionId", ["stripeSubscriptionId"])
     .index("by_status", ["status"]),
+
+  // Invoices (Stripe invoice records)
+  invoices: defineTable({
+    workspaceId: v.id("workspaces"),
+    stripeInvoiceId: v.string(),
+    amount: v.number(), // in cents
+    status: v.string(), // "paid" | "pending" | "failed" | "void"
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    callCount: v.number(),
+    pdfUrl: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_stripeInvoiceId", ["stripeInvoiceId"])
+    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"]),
+
+  // Usage records (daily aggregation for billing)
+  usageRecords: defineTable({
+    workspaceId: v.id("workspaces"),
+    date: v.string(), // "2026-02-28" format
+    callCount: v.number(),
+    reportedToStripe: v.boolean(),
+    stripeUsageRecordId: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_date", ["date"])
+    .index("by_workspaceId_date", ["workspaceId", "date"])
+    .index("by_reportedToStripe", ["reportedToStripe"]),
 
   // Agent sessions (for MCP server authentication)
   agentSessions: defineTable({

@@ -1,6 +1,14 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import {
+  createCheckoutSession,
+  createPortalSession,
+  handleStripeWebhook,
+  checkoutOptions,
+  portalOptions,
+  webhookOptions,
+} from "./stripeActions";
 
 const http = httpRouter();
 
@@ -786,4 +794,47 @@ http.route({
   path: "/workspace/send-reminder",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// STRIPE BILLING ENDPOINTS
+// ==============================================
+
+// Create checkout session
+http.route({
+  path: "/api/billing/checkout",
+  method: "POST",
+  handler: createCheckoutSession,
+});
+
+http.route({
+  path: "/api/billing/checkout",
+  method: "OPTIONS",
+  handler: checkoutOptions,
+});
+
+// Create billing portal session
+http.route({
+  path: "/api/billing/portal",
+  method: "POST",
+  handler: createPortalSession,
+});
+
+http.route({
+  path: "/api/billing/portal",
+  method: "OPTIONS",
+  handler: portalOptions,
+});
+
+// Stripe webhook handler
+http.route({
+  path: "/api/webhooks/stripe",
+  method: "POST",
+  handler: handleStripeWebhook,
+});
+
+http.route({
+  path: "/api/webhooks/stripe",
+  method: "OPTIONS",
+  handler: webhookOptions,
 });

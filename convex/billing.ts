@@ -1,306 +1,260 @@
 import { v } from "convex/values";
-import { mutation, query, action } from "./_generated/server";
-import { api } from "./_generated/api";
-
-// Tier limits
-const TIER_LIMITS: Record<string, number> = {
-  free: 50,      // 100 API calls/month
-  pro: 10000,     // 10k API calls/month
-  enterprise: -1, // unlimited
-};
+import { mutation, query, internalMutation } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 // ============================================
-// STRIPE CUSTOMER MANAGEMENT
+// MUTATIONS
 // ============================================
 
-// Create Stripe customer for workspace
-export const createStripeCustomer = action({
-  args: {
-    workspaceId: v.id("workspaces"),
-  },
-  handler: async (ctx, args): Promise<{ success: boolean; customerId?: string; error?: string }> => {
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeSecretKey) {
-      return { success: false, error: "Stripe not configured" };
-    }
-
-    // Get workspace
-    const workspace = await ctx.runQuery(api.billing.getWorkspace, { 
-      workspaceId: args.workspaceId 
-    });
-    
-    if (!workspace) {
-      return { success: false, error: "Workspace not found" };
-    }
-
-    // Check if already has customer
-    if (workspace.stripeCustomerId) {
-      return { success: true, customerId: workspace.stripeCustomerId };
-    }
-
-    try {
-      // Create Stripe customer
-      const response = await fetch("https://api.stripe.com/v1/customers", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${stripeSecretKey}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          email: workspace.email,
-          "metadata[workspaceId]": args.workspaceId,
-          "metadata[source]": "apiclaw",
-        }),
-      });
-
-      const customer = await response.json() as { id: string; error?: { message: string } };
-      
-      if (!response.ok || customer.error) {
-        return { success: false, error: customer.error?.message || "Failed to create customer" };
-      }
-
-      // Save customer ID to workspace
-      await ctx.runMutation(api.billing.saveStripeCustomerId, {
-        workspaceId: args.workspaceId,
-        stripeCustomerId: customer.id,
-      });
-
-      return { success: true, customerId: customer.id };
-    } catch (error) {
-      return { success: false, error: String(error) };
-    }
-  },
-});
-
-// Internal: Save Stripe customer ID to workspace
-export const saveStripeCustomerId = mutation({
+/**
+ * Link a Stripe customer to a workspace
+ */
+export const linkCustomer = mutation({
   args: {
     workspaceId: v.id("workspaces"),
     stripeCustomerId: v.string(),
   },
   handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
     await ctx.db.patch(args.workspaceId, {
       stripeCustomerId: args.stripeCustomerId,
       updatedAt: Date.now(),
     });
+
+    return { success: true };
   },
 });
 
-// Query workspace (for actions)
-export const getWorkspace = query({
+/**
+ * Update subscription status for a workspace
+ */
+export const updateSubscription = mutation({
   args: {
     workspaceId: v.id("workspaces"),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.workspaceId);
-  },
-});
-
-// ============================================
-// CHECKOUT SESSION (Add Payment Method)
-// ============================================
-
-// Create checkout session for subscription
-export const createCheckoutSession = action({
-  args: {
-    workspaceId: v.id("workspaces"),
-    successUrl: v.string(),
-    cancelUrl: v.string(),
-  },
-  handler: async (ctx, args): Promise<{ success: boolean; sessionId?: string; url?: string; error?: string }> => {
-    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeSecretKey) {
-      return { success: false, error: "Stripe not configured" };
-    }
-
-    // Get workspace
-    const workspace = await ctx.runQuery(api.billing.getWorkspace, { 
-      workspaceId: args.workspaceId 
-    });
-    
-    if (!workspace) {
-      return { success: false, error: "Workspace not found" };
-    }
-
-    // Create customer if needed
-    let customerId = workspace.stripeCustomerId;
-    if (!customerId) {
-      const result = await ctx.runAction(api.billing.createStripeCustomer, {
-        workspaceId: args.workspaceId,
-      });
-      if (!result.success || !result.customerId) {
-        return { success: false, error: result.error || "Failed to create customer" };
-      }
-      customerId = result.customerId;
-    }
-
-    try {
-      // Create checkout session for Pro subscription
-      // Using the existing APIClaw Pro price
-      const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${stripeSecretKey}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          customer: customerId,
-          mode: "subscription",
-          "line_items[0][price]": "price_1T1OC2RtJYK3aJTqlJZskgtP", // APIClaw Pro $99/month
-          "line_items[0][quantity]": "1",
-          success_url: args.successUrl,
-          cancel_url: args.cancelUrl,
-          "metadata[workspaceId]": args.workspaceId,
-          "metadata[type]": "upgrade_pro",
-        }),
-      });
-
-      const session = await response.json() as { 
-        id: string; 
-        url: string;
-        error?: { message: string } 
-      };
-      
-      if (!response.ok || session.error) {
-        return { success: false, error: session.error?.message || "Failed to create session" };
-      }
-
-      return { 
-        success: true, 
-        sessionId: session.id,
-        url: session.url,
-      };
-    } catch (error) {
-      return { success: false, error: String(error) };
-    }
-  },
-});
-
-// ============================================
-// WORKSPACE UPGRADE
-// ============================================
-
-// Upgrade workspace to paid tier
-export const upgradeWorkspace = mutation({
-  args: {
-    workspaceId: v.id("workspaces"),
-    tier: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
+    billingPlan: v.string(),
   },
   handler: async (ctx, args) => {
     const workspace = await ctx.db.get(args.workspaceId);
     if (!workspace) {
-      return { success: false, error: "workspace_not_found" };
+      throw new Error("Workspace not found");
     }
 
-    const newTier = args.tier || "pro";
-    const newLimit = TIER_LIMITS[newTier] || TIER_LIMITS.pro;
-
-    await ctx.db.patch(args.workspaceId, {
-      tier: newTier,
-      usageLimit: newLimit,
-      status: "active",
-      updatedAt: Date.now(),
-    });
-
-    return { 
-      success: true,
-      tier: newTier,
-      usageLimit: newLimit,
+    // Update tier and usage limit based on plan
+    const planLimits: Record<string, number> = {
+      free: 100,
+      usage_based: 999999999, // Effectively unlimited
+      starter: 1000,
+      pro: 10000,
+      scale: 100000,
     };
-  },
-});
 
-// Suspend workspace (e.g., payment failed)
-export const suspendWorkspace = mutation({
-  args: {
-    workspaceId: v.id("workspaces"),
-    reason: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const workspace = await ctx.db.get(args.workspaceId);
-    if (!workspace) {
-      return { success: false, error: "workspace_not_found" };
-    }
+    const newLimit = planLimits[args.billingPlan] || 100;
 
     await ctx.db.patch(args.workspaceId, {
-      status: "suspended",
+      stripeSubscriptionId: args.stripeSubscriptionId,
+      billingPlan: args.billingPlan,
+      tier: args.billingPlan === "free" ? "free" : "pro",
+      usageLimit: newLimit,
       updatedAt: Date.now(),
     });
 
-    return { success: true };
+    return { success: true, newLimit };
   },
 });
 
-// Get workspace by Stripe customer ID (for webhooks)
-export const getWorkspaceByStripeCustomer = query({
-  args: {
-    stripeCustomerId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("workspaces")
-      .withIndex("by_stripeCustomerId", (q) => q.eq("stripeCustomerId", args.stripeCustomerId))
-      .first();
-  },
-});
-
-// ============================================
-// USAGE REPORTING
-// ============================================
-
-// Report usage to Stripe (for metered billing)
-// Currently APIClaw Pro is flat-rate, but this prepares for metered billing
-export const reportUsage = action({
+/**
+ * Record daily usage for billing
+ */
+export const recordUsage = mutation({
   args: {
     workspaceId: v.id("workspaces"),
-    amount: v.number(),
-    description: v.optional(v.string()),
+    callCount: v.number(),
+    date: v.string(), // "2026-02-28" format
   },
-  handler: async (ctx, args): Promise<{ success: boolean; error?: string }> => {
-    // Get workspace
-    const workspace = await ctx.runQuery(api.billing.getWorkspace, { 
-      workspaceId: args.workspaceId 
-    });
-    
-    if (!workspace) {
-      return { success: false, error: "Workspace not found" };
+  handler: async (ctx, args) => {
+    // Check if record exists for this date
+    const existing = await ctx.db
+      .query("usageRecords")
+      .withIndex("by_workspaceId_date", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("date", args.date)
+      )
+      .unique();
+
+    if (existing) {
+      // Update existing record
+      await ctx.db.patch(existing._id, {
+        callCount: existing.callCount + args.callCount,
+        updatedAt: Date.now(),
+      });
+      return { id: existing._id, callCount: existing.callCount + args.callCount };
+    } else {
+      // Create new record
+      const id = await ctx.db.insert("usageRecords", {
+        workspaceId: args.workspaceId,
+        date: args.date,
+        callCount: args.callCount,
+        reportedToStripe: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      return { id, callCount: args.callCount };
+    }
+  },
+});
+
+/**
+ * Process a successful payment (from webhook)
+ */
+export const processPayment = mutation({
+  args: {
+    stripeInvoiceId: v.string(),
+    workspaceId: v.id("workspaces"),
+    amount: v.number(), // in cents
+    periodStart: v.number(),
+    periodEnd: v.number(),
+    callCount: v.number(),
+    pdfUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Check for idempotency - don't process same invoice twice
+    const existing = await ctx.db
+      .query("invoices")
+      .withIndex("by_stripeInvoiceId", (q) =>
+        q.eq("stripeInvoiceId", args.stripeInvoiceId)
+      )
+      .unique();
+
+    if (existing) {
+      // Already processed, return existing
+      return { id: existing._id, alreadyProcessed: true };
     }
 
-    // Only track usage for paid tiers
-    if (workspace.tier === "free") {
-      // Free tier just uses incrementUsage in workspaces.ts
-      return { success: true };
-    }
-
-    // For paid tiers, increment the usage counter
-    // Future: Report to Stripe Billing Meter when metered pricing is set up
-    await ctx.runMutation(api.billing.incrementWorkspaceUsage, {
+    // Create invoice record
+    const id = await ctx.db.insert("invoices", {
       workspaceId: args.workspaceId,
+      stripeInvoiceId: args.stripeInvoiceId,
       amount: args.amount,
+      status: "paid",
+      periodStart: args.periodStart,
+      periodEnd: args.periodEnd,
+      callCount: args.callCount,
+      pdfUrl: args.pdfUrl,
+      createdAt: Date.now(),
     });
 
-    // TODO: When metered pricing is configured, report to Stripe:
-    // await reportToStripeMeter(workspace.stripeCustomerId, args.amount);
+    // Update workspace last billing date
+    await ctx.db.patch(args.workspaceId, {
+      lastBillingDate: Date.now(),
+      updatedAt: Date.now(),
+    });
 
-    return { success: true };
+    return { id, alreadyProcessed: false };
   },
 });
 
-// Internal: Increment workspace usage
-export const incrementWorkspaceUsage = mutation({
+/**
+ * Increment credit balance (for prepaid credits)
+ */
+export const incrementCredits = mutation({
   args: {
     workspaceId: v.id("workspaces"),
-    amount: v.number(),
+    amount: v.number(), // in cents
   },
   handler: async (ctx, args) => {
     const workspace = await ctx.db.get(args.workspaceId);
-    if (!workspace) return;
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    const currentBalance = workspace.creditBalance || 0;
+    const newBalance = currentBalance + args.amount;
 
     await ctx.db.patch(args.workspaceId, {
-      usageCount: workspace.usageCount + args.amount,
+      creditBalance: newBalance,
       updatedAt: Date.now(),
     });
+
+    return { previousBalance: currentBalance, newBalance };
+  },
+});
+
+/**
+ * Decrement credit balance (when using prepaid credits)
+ */
+export const decrementCredits = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    amount: v.number(), // in cents
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    const currentBalance = workspace.creditBalance || 0;
+    if (currentBalance < args.amount) {
+      throw new Error("Insufficient credit balance");
+    }
+
+    const newBalance = currentBalance - args.amount;
+
+    await ctx.db.patch(args.workspaceId, {
+      creditBalance: newBalance,
+      updatedAt: Date.now(),
+    });
+
+    return { previousBalance: currentBalance, newBalance };
+  },
+});
+
+/**
+ * Mark usage as reported to Stripe
+ */
+export const markUsageReported = internalMutation({
+  args: {
+    usageRecordId: v.id("usageRecords"),
+    stripeUsageRecordId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.usageRecordId, {
+      reportedToStripe: true,
+      stripeUsageRecordId: args.stripeUsageRecordId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Update invoice status (from webhook)
+ */
+export const updateInvoiceStatus = mutation({
+  args: {
+    stripeInvoiceId: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const invoice = await ctx.db
+      .query("invoices")
+      .withIndex("by_stripeInvoiceId", (q) =>
+        q.eq("stripeInvoiceId", args.stripeInvoiceId)
+      )
+      .unique();
+
+    if (!invoice) {
+      return { found: false };
+    }
+
+    await ctx.db.patch(invoice._id, {
+      status: args.status,
+    });
+
+    return { found: true, id: invoice._id };
   },
 });
 
@@ -308,34 +262,206 @@ export const incrementWorkspaceUsage = mutation({
 // QUERIES
 // ============================================
 
-// Get billing status for workspace
-export const getBillingStatus = query({
+/**
+ * Get billing info for a workspace
+ */
+export const getInfo = query({
   args: {
     workspaceId: v.id("workspaces"),
   },
   handler: async (ctx, args) => {
     const workspace = await ctx.db.get(args.workspaceId);
     if (!workspace) {
-      return null;
+      throw new Error("Workspace not found");
     }
 
-    const usageRemaining = workspace.usageLimit > 0 
-      ? workspace.usageLimit - workspace.usageCount 
-      : -1;
+    // Get recent invoices
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_workspaceId_createdAt", (q) =>
+        q.eq("workspaceId", args.workspaceId)
+      )
+      .order("desc")
+      .take(10);
 
-    const usagePercent = workspace.usageLimit > 0
-      ? Math.round((workspace.usageCount / workspace.usageLimit) * 100)
-      : 0;
+    // Calculate current period usage
+    const now = new Date();
+    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodStartStr = periodStart.toISOString().split("T")[0];
+
+    const usageRecords = await ctx.db
+      .query("usageRecords")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .collect();
+
+    const currentPeriodUsage = usageRecords
+      .filter((r) => r.date >= periodStartStr)
+      .reduce((sum, r) => sum + r.callCount, 0);
+
+    // Determine plan limits
+    const plan = workspace.billingPlan || "free";
+    const planLimits: Record<string, number> = {
+      free: 100,
+      usage_based: 999999999,
+      starter: 1000,
+      pro: 10000,
+      scale: 100000,
+    };
 
     return {
+      plan,
       tier: workspace.tier,
-      status: workspace.status,
-      usageCount: workspace.usageCount,
-      usageLimit: workspace.usageLimit,
-      usageRemaining,
-      usagePercent,
-      hasStripe: !!workspace.stripeCustomerId,
-      email: workspace.email,
+      usage: workspace.usageCount,
+      currentPeriodUsage,
+      limit: workspace.usageLimit,
+      creditBalance: workspace.creditBalance || 0,
+      stripeCustomerId: workspace.stripeCustomerId,
+      stripeSubscriptionId: workspace.stripeSubscriptionId,
+      lastBillingDate: workspace.lastBillingDate,
+      invoices: invoices.map((inv) => ({
+        id: inv._id,
+        stripeInvoiceId: inv.stripeInvoiceId,
+        amount: inv.amount,
+        status: inv.status,
+        periodStart: inv.periodStart,
+        periodEnd: inv.periodEnd,
+        callCount: inv.callCount,
+        pdfUrl: inv.pdfUrl,
+        createdAt: inv.createdAt,
+      })),
+      // Check if payment method needed
+      needsPaymentMethod:
+        plan === "free" && workspace.usageCount >= workspace.usageLimit,
     };
+  },
+});
+
+/**
+ * Get current period usage
+ */
+export const getCurrentUsage = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    // Current billing period (month)
+    const now = new Date();
+    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const periodStartStr = periodStart.toISOString().split("T")[0];
+
+    // Get usage records for this period
+    const usageRecords = await ctx.db
+      .query("usageRecords")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .collect();
+
+    const periodRecords = usageRecords.filter((r) => r.date >= periodStartStr);
+    const callCount = periodRecords.reduce((sum, r) => sum + r.callCount, 0);
+
+    // Calculate estimated cost (for usage-based billing)
+    const FREE_CALLS = 100;
+    const COST_PER_CALL = 1; // 1 cent = $0.01
+    const billableCalls = Math.max(0, callCount - FREE_CALLS);
+    const estimatedCost = billableCalls * COST_PER_CALL;
+
+    return {
+      callCount,
+      periodStart: periodStart.getTime(),
+      periodEnd: periodEnd.getTime(),
+      limit: workspace.usageLimit,
+      remaining: Math.max(0, workspace.usageLimit - workspace.usageCount),
+      percentUsed: Math.round((workspace.usageCount / workspace.usageLimit) * 100),
+      billableCalls,
+      estimatedCostCents: estimatedCost,
+      dailyBreakdown: periodRecords.map((r) => ({
+        date: r.date,
+        calls: r.callCount,
+        reportedToStripe: r.reportedToStripe,
+      })),
+    };
+  },
+});
+
+/**
+ * Get invoices for a workspace
+ */
+export const getInvoices = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 20;
+
+    const invoices = await ctx.db
+      .query("invoices")
+      .withIndex("by_workspaceId_createdAt", (q) =>
+        q.eq("workspaceId", args.workspaceId)
+      )
+      .order("desc")
+      .take(limit);
+
+    return invoices.map((inv) => ({
+      id: inv._id,
+      stripeInvoiceId: inv.stripeInvoiceId,
+      amount: inv.amount,
+      amountFormatted: `$${(inv.amount / 100).toFixed(2)}`,
+      status: inv.status,
+      periodStart: inv.periodStart,
+      periodEnd: inv.periodEnd,
+      callCount: inv.callCount,
+      pdfUrl: inv.pdfUrl,
+      createdAt: inv.createdAt,
+    }));
+  },
+});
+
+/**
+ * Get unreported usage records (for cron job)
+ */
+export const getUnreportedUsage = query({
+  args: {},
+  handler: async (ctx) => {
+    const unreported = await ctx.db
+      .query("usageRecords")
+      .withIndex("by_reportedToStripe", (q) => q.eq("reportedToStripe", false))
+      .collect();
+
+    return unreported;
+  },
+});
+
+/**
+ * Get workspace by Stripe customer ID
+ */
+export const getByStripeCustomerId = query({
+  args: {
+    stripeCustomerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("workspaces")
+      .withIndex("by_stripeCustomerId", (q) =>
+        q.eq("stripeCustomerId", args.stripeCustomerId)
+      )
+      .unique();
+  },
+});
+
+/**
+ * Get workspace by ID
+ */
+export const getWorkspace = query({
+  args: {
+    id: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
   },
 });

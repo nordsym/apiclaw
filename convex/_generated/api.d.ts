@@ -21,6 +21,7 @@ import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
+import type * as stripeActions from "../stripeActions.js";
 import type * as telemetry from "../telemetry.js";
 import type * as usage from "../usage.js";
 import type * as waitlist from "../waitlist.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   providers: typeof providers;
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;
+  stripeActions: typeof stripeActions;
   telemetry: typeof telemetry;
   usage: typeof usage;
   waitlist: typeof waitlist;
