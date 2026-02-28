@@ -154,44 +154,45 @@ export const sendMagicLinkEmail = action({
       throw new Error("RESEND_API_KEY not configured");
     }
 
-    const verifyUrl = APP_URL + "/auth/verify?token=" + args.token;
-    const html = magicLinkEmailTemplate(verifyUrl);
+    var verifyUrl = APP_URL + "/auth/verify?token=" + args.token;
     
-    console.log("[Email] Sending magic link to:", args.email);
-    console.log("[Email] HTML length:", html.length);
-    console.log("[Email] HTML preview:", html.substring(0, 200));
-
+    // Generate HTML inline (same approach as debug that works)
+    var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
+    html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
+    html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
+    html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
+    html += "<tr><td style='padding:32px;text-align:center;'>";
+    html += "<div style='font-size:48px;'>🦞</div>";
+    html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw</h1>";
+    html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
+    html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
+    html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
+    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
+    html += "</td></tr></table>";
+    html += "</td></tr></table></body></html>";
+    
     var textContent = "APIClaw - An AI Agent Wants to Connect\n\n";
-    textContent += "Click the link below to verify your email and activate your APIClaw workspace.\n\n";
-    textContent += "Verify here: " + verifyUrl + "\n\n";
-    textContent += "Free tier: 50 API calls included. No credit card required.\n\n";
-    textContent += "This link expires in 1 hour.";
-
-    const emailPayload = {
-      from: EMAIL_FROM,
-      to: args.email,
-      subject: "🦞 An AI Agent Wants to Connect — Verify Your Email",
-      html,
-      text: textContent,
-    };
+    textContent += "Click the link: " + verifyUrl + "\n\n";
+    textContent += "Free tier: 50 API calls. Expires in 1 hour.";
     
-    console.log("[Email] Payload html length:", emailPayload.html?.length);
-    console.log("[Email] Payload text length:", emailPayload.text?.length);
-    
-    const response = await fetch("https://api.resend.com/emails", {
+    var response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Authorization": "Bearer " + RESEND_API_KEY,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(emailPayload),
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: args.email,
+        subject: "🦞 An AI Agent Wants to Connect — Verify Your Email",
+        html: html,
+        text: textContent,
+      }),
     });
 
-    const responseData = await response.text();
-    console.log("[Email] Resend response:", response.status, responseData);
-    
     if (!response.ok) {
-      throw new Error(`Failed to send email: ${responseData}`);
+      var errorText = await response.text();
+      throw new Error("Failed to send email: " + errorText);
     }
 
     return { success: true };
