@@ -68,6 +68,11 @@ function VerifyContent() {
         setStatus("success");
         setWorkspace(data.workspace || null);
         setSessionToken(data.sessionToken || "");
+        
+        // Store session for workspace dashboard
+        if (data.sessionToken) {
+          localStorage.setItem("apiclaw_workspace_session", data.sessionToken);
+        }
       } else {
         setStatus("error");
         switch (data.error) {
@@ -235,9 +240,15 @@ function VerifyContent() {
               </div>
             )}
 
-            <div className="text-center pt-4 border-t border-[var(--border)]">
+            <div className="text-center pt-4 border-t border-[var(--border)] space-y-3">
+              <a 
+                href="/workspace"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[var(--accent)] text-white rounded-lg font-medium hover:opacity-90 transition w-full"
+              >
+                Go to Workspace →
+              </a>
               <p className="text-[var(--text-muted)] text-sm">
-                ✓ You can close this tab now
+                ✓ Or close this tab if using CLI
               </p>
             </div>
           </div>
@@ -267,8 +278,8 @@ function VerifyContent() {
         {/* Footer */}
         <p className="text-center text-[var(--text-muted)] text-xs mt-6">
           Having trouble? Contact{" "}
-          <a href="mailto:support@apiclaw.com" className="text-[var(--accent)] hover:underline">
-            support@apiclaw.com
+          <a href="mailto:support_apiclaw@nordsym.com" className="text-[var(--accent)] hover:underline">
+            support_apiclaw@nordsym.com
           </a>
         </p>
       </div>
