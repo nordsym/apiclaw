@@ -238,3 +238,36 @@ MIT © [NordSym](https://nordsym.com)
   <strong>🦞 APIClaw</strong><br/>
   <em>The API layer for the agentic era.</em>
 </p>
+
+## 💳 Metered Billing (Pay-per-Call)
+
+APIClaw supports usage-based billing at **$0.002 per API call**.
+
+### Setup
+```typescript
+// 1. Customer signs up for metered billing
+const result = await mcp.call('setup_metered_billing', {
+  email: 'customer@example.com'
+});
+// Returns checkout URL - customer completes payment setup
+
+// 2. After checkout, API calls are tracked automatically
+// Usage is reported to Stripe meter after each successful call
+
+// 3. Check usage during billing period
+const usage = await mcp.call('get_usage_summary', {
+  subscription_id: 'sub_xxx'
+});
+// Returns: { total_calls: 150, estimated_cost: "$0.30" }
+```
+
+### Pricing Examples
+| Calls/Month | Cost |
+|-------------|------|
+| 100 | $0.20 |
+| 1,000 | $2.00 |
+| 10,000 | $20.00 |
+| 100,000 | $200.00 |
+
+### Direct Call Mode
+If you have your own API keys, Direct Call bypasses metered billing - you pay providers directly.

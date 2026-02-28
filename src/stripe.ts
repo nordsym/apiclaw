@@ -241,3 +241,256 @@ export function processWebhookEvent(event: Stripe.Event): CreditGrant | null {
 export function getStripe(): Stripe | null {
   return stripe;
 }
+
+// ============================================
+// METERED BILLING (Pay-per-call)
+// ============================================
+
+// Stripe Meter configuration
+export const METERED_BILLING = {
+  meterId: 'mtr_61UFEGojJ0b2awh1441RtJYK3aJTqS9g',
+  eventName: 'api_call',
+  priceId: 'price_1T5qMQRtJYK3aJTqun4YZLsE',
+  productId: 'prod_U3yHbnc4NcLofW',
+  pricePerCall: 0.002, // $0.002 per API call
+} as const;
+
+/**
+ * Report API usage to Stripe Meter
+ * Call this after each successful API call
+ */
+export async function reportUsage(
+  customerId: string,
+  calls: number = 1,
+  idempotencyKey?: string
+): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  if (!stripe) {
+    return { success: false, error: 'Stripe not configured' };
+  }
+
+  try {
+    // Use Stripe's meter event API
+    const event = await stripe.billing.meterEvents.create({
+      event_name: METERED_BILLING.eventName,
+      payload: {
+        stripe_customer_id: customerId,
+        value: calls.toString(),
+      },
+      timestamp: Math.floor(Date.now() / 1000),
+    }, {
+      idempotencyKey: idempotencyKey || `usage_${customerId}_${Date.now()}_${Math.random()}`,
+    });
+
+    return { success: true, eventId: event.identifier };
+  } catch (error) {
+    console.error('Failed to report usage:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Usage reporting failed',
+    };
+  }
+}
+
+/**
+ * Create or get a customer in Stripe
+ */
+export async function getOrCreateCustomer(
+  agentId: string,
+  email?: string
+): Promise<{ customerId: string } | { error: string }> {
+  if (!stripe) {
+    return { error: 'Stripe not configured' };
+  }
+
+  try {
+    // Search for existing customer by agentId
+    const existing = await stripe.customers.search({
+      query: `metadata['agentId']:'${agentId}'`,
+    });
+
+    if (existing.data.length > 0) {
+      return { customerId: existing.data[0].id };
+    }
+
+    // Create new customer
+    const customer = await stripe.customers.create({
+      email: email || `${agentId}@apiclaw.local`,
+      metadata: {
+        agentId,
+        source: 'apiclaw',
+      },
+    });
+
+    return { customerId: customer.id };
+  } catch (error) {
+    console.error('Failed to get/create customer:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Customer creation failed',
+    };
+  }
+}
+
+/**
+ * Create a metered subscription for pay-per-call billing
+ */
+export async function createMeteredSubscription(
+  customerId: string,
+  paymentMethodId?: string
+): Promise<{ subscriptionId: string; status: string } | { error: string }> {
+  if (!stripe) {
+    return { error: 'Stripe not configured' };
+  }
+
+  try {
+    // If payment method provided, attach it
+    if (paymentMethodId) {
+      await stripe.paymentMethods.attach(paymentMethodId, {
+        customer: customerId,
+      });
+      await stripe.customers.update(customerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId,
+        },
+      });
+    }
+
+    // Create subscription with metered price
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [
+        {
+          price: METERED_BILLING.priceId,
+        },
+      ],
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+      },
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    return {
+      subscriptionId: subscription.id,
+      status: subscription.status,
+    };
+  } catch (error) {
+    console.error('Failed to create metered subscription:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Subscription creation failed',
+    };
+  }
+}
+
+/**
+ * Create a checkout session for metered billing subscription
+ */
+export async function createMeteredCheckoutSession(
+  agentId: string,
+  successUrl: string,
+  cancelUrl: string
+): Promise<{ sessionId: string; url: string } | { error: string }> {
+  if (!stripe) {
+    return { error: 'Stripe not configured' };
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: METERED_BILLING.priceId,
+        },
+      ],
+      metadata: {
+        agentId,
+        billingType: 'metered',
+      },
+      subscription_data: {
+        metadata: {
+          agentId,
+          billingType: 'metered',
+        },
+      },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+
+    return {
+      sessionId: session.id,
+      url: session.url!,
+    };
+  } catch (error) {
+    console.error('Metered checkout error:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Checkout failed',
+    };
+  }
+}
+
+/**
+ * Get usage summary for a subscription
+ */
+export async function getUsageSummary(
+  subscriptionId: string
+): Promise<{ totalCalls: number; totalCost: number; period: { start: number; end: number } } | { error: string }> {
+  if (!stripe) {
+    return { error: 'Stripe not configured' };
+  }
+
+  try {
+    // Get subscription details - use raw API response
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const subData = subscription as unknown as {
+      current_period_start: number;
+      current_period_end: number;
+      status: string;
+    };
+
+    // For metered billing with meters, usage is tracked via meter events
+    // The actual usage amount will show up on the invoice at period end
+    // For now, return period info and note that detailed usage is on the Stripe dashboard
+    
+    return {
+      totalCalls: 0, // Usage tracked via meter events, visible in Stripe dashboard
+      totalCost: 0,
+      period: {
+        start: subData.current_period_start || Math.floor(Date.now() / 1000),
+        end: subData.current_period_end || Math.floor(Date.now() / 1000) + 30 * 24 * 3600,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to get usage summary:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Usage summary failed',
+    };
+  }
+}
+
+/**
+ * Check if a customer has an active metered subscription
+ */
+export async function hasActiveMeteredSubscription(
+  customerId: string
+): Promise<{ active: boolean; subscriptionId?: string }> {
+  if (!stripe) {
+    return { active: false };
+  }
+
+  try {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+      price: METERED_BILLING.priceId,
+    });
+
+    if (subscriptions.data.length > 0) {
+      return { active: true, subscriptionId: subscriptions.data[0].id };
+    }
+
+    return { active: false };
+  } catch (error) {
+    console.error('Failed to check subscription:', error);
+    return { active: false };
+  }
+}

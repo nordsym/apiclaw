@@ -43,6 +43,13 @@ import {
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, SessionData } from './session.js';
 import { ConvexHttpClient } from 'convex/browser';
+import { 
+  getOrCreateCustomer, 
+  createMeteredCheckoutSession, 
+  getUsageSummary,
+  METERED_BILLING 
+} from './stripe.js';
+import { estimateCost } from './metered.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
@@ -391,6 +398,59 @@ const tools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {}
+    }
+  },
+  // Metered Billing Tools
+  {
+    name: 'setup_metered_billing',
+    description: 'Set up pay-per-call billing. Creates a subscription that charges $0.002 per API call at end of month.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: 'Email for the billing account'
+        },
+        success_url: {
+          type: 'string',
+          description: 'URL to redirect after successful setup',
+          default: 'https://apiclaw.nordsym.com/billing/success'
+        },
+        cancel_url: {
+          type: 'string',
+          description: 'URL to redirect if setup is cancelled',
+          default: 'https://apiclaw.nordsym.com/billing/cancel'
+        }
+      },
+      required: ['email']
+    }
+  },
+  {
+    name: 'get_usage_summary',
+    description: 'Get current billing period usage and estimated cost for metered billing.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        subscription_id: {
+          type: 'string',
+          description: 'Stripe subscription ID (stored after setup_metered_billing)'
+        }
+      },
+      required: ['subscription_id']
+    }
+  },
+  {
+    name: 'estimate_cost',
+    description: 'Estimate the cost for a given number of API calls.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        call_count: {
+          type: 'number',
+          description: 'Number of API calls to estimate cost for'
+        }
+      },
+      required: ['call_count']
     }
   }
 ];
@@ -1199,6 +1259,151 @@ Docs: https://apiclaw.nordsym.com
             isError: true
           };
         }
+      }
+
+      // Metered Billing Tools
+      case 'setup_metered_billing': {
+        const { email, success_url, cancel_url } = args as {
+          email: string;
+          success_url?: string;
+          cancel_url?: string;
+        };
+
+        if (!email) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: 'Email is required' }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        // Create or get customer
+        const customerResult = await getOrCreateCustomer(email, email);
+        if ('error' in customerResult) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: customerResult.error }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        // Create checkout session for metered subscription
+        const checkoutResult = await createMeteredCheckoutSession(
+          email,
+          success_url || 'https://apiclaw.nordsym.com/billing/success',
+          cancel_url || 'https://apiclaw.nordsym.com/billing/cancel'
+        );
+
+        if ('error' in checkoutResult) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: checkoutResult.error }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'checkout_ready',
+              message: 'Complete checkout to activate pay-per-call billing',
+              checkout_url: checkoutResult.url,
+              session_id: checkoutResult.sessionId,
+              customer_id: customerResult.customerId,
+              pricing: {
+                per_call: '$0.002',
+                billing_period: 'monthly',
+                billed_at: 'end of period based on usage'
+              }
+            }, null, 2)
+          }]
+        };
+      }
+
+      case 'get_usage_summary': {
+        const { subscription_id } = args as { subscription_id: string };
+
+        if (!subscription_id) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: 'subscription_id is required' }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        const usage = await getUsageSummary(subscription_id);
+        if ('error' in usage) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: usage.error }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'success',
+              billing_period: {
+                start: new Date(usage.period.start * 1000).toISOString(),
+                end: new Date(usage.period.end * 1000).toISOString()
+              },
+              usage: {
+                total_calls: usage.totalCalls,
+                price_per_call: METERED_BILLING.pricePerCall,
+                estimated_cost: `$${usage.totalCost.toFixed(4)}`
+              }
+            }, null, 2)
+          }]
+        };
+      }
+
+      case 'estimate_cost': {
+        const { call_count } = args as { call_count: number };
+
+        if (!call_count || call_count < 0) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ status: 'error', error: 'Valid call_count is required' }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        const estimate = estimateCost(call_count);
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'success',
+              estimate: {
+                calls: estimate.calls,
+                price_per_call: `$${estimate.pricePerCall}`,
+                total_cost: `$${estimate.totalCost.toFixed(4)}`,
+                currency: estimate.currency
+              },
+              examples: {
+                '100 calls': `$${(100 * METERED_BILLING.pricePerCall).toFixed(2)}`,
+                '1,000 calls': `$${(1000 * METERED_BILLING.pricePerCall).toFixed(2)}`,
+                '10,000 calls': `$${(10000 * METERED_BILLING.pricePerCall).toFixed(2)}`
+              }
+            }, null, 2)
+          }]
+        };
       }
 
       default:
