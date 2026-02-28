@@ -716,7 +716,7 @@ function OverviewTab({
   return (
     <div className="space-y-8">
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
           <div className="flex items-center gap-3 mb-3">
             <Zap className="w-6 h-6 text-[#ef4444]" />
@@ -1060,18 +1060,18 @@ function AgentsTab({
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Send a magic link to connect your agent without using the CLI.
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
               />
               <button
                 onClick={handleSendMagicLink}
                 disabled={sendingLink || !email}
-                className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {sendingLink ? (
                   <>
@@ -1111,42 +1111,44 @@ function AgentsTab({
       ) : (
         <div className="grid gap-4">
           {agents.map((agent) => (
-            <div key={agent.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-[#ef4444]" />
+            <div key={agent.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
+                    <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#ef4444]" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     {editingAgent === agent.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <input
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           placeholder="Agent name..."
-                          className="px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                          className="w-full sm:w-auto px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
                           autoFocus
                         />
-                        <button
-                          onClick={() => {
-                            onRename(agent.id, editName);
-                            setEditingAgent(null);
-                          }}
-                          className="px-3 py-1 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingAgent(null)}
-                          className="px-3 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                        >
-                          Cancel
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              onRename(agent.id, editName);
+                              setEditingAgent(null);
+                            }}
+                            className="px-3 py-1 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingAgent(null)}
+                            className="px-3 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{agent.name || agent.fingerprint}</h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold truncate">{agent.name || agent.fingerprint}</h3>
                         <button
                           onClick={() => {
                             setEditingAgent(agent.id);
@@ -1165,37 +1167,38 @@ function AgentsTab({
                       </div>
                     )}
                     {agent.fingerprint !== agent.name && agent.name && (
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">{agent.fingerprint}</p>
+                      <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">{agent.fingerprint}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-1 text-sm text-[var(--text-muted)]">
+                    <div className="flex items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-[var(--text-muted)]">
                       <span className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        Last active: {new Date(agent.lastUsedAt).toLocaleString()}
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Last active:</span> {new Date(agent.lastUsedAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => {
                       setEditingAgent(agent.id);
                       setEditName(agent.name || agent.fingerprint || "");
                     }}
-                    className="px-3 py-2 rounded-lg text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition"
+                    className="flex-1 sm:flex-none px-3 py-2 rounded-lg text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition text-center"
                   >
                     Rename
                   </button>
                   <button
                     onClick={() => handleRevoke(agent.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1 ${
                       confirmRevoke === agent.id
                         ? "bg-red-500 text-white"
                         : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                     }`}
                     title={agent.isCurrent ? "This will log you out" : "Remove this agent"}
                   >
-                    <Trash2 className="w-4 h-4 inline-block mr-1" />
-                    {confirmRevoke === agent.id ? (agent.isCurrent ? "Logout & Remove" : "Confirm") : "Revoke"}
+                    <Trash2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">{confirmRevoke === agent.id ? (agent.isCurrent ? "Logout & Remove" : "Confirm") : "Revoke"}</span>
+                    <span className="sm:hidden">{confirmRevoke === agent.id ? "Confirm" : "Revoke"}</span>
                   </button>
                 </div>
               </div>
@@ -1224,31 +1227,31 @@ function UsageTab({
     <div className="space-y-8">
       <h2 className="text-2xl font-bold">Usage Analytics</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Zap className="w-6 h-6 text-[#ef4444]" />
-            <span className="text-[var(--text-muted)]">Total Calls</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-[#ef4444]" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Total Calls</span>
           </div>
-          <p className="text-4xl font-bold text-[#ef4444]">
+          <p className="text-2xl sm:text-4xl font-bold text-[#ef4444]">
             {(usage?.total || workspace?.usageCount || 0).toLocaleString()}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-6 h-6 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">Providers Used</span>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Providers Used</span>
           </div>
-          <p className="text-4xl font-bold">{usage?.byProvider.length || 0}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{usage?.byProvider.length || 0}</p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Shield className="w-6 h-6 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">Remaining</span>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Remaining</span>
           </div>
-          <p className="text-4xl font-bold">{workspace?.usageRemaining.toLocaleString() || "∞"}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{workspace?.usageRemaining.toLocaleString() || "∞"}</p>
         </div>
       </div>
 
@@ -1457,16 +1460,16 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-[var(--text-muted)]">{title}</span>
-        <Icon className={`w-5 h-5 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
+    <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <span className="text-xs sm:text-sm text-[var(--text-muted)] truncate pr-2">{title}</span>
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
       </div>
       <div className="flex items-end justify-between">
-        <span className={`text-3xl font-bold ${accent ? "text-[#ef4444]" : ""}`}>{value}</span>
+        <span className={`text-xl sm:text-3xl font-bold ${accent ? "text-[#ef4444]" : ""}`}>{value}</span>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-green-500" : "text-red-500"}`}>
-            {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+          <div className={`flex items-center gap-1 text-xs sm:text-sm ${change >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {change >= 0 ? <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" /> : <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />}
             {Math.abs(change).toFixed(1)}%
           </div>
         )}
@@ -1565,7 +1568,7 @@ function MyAPIsAnalytics({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Unique Agents" value={uniqueAgents.toString()} icon={Users} />
         <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
@@ -1721,7 +1724,7 @@ function MyAgentsAnalytics({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard title="Total API Calls" value={isPreview ? "1,247" : totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Connected Agents" value={isPreview ? "3" : agents.length.toString()} icon={Users} />
         <StatCard title="APIs Used" value={isPreview ? "8" : (usage?.byProvider.length || 0).toString()} icon={BarChart3} />
@@ -1866,19 +1869,19 @@ function EarnTab() {
       </div>
 
       {/* Referral */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
         <h3 className="font-semibold mb-2">Invite Friends</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Earn 10 calls for each friend who joins.</p>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={"https://apiclaw.nordsym.com?ref=" + referralCode}
             readOnly
-            className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
+            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
           />
           <button
             onClick={handleCopyReferral}
-            className="px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
+            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
           >
             {copied ? "Copied!" : "Copy"}
           </button>
@@ -1886,21 +1889,21 @@ function EarnTab() {
       </div>
 
       {/* Newsletter */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
         <h3 className="font-semibold mb-2">Newsletter (+15 calls)</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Get weekly updates, tips, and new API announcements.</p>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
-            className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
+            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
           />
           <button
             onClick={() => setSubscribed(true)}
             disabled={subscribed}
-            className="px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
           >
             {subscribed ? "Subscribed!" : "Subscribe"}
           </button>

@@ -456,7 +456,7 @@ Website: https://apiclaw.nordsym.com`;
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-6">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="badge badge-live inline-flex">
                   <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
                 </div>
@@ -468,13 +468,13 @@ Website: https://apiclaw.nordsym.com`;
                 </button>
               </div>
               
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-[1.05] tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-[1.05] tracking-tighter">
                 <span className="gradient-text">The API Layer</span>
                 <br />
                 <span className="text-text-primary">for AI Agents</span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-text-secondary mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-lg sm:text-xl md:text-2xl text-text-secondary mb-3 sm:mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Find, evaluate, and integrate APIs in milliseconds.
               </p>
               
@@ -486,20 +486,20 @@ Website: https://apiclaw.nordsym.com`;
               {/* Copy Context Button */}
               <button
                 onClick={copyContextToClipboard}
-                className="group relative inline-flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-white font-bold rounded-2xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02]"
+                className="group relative inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02] w-full sm:w-auto justify-center"
               >
-                <Sparkles className="w-6 h-6" />
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span className="flex flex-col items-start">
-                  <span className="text-base">{showContextCopied ? "Copied!" : "Explain to your AI"}</span>
+                  <span className="text-sm sm:text-base">{showContextCopied ? "Copied!" : "Explain to your AI"}</span>
                   <span className="text-xs opacity-80 font-normal">Copy context for your agent</span>
                 </span>
                 {showContextCopied ? (
-                  <Check className="w-5 h-5" />
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                 ) : (
-                  <Copy className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <Copy className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
                 )}
                 {showContextCopied && (
-                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-lg">
+                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap shadow-lg">
                     ✓ Paste this to your AI agent!
                   </span>
                 )}
@@ -648,26 +648,26 @@ Website: https://apiclaw.nordsym.com`;
           </p>
           
           {/* Waitlist Form */}
-          <div className="max-w-md mx-auto mt-6">
+          <div className="max-w-md mx-auto mt-6 px-4 sm:px-0">
             {waitlistStatus === "success" ? (
-              <div className="flex items-center justify-center gap-2 text-green-500 bg-green-500/10 rounded-xl px-4 py-3">
-                <Check className="w-5 h-5" />
+              <div className="flex items-center justify-center gap-2 text-green-500 bg-green-500/10 rounded-xl px-4 py-3 text-sm sm:text-base">
+                <Check className="w-5 h-5 flex-shrink-0" />
                 <span>You're on the list! We'll reach out soon.</span>
               </div>
             ) : (
-              <form onSubmit={submitWaitlist} className="flex gap-2">
+              <form onSubmit={submitWaitlist} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   placeholder="your@email.com"
                   value={waitlistEmail}
                   onChange={(e) => setWaitlistEmail(e.target.value)}
                   required
-                  className="flex-1 px-4 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none text-sm"
+                  className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none text-sm"
                 />
                 <button
                   type="submit"
                   disabled={waitlistStatus === "loading"}
-                  className="px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
                 >
                   {waitlistStatus === "loading" ? "..." : "Join Waitlist"}
                 </button>
@@ -681,17 +681,17 @@ Website: https://apiclaw.nordsym.com`;
       </section>
 
       {/* Quick Start */}
-      <section className="py-16 px-6 bg-surface/50">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-surface/50">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3">
-              <Zap className="w-6 h-6 text-accent" />
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center justify-center gap-2 sm:gap-3">
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
               Quick Start
             </h2>
-            <p className="text-text-secondary mt-2">Get running in 30 seconds</p>
+            <p className="text-text-secondary mt-2 text-sm sm:text-base">Get running in 30 seconds</p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
             {/* Install */}
             <div className="code-preview">
               <div className="code-preview-header">
@@ -750,24 +750,24 @@ Website: https://apiclaw.nordsym.com`;
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {howItWorks.map((step, i) => (
               <div key={i} className="feature-card">
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="step-indicator">{step.step}</div>
                   <div>
-                    <h3 className="font-bold text-xl">{step.title}</h3>
+                    <h3 className="font-bold text-lg sm:text-xl">{step.title}</h3>
                   </div>
                 </div>
-                <p className="text-text-secondary mb-6 leading-relaxed">
+                <p className="text-text-secondary mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
                   {step.description}
                 </p>
                 <div className="code-preview">
                   <div className="code-preview-header">
                     example.ts
                   </div>
-                  <div className="code-preview-body">
-                    <pre className="text-sm whitespace-pre-wrap">{step.codeJsx}</pre>
+                  <div className="code-preview-body overflow-x-auto">
+                    <pre className="text-xs sm:text-sm whitespace-pre-wrap">{step.codeJsx}</pre>
                   </div>
                 </div>
               </div>
@@ -952,33 +952,33 @@ Website: https://apiclaw.nordsym.com`;
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             {/* For Agents */}
-            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-8 relative glow">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
+            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 sm:p-8 relative glow">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
                 Live Now
               </div>
-              <h3 className="text-2xl font-bold mb-2">For Agents</h3>
-              <p className="text-text-secondary mb-8">Discovery + Direct Call</p>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">For Agents</h3>
+              <p className="text-text-secondary mb-6 sm:mb-8">Discovery + Direct Call</p>
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Search {statsData.apiCount.toLocaleString()}+ APIs by capability
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Direct Call: Use APIs without keys
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   10+ providers (AI Models, Scraping, Code, Search)
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Structured JSON responses
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   MCP native
                 </li>
               </ul>
@@ -988,31 +988,31 @@ Website: https://apiclaw.nordsym.com`;
             </div>
 
             {/* For Providers */}
-            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-8 relative glow">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
+            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 sm:p-8 relative glow">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
                 Live Now
               </div>
-              <h3 className="text-2xl font-bold mb-2">For Providers</h3>
-              <p className="text-text-secondary mb-8">Get discovered by AI agents</p>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">For Providers</h3>
+              <p className="text-text-secondary mb-6 sm:mb-8">Get discovered by AI agents</p>
+              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Get discovered by AI agents
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Become a Direct Call partner
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Self-service onboarding
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Analytics & usage insights
                 </li>
-                <li className="flex items-center gap-3 text-text-secondary">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   Zero integration work
                 </li>
               </ul>
