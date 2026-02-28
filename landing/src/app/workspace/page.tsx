@@ -18,6 +18,7 @@ import {
   Check,
   Crown,
   ChevronRight,
+  ChevronDown,
   Plus,
   ExternalLink,
   CreditCard,
@@ -29,6 +30,9 @@ import {
   X,
   ArrowUpRight,
   ArrowDownRight,
+  Terminal,
+  Copy,
+  BookOpen,
 } from "lucide-react";
 import {
   LineChart,
@@ -138,6 +142,8 @@ export default function WorkspacePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "overview");
+  const [analyticsSubtab, setAnalyticsSubtab] = useState<"apis" | "agents">("apis");
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(tabFromUrl === "analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
   
@@ -156,8 +162,17 @@ export default function WorkspacePage() {
   useEffect(() => {
     if (tabFromUrl && ["overview", "apis", "analytics", "agents", "usage", "billing"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
+      if (tabFromUrl === "analytics") {
+        setAnalyticsExpanded(true);
+        const subParam = searchParams.get("sub");
+        if (subParam === "agents") {
+          setAnalyticsSubtab("agents");
+        } else {
+          setAnalyticsSubtab("apis");
+        }
+      }
     }
-  }, [tabFromUrl]);
+  }, [tabFromUrl, searchParams]);
 
   const fetchWorkspaceData = useCallback(async (token: string) => {
     try {
@@ -476,24 +491,92 @@ export default function WorkspacePage() {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setSidebarOpen(false);
-                  router.push(`/workspace?tab=${tab.id}`);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                  activeTab === tab.id
-                    ? "bg-[#ef4444] text-white"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              // Special handling for Analytics with dropdown
+              if (tab.id === "analytics") {
+                return (
+                  <div key={tab.id}>
+                    <button
+                      onClick={() => {
+                        setAnalyticsExpanded(!analyticsExpanded);
+                        if (!analyticsExpanded) {
+                          setActiveTab("analytics");
+                          router.push(`/workspace?tab=analytics`);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition ${
+                        activeTab === "analytics"
+                          ? "bg-[#ef4444] text-white"
+                          : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <tab.icon className="w-5 h-5" />
+                        <span>{tab.label}</span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${analyticsExpanded ? "rotate-180" : ""}`} />
+                    </button>
+                    {/* Dropdown submenu */}
+                    {analyticsExpanded && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        <button
+                          onClick={() => {
+                            setActiveTab("analytics");
+                            setAnalyticsSubtab("apis");
+                            setSidebarOpen(false);
+                            router.push(`/workspace?tab=analytics&sub=apis`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                            activeTab === "analytics" && analyticsSubtab === "apis"
+                              ? "bg-[#ef4444]/20 text-[#ef4444]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <Zap className="w-4 h-4" />
+                          <span>My APIs</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab("analytics");
+                            setAnalyticsSubtab("agents");
+                            setSidebarOpen(false);
+                            router.push(`/workspace?tab=analytics&sub=agents`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                            activeTab === "analytics" && analyticsSubtab === "agents"
+                              ? "bg-[#ef4444]/20 text-[#ef4444]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <Users className="w-4 h-4" />
+                          <span>My Agents</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
+              // Regular tab button
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSidebarOpen(false);
+                    router.push(`/workspace?tab=${tab.id}`);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                    activeTab === tab.id
+                      ? "bg-[#ef4444] text-white"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </nav>
 
           {/* Bottom section */}
@@ -556,6 +639,8 @@ export default function WorkspacePage() {
               workspace={workspace}
               agents={agents}
               usage={usage}
+              activeSubtab={analyticsSubtab}
+              setActiveSubtab={setAnalyticsSubtab}
             />
           )}
           {activeTab === "agents" && (
@@ -849,12 +934,47 @@ function AgentsTab({
         <p className="text-[var(--text-muted)]">{agents.length} total</p>
       </div>
 
+      {/* How to Connect Agents */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-[#ef4444]" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold mb-2">How to Connect Your AI Agent</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Add APIClaw to your AI agent&apos;s MCP config to enable API discovery and Direct Call.
+            </p>
+            <div className="bg-[var(--background)] rounded-xl p-4 font-mono text-sm mb-4 relative">
+              <pre className="text-[var(--text-secondary)] overflow-x-auto">{`{
+  "mcpServers": {
+    "apiclaw": {
+      "command": "npx",
+      "args": ["@nordsym/apiclaw"]
+    }
+  }
+}`}</pre>
+            </div>
+            <p className="text-sm text-[var(--text-muted)] mb-3">
+              Or run directly in terminal to test:
+            </p>
+            <div className="flex items-center gap-2 bg-[var(--background)] rounded-lg px-4 py-2 font-mono text-sm w-fit">
+              <Terminal className="w-4 h-4 text-[#ef4444]" />
+              <code>npx @nordsym/apiclaw</code>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-3">
+              First run prompts for email → sends magic link → registers your agent to this workspace.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {agents.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
+        <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
           <Users className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No Agents Connected</h3>
+          <h3 className="font-semibold text-lg mb-2">No Agents Connected Yet</h3>
           <p className="text-[var(--text-muted)] max-w-md mx-auto">
-            When you register AI agents with your workspace, they&apos;ll appear here.
+            Follow the instructions above to connect your first AI agent.
           </p>
         </div>
       ) : (
@@ -1179,15 +1299,17 @@ function AnalyticsTab({
   workspace,
   agents,
   usage,
+  activeSubtab,
+  setActiveSubtab,
 }: {
   apis: ProviderAPI[];
   analytics: ProviderAnalytics | null;
   workspace: Workspace | null;
   agents: Agent[];
   usage: UsageData | null;
+  activeSubtab: "apis" | "agents";
+  setActiveSubtab: (tab: "apis" | "agents") => void;
 }) {
-  const [activeSubtab, setActiveSubtab] = useState<"apis" | "agents">("apis");
-
   return (
     <div className="space-y-6">
       {/* Subtab Navigation */}
