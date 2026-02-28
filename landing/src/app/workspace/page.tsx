@@ -159,26 +159,37 @@ export default function WorkspacePage() {
       const providerData = localStorage.getItem("apiclaw_provider");
       const providerSession = localStorage.getItem("apiclaw_session");
       
-      if (providerData && providerSession) {
-        const parsed = JSON.parse(providerData);
-        setProviderName(parsed.name || parsed.email || "Provider");
+      if (!providerData || !providerSession) {
+        setIsProvider(false);
+        return;
+      }
+      
+      const parsed = JSON.parse(providerData);
+      setProviderName(parsed.name || parsed.email || "Provider");
+      
+      // Fetch provider APIs BEFORE setting isProvider
+      const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "providers:getProviderAPIs",
+          args: { sessionToken: providerSession },
+        }),
+      });
+      
+      const apisData = await apisRes.json();
+      const apis = apisData.value || apisData || [];
+      
+      // Only set as provider if we got valid data
+      if (Array.isArray(apis)) {
+        setProviderApis(apis);
         setIsProvider(true);
-        
-        // Fetch provider APIs
-        const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "providers:getProviderAPIs",
-            args: { sessionToken: providerSession },
-          }),
-        });
-        
-        const apisData = await apisRes.json();
-        setProviderApis(apisData.value || apisData || []);
+      } else {
+        setIsProvider(false);
       }
     } catch (err) {
       console.error("Fetch provider error:", err);
+      setIsProvider(false);
     }
   }, []);
 
@@ -630,7 +641,7 @@ function OverviewTab({
 // ============================================
 
 function ApisTab({ apis }: { apis: ProviderAPI[] }) {
-  if (apis.length === 0) {
+  if (!apis || apis.length === 0) {
     return (
       <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
         <Zap className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />

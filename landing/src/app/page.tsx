@@ -154,6 +154,7 @@ const directCallProviders = [
 
 export default function Home() {
   const [isDark, setIsDark] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [showContextCopied, setShowContextCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
@@ -262,6 +263,11 @@ Website: https://apiclaw.nordsym.com`;
     const prefersDark = saved ? saved === 'dark' : true;
     setIsDark(prefersDark);
     document.documentElement.classList.toggle('dark', prefersDark);
+    
+    // Check if logged in
+    const workspaceSession = localStorage.getItem('apiclaw_workspace_session');
+    const providerSession = localStorage.getItem('apiclaw_session');
+    setIsLoggedIn(!!(workspaceSession || providerSession));
   }, []);
 
   const toggleTheme = () => {
@@ -325,13 +331,23 @@ Website: https://apiclaw.nordsym.com`;
           
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="/providers/dashboard"
-              className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
-            >
-              <FileText className="w-4 h-4" />
-              Add Your API
-            </a>
+            {isLoggedIn ? (
+              <a
+                href="/workspace"
+                className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
+              >
+                <Zap className="w-4 h-4" />
+                Workspace
+              </a>
+            ) : (
+              <a
+                href="/providers/register"
+                className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
+              >
+                <FileText className="w-4 h-4" />
+                Add Your API
+              </a>
+            )}
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-lg hover:bg-surface transition"
