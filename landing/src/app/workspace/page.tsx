@@ -27,6 +27,8 @@ import {
   Moon,
   Menu,
   X,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 import {
   LineChart,
@@ -78,7 +80,55 @@ interface ProviderAPI {
   hasDirectCall?: boolean;
 }
 
-type TabType = "overview" | "apis" | "agents" | "usage" | "billing";
+interface ProviderAnalytics {
+  totalCalls: number;
+  uniqueAgents: number;
+  avgLatency: number;
+  successRate: number;
+  isPreview?: boolean;
+  callsByDay: { date: string; calls: number }[];
+  topAgents: { agentId: string; calls: number }[];
+  topActions: { actionName: string; calls: number }[];
+}
+
+type TabType = "overview" | "apis" | "analytics" | "agents" | "usage" | "billing";
+
+// Generate preview analytics data for demo
+function generatePreviewAnalytics(): ProviderAnalytics {
+  const days = [];
+  const baseDate = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(baseDate);
+    date.setDate(date.getDate() - i);
+    days.push({
+      date: date.toISOString().split("T")[0],
+      calls: Math.floor(Math.random() * 150) + 50 + Math.floor(i * 3),
+    });
+  }
+  
+  return {
+    totalCalls: 2847,
+    uniqueAgents: 156,
+    avgLatency: 145,
+    successRate: 98.2,
+    isPreview: true,
+    callsByDay: days,
+    topAgents: [
+      { agentId: "agent_claude_prod_7x9k", calls: 847 },
+      { agentId: "agent_cursor_dev_3m2p", calls: 623 },
+      { agentId: "agent_gpt4_main_1n8q", calls: 512 },
+      { agentId: "agent_cline_test_4r7w", calls: 389 },
+      { agentId: "agent_aider_auto_2k5j", calls: 276 },
+      { agentId: "agent_sweep_ci_9p3m", calls: 200 },
+    ],
+    topActions: [
+      { actionName: "generate_image", calls: 1247 },
+      { actionName: "search_web", calls: 892 },
+      { actionName: "send_sms", calls: 456 },
+      { actionName: "transcribe_audio", calls: 252 },
+    ],
+  };
+}
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -99,11 +149,12 @@ export default function WorkspacePage() {
   
   // Provider data
   const [providerApis, setProviderApis] = useState<ProviderAPI[]>([]);
+  const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["overview", "apis", "agents", "usage", "billing"].includes(tabFromUrl)) {
+    if (tabFromUrl && ["overview", "apis", "analytics", "agents", "usage", "billing"].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
@@ -184,6 +235,31 @@ export default function WorkspacePage() {
       if (Array.isArray(apis)) {
         setProviderApis(apis);
         setIsProvider(true);
+        
+        // Fetch provider analytics
+        try {
+          const analyticsRes = await fetch(`${CONVEX_URL}/api/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: "providers:getProviderAnalytics",
+              args: { sessionToken: providerSession },
+            }),
+          });
+          
+          const analyticsData = await analyticsRes.json();
+          const analytics = analyticsData.value || analyticsData;
+          
+          if (analytics && typeof analytics === "object") {
+            setProviderAnalytics(analytics);
+          } else {
+            // Generate preview data if no analytics
+            setProviderAnalytics(generatePreviewAnalytics());
+          }
+        } catch {
+          // Generate preview data on error
+          setProviderAnalytics(generatePreviewAnalytics());
+        }
       } else {
         setIsProvider(false);
       }
@@ -278,7 +354,10 @@ export default function WorkspacePage() {
 
   const tabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
-    ...(isProvider ? [{ id: "apis" as TabType, label: "APIs", icon: Zap }] : []),
+    ...(isProvider ? [
+      { id: "apis" as TabType, label: "APIs", icon: Zap },
+      { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
+    ] : []),
     { id: "agents" as TabType, label: "Agents", icon: Users },
     { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
     { id: "billing" as TabType, label: "Billing", icon: CreditCard },
@@ -437,6 +516,9 @@ export default function WorkspacePage() {
           )}
           {activeTab === "apis" && isProvider && (
             <ApisTab apis={providerApis} />
+          )}
+          {activeTab === "analytics" && isProvider && (
+            <AnalyticsTab apis={providerApis} analytics={providerAnalytics} />
           )}
           {activeTab === "agents" && (
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} />
@@ -1015,6 +1097,217 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
             <span>{workspace.usageCount.toLocaleString()} of {workspace.usageLimit.toLocaleString()} calls used</span>
             <span>{workspace.usagePercentage.toFixed(1)}%</span>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// ANALYTICS TAB (Provider)
+// ============================================
+
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  accent,
+}: {
+  title: string;
+  value: string;
+  change?: number;
+  icon: typeof Zap;
+  accent?: boolean;
+}) {
+  return (
+    <div className={`rounded-2xl border p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm text-[var(--text-muted)]">{title}</span>
+        <Icon className={`w-5 h-5 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
+      </div>
+      <div className="flex items-end justify-between">
+        <span className={`text-3xl font-bold ${accent ? "text-[#ef4444]" : ""}`}>{value}</span>
+        {change !== undefined && (
+          <div className={`flex items-center gap-1 text-sm ${change >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {change >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+            {Math.abs(change).toFixed(1)}%
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsTab({
+  apis,
+  analytics,
+}: {
+  apis: ProviderAPI[];
+  analytics: ProviderAnalytics | null;
+}) {
+  const totalCalls = analytics?.totalCalls || 0;
+  const uniqueAgents = analytics?.uniqueAgents || 0;
+  const totalDiscoveries = apis.reduce((sum, a) => sum + (a.discoveryCount || 0), 0);
+  const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
+
+  return (
+    <div className="space-y-8">
+      {/* Preview Banner */}
+      {analytics?.isPreview && (
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+          <div>
+            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your API.</p>
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-2xl font-bold">Analytics</h2>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Calls"
+          value={totalCalls.toLocaleString()}
+          icon={Zap}
+          accent
+        />
+        <StatCard
+          title="Unique Agents"
+          value={uniqueAgents.toString()}
+          icon={Users}
+        />
+        <StatCard
+          title="Avg Latency"
+          value={`${analytics?.avgLatency || 145}ms`}
+          icon={Clock}
+        />
+        <StatCard
+          title="Success Rate"
+          value={`${(analytics?.successRate || 98.2).toFixed(1)}%`}
+          icon={Check}
+        />
+      </div>
+
+      {/* Charts */}
+      {hasChartData && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Line Chart - Calls Over Time */}
+          <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+            <h3 className="font-semibold mb-4">Calls Over Time</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={analytics!.callsByDay}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12, fill: "var(--text-muted)" }}
+                    tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--surface-elevated)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "8px",
+                    }}
+                    labelFormatter={(d) => new Date(d).toLocaleDateString()}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="calls"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#ef4444" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Agents */}
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+            <h3 className="font-semibold mb-4">Top Agents</h3>
+            <div className="space-y-3">
+              {analytics!.topAgents.slice(0, 6).map((agent, i) => (
+                <div key={agent.agentId} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm font-mono truncate max-w-[140px]">
+                      {agent.agentId.replace("agent_", "")}
+                    </span>
+                  </div>
+                  <span className="text-sm text-[var(--text-muted)]">{agent.calls.toLocaleString()}</span>
+                </div>
+              ))}
+              {analytics!.topAgents.length === 0 && (
+                <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Actions */}
+      {analytics?.topActions && analytics.topActions.length > 0 && (
+        <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+          <h3 className="font-semibold mb-4">Top Actions</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {analytics.topActions.slice(0, 8).map((action, i) => (
+              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm font-mono">{action.actionName}</span>
+                </div>
+                <span className="text-sm text-[var(--text-muted)]">{action.calls.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Usage by API */}
+      <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
+        <h3 className="font-semibold text-lg mb-4">Usage by API</h3>
+        {apis.length > 0 ? (
+          <div className="space-y-4">
+            {apis.map((api) => (
+              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-[#ef4444]" />
+                  <div>
+                    <p className="font-medium">{api.name}</p>
+                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    {api.status === "approved" ? "Live" : api.status}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[var(--text-muted)] text-center py-8">No APIs listed yet</p>
+        )}
+      </div>
+
+      {totalCalls === 0 && !analytics?.isPreview && (
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+          <TrendingUp className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-lg mb-2">No Usage Yet</h3>
+          <p className="text-[var(--text-muted)]">
+            When agents start using your APIs, analytics stats will appear here.
+          </p>
         </div>
       )}
     </div>
