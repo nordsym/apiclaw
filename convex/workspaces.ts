@@ -226,6 +226,37 @@ export const getConnectedAgents = query({
   },
 });
 
+// Debug: Get sessions by workspace email
+export const getSessionsByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", email.toLowerCase()))
+      .first();
+
+    if (!workspace) {
+      return { error: "Workspace not found", sessions: [] };
+    }
+
+    const sessions = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace._id))
+      .collect();
+
+    return {
+      workspaceId: workspace._id,
+      email: workspace.email,
+      sessions: sessions.map(s => ({
+        id: s._id,
+        fingerprint: s.fingerprint,
+        createdAt: s.createdAt,
+        lastUsedAt: s.lastUsedAt,
+      })),
+    };
+  },
+});
+
 // Get usage breakdown by provider
 export const getUsageBreakdown = query({
   args: { token: v.string() },

@@ -72,6 +72,10 @@ function VerifyContent() {
         // Store session for workspace dashboard
         if (data.sessionToken) {
           localStorage.setItem("apiclaw_workspace_session", data.sessionToken);
+          // Auto-redirect to workspace after 2 seconds
+          setTimeout(() => {
+            window.location.href = "/workspace";
+          }, 2000);
         }
       } else {
         setStatus("error");

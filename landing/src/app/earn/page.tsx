@@ -10,7 +10,7 @@ const EARN_CHANNELS = [
     iconName: 'star',
     title: 'Star on GitHub',
     description: 'Show some love on GitHub',
-    credits: 500,
+    credits: 20,
     cta: 'Star Repository',
     href: 'https://github.com/nordsym/apiclaw',
     color: 'from-red-500/20 to-orange-500/10',
@@ -22,7 +22,7 @@ const EARN_CHANNELS = [
     iconName: 'twitter',
     title: 'Follow @NordSym',
     description: 'Stay updated on X/Twitter',
-    credits: 250,
+    credits: 15,
     cta: 'Follow Us',
     href: 'https://x.com/NordSym',
     color: 'from-red-400/20 to-rose-500/10',
@@ -34,7 +34,7 @@ const EARN_CHANNELS = [
     iconName: 'mail',
     title: 'Join Newsletter',
     description: 'Get weekly updates & tips',
-    credits: 100,
+    credits: 15,
     cta: 'Subscribe',
     href: '#newsletter',
     color: 'from-rose-500/20 to-red-500/10',
@@ -45,8 +45,8 @@ const EARN_CHANNELS = [
     id: 'referral',
     iconName: 'users',
     title: 'Invite Friends',
-    description: 'Earn for each friend who joins',
-    credits: 500,
+    description: 'Earn 10 calls for each friend',
+    credits: 10,
     perUnit: 'per friend',
     cta: 'Copy Link',
     color: 'from-orange-500/20 to-red-500/10',
@@ -72,7 +72,7 @@ export default function EarnPage() {
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
-  const [totalCredits] = useState(1350); // Demo value
+  const [totalCredits] = useState(50); // Demo value - matches free tier max earn
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
