@@ -20,7 +20,7 @@ export default function LoginPage() {
         const res = await fetch("/api/workspace-auth/session");
         const data = await res.json();
         if (data.session) {
-          router.push("/dashboard");
+          router.push("/workspace");
           return;
         }
       } catch {

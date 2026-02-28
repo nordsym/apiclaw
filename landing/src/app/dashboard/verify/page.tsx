@@ -43,7 +43,7 @@ function VerifyContent() {
 
         // Redirect to dashboard after short delay
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/workspace");
         }, 1500);
       } catch (err) {
         setStatus("error");
