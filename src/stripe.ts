@@ -250,7 +250,7 @@ export function getStripe(): Stripe | null {
 export const METERED_BILLING = {
   meterId: 'mtr_61UFEGojJ0b2awh1441RtJYK3aJTqS9g',
   eventName: 'api_call',
-  priceId: 'price_1T5qMQRtJYK3aJTqun4YZLsE',
+  priceId: 'price_1T5qNFRtJYK3aJTqzHLnUjKG', // $0.002/call, linked to meter
   productId: 'prod_U3yHbnc4NcLofW',
   pricePerCall: 0.002, // $0.002 per API call
 } as const;

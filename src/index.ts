@@ -29,7 +29,8 @@ import {
   getProvidersWithRealCredentials 
 } from './credits.js';
 import { hasRealCredentials } from './credentials.js';
-import { executeAPICall, getConnectedProviders } from './execute.js';
+import { getConnectedProviders } from './execute.js';
+import { executeMetered } from './metered.js';
 import { logAPICall } from './analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
 import { 
@@ -769,10 +770,15 @@ Docs: https://apiclaw.nordsym.com
             };
           }
 
-          // Execute the confirmed action
+          // Execute the confirmed action with metered billing
           apiType = 'direct';
           const customerKey = (args?.customer_key as string) || getCustomerKey(pending.provider);
-          result = await executeAPICall(pending.provider, pending.action, pending.params, DEFAULT_AGENT_ID, customerKey);
+          const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
+          result = await executeMetered(pending.provider, pending.action, pending.params, {
+            customerId: stripeCustomerId,
+            customerKey,
+            userId: DEFAULT_AGENT_ID,
+          });
 
           // Log the confirmed API call
           logAPICall({
@@ -854,7 +860,12 @@ Docs: https://apiclaw.nordsym.com
         } else {
           apiType = 'direct';
           const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
-          result = await executeAPICall(provider, action, params, DEFAULT_AGENT_ID, customerKey);
+          const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
+          result = await executeMetered(provider, action, params, {
+            customerId: stripeCustomerId,
+            customerKey,
+            userId: DEFAULT_AGENT_ID,
+          });
         }
 
         // Log the API call for analytics

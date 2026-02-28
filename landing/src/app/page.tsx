@@ -13,8 +13,8 @@ import { HeroTabs } from "@/components/HeroTabs";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
-  { number: "865", label: "Open APIs", live: true },
-  { number: "11", label: "Direct Call", live: true },
+  { number: "866", label: "Open APIs", live: true },
+  { number: "10", label: "Direct Call", live: true },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
