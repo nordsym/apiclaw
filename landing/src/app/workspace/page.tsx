@@ -68,6 +68,12 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import {
+  CheckoutButton,
+  UsageWarningBanner,
+  UsageExceededBanner,
+} from "@/components/CheckoutButton";
+import { Toast, useToast } from "@/components/Toast";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
@@ -196,6 +202,26 @@ export default function WorkspacePage() {
   const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
+  
+  // Toast notifications
+  const { toast, showToast, hideToast } = useToast();
+
+  // Handle billing return params
+  useEffect(() => {
+    const billingParam = searchParams.get("billing");
+    if (billingParam === "success") {
+      showToast("Payment method added! You now have unlimited API calls.", "success");
+      // Clean up URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("billing");
+      window.history.replaceState({}, "", newUrl.toString());
+    } else if (billingParam === "cancel") {
+      showToast("Checkout cancelled. You can try again anytime.", "info");
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("billing");
+      window.history.replaceState({}, "", newUrl.toString());
+    }
+  }, [searchParams, showToast]);
 
   useEffect(() => {
     const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "analytics", "webhooks", "api-keys", "earn", "docs", "feedback", "settings", "billing"];
@@ -548,9 +574,17 @@ export default function WorkspacePage() {
 
   const displayEmail = workspace?.email || providerName || "User";
   const displayTier = workspace?.tier || "free";
+  
+  // Usage thresholds for banners
+  const showUsageWarning = workspace && workspace.tier === "free" && workspace.usagePercentage >= 80 && workspace.usagePercentage < 100;
+  const showUsageExceeded = workspace && workspace.tier === "free" && workspace.usagePercentage >= 100;
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      {/* Toast notification */}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--border)]">
         <div className="flex items-center justify-between px-4 py-3">
@@ -802,6 +836,23 @@ export default function WorkspacePage() {
 
         {/* Page content */}
         <div className="p-4 lg:p-8">
+          {/* Usage warning/exceeded banners */}
+          {showUsageWarning && sessionToken && (
+            <UsageWarningBanner
+              usagePercentage={workspace!.usagePercentage}
+              usageCount={workspace!.usageCount}
+              usageLimit={workspace!.usageLimit}
+              sessionToken={sessionToken}
+            />
+          )}
+          {showUsageExceeded && sessionToken && (
+            <UsageExceededBanner
+              usageCount={workspace!.usageCount}
+              usageLimit={workspace!.usageLimit}
+              sessionToken={sessionToken}
+            />
+          )}
+          
           {activeTab === "overview" && (
             <OverviewTab
               workspace={workspace}
@@ -839,7 +890,7 @@ export default function WorkspacePage() {
             <ApiKeysTab />
           )}
           {activeTab === "billing" && (
-            <BillingTab workspace={workspace} />
+            <BillingTab workspace={workspace} sessionToken={sessionToken} />
           )}
           {activeTab === "earn" && (
             <EarnTab />
@@ -2257,9 +2308,8 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
 // BILLING TAB
 // ============================================
 
-function BillingTab({ workspace }: { workspace: Workspace | null }) {
+function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
   const tier = workspace?.tier || "free";
-  const PAYMENT_LINK = "https://buy.stripe.com/aFabJ32S0h185GI2GQcMM0h";
 
   return (
     <div className="space-y-8">
@@ -2310,17 +2360,17 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
         )}
       </div>
 
-      {/* Upgrade CTA */}
-      {tier === "free" && (
+      {/* Upgrade CTA - Usage-Based Billing */}
+      {tier === "free" && sessionToken && (
         <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-[#ef4444]/5 p-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center">
-              <Crown className="w-6 h-6 text-[#ef4444]" />
+              <Zap className="w-6 h-6 text-[#ef4444]" />
             </div>
             <div>
-              <h3 className="font-bold text-xl mb-2">Upgrade to Pro</h3>
+              <h3 className="font-bold text-xl mb-2">Unlock Unlimited API Calls</h3>
               <p className="text-[var(--text-muted)]">
-                Get 10x more API calls and priority support.
+                Pay only for what you use. First 100 calls free every month, then just $0.01 per call.
               </p>
             </div>
           </div>
@@ -2328,28 +2378,31 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>10,000 API calls / month</span>
+              <span>100 free calls / month</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>Priority support</span>
+              <span>$0.01 per additional call</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>Advanced analytics</span>
+              <span>No monthly minimum</span>
             </div>
             <div className="flex items-center gap-3">
               <Check className="w-5 h-5 text-green-500" />
-              <span>Custom integrations</span>
+              <span>Cancel anytime</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <a href={PAYMENT_LINK} className="btn-primary">
-              Upgrade for $99/month
-              <ChevronRight className="w-5 h-5" />
-            </a>
-          </div>
+          <CheckoutButton sessionToken={sessionToken} variant="primary">
+            <CreditCard className="w-5 h-5" />
+            Add Payment Method
+            <ChevronRight className="w-5 h-5" />
+          </CheckoutButton>
+          
+          <p className="mt-4 text-sm text-[var(--text-muted)]">
+            You&apos;ll only be charged for usage beyond 100 free calls. Billed monthly.
+          </p>
         </div>
       )}
 
