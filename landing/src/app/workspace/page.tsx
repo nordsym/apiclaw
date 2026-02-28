@@ -44,6 +44,9 @@ import {
   Lock,
   Building,
   ChevronUp,
+  Bug,
+  Sparkles,
+  MessageCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -3603,7 +3606,7 @@ function FeedbackTab() {
                       : "bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--background)]"
                   }`}
                 >
-                  {type === "bug" ? "🐛 Bug" : type === "feature" ? "✨ Feature" : "💬 General"}
+                  {type === "bug" ? <><Bug className="w-4 h-4 inline mr-1" /> Bug</> : type === "feature" ? <><Sparkles className="w-4 h-4 inline mr-1" /> Feature</> : <><MessageCircle className="w-4 h-4 inline mr-1" /> General</>}
                 </button>
               ))}
             </div>
@@ -3668,9 +3671,9 @@ function FeedbackTab() {
               className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
             >
               <option value="all">All Types</option>
-              <option value="bug">🐛 Bugs</option>
-              <option value="feature">✨ Features</option>
-              <option value="general">💬 General</option>
+              <option value="bug">Bugs</option>
+              <option value="feature">Features</option>
+              <option value="general">General</option>
             </select>
 
             {/* Sort */}
