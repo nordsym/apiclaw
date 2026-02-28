@@ -632,10 +632,35 @@ http.route({
         fingerprint,
       });
 
-      // Send email
-      await ctx.runAction(api.email.sendMagicLinkEmail, {
-        email: email.toLowerCase(),
-        token: result.token,
+      // Send email directly (bypassing action)
+      var verifyUrl = "https://apiclaw.nordsym.com/auth/verify?token=" + result.token;
+      var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
+      html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
+      html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
+      html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
+      html += "<tr><td style='padding:32px;text-align:center;'>";
+      html += "<div style='font-size:48px;'>🦞</div>";
+      html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw</h1>";
+      html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
+      html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
+      html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
+      html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
+      html += "</td></tr></table>";
+      html += "</td></tr></table></body></html>";
+      
+      var RESEND_KEY = process.env.RESEND_API_KEY;
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + RESEND_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "APIClaw <noreply@apiclaw.nordsym.com>",
+          to: email.toLowerCase(),
+          subject: "🦞 Verify Your Email — APIClaw",
+          html: html,
+        }),
       });
 
       return jsonResponse({
