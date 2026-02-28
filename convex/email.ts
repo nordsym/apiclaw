@@ -154,29 +154,18 @@ export const sendMagicLinkEmail = action({
       throw new Error("RESEND_API_KEY not configured");
     }
 
-    const verifyUrl = `${APP_URL}/auth/verify?token=${args.token}`;
+    const verifyUrl = APP_URL + "/auth/verify?token=" + args.token;
     const html = magicLinkEmailTemplate(verifyUrl);
     
     console.log("[Email] Sending magic link to:", args.email);
     console.log("[Email] HTML length:", html.length);
     console.log("[Email] HTML preview:", html.substring(0, 200));
 
-    const textContent = `
-APIClaw - An AI Agent Wants to Connect
-
-Click the link below to verify your email and activate your APIClaw workspace.
-Your agent will be able to use APIs immediately.
-
-Verify here: ${verifyUrl}
-
-Free tier: 50 API calls included. No credit card required.
-
-This link expires in 1 hour. If you didn't request this, ignore this email.
-
----
-APIClaw - The API Layer for AI Agents
-© ${new Date().getFullYear()} NordSym. Stockholm, Sweden.
-    `.trim();
+    var textContent = "APIClaw - An AI Agent Wants to Connect\n\n";
+    textContent += "Click the link below to verify your email and activate your APIClaw workspace.\n\n";
+    textContent += "Verify here: " + verifyUrl + "\n\n";
+    textContent += "Free tier: 50 API calls included. No credit card required.\n\n";
+    textContent += "This link expires in 1 hour.";
 
     const emailPayload = {
       from: EMAIL_FROM,
@@ -285,5 +274,55 @@ export const sendLimitReachedEmail = action({
     }
 
     return { success: true };
+  },
+});
+
+// Debug: Test email template generation
+export const debugEmailTemplate = action({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const testUrl = "https://apiclaw.nordsym.com/auth/verify?token=DEBUG_TEST";
+    
+    // Generate HTML using the template
+    var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
+    html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
+    html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
+    html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
+    html += "<tr><td style='padding:32px;text-align:center;'>";
+    html += "<div style='font-size:48px;'>🦞</div>";
+    html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw DEBUG</h1>";
+    html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>Debug Email Test</h2>";
+    html += "<p style='margin:0 0 24px;color:#525252;'>This is a debug test email.</p>";
+    html += "<a href='" + testUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Test Link</a>";
+    html += "</td></tr></table>";
+    html += "</td></tr></table></body></html>";
+    
+    console.log("[Debug] HTML length:", html.length);
+    console.log("[Debug] HTML:", html);
+    
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + RESEND_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "APIClaw <noreply@apiclaw.nordsym.com>",
+        to: email,
+        subject: "DEBUG EMAIL FROM CONVEX",
+        html: html,
+      }),
+    });
+    
+    const result = await response.text();
+    console.log("[Debug] Response:", response.status, result);
+    
+    return { 
+      htmlLength: html.length, 
+      htmlPreview: html.substring(0, 200),
+      resendStatus: response.status,
+      resendResult: result 
+    };
   },
 });
