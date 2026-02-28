@@ -33,6 +33,8 @@ import {
   Terminal,
   Copy,
   BookOpen,
+  Mail,
+  Send,
 } from "lucide-react";
 import {
   LineChart,
@@ -676,7 +678,7 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "agents" && (
-            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} />
+            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} workspaceEmail={workspace?.email} />
           )}
           {activeTab === "usage" && (
             <UsageTab workspace={workspace} usage={usage} />
@@ -944,11 +946,16 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
 function AgentsTab({
   agents,
   onRevoke,
+  workspaceEmail,
 }: {
   agents: Agent[];
   onRevoke: (agentId: string) => void;
+  workspaceEmail?: string;
 }) {
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
+  const [sendingLink, setSendingLink] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
+  const [email, setEmail] = useState(workspaceEmail || "");
 
   const handleRevoke = (agentId: string) => {
     if (confirmRevoke === agentId) {
@@ -956,6 +963,29 @@ function AgentsTab({
       setConfirmRevoke(null);
     } else {
       setConfirmRevoke(agentId);
+    }
+  };
+
+  const handleSendMagicLink = async () => {
+    if (!email || !email.includes("@")) return;
+    
+    setSendingLink(true);
+    try {
+      const response = await fetch(`${CONVEX_URL.replace('.cloud', '.site')}/workspace/magic-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        setLinkSent(true);
+        setTimeout(() => setLinkSent(false), 5000);
+      }
+    } catch (err) {
+      console.error("Failed to send magic link:", err);
+    } finally {
+      setSendingLink(false);
     }
   };
 
@@ -997,6 +1027,57 @@ function AgentsTab({
             <p className="text-xs text-[var(--text-muted)] mt-3">
               First run prompts for email → sends magic link → registers your agent to this workspace.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Connect via Email */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+            <Mail className="w-5 h-5 text-green-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold mb-2">Quick Connect via Email</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Send a magic link to connect your agent without using the CLI.
+            </p>
+            <div className="flex gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+              />
+              <button
+                onClick={handleSendMagicLink}
+                disabled={sendingLink || !email}
+                className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
+              >
+                {sendingLink ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : linkSent ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Sent!
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Link
+                  </>
+                )}
+              </button>
+            </div>
+            {linkSent && (
+              <p className="text-sm text-green-500 mt-2">
+                ✓ Magic link sent! Check your email and click to connect.
+              </p>
+            )}
           </div>
         </div>
       </div>
