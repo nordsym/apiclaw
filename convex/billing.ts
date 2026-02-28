@@ -1,6 +1,17 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "./_generated/server";
+import { mutation, query, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+import Stripe from "stripe";
+
+// Initialize Stripe
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error("STRIPE_SECRET_KEY not configured");
+  }
+  return new Stripe(key);
+}
 
 // ============================================
 // MUTATIONS
@@ -463,5 +474,251 @@ export const getWorkspace = query({
   },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
+  },
+});
+
+// ============================================
+// STRIPE USAGE REPORTING (Internal Actions)
+// ============================================
+
+/**
+ * Get all workspaces with active Stripe subscriptions (internal)
+ */
+export const getActiveSubscriptions = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    // Get all workspaces with a subscription ID
+    const workspaces = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.neq(q.field("stripeSubscriptionId"), undefined))
+      .collect();
+
+    // Filter to only those with billing plan that requires reporting
+    return workspaces.filter(
+      (w) => w.billingPlan === "usage_based" && w.stripeSubscriptionId
+    );
+  },
+});
+
+/**
+ * Get unreported usage records for a specific workspace (internal)
+ */
+export const getUnreportedUsageForWorkspace = internalQuery({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("usageRecords")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("reportedToStripe"), false))
+      .collect();
+  },
+});
+
+/**
+ * Mark multiple usage records as reported (internal)
+ */
+export const markUsageRecordsReported = internalMutation({
+  args: {
+    usageRecordIds: v.array(v.id("usageRecords")),
+    stripeUsageRecordId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    for (const recordId of args.usageRecordIds) {
+      await ctx.db.patch(recordId, {
+        reportedToStripe: true,
+        stripeUsageRecordId: args.stripeUsageRecordId,
+        updatedAt: now,
+      });
+    }
+  },
+});
+
+/**
+ * Report usage to Stripe for a single workspace
+ * Internal action - called by the daily cron
+ */
+export const reportUsageToStripe = internalAction({
+  args: {
+    workspaceId: v.id("workspaces"),
+    stripeSubscriptionId: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ success: boolean; callCount: number; error?: string }> => {
+    try {
+      // Get unreported usage records
+      const usageRecords = await ctx.runQuery(
+        internal.billing.getUnreportedUsageForWorkspace,
+        { workspaceId: args.workspaceId }
+      );
+
+      if (usageRecords.length === 0) {
+        return { success: true, callCount: 0 };
+      }
+
+      // Sum up all unreported calls
+      const totalCalls = usageRecords.reduce(
+        (sum: number, r: { callCount: number }) => sum + r.callCount,
+        0
+      );
+
+      if (totalCalls === 0) {
+        // Mark as reported even if 0 calls (to prevent re-processing)
+        await ctx.runMutation(internal.billing.markUsageRecordsReported, {
+          usageRecordIds: usageRecords.map((r: { _id: Id<"usageRecords"> }) => r._id),
+          stripeUsageRecordId: "zero_usage",
+        });
+        return { success: true, callCount: 0 };
+      }
+
+      const stripe = getStripe();
+
+      // Get subscription to find the metered subscription item
+      const subscription = await stripe.subscriptions.retrieve(args.stripeSubscriptionId);
+
+      // Find the metered price item (usage_based price)
+      const meteredItem = subscription.items.data.find((item) => {
+        return item.price.recurring?.usage_type === "metered";
+      });
+
+      if (!meteredItem) {
+        console.error(
+          `No metered subscription item found for subscription ${args.stripeSubscriptionId}`
+        );
+        return {
+          success: false,
+          callCount: totalCalls,
+          error: "No metered subscription item found",
+        };
+      }
+
+      // Report usage to Stripe using usage records API
+      // Using raw fetch since SDK method varies by version
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      const usageRecordResponse = await fetch(
+        `https://api.stripe.com/v1/subscription_items/${meteredItem.id}/usage_records`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${stripeKey}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            quantity: String(totalCalls),
+            timestamp: String(Math.floor(Date.now() / 1000)),
+            action: "increment",
+          }),
+        }
+      );
+
+      if (!usageRecordResponse.ok) {
+        const errorData = await usageRecordResponse.text();
+        throw new Error(`Stripe API error: ${usageRecordResponse.status} - ${errorData}`);
+      }
+
+      const usageRecord = await usageRecordResponse.json() as { id: string };
+
+      // Mark records as reported
+      await ctx.runMutation(internal.billing.markUsageRecordsReported, {
+        usageRecordIds: usageRecords.map((r: { _id: Id<"usageRecords"> }) => r._id),
+        stripeUsageRecordId: usageRecord.id,
+      });
+
+      console.log(
+        `Reported ${totalCalls} calls for workspace ${args.workspaceId} to Stripe`
+      );
+
+      return { success: true, callCount: totalCalls };
+    } catch (error: any) {
+      console.error(
+        `Failed to report usage for workspace ${args.workspaceId}:`,
+        error
+      );
+      return {
+        success: false,
+        callCount: 0,
+        error: error.message || "Unknown error",
+      };
+    }
+  },
+});
+
+// Type for workspace with active subscription
+type ActiveWorkspace = {
+  _id: Id<"workspaces">;
+  email: string;
+  stripeSubscriptionId?: string;
+};
+
+// Type for cron results
+type CronResults = {
+  total: number;
+  success: number;
+  failed: number;
+  skipped: number;
+  totalCallsReported: number;
+  errors: string[];
+};
+
+/**
+ * Daily cron job: Report all unreported usage to Stripe
+ * Runs at 00:05 UTC
+ */
+export const reportAllUsageToStripe = internalAction({
+  args: {},
+  handler: async (ctx): Promise<CronResults> => {
+    console.log("[Cron] Starting daily usage reporting to Stripe...");
+
+    // Get all workspaces with active subscriptions
+    const workspaces: ActiveWorkspace[] = await ctx.runQuery(
+      internal.billing.getActiveSubscriptions,
+      {}
+    );
+
+    console.log(`[Cron] Found ${workspaces.length} workspaces with active subscriptions`);
+
+    const results: CronResults = {
+      total: workspaces.length,
+      success: 0,
+      failed: 0,
+      skipped: 0,
+      totalCallsReported: 0,
+      errors: [],
+    };
+
+    // Process each workspace
+    for (const workspace of workspaces) {
+      if (!workspace.stripeSubscriptionId) {
+        results.skipped++;
+        continue;
+      }
+
+      try {
+        const result = await ctx.runAction(internal.billing.reportUsageToStripe, {
+          workspaceId: workspace._id,
+          stripeSubscriptionId: workspace.stripeSubscriptionId,
+        });
+
+        if (result.success) {
+          results.success++;
+          results.totalCallsReported += result.callCount;
+        } else {
+          results.failed++;
+          results.errors.push(
+            `${workspace.email}: ${result.error || "Unknown error"}`
+          );
+        }
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push(`${workspace.email}: ${error.message || "Unknown error"}`);
+        console.error(`[Cron] Error processing workspace ${workspace._id}:`, error);
+        // Continue with next workspace
+      }
+    }
+
+    console.log("[Cron] Daily usage reporting complete:", JSON.stringify(results));
+
+    return results;
   },
 });
