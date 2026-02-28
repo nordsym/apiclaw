@@ -307,7 +307,7 @@ Website: https://apiclaw.nordsym.com`;
               href="#for-providers" 
               className={`transition ${activeSection === "for-providers" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
-              For Providers
+              For API Providers
             </a>
             <a 
               href="/docs" 
@@ -341,7 +341,7 @@ Website: https://apiclaw.nordsym.com`;
               </a>
             ) : (
               <a
-                href="/providers/register"
+                href="/workspace?tab=my-apis"
                 className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
               >
                 <FileText className="w-4 h-4" />
@@ -408,7 +408,7 @@ Website: https://apiclaw.nordsym.com`;
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
-                For Providers
+                For API Providers
               </a>
               <a 
                 href="#get-started" 
@@ -426,7 +426,7 @@ Website: https://apiclaw.nordsym.com`;
               </a>
               <div className="border-t border-border pt-3 mt-1 flex flex-col space-y-3">
                 <a
-                  href="/providers/dashboard"
+                  href="/workspace?tab=my-apis"
                   onClick={() => setMobileMenuOpen(false)}
                   className="py-2 text-accent font-medium flex items-center gap-2"
                 >
@@ -893,7 +893,7 @@ Website: https://apiclaw.nordsym.com`;
                     <p className="text-text-muted text-sm">For all API providers</p>
                   </div>
                   <div className="flex gap-2">
-                    <a href="/providers/dashboard" className="btn-ghost !py-2.5 !px-4 text-sm">
+                    <a href="/workspace?tab=my-apis" className="btn-ghost !py-2.5 !px-4 text-sm">
                       Dashboard
                     </a>
                     <a href="/providers" className="btn-primary !py-2.5 !px-5 text-sm">
@@ -992,7 +992,7 @@ Website: https://apiclaw.nordsym.com`;
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
                 Live Now
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2">For Providers</h3>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">For API Providers</h3>
               <p className="text-text-secondary mb-6 sm:mb-8">Get discovered by AI agents</p>
               <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
@@ -1016,7 +1016,7 @@ Website: https://apiclaw.nordsym.com`;
                   Zero integration work
                 </li>
               </ul>
-              <a href="/providers/dashboard" className="btn-primary w-full justify-center">
+              <a href="/workspace?tab=my-apis" className="btn-primary w-full justify-center">
                 Add Your API
               </a>
             </div>
@@ -1129,8 +1129,8 @@ Website: https://apiclaw.nordsym.com`;
               <ul className="space-y-3 text-text-muted">
                 <li><a href="#how-it-works" className="hover:text-text-primary transition">How It Works</a></li>
                 <li><a href="#for-agents" className="hover:text-text-primary transition">For Agents</a></li>
-                <li><a href="#for-providers" className="hover:text-text-primary transition">For Providers</a></li>
-                <li><a href="/providers/dashboard" className="hover:text-text-primary transition">Provider Dashboard</a></li>
+                <li><a href="#for-providers" className="hover:text-text-primary transition">For API Providers</a></li>
+                <li><a href="/workspace" className="hover:text-text-primary transition">Workspace</a></li>
                 <li><a href="#get-started" className="hover:text-text-primary transition">Get Started</a></li>
                 <li><a href="#faq" className="hover:text-text-primary transition">FAQ</a></li>
                 <li><a href="/docs" className="hover:text-text-primary transition">Documentation</a></li>
