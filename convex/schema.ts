@@ -340,6 +340,24 @@ export default defineSchema({
     .index("by_userId_timestamp", ["userId", "timestamp"]),
 
   // ============================================
+  // API LOGS (workspace/consumer view)
+  // ============================================
+
+  apiLogs: defineTable({
+    workspaceId: v.id("workspaces"),
+    sessionToken: v.string(),
+    provider: v.string(),
+    action: v.string(),
+    status: v.union(v.literal("success"), v.literal("error")),
+    latencyMs: v.number(),
+    errorMessage: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_createdAt", ["createdAt"])
+    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"]),
+
+  // ============================================
   // WAITLIST (for Direct Call provider leads)
   // ============================================
 

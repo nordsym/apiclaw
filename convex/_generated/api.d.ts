@@ -15,6 +15,7 @@ import type * as credits from "../credits.js";
 import type * as directCall from "../directCall.js";
 import type * as email from "../email.js";
 import type * as http from "../http.js";
+import type * as logs from "../logs.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   directCall: typeof directCall;
   email: typeof email;
   http: typeof http;
+  logs: typeof logs;
   providers: typeof providers;
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;

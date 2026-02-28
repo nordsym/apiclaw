@@ -753,7 +753,7 @@ export default function WorkspacePage() {
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
           )}
           {activeTab === "logs" && (
-            <LogsTab />
+            <LogsTab sessionToken={sessionToken} />
           )}
           {activeTab === "usage" && (
             <UsageTab workspace={workspace} usage={usage} />
@@ -2087,27 +2087,338 @@ function DocsTab() {
 // LOGS TAB
 // ============================================
 
-function LogsTab() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Logs</h2>
-        <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
-      </div>
+interface LogEntry {
+  id: string;
+  provider: string;
+  action: string;
+  status: "success" | "error";
+  latencyMs: number;
+  errorMessage?: string;
+  createdAt: number;
+}
 
-      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
-        <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
-        <h3 className="font-semibold text-xl mb-2">Coming Soon</h3>
-        <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-          API call logs, errors, and debug info will appear here. Track every request your agents make with detailed timestamps, latency, and response data.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 text-sm text-[var(--text-muted)]">
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Request/Response Logs</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Error Tracking</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Latency Metrics</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">Export to JSON/CSV</span>
+interface LogStats {
+  totalCalls: number;
+  successCount: number;
+  errorCount: number;
+  successRate: number;
+  avgLatency: number;
+  providers: string[];
+}
+
+function LogsTab({ sessionToken }: { sessionToken: string | null }) {
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [stats, setStats] = useState<LogStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"all" | "success" | "error">("all");
+  const [providerFilter, setProviderFilter] = useState<string>("all");
+  const [providers, setProviders] = useState<string[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<number | undefined>();
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchLogs = useCallback(async (append = false) => {
+    if (!sessionToken) return;
+    
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
+
+    try {
+      const cursor = append ? nextCursor : undefined;
+      
+      const logsRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "logs:getLogs",
+          args: { 
+            token: sessionToken, 
+            limit: 50,
+            cursor,
+            status: statusFilter,
+            provider: providerFilter === "all" ? undefined : providerFilter,
+          },
+        }),
+      });
+
+      const logsData = await logsRes.json();
+      const result = logsData.value || logsData;
+
+      if (append) {
+        setLogs(prev => [...prev, ...(result.logs || [])]);
+      } else {
+        setLogs(result.logs || []);
+      }
+      setHasMore(result.hasMore || false);
+      setNextCursor(result.nextCursor);
+    } catch (err) {
+      console.error("Error fetching logs:", err);
+    } finally {
+      setIsLoading(false);
+      setLoadingMore(false);
+    }
+  }, [sessionToken, statusFilter, providerFilter, nextCursor]);
+
+  const fetchStats = useCallback(async () => {
+    if (!sessionToken) return;
+
+    try {
+      const statsRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "logs:getLogStats",
+          args: { token: sessionToken, periodDays: 7 },
+        }),
+      });
+
+      const statsData = await statsRes.json();
+      const result = statsData.value || statsData;
+      setStats(result);
+      setProviders(result.providers || []);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  }, [sessionToken]);
+
+  useEffect(() => {
+    fetchLogs();
+    fetchStats();
+  }, [fetchLogs, fetchStats]);
+
+  // Reset and refetch when filters change
+  useEffect(() => {
+    setNextCursor(undefined);
+    fetchLogs(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, providerFilter]);
+
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`;
+    
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (!sessionToken) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Logs</h2>
+          <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
+        </div>
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+          <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">Not Logged In</h3>
+          <p className="text-[var(--text-muted)]">Please log in to view your API logs.</p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Logs</h2>
+          <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
+        </div>
+        
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as "all" | "success" | "error")}
+            className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+          >
+            <option value="all">All Status</option>
+            <option value="success">Success</option>
+            <option value="error">Error</option>
+          </select>
+          
+          <select
+            value={providerFilter}
+            onChange={(e) => setProviderFilter(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+          >
+            <option value="all">All Providers</option>
+            {providers.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && stats.totalCalls > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-4 h-4 text-[var(--text-muted)]" />
+              <span className="text-sm text-[var(--text-muted)]">Total Calls</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.totalCalls.toLocaleString()}</p>
+          </div>
+          
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Check className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-[var(--text-muted)]">Success Rate</span>
+            </div>
+            <p className="text-2xl font-bold text-green-500">{stats.successRate}%</p>
+          </div>
+          
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-4 h-4 text-red-500" />
+              <span className="text-sm text-[var(--text-muted)]">Errors</span>
+            </div>
+            <p className="text-2xl font-bold text-red-500">{stats.errorCount}</p>
+          </div>
+          
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-[var(--text-muted)]" />
+              <span className="text-sm text-[var(--text-muted)]">Avg Latency</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.avgLatency}ms</p>
+          </div>
+        </div>
+      )}
+
+      {/* Logs Table */}
+      {isLoading ? (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-12 text-center">
+          <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin mx-auto mb-4" />
+          <p className="text-[var(--text-muted)]">Loading logs...</p>
+        </div>
+      ) : logs.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+          <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">No API calls logged yet</h3>
+          <p className="text-[var(--text-muted)] max-w-md mx-auto">
+            When your agents start making Direct Call API requests, they&apos;ll appear here with timestamps, latency, and status information.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[var(--surface)]">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Time</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Provider</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Action</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Latency</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {logs.map((log) => (
+                  <tr key={log.id} className="hover:bg-[var(--surface)] transition">
+                    <td className="px-4 py-3 text-sm text-[var(--text-muted)]">
+                      {formatTime(log.createdAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-medium">{log.provider}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <code className="px-2 py-1 rounded bg-[var(--surface)] text-sm font-mono">
+                        {log.action}
+                      </code>
+                    </td>
+                    <td className="px-4 py-3">
+                      {log.status === "success" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                          <Check className="w-3 h-3" />
+                          Success
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium" title={log.errorMessage}>
+                          <AlertCircle className="w-3 h-3" />
+                          Error
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className={log.latencyMs > 1000 ? "text-yellow-500" : "text-[var(--text-muted)]"}>
+                        {log.latencyMs}ms
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-[var(--border)]">
+            {logs.map((log) => (
+              <div key={log.id} className="p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{log.provider}</span>
+                  {log.status === "success" ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                      <Check className="w-3 h-3" />
+                      Success
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium">
+                      <AlertCircle className="w-3 h-3" />
+                      Error
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <code className="px-2 py-1 rounded bg-[var(--surface)] font-mono text-xs">
+                    {log.action}
+                  </code>
+                  <span className="text-[var(--text-muted)]">{log.latencyMs}ms</span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)]">{formatTime(log.createdAt)}</p>
+                {log.errorMessage && (
+                  <p className="text-xs text-red-500 truncate">{log.errorMessage}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Load More */}
+          {hasMore && (
+            <div className="p-4 border-t border-[var(--border)] text-center">
+              <button
+                onClick={() => fetchLogs(true)}
+                disabled={loadingMore}
+                className="px-6 py-2 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition text-sm font-medium disabled:opacity-50"
+              >
+                {loadingMore ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </span>
+                ) : (
+                  "Load More"
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
