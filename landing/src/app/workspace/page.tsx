@@ -536,6 +536,7 @@ export default function WorkspacePage() {
 
   // Bottom navigation tabs (before theme/logout)
   const bottomTabs = [
+    { id: "billing" as TabType, label: "Billing", icon: CreditCard },
     { id: "settings" as TabType, label: "Settings", icon: Settings },
   ];
 
@@ -1257,9 +1258,9 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
 
         <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
           <Terminal className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-xl mb-2">List Your First API</h3>
+          <h3 className="font-semibold text-xl mb-2">Get Your API in Front of AI Agents</h3>
           <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-            Got an API you want AI agents to discover and use? List it here and let APIClaw handle the rest.
+            List your API and let AI agents discover and use it — no integration work for them.
           </p>
           <Link href="/providers/register" className="btn-primary">
             <Plus className="w-5 h-5" />
@@ -1273,8 +1274,8 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
               <div className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">Reach 1000s of AI agents</p>
-                  <p className="text-sm text-[var(--text-muted)]">Get discovered by agents looking for your capabilities.</p>
+                  <p className="font-medium">Get discovered by AI agents</p>
+                  <p className="text-sm text-[var(--text-muted)]">Agents query APIClaw to find APIs matching their needs.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
