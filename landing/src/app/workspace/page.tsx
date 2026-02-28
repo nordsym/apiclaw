@@ -47,6 +47,8 @@ import {
   Bug,
   Sparkles,
   MessageCircle,
+  Search,
+  Phone,
 } from "lucide-react";
 import {
   LineChart,
@@ -100,6 +102,16 @@ interface ProviderAPI {
   hasDirectCall?: boolean;
 }
 
+interface ApprovedAPI {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  status: string;
+  hasDirectCall?: boolean;
+  icon?: string;
+}
+
 interface ProviderAnalytics {
   totalCalls: number;
   uniqueAgents: number;
@@ -111,7 +123,8 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "apis" | "analytics" | "agents" | "logs" | "usage" | "webhooks" | "api-keys" | "earn" | "docs" | "feedback" | "settings" | "billing";
+type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "analytics" | "webhooks" | "api-keys" | "earn" | "docs" | "feedback" | "settings" | "billing";
+type AnalyticsSubtab = "overview" | "usage" | "logs";
 
 // Generate preview analytics data for demo
 function generatePreviewAnalytics(): ProviderAnalytics {
@@ -154,11 +167,12 @@ export default function WorkspacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab") as TabType | null;
+  const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "overview");
-  const [analyticsSubtab, setAnalyticsSubtab] = useState<"apis" | "agents">("apis");
+  const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "overview");
   const [analyticsExpanded, setAnalyticsExpanded] = useState(tabFromUrl === "analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
@@ -171,24 +185,23 @@ export default function WorkspacePage() {
   
   // Provider data
   const [providerApis, setProviderApis] = useState<ProviderAPI[]>([]);
+  const [approvedApis, setApprovedApis] = useState<ApprovedAPI[]>([]);
   const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
 
   useEffect(() => {
-    if (tabFromUrl && ["overview", "apis", "analytics", "agents", "logs", "usage", "webhooks", "api-keys", "earn", "docs", "feedback", "settings", "billing"].includes(tabFromUrl)) {
+    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "analytics", "webhooks", "api-keys", "earn", "docs", "feedback", "settings", "billing"];
+    if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
         setAnalyticsExpanded(true);
-        const subParam = searchParams.get("sub");
-        if (subParam === "agents") {
-          setAnalyticsSubtab("agents");
-        } else {
-          setAnalyticsSubtab("apis");
+        if (subFromUrl && ["overview", "usage", "logs"].includes(subFromUrl)) {
+          setAnalyticsSubtab(subFromUrl);
         }
       }
     }
-  }, [tabFromUrl, searchParams]);
+  }, [tabFromUrl, subFromUrl]);
 
   const fetchWorkspaceData = useCallback(async (token: string) => {
     try {
@@ -233,6 +246,26 @@ export default function WorkspacePage() {
       setUsage(usageData.value || usageData);
     } catch (err) {
       console.error("Fetch workspace error:", err);
+    }
+  }, []);
+
+  const fetchApprovedAPIs = useCallback(async () => {
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "providers:getApprovedAPIs",
+          args: {},
+        }),
+      });
+      const data = await res.json();
+      const apis = data.value || data || [];
+      if (Array.isArray(apis)) {
+        setApprovedApis(apis);
+      }
+    } catch (err) {
+      console.error("Fetch approved APIs error:", err);
     }
   }, []);
 
@@ -300,6 +333,7 @@ export default function WorkspacePage() {
       // Set provider APIs (even empty array is OK)
       if (Array.isArray(apis)) {
         setProviderApis(apis);
+        setIsProvider(true);
         console.log("Provider APIs loaded:", apis.length);
         
         // Fetch provider analytics
@@ -342,6 +376,9 @@ export default function WorkspacePage() {
           await fetchWorkspaceData(token);
         }
         
+        // Fetch all approved APIs for the catalog
+        await fetchApprovedAPIs();
+        
         // Check provider session and fetch APIs
         await fetchProviderData();
         
@@ -368,7 +405,7 @@ export default function WorkspacePage() {
     document.documentElement.classList.toggle("dark", saved !== "light");
 
     init();
-  }, [router, fetchWorkspaceData, fetchProviderData]);
+  }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -393,6 +430,7 @@ export default function WorkspacePage() {
     setIsLoading(true);
     try {
       if (sessionToken) await fetchWorkspaceData(sessionToken);
+      await fetchApprovedAPIs();
       await fetchProviderData();
     } catch (err) {
       setError("Failed to refresh");
@@ -438,17 +476,16 @@ export default function WorkspacePage() {
   // Main navigation tabs
   const mainTabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
-    { id: "apis" as TabType, label: "APIs", icon: Zap },
-    { id: "agents" as TabType, label: "Agents", icon: Users },
-    { id: "logs" as TabType, label: "Logs", icon: ScrollText },
-    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3 },
-    { id: "usage" as TabType, label: "Usage", icon: TrendingUp },
+    { id: "api-catalog" as TabType, label: "API Catalog", icon: Zap },
+    { id: "my-agents" as TabType, label: "My Agents", icon: Users },
+    { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
+    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
     { id: "webhooks" as TabType, label: "Webhooks", icon: Webhook },
+    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
   ];
 
   // Secondary navigation tabs
   const secondaryTabs = [
-    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
     { id: "earn" as TabType, label: "Earn Credits", icon: Crown },
     { id: "docs" as TabType, label: "Docs", icon: BookOpen },
     { id: "feedback" as TabType, label: "Feedback", icon: MessageSquare },
@@ -461,6 +498,19 @@ export default function WorkspacePage() {
 
   // All tabs for lookup
   const tabs = [...mainTabs, ...secondaryTabs, ...bottomTabs, { id: "billing" as TabType, label: "Billing", icon: CreditCard }];
+
+  // Get display name for current tab
+  const getTabLabel = () => {
+    if (activeTab === "analytics") {
+      const subLabels: Record<AnalyticsSubtab, string> = {
+        overview: "Analytics Overview",
+        usage: "Usage",
+        logs: "Logs",
+      };
+      return subLabels[analyticsSubtab] || "Analytics";
+    }
+    return tabs.find(t => t.id === activeTab)?.label || "Workspace";
+  };
 
   if (isLoading) {
     return (
@@ -564,7 +614,8 @@ export default function WorkspacePage() {
                         setAnalyticsExpanded(!analyticsExpanded);
                         if (!analyticsExpanded) {
                           setActiveTab("analytics");
-                          router.push(`/workspace?tab=analytics`);
+                          setAnalyticsSubtab("overview");
+                          router.push(`/workspace?tab=analytics&sub=overview`);
                         }
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition ${
@@ -585,34 +636,50 @@ export default function WorkspacePage() {
                         <button
                           onClick={() => {
                             setActiveTab("analytics");
-                            setAnalyticsSubtab("apis");
+                            setAnalyticsSubtab("overview");
                             setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=apis`);
+                            router.push(`/workspace?tab=analytics&sub=overview`);
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "apis"
+                            activeTab === "analytics" && analyticsSubtab === "overview"
                               ? "bg-[#ef4444]/20 text-[#ef4444]"
                               : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                           }`}
                         >
-                          <Zap className="w-4 h-4" />
-                          <span>My APIs</span>
+                          <BarChart3 className="w-4 h-4" />
+                          <span>Overview</span>
                         </button>
                         <button
                           onClick={() => {
                             setActiveTab("analytics");
-                            setAnalyticsSubtab("agents");
+                            setAnalyticsSubtab("usage");
                             setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=agents`);
+                            router.push(`/workspace?tab=analytics&sub=usage`);
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "agents"
+                            activeTab === "analytics" && analyticsSubtab === "usage"
                               ? "bg-[#ef4444]/20 text-[#ef4444]"
                               : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                           }`}
                         >
-                          <Users className="w-4 h-4" />
-                          <span>My Agents</span>
+                          <TrendingUp className="w-4 h-4" />
+                          <span>Usage</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab("analytics");
+                            setAnalyticsSubtab("logs");
+                            setSidebarOpen(false);
+                            router.push(`/workspace?tab=analytics&sub=logs`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                            activeTab === "analytics" && analyticsSubtab === "logs"
+                              ? "bg-[#ef4444]/20 text-[#ef4444]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <ScrollText className="w-4 h-4" />
+                          <span>Logs</span>
                         </button>
                       </div>
                     )}
@@ -712,17 +779,15 @@ export default function WorkspacePage() {
       <main className="lg:ml-64 min-h-screen pt-14 lg:pt-0">
         {/* Desktop header */}
         <header className="hidden lg:flex items-center justify-between px-8 py-4 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl sticky top-0 z-40">
-          <h1 className="text-xl font-bold">
-            {tabs.find(t => t.id === activeTab)?.label || "Workspace"}
-          </h1>
+          <h1 className="text-xl font-bold">{getTabLabel()}</h1>
           <div className="flex items-center gap-4">
             <button onClick={handleRefresh} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" title="Refresh">
               <RefreshCw className="w-5 h-5 text-[var(--text-muted)]" />
             </button>
-            {activeTab === "apis" && (
+            {activeTab === "my-apis" && (
               <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
                 <Plus className="w-4 h-4" />
-                Add API
+                List New API
               </Link>
             )}
           </div>
@@ -735,11 +800,18 @@ export default function WorkspacePage() {
               workspace={workspace}
               agents={agents}
               providerApis={providerApis}
+              approvedApis={approvedApis}
               setActiveTab={setActiveTab}
             />
           )}
-          {activeTab === "apis" && (
-            <ApisTab apis={providerApis} />
+          {activeTab === "api-catalog" && (
+            <APICatalogTab apis={approvedApis} />
+          )}
+          {activeTab === "my-agents" && (
+            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
+          )}
+          {activeTab === "my-apis" && (
+            <MyAPIsTab apis={providerApis} />
           )}
           {activeTab === "analytics" && (
             <AnalyticsTab 
@@ -750,16 +822,8 @@ export default function WorkspacePage() {
               usage={usage}
               activeSubtab={analyticsSubtab}
               setActiveSubtab={setAnalyticsSubtab}
+              sessionToken={sessionToken}
             />
-          )}
-          {activeTab === "agents" && (
-            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
-          )}
-          {activeTab === "logs" && (
-            <LogsTab sessionToken={sessionToken} />
-          )}
-          {activeTab === "usage" && (
-            <UsageTab workspace={workspace} usage={usage} />
           )}
           {activeTab === "webhooks" && (
             <WebhooksTab />
@@ -796,11 +860,13 @@ function OverviewTab({
   workspace,
   agents,
   providerApis,
+  approvedApis,
   setActiveTab,
 }: {
   workspace: Workspace | null;
   agents: Agent[];
   providerApis: ProviderAPI[];
+  approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
   return (
@@ -810,9 +876,9 @@ function OverviewTab({
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
           <div className="flex items-center gap-3 mb-3">
             <Zap className="w-6 h-6 text-[#ef4444]" />
-            <span className="text-[var(--text-muted)]">Listed APIs</span>
+            <span className="text-[var(--text-muted)]">Available APIs</span>
           </div>
-          <p className="text-4xl font-bold text-[#ef4444]">{providerApis.length}</p>
+          <p className="text-4xl font-bold text-[#ef4444]">{approvedApis.length}</p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
@@ -833,19 +899,17 @@ function OverviewTab({
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-center gap-3 mb-3">
             <Users className="w-6 h-6 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">Connected Agents</span>
+            <span className="text-[var(--text-muted)]">My Agents</span>
           </div>
           <p className="text-4xl font-bold">{agents.length}</p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-center gap-3 mb-3">
-            <Check className="w-6 h-6 text-green-500" />
-            <span className="text-[var(--text-muted)]">Status</span>
+            <Terminal className="w-6 h-6 text-[var(--text-muted)]" />
+            <span className="text-[var(--text-muted)]">My APIs</span>
           </div>
-          <p className="text-xl font-bold text-green-500 capitalize">
-            {workspace?.status || "Active"}
-          </p>
+          <p className="text-4xl font-bold">{providerApis.length}</p>
         </div>
       </div>
 
@@ -890,21 +954,54 @@ function OverviewTab({
         </div>
       )}
 
-      {/* Provider APIs Preview */}
+      {/* Available APIs Preview */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg">API Catalog</h3>
+          <button onClick={() => setActiveTab("api-catalog")} className="text-sm text-[#ef4444] hover:underline">
+            View all {approvedApis.length} APIs
+          </button>
+        </div>
+        <div className="grid md:grid-cols-3 gap-3">
+          {approvedApis.slice(0, 3).map((api) => (
+            <div
+              key={api._id}
+              className="p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{api.icon || "🔌"}</span>
+                <p className="font-medium">{api.name}</p>
+              </div>
+              <p className="text-sm text-[var(--text-muted)] line-clamp-2">{api.description}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="px-2 py-0.5 rounded-full bg-[var(--background)] text-xs text-[var(--text-muted)]">
+                  {api.category}
+                </span>
+                {api.hasDirectCall && (
+                  <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                    Direct Call
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* My APIs Preview */}
       {providerApis.length > 0 && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Your APIs</h3>
-            <button onClick={() => setActiveTab("apis")} className="text-sm text-[#ef4444] hover:underline">
-              View all
+            <h3 className="font-bold text-lg">My APIs</h3>
+            <button onClick={() => setActiveTab("my-apis")} className="text-sm text-[#ef4444] hover:underline">
+              Manage APIs
             </button>
           </div>
           <div className="space-y-3">
             {providerApis.slice(0, 3).map((api) => (
-              <Link
+              <div
                 key={api._id}
-                href={`/providers/dashboard/${api._id}`}
-                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
+                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]"
               >
                 <div>
                   <p className="font-medium">{api.name}</p>
@@ -922,7 +1019,7 @@ function OverviewTab({
                     {api.status}
                   </span>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -931,8 +1028,8 @@ function OverviewTab({
       {/* Recent Agents */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Recent Agents</h3>
-          <button onClick={() => setActiveTab("agents")} className="text-sm text-[#ef4444] hover:underline">
+          <h3 className="font-bold text-lg">My Agents</h3>
+          <button onClick={() => setActiveTab("my-agents")} className="text-sm text-[#ef4444] hover:underline">
             View all
           </button>
         </div>
@@ -968,22 +1065,175 @@ function OverviewTab({
 }
 
 // ============================================
-// APIS TAB (Provider)
+// API CATALOG TAB (All Approved APIs)
 // ============================================
 
-function ApisTab({ apis }: { apis: ProviderAPI[] }) {
+function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  // Get unique categories
+  const categories = ["all", ...Array.from(new Set(apis.map(a => a.category)))];
+
+  // Filter APIs
+  const filteredApis = apis.filter(api => {
+    const matchesSearch = !searchQuery || 
+      api.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      api.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || api.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Get icon for category
+  const getCategoryIcon = (category: string): string => {
+    const icons: Record<string, string> = {
+      "Search": "🔍",
+      "AI & LLM": "🤖",
+      "Communication": "📱",
+      "Email": "📧",
+      "Voice & Audio": "🎙️",
+      "Code Execution": "💻",
+      "Web Scraping": "🌐",
+      "Image": "🖼️",
+      "Media": "🎬",
+    };
+    return icons[category] || "🔌";
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">API Catalog</h2>
+          <p className="text-[var(--text-muted)]">{apis.length} APIs available for Direct Call</p>
+        </div>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search APIs..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+          />
+        </div>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          {categories.map(cat => (
+            <option key={cat} value={cat}>
+              {cat === "all" ? "All Categories" : cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* API Grid */}
+      {filteredApis.length === 0 ? (
+        <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
+          <Search className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-lg mb-2">No APIs Found</h3>
+          <p className="text-[var(--text-muted)]">Try adjusting your search or filter.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredApis.map((api) => (
+            <div
+              key={api._id}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 hover:border-[#ef4444]/50 transition group"
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <span className="text-2xl">{api.icon || getCategoryIcon(api.category)}</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg truncate">{api.name}</h3>
+                  <span className="text-sm text-[var(--text-muted)]">{api.category}</span>
+                </div>
+              </div>
+              <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-4">{api.description}</p>
+              <div className="flex items-center justify-between">
+                {api.hasDirectCall ? (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                    <Check className="w-3 h-3" />
+                    Direct Call Ready
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-1 rounded-full bg-[var(--surface)] text-xs text-[var(--text-muted)]">
+                    BYOK Required
+                  </span>
+                )}
+                <Link 
+                  href={`/api/${api._id}`}
+                  className="text-sm text-[#ef4444] hover:underline opacity-0 group-hover:opacity-100 transition"
+                >
+                  View Docs →
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// MY APIs TAB (Provider)
+// ============================================
+
+function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
   if (!apis || apis.length === 0) {
     return (
-      <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
-        <Zap className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-        <h3 className="font-semibold text-lg mb-2">No APIs Listed</h3>
-        <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-          List your first API to start getting discovered by AI agents.
-        </p>
-        <Link href="/providers/register" className="btn-primary">
-          <Plus className="w-5 h-5" />
-          Add API
-        </Link>
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold">My APIs</h2>
+          <p className="text-[var(--text-muted)]">APIs you&apos;ve listed for other agents to discover and use.</p>
+        </div>
+
+        <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
+          <Terminal className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">List Your First API</h3>
+          <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
+            Got an API you want AI agents to discover and use? List it here and let APIClaw handle the rest.
+          </p>
+          <Link href="/providers/register" className="btn-primary">
+            <Plus className="w-5 h-5" />
+            List New API
+          </Link>
+
+          {/* Benefits */}
+          <div className="mt-8 pt-8 border-t border-[var(--border)] max-w-lg mx-auto">
+            <h4 className="font-medium mb-4 text-left">Why list your API?</h4>
+            <div className="space-y-3 text-left">
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Reach 1000s of AI agents</p>
+                  <p className="text-sm text-[var(--text-muted)]">Get discovered by agents looking for your capabilities.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Direct Call = we handle keys</p>
+                  <p className="text-sm text-[var(--text-muted)]">No need for agents to manage API keys.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Analytics on who&apos;s using your API</p>
+                  <p className="text-sm text-[var(--text-muted)]">See which agents call your API and how often.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -991,22 +1241,24 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Your APIs</h2>
+        <div>
+          <h2 className="text-2xl font-bold">My APIs</h2>
+          <p className="text-[var(--text-muted)]">{apis.length} API{apis.length !== 1 ? "s" : ""} listed</p>
+        </div>
         <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
           <Plus className="w-4 h-4" />
-          Add API
+          List New API
         </Link>
       </div>
 
       <div className="grid gap-4">
         {apis.map((api) => (
-          <Link
+          <div
             key={api._id}
-            href={`/providers/dashboard/${api._id}`}
             className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition"
           >
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="font-semibold text-lg">{api.name}</h3>
                   {api.hasDirectCall && (
@@ -1026,9 +1278,22 @@ function ApisTab({ apis }: { apis: ProviderAPI[] }) {
                   <span>{api.discoveryCount || 0} discoveries</span>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />
+              <div className="flex items-center gap-2 ml-4">
+                <Link
+                  href={`/providers/dashboard/${api._id}`}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                >
+                  Edit
+                </Link>
+                <Link
+                  href={`/providers/dashboard/${api._id}`}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition"
+                >
+                  Analytics
+                </Link>
+              </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
@@ -1100,8 +1365,10 @@ function AgentsTab({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Connected Agents</h2>
-        <p className="text-[var(--text-muted)]">{agents.length} total</p>
+        <div>
+          <h2 className="text-2xl font-bold">My Agents</h2>
+          <p className="text-[var(--text-muted)]">{agents.length} connected agent{agents.length !== 1 ? "s" : ""}</p>
+        </div>
       </div>
 
       {/* How to Connect Agents */}
@@ -1301,6 +1568,257 @@ function AgentsTab({
 }
 
 // ============================================
+// ANALYTICS TAB (with subtabs)
+// ============================================
+
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  accent,
+}: {
+  title: string;
+  value: string;
+  change?: number;
+  icon: typeof Zap;
+  accent?: boolean;
+}) {
+  return (
+    <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <span className="text-xs sm:text-sm text-[var(--text-muted)] truncate pr-2">{title}</span>
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
+      </div>
+      <div className="flex items-end justify-between">
+        <span className={`text-xl sm:text-3xl font-bold ${accent ? "text-[#ef4444]" : ""}`}>{value}</span>
+        {change !== undefined && (
+          <div className={`flex items-center gap-1 text-xs sm:text-sm ${change >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {change >= 0 ? <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" /> : <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />}
+            {Math.abs(change).toFixed(1)}%
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsTab({
+  apis,
+  analytics,
+  workspace,
+  agents,
+  usage,
+  activeSubtab,
+  setActiveSubtab,
+  sessionToken,
+}: {
+  apis: ProviderAPI[];
+  analytics: ProviderAnalytics | null;
+  workspace: Workspace | null;
+  agents: Agent[];
+  usage: UsageData | null;
+  activeSubtab: AnalyticsSubtab;
+  setActiveSubtab: (tab: AnalyticsSubtab) => void;
+  sessionToken: string | null;
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="space-y-6">
+      {/* Subtab Navigation */}
+      <div className="flex items-center gap-1 p-1 bg-[var(--surface)] rounded-xl w-fit">
+        <button
+          onClick={() => {
+            setActiveSubtab("overview");
+            router.push("/workspace?tab=analytics&sub=overview");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "overview"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          Overview
+        </button>
+        <button
+          onClick={() => {
+            setActiveSubtab("usage");
+            router.push("/workspace?tab=analytics&sub=usage");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "usage"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          Usage
+        </button>
+        <button
+          onClick={() => {
+            setActiveSubtab("logs");
+            router.push("/workspace?tab=analytics&sub=logs");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "logs"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <ScrollText className="w-4 h-4" />
+          Logs
+        </button>
+      </div>
+
+      {/* Subtab Content */}
+      {activeSubtab === "overview" && (
+        <AnalyticsOverviewTab apis={apis} analytics={analytics} workspace={workspace} agents={agents} usage={usage} />
+      )}
+      {activeSubtab === "usage" && (
+        <UsageTab workspace={workspace} usage={usage} />
+      )}
+      {activeSubtab === "logs" && (
+        <LogsTab sessionToken={sessionToken} />
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// ANALYTICS OVERVIEW TAB
+// ============================================
+
+function AnalyticsOverviewTab({
+  apis,
+  analytics,
+  workspace,
+  agents,
+  usage,
+}: {
+  apis: ProviderAPI[];
+  analytics: ProviderAnalytics | null;
+  workspace: Workspace | null;
+  agents: Agent[];
+  usage: UsageData | null;
+}) {
+  const totalCalls = analytics?.totalCalls || workspace?.usageCount || 0;
+  const uniqueAgents = analytics?.uniqueAgents || agents.length || 0;
+  const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
+
+  return (
+    <div className="space-y-8">
+      {/* Preview Banner */}
+      {analytics?.isPreview && (
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+          <div>
+            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once your agents start making API calls.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
+        <StatCard title="Connected Agents" value={uniqueAgents.toString()} icon={Users} />
+        <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
+        <StatCard title="Success Rate" value={`${(analytics?.successRate || 98.2).toFixed(1)}%`} icon={Check} />
+      </div>
+
+      {/* Charts */}
+      {hasChartData && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Line Chart */}
+          <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+            <h3 className="font-semibold mb-4">Calls Over Time</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={analytics!.callsByDay}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12, fill: "var(--text-muted)" }}
+                    tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
+                    labelFormatter={(d) => new Date(d).toLocaleDateString()}
+                  />
+                  <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Agents */}
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+            <h3 className="font-semibold mb-4">Top Agents</h3>
+            <div className="space-y-3">
+              {(analytics?.topAgents || []).slice(0, 6).map((agent, i) => (
+                <div key={agent.agentId} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">{i + 1}</span>
+                    <span className="text-sm font-mono truncate max-w-[140px]">{agent.agentId.replace("agent_", "")}</span>
+                  </div>
+                  <span className="text-sm text-[var(--text-muted)]">{agent.calls.toLocaleString()}</span>
+                </div>
+              ))}
+              {(!analytics?.topAgents || analytics.topAgents.length === 0) && <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Actions */}
+      {analytics?.topActions && analytics.topActions.length > 0 && (
+        <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
+          <h3 className="font-semibold mb-4">Top Actions</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {analytics.topActions.slice(0, 8).map((action, i) => (
+              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">{i + 1}</span>
+                  <span className="text-sm font-mono">{action.actionName}</span>
+                </div>
+                <span className="text-sm text-[var(--text-muted)]">{action.calls.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* My APIs Performance */}
+      {apis.length > 0 && (
+        <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
+          <h3 className="font-semibold text-lg mb-4">My APIs Performance</h3>
+          <div className="space-y-4">
+            {apis.map((api) => (
+              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-[#ef4444]" />
+                  <div>
+                    <p className="font-medium">{api.name}</p>
+                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
+                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
 // USAGE TAB
 // ============================================
 
@@ -1315,8 +1833,6 @@ function UsageTab({
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Usage Analytics</h2>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -1405,683 +1921,6 @@ function UsageTab({
           </p>
         </div>
       )}
-    </div>
-  );
-}
-
-// ============================================
-// BILLING TAB
-// ============================================
-
-function BillingTab({ workspace }: { workspace: Workspace | null }) {
-  const tier = workspace?.tier || "free";
-  const PAYMENT_LINK = "https://buy.stripe.com/aFabJ32S0h185GI2GQcMM0h";
-
-  return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Billing</h2>
-
-      {/* Current Plan */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="font-bold text-lg">Current Plan</h3>
-            <p className="text-[var(--text-muted)]">Your workspace subscription</p>
-          </div>
-          <div className="px-4 py-2 rounded-full bg-[#ef4444]/20 text-[#ef4444] font-semibold capitalize">
-            {tier}
-          </div>
-        </div>
-
-        {tier === "free" ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit.toLocaleString() || "50"} / month</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Support</span>
-              <span className="font-medium">Community</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[var(--text-muted)]">Price</span>
-              <span className="font-medium">Free</span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">10,000 / month</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Support</span>
-              <span className="font-medium">Priority</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[var(--text-muted)]">Price</span>
-              <span className="font-medium">$99 / month</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Upgrade CTA */}
-      {tier === "free" && (
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-[#ef4444]/5 p-8">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center">
-              <Crown className="w-6 h-6 text-[#ef4444]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-xl mb-2">Upgrade to Pro</h3>
-              <p className="text-[var(--text-muted)]">
-                Get 10x more API calls and priority support.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>10,000 API calls / month</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Priority support</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Advanced analytics</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Custom integrations</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <a href={PAYMENT_LINK} className="btn-primary">
-              Upgrade for $99/month
-              <ChevronRight className="w-5 h-5" />
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* Usage This Month */}
-      {workspace && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <h3 className="font-bold text-lg mb-4">Usage This Month</h3>
-          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden mb-4">
-            <div
-              className={`h-full rounded-full ${
-                workspace.usagePercentage > 90 ? "bg-red-500" :
-                workspace.usagePercentage > 70 ? "bg-yellow-500" : "bg-[#ef4444]"
-              }`}
-              style={{ width: `${Math.min(workspace.usagePercentage, 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
-            <span>{workspace.usageCount.toLocaleString()} of {workspace.usageLimit.toLocaleString()} calls used</span>
-            <span>{workspace.usagePercentage.toFixed(1)}%</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================
-// ANALYTICS TAB (Provider)
-// ============================================
-
-function StatCard({
-  title,
-  value,
-  change,
-  icon: Icon,
-  accent,
-}: {
-  title: string;
-  value: string;
-  change?: number;
-  icon: typeof Zap;
-  accent?: boolean;
-}) {
-  return (
-    <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
-      <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <span className="text-xs sm:text-sm text-[var(--text-muted)] truncate pr-2">{title}</span>
-        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
-      </div>
-      <div className="flex items-end justify-between">
-        <span className={`text-xl sm:text-3xl font-bold ${accent ? "text-[#ef4444]" : ""}`}>{value}</span>
-        {change !== undefined && (
-          <div className={`flex items-center gap-1 text-xs sm:text-sm ${change >= 0 ? "text-green-500" : "text-red-500"}`}>
-            {change >= 0 ? <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" /> : <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />}
-            {Math.abs(change).toFixed(1)}%
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function AnalyticsTab({
-  apis,
-  analytics,
-  workspace,
-  agents,
-  usage,
-  activeSubtab,
-  setActiveSubtab,
-}: {
-  apis: ProviderAPI[];
-  analytics: ProviderAnalytics | null;
-  workspace: Workspace | null;
-  agents: Agent[];
-  usage: UsageData | null;
-  activeSubtab: "apis" | "agents";
-  setActiveSubtab: (tab: "apis" | "agents") => void;
-}) {
-  return (
-    <div className="space-y-6">
-      {/* Subtab Navigation */}
-      <div className="flex items-center gap-1 p-1 bg-[var(--surface)] rounded-xl w-fit">
-        <button
-          onClick={() => setActiveSubtab("apis")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeSubtab === "apis"
-              ? "bg-[#ef4444] text-white"
-              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          <Zap className="w-4 h-4" />
-          My APIs
-        </button>
-        <button
-          onClick={() => setActiveSubtab("agents")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeSubtab === "agents"
-              ? "bg-[#ef4444] text-white"
-              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          My Agents
-        </button>
-      </div>
-
-      {/* Subtab Content */}
-      {activeSubtab === "apis" && (
-        <MyAPIsAnalytics apis={apis} analytics={analytics} />
-      )}
-      {activeSubtab === "agents" && (
-        <MyAgentsAnalytics workspace={workspace} agents={agents} usage={usage} />
-      )}
-    </div>
-  );
-}
-
-// ============================================
-// MY APIs ANALYTICS (Provider view)
-// ============================================
-
-function MyAPIsAnalytics({
-  apis,
-  analytics,
-}: {
-  apis: ProviderAPI[];
-  analytics: ProviderAnalytics | null;
-}) {
-  const totalCalls = analytics?.totalCalls || 0;
-  const uniqueAgents = analytics?.uniqueAgents || 0;
-  const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
-
-  return (
-    <div className="space-y-8">
-      {/* Preview Banner */}
-      {analytics?.isPreview && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
-          <div>
-            <p className="font-medium text-[#ef4444]">Preview Mode</p>
-            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your APIs.</p>
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-2xl font-bold">My APIs Analytics</h2>
-        <p className="text-[var(--text-muted)]">How other agents are using your listed APIs</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
-        <StatCard title="Unique Agents" value={uniqueAgents.toString()} icon={Users} />
-        <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
-        <StatCard title="Success Rate" value={`${(analytics?.successRate || 98.2).toFixed(1)}%`} icon={Check} />
-      </div>
-
-      {/* Charts */}
-      {hasChartData && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Line Chart */}
-          <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Calls Over Time</h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analytics!.callsByDay}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                    tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  />
-                  <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
-                  <Tooltip
-                    contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
-                    labelFormatter={(d) => new Date(d).toLocaleDateString()}
-                  />
-                  <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Top Agents using your APIs */}
-          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Top Consumers</h3>
-            <div className="space-y-3">
-              {analytics!.topAgents.slice(0, 6).map((agent, i) => (
-                <div key={agent.agentId} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">{i + 1}</span>
-                    <span className="text-sm font-mono truncate max-w-[140px]">{agent.agentId.replace("agent_", "")}</span>
-                  </div>
-                  <span className="text-sm text-[var(--text-muted)]">{agent.calls.toLocaleString()}</span>
-                </div>
-              ))}
-              {analytics!.topAgents.length === 0 && <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Top Actions */}
-      {analytics?.topActions && analytics.topActions.length > 0 && (
-        <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-          <h3 className="font-semibold mb-4">Top Actions</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {analytics.topActions.slice(0, 8).map((action, i) => (
-              <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">{i + 1}</span>
-                  <span className="text-sm font-mono">{action.actionName}</span>
-                </div>
-                <span className="text-sm text-[var(--text-muted)]">{action.calls.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Usage by API */}
-      <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
-        <h3 className="font-semibold text-lg mb-4">Performance by API</h3>
-        {apis.length > 0 ? (
-          <div className="space-y-4">
-            {apis.map((api) => (
-              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-5 h-5 text-[#ef4444]" />
-                  <div>
-                    <p className="font-medium">{api.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
-                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-[var(--text-muted)] mb-4">No APIs listed yet</p>
-            <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
-              <Plus className="w-4 h-4" />
-              Add Your First API
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// MY AGENTS ANALYTICS (Consumer view)
-// ============================================
-
-function generateAgentPreviewData() {
-  const days = [];
-  const baseDate = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(baseDate);
-    date.setDate(date.getDate() - i);
-    days.push({
-      date: date.toISOString().split("T")[0],
-      calls: Math.floor(Math.random() * 80) + 20 + Math.floor(i * 1.5),
-    });
-  }
-  return days;
-}
-
-function MyAgentsAnalytics({
-  workspace,
-  agents,
-  usage,
-}: {
-  workspace: Workspace | null;
-  agents: Agent[];
-  usage: UsageData | null;
-}) {
-  const totalCalls = workspace?.usageCount || usage?.total || 0;
-  const hasUsageData = usage && usage.byDay && usage.byDay.length > 0;
-  const isPreview = !hasUsageData && totalCalls === 0;
-  const chartData = hasUsageData ? usage!.byDay : generateAgentPreviewData();
-
-  return (
-    <div className="space-y-8">
-      {/* Preview Banner */}
-      {isPreview && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
-          <div>
-            <p className="font-medium text-[#ef4444]">Preview Mode</p>
-            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once your agents start making API calls.</p>
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-2xl font-bold">My Agents Analytics</h2>
-        <p className="text-[var(--text-muted)]">How your agents are using APIs through APIClaw</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard title="Total API Calls" value={isPreview ? "1,247" : totalCalls.toLocaleString()} icon={Zap} accent />
-        <StatCard title="Connected Agents" value={isPreview ? "3" : agents.length.toString()} icon={Users} />
-        <StatCard title="APIs Used" value={isPreview ? "8" : (usage?.byProvider.length || 0).toString()} icon={BarChart3} />
-        <StatCard 
-          title="Remaining Calls" 
-          value={isPreview ? "8,753" : (workspace?.usageRemaining || 0).toLocaleString()} 
-          icon={Shield} 
-        />
-      </div>
-
-      {/* Usage Chart */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-        <h3 className="font-semibold mb-4">Your Agents&apos; API Calls Over Time</h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-              />
-              <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
-              <Tooltip
-                contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
-                labelFormatter={(d) => new Date(d).toLocaleDateString()}
-              />
-              <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* APIs Your Agents Use */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-        <h3 className="font-semibold mb-4">APIs Your Agents Use</h3>
-        {(usage?.byProvider && usage.byProvider.length > 0) || isPreview ? (
-          <div className="space-y-3">
-            {(isPreview ? [
-              { provider: "OpenRouter", calls: 523, cost: 0 },
-              { provider: "Replicate", calls: 312, cost: 0 },
-              { provider: "ElevenLabs", calls: 189, cost: 0 },
-              { provider: "Brave Search", calls: 156, cost: 0 },
-              { provider: "46elks", calls: 67, cost: 0 },
-            ] : usage!.byProvider).map((p, i) => (
-              <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">{i + 1}</span>
-                  <span className="font-medium">{p.provider}</span>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{p.calls.toLocaleString()} calls</p>
-                  {p.cost > 0 && <p className="text-sm text-[var(--text-muted)]">${p.cost.toFixed(2)}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-[var(--text-muted)] text-center py-8">No API usage data yet</p>
-        )}
-      </div>
-
-      {/* Connected Agents */}
-      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-        <h3 className="font-semibold mb-4">Your Connected Agents</h3>
-        {agents.length > 0 || isPreview ? (
-          <div className="space-y-3">
-            {(isPreview ? [
-              { id: "1", fingerprint: "claude_prod_main", lastUsedAt: Date.now() - 3600000, isCurrent: true },
-              { id: "2", fingerprint: "cursor_dev_local", lastUsedAt: Date.now() - 86400000, isCurrent: false },
-              { id: "3", fingerprint: "aider_ci_runner", lastUsedAt: Date.now() - 172800000, isCurrent: false },
-            ] as Agent[] : agents).map((agent) => (
-              <div key={agent.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[#ef4444]" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{agent.fingerprint}</p>
-                    <p className="text-sm text-[var(--text-muted)]">Last active: {new Date(agent.lastUsedAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                {agent.isCurrent && (
-                  <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Current</span>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-[var(--text-muted)] text-center py-8">No agents connected yet</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-
-// ============================================
-// EARN TAB
-// ============================================
-
-function EarnTab() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const referralCode = "CLAW-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  const earnChannels = [
-    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "⭐" },
-    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "𝕏" },
-    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "📧" },
-  ];
-
-  const handleCopyReferral = () => {
-    navigator.clipboard.writeText("https://apiclaw.nordsym.com?ref=" + referralCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Earn Credits</h2>
-        <p className="text-[var(--text-muted)]">Complete tasks to earn free API calls. Max 50 extra calls.</p>
-      </div>
-
-      {/* Earn Channels */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {earnChannels.map((channel) => (
-          <a
-            key={channel.id}
-            href={channel.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition group"
-          >
-            <div className="text-3xl mb-3">{channel.icon}</div>
-            <h3 className="font-semibold mb-1">{channel.title}</h3>
-            <p className="text-sm text-[#ef4444] font-medium">+{channel.credits} calls</p>
-          </a>
-        ))}
-      </div>
-
-      {/* Referral */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
-        <h3 className="font-semibold mb-2">Invite Friends</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">Earn 10 calls for each friend who joins.</p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={"https://apiclaw.nordsym.com?ref=" + referralCode}
-            readOnly
-            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
-          />
-          <button
-            onClick={handleCopyReferral}
-            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-        </div>
-      </div>
-
-      {/* Newsletter */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
-        <h3 className="font-semibold mb-2">Newsletter (+15 calls)</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">Get weekly updates, tips, and new API announcements.</p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
-          />
-          <button
-            onClick={() => setSubscribed(true)}
-            disabled={subscribed}
-            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
-          >
-            {subscribed ? "Subscribed!" : "Subscribe"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// DOCS TAB
-// ============================================
-
-function DocsTab() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Documentation</h2>
-        <p className="text-[var(--text-muted)]">Everything you need to integrate APIClaw with your AI agent.</p>
-      </div>
-
-      {/* Quick Start */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Quick Start</h3>
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-[var(--text-muted)] mb-2">1. Add to your MCP config:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm overflow-x-auto">
-{`{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
-    }
-  }
-}`}
-            </pre>
-          </div>
-          <div>
-            <p className="text-sm text-[var(--text-muted)] mb-2">2. Or run directly:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw</pre>
-          </div>
-          <div>
-            <p className="text-sm text-[var(--text-muted)] mb-2">3. Interactive CLI mode:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw --cli</pre>
-          </div>
-        </div>
-      </div>
-
-      {/* Available Tools */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">MCP Tools</h3>
-        <div className="space-y-3">
-          {[
-            { name: "discover_apis", desc: "Search 19,000+ APIs by capability" },
-            { name: "get_api_details", desc: "Get full details for a specific API" },
-            { name: "call_api", desc: "Execute a Direct Call API" },
-            { name: "list_connected", desc: "Show available Direct Call providers" },
-            { name: "get_categories", desc: "List all API categories" },
-            { name: "register_owner", desc: "Authenticate workspace via magic link" },
-          ].map((tool) => (
-            <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
-              <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
-              <p className="text-sm text-[var(--text-muted)]">{tool.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Direct Call Providers */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
-        <div className="grid gap-2 md:grid-cols-2">
-          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Web Scraper", "Screenshot"].map((p) => (
-            <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
-          ))}
-        </div>
-      </div>
-
-      {/* Links */}
-      <div className="flex gap-4">
-        <a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
-          GitHub Repository →
-        </a>
-        <a href="https://npmjs.com/package/@nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
-          NPM Package →
-        </a>
-      </div>
     </div>
   );
 }
@@ -2220,10 +2059,6 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
   if (!sessionToken) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Logs</h2>
-          <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
-        </div>
         <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
           <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
           <h3 className="font-semibold text-xl mb-2">Not Logged In</h3>
@@ -2235,35 +2070,28 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Logs</h2>
-          <p className="text-[var(--text-muted)]">View API call logs, errors, and debug information.</p>
-        </div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as "all" | "success" | "error")}
+          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          <option value="all">All Status</option>
+          <option value="success">Success</option>
+          <option value="error">Error</option>
+        </select>
         
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as "all" | "success" | "error")}
-            className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-          >
-            <option value="all">All Status</option>
-            <option value="success">Success</option>
-            <option value="error">Error</option>
-          </select>
-          
-          <select
-            value={providerFilter}
-            onChange={(e) => setProviderFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-          >
-            <option value="all">All Providers</option>
-            {providers.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={providerFilter}
+          onChange={(e) => setProviderFilter(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          <option value="all">All Providers</option>
+          {providers.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
       </div>
 
       {/* Stats Cards */}
@@ -2420,6 +2248,129 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
               </button>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// BILLING TAB
+// ============================================
+
+function BillingTab({ workspace }: { workspace: Workspace | null }) {
+  const tier = workspace?.tier || "free";
+  const PAYMENT_LINK = "https://buy.stripe.com/aFabJ32S0h185GI2GQcMM0h";
+
+  return (
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold">Billing</h2>
+
+      {/* Current Plan */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-bold text-lg">Current Plan</h3>
+            <p className="text-[var(--text-muted)]">Your workspace subscription</p>
+          </div>
+          <div className="px-4 py-2 rounded-full bg-[#ef4444]/20 text-[#ef4444] font-semibold capitalize">
+            {tier}
+          </div>
+        </div>
+
+        {tier === "free" ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">API Calls</span>
+              <span className="font-medium">{workspace?.usageLimit.toLocaleString() || "50"} / month</span>
+            </div>
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">Support</span>
+              <span className="font-medium">Community</span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <span className="text-[var(--text-muted)]">Price</span>
+              <span className="font-medium">Free</span>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">API Calls</span>
+              <span className="font-medium">10,000 / month</span>
+            </div>
+            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
+              <span className="text-[var(--text-muted)]">Support</span>
+              <span className="font-medium">Priority</span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <span className="text-[var(--text-muted)]">Price</span>
+              <span className="font-medium">$99 / month</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Upgrade CTA */}
+      {tier === "free" && (
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-[#ef4444]/5 p-8">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center">
+              <Crown className="w-6 h-6 text-[#ef4444]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl mb-2">Upgrade to Pro</h3>
+              <p className="text-[var(--text-muted)]">
+                Get 10x more API calls and priority support.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Check className="w-5 h-5 text-green-500" />
+              <span>10,000 API calls / month</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Check className="w-5 h-5 text-green-500" />
+              <span>Priority support</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Check className="w-5 h-5 text-green-500" />
+              <span>Advanced analytics</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Check className="w-5 h-5 text-green-500" />
+              <span>Custom integrations</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <a href={PAYMENT_LINK} className="btn-primary">
+              Upgrade for $99/month
+              <ChevronRight className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Usage This Month */}
+      {workspace && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <h3 className="font-bold text-lg mb-4">Usage This Month</h3>
+          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden mb-4">
+            <div
+              className={`h-full rounded-full ${
+                workspace.usagePercentage > 90 ? "bg-red-500" :
+                workspace.usagePercentage > 70 ? "bg-yellow-500" : "bg-[#ef4444]"
+              }`}
+              style={{ width: `${Math.min(workspace.usagePercentage, 100)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
+            <span>{workspace.usageCount.toLocaleString()} of {workspace.usageLimit.toLocaleString()} calls used</span>
+            <span>{workspace.usagePercentage.toFixed(1)}%</span>
+          </div>
         </div>
       )}
     </div>
@@ -2960,7 +2911,6 @@ function EditWebhookModal({
         </div>
 
         <div className="space-y-4">
-          {/* URL (read-only) */}
           <div>
             <label className="block text-sm font-medium mb-2">Webhook URL</label>
             <input
@@ -2972,7 +2922,6 @@ function EditWebhookModal({
             <p className="text-xs text-[var(--text-muted)] mt-1">URL cannot be changed for security reasons</p>
           </div>
 
-          {/* Enabled toggle */}
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
             <div>
               <p className="font-medium">Enabled</p>
@@ -2986,7 +2935,6 @@ function EditWebhookModal({
             </button>
           </div>
 
-          {/* Events */}
           <div>
             <label className="block text-sm font-medium mb-2">Events</label>
             <div className="space-y-2">
@@ -3073,7 +3021,6 @@ function ApiKeysTab() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Fetch keys on mount
   useEffect(() => {
     const fetchKeys = async () => {
       const token = localStorage.getItem("apiclaw_workspace_session");
@@ -3128,7 +3075,6 @@ function ApiKeysTab() {
       const data = await res.json();
 
       if (data.value?.success || data.success) {
-        // Refresh keys
         const keysRes = await fetch(`${CONVEX_URL}/api/query`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -3213,7 +3159,6 @@ function ApiKeysTab() {
         </p>
       </div>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3">
           <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -3221,7 +3166,6 @@ function ApiKeysTab() {
         </div>
       )}
 
-      {/* Error Message */}
       {errorMessage && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -3229,7 +3173,6 @@ function ApiKeysTab() {
         </div>
       )}
 
-      {/* Info Banner */}
       <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
@@ -3244,7 +3187,6 @@ function ApiKeysTab() {
         </div>
       </div>
 
-      {/* Provider List */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
         <div className="p-4 border-b border-[var(--border)]">
           <h3 className="font-semibold">Providers</h3>
@@ -3306,7 +3248,6 @@ function ApiKeysTab() {
         </div>
       </div>
 
-      {/* Add Custom Provider (placeholder) */}
       <div className="relative group">
         <button
           className="w-full rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed"
@@ -3323,7 +3264,6 @@ function ApiKeysTab() {
         </div>
       </div>
 
-      {/* Add Key Modal */}
       {showAddModal && selectedProvider && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md p-6">
@@ -3398,6 +3338,173 @@ function ApiKeysTab() {
 }
 
 // ============================================
+// EARN TAB
+// ============================================
+
+function EarnTab() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const referralCode = "CLAW-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const earnChannels = [
+    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "⭐" },
+    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "𝕏" },
+    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "📧" },
+  ];
+
+  const handleCopyReferral = () => {
+    navigator.clipboard.writeText("https://apiclaw.nordsym.com?ref=" + referralCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Earn Credits</h2>
+        <p className="text-[var(--text-muted)]">Complete tasks to earn free API calls. Max 50 extra calls.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {earnChannels.map((channel) => (
+          <a
+            key={channel.id}
+            href={channel.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition group"
+          >
+            <div className="text-3xl mb-3">{channel.icon}</div>
+            <h3 className="font-semibold mb-1">{channel.title}</h3>
+            <p className="text-sm text-[#ef4444] font-medium">+{channel.credits} calls</p>
+          </a>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
+        <h3 className="font-semibold mb-2">Invite Friends</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Earn 10 calls for each friend who joins.</p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={"https://apiclaw.nordsym.com?ref=" + referralCode}
+            readOnly
+            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
+          />
+          <button
+            onClick={handleCopyReferral}
+            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
+        <h3 className="font-semibold mb-2">Newsletter (+15 calls)</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Get weekly updates, tips, and new API announcements.</p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your@email.com"
+            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
+          />
+          <button
+            onClick={() => setSubscribed(true)}
+            disabled={subscribed}
+            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
+          >
+            {subscribed ? "Subscribed!" : "Subscribe"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// DOCS TAB
+// ============================================
+
+function DocsTab() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Documentation</h2>
+        <p className="text-[var(--text-muted)]">Everything you need to integrate APIClaw with your AI agent.</p>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Quick Start</h3>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">1. Add to your MCP config:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm overflow-x-auto">
+{`{
+  "mcpServers": {
+    "apiclaw": {
+      "command": "npx",
+      "args": ["@nordsym/apiclaw"]
+    }
+  }
+}`}
+            </pre>
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">2. Or run directly:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw</pre>
+          </div>
+          <div>
+            <p className="text-sm text-[var(--text-muted)] mb-2">3. Interactive CLI mode:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw --cli</pre>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">MCP Tools</h3>
+        <div className="space-y-3">
+          {[
+            { name: "discover_apis", desc: "Search 19,000+ APIs by capability" },
+            { name: "get_api_details", desc: "Get full details for a specific API" },
+            { name: "call_api", desc: "Execute a Direct Call API" },
+            { name: "list_connected", desc: "Show available Direct Call providers" },
+            { name: "get_categories", desc: "List all API categories" },
+            { name: "register_owner", desc: "Authenticate workspace via magic link" },
+          ].map((tool) => (
+            <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
+              <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
+              <p className="text-sm text-[var(--text-muted)]">{tool.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
+        <div className="grid gap-2 md:grid-cols-2">
+          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Web Scraper", "Screenshot"].map((p) => (
+            <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex gap-4">
+        <a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
+          GitHub Repository →
+        </a>
+        <a href="https://npmjs.com/package/@nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-[#ef4444] hover:underline">
+          NPM Package →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // FEEDBACK TAB
 // ============================================
 
@@ -3427,7 +3534,6 @@ function FeedbackTab() {
 
   const sessionToken = typeof window !== "undefined" ? localStorage.getItem("apiclaw_workspace_session") : null;
 
-  // Fetch feedback on mount
   useEffect(() => {
     if (sessionToken) {
       fetchFeedback();
@@ -3488,7 +3594,6 @@ function FeedbackTab() {
         setSubmitted(true);
         setContent("");
         setTimeout(() => setSubmitted(false), 3000);
-        // Refresh feedback list
         fetchFeedback();
       }
     } catch (err) {
@@ -3520,7 +3625,6 @@ function FeedbackTab() {
       const result = data.value || data;
       
       if (result.success) {
-        // Update local state
         setFeedbackList((prev) =>
           prev.map((f) =>
             f._id === feedbackId
@@ -3538,29 +3642,20 @@ function FeedbackTab() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "new":
-        return "bg-gray-500/20 text-gray-400";
-      case "reviewing":
-        return "bg-yellow-500/20 text-yellow-500";
-      case "planned":
-        return "bg-blue-500/20 text-blue-500";
-      case "shipped":
-        return "bg-green-500/20 text-green-500";
-      default:
-        return "bg-gray-500/20 text-gray-400";
+      case "new": return "bg-gray-500/20 text-gray-400";
+      case "reviewing": return "bg-yellow-500/20 text-yellow-500";
+      case "planned": return "bg-blue-500/20 text-blue-500";
+      case "shipped": return "bg-green-500/20 text-green-500";
+      default: return "bg-gray-500/20 text-gray-400";
     }
   };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
-      case "bug":
-        return "bg-red-500/20 text-red-500";
-      case "feature":
-        return "bg-purple-500/20 text-purple-500";
-      case "general":
-        return "bg-gray-500/20 text-gray-400";
-      default:
-        return "bg-gray-500/20 text-gray-400";
+      case "bug": return "bg-red-500/20 text-red-500";
+      case "feature": return "bg-purple-500/20 text-purple-500";
+      case "general": return "bg-gray-500/20 text-gray-400";
+      default: return "bg-gray-500/20 text-gray-400";
     }
   };
 
@@ -3583,11 +3678,9 @@ function FeedbackTab() {
         <p className="text-[var(--text-muted)]">Your feedback helps us improve APIClaw.</p>
       </div>
 
-      {/* Submit Feedback Form */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Share Your Feedback</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Type Selection */}
           <div>
             <label className="block text-sm text-[var(--text-muted)] mb-2">Type</label>
             <div className="flex flex-wrap gap-2">
@@ -3612,7 +3705,6 @@ function FeedbackTab() {
             </div>
           </div>
 
-          {/* Content */}
           <div>
             <label className="block text-sm text-[var(--text-muted)] mb-2">Your Feedback</label>
             <textarea
@@ -3639,32 +3731,21 @@ function FeedbackTab() {
               className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
             >
               {submitted ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  Sent!
-                </>
+                <><Check className="w-4 h-4" /> Sent!</>
               ) : submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Submitting...
-                </>
+                <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</>
               ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Submit
-                </>
+                <><Send className="w-4 h-4" /> Submit</>
               )}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Community Feedback */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h3 className="font-semibold text-lg">Community Feedback</h3>
           <div className="flex flex-wrap gap-2">
-            {/* Filter by Type */}
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as typeof filterType)}
@@ -3676,7 +3757,6 @@ function FeedbackTab() {
               <option value="general">General</option>
             </select>
 
-            {/* Sort */}
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -3712,7 +3792,6 @@ function FeedbackTab() {
                     : "border-[var(--border)] bg-[var(--surface)]"
                 }`}
               >
-                {/* Voting */}
                 <div className="flex flex-col items-center gap-1 min-w-[40px]">
                   <button
                     onClick={() => handleVote(item._id, "up")}
@@ -3735,7 +3814,6 @@ function FeedbackTab() {
                   </button>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[var(--text-primary)] mb-2">{item.content}</p>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -3811,7 +3889,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         <p className="text-[var(--text-muted)]">Manage your account and workspace settings.</p>
       </div>
 
-      {/* Profile Section */}
       <SettingsSection title="Profile" icon={User} defaultOpen={true}>
         <div className="space-y-4 pt-4">
           <div>
@@ -3836,7 +3913,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         </div>
       </SettingsSection>
 
-      {/* Security Section */}
       <SettingsSection title="Security" icon={Lock}>
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
@@ -3866,7 +3942,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         </div>
       </SettingsSection>
 
-      {/* Notifications Section */}
       <SettingsSection title="Notifications" icon={Bell}>
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
@@ -3890,7 +3965,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         </div>
       </SettingsSection>
 
-      {/* Workspace Section */}
       <SettingsSection title="Workspace" icon={Building}>
         <div className="space-y-4 pt-4">
           <div>
@@ -3915,7 +3989,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         </div>
       </SettingsSection>
 
-      {/* API Tokens Section */}
       <SettingsSection title="API Tokens" icon={Key}>
         <div className="space-y-4 pt-4">
           <p className="text-sm text-[var(--text-muted)]">
@@ -3932,7 +4005,6 @@ function SettingsTab({ workspace }: { workspace: Workspace | null }) {
         </div>
       </SettingsSection>
 
-      {/* Danger Zone */}
       <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
         <h3 className="font-semibold text-red-500 mb-2">Danger Zone</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">

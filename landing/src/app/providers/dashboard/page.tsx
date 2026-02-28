@@ -8,7 +8,7 @@ export default function ProviderDashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/workspace?tab=apis");
+    router.replace("/workspace?tab=my-apis");
   }, [router]);
 
   return (
