@@ -983,9 +983,15 @@ function AgentsTab({
   const [editName, setEditName] = useState("");
 
   const handleRevoke = (agentId: string) => {
+    const agent = agents.find(a => a.id === agentId);
     if (confirmRevoke === agentId) {
       onRevoke(agentId);
       setConfirmRevoke(null);
+      // If revoking current session, clear localStorage and redirect
+      if (agent?.isCurrent) {
+        localStorage.removeItem("apiclaw_workspace_session");
+        window.location.href = "/login";
+      }
     } else {
       setConfirmRevoke(agentId);
     }
@@ -1192,19 +1198,18 @@ function AgentsTab({
                   >
                     Rename
                   </button>
-                  {!agent.isCurrent && (
-                    <button
-                      onClick={() => handleRevoke(agent.id)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                        confirmRevoke === agent.id
-                          ? "bg-red-500 text-white"
-                          : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                      }`}
-                    >
-                      <Trash2 className="w-4 h-4 inline-block mr-1" />
-                      {confirmRevoke === agent.id ? "Confirm" : "Revoke"}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleRevoke(agent.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                      confirmRevoke === agent.id
+                        ? "bg-red-500 text-white"
+                        : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                    }`}
+                    title={agent.isCurrent ? "This will log you out" : "Remove this agent"}
+                  >
+                    <Trash2 className="w-4 h-4 inline-block mr-1" />
+                    {confirmRevoke === agent.id ? (agent.isCurrent ? "Logout & Remove" : "Confirm") : "Revoke"}
+                  </button>
                 </div>
               </div>
             </div>
