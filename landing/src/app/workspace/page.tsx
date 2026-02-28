@@ -1167,17 +1167,11 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
                 </div>
               </div>
               <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-4">{api.description}</p>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
                   <Check className="w-3 h-3" />
                   Direct Call Ready
                 </span>
-                <Link 
-                  href={`/api/${api._id}`}
-                  className="text-sm text-[#ef4444] hover:underline opacity-0 group-hover:opacity-100 transition"
-                >
-                  View Docs →
-                </Link>
               </div>
             </div>
           ))}
