@@ -3398,17 +3398,179 @@ function ApiKeysTab() {
 // FEEDBACK TAB
 // ============================================
 
-function FeedbackTab() {
-  const [feedback, setFeedback] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+interface FeedbackItem {
+  _id: string;
+  workspaceId: string;
+  type: "bug" | "feature" | "general";
+  content: string;
+  votes: number;
+  votedBy: string[];
+  status: "new" | "reviewing" | "planned" | "shipped";
+  createdAt: number;
+  hasVoted: boolean;
+  isOwn: boolean;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
+function FeedbackTab() {
+  const [content, setContent] = useState("");
+  const [feedbackType, setFeedbackType] = useState<"bug" | "feature" | "general">("feature");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterType, setFilterType] = useState<"all" | "bug" | "feature" | "general">("all");
+  const [sortBy, setSortBy] = useState<"votes" | "recent">("votes");
+  const [votingId, setVotingId] = useState<string | null>(null);
+
+  const sessionToken = typeof window !== "undefined" ? localStorage.getItem("apiclaw_workspace_session") : null;
+
+  // Fetch feedback on mount
+  useEffect(() => {
+    if (sessionToken) {
+      fetchFeedback();
+    }
+  }, [sessionToken, filterType, sortBy]);
+
+  const fetchFeedback = async () => {
+    if (!sessionToken) return;
+    
+    try {
+      const response = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "feedback:getFeedback",
+          args: {
+            token: sessionToken,
+            filterType: filterType === "all" ? undefined : filterType,
+            sortBy,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      const result = data.value || data;
+      
+      if (result.feedback) {
+        setFeedbackList(result.feedback);
+      }
+    } catch (err) {
+      console.error("Failed to fetch feedback:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!feedback.trim()) return;
-    // TODO: Submit to backend
-    setSubmitted(true);
-    setFeedback("");
-    setTimeout(() => setSubmitted(false), 3000);
+    if (!content.trim() || !sessionToken) return;
+
+    setSubmitting(true);
+    try {
+      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "feedback:submitFeedback",
+          args: {
+            token: sessionToken,
+            type: feedbackType,
+            content: content.trim(),
+          },
+        }),
+      });
+
+      const data = await response.json();
+      if (data.value?.success || data.success) {
+        setSubmitted(true);
+        setContent("");
+        setTimeout(() => setSubmitted(false), 3000);
+        // Refresh feedback list
+        fetchFeedback();
+      }
+    } catch (err) {
+      console.error("Failed to submit feedback:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVote = async (feedbackId: string, direction: "up" | "down") => {
+    if (!sessionToken || votingId) return;
+
+    setVotingId(feedbackId);
+    try {
+      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "feedback:voteFeedback",
+          args: {
+            token: sessionToken,
+            feedbackId,
+            direction,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      const result = data.value || data;
+      
+      if (result.success) {
+        // Update local state
+        setFeedbackList((prev) =>
+          prev.map((f) =>
+            f._id === feedbackId
+              ? { ...f, votes: result.votes, hasVoted: result.hasVoted }
+              : f
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to vote:", err);
+    } finally {
+      setVotingId(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "new":
+        return "bg-gray-500/20 text-gray-400";
+      case "reviewing":
+        return "bg-yellow-500/20 text-yellow-500";
+      case "planned":
+        return "bg-blue-500/20 text-blue-500";
+      case "shipped":
+        return "bg-green-500/20 text-green-500";
+      default:
+        return "bg-gray-500/20 text-gray-400";
+    }
+  };
+
+  const getTypeBadge = (type: string) => {
+    switch (type) {
+      case "bug":
+        return "bg-red-500/20 text-red-500";
+      case "feature":
+        return "bg-purple-500/20 text-purple-500";
+      case "general":
+        return "bg-gray-500/20 text-gray-400";
+      default:
+        return "bg-gray-500/20 text-gray-400";
+    }
+  };
+
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -3418,29 +3580,70 @@ function FeedbackTab() {
         <p className="text-[var(--text-muted)]">Your feedback helps us improve APIClaw.</p>
       </div>
 
-      {/* Feedback Form */}
+      {/* Submit Feedback Form */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Share Your Thoughts</h3>
+        <h3 className="font-semibold mb-4">Share Your Feedback</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="What's on your mind? Bug reports, feature requests, or general feedback..."
-            className="w-full h-40 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
-          />
+          {/* Type Selection */}
+          <div>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Type</label>
+            <div className="flex flex-wrap gap-2">
+              {(["bug", "feature", "general"] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setFeedbackType(type)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
+                    feedbackType === type
+                      ? type === "bug"
+                        ? "bg-red-500 text-white"
+                        : type === "feature"
+                        ? "bg-purple-500 text-white"
+                        : "bg-gray-500 text-white"
+                      : "bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--background)]"
+                  }`}
+                >
+                  {type === "bug" ? "🐛 Bug" : type === "feature" ? "✨ Feature" : "💬 General"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Your Feedback</label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={
+                feedbackType === "bug"
+                  ? "Describe the bug you encountered..."
+                  : feedbackType === "feature"
+                  ? "Describe the feature you'd like to see..."
+                  : "Tell us what you think..."
+              }
+              className="w-full h-32 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
+            />
+          </div>
+
           <div className="flex items-center justify-between">
             <p className="text-sm text-[var(--text-muted)]">
               We read every piece of feedback.
             </p>
             <button
               type="submit"
-              disabled={!feedback.trim() || submitted}
+              disabled={!content.trim() || submitting || submitted}
               className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
             >
               {submitted ? (
                 <>
                   <Check className="w-4 h-4" />
                   Sent!
+                </>
+              ) : submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
                 </>
               ) : (
                 <>
@@ -3453,29 +3656,104 @@ function FeedbackTab() {
         </form>
       </div>
 
-      {/* Quick Reactions */}
+      {/* Community Feedback */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Quick Reactions</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">How are you finding APIClaw so far?</p>
-        <div className="flex flex-wrap gap-3">
-          {["😍 Love it", "👍 It's good", "🤔 Needs work", "😕 Confused", "🐛 Found a bug"].map((reaction) => (
-            <button
-              key={reaction}
-              className="px-4 py-2 rounded-lg border border-[var(--border)] hover:border-[#ef4444]/50 hover:bg-[var(--surface)] transition text-sm"
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h3 className="font-semibold text-lg">Community Feedback</h3>
+          <div className="flex flex-wrap gap-2">
+            {/* Filter by Type */}
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as typeof filterType)}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
             >
-              {reaction}
-            </button>
-          ))}
-        </div>
-      </div>
+              <option value="all">All Types</option>
+              <option value="bug">🐛 Bugs</option>
+              <option value="feature">✨ Features</option>
+              <option value="general">💬 General</option>
+            </select>
 
-      {/* Feature Requests Preview */}
-      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center">
-        <MessageSquare className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-3" />
-        <h3 className="font-semibold mb-1">Feature Requests</h3>
-        <p className="text-sm text-[var(--text-muted)]">
-          Public feature request board coming soon. Vote on what gets built next!
-        </p>
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+            >
+              <option value="votes">Most Votes</option>
+              <option value="recent">Most Recent</option>
+            </select>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin mx-auto mb-2" />
+            <p className="text-sm text-[var(--text-muted)]">Loading feedback...</p>
+          </div>
+        ) : feedbackList.length === 0 ? (
+          <div className="text-center py-12 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
+            <MessageSquare className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" />
+            <h4 className="font-semibold mb-1">No Feedback Yet</h4>
+            <p className="text-sm text-[var(--text-muted)]">
+              Be the first to share your thoughts!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {feedbackList.map((item) => (
+              <div
+                key={item._id}
+                className={`flex gap-3 p-4 rounded-xl border transition ${
+                  item.isOwn
+                    ? "border-[#ef4444]/30 bg-[#ef4444]/5"
+                    : "border-[var(--border)] bg-[var(--surface)]"
+                }`}
+              >
+                {/* Voting */}
+                <div className="flex flex-col items-center gap-1 min-w-[40px]">
+                  <button
+                    onClick={() => handleVote(item._id, "up")}
+                    disabled={votingId === item._id}
+                    className={`p-1 rounded hover:bg-[var(--background)] transition ${
+                      item.hasVoted ? "text-[#ef4444]" : "text-[var(--text-muted)]"
+                    }`}
+                  >
+                    <ChevronUp className="w-5 h-5" />
+                  </button>
+                  <span className={`text-sm font-bold ${item.votes > 0 ? "text-[#ef4444]" : item.votes < 0 ? "text-red-500" : "text-[var(--text-muted)]"}`}>
+                    {item.votes}
+                  </span>
+                  <button
+                    onClick={() => handleVote(item._id, "down")}
+                    disabled={votingId === item._id}
+                    className="p-1 rounded text-[var(--text-muted)] hover:bg-[var(--background)] transition"
+                  >
+                    <ChevronDown className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[var(--text-primary)] mb-2">{item.content}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className={`px-2 py-0.5 rounded-full capitalize ${getTypeBadge(item.type)}`}>
+                      {item.type}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full capitalize ${getStatusBadge(item.status)}`}>
+                      {item.status}
+                    </span>
+                    <span className="text-[var(--text-muted)]">
+                      {formatDate(item.createdAt)}
+                    </span>
+                    {item.isOwn && (
+                      <span className="text-[#ef4444]">• You</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

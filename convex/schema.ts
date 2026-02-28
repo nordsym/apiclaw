@@ -471,4 +471,24 @@ export default defineSchema({
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_provider", ["workspaceId", "provider"]),
+
+  // ============================================
+  // FEEDBACK SYSTEM
+  // ============================================
+
+  // User feedback with voting
+  feedback: defineTable({
+    workspaceId: v.id("workspaces"),
+    type: v.union(v.literal("bug"), v.literal("feature"), v.literal("general")),
+    content: v.string(),
+    votes: v.number(),
+    votedBy: v.array(v.string()), // workspace IDs that voted
+    status: v.union(v.literal("new"), v.literal("reviewing"), v.literal("planned"), v.literal("shipped")),
+    createdAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_type", ["type"])
+    .index("by_status", ["status"])
+    .index("by_votes", ["votes"])
+    .index("by_createdAt", ["createdAt"]),
 });

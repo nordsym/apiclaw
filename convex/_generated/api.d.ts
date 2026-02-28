@@ -14,6 +14,7 @@ import type * as capabilities from "../capabilities.js";
 import type * as credits from "../credits.js";
 import type * as directCall from "../directCall.js";
 import type * as email from "../email.js";
+import type * as feedback from "../feedback.js";
 import type * as http from "../http.js";
 import type * as logs from "../logs.js";
 import type * as providerKeys from "../providerKeys.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   credits: typeof credits;
   directCall: typeof directCall;
   email: typeof email;
+  feedback: typeof feedback;
   http: typeof http;
   logs: typeof logs;
   providerKeys: typeof providerKeys;
