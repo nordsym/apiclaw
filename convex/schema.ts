@@ -434,6 +434,23 @@ export default defineSchema({
     .index("by_timestamp", ["timestamp"]),
 
   // ============================================
+  // WEBHOOKS
+  // ============================================
+
+  webhooks: defineTable({
+    workspaceId: v.id("workspaces"),
+    url: v.string(),
+    events: v.array(v.string()),
+    secret: v.string(), // For signature verification
+    enabled: v.boolean(),
+    lastTriggeredAt: v.optional(v.number()),
+    lastStatus: v.optional(v.string()), // "success" | "failed"
+    failCount: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"]),
+
+  // ============================================
   // BYOK - BRING YOUR OWN KEY
   // ============================================
 

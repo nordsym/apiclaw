@@ -23,6 +23,7 @@ import type * as ratelimit from "../ratelimit.js";
 import type * as telemetry from "../telemetry.js";
 import type * as usage from "../usage.js";
 import type * as waitlist from "../waitlist.js";
+import type * as webhooks from "../webhooks.js";
 import type * as workspaces from "../workspaces.js";
 
 import type {
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   telemetry: typeof telemetry;
   usage: typeof usage;
   waitlist: typeof waitlist;
+  webhooks: typeof webhooks;
   workspaces: typeof workspaces;
 }>;
 

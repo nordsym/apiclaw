@@ -2427,25 +2427,605 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
 // WEBHOOKS TAB
 // ============================================
 
+interface WebhookData {
+  id: string;
+  url: string;
+  events: string[];
+  enabled: boolean;
+  lastTriggeredAt?: number;
+  lastStatus?: string;
+  failCount: number;
+  createdAt: number;
+  secretHint: string;
+}
+
+const WEBHOOK_EVENTS = [
+  { id: "usage.threshold.80", label: "Usage at 80%", description: "Triggered when usage reaches 80% of limit" },
+  { id: "usage.threshold.100", label: "Usage at 100%", description: "Triggered when usage reaches limit" },
+  { id: "api.error", label: "API Error", description: "Triggered when an API call fails" },
+  { id: "agent.connected", label: "Agent Connected", description: "Triggered when a new agent connects" },
+  { id: "agent.revoked", label: "Agent Revoked", description: "Triggered when an agent is revoked" },
+];
+
 function WebhooksTab() {
+  const [webhooks, setWebhooks] = useState<WebhookData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<WebhookData | null>(null);
+  const [showSecretModal, setShowSecretModal] = useState<{ id: string; secret: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [testingWebhook, setTestingWebhook] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ id: string; success: boolean; message: string } | null>(null);
+  
+  // Add modal state
+  const [newUrl, setNewUrl] = useState("");
+  const [newEvents, setNewEvents] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch webhooks on mount
+  useEffect(() => {
+    fetchWebhooks();
+  }, []);
+
+  const fetchWebhooks = async () => {
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "webhooks:getWebhooks",
+          args: { token },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+      if (result.webhooks) {
+        setWebhooks(result.webhooks);
+      }
+    } catch (err) {
+      console.error("Failed to fetch webhooks:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateWebhook = async () => {
+    if (!newUrl.trim() || newEvents.length === 0) {
+      setError("URL and at least one event are required");
+      return;
+    }
+
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "webhooks:createWebhook",
+          args: { token, url: newUrl, events: newEvents },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+
+      if (result.error) {
+        setError(result.error);
+      } else if (result.success) {
+        // Show secret modal
+        setShowSecretModal({ id: result.webhookId, secret: result.secret });
+        setShowAddModal(false);
+        setNewUrl("");
+        setNewEvents([]);
+        // Refresh webhooks
+        await fetchWebhooks();
+      }
+    } catch (err) {
+      setError("Failed to create webhook");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateWebhook = async (webhookId: string, updates: { enabled?: boolean; events?: string[] }) => {
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "webhooks:updateWebhook",
+          args: { token, webhookId, ...updates },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+
+      if (result.success) {
+        await fetchWebhooks();
+        setShowEditModal(null);
+      }
+    } catch (err) {
+      console.error("Failed to update webhook:", err);
+    }
+  };
+
+  const handleDeleteWebhook = async (webhookId: string) => {
+    if (confirmDelete !== webhookId) {
+      setConfirmDelete(webhookId);
+      return;
+    }
+
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "webhooks:deleteWebhook",
+          args: { token, webhookId },
+        }),
+      });
+      setWebhooks(webhooks.filter((w) => w.id !== webhookId));
+      setConfirmDelete(null);
+    } catch (err) {
+      console.error("Failed to delete webhook:", err);
+    }
+  };
+
+  const handleTestWebhook = async (webhookId: string) => {
+    const token = localStorage.getItem("apiclaw_workspace_session");
+    if (!token) return;
+
+    setTestingWebhook(webhookId);
+    setTestResult(null);
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "webhooks:testWebhook",
+          args: { token, webhookId },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+
+      setTestResult({
+        id: webhookId,
+        success: result.success,
+        message: result.message || (result.success ? "Delivered successfully" : "Failed to deliver"),
+      });
+
+      // Clear result after 5 seconds
+      setTimeout(() => setTestResult(null), 5000);
+    } catch (err) {
+      setTestResult({
+        id: webhookId,
+        success: false,
+        message: "Failed to test webhook",
+      });
+    } finally {
+      setTestingWebhook(null);
+    }
+  };
+
+  const toggleEvent = (eventId: string, currentEvents: string[], setEvents: (events: string[]) => void) => {
+    if (currentEvents.includes(eventId)) {
+      setEvents(currentEvents.filter((e) => e !== eventId));
+    } else {
+      setEvents([...currentEvents, eventId]);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
-        <p className="text-[var(--text-muted)]">React to events with webhooks.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
+          <p className="text-[var(--text-muted)]">Get notified when events happen in your workspace</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Add Webhook
+        </button>
       </div>
 
-      <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
-        <Webhook className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
-        <h3 className="font-semibold text-xl mb-2">Coming Soon</h3>
-        <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-          Set up webhooks to receive real-time notifications when events occur. Get alerts for usage thresholds, errors, agent connections, and more.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 text-sm text-[var(--text-muted)]">
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">usage.threshold</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">api.error</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">agent.connected</span>
-          <span className="px-3 py-1 rounded-full bg-[var(--surface)]">agent.revoked</span>
+      {/* Webhooks list */}
+      {webhooks.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+          <Webhook className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">No Webhooks Configured</h3>
+          <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
+            Add a webhook to get notified about events in your workspace.
+          </p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-primary"
+          >
+            <Plus className="w-5 h-5" />
+            Add Webhook
+          </button>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border)]">
+                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">URL</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Events</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Status</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {webhooks.map((webhook) => (
+                  <tr key={webhook.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface)]">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2 max-w-xs">
+                        <span className="truncate font-mono text-sm">{webhook.url}</span>
+                      </div>
+                      {webhook.lastTriggeredAt && (
+                        <p className="text-xs text-[var(--text-muted)] mt-1">
+                          Last triggered: {new Date(webhook.lastTriggeredAt).toLocaleDateString()}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {webhook.events.slice(0, 2).map((event) => (
+                          <span key={event} className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-xs">
+                            {event.split(".").slice(-1)[0]}
+                          </span>
+                        ))}
+                        {webhook.events.length > 2 && (
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-xs text-[var(--text-muted)]">
+                            +{webhook.events.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      {webhook.enabled ? (
+                        <span className="flex items-center gap-1 text-green-500 text-sm">
+                          <Check className="w-4 h-4" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[var(--text-muted)] text-sm">
+                          <AlertCircle className="w-4 h-4" />
+                          Disabled
+                        </span>
+                      )}
+                      {webhook.failCount > 0 && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {webhook.failCount} failure{webhook.failCount > 1 ? "s" : ""}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Test result indicator */}
+                        {testResult?.id === webhook.id && (
+                          <span className={`text-xs px-2 py-1 rounded ${testResult.success ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"}`}>
+                            {testResult.success ? "✓ Delivered" : `✗ ${testResult.message}`}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleTestWebhook(webhook.id)}
+                          disabled={testingWebhook === webhook.id}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition disabled:opacity-50"
+                        >
+                          {testingWebhook === webhook.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            "Test"
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setShowEditModal(webhook)}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteWebhook(webhook.id)}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                            confirmDelete === webhook.id
+                              ? "bg-red-500 text-white"
+                              : "text-red-500 hover:bg-red-500/10"
+                          }`}
+                        >
+                          {confirmDelete === webhook.id ? "Confirm" : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Add Webhook Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-lg">Add Webhook</h3>
+              <button onClick={() => { setShowAddModal(false); setError(null); }} className="p-2 rounded-lg hover:bg-[var(--surface)]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Webhook URL</label>
+                <input
+                  type="url"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  placeholder="https://your-server.com/webhook"
+                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                />
+                <p className="text-xs text-[var(--text-muted)] mt-1">Must use HTTPS</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Events</label>
+                <div className="space-y-2">
+                  {WEBHOOK_EVENTS.map((event) => (
+                    <label key={event.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] cursor-pointer transition">
+                      <input
+                        type="checkbox"
+                        checked={newEvents.includes(event.id)}
+                        onChange={() => toggleEvent(event.id, newEvents, setNewEvents)}
+                        className="mt-0.5 w-4 h-4 rounded border-[var(--border)] text-[#ef4444] focus:ring-[#ef4444]"
+                      />
+                      <div>
+                        <p className="font-medium text-sm">{event.label}</p>
+                        <p className="text-xs text-[var(--text-muted)]">{event.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowAddModal(false); setError(null); setNewUrl(""); setNewEvents([]); }}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateWebhook}
+                  disabled={!newUrl.trim() || newEvents.length === 0 || isSaving}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Webhook"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Webhook Modal */}
+      {showEditModal && (
+        <EditWebhookModal
+          webhook={showEditModal}
+          onClose={() => setShowEditModal(null)}
+          onUpdate={handleUpdateWebhook}
+        />
+      )}
+
+      {/* Secret Display Modal */}
+      {showSecretModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                <Check className="w-6 h-6 text-green-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Webhook Created!</h3>
+                <p className="text-sm text-[var(--text-muted)]">Save your signing secret now</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[var(--background)] border border-[var(--border)] p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[var(--text-muted)]">Signing Secret</span>
+                <button
+                  onClick={() => copyToClipboard(showSecretModal.secret)}
+                  className="flex items-center gap-1 text-sm text-[#ef4444] hover:underline"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy
+                </button>
+              </div>
+              <code className="block font-mono text-sm break-all">{showSecretModal.secret}</code>
+            </div>
+
+            <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-yellow-500">Save this secret now!</p>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    This is the only time you&apos;ll see this secret. Use it to verify webhook signatures.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSecretModal(null)}
+              className="w-full px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition"
+            >
+              I&apos;ve Saved My Secret
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditWebhookModal({
+  webhook,
+  onClose,
+  onUpdate,
+}: {
+  webhook: WebhookData;
+  onClose: () => void;
+  onUpdate: (id: string, updates: { enabled?: boolean; events?: string[] }) => void;
+}) {
+  const [enabled, setEnabled] = useState(webhook.enabled);
+  const [events, setEvents] = useState(webhook.events);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onUpdate(webhook.id, { enabled, events });
+    setIsSaving(false);
+  };
+
+  const toggleEvent = (eventId: string) => {
+    if (events.includes(eventId)) {
+      setEvents(events.filter((e) => e !== eventId));
+    } else {
+      setEvents([...events, eventId]);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-lg">Edit Webhook</h3>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--surface)]">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* URL (read-only) */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Webhook URL</label>
+            <input
+              type="url"
+              value={webhook.url}
+              disabled
+              className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-muted)] opacity-60"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">URL cannot be changed for security reasons</p>
+          </div>
+
+          {/* Enabled toggle */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium">Enabled</p>
+              <p className="text-sm text-[var(--text-muted)]">Receive webhook notifications</p>
+            </div>
+            <button
+              onClick={() => setEnabled(!enabled)}
+              className={`w-12 h-6 rounded-full transition relative ${enabled ? "bg-[#ef4444]" : "bg-[var(--border)]"}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all shadow ${enabled ? "left-6" : "left-0.5"}`} />
+            </button>
+          </div>
+
+          {/* Events */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Events</label>
+            <div className="space-y-2">
+              {WEBHOOK_EVENTS.map((event) => (
+                <label key={event.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] cursor-pointer transition">
+                  <input
+                    type="checkbox"
+                    checked={events.includes(event.id)}
+                    onChange={() => toggleEvent(event.id)}
+                    className="mt-0.5 w-4 h-4 rounded border-[var(--border)] text-[#ef4444] focus:ring-[#ef4444]"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">{event.label}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{event.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={events.length === 0 || isSaving}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
