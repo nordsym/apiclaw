@@ -1233,6 +1233,13 @@ Docs: https://apiclaw.nordsym.com
 
 // Start server
 async function main() {
+  // Check for CLI mode
+  if (process.argv.includes('--cli') || process.argv.includes('-c')) {
+    const { startCLI } = await import('./cli.js');
+    await startCLI();
+    return;
+  }
+  
   const transport = new StdioServerTransport();
   await server.connect(transport);
   trackStartup();
@@ -1257,6 +1264,9 @@ Quick Start:
 
 Direct Call (no API key needed):
   list_connected()
+
+Interactive CLI mode:
+  npx @nordsym/apiclaw --cli
 
 Docs: https://apiclaw.nordsym.com
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
