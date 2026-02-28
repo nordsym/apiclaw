@@ -984,11 +984,9 @@ function OverviewTab({
                 <span className="px-2 py-0.5 rounded-full bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   {api.category}
                 </span>
-                {api.hasDirectCall && (
-                  <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                    Direct Call
-                  </span>
-                )}
+                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                  Direct Call
+                </span>
               </div>
             </div>
           ))}
@@ -1170,16 +1168,10 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
               </div>
               <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-4">{api.description}</p>
               <div className="flex items-center justify-between">
-                {api.hasDirectCall ? (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                    <Check className="w-3 h-3" />
-                    Direct Call Ready
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-full bg-[var(--surface)] text-xs text-[var(--text-muted)]">
-                    BYOK Required
-                  </span>
-                )}
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                  <Check className="w-3 h-3" />
+                  Direct Call Ready
+                </span>
                 <Link 
                   href={`/api/${api._id}`}
                   className="text-sm text-[#ef4444] hover:underline opacity-0 group-hover:opacity-100 transition"
