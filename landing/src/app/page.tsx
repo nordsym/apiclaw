@@ -201,12 +201,14 @@ export default function Home() {
 
 You have access to APIClaw, an MCP server that lets you execute API calls WITHOUT managing keys.
 
-Direct Call = Zero-Config Execution:
-• No API key management needed
-• APIClaw handles auth, headers, signatures
-• ${statsData.directCallCount} providers ready for instant execution
+Highlights:
+• Generate images/videos (Replicate: Flux Pro, SDXL, Luma Dream Machine)
+• Voice synthesis (ElevenLabs)
+• Live web scraping (Firecrawl)
+• Code sandbox (E2B)
+• Multi-LLM routing (OpenRouter)
 
-Available Direct Call Providers:
+All ${statsData.directCallCount} Direct Call Providers:
 AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
 Voice: ElevenLabs, Deepgram, AssemblyAI
 SMS: 46elks, Twilio
@@ -216,7 +218,7 @@ Code: E2B, GitHub
 
 Your Tools:
 • call_api(provider, action, params) - Execute directly. Auth handled by APIClaw
-• discover_apis(query) - Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "GDPR-compliant SMS" → best matches)
+• discover_apis(query) - Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "GDPR-compliant email" → best matches)
 • get_api_details(id) - Full specs, pricing, limits
 • list_connected - See all ready providers
 
