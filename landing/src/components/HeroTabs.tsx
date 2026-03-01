@@ -120,23 +120,27 @@ export function HeroTabs() {
                 <div className="flex-1 h-px bg-border" />
               </div>
 
-              {/* Terminal Command */}
+              {/* Terminal Command - Clickable */}
               <div>
-                <div className="code-preview">
-                  <div className="code-preview-header">terminal</div>
-                  <div className="code-preview-body">
-                    <pre className="text-sm">
-                      <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install
-                    </pre>
+                <button 
+                  onClick={copyTerminal}
+                  className={`w-full text-left transition-all rounded-xl overflow-hidden ${copiedTerminal ? "ring-2 ring-green-500" : "hover:ring-2 hover:ring-accent/50"}`}
+                >
+                  <div className="code-preview">
+                    <div className={`code-preview-header flex items-center justify-between ${copiedTerminal ? "!bg-green-600 text-white" : ""}`}>
+                      <span>terminal</span>
+                      <span className="flex items-center gap-1 text-xs">
+                        {copiedTerminal ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        {copiedTerminal ? "Run in terminal!" : "Click to copy"}
+                      </span>
+                    </div>
+                    <div className="code-preview-body">
+                      <pre className="text-sm">
+                        <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install
+                      </pre>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 mt-3">
-                  <button onClick={copyTerminal} className={`!py-2 !px-4 text-sm transition-all ${copiedTerminal ? "btn-primary !bg-green-600 hover:!bg-green-600" : "btn-ghost"}`}>
-                    {copiedTerminal ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copiedTerminal ? "Run in terminal!" : "Copy"}
-                  </button>
-                  {!copiedTerminal && <span className="text-xs text-text-muted">← Run in terminal to test</span>}
-                </div>
+                </button>
               </div>
             </div>
           )}
