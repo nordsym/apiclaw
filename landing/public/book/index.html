@@ -231,12 +231,8 @@
         
         <div class="form-group">
           <label>Preferred Day</label>
-          <select name="day" required>
+          <select name="day" required id="day-select">
             <option value="">Select a day</option>
-            <option value="tuesday">Tuesday (Feb 25)</option>
-            <option value="wednesday">Wednesday (Feb 26)</option>
-            <option value="thursday">Thursday (Feb 27)</option>
-            <option value="friday">Friday (Feb 28)</option>
           </select>
         </div>
         
@@ -300,6 +296,29 @@
       }
     });
     
+    // Generate dynamic weekday options (next 5 weekdays)
+    const daySelect = document.getElementById('day-select');
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let date = new Date();
+    let addedDays = 0;
+    
+    while (addedDays < 5) {
+      date.setDate(date.getDate() + 1);
+      const dayOfWeek = date.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Skip weekends
+        const dayName = dayNames[dayOfWeek];
+        const monthName = monthNames[date.getMonth()];
+        const dateNum = date.getDate();
+        const option = document.createElement('option');
+        option.value = `${dayName.toLowerCase()}-${date.toISOString().split('T')[0]}`;
+        option.textContent = `${dayName} (${monthName} ${dateNum})`;
+        daySelect.appendChild(option);
+        addedDays++;
+      }
+    }
+
     // Time slot selection
     document.querySelectorAll('.time-slot').forEach(slot => {
       slot.addEventListener('click', () => {
