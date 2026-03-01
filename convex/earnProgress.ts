@@ -13,7 +13,7 @@ const EARN_REWARDS = {
   byokSetup: 5,
   githubStarred: 10,
   twitterFollowed: 5,
-  referral: 10, // per referral
+  referral: 0, // DISABLED (2026-03-01): Risk of abuse
 } as const;
 
 const APIS_REQUIRED_FOR_COMPLETE = 3;

@@ -94,7 +94,10 @@ export const verifyMagicLink = mutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50, // 50 free API calls
+        usageLimit: 50, // Legacy field, now using weekly limits
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50, // 50 calls/week for free tier
+        hourlyUsageCount: 0,
         referralCode: newReferralCode!,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -102,56 +105,21 @@ export const verifyMagicLink = mutation({
       workspace = await ctx.db.get(workspaceId);
     }
 
-    // Process referral for new users
+    // REFERRAL DISABLED (2026-03-01): Risk of abuse with awesome-list exposure
+    // Tracking referredBy for analytics only, no credit bonus
     if (isNewUser && referralCode) {
-      // Find referrer by code
       const referrer = await ctx.db
         .query("workspaces")
         .withIndex("by_referralCode", (q) => q.eq("referralCode", referralCode))
         .first();
 
       if (referrer && referrer._id !== workspace!._id) {
-        // Update new user's referredBy
+        // Track referral for analytics only
         await ctx.db.patch(workspace!._id, {
           referredBy: referrer._id,
           updatedAt: Date.now(),
         });
-
-        // Get or create referrer's earn progress
-        let referrerProgress = await ctx.db
-          .query("earnProgress")
-          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", referrer._id))
-          .first();
-
-        if (!referrerProgress) {
-          await ctx.db.insert("earnProgress", {
-            workspaceId: referrer._id,
-            firstDirectCall: false,
-            apisUsed: [],
-            apisUsedComplete: false,
-            agentListed: false,
-            apiListed: false,
-            byokSetup: false,
-            githubStarred: false,
-            twitterFollowed: false,
-            referralCount: 1,
-            totalEarned: 10,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-        } else {
-          await ctx.db.patch(referrerProgress._id, {
-            referralCount: referrerProgress.referralCount + 1,
-            totalEarned: referrerProgress.totalEarned + 10,
-            updatedAt: Date.now(),
-          });
-        }
-
-        // Credit referrer with +10 API calls
-        await ctx.db.patch(referrer._id, {
-          usageLimit: referrer.usageLimit + 10,
-          updatedAt: Date.now(),
-        });
+        // No credit bonus - referral rewards disabled
       }
     }
 
@@ -537,6 +505,29 @@ export const updateTier = mutation({
 });
 
 // Increment usage count
+// Constants for rate limiting
+const FREE_WEEKLY_LIMIT = 50;
+const FREE_HOURLY_LIMIT = 10;
+const BACKER_END_DATE = new Date("2026-12-31T23:59:59Z").getTime();
+
+// Helper: Get start of current week (Monday 00:00 UTC)
+function getWeekStart(): number {
+  const now = new Date();
+  const dayOfWeek = now.getUTCDay();
+  const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday = 0
+  const monday = new Date(now);
+  monday.setUTCDate(now.getUTCDate() - diff);
+  monday.setUTCHours(0, 0, 0, 0);
+  return monday.getTime();
+}
+
+// Helper: Get start of current hour
+function getHourStart(): number {
+  const now = new Date();
+  now.setUTCMinutes(0, 0, 0);
+  return now.getTime();
+}
+
 export const incrementUsage = mutation({
   args: {
     workspaceId: v.id("workspaces"),
@@ -548,22 +539,65 @@ export const incrementUsage = mutation({
       throw new Error("Workspace not found");
     }
 
-    const newCount = workspace.usageCount + amount;
+    const now = Date.now();
+    const weekStart = getWeekStart();
+    const hourStart = getHourStart();
     
-    // Check if over limit
-    if (newCount > workspace.usageLimit) {
-      throw new Error("Usage limit exceeded");
+    // Check if Backer (unlimited until end of 2026)
+    const isBacker = workspace.tier === "backer" || 
+                     (workspace.backerUntil && workspace.backerUntil > now);
+    
+    // Initialize weekly/hourly counters if needed
+    let weeklyCount = workspace.weeklyUsageCount || 0;
+    let hourlyCount = workspace.hourlyUsageCount || 0;
+    
+    // Reset weekly counter if new week
+    if (!workspace.lastWeeklyResetAt || workspace.lastWeeklyResetAt < weekStart) {
+      weeklyCount = 0;
+    }
+    
+    // Reset hourly counter if new hour
+    if (!workspace.lastHourlyResetAt || workspace.lastHourlyResetAt < hourStart) {
+      hourlyCount = 0;
+    }
+    
+    // Check rate limits for free tier
+    if (!isBacker && workspace.tier !== "pro" && workspace.tier !== "enterprise") {
+      // Check hourly limit (10/hour for free)
+      if (hourlyCount + amount > FREE_HOURLY_LIMIT) {
+        throw new Error(`Hourly rate limit exceeded (${FREE_HOURLY_LIMIT}/hour). Upgrade to Backer for unlimited.`);
+      }
+      
+      // Check weekly limit (50/week for free)
+      if (weeklyCount + amount > FREE_WEEKLY_LIMIT) {
+        throw new Error(`Weekly limit exceeded (${FREE_WEEKLY_LIMIT}/week). Upgrade to Backer for unlimited.`);
+      }
     }
 
+    const newTotalCount = workspace.usageCount + amount;
+    const newWeeklyCount = weeklyCount + amount;
+    const newHourlyCount = hourlyCount + amount;
+
     await ctx.db.patch(workspaceId, {
-      usageCount: newCount,
-      updatedAt: Date.now(),
+      usageCount: newTotalCount,
+      weeklyUsageCount: newWeeklyCount,
+      hourlyUsageCount: newHourlyCount,
+      lastWeeklyResetAt: weekStart,
+      lastHourlyResetAt: hourStart,
+      updatedAt: now,
     });
+
+    // Calculate remaining for free tier
+    const weeklyRemaining = isBacker ? Infinity : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
+    const hourlyRemaining = isBacker ? Infinity : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
 
     return { 
       success: true, 
-      usageCount: newCount,
-      usageRemaining: workspace.usageLimit - newCount,
+      usageCount: newTotalCount,
+      weeklyUsageCount: newWeeklyCount,
+      weeklyRemaining,
+      hourlyRemaining,
+      isBacker,
     };
   },
 });

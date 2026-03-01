@@ -46,9 +46,18 @@ export default defineSchema({
     email: v.string(),
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
-    tier: v.string(), // "free" | "pro" | "enterprise"
-    usageCount: v.number(), // total API calls made
+    tier: v.string(), // "free" | "pro" | "enterprise" | "backer"
+    usageCount: v.number(), // total API calls made (lifetime)
     usageLimit: v.number(), // max API calls for tier
+    // Weekly usage (resets every Monday 00:00 UTC)
+    weeklyUsageCount: v.optional(v.number()), // calls this week
+    weeklyUsageLimit: v.optional(v.number()), // 50 for free, unlimited for backer
+    lastWeeklyResetAt: v.optional(v.number()), // timestamp of last reset
+    // Hourly rate limit
+    hourlyUsageCount: v.optional(v.number()), // calls this hour
+    lastHourlyResetAt: v.optional(v.number()), // timestamp of last hourly reset
+    // Backer status (Founding Backer = unlimited until end of 2026)
+    backerUntil: v.optional(v.number()), // timestamp when backer status expires
     // Main agent identification
     mainAgentId: v.optional(v.string()), // UUID, auto-generated on first call
     mainAgentName: v.optional(v.string()), // Auto-generated name (e.g., "Crimson Phoenix")

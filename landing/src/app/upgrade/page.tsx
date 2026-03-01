@@ -188,19 +188,19 @@ function UpgradeContent() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>{isPro ? "10,000" : "100"} API calls/month</span>
+              <span>{isPro ? "Unlimited" : "50"} API calls{isPro ? "" : "/week"}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>Priority support</span>
+              <span>{isPro ? "10/hour" : "Priority support"}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>Advanced analytics</span>
+              <span>All Direct Call providers</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>All providers</span>
+              <span>API discovery</span>
             </div>
           </div>
         </div>
@@ -211,15 +211,15 @@ function UpgradeContent() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-xl font-bold text-white mb-1">
-                  Upgrade to Pro
+                  🦞 Become a Founding Backer
                 </div>
                 <div className="text-gray-400">
-                  100x more API calls, priority support
+                  Unlimited API calls until Dec 31, 2026
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-white">$99</div>
-                <div className="text-gray-400 text-sm">/month</div>
+                <div className="text-gray-400 text-sm">one-time</div>
               </div>
             </div>
 
@@ -252,15 +252,15 @@ function UpgradeContent() {
             </button>
 
             <div className="text-center text-gray-500 text-xs mt-4">
-              Secure payment via Stripe. Cancel anytime.
+              Secure payment via Stripe. One-time payment, no subscription.
             </div>
           </div>
         )}
 
-        {/* Already Pro Message */}
+        {/* Already Backer Message */}
         {isPro && !success && (
           <div className="text-center text-gray-400">
-            You&apos;re on the Pro plan. Enjoy unlimited API calls!
+            🦞 You&apos;re a Founding Backer! Unlimited API calls until Dec 31, 2026.
           </div>
         )}
 

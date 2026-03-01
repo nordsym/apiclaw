@@ -57,20 +57,35 @@ export const updateSubscription = mutation({
 
     // Update tier and usage limit based on plan
     const planLimits: Record<string, number> = {
-      free: 100,
+      free: 50,
       usage_based: 999999999, // Effectively unlimited
       starter: 1000,
       pro: 10000,
       scale: 100000,
+      backer: 999999999, // Founding Backer - unlimited until end of 2026
     };
 
-    const newLimit = planLimits[args.billingPlan] || 100;
+    const newLimit = planLimits[args.billingPlan] || 50;
+    
+    // Determine tier
+    let newTier = "free";
+    if (args.billingPlan === "backer") {
+      newTier = "backer";
+    } else if (args.billingPlan !== "free") {
+      newTier = "pro";
+    }
+    
+    // For Backer: set expiry to end of 2026
+    const backerUntil = args.billingPlan === "backer" 
+      ? new Date("2026-12-31T23:59:59Z").getTime()
+      : undefined;
 
     await ctx.db.patch(args.workspaceId, {
       stripeSubscriptionId: args.stripeSubscriptionId,
       billingPlan: args.billingPlan,
-      tier: args.billingPlan === "free" ? "free" : "pro",
+      tier: newTier,
       usageLimit: newLimit,
+      ...(backerUntil && { backerUntil }),
       updatedAt: Date.now(),
     });
 
