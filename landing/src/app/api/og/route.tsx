@@ -60,11 +60,9 @@ export async function GET() {
         >
           <span>{statsData.apiCount.toLocaleString()}+ APIs</span>
           <span>•</span>
-          <span>{statsData.categoryCount} Categories</span>
+          <span>{statsData.directCallCount} Direct Call</span>
           <span>•</span>
           <span>MCP Native</span>
-          <span>•</span>
-          <span>Direct Call</span>
         </div>
         <div
           style={{

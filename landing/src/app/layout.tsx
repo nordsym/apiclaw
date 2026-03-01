@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/api/og?v=2",
+        url: "/api/og?v=3",
         width: 1200,
         height: 630,
         alt: "APIClaw - The API layer for AI agents",
