@@ -122,6 +122,29 @@ async function validateSession(): Promise<boolean> {
 }
 
 /**
+ * Track earn progress after successful API call
+ * Handles firstDirectCall and apisUsed tracking
+ */
+async function trackEarnProgress(workspaceId: string, provider: string, action: string): Promise<void> {
+  try {
+    // Track first direct call
+    await convex.mutation("earnProgress:markFirstDirectCall" as any, {
+      workspaceId: workspaceId as any,
+    });
+
+    // Track unique API usage
+    const apiId = `${provider}:${action}`;
+    await convex.mutation("earnProgress:trackApiUsed" as any, {
+      workspaceId: workspaceId as any,
+      apiId,
+    });
+  } catch (e) {
+    // Non-critical - don't fail the API call if earn tracking fails
+    console.error('[APIClaw] Failed to track earn progress:', e);
+  }
+}
+
+/**
  * Check if workspace is active and has usage remaining
  */
 function checkWorkspaceAccess(): { allowed: boolean; error?: string } {
@@ -217,13 +240,18 @@ const tools: Tool[] = [
   },
   {
     name: 'get_api_details',
-    description: 'Get detailed information about a specific API provider, including endpoints, pricing, and features.',
+    description: 'Get detailed information about a specific API provider, including endpoints, pricing, and features. Use compact=true to save ~60% tokens.',
     inputSchema: {
       type: 'object',
       properties: {
         api_id: {
           type: 'string',
           description: 'The API provider ID (e.g., "46elks", "resend", "openrouter")'
+        },
+        compact: {
+          type: 'boolean',
+          description: 'If true, returns minified spec (strips examples, keeps essential params). Saves ~60% context window.',
+          default: false
         }
       },
       required: ['api_id']
@@ -315,6 +343,10 @@ const tools: Tool[] = [
         confirm_token: {
           type: 'string',
           description: 'Confirmation token from a previous call. Required to execute actions that cost money after reviewing the preview.'
+        },
+        dry_run: {
+          type: 'boolean',
+          description: 'If true, shows what WOULD be sent without making actual API calls. Returns mock response and request details. Great for testing and debugging.'
         }
       },
       required: ['provider', 'action']
@@ -573,7 +605,8 @@ Docs: https://apiclaw.nordsym.com
 
       case 'get_api_details': {
         const apiId = args?.api_id as string;
-        const api = getAPIDetails(apiId);
+        const compact = args?.compact as boolean || false;
+        const api = getAPIDetails(apiId, { compact });
 
         if (!api) {
           return {
@@ -583,8 +616,20 @@ Docs: https://apiclaw.nordsym.com
                 text: JSON.stringify({
                   status: 'error',
                   message: `API not found: ${apiId}`,
-                  available_apis: getAllAPIs().map(a => a.id)
+                  hint: 'Try discover_apis to search, or list_connected for direct-call APIs',
                 }, null, 2)
+              }
+            ]
+          };
+        }
+
+        // Compact mode: minimal JSON, no pretty-print
+        if (compact) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({ status: 'ok', ...api })
               }
             ]
           };
@@ -729,6 +774,20 @@ Docs: https://apiclaw.nordsym.com
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
         const confirmToken = args?.confirm_token as string | undefined;
+        const dryRun = args?.dry_run as boolean | undefined;
+        
+        // Handle dry-run mode - no actual API calls, just show what would happen
+        if (dryRun) {
+          const { generateDryRun } = await import('./execute.js');
+          const dryRunResult = generateDryRun(provider, action, params);
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify(dryRunResult, null, 2)
+            }]
+          };
+        }
         
         // Check workspace access (skip for free/open APIs)
         const isFreeAPI = isOpenAPI(provider);
@@ -791,6 +850,11 @@ Docs: https://apiclaw.nordsym.com
             latencyMs: Date.now() - startTime,
             error: result.error,
           });
+
+          // Track earn progress for confirmed actions
+          if (result.success && workspaceContext) {
+            await trackEarnProgress(workspaceContext.workspaceId, pending.provider, pending.action);
+          }
 
           return {
             content: [{
@@ -889,6 +953,9 @@ Docs: https://apiclaw.nordsym.com
             if (usageResult.success) {
               workspaceContext.usageRemaining = usageResult.remaining ?? -1;
             }
+
+            // Track earn progress (first direct call + unique APIs)
+            await trackEarnProgress(workspaceContext.workspaceId, provider, action);
           } catch (e) {
             console.error('[APIClaw] Failed to track usage:', e);
           }

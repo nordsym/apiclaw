@@ -1,10 +1,12 @@
 // Discovery engine for APIvault
 // MVP: Keyword matching. Future: Embeddings + semantic search
 
-import { APIProvider, SearchResult } from './types.js';
+import { APIProvider, SearchResult, APIDetailsResponse } from './types.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { getConnectedProviders } from './execute.js';
+import { openAPIs, isOpenAPI } from './open-apis.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,6 +15,218 @@ const apisData = JSON.parse(
   readFileSync(join(__dirname, 'registry', 'apis.json'), 'utf-8')
 );
 const apis: APIProvider[] = apisData.apis;
+
+// Direct Call provider specs (hardcoded handlers with params)
+const DIRECT_CALL_SPECS: Record<string, {
+  description: string;
+  auth: string;
+  docs: string;
+  actions: Record<string, { params: { name: string; required: boolean; desc: string }[]; desc: string }>;
+}> = {
+  '46elks': {
+    description: 'Swedish SMS and voice API',
+    auth: 'basic',
+    docs: 'https://46elks.com/docs',
+    actions: {
+      send_sms: {
+        desc: 'Send SMS message',
+        params: [
+          { name: 'to', required: true, desc: 'Phone number (+46...)' },
+          { name: 'message', required: true, desc: 'SMS text (max 160 chars for 1 segment)' },
+          { name: 'from', required: false, desc: 'Sender ID (default: APIClaw)' },
+        ],
+      },
+    },
+  },
+  twilio: {
+    description: 'Global SMS and voice API',
+    auth: 'basic',
+    docs: 'https://www.twilio.com/docs',
+    actions: {
+      send_sms: {
+        desc: 'Send SMS message',
+        params: [
+          { name: 'to', required: true, desc: 'Phone number (E.164 format)' },
+          { name: 'message', required: true, desc: 'SMS text' },
+          { name: 'from', required: false, desc: 'Sender phone number' },
+        ],
+      },
+    },
+  },
+  brave_search: {
+    description: 'Web search API',
+    auth: 'api_key',
+    docs: 'https://api.search.brave.com/docs',
+    actions: {
+      search: {
+        desc: 'Search the web',
+        params: [
+          { name: 'query', required: true, desc: 'Search query' },
+          { name: 'count', required: false, desc: 'Number of results (default: 5)' },
+        ],
+      },
+    },
+  },
+  resend: {
+    description: 'Email API',
+    auth: 'bearer',
+    docs: 'https://resend.com/docs',
+    actions: {
+      send_email: {
+        desc: 'Send email',
+        params: [
+          { name: 'to', required: true, desc: 'Recipient email' },
+          { name: 'subject', required: true, desc: 'Email subject' },
+          { name: 'html', required: false, desc: 'HTML body' },
+          { name: 'text', required: false, desc: 'Plain text body' },
+          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.nordsym.com)' },
+        ],
+      },
+    },
+  },
+  openrouter: {
+    description: 'LLM routing (100+ models)',
+    auth: 'bearer',
+    docs: 'https://openrouter.ai/docs',
+    actions: {
+      chat: {
+        desc: 'Chat completion',
+        params: [
+          { name: 'messages', required: true, desc: 'Array of {role, content}' },
+          { name: 'model', required: false, desc: 'Model ID (default: claude-3-haiku)' },
+          { name: 'max_tokens', required: false, desc: 'Max response tokens (default: 1000)' },
+        ],
+      },
+    },
+  },
+  elevenlabs: {
+    description: 'Text-to-speech',
+    auth: 'api_key',
+    docs: 'https://elevenlabs.io/docs',
+    actions: {
+      text_to_speech: {
+        desc: 'Generate audio from text',
+        params: [
+          { name: 'text', required: true, desc: 'Text to speak' },
+          { name: 'voice_id', required: false, desc: 'Voice ID (default: Rachel)' },
+          { name: 'model_id', required: false, desc: 'Model ID' },
+        ],
+      },
+    },
+  },
+  replicate: {
+    description: 'Run any AI model (images, video, audio)',
+    auth: 'bearer',
+    docs: 'https://replicate.com/docs',
+    actions: {
+      run: {
+        desc: 'Run a model',
+        params: [
+          { name: 'model', required: true, desc: 'Model ID (e.g., stability-ai/sdxl:...)' },
+          { name: 'input', required: true, desc: 'Model input parameters' },
+        ],
+      },
+      list_models: {
+        desc: 'List available models',
+        params: [],
+      },
+    },
+  },
+  firecrawl: {
+    description: 'Web scraping and crawling',
+    auth: 'bearer',
+    docs: 'https://firecrawl.dev/docs',
+    actions: {
+      scrape: {
+        desc: 'Scrape a URL',
+        params: [
+          { name: 'url', required: true, desc: 'URL to scrape' },
+          { name: 'formats', required: false, desc: 'Output formats (default: ["markdown"])' },
+        ],
+      },
+      crawl: {
+        desc: 'Start a crawl job',
+        params: [
+          { name: 'url', required: true, desc: 'Starting URL' },
+          { name: 'limit', required: false, desc: 'Max pages (default: 10)' },
+        ],
+      },
+      map: {
+        desc: 'Map site structure',
+        params: [
+          { name: 'url', required: true, desc: 'URL to map' },
+        ],
+      },
+    },
+  },
+  github: {
+    description: 'Code repos and developer data',
+    auth: 'bearer',
+    docs: 'https://docs.github.com/rest',
+    actions: {
+      search_repos: {
+        desc: 'Search repositories',
+        params: [
+          { name: 'query', required: true, desc: 'Search query' },
+          { name: 'sort', required: false, desc: 'Sort by (default: stars)' },
+          { name: 'limit', required: false, desc: 'Max results (default: 10)' },
+        ],
+      },
+      get_repo: {
+        desc: 'Get repo details',
+        params: [
+          { name: 'owner', required: true, desc: 'Repo owner' },
+          { name: 'repo', required: true, desc: 'Repo name' },
+        ],
+      },
+      list_issues: {
+        desc: 'List issues',
+        params: [
+          { name: 'owner', required: true, desc: 'Repo owner' },
+          { name: 'repo', required: true, desc: 'Repo name' },
+          { name: 'state', required: false, desc: 'State filter (default: open)' },
+        ],
+      },
+      create_issue: {
+        desc: 'Create issue',
+        params: [
+          { name: 'owner', required: true, desc: 'Repo owner' },
+          { name: 'repo', required: true, desc: 'Repo name' },
+          { name: 'title', required: true, desc: 'Issue title' },
+          { name: 'body', required: false, desc: 'Issue body' },
+        ],
+      },
+      get_file: {
+        desc: 'Get file contents',
+        params: [
+          { name: 'owner', required: true, desc: 'Repo owner' },
+          { name: 'repo', required: true, desc: 'Repo name' },
+          { name: 'path', required: true, desc: 'File path' },
+        ],
+      },
+    },
+  },
+  e2b: {
+    description: 'Code sandbox for AI agents',
+    auth: 'api_key',
+    docs: 'https://e2b.dev/docs',
+    actions: {
+      run_code: {
+        desc: 'Execute code in sandbox',
+        params: [
+          { name: 'code', required: true, desc: 'Code to run' },
+          { name: 'language', required: false, desc: 'Language (default: python)' },
+        ],
+      },
+      run_shell: {
+        desc: 'Execute shell command',
+        params: [
+          { name: 'command', required: true, desc: 'Shell command' },
+        ],
+      },
+    },
+  },
+};
 
 /**
  * Discover APIs based on a natural language query
@@ -107,9 +321,120 @@ export function discoverAPIs(
 
 /**
  * Get detailed information about a specific API
+ * @param apiId - The API provider ID
+ * @param options.compact - If true, returns minified spec (saves ~60% tokens)
  */
-export function getAPIDetails(apiId: string): APIProvider | null {
-  return apis.find(api => api.id === apiId) || null;
+export function getAPIDetails(
+  apiId: string, 
+  options: { compact?: boolean } = {}
+): APIDetailsResponse | null {
+  const { compact = false } = options;
+  
+  // Check if it's a Direct Call provider (hardcoded handlers)
+  const directSpec = DIRECT_CALL_SPECS[apiId];
+  if (directSpec) {
+    if (compact) {
+      // Minified format: ~60% smaller
+      return {
+        id: apiId,
+        type: 'direct_call',
+        desc: directSpec.description,
+        auth: directSpec.auth,
+        actions: Object.fromEntries(
+          Object.entries(directSpec.actions).map(([action, info]) => [
+            action,
+            {
+              params: info.params.map(p => 
+                p.required ? p.name : `${p.name}?`
+              ),
+            },
+          ])
+        ),
+      } as APIDetailsResponse;
+    }
+    
+    return {
+      id: apiId,
+      type: 'direct_call',
+      name: apiId,
+      description: directSpec.description,
+      auth_type: directSpec.auth,
+      docs_url: directSpec.docs,
+      direct_call: true,
+      actions: Object.fromEntries(
+        Object.entries(directSpec.actions).map(([action, info]) => [
+          action,
+          {
+            description: info.desc,
+            params: info.params,
+          },
+        ])
+      ),
+    } as APIDetailsResponse;
+  }
+  
+  // Check if it's an Open API (free, no auth)
+  if (isOpenAPI(apiId)) {
+    const openApi = openAPIs[apiId];
+    const actions = Object.keys(openApi.actions);
+    
+    if (compact) {
+      return {
+        id: apiId,
+        type: 'open',
+        desc: openApi.description,
+        auth: 'none',
+        actions: Object.fromEntries(
+          actions.map(a => [a, { params: [] }])
+        ),
+      } as APIDetailsResponse;
+    }
+    
+    return {
+      id: apiId,
+      type: 'open',
+      name: openApi.name,
+      description: openApi.description,
+      auth_type: 'none',
+      free: true,
+      actions: Object.fromEntries(
+        actions.map(a => [a, { description: `Execute ${a}`, params: [] }])
+      ),
+    } as APIDetailsResponse;
+  }
+  
+  // Fall back to registry (19,000+ APIs - basic info only)
+  const registryApi = apis.find(api => 
+    api.id === apiId || 
+    api.name?.toLowerCase() === apiId.toLowerCase()
+  );
+  
+  if (!registryApi) {
+    return null;
+  }
+  
+  if (compact) {
+    return {
+      id: registryApi.id || registryApi.name,
+      type: 'registry',
+      desc: registryApi.description?.slice(0, 80),
+      auth: registryApi.auth_type || (registryApi as any).auth || 'unknown',
+      url: registryApi.base_url || (registryApi as any).baseUrl,
+    } as APIDetailsResponse;
+  }
+  
+  return {
+    id: registryApi.id || registryApi.name,
+    type: 'registry',
+    name: registryApi.name,
+    description: registryApi.description,
+    category: registryApi.category,
+    auth_type: registryApi.auth_type || (registryApi as any).auth,
+    base_url: registryApi.base_url || (registryApi as any).baseUrl,
+    docs_url: registryApi.docs_url || (registryApi as any).docsUrl,
+    pricing: registryApi.pricing || (registryApi as any).pricing,
+    note: 'Registry API - use call_api with customer_key or check docs for integration',
+  } as APIDetailsResponse;
 }
 
 /**

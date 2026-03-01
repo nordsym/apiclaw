@@ -75,3 +75,35 @@ export interface UsageRecord {
   cost_incurred_usd: number;
   last_used_at: string;
 }
+
+/**
+ * Enhanced API details response
+ * Supports both full and compact (minified) modes
+ */
+export interface APIDetailsResponse {
+  id: string;
+  type: 'direct_call' | 'open' | 'registry';
+  
+  // Full mode fields
+  name?: string;
+  description?: string;
+  category?: string;
+  auth_type?: string;
+  base_url?: string;
+  docs_url?: string;
+  pricing?: APIPricing | string;
+  direct_call?: boolean;
+  free?: boolean;
+  note?: string;
+  
+  // Compact mode fields
+  desc?: string;
+  auth?: string;
+  url?: string;
+  
+  // Actions (for direct_call and open types)
+  actions?: Record<string, {
+    description?: string;
+    params: { name: string; required: boolean; desc: string }[] | string[];
+  }>;
+}
