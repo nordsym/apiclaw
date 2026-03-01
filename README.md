@@ -1,9 +1,13 @@
-# APIClaw
+# 🦞 APIClaw
 
-> **Universal API access for AI agents.** Connect any MCP client to thousands of APIs with zero configuration.
+> **The API layer for AI agents.** 22,000+ APIs indexed. Direct Call execution. Zero config.
 
 [![npm version](https://img.shields.io/npm/v/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
+[![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
+
+**APIs Indexed:** 22,392 • **Open APIs:** 1,636 • **Direct Call Providers:** 18
 
 ---
 
