@@ -292,7 +292,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
     <main className="min-h-screen overflow-x-hidden">
       {/* Early Access Banner */}
       <div className="fixed top-0 w-full z-[60] bg-accent text-background text-center py-2 px-4 text-sm font-medium">
-        🚀 <span className="font-bold">Early Access</span> — Be among the first to use the API Layer for AI Agents
+        🦞 <span className="font-bold">Early Access</span> — Join the first wave of agents
       </div>
       
       {/* Header */}
