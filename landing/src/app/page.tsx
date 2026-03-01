@@ -1069,7 +1069,6 @@ Docs: https://apiclaw.nordsym.com/docs`;
               List your API for free →
             </a>
           </div>
-          </div>
         </div>
       </section>
 
