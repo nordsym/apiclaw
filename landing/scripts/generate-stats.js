@@ -94,7 +94,8 @@ try {
   ).length;
   
   // Direct call providers (hardcoded for now, update when adding new providers)
-  const directCallCount = 10;
+  // Groq, Deepgram, Mistral, Cohere, Together, Stability, AssemblyAI, Serper, OpenAI, Anthropic, ElevenLabs, Replicate, Brave, Resend, Twilio, 46elks, Stripe, SendGrid
+  const directCallCount = 18;
   
   const stats = {
     apiCount: registry.count,
@@ -120,7 +121,7 @@ try {
   const fallback = {
     apiCount: 22392,
     openApiCount: 996,
-    directCallCount: 10,
+    directCallCount: 18,
     categoryCount: 14,
     lastUpdated: new Date().toISOString().split('T')[0],
     generatedAt: new Date().toISOString(),
