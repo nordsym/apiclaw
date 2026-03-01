@@ -290,8 +290,13 @@ Docs: https://apiclaw.nordsym.com/docs`;
 
   return (
     <main className="min-h-screen overflow-x-hidden">
+      {/* Early Access Banner */}
+      <div className="fixed top-0 w-full z-[60] bg-accent text-background text-center py-2 px-4 text-sm font-medium">
+        🚀 <span className="font-bold">Early Access</span> — Be among the first to use the API Layer for AI Agents
+      </div>
+      
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border-subtle">
+      <header className="fixed top-9 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-border-subtle">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-accent/20 flex items-center justify-center text-xl sm:text-2xl logo-float">
@@ -441,7 +446,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
       </header>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-20 px-6 bg-grid">
+      <section className="relative pt-44 pb-20 px-6 bg-grid">
         <div className="hero-glow" />
         
         <div className="max-w-6xl mx-auto relative z-10">
