@@ -1081,7 +1081,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               },
               {
                 q: "What's MCP?",
-                a: "MCP (Model Context Protocol) is the open standard for connecting AI agents to external tools. APIClaw is an MCP server — add one line to your config and your agent can discover and call any API in our registry. Works with Claude Desktop, Cursor, and any MCP-compatible client."
+                a: "MCP (Model Context Protocol) is the open standard for connecting AI agents to external tools. APIClaw is an MCP server — add one line to your config and your agent can discover and call any API in our registry. Works with Claude Desktop, Cursor, and any MCP-compatible agent."
               }
             ].map((faq, i) => (
               <div 
