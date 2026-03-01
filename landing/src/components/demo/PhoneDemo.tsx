@@ -8,6 +8,8 @@ interface WithMessage {
   meta?: string;
   typing?: boolean;
   image?: boolean;
+  audio?: boolean;
+  transcript?: boolean;
   success?: boolean;
   search?: boolean;
   results?: { name: string; match: string; cost: string }[];
@@ -21,27 +23,28 @@ interface WithoutMessage {
 type Message = WithMessage | WithoutMessage;
 
 const WithAPIClaw: WithMessage[] = [
-  { role: "user", text: "I need to generate product images with AI" },
+  { role: "user", text: "I need to transcribe this meeting recording" },
   { role: "assistant", text: "Searching APIs...", search: true },
   { 
     role: "assistant", 
-    text: "Found 3 matches",
+    text: "Found 4 matches",
     results: [
-      { name: "Replicate", match: "98%", cost: "$0.003" },
-      { name: "Stability AI", match: "94%", cost: "$0.006" },
-      { name: "OpenAI DALL-E", match: "91%", cost: "$0.020" },
+      { name: "Deepgram", match: "96%", cost: "$0.0043/min" },
+      { name: "AssemblyAI", match: "94%", cost: "$0.0065/min" },
+      { name: "Rev.ai", match: "91%", cost: "$0.02/min" },
+      { name: "Google STT", match: "89%", cost: "$0.006/min" },
     ]
   },
-  { role: "assistant", text: "Using Replicate SDXL", meta: "Best match · Direct Call ready" },
-  { role: "assistant", text: "Generating...", typing: true },
-  { role: "assistant", text: "Image ready", image: true, success: true },
+  { role: "assistant", text: "Using Deepgram Nova-2", meta: "Best accuracy · Direct Call ready" },
+  { role: "assistant", text: "Transcribing...", typing: true },
+  { role: "assistant", text: "Done", transcript: true, success: true },
 ];
 
 const WithoutAPIClaw: WithoutMessage[] = [
-  { role: "step", text: "Search \"AI image generation API\"" },
+  { role: "step", text: "Search \"speech to text API\"" },
   { role: "step", text: "Open 12 tabs, compare providers" },
   { role: "step", text: "Read documentation for each" },
-  { role: "step", text: "Create account on Replicate" },
+  { role: "step", text: "Create account on Deepgram" },
   { role: "step", text: "Verify email, set up billing" },
   { role: "step", text: "Generate API key" },
   { role: "step", text: "Store key securely in .env" },
@@ -50,7 +53,7 @@ const WithoutAPIClaw: WithoutMessage[] = [
   { role: "step", text: "Finally make first API call" },
 ];
 
-// OpenAI-style logo (hexagon/flower shape)
+// OpenAI-style logo
 function OpenAILogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -121,7 +124,7 @@ export function PhoneDemo() {
               </div>
             </div>
             
-            {/* App Header - ChatGPT style */}
+            {/* App Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
               <div className="flex items-center gap-3">
                 {withClaw ? (
@@ -177,7 +180,7 @@ export function PhoneDemo() {
                     </div>
                   ) : (
                     <div className="flex gap-3">
-                      {/* Avatar - OpenAI style */}
+                      {/* Avatar */}
                       <div className="w-7 h-7 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0">
                         <OpenAILogo className="w-4 h-4 text-white" />
                       </div>
@@ -232,13 +235,18 @@ export function PhoneDemo() {
                         {msg.meta && (
                           <div className="text-zinc-400 text-xs mt-0.5">{msg.meta}</div>
                         )}
-                        {msg.image && (
-                          <div className="mt-2 w-40 aspect-square bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center shadow-md overflow-hidden">
-                            <div className="text-center">
-                              <svg className="w-8 h-8 text-white/60 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        {msg.transcript && (
+                          <div className="mt-2 bg-zinc-50 border border-zinc-200 rounded-xl p-3 max-w-[220px]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
-                              <span className="text-white/80 text-xs font-medium">Generated</span>
+                              <span className="text-xs font-medium text-zinc-700">Transcript</span>
+                            </div>
+                            <div className="space-y-1.5 text-xs text-zinc-600">
+                              <p><span className="font-medium text-zinc-900">Sarah:</span> Let&apos;s review the Q3 metrics...</p>
+                              <p><span className="font-medium text-zinc-900">Mike:</span> Revenue is up 23% from last quarter.</p>
+                              <p className="text-zinc-400">+ 47 more lines</p>
                             </div>
                           </div>
                         )}
@@ -249,7 +257,7 @@ export function PhoneDemo() {
               ))}
             </div>
             
-            {/* Input area - ChatGPT style */}
+            {/* Input area */}
             <div className="p-3 border-t border-zinc-100">
               <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3">
                 <input 
