@@ -126,7 +126,7 @@ export function HeroTabs() {
                   <div className="code-preview-header">terminal</div>
                   <div className="code-preview-body">
                     <pre className="text-sm">
-                      <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw
+                      <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw setup
                     </pre>
                   </div>
                 </div>
