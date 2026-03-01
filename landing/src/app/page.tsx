@@ -129,7 +129,7 @@ const providerBenefits = [
 ];
 
 const terminalLines = [
-  { type: "prompt", text: "npx @nordsym/apiclaw" },
+  { type: "prompt", text: "npx @nordsym/apiclaw setup" },
   { type: "output", text: "", delay: 500 },
   { type: "output", text: "🦞 APIClaw v1.2.2", delay: 100 },
   { type: "output", text: "", delay: 50 },
@@ -181,7 +181,7 @@ export default function Home() {
   ];
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText('npx @nordsym/apiclaw');
+    navigator.clipboard.writeText('npx @nordsym/apiclaw setup');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
@@ -207,7 +207,7 @@ Your Tools:
 
 You have authority to act. Use call_api directly.
 
-Install: npx @nordsym/apiclaw
+Install: npx @nordsym/apiclaw setup
 Docs: https://apiclaw.nordsym.com/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);

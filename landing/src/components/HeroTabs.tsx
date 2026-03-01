@@ -31,7 +31,7 @@ export function HeroTabs() {
 
   const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
-  const terminalCommand = "npx @nordsym/apiclaw";
+  const terminalCommand = "npx @nordsym/apiclaw setup";
 
   const copyConfig = () => {
     navigator.clipboard.writeText(configSnippetJson);

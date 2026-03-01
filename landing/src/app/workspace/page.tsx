@@ -1462,7 +1462,7 @@ function AgentsTab({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const mcpCommand = "npx @nordsym/apiclaw";
+  const mcpCommand = "npx @nordsym/apiclaw setup";
 
   return (
     <div className="space-y-6">
@@ -3725,7 +3725,7 @@ function DocsTab() {
           </div>
           <div>
             <p className="text-sm text-[var(--text-muted)] mb-2">2. Or run directly:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw</pre>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw setup</pre>
           </div>
           <div>
             <p className="text-sm text-[var(--text-muted)] mb-2">3. Interactive CLI mode:</p>
