@@ -968,7 +968,8 @@ Docs: https://apiclaw.nordsym.com/docs`;
               Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              Discovery is free forever. Direct Call has usage-based pricing.
+              Discovery is free forever — search, compare, evaluate at no cost.<br />
+              {statsData.openApiCount.toLocaleString()}+ Open APIs work without any account.
             </p>
           </div>
 
