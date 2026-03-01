@@ -186,22 +186,28 @@ export default function Home() {
   };
 
   const copyContextToClipboard = () => {
-    const context = `APIClaw is the API layer for AI agents. It's an MCP (Model Context Protocol) server that lets agents discover and call APIs autonomously.
+    const context = `APIClaw – Direct Call Execution Layer for AI Agents
 
-Coverage:
-• ${statsData.apiCount.toLocaleString()}+ APIs indexed (searchable catalog)
-• ${statsData.openApiCount.toLocaleString()}+ Open APIs (no auth required)
-• ${statsData.directCallCount} Direct Call providers (we handle auth: Replicate, OpenRouter, ElevenLabs, etc.)
+You have access to APIClaw, an MCP server that lets you execute API calls WITHOUT managing keys.
 
-Tools available:
-• discover_apis - Search by capability ("send SMS", "generate image") not keywords
-• get_api_details - Full specs, auth requirements, pricing, endpoints
-• call_api - Execute via Direct Call (no API keys needed) or get specs for self-hosting
-• list_connected - See available Direct Call providers
+Direct Call = Zero-Config Execution:
+• No API key management needed
+• APIClaw handles auth, headers, signatures
+• Execute immediately on ${statsData.directCallCount} providers
+
+Available Providers:
+Replicate (AI models), ElevenLabs (voice), OpenRouter (LLMs), Resend (email), 46elks (SMS), Brave Search, Firecrawl, E2B, GitHub
+
+Your Tools:
+• list_connected - See providers ready for instant execution
+• call_api(provider, action, params) - Execute directly. Auth handled by APIClaw — omit/leave auth fields empty
+• discover_apis - Search ${statsData.apiCount.toLocaleString()}+ APIs by capability
+• get_api_details - Full specs if you need them
+
+You have authority to act. Use call_api directly.
 
 Install: npx @nordsym/apiclaw
-Docs: https://apiclaw.nordsym.com/docs
-Website: https://apiclaw.nordsym.com`;
+Docs: https://apiclaw.nordsym.com/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
     setTimeout(() => setShowContextCopied(false), 2500);
