@@ -197,21 +197,26 @@ export default function Home() {
   };
 
   const copyContextToClipboard = () => {
-    const context = `APIClaw – Direct Call Execution Layer for AI Agents
+    const context = `APIClaw – The API Layer for AI Agents
 
 You have access to APIClaw, an MCP server that lets you execute API calls WITHOUT managing keys.
 
 Direct Call = Zero-Config Execution:
 • No API key management needed
 • APIClaw handles auth, headers, signatures
-• Execute immediately on ${statsData.directCallCount} providers
+• ${statsData.directCallCount} providers ready for instant execution
 
-Available Providers:
-Replicate (AI models), ElevenLabs (voice), OpenRouter (LLMs), Resend (email), 46elks (SMS), Brave Search, Firecrawl, E2B, GitHub
+Available Direct Call Providers:
+AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
+Voice: ElevenLabs, Deepgram, AssemblyAI
+SMS: 46elks, Twilio
+Email: Resend
+Search: Brave Search, Serper, Firecrawl
+Code: E2B, GitHub
 
 Your Tools:
 • list_connected - See providers ready for instant execution
-• call_api(provider, action, params) - Execute directly. Auth handled by APIClaw — omit/leave auth fields empty
+• call_api(provider, action, params) - Execute directly. Auth handled by APIClaw
 • discover_apis - Search ${statsData.apiCount.toLocaleString()}+ APIs by capability
 • get_api_details - Full specs if you need them
 
