@@ -983,7 +983,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  10+ providers (AI Models, Scraping, Code, Search)
+                  18 providers (AI Models, Scraping, Code, Search)
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
@@ -1056,7 +1056,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               },
               {
                 q: "How does Direct Call work?",
-                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 10+ providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
+                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 18 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
               },
               {
                 q: "How are API credentials secured?",
