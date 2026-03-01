@@ -201,30 +201,29 @@ export default function Home() {
 
 You have access to APIClaw, an MCP server that lets you execute API calls WITHOUT managing keys.
 
-Highlights:
+Instant highlights:
 • Generate images/videos (Replicate: Flux Pro, SDXL, Luma Dream Machine)
 • Voice synthesis (ElevenLabs)
 • Live web scraping (Firecrawl)
 • Code sandbox (E2B)
 • Multi-LLM routing (OpenRouter)
 
-All ${statsData.directCallCount} Direct Call Providers:
+${statsData.directCallCount}+ Direct Call providers including:
 AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
 Voice: ElevenLabs, Deepgram, AssemblyAI
-SMS: 46elks, Twilio
-Email: Resend
 Search: Brave Search, Serper, Firecrawl
 Code: E2B, GitHub
+Utility: Resend (email), 46elks, Twilio (SMS)
 
 Your Tools:
-• call_api(provider, action, params) - Execute directly. Auth handled by APIClaw
-• discover_apis(query) - Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "GDPR-compliant email" → best matches)
-• get_api_details(id) - Full specs, pricing, limits
-• list_connected - See all ready providers
+• call_api(provider, action, params) – Execute immediately (leave auth fields empty – APIClaw handles it)
+• discover_apis(query) – Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "image generation API")
+• get_api_details(id) – Full specs, pricing, limits
+• list_connected – See all ready providers
 
 When an API call helps the task, execute it directly.
 
-Install: npx @nordsym/apiclaw mcp-install
+Get started in seconds: npx @nordsym/apiclaw mcp-install
 Docs: https://apiclaw.nordsym.com/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
