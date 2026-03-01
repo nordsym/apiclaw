@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.3.11",
+  "version": "1.3.12",
   "description": "The API layer for AI agents. 22,000+ APIs. Direct Call. Works with any MCP-compatible agent.",
   "type": "module",
   "main": "dist/index.js",
