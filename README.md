@@ -1,230 +1,481 @@
-<h1 align="center">🦞 APIClaw</h1>
+# APIClaw
 
-<p align="center">
-  <strong>The API Layer for AI Agents</strong>
-</p>
+> **Universal API access for AI agents.** Connect any MCP client to thousands of APIs with zero configuration.
 
-<p align="center">
-  22,000+ APIs. One MCP config. Direct Call = no keys needed.
-</p>
-
-<p align="center">
-  <a href="https://apiclaw.com">Website</a> •
-  <a href="#direct-call">Direct Call</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#for-providers">For Providers</a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/APIs-22,392-ef4444" alt="APIs" />
-  <img src="https://img.shields.io/badge/Categories-14-171717" alt="Categories" />
-  <img src="https://img.shields.io/badge/Direct_Call-11_Providers-00d4ff" alt="Direct Call" />
-  <img src="https://img.shields.io/badge/MCP-Compatible-00d4ff" alt="MCP Compatible" />
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License" />
-</p>
-
----
-
-## Why APIClaw?
-
-AI agents don't browse documentation. They query capabilities and execute.
-
-APIClaw is the missing layer between agents and the API economy:
-
-- **Discovery** — 22,000+ APIs, searchable by capability
-- **Direct Call** — Execute without API keys (we handle auth)
-- **One config** — Add APIClaw MCP, access everything
-
----
-
-## Direct Call
-
-**No API keys. No setup. Just call.**
-
-Your agent can execute these APIs directly through APIClaw:
-
-```javascript
-// Run any ML model
-mcp.call("call_api", {
-  provider: "replicate",
-  action: "run_model",
-  params: {
-    model: "stability-ai/sdxl",
-    input: { prompt: "a cyber-lobster in neon lights" }
-  }
-})
-
-// Access 100+ LLMs through one endpoint
-mcp.call("call_api", {
-  provider: "openrouter",
-  action: "chat",
-  params: {
-    model: "anthropic/claude-3-opus",
-    messages: [{ role: "user", content: "Hello!" }]
-  }
-})
-
-// Execute code in secure sandbox
-mcp.call("call_api", {
-  provider: "e2b",
-  action: "run_code",
-  params: {
-    language: "python",
-    code: "print('Hello from sandbox!')"
-  }
-})
-
-// Scrape any website
-mcp.call("call_api", {
-  provider: "firecrawl",
-  action: "scrape",
-  params: { url: "https://example.com" }
-})
-```
-
-### Available Direct Call Providers
-
-| Provider | What It Does | Actions |
-|----------|--------------|---------|
-| **OpenRouter** | 100+ AI models (Claude, GPT, Llama, etc.) | `chat` |
-| **Replicate** | Any ML model (Stable Diffusion, Whisper, etc.) | `run_model`, `get_prediction` |
-| **E2B** | Secure code sandbox for agents | `run_code`, `run_shell` |
-| **Firecrawl** | Web scraping & crawling | `scrape`, `crawl` |
-| **ElevenLabs** | Voice synthesis | `text_to_speech` |
-| **GitHub** | Repos, issues, code search | `search`, `repos`, `issues` |
-| **Brave Search** | Web search | `search` |
-| **Resend** | Transactional email | `send_email` |
-| **46elks** | SMS/Voice (Swedish/EU) | `send_sms` |
-| **Twilio** | SMS/Voice (Global) | `send_sms` |
-| **CoinGecko** | Crypto prices & data | `price`, `markets` |
+[![npm version](https://img.shields.io/npm/v/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
 ## Quick Start
 
 ```bash
-npx @nordsym/apiclaw
+# Auto-detect and configure all MCP clients
+npx @nordsym/apiclaw setup
+
+# That's it! Restart your AI assistant and ask:
+# "List available APIs" or "Send an SMS via 46elks"
 ```
 
-### Add to Claude Desktop
+APIClaw automatically detects Claude Desktop, Cursor, Windsurf, Cline, and Continue — then configures itself as an MCP server in seconds.
+
+---
+
+## What is APIClaw?
+
+APIClaw is an MCP (Model Context Protocol) server that gives AI coding assistants access to real-world APIs:
+
+- **📱 SMS & Voice** — 46elks, Twilio
+- **📧 Email** — Resend, SendGrid
+- **💳 Payments** — Stripe
+- **🔍 Search** — Brave Search
+- **🤖 AI** — OpenRouter, ElevenLabs
+- **...and 100+ more** — growing weekly
+
+Instead of manually configuring API keys and reading documentation, just tell your AI: *"Send a confirmation SMS to +46701234567"* — and it works.
+
+---
+
+## Installation
+
+### Option 1: Auto-Setup (Recommended)
+
+```bash
+npx @nordsym/apiclaw setup
+```
+
+This will:
+1. 🔍 Detect installed MCP clients
+2. 📝 Add APIClaw to their config files
+3. ✅ Verify the setup
+
+### Option 2: Manual Installation
+
+```bash
+npm install -g @nordsym/apiclaw
+apiclaw setup
+```
+
+### Option 3: Use npx (No Install)
+
+Just use `npx @nordsym/apiclaw` anywhere — it downloads on demand.
+
+---
+
+## Commands
+
+### `setup`
+
+Configure APIClaw as an MCP server.
+
+```bash
+# Auto-detect and configure all clients
+npx @nordsym/apiclaw setup
+
+# Configure specific client
+npx @nordsym/apiclaw setup --client claude-desktop
+npx @nordsym/apiclaw setup --client cursor
+npx @nordsym/apiclaw setup --client windsurf
+npx @nordsym/apiclaw setup --client cline
+npx @nordsym/apiclaw setup --client continue
+
+# Custom config path
+npx @nordsym/apiclaw setup --config /path/to/config.json
+
+# Link a workspace
+npx @nordsym/apiclaw setup --workspace ws_abc123
+
+# Preview changes without applying
+npx @nordsym/apiclaw setup --dry-run
+
+# Force overwrite existing config
+npx @nordsym/apiclaw setup --force
+
+# Interactive mode
+npx @nordsym/apiclaw setup --wizard
+```
+
+### `doctor`
+
+Diagnose your APIClaw setup.
+
+```bash
+npx @nordsym/apiclaw doctor
+```
+
+Output:
+```
+🔍 APIClaw Health Check
+========================
+
+System:
+  ✓ Node.js v20.11.0
+  ✓ npm 10.2.4
+  ✓ npx available
+
+MCP Clients:
+  ✓ Claude Desktop - Configured ✓
+  ✓ Cursor - Configured ✓
+  ✗ Windsurf - Not installed
+
+Connectivity:
+  ✓ api.apiclaw.com reachable
+
+Status: All systems operational ✓
+```
+
+### `restore`
+
+Restore config from backup.
+
+```bash
+# Restore most recent backup
+npx @nordsym/apiclaw restore
+
+# List available backups
+npx @nordsym/apiclaw restore --list
+
+# Restore specific backup
+npx @nordsym/apiclaw restore --backup config.backup.1709150400.json
+```
+
+### `uninstall`
+
+Remove APIClaw from all configured clients.
+
+```bash
+npx @nordsym/apiclaw uninstall
+
+# Remove from specific client
+npx @nordsym/apiclaw uninstall --client cursor
+```
+
+---
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--client <name>` | Target specific MCP client |
+| `--config <path>` | Use custom config file path |
+| `--workspace <id>` | Link an APIClaw workspace |
+| `--dry-run` | Preview changes without applying |
+| `--force` | Overwrite existing APIClaw config |
+| `--wizard` | Interactive setup mode |
+| `--no-backup` | Skip creating backup (not recommended) |
+| `--verbose` | Show detailed output |
+| `--version` | Show version number |
+| `--help` | Show help |
+
+---
+
+## Supported MCP Clients
+
+| Client | macOS | Windows | Linux |
+|--------|:-----:|:-------:|:-----:|
+| **Claude Desktop** | ✅ | ✅ | ✅ |
+| **Cursor** | ✅ | ✅ | ✅ |
+| **Windsurf** | ✅ | ✅ | ✅ |
+| **Cline** (VS Code) | ✅ | ✅ | ✅ |
+| **Continue** | ✅ | ✅ | ✅ |
+| **Custom** | ✅ | ✅ | ✅ |
+
+### Config Locations
+
+<details>
+<summary>Claude Desktop</summary>
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/Claude/claude_desktop_config.json` |
+
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Cursor/User/globalStorage/cursor.mcp/config.json` |
+| Windows | `%APPDATA%\Cursor\User\globalStorage\cursor.mcp\config.json` |
+| Linux | `~/.config/Cursor/User/globalStorage/cursor.mcp/config.json` |
+
+</details>
+
+<details>
+<summary>Windsurf</summary>
+
+| OS | Path |
+|----|------|
+| macOS | `~/.codeium/windsurf/mcp_config.json` |
+| Windows | `%USERPROFILE%\.codeium\windsurf\mcp_config.json` |
+| Linux | `~/.codeium/windsurf/mcp_config.json` |
+
+</details>
+
+<details>
+<summary>Cline</summary>
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` |
+| Windows | `%APPDATA%\Code\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json` |
+| Linux | `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` |
+
+</details>
+
+<details>
+<summary>Continue</summary>
+
+| OS | Path |
+|----|------|
+| macOS | `~/.continue/config.json` |
+| Windows | `%USERPROFILE%\.continue\config.json` |
+| Linux | `~/.continue/config.json` |
+
+</details>
+
+---
+
+## Enterprise Deployment
+
+Deploy APIClaw to your entire development team.
+
+### Environment Variables
+
+```bash
+# Pre-configure workspace for all users
+export APICLAW_WORKSPACE="ws_enterprise_123"
+
+# Point to self-hosted instance
+export APICLAW_API_URL="https://api.company.com/apiclaw"
+
+# Disable telemetry
+export APICLAW_DISABLE_TELEMETRY="true"
+
+npx @nordsym/apiclaw setup
+```
+
+### Generate Deployment Script
+
+```bash
+# Generate cross-platform setup script
+npx @nordsym/apiclaw setup --enterprise --output deploy.sh
+```
+
+The generated script handles:
+- OS detection
+- Client detection
+- Config injection
+- Verification
+- Error reporting
+
+### MDM/Group Policy
+
+See [Enterprise Deployment Guide](docs/enterprise-deployment.md) for:
+- Jamf/Kandji/Mosyle (macOS)
+- Intune/Group Policy (Windows)
+- Ansible/Chef/Puppet (Linux)
+
+---
+
+## Troubleshooting
+
+### "Permission denied"
+
+```bash
+# Option 1: Run with sudo
+sudo npx @nordsym/apiclaw setup
+
+# Option 2: Fix permissions
+chmod 644 ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+### "Config file not found"
+
+The MCP client hasn't created its config yet:
+1. Open the client (Claude Desktop, Cursor, etc.)
+2. Close it
+3. Try setup again
+
+Or specify a custom path:
+```bash
+npx @nordsym/apiclaw setup --config /path/to/config.json
+```
+
+### "Invalid JSON"
+
+Your config file has syntax errors:
+```bash
+# Restore from backup
+npx @nordsym/apiclaw restore --list
+npx @nordsym/apiclaw restore
+
+# Or manually fix the JSON
+```
+
+### "Already configured"
+
+APIClaw is already set up. To update:
+```bash
+npx @nordsym/apiclaw setup --force
+```
+
+### Still having issues?
+
+```bash
+# Run diagnostics
+npx @nordsym/apiclaw doctor --verbose
+
+# Get help
+https://docs.apiclaw.com/setup
+https://github.com/nordsym/apiclaw/issues
+```
+
+---
+
+## How It Works
+
+APIClaw modifies your MCP client's config file to register itself as a server:
 
 ```json
 {
   "mcpServers": {
     "apiclaw": {
       "command": "npx",
-      "args": ["@nordsym/apiclaw"]
+      "args": ["-y", "@nordsym/apiclaw"]
     }
   }
 }
 ```
 
-Works with Claude, GPT (via MCP bridge), Cursor, Cline, and any MCP-compatible client.
+When your AI assistant starts, it launches APIClaw as an MCP server. APIClaw then:
+1. Exposes available APIs as MCP tools
+2. Handles authentication and rate limiting
+3. Executes API calls on behalf of the AI
 
 ---
 
-## Discovery
+## Safety Features
 
-22,392 APIs indexed across 14 categories:
+### Automatic Backups
+
+Before modifying any config, APIClaw creates a timestamped backup:
+```
+claude_desktop_config.backup.1709150400.json
+```
+
+### Non-Destructive
+
+- Never overwrites existing configurations
+- Deep merges APIClaw into `mcpServers`
+- Preserves all other settings
+
+### Validation
+
+- Parses JSON before and after modifications
+- Verifies required fields exist
+- Rolls back on any error
+
+---
+
+## Dry-Run Mode
+
+Test API calls without actually executing them. Perfect for debugging, development, and agent testing.
+
+### Usage
 
 ```javascript
-// Find APIs by capability
-mcp.call("discover_apis", {
-  query: "image generation AI",
-  max_results: 5
+// In MCP tool call
+call_api({
+  provider: "46elks",
+  action: "send_sms",
+  params: {
+    to: "+46701234567",
+    message: "Hello from dry-run!"
+  },
+  dry_run: true  // ← No actual API call made
 })
-
-// Get full details
-mcp.call("get_api_details", {
-  api_id: "replicate"
-})
-// → endpoints, auth, pricing, examples
 ```
 
-### Categories
+### Response
 
-| Category | APIs | Category | APIs |
-|----------|------|----------|------|
-| Utilities | 7,069 | Finance | 1,179 |
-| Analytics | 2,600 | Commerce | 1,151 |
-| Development | 2,278 | Location | 976 |
-| Cloud | 1,463 | Communication | 939 |
-| AI & ML | 1,259 | Business | 923 |
-| Entertainment | 1,212 | Health | 740 |
-| Security | 491 | Social | 112 |
-
----
-
-## For Providers
-
-**Get your API in front of AI agents.**
-
-Agents are the next wave of API consumers. They don't see your landing page—they query capabilities.
-
-### Self-Service Dashboard
-
-1. Sign up at [apiclaw.com/providers](https://apiclaw.com/providers)
-2. Add your API spec
-3. Configure Direct Call (optional)
-4. Go live
-
-**Direct Call benefits:**
-- Agents use your API without key setup
-- You provide one service account key
-- We handle auth routing
-- You get usage analytics
-
-→ [apiclaw.com/providers](https://apiclaw.com/providers)
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Your Agent                            │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ MCP Protocol
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       🦞 APIClaw                             │
-│                                                              │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│   │  Discovery   │  │  Direct Call │  │   Provider   │     │
-│   │   22k APIs   │  │  11 Live     │  │   Dashboard  │     │
-│   └──────────────┘  └──────────────┘  └──────────────┘     │
-│                                                              │
-└─────────────────────────────┬───────────────────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        ▼                     ▼                     ▼
-  ┌──────────┐         ┌──────────┐         ┌──────────┐
-  │ OpenRouter│        │ Replicate │        │   E2B    │
-  │ Firecrawl │        │ ElevenLabs│        │  GitHub  │
-  │   + 5     │        │   Brave   │        │  + more  │
-  └──────────┘         └──────────┘         └──────────┘
+```json
+{
+  "dry_run": true,
+  "provider": "46elks",
+  "action": "send_sms",
+  "would_send": {
+    "url": "https://api.46elks.com/a1/sms",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Basic [base64(username:password)]"
+    },
+    "body": {
+      "from": "APIClaw",
+      "to": "+46701234567",
+      "message": "Hello from dry-run!"
+    }
+  },
+  "mock_response": {
+    "success": true,
+    "data": {
+      "id": "mock_sms_123",
+      "status": "delivered"
+    },
+    "estimated_cost": "~0.35-0.52 SEK"
+  },
+  "notes": [
+    "⚠️ DRY-RUN MODE: No actual API call was made",
+    "This shows what WOULD be sent if you remove dry_run: true"
+  ]
+}
 ```
 
+### Benefits
+
+- **💰 No cost** — Test without burning API credits
+- **🔍 Debug** — See exact request that would be sent
+- **🧪 Test** — Validate agent workflows before going live
+- **📋 Mock data** — Get realistic response shapes for development
+
+### Supported Providers
+
+All Direct Call providers support dry-run:
+- 46elks, Twilio (SMS)
+- Resend (Email)
+- Brave Search
+- OpenRouter (LLM)
+- ElevenLabs (TTS)
+- Replicate (AI models)
+- Firecrawl (Web scraping)
+- GitHub
+- E2B (Code sandbox)
+
 ---
 
-## MCP Tools
+## Development
 
-| Tool | Description |
-|------|-------------|
-| `discover_apis` | Search 22k APIs by capability |
-| `get_api_details` | Full spec, auth, endpoints |
-| `list_connected` | Show Direct Call providers |
-| `call_api` | Execute via Direct Call |
-| `list_categories` | Browse all 14 categories |
+```bash
+# Clone the repo
+git clone https://github.com/nordsym/apiclaw.git
+cd apiclaw
 
----
+# Install dependencies
+npm install
 
-## Links
+# Build
+npm run build
 
-- **Website:** [apiclaw.com](https://apiclaw.com)
-- **Providers:** [apiclaw.com/providers](https://apiclaw.com/providers)
-- **npm:** [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)
-- **Built by:** [NordSym](https://nordsym.com)
+# Run locally
+npm run dev
+
+# Test setup locally
+npm run setup:test
+```
 
 ---
 
@@ -234,40 +485,9 @@ MIT © [NordSym](https://nordsym.com)
 
 ---
 
-<p align="center">
-  <strong>🦞 APIClaw</strong><br/>
-  <em>The API layer for the agentic era.</em>
-</p>
+## Links
 
-## 💳 Metered Billing (Pay-per-Call)
-
-APIClaw supports usage-based billing at **$0.002 per API call**.
-
-### Setup
-```typescript
-// 1. Customer signs up for metered billing
-const result = await mcp.call('setup_metered_billing', {
-  email: 'customer@example.com'
-});
-// Returns checkout URL - customer completes payment setup
-
-// 2. After checkout, API calls are tracked automatically
-// Usage is reported to Stripe meter after each successful call
-
-// 3. Check usage during billing period
-const usage = await mcp.call('get_usage_summary', {
-  subscription_id: 'sub_xxx'
-});
-// Returns: { total_calls: 150, estimated_cost: "$0.30" }
-```
-
-### Pricing Examples
-| Calls/Month | Cost |
-|-------------|------|
-| 100 | $0.20 |
-| 1,000 | $2.00 |
-| 10,000 | $20.00 |
-| 100,000 | $200.00 |
-
-### Direct Call Mode
-If you have your own API keys, Direct Call bypasses metered billing - you pay providers directly.
+- **Website:** [apiclaw.com](https://apiclaw.com)
+- **Documentation:** [docs.apiclaw.com](https://docs.apiclaw.com)
+- **GitHub:** [github.com/nordsym/apiclaw](https://github.com/nordsym/apiclaw)
+- **npm:** [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)

@@ -224,6 +224,7 @@ export const deleteAction = mutation({
 
 /**
  * Publish Direct Call - set status to live
+ * Also marks apiListed earn progress for the provider's workspace
  */
 export const publishDirectCall = mutation({
   args: {
@@ -231,14 +232,93 @@ export const publishDirectCall = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
+    
+    // Get the direct call config to find the provider
+    const config = await ctx.db.get(args.id);
+    if (!config) {
+      throw new Error("Direct Call config not found");
+    }
+
     await ctx.db.patch(args.id, {
       status: "live",
       publishedAt: now,
       updatedAt: now,
     });
+
+    // Try to mark apiListed for earn progress
+    // First, get the provider to find their session/workspace
+    const provider = await ctx.db.get(config.providerId);
+    if (provider) {
+      // Find workspace by provider email
+      const workspace = await ctx.db
+        .query("workspaces")
+        .withIndex("by_email", (q) => q.eq("email", provider.email))
+        .first();
+
+      if (workspace) {
+        // Update earn progress
+        const earnProgress = await ctx.db
+          .query("earnProgress")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace._id))
+          .first();
+
+        if (earnProgress && !earnProgress.apiListed) {
+          const newTotal = calculateEarnTotal({ ...earnProgress, apiListed: true });
+          await ctx.db.patch(earnProgress._id, {
+            apiListed: true,
+            apiListedAt: now,
+            totalEarned: newTotal,
+            updatedAt: now,
+          });
+          // Add 10 calls to workspace limit
+          await ctx.db.patch(workspace._id, {
+            usageLimit: workspace.usageLimit + 10,
+            updatedAt: now,
+          });
+        } else if (!earnProgress) {
+          // Create earn progress with apiListed
+          await ctx.db.insert("earnProgress", {
+            workspaceId: workspace._id,
+            firstDirectCall: false,
+            apisUsed: [],
+            apisUsedComplete: false,
+            agentListed: false,
+            apiListed: true,
+            apiListedAt: now,
+            byokSetup: false,
+            githubStarred: false,
+            twitterFollowed: false,
+            referralCount: 0,
+            totalEarned: 10,
+            createdAt: now,
+            updatedAt: now,
+          });
+          // Add 10 calls to workspace limit
+          await ctx.db.patch(workspace._id, {
+            usageLimit: workspace.usageLimit + 10,
+            updatedAt: now,
+          });
+        }
+      }
+    }
+
     return { success: true, publishedAt: now };
   },
 });
+
+// Helper to calculate earn total (duplicated to avoid circular import)
+function calculateEarnTotal(progress: any): number {
+  let total = 0;
+  if (progress.firstDirectCall) total += 15;
+  if (progress.apisUsedComplete) total += 10;
+  if (progress.agentListed) total += 10;
+  if (progress.apiListed) total += 10;
+  if (progress.byokSetup) total += 5;
+  if (progress.githubStarred) total += 10;
+  if (progress.twitterFollowed) total += 5;
+  total += (progress.referralCount || 0) * 10;
+  return total;
+}
 
 /**
  * Set Direct Call status (draft, testing, live)

@@ -17,6 +17,7 @@ export const createLog = mutation({
     status: v.union(v.literal("success"), v.literal("error")),
     latencyMs: v.number(),
     errorMessage: v.optional(v.string()),
+    subagentId: v.optional(v.string()), // from X-APIClaw-Subagent header
   },
   handler: async (ctx, args) => {
     // Verify session and get workspace
@@ -33,6 +34,7 @@ export const createLog = mutation({
     return await ctx.db.insert("apiLogs", {
       workspaceId: session.workspaceId,
       sessionToken: args.token,
+      subagentId: args.subagentId,
       provider: args.provider,
       action: args.action,
       status: args.status,
@@ -56,11 +58,13 @@ export const createLogInternal = mutation({
     status: v.union(v.literal("success"), v.literal("error")),
     latencyMs: v.number(),
     errorMessage: v.optional(v.string()),
+    subagentId: v.optional(v.string()), // from X-APIClaw-Subagent header
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("apiLogs", {
       workspaceId: args.workspaceId,
       sessionToken: args.sessionToken,
+      subagentId: args.subagentId,
       provider: args.provider,
       action: args.action,
       status: args.status,
@@ -85,11 +89,13 @@ export const getLogs = query({
     cursor: v.optional(v.number()), // createdAt timestamp for pagination
     status: v.optional(v.union(v.literal("success"), v.literal("error"), v.literal("all"))),
     provider: v.optional(v.string()),
+    subagentId: v.optional(v.string()), // filter by subagent
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 50;
     const status = args.status ?? "all";
     const provider = args.provider;
+    const subagentId = args.subagentId;
     const cursor = args.cursor;
 
     // Verify session
@@ -127,6 +133,16 @@ export const getLogs = query({
       filteredLogs = filteredLogs.filter((log) => log.provider === provider);
     }
 
+    // Filter by subagent
+    if (subagentId) {
+      if (subagentId === "main") {
+        // Main agent calls (no subagentId)
+        filteredLogs = filteredLogs.filter((log) => !log.subagentId);
+      } else {
+        filteredLogs = filteredLogs.filter((log) => log.subagentId === subagentId);
+      }
+    }
+
     const hasMore = filteredLogs.length > limit;
     const logs = filteredLogs.slice(0, limit);
 
@@ -138,6 +154,7 @@ export const getLogs = query({
         status: log.status,
         latencyMs: log.latencyMs,
         errorMessage: log.errorMessage,
+        subagentId: log.subagentId || null,
         createdAt: log.createdAt,
       })),
       hasMore,

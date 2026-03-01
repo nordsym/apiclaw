@@ -49,19 +49,32 @@ export default defineSchema({
     tier: v.string(), // "free" | "pro" | "enterprise"
     usageCount: v.number(), // total API calls made
     usageLimit: v.number(), // max API calls for tier
+    // Main agent identification
+    mainAgentId: v.optional(v.string()), // UUID, auto-generated on first call
+    mainAgentName: v.optional(v.string()), // Auto-generated name (e.g., "Crimson Phoenix")
     // Stripe billing fields
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
     billingPlan: v.optional(v.string()), // "free" | "usage_based" | "starter" | "pro" | "scale"
     creditBalance: v.optional(v.number()), // prepaid credits in cents
     lastBillingDate: v.optional(v.number()),
+    // Payment method fields
+    hasPaymentMethod: v.optional(v.boolean()),
+    paymentMethodType: v.optional(v.string()),
+    cardBrand: v.optional(v.string()),
+    cardLast4: v.optional(v.string()),
+    // Referral fields
+    referralCode: v.optional(v.string()), // CLAW-XXXXXX format
+    referredBy: v.optional(v.id("workspaces")), // who referred this user
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_email", ["email"])
     .index("by_stripeCustomerId", ["stripeCustomerId"])
     .index("by_stripeSubscriptionId", ["stripeSubscriptionId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_referralCode", ["referralCode"])
+    .index("by_mainAgentId", ["mainAgentId"]),
 
   // Invoices (Stripe invoice records)
   invoices: defineTable({
@@ -105,6 +118,19 @@ export default defineSchema({
   })
     .index("by_sessionToken", ["sessionToken"])
     .index("by_workspaceId", ["workspaceId"]),
+
+  // Subagent tracking (tasks spawned by main agent)
+  subagents: defineTable({
+    workspaceId: v.id("workspaces"),
+    subagentId: v.string(), // from X-APIClaw-Subagent header
+    name: v.optional(v.string()), // optional display name
+    callCount: v.number(),
+    firstSeenAt: v.number(),
+    lastActiveAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_workspaceId_subagentId", ["workspaceId", "subagentId"])
+    .index("by_lastActiveAt", ["lastActiveAt"]),
 
   // Magic links for workspace email verification
   workspaceMagicLinks: defineTable({
@@ -383,6 +409,7 @@ export default defineSchema({
   apiLogs: defineTable({
     workspaceId: v.id("workspaces"),
     sessionToken: v.string(),
+    subagentId: v.optional(v.string()), // from X-APIClaw-Subagent header
     provider: v.string(),
     action: v.string(),
     status: v.union(v.literal("success"), v.literal("error")),
@@ -392,7 +419,8 @@ export default defineSchema({
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_createdAt", ["createdAt"])
-    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"]),
+    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"])
+    .index("by_subagentId", ["subagentId"]),
 
   // ============================================
   // WAITLIST (for Direct Call provider leads)
@@ -508,6 +536,47 @@ export default defineSchema({
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_provider", ["workspaceId", "provider"]),
+
+  // ============================================
+  // EARN PROGRESS TRACKING
+  // ============================================
+
+  earnProgress: defineTable({
+    workspaceId: v.id("workspaces"),
+
+    // Usage tasks
+    firstDirectCall: v.boolean(),
+    firstDirectCallAt: v.optional(v.number()),
+
+    apisUsed: v.array(v.string()), // Track unique provider/action combos
+    apisUsedComplete: v.boolean(),
+
+    agentListed: v.boolean(),
+    agentListedAt: v.optional(v.number()),
+
+    apiListed: v.boolean(),
+    apiListedAt: v.optional(v.number()),
+
+    byokSetup: v.boolean(),
+    byokSetupAt: v.optional(v.number()),
+
+    // Growth tasks
+    githubStarred: v.boolean(),
+    githubStarredAt: v.optional(v.number()),
+
+    twitterFollowed: v.boolean(),
+    twitterFollowedAt: v.optional(v.number()),
+
+    // Referrals (tracked separately but stored here for convenience)
+    referralCount: v.number(),
+
+    // Calculated total
+    totalEarned: v.number(),
+
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"]),
 
   // ============================================
   // FEEDBACK SYSTEM

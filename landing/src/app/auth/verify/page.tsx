@@ -23,6 +23,7 @@ interface VerifyResult {
 function VerifyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const referralCode = searchParams.get("ref"); // Referral code from signup URL
   
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [error, setError] = useState<string>("");
@@ -43,17 +44,23 @@ function VerifyContent() {
       return;
     }
 
-    verifyToken(token);
-  }, [token]);
+    verifyToken(token, referralCode || undefined);
+  }, [token, referralCode]);
 
-  async function verifyToken(token: string) {
+  async function verifyToken(token: string, refCode?: string) {
     try {
+      // Build args with optional referral code
+      const args: { token: string; referralCode?: string } = { token };
+      if (refCode) {
+        args.referralCode = refCode;
+      }
+
       const response = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           path: "workspaces:verifyMagicLink",
-          args: { token },
+          args,
         }),
       });
 

@@ -88,8 +88,18 @@ try {
   });
   const uniqueCategories = Object.keys(categoryBreakdown);
   
+  // Count open APIs (no auth required) - case insensitive
+  const openApiCount = registry.apis.filter(api => 
+    !api.auth || api.auth === '' || api.auth.toLowerCase() === 'none'
+  ).length;
+  
+  // Direct call providers (hardcoded for now, update when adding new providers)
+  const directCallCount = 10;
+  
   const stats = {
     apiCount: registry.count,
+    openApiCount: openApiCount,
+    directCallCount: directCallCount,
     categoryCount: uniqueCategories.length,
     lastUpdated: registry.lastUpdated || new Date().toISOString().split('T')[0],
     generatedAt: new Date().toISOString(),
@@ -109,6 +119,8 @@ try {
   // Write fallback stats
   const fallback = {
     apiCount: 22392,
+    openApiCount: 996,
+    directCallCount: 10,
     categoryCount: 14,
     lastUpdated: new Date().toISOString().split('T')[0],
     generatedAt: new Date().toISOString(),

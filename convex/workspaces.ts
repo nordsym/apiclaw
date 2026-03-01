@@ -27,13 +27,24 @@ export const createMagicLink = mutation({
   },
 });
 
+// Generate a unique referral code (CLAW-XXXXXX format)
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `CLAW-${code}`;
+}
+
 // Verify magic link and create workspace + session
 export const verifyMagicLink = mutation({
   args: { 
     token: v.string(),
     fingerprint: v.optional(v.string()),
+    referralCode: v.optional(v.string()), // Referral code from signup URL
   },
-  handler: async (ctx, { token, fingerprint }) => {
+  handler: async (ctx, { token, fingerprint, referralCode }) => {
     const magicLink = await ctx.db
       .query("workspaceMagicLinks")
       .withIndex("by_token", (q) => q.eq("token", token))
@@ -60,18 +71,88 @@ export const verifyMagicLink = mutation({
       .withIndex("by_email", (q) => q.eq("email", magicLink.email))
       .first();
 
+    let isNewUser = false;
     if (!workspace) {
-      // Create new workspace with free tier
+      isNewUser = true;
+
+      // Generate unique referral code for new user
+      let newReferralCode: string;
+      let attempts = 0;
+      do {
+        newReferralCode = generateReferralCode();
+        const existing = await ctx.db
+          .query("workspaces")
+          .withIndex("by_referralCode", (q) => q.eq("referralCode", newReferralCode))
+          .first();
+        if (!existing) break;
+        attempts++;
+      } while (attempts < 10);
+
+      // Create new workspace with free tier + referral code
       const workspaceId = await ctx.db.insert("workspaces", {
         email: magicLink.email,
         status: "active",
         tier: "free",
         usageCount: 0,
         usageLimit: 50, // 50 free API calls
+        referralCode: newReferralCode!,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
       workspace = await ctx.db.get(workspaceId);
+    }
+
+    // Process referral for new users
+    if (isNewUser && referralCode) {
+      // Find referrer by code
+      const referrer = await ctx.db
+        .query("workspaces")
+        .withIndex("by_referralCode", (q) => q.eq("referralCode", referralCode))
+        .first();
+
+      if (referrer && referrer._id !== workspace!._id) {
+        // Update new user's referredBy
+        await ctx.db.patch(workspace!._id, {
+          referredBy: referrer._id,
+          updatedAt: Date.now(),
+        });
+
+        // Get or create referrer's earn progress
+        let referrerProgress = await ctx.db
+          .query("earnProgress")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", referrer._id))
+          .first();
+
+        if (!referrerProgress) {
+          await ctx.db.insert("earnProgress", {
+            workspaceId: referrer._id,
+            firstDirectCall: false,
+            apisUsed: [],
+            apisUsedComplete: false,
+            agentListed: false,
+            apiListed: false,
+            byokSetup: false,
+            githubStarred: false,
+            twitterFollowed: false,
+            referralCount: 1,
+            totalEarned: 10,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        } else {
+          await ctx.db.patch(referrerProgress._id, {
+            referralCount: referrerProgress.referralCount + 1,
+            totalEarned: referrerProgress.totalEarned + 10,
+            updatedAt: Date.now(),
+          });
+        }
+
+        // Credit referrer with +10 API calls
+        await ctx.db.patch(referrer._id, {
+          usageLimit: referrer.usageLimit + 10,
+          updatedAt: Date.now(),
+        });
+      }
     }
 
     // Create agent session
@@ -92,6 +173,7 @@ export const verifyMagicLink = mutation({
         id: workspace!._id,
         email: workspace!.email,
         tier: workspace!.tier,
+        referralCode: workspace!.referralCode,
       },
     };
   },

@@ -74,6 +74,8 @@ import {
   UsageExceededBanner,
 } from "@/components/CheckoutButton";
 import { Toast, useToast } from "@/components/Toast";
+import { EarnCreditsTab } from "@/components/EarnCreditsTab";
+import statsData from "@/lib/stats.json";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
@@ -547,8 +549,8 @@ export default function WorkspacePage() {
   const getTabLabel = () => {
     if (activeTab === "analytics") {
       const subLabels: Record<AnalyticsSubtab, string> = {
-        overview: "Analytics Overview",
-        usage: "Usage",
+        overview: "Agent Analytics",
+        usage: "API Analytics",
         logs: "Logs",
       };
       return subLabels[analyticsSubtab] || "Analytics";
@@ -699,7 +701,7 @@ export default function WorkspacePage() {
                           }`}
                         >
                           <BarChart3 className="w-4 h-4" />
-                          <span>Overview</span>
+                          <span>Agent Analytics</span>
                         </button>
                         <button
                           onClick={() => {
@@ -715,7 +717,7 @@ export default function WorkspacePage() {
                           }`}
                         >
                           <TrendingUp className="w-4 h-4" />
-                          <span>Usage</span>
+                          <span>API Analytics</span>
                         </button>
                         <button
                           onClick={() => {
@@ -898,13 +900,13 @@ export default function WorkspacePage() {
             <WebhooksTab />
           )}
           {activeTab === "api-keys" && (
-            <ApiKeysTab />
+            <ApiKeysTab workspace={workspace} providerApis={providerApis} sessionToken={sessionToken} />
           )}
           {activeTab === "billing" && (
             <BillingTab workspace={workspace} sessionToken={sessionToken} />
           )}
           {activeTab === "earn" && (
-            <EarnTab />
+            <EarnCreditsTab showToast={showToast} />
           )}
           {activeTab === "docs" && (
             <DocsTab />
@@ -945,9 +947,9 @@ function OverviewTab({
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
           <div className="flex items-center gap-3 mb-3">
             <Zap className="w-6 h-6 text-[#ef4444]" />
-            <span className="text-[var(--text-muted)]">Available APIs</span>
+            <span className="text-[var(--text-muted)]">API Catalog</span>
           </div>
-          <p className="text-4xl font-bold text-[#ef4444]">{approvedApis.length}</p>
+          <p className="text-4xl font-bold text-[#ef4444]">{statsData.apiCount.toLocaleString()}</p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
@@ -1271,10 +1273,7 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Appear in the APIClaw catalog. AI agents find you when searching for capabilities.
             </p>
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                Free
-              </span>
+            <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
           </Link>
@@ -1292,10 +1291,7 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Provide your public OpenAPI spec. Agents call your endpoint with their own keys.
             </p>
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium">
-                Self-hosted
-              </span>
+            <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
           </Link>
@@ -1305,12 +1301,6 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
             href="/providers/register?type=direct"
             className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden"
           >
-            <div className="absolute top-3 right-3">
-              <span className="px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium flex items-center gap-1">
-                <Star className="w-3 h-3" />
-                Premium
-              </span>
-            </div>
             <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
               <Zap className="w-6 h-6 text-[#ef4444]" />
             </div>
@@ -1319,10 +1309,7 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
             <p className="text-sm text-[var(--text-muted)] mb-4">
               APIClaw manages authentication. Agents pay per call, you earn revenue share.
             </p>
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium">
-                Revenue share
-              </span>
+            <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
           </Link>
@@ -1422,7 +1409,7 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
 }
 
 // ============================================
-// AGENTS TAB
+// AGENTS TAB - Agent-first hierarchy view
 // ============================================
 
 function AgentsTab({
@@ -1439,18 +1426,27 @@ function AgentsTab({
   sessionToken?: string;
 }) {
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
-  const [sendingLink, setSendingLink] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
-  const [email, setEmail] = useState(workspaceEmail || "");
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  // Get the primary agent (current session or first agent)
+  const primaryAgent = agents.find(a => a.isCurrent) || agents[0];
+  
+  // Generate agent display name
+  const getAgentDisplayName = (agent: typeof primaryAgent) => {
+    if (!agent) return "agent-xxxx";
+    if (agent.name) return agent.name;
+    // Generate short ID from fingerprint
+    const shortId = agent.fingerprint?.slice(-4) || "xxxx";
+    return `agent-${shortId}`;
+  };
 
   const handleRevoke = (agentId: string) => {
     const agent = agents.find(a => a.id === agentId);
     if (confirmRevoke === agentId) {
       onRevoke(agentId);
       setConfirmRevoke(null);
-      // If revoking current session, clear localStorage and redirect
       if (agent?.isCurrent) {
         localStorage.removeItem("apiclaw_workspace_session");
         window.location.href = "/login";
@@ -1460,230 +1456,166 @@ function AgentsTab({
     }
   };
 
-  const handleSendMagicLink = async () => {
-    if (!email || !email.includes("@")) return;
-    
-    setSendingLink(true);
-    try {
-      const response = await fetch(`${CONVEX_URL.replace('.cloud', '.site')}/workspace/magic-link`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      
-      const result = await response.json();
-      if (result.success) {
-        setLinkSent(true);
-        setTimeout(() => setLinkSent(false), 5000);
-      }
-    } catch (err) {
-      console.error("Failed to send magic link:", err);
-    } finally {
-      setSendingLink(false);
-    }
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
+
+  const mcpCommand = "npx @nordsym/apiclaw";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">My Agents</h2>
-          <p className="text-[var(--text-muted)]">{agents.length} connected agent{agents.length !== 1 ? "s" : ""}</p>
-        </div>
-      </div>
-
-      {/* How to Connect Agents */}
+      {/* Your Agent - Primary Card */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
-            <BookOpen className="w-5 h-5 text-[#ef4444]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold mb-2">How to Connect Your AI Agent</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Add APIClaw to your AI agent&apos;s MCP config to enable API discovery and Direct Call.
-            </p>
-            <div className="bg-[var(--background)] rounded-xl p-4 font-mono text-sm mb-4 relative">
-              <pre className="text-[var(--text-secondary)] overflow-x-auto">{`{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
-    }
-  }
-}`}</pre>
-            </div>
-            <p className="text-sm text-[var(--text-muted)] mb-3">
-              Or run directly in terminal to test:
-            </p>
-            <div className="flex items-center gap-2 bg-[var(--background)] rounded-lg px-4 py-2 font-mono text-sm w-fit">
-              <Terminal className="w-4 h-4 text-[#ef4444]" />
-              <code>npx @nordsym/apiclaw</code>
-            </div>
-            <p className="text-xs text-[var(--text-muted)] mt-3">
-              First run prompts for email → sends magic link → registers your agent to this workspace.
-            </p>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Your Agent</span>
+          {primaryAgent && (
+            <button
+              onClick={() => handleRevoke(primaryAgent.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1 ${
+                confirmRevoke === primaryAgent.id
+                  ? "bg-red-500 text-white"
+                  : "text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10"
+              }`}
+            >
+              <Trash2 className="w-3 h-3" />
+              {confirmRevoke === primaryAgent.id ? "Confirm" : "Remove"}
+            </button>
+          )}
         </div>
-      </div>
-
-      {/* Quick Connect via Email */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
-            <Mail className="w-5 h-5 text-green-500" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold mb-2">Quick Connect via Email</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Send a magic link to connect your agent without using the CLI.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-              />
-              <button
-                onClick={handleSendMagicLink}
-                disabled={sendingLink || !email}
-                className="w-full sm:w-auto px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {sendingLink ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending...
-                  </>
-                ) : linkSent ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Sent!
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Send Link
-                  </>
-                )}
-              </button>
+        
+        {primaryAgent ? (
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
+              <Cpu className="w-7 h-7 text-white" />
             </div>
-            {linkSent && (
-              <p className="text-sm text-green-500 mt-2">
-                ✓ Magic link sent! Check your email and click to connect.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {agents.length === 0 ? (
-        <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
-          <Users className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No Agents Connected Yet</h3>
-          <p className="text-[var(--text-muted)] max-w-md mx-auto">
-            Follow the instructions above to connect your first AI agent.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {agents.map((agent) => (
-            <div key={agent.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#ef4444]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {editingAgent === agent.id ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          placeholder="Agent name..."
-                          className="w-full sm:w-auto px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-                          autoFocus
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              onRename(agent.id, editName);
-                              setEditingAgent(null);
-                            }}
-                            className="px-3 py-1 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingAgent(null)}
-                            className="px-3 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-semibold truncate">{agent.name || agent.fingerprint}</h3>
-                        <button
-                          onClick={() => {
-                            setEditingAgent(agent.id);
-                            setEditName(agent.name || agent.fingerprint || "");
-                          }}
-                          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] opacity-0 group-hover:opacity-100 transition"
-                          title="Rename"
-                        >
-                          <Settings className="w-4 h-4" />
-                        </button>
-                        {agent.isCurrent && (
-                          <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {agent.fingerprint !== agent.name && agent.name && (
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">{agent.fingerprint}</p>
-                    )}
-                    <div className="flex items-center gap-2 sm:gap-4 mt-1 text-xs sm:text-sm text-[var(--text-muted)]">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Last active:</span> {new Date(agent.lastUsedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex-1 min-w-0">
+              {editingAgent === primaryAgent.id ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Agent name..."
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        onRename(primaryAgent.id, editName);
+                        setEditingAgent(null);
+                      } else if (e.key === "Escape") {
+                        setEditingAgent(null);
+                      }
+                    }}
+                  />
                   <button
                     onClick={() => {
-                      setEditingAgent(agent.id);
-                      setEditName(agent.name || agent.fingerprint || "");
+                      onRename(primaryAgent.id, editName);
+                      setEditingAgent(null);
                     }}
-                    className="flex-1 sm:flex-none px-3 py-2 rounded-lg text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition text-center"
+                    className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
                   >
-                    Rename
+                    Save
                   </button>
                   <button
-                    onClick={() => handleRevoke(agent.id)}
-                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1 ${
-                      confirmRevoke === agent.id
-                        ? "bg-red-500 text-white"
-                        : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                    }`}
-                    title={agent.isCurrent ? "This will log you out" : "Remove this agent"}
+                    onClick={() => setEditingAgent(null)}
+                    className="px-3 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">{confirmRevoke === agent.id ? (agent.isCurrent ? "Logout & Remove" : "Confirm") : "Revoke"}</span>
-                    <span className="sm:hidden">{confirmRevoke === agent.id ? "Confirm" : "Revoke"}</span>
+                    Cancel
                   </button>
                 </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold">{getAgentDisplayName(primaryAgent)}</h3>
+                  <button
+                    onClick={() => {
+                      setEditingAgent(primaryAgent.id);
+                      setEditName(primaryAgent.name || getAgentDisplayName(primaryAgent));
+                    }}
+                    className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                    title="Rename agent"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center gap-3 mt-1 text-sm text-[var(--text-muted)]">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  Connected
+                </span>
+                <span className="text-[var(--border)]">•</span>
+                <span className="flex items-center gap-1">
+                  <Activity className="w-3.5 h-3.5" />
+                  Active {new Date(primaryAgent.lastUsedAt).toLocaleDateString()}
+                </span>
               </div>
             </div>
-          ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-[var(--surface)] border-2 border-dashed border-[var(--border)] flex items-center justify-center">
+              <Cpu className="w-7 h-7 text-[var(--text-muted)]" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[var(--text-muted)]">No agent connected</h3>
+              <p className="text-sm text-[var(--text-muted)]">Run the setup command below to connect</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Subagents Section */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Subagents</span>
         </div>
-      )}
+        
+        {/* Empty state - subagents will come from backend later */}
+        <div className="py-8 text-center">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] mx-auto mb-3 flex items-center justify-center">
+            <Users className="w-6 h-6 text-[var(--text-muted)]" />
+          </div>
+          <p className="text-sm text-[var(--text-muted)] max-w-sm mx-auto">
+            Subagents will appear here when your agent makes calls with the{" "}
+            <code className="px-1.5 py-0.5 rounded bg-[var(--surface)] text-[#ef4444] font-mono text-xs">
+              X-APIClaw-Subagent
+            </code>{" "}
+            header.
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Setup - Collapsed at bottom */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Quick Setup</span>
+        </div>
+        
+        <p className="text-sm text-[var(--text-muted)] mb-3">
+          Add to your agent&apos;s MCP config:
+        </p>
+        
+        <div className="flex items-center gap-2 bg-[var(--background)] rounded-lg px-4 py-3 font-mono text-sm">
+          <Terminal className="w-4 h-4 text-[#ef4444] flex-shrink-0" />
+          <code className="flex-1 text-[var(--text-primary)]">{mcpCommand}</code>
+          <button
+            onClick={() => copyToClipboard(mcpCommand)}
+            className="p-1.5 rounded hover:bg-[var(--surface)] transition text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            title="Copy"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+          </button>
+        </div>
+        
+        <p className="text-xs text-[var(--text-muted)] mt-3">
+          Or use header:{" "}
+          <code className="px-1.5 py-0.5 rounded bg-[var(--surface)] font-mono">
+            X-APIClaw-Subagent: name
+          </code>
+        </p>
+      </div>
     </div>
   );
 }
@@ -1950,10 +1882,44 @@ function UsageTab({
   workspace: Workspace | null;
   usage: UsageData | null;
 }) {
-  const hasData = usage && (usage.byProvider.length > 0 || usage.byDay.length > 0);
+  const hasRealData = usage && (usage.byProvider.length > 0 || usage.byDay.length > 0);
+  
+  // Preview data for empty state (provider perspective - how others use YOUR APIs)
+  const previewByDay = [
+    { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 8 },
+    { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 15 },
+    { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 23 },
+    { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 19 },
+    { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 34 },
+    { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 28 },
+    { date: new Date().toISOString().split('T')[0], calls: 21 },
+  ];
+  
+  // Preview shows YOUR listed APIs and agents using them
+  const previewByApi = [
+    { provider: "Your API Name", calls: 89, cost: 4.45 },
+    { provider: "Another API", calls: 42, cost: 2.10 },
+    { provider: "Third API", calls: 17, cost: 0.85 },
+  ];
+  
+  const isPreview = !hasRealData;
+  const displayByDay = hasRealData ? usage!.byDay : previewByDay;
+  const displayByProvider = hasRealData ? usage!.byProvider : previewByApi;
+  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 148;
 
   return (
     <div className="space-y-8">
+      {/* Preview Banner */}
+      {isPreview && (
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+          <div>
+            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your listed APIs.</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -1961,87 +1927,73 @@ function UsageTab({
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Total Calls</span>
           </div>
           <p className="text-2xl sm:text-4xl font-bold text-[#ef4444]">
-            {(usage?.total || workspace?.usageCount || 0).toLocaleString()}
+            {displayTotal.toLocaleString()}
           </p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
-            <span className="text-sm sm:text-base text-[var(--text-muted)]">Providers Used</span>
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Your APIs</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{usage?.byProvider.length || 0}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{displayByProvider.length}</p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
-            <span className="text-sm sm:text-base text-[var(--text-muted)]">Remaining</span>
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique Agents</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{workspace?.usageRemaining.toLocaleString() || "∞"}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "12" : "0"}</p>
         </div>
       </div>
 
-      {hasData ? (
-        <>
-          {usage!.byDay.length > 0 && (
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-              <h3 className="font-semibold mb-4">Usage Over Time</h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={usage!.byDay}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                      tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    />
-                    <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
-                    <Tooltip
-                      contentStyle={{
-                        background: "var(--surface-elevated)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-
-          {usage!.byProvider.length > 0 && (
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-              <h3 className="font-semibold mb-4">Usage by Provider</h3>
-              <div className="space-y-3">
-                {usage!.byProvider.map((p, i) => (
-                  <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                    <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
-                        {i + 1}
-                      </span>
-                      <span className="font-medium">{p.provider}</span>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{p.calls.toLocaleString()} calls</p>
-                      {p.cost > 0 && <p className="text-sm text-[var(--text-muted)]">${p.cost.toFixed(2)}</p>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
-          <TrendingUp className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No Usage Data Yet</h3>
-          <p className="text-[var(--text-muted)] max-w-md mx-auto">
-            When your agents start making API calls, usage analytics will appear here.
-          </p>
+      {/* Usage Over Time Chart */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Usage Over Time</h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={displayByDay}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
+                tickFormatter={(d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              />
+              <YAxis tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--surface-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                }}
+              />
+              <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-      )}
+      </div>
+
+      {/* Calls to Your APIs */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <h3 className="font-semibold mb-4">Calls to Your APIs</h3>
+        <div className="space-y-3">
+          {displayByProvider.map((p, i) => (
+            <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
+                  {i + 1}
+                </span>
+                <span className="font-medium">{p.provider}</span>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">{p.calls.toLocaleString()} calls</p>
+                {p.cost > 0 && <p className="text-sm text-[var(--text-muted)]">${p.cost.toFixed(2)}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -3542,137 +3494,66 @@ const ProviderIcon = ({ iconName, className = "w-6 h-6" }: { iconName: string; c
   }
 };
 
-function ApiKeysTab() {
-  const [keys, setKeys] = useState<ProviderKey[]>([]);
+function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Workspace | null; providerApis: ProviderAPI[]; sessionToken: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const [directCallConfigs, setDirectCallConfigs] = useState<Record<string, { status: string; keyHint: string }>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<BYOKProvider | null>(null);
-  const [apiKeyInput, setApiKeyInput] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Generate workspace API key from email (simple hash for display)
+  const workspaceKey = workspace?.email
+    ? `claw_${btoa(workspace.email).replace(/[^a-zA-Z0-9]/g, "").substring(0, 24)}`
+    : null;
 
   useEffect(() => {
-    const fetchKeys = async () => {
-      const token = localStorage.getItem("apiclaw_workspace_session");
-      if (!token) {
+    const fetchDirectCallConfigs = async () => {
+      if (!sessionToken || providerApis.length === 0) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const res = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "providerKeys:getKeys",
-            args: { token },
-          }),
-        });
-        const data = await res.json();
-        setKeys(data.value?.keys || data.keys || []);
+        // Fetch Direct Call configs for each API
+        const configs: Record<string, { status: string; keyHint: string }> = {};
+        for (const api of providerApis) {
+          try {
+            const res = await fetch(`${CONVEX_URL}/api/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                path: "providerDirectCall:get",
+                args: { token: sessionToken, apiId: api._id },
+              }),
+            });
+            const data = await res.json();
+            const config = data.value || data;
+            if (config && config.status) {
+              configs[api._id] = {
+                status: config.status,
+                keyHint: config.encryptedMasterKey ? "••••" + config.encryptedMasterKey.slice(-4) : "Not set",
+              };
+            }
+          } catch (e) {
+            // Skip this API if config fetch fails
+          }
+        }
+        setDirectCallConfigs(configs);
       } catch (err) {
-        console.error("Failed to fetch keys:", err);
+        console.error("Failed to fetch Direct Call configs:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchKeys();
-  }, []);
+    fetchDirectCallConfigs();
+  }, [sessionToken, providerApis]);
 
-  const handleAddKey = async () => {
-    if (!selectedProvider || !apiKeyInput.trim()) return;
-
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
-    setIsSaving(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "providerKeys:addKey",
-          args: {
-            token,
-            provider: selectedProvider.id,
-            apiKey: apiKeyInput,
-          },
-        }),
-      });
-      const data = await res.json();
-
-      if (data.value?.success || data.success) {
-        const keysRes = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "providerKeys:getKeys",
-            args: { token },
-          }),
-        });
-        const keysData = await keysRes.json();
-        setKeys(keysData.value?.keys || keysData.keys || []);
-
-        setSuccessMessage(`Key saved! Using your key for ${selectedProvider.name}`);
-        setTimeout(() => setSuccessMessage(null), 3000);
-        setShowAddModal(false);
-        setApiKeyInput("");
-        setSelectedProvider(null);
-      } else {
-        setErrorMessage("Failed to save key. Please try again.");
-      }
-    } catch (err) {
-      console.error("Failed to add key:", err);
-      setErrorMessage("Failed to save key. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRemoveKey = async (providerId: string) => {
-    if (confirmRemove !== providerId) {
-      setConfirmRemove(providerId);
-      return;
-    }
-
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
-    try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "providerKeys:removeKey",
-          args: { token, provider: providerId },
-        }),
-      });
-
-      setKeys(keys.filter((k) => k.provider !== providerId));
-      setConfirmRemove(null);
-      setSuccessMessage("Key removed. Back to Direct Call.");
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      console.error("Failed to remove key:", err);
-      setErrorMessage("Failed to remove key. Please try again.");
-    }
-  };
-
-  const getKeyForProvider = (providerId: string) => {
-    return keys.find((k) => k.provider === providerId);
-  };
-
-  const openAddModal = (provider: BYOKProvider) => {
-    setSelectedProvider(provider);
-    setApiKeyInput("");
-    setErrorMessage(null);
-    setShowAddModal(true);
-  };
+  const directCallApis = providerApis.filter((api) => directCallConfigs[api._id]);
 
   if (isLoading) {
     return (
@@ -3687,310 +3568,132 @@ function ApiKeysTab() {
       <div>
         <h2 className="text-2xl font-bold mb-2">API Keys</h2>
         <p className="text-[var(--text-muted)]">
-          Direct Call works without keys. Add your own for unlimited calls and direct provider access.
+          Manage your workspace API key and Direct Call service credentials.
         </p>
       </div>
 
-      {successMessage && (
-        <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-3">
-          <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-          <p className="text-green-500">{successMessage}</p>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-red-500">{errorMessage}</p>
-        </div>
-      )}
-
-      <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
+      {/* Workspace API Key */}
+      <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface-elevated)] p-6">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
-            <Key className="w-5 h-5 text-[#ef4444]" />
+          <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
+            <Key className="w-6 h-6 text-[#ef4444]" />
           </div>
-          <div>
-            <h3 className="font-semibold mb-2">Direct Call is Default</h3>
-            <p className="text-sm text-[var(--text-muted)]">
-              No API keys needed — APIClaw handles authentication for you. Add your own keys to bypass usage limits and route requests directly to providers.
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg mb-1">Workspace API Key</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Use this key to authenticate API calls from your agents.
             </p>
+            {workspaceKey ? (
+              <div className="flex items-center gap-3">
+                <code className="flex-1 px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] font-mono text-sm">
+                  {workspaceKey}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(workspaceKey)}
+                  className="px-4 py-3 rounded-xl border border-[var(--border)] hover:bg-[var(--surface)] transition flex items-center gap-2"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span className="text-green-500">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <p className="text-[var(--text-muted)]">Log in to see your API key.</p>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Direct Call Service Keys */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)]">
-          <h3 className="font-semibold">Providers</h3>
+        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+          <h3 className="font-semibold">Direct Call Service Keys</h3>
+          <span className="text-sm text-[var(--text-muted)]">{directCallApis.length} configured</span>
         </div>
-        <div className="divide-y divide-[var(--border)]">
-          {BYOK_PROVIDERS.map((provider) => {
-            const userKey = getKeyForProvider(provider.id);
-            const hasKey = !!userKey;
-
-            return (
-              <div
-                key={provider.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
-                    <ProviderIcon iconName={provider.icon} className="w-5 h-5 text-[#ef4444]" />
+        
+        {directCallApis.length > 0 ? (
+          <div className="divide-y divide-[var(--border)]">
+            {directCallApis.map((api) => {
+              const config = directCallConfigs[api._id];
+              return (
+                <div
+                  key={api._id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-[#ef4444]" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{api.name}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
+                    </div>
                   </div>
-                  <span className="font-medium">{provider.name}</span>
+                  <div className="flex items-center gap-3 ml-13 sm:ml-0">
+                    <span className="px-3 py-1 rounded-full bg-[var(--surface)] text-sm font-mono text-[var(--text-muted)]">
+                      {config.keyHint}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      config.status === "live"
+                        ? "bg-green-500/20 text-green-500"
+                        : config.status === "testing"
+                        ? "bg-yellow-500/20 text-yellow-500"
+                        : "bg-[var(--surface)] text-[var(--text-muted)]"
+                    }`}>
+                      {config.status}
+                    </span>
+                    <a
+                      href={`/providers/dashboard/${api._id}/direct-call`}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                    >
+                      Manage →
+                    </a>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 ml-10 sm:ml-0">
-                  {hasKey ? (
-                    <>
-                      <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium">
-                        Your Key (•••• {userKey.keyHint})
-                      </span>
-                      <button
-                        onClick={() => openAddModal(provider)}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleRemoveKey(provider.id)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                          confirmRemove === provider.id
-                            ? "bg-red-500 text-white"
-                            : "text-red-500 hover:bg-red-500/10"
-                        }`}
-                      >
-                        {confirmRemove === provider.id ? "Confirm" : "Remove"}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-500 text-sm font-medium">
-                        Direct Call
-                      </span>
-                      <button
-                        onClick={() => openAddModal(provider)}
-                        className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium hover:bg-[var(--surface)] hover:border-[#ef4444]/50 transition"
-                      >
-                        Add Your Key
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="relative group">
-        <button
-          className="w-full rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-6 text-center hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed"
-          disabled
-        >
-          <Plus className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
-          <p className="font-medium text-[var(--text-muted)]">+ Add Custom Provider</p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Connect any REST API with custom authentication</p>
-        </button>
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-          <span className="px-3 py-1.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm font-medium shadow-lg">
-            Coming soon
-          </span>
-        </div>
-      </div>
-
-      {/* Request a Provider */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="font-semibold mb-1">Missing a provider?</h3>
-            <p className="text-sm text-[var(--text-muted)]">
-              Let us know which API providers you'd like to see added to Direct Call.
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 text-center">
+            <Key className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
+            <h4 className="font-semibold mb-2">No Direct Call APIs</h4>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Service keys appear here when you set up Direct Call for your APIs.
             </p>
+            <a
+              href="/workspace?tab=my-apis"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#ef4444]/50 text-[#ef4444] font-medium hover:bg-[#ef4444]/10 transition"
+            >
+              <Plus className="w-4 h-4" />
+              Set Up Direct Call
+            </a>
           </div>
-          <a
-            href="mailto:support_apiclaw@nordsym.com?subject=Provider%20Request&body=Hi%20APIClaw%20team,%0A%0AI%27d%20like%20to%20request%20support%20for%20the%20following%20provider:%0A%0AProvider%20name:%20%0AWebsite:%20%0AUse%20case:%20%0A%0AThanks!"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#ef4444]/50 text-[#ef4444] font-medium hover:bg-[#ef4444]/10 transition whitespace-nowrap"
-          >
-            <MessageSquare className="w-4 h-4" />
-            Request a Provider
-          </a>
-        </div>
+        )}
       </div>
 
-      {showAddModal && selectedProvider && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center">
-                <ProviderIcon iconName={selectedProvider.icon} className="w-7 h-7 text-[#ef4444]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">
-                  {getKeyForProvider(selectedProvider.id) ? "Update" : "Add"} {selectedProvider.name} Key
-                </h3>
-                <p className="text-sm text-[var(--text-muted)]">
-                  Your key will be encrypted and stored securely.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">API Key</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    value={apiKeyInput}
-                    onChange={(e) => setApiKeyInput(e.target.value)}
-                    placeholder="Enter your API key..."
-                    className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 pr-10"
-                    autoFocus
-                  />
-                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
-                </div>
-              </div>
-
-              {errorMessage && (
-                <p className="text-sm text-red-500">{errorMessage}</p>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setShowAddModal(false);
-                    setApiKeyInput("");
-                    setSelectedProvider(null);
-                    setErrorMessage(null);
-                  }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddKey}
-                  disabled={!apiKeyInput.trim() || isSaving}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Save
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+      {/* Info Box */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <div className="flex items-start gap-4">
+          <AlertCircle className="w-5 h-5 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-[var(--text-muted)]">
+            <p className="mb-2"><strong>Workspace API Key:</strong> Authenticate your agent's requests to APIClaw.</p>
+            <p><strong>Direct Call Service Keys:</strong> Your API credentials for provider integrations. Manage these in each API's Direct Call settings.</p>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================
-// EARN TAB
-// ============================================
-
-function EarnTab() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const referralCode = "CLAW-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  const earnChannels = [
-    { id: "github", title: "Star on GitHub", credits: 20, href: "https://github.com/nordsym/apiclaw", icon: "star" },
-    { id: "twitter", title: "Follow @NordSym", credits: 15, href: "https://x.com/NordSym", icon: "twitter" },
-    { id: "newsletter", title: "Join Newsletter", credits: 15, href: "#newsletter", icon: "mail" },
-  ];
-
-  const EarnIcon = ({ iconName }: { iconName: string }) => {
-    const iconClass = "w-8 h-8 text-[#ef4444]";
-    switch (iconName) {
-      case "star": return <Star className={iconClass} />;
-      case "twitter": return <Twitter className={iconClass} />;
-      case "mail": return <Mail className={iconClass} />;
-      default: return <Zap className={iconClass} />;
-    }
-  };
-
-  const handleCopyReferral = () => {
-    navigator.clipboard.writeText("https://apiclaw.nordsym.com?ref=" + referralCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Earn Credits</h2>
-        <p className="text-[var(--text-muted)]">Complete tasks to earn free API calls. Max 50 extra calls.</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        {earnChannels.map((channel) => (
-          <a
-            key={channel.id}
-            href={channel.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-3">
-              <EarnIcon iconName={channel.icon} />
-            </div>
-            <h3 className="font-semibold mb-1">{channel.title}</h3>
-            <p className="text-sm text-[#ef4444] font-medium">+{channel.credits} calls</p>
-          </a>
-        ))}
-      </div>
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
-        <h3 className="font-semibold mb-2">Invite Friends</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">Earn 10 calls for each friend who joins.</p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={"https://apiclaw.nordsym.com?ref=" + referralCode}
-            readOnly
-            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm"
-          />
-          <button
-            onClick={handleCopyReferral}
-            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
-        <h3 className="font-semibold mb-2">Newsletter (+15 calls)</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">Get weekly updates, tips, and new API announcements.</p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="w-full sm:flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)]"
-          />
-          <button
-            onClick={() => setSubscribed(true)}
-            disabled={subscribed}
-            className="w-full sm:w-auto px-4 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
-          >
-            {subscribed ? "Subscribed!" : "Subscribe"}
-          </button>
         </div>
       </div>
     </div>
   );
 }
+
+// EarnTab moved to components/EarnCreditsTab.tsx
 
 // ============================================
 // DOCS TAB
@@ -4649,22 +4352,6 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
               : "Add a payment method to unlock unlimited API calls"
             }
           </p>
-        </div>
-      </SettingsSection>
-
-      <SettingsSection title="API Tokens" icon={Key}>
-        <div className="space-y-4 pt-4">
-          <p className="text-sm text-[var(--text-muted)]">
-            Generate API tokens for programmatic access to your workspace.
-          </p>
-          <button
-            disabled
-            className="w-full px-4 py-3 rounded-xl border border-dashed border-[var(--border)] text-sm font-medium text-[var(--text-muted)] hover:border-[#ef4444]/50 transition opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Generate New Token
-          </button>
-          <p className="text-xs text-[var(--text-muted)] text-center">Coming soon</p>
         </div>
       </SettingsSection>
 

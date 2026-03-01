@@ -4,7 +4,7 @@ const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-av
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, fingerprint } = await req.json();
+    const { email, fingerprint, referralCode } = await req.json();
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 });
@@ -33,8 +33,11 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to get token from Convex");
     }
 
-    // Send magic link email via n8n
-    const magicLinkUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.nordsym.com"}/dashboard/verify?token=${token}`;
+    // Build magic link URL with optional referral code
+    let magicLinkUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.nordsym.com"}/auth/verify?token=${token}`;
+    if (referralCode) {
+      magicLinkUrl += `&ref=${encodeURIComponent(referralCode)}`;
+    }
 
     await fetch("https://nordsym.app.n8n.cloud/webhook/symbot-gmail", {
       method: "POST",

@@ -1,8 +1,10 @@
 {
   "apiCount": 22392,
+  "openApiCount": 996,
+  "directCallCount": 10,
   "categoryCount": 14,
-  "lastUpdated": "2026-02-27T12:05:00.000Z",
-  "generatedAt": "2026-02-27T12:05:00.000Z",
+  "lastUpdated": "2026-02-28T21:45:00.000Z",
+  "generatedAt": "2026-02-28T21:45:00.000Z",
   "categoryBreakdown": {
     "Utilities": 7069,
     "Analytics": 2600,

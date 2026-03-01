@@ -13,8 +13,8 @@ import { HeroTabs } from "@/components/HeroTabs";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
-  { number: "866", label: "Open APIs", live: true },
-  { number: "10", label: "Direct Call", live: true },
+  { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
+  { number: statsData.directCallCount.toString(), label: "Direct Call", live: true },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
@@ -186,13 +186,18 @@ export default function Home() {
   };
 
   const copyContextToClipboard = () => {
-    const context = `APIClaw is the API layer for AI agents. It's an MCP server with ${statsData.apiCount.toLocaleString()}+ APIs.
+    const context = `APIClaw is the API layer for AI agents. It's an MCP (Model Context Protocol) server that lets agents discover and call APIs autonomously.
 
-Your agent can use these tools:
-• discover_apis - Search APIs by capability (not keywords)
-• get_api_details - Get full specs, pricing, and metadata
-• call_api - Direct Call: use APIs without managing keys
-• list_connected - See 11 available providers (Replicate, OpenRouter, ElevenLabs, etc.)
+Coverage:
+• ${statsData.apiCount.toLocaleString()}+ APIs indexed (searchable catalog)
+• ${statsData.openApiCount.toLocaleString()}+ Open APIs (no auth required)
+• ${statsData.directCallCount} Direct Call providers (we handle auth: Replicate, OpenRouter, ElevenLabs, etc.)
+
+Tools available:
+• discover_apis - Search by capability ("send SMS", "generate image") not keywords
+• get_api_details - Full specs, auth requirements, pricing, endpoints
+• call_api - Execute via Direct Call (no API keys needed) or get specs for self-hosting
+• list_connected - See available Direct Call providers
 
 Install: npx @nordsym/apiclaw
 Docs: https://apiclaw.nordsym.com/docs
@@ -309,12 +314,6 @@ Website: https://apiclaw.nordsym.com`;
               For API Providers
             </a>
             <a 
-              href="/earn" 
-              className="transition hover:text-text-primary"
-            >
-              Earn
-            </a>
-            <a 
               href="#faq" 
               className={`transition ${activeSection === "faq" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
@@ -402,13 +401,6 @@ Website: https://apiclaw.nordsym.com`;
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
                 For API Providers
-              </a>
-              <a 
-                href="/earn" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 text-text-muted hover:text-text-primary transition"
-              >
-                Earn
               </a>
               <a 
                 href="#faq" 

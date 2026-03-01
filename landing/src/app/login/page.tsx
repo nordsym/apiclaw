@@ -48,16 +48,22 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      // Check for stored referral code (from /join page)
+      const referralCode = localStorage.getItem("apiclaw_referral_code");
+
       const response = await fetch("/api/workspace-auth/magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, referralCode }),
       });
 
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Failed to send magic link");
       }
+
+      // Clear referral code after sending (it will be in the email link)
+      localStorage.removeItem("apiclaw_referral_code");
 
       setIsSent(true);
     } catch (err) {

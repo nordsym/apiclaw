@@ -64,6 +64,8 @@ export const addKey = mutation({
     const encryptedKey = encryptKey(args.apiKey);
     const keyHint = getKeyHint(args.apiKey);
 
+    let isFirstKey = false;
+
     if (existingKey) {
       // Update existing key
       await ctx.db.patch(existingKey._id, {
@@ -71,7 +73,6 @@ export const addKey = mutation({
         keyHint,
         updatedAt: now,
       });
-      return { success: true, action: "updated" };
     } else {
       // Create new key
       await ctx.db.insert("providerKeys", {
@@ -83,10 +84,89 @@ export const addKey = mutation({
         createdAt: now,
         updatedAt: now,
       });
-      return { success: true, action: "created" };
+
+      // Check if this is the first BYOK key for earn progress
+      const allKeys = await ctx.db
+        .query("providerKeys")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+        .collect();
+
+      // If this is the only key (the one we just created), mark BYOK setup
+      if (allKeys.length === 1) {
+        isFirstKey = true;
+        // Import and call markByokSetup
+        const earnProgress = await ctx.db
+          .query("earnProgress")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+          .first();
+
+        if (earnProgress && !earnProgress.byokSetup) {
+          const newTotal = calculateEarnTotal({ ...earnProgress, byokSetup: true });
+          await ctx.db.patch(earnProgress._id, {
+            byokSetup: true,
+            byokSetupAt: now,
+            totalEarned: newTotal,
+            updatedAt: now,
+          });
+          // Add 5 calls to workspace limit
+          const workspace = await ctx.db.get(workspaceId);
+          if (workspace) {
+            await ctx.db.patch(workspaceId, {
+              usageLimit: workspace.usageLimit + 5,
+              updatedAt: now,
+            });
+          }
+        } else if (!earnProgress) {
+          // Create earn progress with byokSetup
+          await ctx.db.insert("earnProgress", {
+            workspaceId,
+            firstDirectCall: false,
+            apisUsed: [],
+            apisUsedComplete: false,
+            agentListed: false,
+            apiListed: false,
+            byokSetup: true,
+            byokSetupAt: now,
+            githubStarred: false,
+            twitterFollowed: false,
+            referralCount: 0,
+            totalEarned: 5, // BYOK reward
+            createdAt: now,
+            updatedAt: now,
+          });
+          // Add 5 calls to workspace limit
+          const workspace = await ctx.db.get(workspaceId);
+          if (workspace) {
+            await ctx.db.patch(workspaceId, {
+              usageLimit: workspace.usageLimit + 5,
+              updatedAt: now,
+            });
+          }
+        }
+      }
     }
+
+    return { 
+      success: true, 
+      action: existingKey ? "updated" : "created",
+      earnedByok: isFirstKey,
+    };
   },
 });
+
+// Helper to calculate earn total (duplicated to avoid circular import)
+function calculateEarnTotal(progress: any): number {
+  let total = 0;
+  if (progress.firstDirectCall) total += 15;
+  if (progress.apisUsedComplete) total += 10;
+  if (progress.agentListed) total += 10;
+  if (progress.apiListed) total += 10;
+  if (progress.byokSetup) total += 5;
+  if (progress.githubStarred) total += 10;
+  if (progress.twitterFollowed) total += 5;
+  total += (progress.referralCount || 0) * 10;
+  return total;
+}
 
 // ============================================
 // REMOVE KEY
