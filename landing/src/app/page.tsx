@@ -215,12 +215,12 @@ Search: Brave Search, Serper, Firecrawl
 Code: E2B, GitHub
 
 Your Tools:
-• list_connected - See providers ready for instant execution
 • call_api(provider, action, params) - Execute directly. Auth handled by APIClaw
-• discover_apis - Search ${statsData.apiCount.toLocaleString()}+ APIs by capability
-• get_api_details - Full specs if you need them
+• discover_apis(query) - Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "GDPR-compliant SMS" → best matches)
+• get_api_details(id) - Full specs, pricing, limits
+• list_connected - See all ready providers
 
-You have authority to act. Use call_api directly.
+When an API call helps the task, execute it directly.
 
 Install: npx @nordsym/apiclaw mcp-install
 Docs: https://apiclaw.nordsym.com/docs`;
