@@ -961,85 +961,114 @@ Docs: https://apiclaw.nordsym.com/docs`;
 
       {/* Get Started */}
       <section id="get-started" className="py-24 px-6 bg-surface/30">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="section-label">GET STARTED</span>
+            <span className="section-label">PRICING</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-4 tracking-tight">
-              Simple. Free. Forever.
+              Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              API discovery should be free. We're building the API layer for AI agents.
+              Discovery is free forever. Direct Call has usage-based pricing.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-            {/* For Agents */}
-            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 sm:p-8 relative glow">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
-                Live Now
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2">For Agents</h3>
-              <p className="text-text-secondary mb-6 sm:mb-8">Discovery + Direct Call</p>
-              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Free */}
+            <div className="rounded-2xl bg-surface-elevated border border-border p-6 relative">
+              <h3 className="text-xl font-bold mb-2">Free</h3>
+              <div className="text-3xl font-bold mb-1">$0</div>
+              <p className="text-text-muted text-sm mb-6">Forever</p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Search {statsData.apiCount.toLocaleString()}+ APIs by capability
+                  50 Direct Call requests/week
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Direct Call: Use APIs without keys
+                  Unlimited API discovery
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  18 providers (AI Models, Scraping, Code, Search)
+                  18 Direct Call providers
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Structured JSON responses
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                   MCP native
                 </li>
               </ul>
-              <a href="/docs" className="btn-primary w-full justify-center">
-                Get Started Free
+              <a href="/docs" className="btn-ghost w-full justify-center border border-border">
+                Get Started
               </a>
             </div>
 
-            {/* For Providers */}
-            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 sm:p-8 relative glow">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
-                Live Now
+            {/* Pay as you go */}
+            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 relative glow">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
+                Recommended
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2">For API Providers</h3>
-              <p className="text-text-secondary mb-6 sm:mb-8">Get discovered by AI agents</p>
-              <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+              <h3 className="text-xl font-bold mb-2">Pay as you go</h3>
+              <div className="text-3xl font-bold mb-1">Usage-based</div>
+              <p className="text-text-muted text-sm mb-6">Monthly invoice</p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Get discovered by AI agents
+                  Unlimited Direct Call requests
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Become a Direct Call partner
+                  Add card, get monthly invoice
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Self-service onboarding
+                  No commitment, cancel anytime
                 </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Analytics & usage insights
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm sm:text-base">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Zero integration work
+                  Priority support
                 </li>
               </ul>
-              <a href="/workspace?tab=my-apis" className="btn-primary w-full justify-center">
-                Add Your API
+              <a href="/workspace?tab=billing" className="btn-primary w-full justify-center">
+                Add Payment Method
               </a>
             </div>
+
+            {/* Founding Backer */}
+            <div className="rounded-2xl bg-surface-elevated border border-border p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-gradient-to-l from-accent/20 to-transparent w-32 h-32 blur-2xl" />
+              <h3 className="text-xl font-bold mb-2">Founding Backer</h3>
+              <div className="text-3xl font-bold mb-1">$199</div>
+              <p className="text-text-muted text-sm mb-6">One-time, unlimited until 2027</p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                  Unlimited everything until end of 2026
+                </li>
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                  Early access to new features
+                </li>
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                  Direct Slack with founders
+                </li>
+                <li className="flex items-start gap-3 text-text-secondary text-sm">
+                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                  Shape the roadmap
+                </li>
+              </ul>
+              <a href="/workspace?tab=billing" className="btn-ghost w-full justify-center border border-accent text-accent hover:bg-accent hover:text-white">
+                Become a Backer
+              </a>
+            </div>
+          </div>
+
+          {/* For API Providers - smaller section below */}
+          <div className="mt-16 text-center">
+            <p className="text-text-muted mb-4">Are you an API provider?</p>
+            <a href="/workspace?tab=my-apis" className="text-accent hover:underline font-medium">
+              List your API for free →
+            </a>
+          </div>
           </div>
         </div>
       </section>
