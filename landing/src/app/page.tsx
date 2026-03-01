@@ -486,7 +486,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               </p>
               
               <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
-                No API keys. No setup. Just call.
+                <span className="text-accent font-medium">Direct Call:</span> No API keys. No setup. Just call.
               </p>
 
               {/* Copy Context Button */}
