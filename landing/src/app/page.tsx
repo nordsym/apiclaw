@@ -865,7 +865,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                   <span className="text-gray-500">{"// • call_api - Direct Call (no keys needed)"}</span>{"\n"}
                   <span className="text-gray-500">{"// • list_connected - See available providers"}</span>{"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// Works with Claude, Cursor, and any MCP client 🦞"}</span>
+                  <span className="text-gray-500">{"// Works with Claude, Cursor, and any MCP compatible Agent 🦞"}</span>
                 </pre>
               </div>
             </div>
