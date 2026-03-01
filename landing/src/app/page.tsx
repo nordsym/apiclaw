@@ -721,11 +721,10 @@ Docs: https://apiclaw.nordsym.com/docs`;
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm whitespace-pre-wrap">
-                  <span className="text-gray-500"># Run directly with npx</span>{"\n"}
-                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw{"\n\n"}
-                  <span className="text-gray-500"># Or install globally</span>{"\n"}
-                  <span className="text-green-400">$</span> <span className="text-blue-400">npm</span> install -g @nordsym/apiclaw{"\n"}
-                  <span className="text-green-400">$</span> apiclaw
+                  <span className="text-gray-500"># Auto-install MCP server</span>{"\n"}
+                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install{"\n\n"}
+                  <span className="text-gray-500"># Or start the server directly</span>{"\n"}
+                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw serve
                 </pre>
               </div>
             </div>
