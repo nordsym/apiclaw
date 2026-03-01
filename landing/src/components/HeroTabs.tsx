@@ -31,7 +31,7 @@ export function HeroTabs() {
 
   const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
-  const terminalCommand = "npx @nordsym/apiclaw setup";
+  const terminalCommand = "npx @nordsym/apiclaw mcp-install";
 
   const copyConfig = () => {
     navigator.clipboard.writeText(configSnippetJson);
@@ -126,16 +126,16 @@ export function HeroTabs() {
                   <div className="code-preview-header">terminal</div>
                   <div className="code-preview-body">
                     <pre className="text-sm">
-                      <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw setup
+                      <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install
                     </pre>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 mt-3">
-                  <button onClick={copyTerminal} className="btn-ghost !py-2 !px-4 text-sm">
+                  <button onClick={copyTerminal} className={`!py-2 !px-4 text-sm transition-all ${copiedTerminal ? "btn-primary !bg-green-600 hover:!bg-green-600" : "btn-ghost"}`}>
                     {copiedTerminal ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copiedTerminal ? "Copied!" : "Copy"}
+                    {copiedTerminal ? "Run in terminal!" : "Copy"}
                   </button>
-                  <span className="text-xs text-text-muted">← Run in terminal to test</span>
+                  {!copiedTerminal && <span className="text-xs text-text-muted">← Run in terminal to test</span>}
                 </div>
               </div>
             </div>

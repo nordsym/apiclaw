@@ -10,14 +10,14 @@
 ## Quick Start
 
 ```bash
-# Auto-detect and configure all MCP clients
-npx @nordsym/apiclaw setup
+# Install APIClaw into Claude Desktop or Claude Code
+npx @nordsym/apiclaw mcp-install
 
 # That's it! Restart your AI assistant and ask:
 # "List available APIs" or "Send an SMS via 46elks"
 ```
 
-APIClaw automatically detects Claude Desktop, Cursor, Windsurf, Cline, and Continue — then configures itself as an MCP server in seconds.
+APIClaw automatically detects Claude Desktop and Claude Code — then configures itself as an MCP server in seconds.
 
 ---
 
@@ -38,15 +38,15 @@ Instead of manually configuring API keys and reading documentation, just tell yo
 
 ## Installation
 
-### Option 1: Auto-Setup (Recommended)
+### Option 1: MCP Install (Recommended)
 
 ```bash
-npx @nordsym/apiclaw setup
+npx @nordsym/apiclaw mcp-install
 ```
 
 This will:
-1. 🔍 Detect installed MCP clients
-2. 📝 Add APIClaw to their config files
+1. 🔍 Detect Claude Desktop or Claude Code
+2. 📝 Add APIClaw to the MCP config
 3. ✅ Verify the setup
 
 ### Option 2: Manual Installation
@@ -64,9 +64,25 @@ Just use `npx @nordsym/apiclaw` anywhere — it downloads on demand.
 
 ## Commands
 
+### `mcp-install`
+
+Simple, focused installation for Claude Desktop and Claude Code.
+
+```bash
+# Auto-detect and install
+npx @nordsym/apiclaw mcp-install
+
+# Install to specific client
+npx @nordsym/apiclaw mcp-install --client claude-desktop
+npx @nordsym/apiclaw mcp-install --client claude-code
+
+# Preview changes without applying
+npx @nordsym/apiclaw mcp-install --dry-run
+```
+
 ### `setup`
 
-Configure APIClaw as an MCP server.
+Full-featured setup with support for all MCP clients.
 
 ```bash
 # Auto-detect and configure all clients
@@ -255,7 +271,7 @@ export APICLAW_API_URL="https://api.company.com/apiclaw"
 # Disable telemetry
 export APICLAW_DISABLE_TELEMETRY="true"
 
-npx @nordsym/apiclaw setup
+npx @nordsym/apiclaw mcp-install
 ```
 
 ### Generate Deployment Script
@@ -287,7 +303,7 @@ See [Enterprise Deployment Guide](docs/enterprise-deployment.md) for:
 
 ```bash
 # Option 1: Run with sudo
-sudo npx @nordsym/apiclaw setup
+sudo npx @nordsym/apiclaw mcp-install
 
 # Option 2: Fix permissions
 chmod 644 ~/Library/Application\ Support/Claude/claude_desktop_config.json
@@ -296,11 +312,11 @@ chmod 644 ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ### "Config file not found"
 
 The MCP client hasn't created its config yet:
-1. Open the client (Claude Desktop, Cursor, etc.)
+1. Open the client (Claude Desktop or Claude Code)
 2. Close it
-3. Try setup again
+3. Try mcp-install again
 
-Or specify a custom path:
+Or use the full setup command with a custom path:
 ```bash
 npx @nordsym/apiclaw setup --config /path/to/config.json
 ```

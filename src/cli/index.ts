@@ -7,6 +7,7 @@
 import { Command } from 'commander';
 import { writeFileSync } from 'fs';
 import { setupCommand } from './commands/setup.js';
+import { mcpInstallCommand } from './commands/mcp-install.js';
 import { doctorCommand } from './commands/doctor.js';
 import { restoreCommand } from './commands/restore.js';
 import { uninstallCommand } from './commands/uninstall.js';
@@ -67,6 +68,14 @@ program
     // Normal setup
     await setupCommand(options);
   });
+
+// MCP Install command - simple focused installation
+program
+  .command('mcp-install')
+  .description('Install APIClaw into Claude Desktop or Claude Code MCP config')
+  .option('-c, --client <client>', 'Target specific client (claude-desktop, claude-code)')
+  .option('--dry-run', 'Show what would happen without making changes')
+  .action(mcpInstallCommand);
 
 // Doctor command - health check
 program

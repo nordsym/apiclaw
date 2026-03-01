@@ -78,11 +78,10 @@ export default function DocsPage() {
             <p className="text-[var(--text-secondary)] mb-4">Get running in 30 seconds:</p>
             <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
               <code className="text-sm">
-                <span className="text-[var(--text-muted)]"># Run directly with npx</span>{'\n'}
-                <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span>{'\n\n'}
-                <span className="text-[var(--text-muted)]"># Or install globally</span>{'\n'}
-                <span className="text-emerald-500 dark:text-emerald-400">npm</span> install -g <span className="text-[var(--accent)]">@nordsym/apiclaw</span>{'\n'}
-                <span className="text-emerald-500 dark:text-emerald-400">apiclaw</span>
+                <span className="text-[var(--text-muted)]"># Auto-install to Claude Desktop/Code</span>{'\n'}
+                <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span> mcp-install{'\n\n'}
+                <span className="text-[var(--text-muted)]"># Or run the MCP server directly</span>{'\n'}
+                <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span>
               </code>
             </pre>
           </div>
