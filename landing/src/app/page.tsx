@@ -10,6 +10,7 @@ import {
 import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
+import { PhoneDemo } from "@/components/demo";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
@@ -527,6 +528,21 @@ Docs: https://apiclaw.nordsym.com/docs`;
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Phone Demo - With vs Without APIClaw */}
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              See the Difference
+            </h2>
+            <p className="text-text-muted text-lg max-w-2xl mx-auto">
+              Toggle to compare what happens when your AI agent has APIClaw — versus doing it the old way.
+            </p>
+          </div>
+          <PhoneDemo />
         </div>
       </section>
 
