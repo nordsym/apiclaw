@@ -10,7 +10,6 @@ interface WithMessage {
   typing?: boolean;
   image?: boolean;
   currency?: boolean;
-  transcript?: boolean;
   success?: boolean;
   search?: boolean;
   models?: { name: string; match: string }[];
@@ -100,42 +99,53 @@ export function PhoneDemo() {
   const [exampleIndex, setExampleIndex] = useState(0);
   const [visibleMessages, setVisibleMessages] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   
   const currentExample = examples[exampleIndex];
   const messages: Message[] = withClaw ? currentExample.messages : WithoutAPIClaw;
   
-  // Reset visible messages when example changes
+  // Reset when switching modes or examples
   useEffect(() => {
     setVisibleMessages(0);
+    setCompletedSteps([]);
   }, [exampleIndex, withClaw]);
   
   // Animate messages appearing
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisibleMessages((v) => {
-        if (v >= messages.length) {
-          clearInterval(interval);
-          return v;
-        }
-        return v + 1;
-      });
-    }, withClaw ? 800 : 500);
+    if (visibleMessages >= messages.length) return;
     
-    return () => clearInterval(interval);
-  }, [messages.length, exampleIndex, withClaw]);
+    const delay = withClaw ? 800 : 700;
+    const timer = setTimeout(() => {
+      setVisibleMessages(v => v + 1);
+      // For "Without" mode, mark previous step as completed after a delay
+      if (!withClaw && visibleMessages > 0) {
+        setTimeout(() => {
+          setCompletedSteps(prev => [...prev, visibleMessages - 1]);
+        }, 300);
+      }
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [visibleMessages, messages.length, withClaw]);
+  
+  // Mark last step as completed when all visible
+  useEffect(() => {
+    if (!withClaw && visibleMessages === messages.length && visibleMessages > 0) {
+      const timer = setTimeout(() => {
+        setCompletedSteps(prev => [...prev, visibleMessages - 1]);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [visibleMessages, messages.length, withClaw]);
   
   // Auto-rotate examples (only when withClaw is true)
   useEffect(() => {
     if (!withClaw || isPaused) return;
+    if (visibleMessages < messages.length) return;
     
     const timer = setTimeout(() => {
-      if (visibleMessages >= messages.length) {
-        // Wait 3 seconds after animation completes, then switch
-        setTimeout(() => {
-          setExampleIndex((i) => (i + 1) % examples.length);
-        }, 3000);
-      }
-    }, 100);
+      setExampleIndex((i) => (i + 1) % examples.length);
+    }, 3500);
     
     return () => clearTimeout(timer);
   }, [visibleMessages, messages.length, withClaw, isPaused]);
@@ -143,7 +153,6 @@ export function PhoneDemo() {
   const handleDotClick = useCallback((index: number) => {
     setExampleIndex(index);
     setIsPaused(true);
-    // Resume auto-rotation after 15 seconds
     setTimeout(() => setIsPaused(false), 15000);
   }, []);
 
@@ -153,7 +162,7 @@ export function PhoneDemo() {
       <div className="flex items-center justify-center gap-3 mb-6">
         <button
           onClick={() => setWithClaw(true)}
-          className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
+          className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
             withClaw 
               ? "bg-zinc-900 text-white shadow-lg" 
               : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -163,7 +172,7 @@ export function PhoneDemo() {
         </button>
         <button
           onClick={() => setWithClaw(false)}
-          className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
+          className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
             !withClaw 
               ? "bg-zinc-900 text-white shadow-lg" 
               : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -173,22 +182,19 @@ export function PhoneDemo() {
         </button>
       </div>
 
-      {/* Example indicator dots (only show when withClaw) */}
+      {/* Example indicator (only show when withClaw) */}
       {withClaw && (
         <div className="flex items-center justify-center gap-2 mb-4">
           {examples.map((ex, i) => (
             <button
               key={ex.id}
               onClick={() => handleDotClick(i)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                 i === exampleIndex 
                   ? "bg-zinc-900 text-white" 
                   : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
               }`}
             >
-              {ex.id === "direct" && "⚡"}
-              {ex.id === "open" && "🌐"}
-              {ex.id === "discovery" && "🔍"}
               {ex.label}
             </button>
           ))}
@@ -197,9 +203,7 @@ export function PhoneDemo() {
       
       {/* ChatGPT-style Phone Frame */}
       <div className="relative mx-auto" style={{ maxWidth: "340px" }}>
-        {/* Phone body */}
         <div className="relative bg-zinc-900 rounded-[2.5rem] p-2 shadow-2xl">
-          {/* Screen */}
           <div className="bg-white rounded-[2.2rem] overflow-hidden min-h-[480px] flex flex-col">
             {/* Status bar */}
             <div className="flex items-center justify-between px-6 py-2 text-xs text-zinc-900 font-medium">
@@ -236,8 +240,13 @@ export function PhoneDemo() {
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white">
               {messages.slice(0, visibleMessages).map((msg, i) => (
                 <div
-                  key={`${exampleIndex}-${i}`}
-                  className="animate-fade-in"
+                  key={`${withClaw}-${exampleIndex}-${i}`}
+                  className="transition-all duration-500 ease-out"
+                  style={{
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                    animation: 'slideUp 0.4s ease-out'
+                  }}
                 >
                   {msg.role === "user" ? (
                     <div className="flex justify-end">
@@ -246,17 +255,32 @@ export function PhoneDemo() {
                       </div>
                     </div>
                   ) : msg.role === "step" ? (
-                    <div className="flex items-start gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
-                        i < visibleMessages - 1 
-                          ? "bg-orange-100 text-orange-600" 
+                    <div className="flex items-center gap-3 transition-all duration-300">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 transition-all duration-300 ${
+                        completedSteps.includes(i)
+                          ? "bg-green-500 text-white scale-100" 
                           : "bg-zinc-100 text-zinc-500"
                       }`}>
-                        {i < visibleMessages - 1 ? "✓" : i + 1}
+                        {completedSteps.includes(i) ? (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          i + 1
+                        )}
                       </div>
-                      <span className={`text-sm pt-0.5 ${i < visibleMessages - 1 ? "text-zinc-400" : "text-zinc-700"}`}>
+                      <span className={`text-sm transition-all duration-300 ${
+                        completedSteps.includes(i) ? "text-zinc-400" : "text-zinc-700"
+                      }`}>
                         {msg.text}
                       </span>
+                      {!completedSteps.includes(i) && i === visibleMessages - 1 && (
+                        <div className="flex gap-0.5 ml-1">
+                          <span className="w-1 h-1 bg-zinc-400 rounded-full animate-pulse" />
+                          <span className="w-1 h-1 bg-zinc-400 rounded-full animate-pulse" style={{ animationDelay: "0.15s" }} />
+                          <span className="w-1 h-1 bg-zinc-400 rounded-full animate-pulse" style={{ animationDelay: "0.3s" }} />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex gap-3">
@@ -278,7 +302,7 @@ export function PhoneDemo() {
                             <div className="text-zinc-900 text-sm font-medium">{msg.text}</div>
                             <div className="space-y-1.5">
                               {msg.models.map((m, j) => (
-                                <div key={j} className={`flex items-center justify-between text-xs px-3 py-2 rounded-lg ${
+                                <div key={j} className={`flex items-center justify-between text-xs px-3 py-2 rounded-lg transition-all duration-200 ${
                                   j === 0 ? "bg-zinc-900 text-white" : "bg-zinc-50 text-zinc-600"
                                 }`}>
                                   <span className={j === 0 ? "font-medium" : ""}>{m.name}</span>
@@ -293,7 +317,7 @@ export function PhoneDemo() {
                             <div className="text-zinc-900 text-sm font-medium">{msg.text}</div>
                             <div className="space-y-1.5">
                               {msg.results.map((r, j) => (
-                                <div key={j} className={`flex items-center justify-between text-xs px-3 py-2 rounded-lg ${
+                                <div key={j} className={`flex items-center justify-between text-xs px-3 py-2 rounded-lg transition-all duration-200 ${
                                   j === 0 ? "bg-zinc-900 text-white" : "bg-zinc-50 text-zinc-600"
                                 }`}>
                                   <span className={j === 0 ? "font-medium" : ""}>{r.name}</span>
@@ -310,7 +334,7 @@ export function PhoneDemo() {
                         {!msg.search && !msg.results && !msg.models && (
                           <div className="text-zinc-800 text-sm flex items-center gap-2 py-1">
                             {msg.success && (
-                              <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
                             )}
@@ -380,6 +404,20 @@ export function PhoneDemo() {
           </div>
         </div>
       </div>
+      
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
