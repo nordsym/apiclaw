@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 interface WithMessage {
@@ -9,6 +9,8 @@ interface WithMessage {
   meta?: string;
   typing?: boolean;
   image?: boolean;
+  currency?: boolean;
+  transcript?: boolean;
   success?: boolean;
   search?: boolean;
   models?: { name: string; match: string }[];
@@ -22,7 +24,8 @@ interface WithoutMessage {
 
 type Message = WithMessage | WithoutMessage;
 
-const WithAPIClaw: WithMessage[] = [
+// Example 1: Direct Call - Replicate
+const DirectCallExample: WithMessage[] = [
   { role: "user", text: "Generate a product photo of a coffee mug" },
   { role: "assistant", text: "Direct Call → Replicate", search: true },
   { 
@@ -39,17 +42,48 @@ const WithAPIClaw: WithMessage[] = [
   { role: "assistant", text: "Done", image: true, success: true },
 ];
 
+// Example 2: Open API - Currency
+const OpenAPIExample: WithMessage[] = [
+  { role: "user", text: "What's the USD to SEK exchange rate?" },
+  { role: "assistant", text: "Open API → Frankfurter", search: true },
+  { role: "assistant", text: "No API key needed", meta: "Free, open access" },
+  { role: "assistant", text: "Fetching rate...", typing: true },
+  { role: "assistant", text: "Current rate", currency: true, success: true },
+];
+
+// Example 3: Discovery - Search 22k APIs
+const DiscoveryExample: WithMessage[] = [
+  { role: "user", text: "I need to transcribe meeting recordings" },
+  { role: "assistant", text: "Searching 22,000+ APIs...", search: true },
+  { 
+    role: "assistant", 
+    text: "Found 4 matches",
+    results: [
+      { name: "Deepgram", match: "96%", cost: "$0.0043/min" },
+      { name: "AssemblyAI", match: "94%", cost: "$0.0065/min" },
+      { name: "Rev.ai", match: "91%", cost: "$0.02/min" },
+      { name: "Google STT", match: "89%", cost: "$0.006/min" },
+    ]
+  },
+  { role: "assistant", text: "Deepgram recommended", meta: "Best accuracy + pricing", success: true },
+];
+
 const WithoutAPIClaw: WithoutMessage[] = [
-  { role: "step", text: "Search \"AI image generation API\"" },
+  { role: "step", text: "Search for the right API" },
   { role: "step", text: "Open 12 tabs, compare providers" },
-  { role: "step", text: "Read Replicate documentation" },
-  { role: "step", text: "Create account on Replicate" },
-  { role: "step", text: "Verify email, set up billing" },
-  { role: "step", text: "Generate API key" },
+  { role: "step", text: "Read documentation for each" },
+  { role: "step", text: "Create account, verify email" },
+  { role: "step", text: "Set up billing, generate key" },
   { role: "step", text: "Store key securely in .env" },
-  { role: "step", text: "Research which model to use" },
   { role: "step", text: "Write API integration code" },
+  { role: "step", text: "Debug authentication errors" },
   { role: "step", text: "Finally make first API call" },
+];
+
+const examples = [
+  { id: "direct", label: "Direct Call", messages: DirectCallExample },
+  { id: "open", label: "Open API", messages: OpenAPIExample },
+  { id: "discovery", label: "Discovery", messages: DiscoveryExample },
 ];
 
 // OpenAI-style logo
@@ -63,12 +97,20 @@ function OpenAILogo({ className }: { className?: string }) {
 
 export function PhoneDemo() {
   const [withClaw, setWithClaw] = useState(true);
+  const [exampleIndex, setExampleIndex] = useState(0);
   const [visibleMessages, setVisibleMessages] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   
-  const messages: Message[] = withClaw ? WithAPIClaw : WithoutAPIClaw;
+  const currentExample = examples[exampleIndex];
+  const messages: Message[] = withClaw ? currentExample.messages : WithoutAPIClaw;
   
+  // Reset visible messages when example changes
   useEffect(() => {
     setVisibleMessages(0);
+  }, [exampleIndex, withClaw]);
+  
+  // Animate messages appearing
+  useEffect(() => {
     const interval = setInterval(() => {
       setVisibleMessages((v) => {
         if (v >= messages.length) {
@@ -77,15 +119,38 @@ export function PhoneDemo() {
         }
         return v + 1;
       });
-    }, withClaw ? 1000 : 600);
+    }, withClaw ? 800 : 500);
     
     return () => clearInterval(interval);
-  }, [withClaw, messages.length]);
+  }, [messages.length, exampleIndex, withClaw]);
+  
+  // Auto-rotate examples (only when withClaw is true)
+  useEffect(() => {
+    if (!withClaw || isPaused) return;
+    
+    const timer = setTimeout(() => {
+      if (visibleMessages >= messages.length) {
+        // Wait 3 seconds after animation completes, then switch
+        setTimeout(() => {
+          setExampleIndex((i) => (i + 1) % examples.length);
+        }, 3000);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [visibleMessages, messages.length, withClaw, isPaused]);
+
+  const handleDotClick = useCallback((index: number) => {
+    setExampleIndex(index);
+    setIsPaused(true);
+    // Resume auto-rotation after 15 seconds
+    setTimeout(() => setIsPaused(false), 15000);
+  }, []);
 
   return (
     <div className="w-full max-w-sm mx-auto">
       {/* Toggle */}
-      <div className="flex items-center justify-center gap-3 mb-8">
+      <div className="flex items-center justify-center gap-3 mb-6">
         <button
           onClick={() => setWithClaw(true)}
           className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
@@ -107,6 +172,28 @@ export function PhoneDemo() {
           Without
         </button>
       </div>
+
+      {/* Example indicator dots (only show when withClaw) */}
+      {withClaw && (
+        <div className="flex items-center justify-center gap-2 mb-4">
+          {examples.map((ex, i) => (
+            <button
+              key={ex.id}
+              onClick={() => handleDotClick(i)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                i === exampleIndex 
+                  ? "bg-zinc-900 text-white" 
+                  : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+              }`}
+            >
+              {ex.id === "direct" && "⚡"}
+              {ex.id === "open" && "🌐"}
+              {ex.id === "discovery" && "🔍"}
+              {ex.label}
+            </button>
+          ))}
+        </div>
+      )}
       
       {/* ChatGPT-style Phone Frame */}
       <div className="relative mx-auto" style={{ maxWidth: "340px" }}>
@@ -143,20 +230,14 @@ export function PhoneDemo() {
                   </div>
                 </div>
               </div>
-              <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100">
-                <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </button>
             </div>
             
             {/* Messages area */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-white">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white">
               {messages.slice(0, visibleMessages).map((msg, i) => (
                 <div
-                  key={i}
+                  key={`${exampleIndex}-${i}`}
                   className="animate-fade-in"
-                  style={{ animationDelay: `${i * 50}ms` }}
                 >
                   {msg.role === "user" ? (
                     <div className="flex justify-end">
@@ -179,12 +260,10 @@ export function PhoneDemo() {
                     </div>
                   ) : (
                     <div className="flex gap-3">
-                      {/* Avatar */}
                       <div className="w-7 h-7 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0">
                         <OpenAILogo className="w-4 h-4 text-white" />
                       </div>
                       
-                      {/* Message content */}
                       <div className="flex-1 min-w-0">
                         {msg.search && (
                           <div className="flex items-center gap-2 text-zinc-700 text-sm py-1 font-medium">
@@ -257,6 +336,17 @@ export function PhoneDemo() {
                               height={176}
                               className="w-full h-full object-cover"
                             />
+                          </div>
+                        )}
+                        {msg.currency && (
+                          <div className="mt-2 bg-zinc-50 border border-zinc-200 rounded-xl p-3 inline-block">
+                            <div className="flex items-center gap-3">
+                              <div className="text-2xl font-bold text-zinc-900">10.82</div>
+                              <div className="text-sm text-zinc-500">
+                                <div className="font-medium">USD → SEK</div>
+                                <div className="text-xs text-zinc-400">Live rate</div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
