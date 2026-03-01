@@ -1173,7 +1173,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
 
       {/* Telegram Chat Bubble */}
       <a
-        href="https://t.me/Symbot_nordsym_bot"
+        href="https://t.me/Symbot_nordsym_bot?start=apiclaw"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 group"
