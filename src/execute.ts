@@ -13,6 +13,64 @@ interface ExecuteResult {
   data?: unknown;
   error?: string;
   cost?: number;
+  // Normalized top-level fields (extracted from data for convenience)
+  url?: string;
+  id?: string;
+  content?: string;
+  status?: string;
+}
+
+/**
+ * Normalize response by extracting common fields to top-level
+ * Makes it easier for agents to access key data without digging into provider-specific structures
+ */
+function normalizeResponse(result: ExecuteResult): ExecuteResult {
+  if (!result.success || !result.data) return result;
+  
+  const data = result.data as Record<string, unknown>;
+  const normalized: ExecuteResult = { ...result };
+  
+  // Extract URL (various field names across providers)
+  const urlFields = ['url', 'audioUrl', 'audio_url', 'output_url', 'image_url', 'video_url', 'file_url', 'download_url'];
+  for (const field of urlFields) {
+    if (data[field] && typeof data[field] === 'string') {
+      normalized.url = data[field] as string;
+      break;
+    }
+  }
+  // Handle array outputs (e.g., Replicate returns output: ["url1", "url2"])
+  if (!normalized.url && Array.isArray(data.output) && data.output.length > 0 && typeof data.output[0] === 'string') {
+    normalized.url = data.output[0];
+  }
+  
+  // Extract ID
+  const idFields = ['id', 'sid', 'message_id', 'prediction_id', 'job_id', 'request_id'];
+  for (const field of idFields) {
+    if (data[field] && (typeof data[field] === 'string' || typeof data[field] === 'number')) {
+      normalized.id = String(data[field]);
+      break;
+    }
+  }
+  
+  // Extract content (for LLM/text responses)
+  const contentFields = ['content', 'text', 'message', 'response', 'output'];
+  for (const field of contentFields) {
+    if (data[field] && typeof data[field] === 'string') {
+      normalized.content = data[field] as string;
+      break;
+    }
+  }
+  
+  // Extract status
+  const statusFields = ['status', 'state'];
+  for (const field of statusFields) {
+    if (data[field] && typeof data[field] === 'string') {
+      normalized.status = data[field] as string;
+      break;
+    }
+  }
+  
+  return normalized;
 }
 
 interface DryRunResult {
@@ -1028,7 +1086,8 @@ export async function executeAPICall(
   if (userId) {
     const isDynamic = await hasDynamicConfig(providerId);
     if (isDynamic) {
-      return executeDynamicAction(providerId, action, params, userId, customerKey);
+      const dynamicResult = await executeDynamicAction(providerId, action, params, userId, customerKey);
+      return normalizeResponse(dynamicResult);
     }
   }
   
@@ -1083,12 +1142,12 @@ export async function executeAPICall(
     if (PROXY_PROVIDERS.includes(providerId)) {
       try {
         const proxyResult = await callProxy(providerId, { action, ...params });
-        return {
+        return normalizeResponse({
           success: true,
           provider: providerId,
           action,
           data: proxyResult,
-        };
+        });
       } catch (e: any) {
         return {
           success: false,
@@ -1106,9 +1165,10 @@ export async function executeAPICall(
     };
   }
 
-  // Execute
+  // Execute and normalize response
   try {
-    return await handler(params, creds);
+    const result = await handler(params, creds);
+    return normalizeResponse(result);
   } catch (error: any) {
     return {
       success: false,
