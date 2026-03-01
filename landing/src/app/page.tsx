@@ -208,7 +208,7 @@ Instant highlights:
 • Code sandbox (E2B)
 • Multi-LLM routing (OpenRouter)
 
-${statsData.directCallCount} Direct Call providers across categories:
+${statsData.directCallCount}+ Direct Call providers across categories:
 AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
 Voice: ElevenLabs, Deepgram, AssemblyAI
 Search: Brave Search, Serper, Firecrawl
@@ -217,7 +217,7 @@ Utility: Resend (email), 46elks & Twilio (SMS)
 
 Your Tools:
 • call_api(provider, action, params) – Execute immediately (leave auth fields empty – APIClaw handles it)
-• discover_apis(query) – Semantic search ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "image-to-video model")
+• discover_apis(query) – Semantic search across ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "image-to-video model")
 • get_api_details(id) – Full specs, pricing, limits
 • list_connected() – See all ready providers
 
