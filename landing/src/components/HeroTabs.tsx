@@ -121,17 +121,17 @@ export function HeroTabs() {
               </div>
 
               {/* Terminal Command - Clickable */}
-              <div>
+              <div className="relative">
                 <button 
                   onClick={copyTerminal}
-                  className={`w-full text-left transition-all rounded-xl overflow-hidden ${copiedTerminal ? "ring-2 ring-green-500" : "hover:ring-2 hover:ring-accent/50"}`}
+                  className={`w-full text-left transition-all rounded-xl overflow-hidden hover:ring-2 hover:ring-accent/50 ${copiedTerminal ? "ring-2 ring-green-500" : ""}`}
                 >
                   <div className="code-preview">
-                    <div className={`code-preview-header flex items-center justify-between ${copiedTerminal ? "!bg-green-600 text-white" : ""}`}>
+                    <div className="code-preview-header flex items-center justify-between">
                       <span>terminal</span>
                       <span className="flex items-center gap-1 text-xs">
-                        {copiedTerminal ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedTerminal ? "Run in terminal!" : "Click to copy"}
+                        {copiedTerminal ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                        {copiedTerminal ? "Copied!" : "Click to copy"}
                       </span>
                     </div>
                     <div className="code-preview-body">
@@ -141,6 +141,11 @@ export function HeroTabs() {
                     </div>
                   </div>
                 </button>
+                {copiedTerminal && (
+                  <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg animate-fade-in">
+                    ✓ Run this in your terminal!
+                  </span>
+                )}
               </div>
             </div>
           )}

@@ -168,6 +168,7 @@ export default function Home() {
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const directCallProviders = [
+    // Original 10
     { name: "Replicate", desc: "Whisper, Stable Diffusion, 1000+ ML models", category: "AI & LLM" },
     { name: "OpenRouter", desc: "GPT-4, Claude, Llama, 100+ LLMs", category: "AI & LLM" },
     { name: "ElevenLabs", desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
@@ -176,8 +177,17 @@ export default function Home() {
     { name: "Resend", desc: "Modern email API for developers", category: "Email" },
     { name: "Brave Search", desc: "Privacy-focused web search", category: "Search" },
     { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
-    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "AI & LLM" },
-    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Other" },
+    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
+    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
+    // New 8
+    { name: "Groq", desc: "Ultra-fast LLM inference", category: "AI & LLM" },
+    { name: "Deepgram", desc: "Speech-to-text transcription", category: "Voice & TTS" },
+    { name: "Serper", desc: "Google search API for AI", category: "Search" },
+    { name: "Mistral", desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
+    { name: "Cohere", desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
+    { name: "Together AI", desc: "Open-source model inference", category: "AI & LLM" },
+    { name: "Stability AI", desc: "Stable Diffusion image generation", category: "AI & LLM" },
+    { name: "AssemblyAI", desc: "Audio transcription and intelligence", category: "Voice & TTS" },
   ];
 
   const copyToClipboard = () => {
