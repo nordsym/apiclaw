@@ -486,8 +486,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               </p>
               
               <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
-                Structured data. Ranked results. Sub-200ms responses.
-                Built for the agentic era.
+                No API keys. No setup. Just call.
               </p>
 
               {/* Copy Context Button */}
