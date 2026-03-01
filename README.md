@@ -21,13 +21,13 @@ npx @nordsym/apiclaw mcp-install
 # "List available APIs" or "Send an SMS via 46elks"
 ```
 
-APIClaw automatically detects Claude Desktop and Claude Code — then configures itself as an MCP server in seconds.
+APIClaw automatically detects Claude Desktop and Claude Code — then configures itself as an MCP server in seconds. Works with any MCP-compatible agent.
 
 ---
 
 ## What is APIClaw?
 
-APIClaw is an MCP (Model Context Protocol) server that gives AI coding assistants access to real-world APIs:
+**The API layer for AI agents.** APIClaw is an MCP server that gives any MCP-compatible agent access to real-world APIs:
 
 - **📱 SMS & Voice** — 46elks, Twilio
 - **📧 Email** — Resend, SendGrid
