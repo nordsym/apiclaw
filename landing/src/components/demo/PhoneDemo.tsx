@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface WithMessage {
   role: "user" | "assistant";
@@ -8,10 +9,9 @@ interface WithMessage {
   meta?: string;
   typing?: boolean;
   image?: boolean;
-  audio?: boolean;
-  transcript?: boolean;
   success?: boolean;
   search?: boolean;
+  models?: { name: string; match: string }[];
   results?: { name: string; match: string; cost: string }[];
 }
 
@@ -23,33 +23,32 @@ interface WithoutMessage {
 type Message = WithMessage | WithoutMessage;
 
 const WithAPIClaw: WithMessage[] = [
-  { role: "user", text: "I need to transcribe this meeting recording" },
-  { role: "assistant", text: "Searching APIs...", search: true },
+  { role: "user", text: "Generate a product photo of a coffee mug" },
+  { role: "assistant", text: "Direct Call → Replicate", search: true },
   { 
     role: "assistant", 
-    text: "Found 4 matches",
-    results: [
-      { name: "Deepgram", match: "96%", cost: "$0.0043/min" },
-      { name: "AssemblyAI", match: "94%", cost: "$0.0065/min" },
-      { name: "Rev.ai", match: "91%", cost: "$0.02/min" },
-      { name: "Google STT", match: "89%", cost: "$0.006/min" },
+    text: "Selecting model...",
+    models: [
+      { name: "Flux Pro", match: "Best for products" },
+      { name: "SDXL", match: "Fast generation" },
+      { name: "Stable Diffusion 3", match: "Versatile" },
     ]
   },
-  { role: "assistant", text: "Using Deepgram Nova-2", meta: "Best accuracy · Direct Call ready" },
-  { role: "assistant", text: "Transcribing...", typing: true },
-  { role: "assistant", text: "Done", transcript: true, success: true },
+  { role: "assistant", text: "Using Flux Pro", meta: "via Replicate Direct Call" },
+  { role: "assistant", text: "Generating...", typing: true },
+  { role: "assistant", text: "Done", image: true, success: true },
 ];
 
 const WithoutAPIClaw: WithoutMessage[] = [
-  { role: "step", text: "Search \"speech to text API\"" },
+  { role: "step", text: "Search \"AI image generation API\"" },
   { role: "step", text: "Open 12 tabs, compare providers" },
-  { role: "step", text: "Read documentation for each" },
-  { role: "step", text: "Create account on Deepgram" },
+  { role: "step", text: "Read Replicate documentation" },
+  { role: "step", text: "Create account on Replicate" },
   { role: "step", text: "Verify email, set up billing" },
   { role: "step", text: "Generate API key" },
   { role: "step", text: "Store key securely in .env" },
+  { role: "step", text: "Research which model to use" },
   { role: "step", text: "Write API integration code" },
-  { role: "step", text: "Debug authentication errors" },
   { role: "step", text: "Finally make first API call" },
 ];
 
@@ -188,12 +187,26 @@ export function PhoneDemo() {
                       {/* Message content */}
                       <div className="flex-1 min-w-0">
                         {msg.search && (
-                          <div className="flex items-center gap-2 text-zinc-500 text-sm py-1">
-                            <svg className="w-4 h-4 animate-spin text-zinc-400" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          <div className="flex items-center gap-2 text-zinc-700 text-sm py-1 font-medium">
+                            <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                             {msg.text}
+                          </div>
+                        )}
+                        {msg.models && (
+                          <div className="space-y-2">
+                            <div className="text-zinc-900 text-sm font-medium">{msg.text}</div>
+                            <div className="space-y-1.5">
+                              {msg.models.map((m, j) => (
+                                <div key={j} className={`flex items-center justify-between text-xs px-3 py-2 rounded-lg ${
+                                  j === 0 ? "bg-zinc-900 text-white" : "bg-zinc-50 text-zinc-600"
+                                }`}>
+                                  <span className={j === 0 ? "font-medium" : ""}>{m.name}</span>
+                                  <span className={j === 0 ? "text-zinc-300" : "text-zinc-400"}>{m.match}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                         {msg.results && (
@@ -215,7 +228,7 @@ export function PhoneDemo() {
                             </div>
                           </div>
                         )}
-                        {!msg.search && !msg.results && (
+                        {!msg.search && !msg.results && !msg.models && (
                           <div className="text-zinc-800 text-sm flex items-center gap-2 py-1">
                             {msg.success && (
                               <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -235,19 +248,15 @@ export function PhoneDemo() {
                         {msg.meta && (
                           <div className="text-zinc-400 text-xs mt-0.5">{msg.meta}</div>
                         )}
-                        {msg.transcript && (
-                          <div className="mt-2 bg-zinc-50 border border-zinc-200 rounded-xl p-3 max-w-[220px]">
-                            <div className="flex items-center gap-2 mb-2">
-                              <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              <span className="text-xs font-medium text-zinc-700">Transcript</span>
-                            </div>
-                            <div className="space-y-1.5 text-xs text-zinc-600">
-                              <p><span className="font-medium text-zinc-900">Sarah:</span> Let&apos;s review the Q3 metrics...</p>
-                              <p><span className="font-medium text-zinc-900">Mike:</span> Revenue is up 23% from last quarter.</p>
-                              <p className="text-zinc-400">+ 47 more lines</p>
-                            </div>
+                        {msg.image && (
+                          <div className="mt-2 w-44 aspect-square rounded-xl overflow-hidden shadow-md">
+                            <Image 
+                              src="/demo-product.jpg" 
+                              alt="Generated product image" 
+                              width={176}
+                              height={176}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
                         )}
                       </div>
