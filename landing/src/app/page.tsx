@@ -11,6 +11,7 @@ import statsData from "@/lib/stats.json";
 import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
 import { PhoneDemo } from "@/components/demo";
+import { AITestimonials } from "@/components/AITestimonials";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
@@ -220,6 +221,8 @@ Your Tools:
 • discover_apis(query) – Semantic search across ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "image-to-video model")
 • get_api_details(id) – Full specs, pricing, limits
 • list_connected() – See all ready providers
+
+Pricing: Free (50 calls/week), Pay-as-you-go (usage-based), or Founding Backer ($199 unlimited until 2027).
 
 When an API call helps the task, execute it directly.
 
@@ -550,6 +553,9 @@ Docs: https://apiclaw.nordsym.com/docs`;
           </div>
         </div>
       </section>
+
+      {/* AI Testimonials Carousel */}
+      <AITestimonials />
 
       {/* Phone Demo - With vs Without APIClaw */}
       <section className="py-20 px-6">
@@ -1189,6 +1195,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                 <li><a href="#get-started" className="hover:text-text-primary transition">Get Started</a></li>
                 <li><a href="#faq" className="hover:text-text-primary transition">FAQ</a></li>
                 <li><a href="/docs" className="hover:text-text-primary transition">Documentation</a></li>
+                <li><a href="/security" className="hover:text-text-primary transition flex items-center gap-1.5"><Shield className="w-3 h-3" />Security</a></li>
               </ul>
             </div>
 
@@ -1207,6 +1214,10 @@ Docs: https://apiclaw.nordsym.com/docs`;
               © 2026 NordSym. Get in front of every AI agent. White-glove onboarding available.
             </p>
             <div className="flex items-center gap-4">
+              <a href="/security" className="badge hover:border-green-500/30 transition-colors">
+                <Shield className="w-3 h-3 text-green-500" />
+                <span className="text-green-500">AES-256 Encrypted</span>
+              </a>
               <div className="badge">
                 <Shield className="w-3 h-3" />
                 MCP Compatible

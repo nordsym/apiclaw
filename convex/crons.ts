@@ -14,4 +14,15 @@ crons.daily(
   internal.billing.reportAllUsageToStripe
 );
 
+/**
+ * Monthly Spend Reset
+ * Runs at 00:01 UTC on the 1st of each month
+ * Resets monthlySpendCents and budgetAlertSentAt for all workspaces
+ */
+crons.monthly(
+  "reset-monthly-spend",
+  { day: 1, hourUTC: 0, minuteUTC: 1 },
+  internal.spendAlerts.resetMonthlySpend
+);
+
 export default crons;

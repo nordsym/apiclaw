@@ -477,6 +477,78 @@ All Direct Call providers support dry-run:
 
 ---
 
+## Error Handling
+
+APIClaw returns structured error responses across all providers, making it easy to handle failures programmatically.
+
+### Error Response Format
+
+All errors follow this structure:
+
+```json
+{
+  "success": false,
+  "provider": "replicate",
+  "action": "run",
+  "error": "Rate limit exceeded",
+  "code": "RATE_LIMITED"
+}
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `RATE_LIMITED` | API rate limit hit (429) |
+| `SERVICE_UNAVAILABLE` | Service temporarily unavailable (502, 503, 504) |
+| `UNAUTHORIZED` | Invalid or missing credentials (401) |
+| `FORBIDDEN` | Access denied (403) |
+| `NOT_FOUND` | Resource not found (404) |
+| `BAD_REQUEST` | Invalid request parameters (400) |
+| `TIMEOUT` | Request timed out |
+| `NETWORK_ERROR` | Network connectivity issue |
+| `PROVIDER_ERROR` | Provider-specific error |
+| `INVALID_PARAMS` | Missing or invalid parameters |
+| `NO_CREDENTIALS` | No credentials configured for provider |
+| `UNKNOWN_PROVIDER` | Provider not available |
+| `UNKNOWN_ACTION` | Action not available for provider |
+| `MAX_RETRIES_EXCEEDED` | All retry attempts failed |
+
+### Automatic Retry
+
+APIClaw automatically retries transient failures with exponential backoff:
+
+- **Retryable errors:** 429 (Rate Limited), 502, 503, 504 (Service Unavailable)
+- **Max retries:** 3
+- **Backoff:** Exponential with jitter (1s → 2s → 4s, capped at 30s)
+- **Retry-After:** Respects `Retry-After` header when present
+
+```javascript
+// APIClaw handles retries automatically — you just see the final result
+const result = await call_api({
+  provider: "openrouter",
+  action: "chat",
+  params: { messages: [...] }
+});
+
+if (!result.success) {
+  console.log(`Error: ${result.error} (${result.code})`);
+  // Handle error based on code
+  if (result.code === "RATE_LIMITED") {
+    // Wait longer before next request
+  }
+}
+```
+
+### Best Practices
+
+1. **Always check `success`** before accessing `data`
+2. **Use `code`** for programmatic error handling
+3. **Use `error`** for human-readable messages
+4. **Let APIClaw retry** — don't implement your own retry logic for 429/503
+
+---
+
 ## Development
 
 ```bash

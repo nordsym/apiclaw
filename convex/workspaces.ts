@@ -226,6 +226,14 @@ export const getWorkspaceDashboard = query({
     const usageRemaining = workspace.usageLimit - workspace.usageCount;
     const usagePercentage = (workspace.usageCount / workspace.usageLimit) * 100;
 
+    // Budget status (PRD 2.6)
+    const monthStart = getMonthStartForBudget();
+    let currentSpend = workspace.monthlySpendCents || 0;
+    if (!workspace.lastSpendResetAt || workspace.lastSpendResetAt < monthStart) {
+      currentSpend = 0;
+    }
+    const budgetCap = workspace.budgetCap || null;
+
     return {
       workspace: {
         id: workspace._id,
@@ -244,9 +252,27 @@ export const getWorkspaceDashboard = query({
         totalCredits: workspaceCredits.reduce((sum, c) => sum + c.balanceUsd, 0),
         totalPurchases: workspacePurchases.length,
       },
+      budget: {
+        budgetCapCents: budgetCap,
+        budgetCapUsd: budgetCap ? budgetCap / 100 : null,
+        currentSpendCents: currentSpend,
+        currentSpendUsd: currentSpend / 100,
+        remainingCents: budgetCap ? Math.max(0, budgetCap - currentSpend) : null,
+        remainingUsd: budgetCap ? Math.max(0, (budgetCap - currentSpend) / 100) : null,
+        budgetPercentage: budgetCap ? Math.min(100, (currentSpend / budgetCap) * 100) : null,
+        pauseOnBudgetExceeded: workspace.pauseOnBudgetExceeded || false,
+        isOverBudget: budgetCap ? currentSpend >= budgetCap : false,
+        isNearBudget: budgetCap ? currentSpend >= budgetCap * 0.8 : false,
+      },
     };
   },
 });
+
+// Helper for budget month start
+function getMonthStartForBudget(): number {
+  const now = new Date();
+  return new Date(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0).getTime();
+}
 
 // Get connected agents for workspace
 export const getConnectedAgents = query({

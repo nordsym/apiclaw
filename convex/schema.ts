@@ -75,6 +75,12 @@ export default defineSchema({
     // Referral fields
     referralCode: v.optional(v.string()), // CLAW-XXXXXX format
     referredBy: v.optional(v.id("workspaces")), // who referred this user
+    // Budget & Spend Alerts (PRD 2.6)
+    budgetCap: v.optional(v.number()), // Monthly budget cap in USD cents (null = unlimited)
+    budgetAlertSentAt: v.optional(v.number()), // When 80% alert was last sent (resets monthly)
+    pauseOnBudgetExceeded: v.optional(v.boolean()), // If true, block execution when budget exceeded
+    monthlySpendCents: v.optional(v.number()), // Current month's spend in cents
+    lastSpendResetAt: v.optional(v.number()), // When monthly spend was last reset
     createdAt: v.number(),
     updatedAt: v.number(),
   })

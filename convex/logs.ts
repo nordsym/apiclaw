@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
 
 // ============================================
 // MUTATIONS
@@ -72,6 +73,112 @@ export const createLogInternal = mutation({
       errorMessage: args.errorMessage,
       createdAt: Date.now(),
     });
+  },
+});
+
+// ============================================
+// HELPER: Get month start
+// ============================================
+
+function getMonthStart(): number {
+  const now = new Date();
+  return new Date(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0).getTime();
+}
+
+/**
+ * Combined log creation + spend tracking (PRD 2.6)
+ * Creates log entry, tracks spend, returns budget status
+ * Returns shouldSendAlert: true if 80% threshold crossed (caller should send email)
+ */
+export const createLogWithSpend = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    sessionToken: v.string(),
+    provider: v.string(),
+    action: v.string(),
+    status: v.union(v.literal("success"), v.literal("error")),
+    latencyMs: v.number(),
+    costCents: v.number(), // Cost in USD cents
+    errorMessage: v.optional(v.string()),
+    subagentId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const monthStart = getMonthStart();
+    
+    // 1. Create log entry
+    const logId = await ctx.db.insert("apiLogs", {
+      workspaceId: args.workspaceId,
+      sessionToken: args.sessionToken,
+      subagentId: args.subagentId,
+      provider: args.provider,
+      action: args.action,
+      status: args.status,
+      latencyMs: args.latencyMs,
+      errorMessage: args.errorMessage,
+      createdAt: now,
+    });
+
+    // 2. Track spend if successful call with cost
+    if (args.status === "success" && args.costCents > 0) {
+      const workspace = await ctx.db.get(args.workspaceId);
+      if (!workspace) {
+        return { logId, spendTracked: false };
+      }
+
+      // Reset monthly spend if new month
+      let currentSpend = workspace.monthlySpendCents || 0;
+      if (!workspace.lastSpendResetAt || workspace.lastSpendResetAt < monthStart) {
+        currentSpend = 0;
+      }
+
+      // Add new spend
+      const newSpend = currentSpend + args.costCents;
+      const budgetCap = workspace.budgetCap;
+
+      // Update workspace
+      await ctx.db.patch(args.workspaceId, {
+        monthlySpendCents: newSpend,
+        lastSpendResetAt: monthStart,
+        updatedAt: now,
+      });
+
+      // Check if we need to send alert (80% threshold)
+      let shouldSendAlert = false;
+      let budgetExceeded = false;
+
+      if (budgetCap && budgetCap > 0) {
+        const threshold = budgetCap * 0.8;
+        const alertAlreadySentThisMonth = workspace.budgetAlertSentAt &&
+          workspace.budgetAlertSentAt >= monthStart;
+
+        // Check if at 80% and alert not yet sent
+        if (newSpend >= threshold && !alertAlreadySentThisMonth) {
+          shouldSendAlert = true;
+          await ctx.db.patch(args.workspaceId, {
+            budgetAlertSentAt: now,
+          });
+        }
+
+        // Check if budget exceeded
+        if (newSpend >= budgetCap) {
+          budgetExceeded = true;
+        }
+      }
+
+      return {
+        logId,
+        spendTracked: true,
+        currentSpendCents: newSpend,
+        budgetCapCents: budgetCap || null,
+        budgetPercentage: budgetCap ? Math.round((newSpend / budgetCap) * 100) : null,
+        shouldSendAlert,
+        budgetExceeded,
+        email: workspace.email,
+      };
+    }
+
+    return { logId, spendTracked: false };
   },
 });
 

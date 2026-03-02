@@ -12,12 +12,135 @@ interface ExecuteResult {
   action: string;
   data?: unknown;
   error?: string;
+  code?: string;  // Structured error code (e.g., RATE_LIMITED, SERVICE_UNAVAILABLE)
   cost?: number;
   // Normalized top-level fields (extracted from data for convenience)
   url?: string;
   id?: string;
   content?: string;
   status?: string;
+}
+
+// Error codes for structured error responses
+const ERROR_CODES = {
+  RATE_LIMITED: 'RATE_LIMITED',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  BAD_REQUEST: 'BAD_REQUEST',
+  TIMEOUT: 'TIMEOUT',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  PROVIDER_ERROR: 'PROVIDER_ERROR',
+  INVALID_PARAMS: 'INVALID_PARAMS',
+  NO_CREDENTIALS: 'NO_CREDENTIALS',
+  UNKNOWN_PROVIDER: 'UNKNOWN_PROVIDER',
+  UNKNOWN_ACTION: 'UNKNOWN_ACTION',
+  MAX_RETRIES_EXCEEDED: 'MAX_RETRIES_EXCEEDED',
+} as const;
+
+type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+
+// Retry configuration
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelayMs: 1000,  // Start with 1 second
+  maxDelayMs: 30000,  // Cap at 30 seconds
+  retryableStatusCodes: [429, 503, 502, 504],  // Rate limit + service unavailable variants
+};
+
+/**
+ * Calculate exponential backoff delay with jitter
+ */
+function calculateBackoff(attempt: number): number {
+  const exponentialDelay = RETRY_CONFIG.baseDelayMs * Math.pow(2, attempt);
+  const jitter = Math.random() * 0.3 * exponentialDelay; // 0-30% jitter
+  return Math.min(exponentialDelay + jitter, RETRY_CONFIG.maxDelayMs);
+}
+
+/**
+ * Sleep for a given number of milliseconds
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Map HTTP status code to error code
+ */
+function statusToErrorCode(status: number): ErrorCode {
+  switch (status) {
+    case 400: return ERROR_CODES.BAD_REQUEST;
+    case 401: return ERROR_CODES.UNAUTHORIZED;
+    case 403: return ERROR_CODES.FORBIDDEN;
+    case 404: return ERROR_CODES.NOT_FOUND;
+    case 429: return ERROR_CODES.RATE_LIMITED;
+    case 502:
+    case 503:
+    case 504: return ERROR_CODES.SERVICE_UNAVAILABLE;
+    default: return ERROR_CODES.PROVIDER_ERROR;
+  }
+}
+
+/**
+ * Check if a response status code is retryable
+ */
+function isRetryableStatus(status: number): boolean {
+  return RETRY_CONFIG.retryableStatusCodes.includes(status);
+}
+
+/**
+ * Fetch with automatic retry for transient failures (429, 503)
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  context: { provider: string; action: string }
+): Promise<Response> {
+  let lastError: Error | null = null;
+  let lastResponse: Response | null = null;
+
+  for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Check if we should retry
+      if (isRetryableStatus(response.status) && attempt < RETRY_CONFIG.maxRetries) {
+        lastResponse = response;
+        const delay = calculateBackoff(attempt);
+        
+        // Check for Retry-After header
+        const retryAfter = response.headers.get('Retry-After');
+        const retryDelay = retryAfter 
+          ? (parseInt(retryAfter) * 1000 || delay) 
+          : delay;
+        
+        console.log(`[APIClaw] ${context.provider}/${context.action}: Got ${response.status}, retrying in ${Math.round(retryDelay)}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`);
+        await sleep(Math.min(retryDelay, RETRY_CONFIG.maxDelayMs));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Retry on network errors
+      if (attempt < RETRY_CONFIG.maxRetries) {
+        const delay = calculateBackoff(attempt);
+        console.log(`[APIClaw] ${context.provider}/${context.action}: Network error, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries})`);
+        await sleep(delay);
+        continue;
+      }
+    }
+  }
+
+  // If we have a response (even if error status), return it for proper error handling
+  if (lastResponse) {
+    return lastResponse;
+  }
+
+  // All retries exhausted with network errors
+  throw lastError || new Error('Max retries exceeded');
 }
 
 /**
@@ -329,6 +452,25 @@ export function generateDryRun(
   };
 }
 
+/**
+ * Create a structured error result with error code
+ */
+function createErrorResult(
+  provider: string,
+  action: string,
+  error: string,
+  code: ErrorCode,
+  status?: number
+): ExecuteResult {
+  return {
+    success: false,
+    provider,
+    action,
+    error,
+    code,
+  };
+}
+
 // Helper to safely access properties
 function safeGet(obj: unknown, ...keys: string[]): unknown {
   let current: unknown = obj;
@@ -351,24 +493,24 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { to, message, from = 'APIClaw' } = params;
       
       if (!to || !message) {
-        return { success: false, provider: '46elks', action: 'send_sms', error: 'Missing required params: to, message' };
+        return createErrorResult('46elks', 'send_sms', 'Missing required params: to, message', ERROR_CODES.INVALID_PARAMS);
       }
 
       const auth = Buffer.from(`${creds.username}:${creds.password}`).toString('base64');
       
-      const response = await fetch('https://api.46elks.com/a1/sms', {
+      const response = await fetchWithRetry('https://api.46elks.com/a1/sms', {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${auth}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({ from, to, message }),
-      });
+      }, { provider: '46elks', action: 'send_sms' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: '46elks', action: 'send_sms', error: (data.message as string) || 'SMS failed' };
+        return createErrorResult('46elks', 'send_sms', (data.message as string) || 'SMS failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -387,13 +529,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { to, message, from } = params;
       
       if (!to || !message) {
-        return { success: false, provider: 'twilio', action: 'send_sms', error: 'Missing required params: to, message' };
+        return createErrorResult('twilio', 'send_sms', 'Missing required params: to, message', ERROR_CODES.INVALID_PARAMS);
       }
 
       const auth = Buffer.from(`${creds.username}:${creds.password}`).toString('base64');
       const fromNumber = from || creds.from_number || '+15017122661';
       
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `https://api.twilio.com/2010-04-01/Accounts/${creds.username}/Messages.json`,
         {
           method: 'POST',
@@ -402,13 +544,14 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: new URLSearchParams({ From: fromNumber, To: to, Body: message }),
-        }
+        },
+        { provider: 'twilio', action: 'send_sms' }
       );
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'twilio', action: 'send_sms', error: (data.message as string) || 'SMS failed' };
+        return createErrorResult('twilio', 'send_sms', (data.message as string) || 'SMS failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -426,21 +569,21 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { query, count = 5 } = params;
       
       if (!query) {
-        return { success: false, provider: 'brave_search', action: 'search', error: 'Missing required param: query' };
+        return createErrorResult('brave_search', 'search', 'Missing required param: query', ERROR_CODES.INVALID_PARAMS);
       }
 
       const url = new URL('https://api.search.brave.com/res/v1/web/search');
       url.searchParams.set('q', query);
       url.searchParams.set('count', count.toString());
 
-      const response = await fetch(url.toString(), {
+      const response = await fetchWithRetry(url.toString(), {
         headers: { 'X-Subscription-Token': creds.api_key },
-      });
+      }, { provider: 'brave_search', action: 'search' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'brave_search', action: 'search', error: (data.message as string) || 'Search failed' };
+        return createErrorResult('brave_search', 'search', (data.message as string) || 'Search failed', statusToErrorCode(response.status));
       }
 
       const webData = data.web as Record<string, unknown> | undefined;
@@ -466,22 +609,22 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { to, subject, html, text, from = 'APIClaw <noreply@apiclaw.nordsym.com>' } = params;
       
       if (!to || !subject || (!html && !text)) {
-        return { success: false, provider: 'resend', action: 'send_email', error: 'Missing required params: to, subject, html or text' };
+        return createErrorResult('resend', 'send_email', 'Missing required params: to, subject, html or text', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetchWithRetry('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ from, to, subject, html, text }),
-      });
+      }, { provider: 'resend', action: 'send_email' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'resend', action: 'send_email', error: (data.message as string) || 'Email failed' };
+        return createErrorResult('resend', 'send_email', (data.message as string) || 'Email failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -499,10 +642,10 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { messages, model = 'anthropic/claude-3-haiku', max_tokens = 1000 } = params;
       
       if (!messages || !Array.isArray(messages)) {
-        return { success: false, provider: 'openrouter', action: 'chat', error: 'Missing required param: messages (array)' };
+        return createErrorResult('openrouter', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetchWithRetry('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
@@ -510,13 +653,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           'HTTP-Referer': 'https://apiclaw.nordsym.com',
         },
         body: JSON.stringify({ model, messages, max_tokens }),
-      });
+      }, { provider: 'openrouter', action: 'chat' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
         const errorData = data.error as Record<string, unknown> | undefined;
-        return { success: false, provider: 'openrouter', action: 'chat', error: (errorData?.message as string) || 'Chat failed' };
+        return createErrorResult('openrouter', 'chat', (errorData?.message as string) || 'Chat failed', statusToErrorCode(response.status));
       }
 
       const choices = data.choices as Array<Record<string, unknown>> | undefined;
@@ -542,10 +685,10 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { text, voice_id = '21m00Tcm4TlvDq8ikWAM', model_id = 'eleven_monolingual_v1' } = params;
       
       if (!text) {
-        return { success: false, provider: 'elevenlabs', action: 'text_to_speech', error: 'Missing required param: text' };
+        return createErrorResult('elevenlabs', 'text_to_speech', 'Missing required param: text', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`,
         {
           method: 'POST',
@@ -554,12 +697,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ text, model_id }),
-        }
+        },
+        { provider: 'elevenlabs', action: 'text_to_speech' }
       );
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({})) as Record<string, unknown>;
-        return { success: false, provider: 'elevenlabs', action: 'text_to_speech', error: (error.detail as string) || 'TTS failed' };
+        return createErrorResult('elevenlabs', 'text_to_speech', (error.detail as string) || 'TTS failed', statusToErrorCode(response.status));
       }
 
       // Return audio as base64
@@ -585,17 +729,17 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { model, input } = params;
       
       if (!model) {
-        return { success: false, provider: 'replicate', action: 'run', error: 'Missing required param: model (e.g., "stability-ai/sdxl:...")' };
+        return createErrorResult('replicate', 'run', 'Missing required param: model (e.g., "stability-ai/sdxl:...")', ERROR_CODES.INVALID_PARAMS);
       }
       if (!input) {
-        return { success: false, provider: 'replicate', action: 'run', error: 'Missing required param: input (object with model inputs)' };
+        return createErrorResult('replicate', 'run', 'Missing required param: input (object with model inputs)', ERROR_CODES.INVALID_PARAMS);
       }
 
       // Parse model into owner/name and version
       const [modelPath, version] = model.split(':');
       
       // Create prediction
-      const response = await fetch('https://api.replicate.com/v1/predictions', {
+      const response = await fetchWithRetry('https://api.replicate.com/v1/predictions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
@@ -606,11 +750,11 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           model: version ? undefined : modelPath,
           input,
         }),
-      });
+      }, { provider: 'replicate', action: 'run' });
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({})) as Record<string, unknown>;
-        return { success: false, provider: 'replicate', action: 'run', error: (error.detail as string) || 'Prediction failed' };
+        return createErrorResult('replicate', 'run', (error.detail as string) || 'Prediction failed', statusToErrorCode(response.status));
       }
 
       const prediction = await response.json() as Record<string, unknown>;
@@ -632,15 +776,15 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
             }
           };
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const pollResponse = await fetch((result.urls as Record<string, string>)?.get || `https://api.replicate.com/v1/predictions/${result.id}`, {
+        await sleep(1000);
+        const pollResponse = await fetchWithRetry((result.urls as Record<string, string>)?.get || `https://api.replicate.com/v1/predictions/${result.id}`, {
           headers: { 'Authorization': `Bearer ${creds.api_key}` },
-        });
+        }, { provider: 'replicate', action: 'run_poll' });
         result = await pollResponse.json() as Record<string, unknown>;
       }
 
       if (result.status === 'failed') {
-        return { success: false, provider: 'replicate', action: 'run', error: (result.error as string) || 'Prediction failed' };
+        return createErrorResult('replicate', 'run', (result.error as string) || 'Prediction failed', ERROR_CODES.PROVIDER_ERROR);
       }
 
       return { 
@@ -657,12 +801,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
     },
 
     list_models: async (_params, creds) => {
-      const response = await fetch('https://api.replicate.com/v1/models', {
+      const response = await fetchWithRetry('https://api.replicate.com/v1/models', {
         headers: { 'Authorization': `Bearer ${creds.api_key}` },
-      });
+      }, { provider: 'replicate', action: 'list_models' });
 
       if (!response.ok) {
-        return { success: false, provider: 'replicate', action: 'list_models', error: 'Failed to list models' };
+        return createErrorResult('replicate', 'list_models', 'Failed to list models', statusToErrorCode(response.status));
       }
 
       const data = await response.json() as Record<string, unknown>;
@@ -685,22 +829,22 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { url, formats = ['markdown'] } = params;
       
       if (!url) {
-        return { success: false, provider: 'firecrawl', action: 'scrape', error: 'Missing required param: url' };
+        return createErrorResult('firecrawl', 'scrape', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      const response = await fetchWithRetry('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url, formats }),
-      });
+      }, { provider: 'firecrawl', action: 'scrape' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok || !data.success) {
-        return { success: false, provider: 'firecrawl', action: 'scrape', error: (data.error as string) || 'Scrape failed' };
+        return createErrorResult('firecrawl', 'scrape', (data.error as string) || 'Scrape failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -715,22 +859,22 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { url, limit = 10 } = params;
       
       if (!url) {
-        return { success: false, provider: 'firecrawl', action: 'crawl', error: 'Missing required param: url' };
+        return createErrorResult('firecrawl', 'crawl', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch('https://api.firecrawl.dev/v1/crawl', {
+      const response = await fetchWithRetry('https://api.firecrawl.dev/v1/crawl', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url, limit }),
-      });
+      }, { provider: 'firecrawl', action: 'crawl' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok || !data.success) {
-        return { success: false, provider: 'firecrawl', action: 'crawl', error: (data.error as string) || 'Crawl failed' };
+        return createErrorResult('firecrawl', 'crawl', (data.error as string) || 'Crawl failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -745,22 +889,22 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { url } = params;
       
       if (!url) {
-        return { success: false, provider: 'firecrawl', action: 'map', error: 'Missing required param: url' };
+        return createErrorResult('firecrawl', 'map', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch('https://api.firecrawl.dev/v1/map', {
+      const response = await fetchWithRetry('https://api.firecrawl.dev/v1/map', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url }),
-      });
+      }, { provider: 'firecrawl', action: 'map' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok || !data.success) {
-        return { success: false, provider: 'firecrawl', action: 'map', error: (data.error as string) || 'Map failed' };
+        return createErrorResult('firecrawl', 'map', (data.error as string) || 'Map failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -778,21 +922,21 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { query, sort = 'stars', limit = 10 } = params;
       
       if (!query) {
-        return { success: false, provider: 'github', action: 'search_repos', error: 'Missing required param: query' };
+        return createErrorResult('github', 'search_repos', 'Missing required param: query', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=${limit}`, {
+      const response = await fetchWithRetry(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=${limit}`, {
         headers: {
           'Authorization': `Bearer ${creds.token}`,
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'APIClaw',
         },
-      });
+      }, { provider: 'github', action: 'search_repos' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'github', action: 'search_repos', error: (data.message as string) || 'Search failed' };
+        return createErrorResult('github', 'search_repos', (data.message as string) || 'Search failed', statusToErrorCode(response.status));
       }
 
       const items = (data.items as any[]) || [];
@@ -817,21 +961,21 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { owner, repo } = params;
       
       if (!owner || !repo) {
-        return { success: false, provider: 'github', action: 'get_repo', error: 'Missing required params: owner, repo' };
+        return createErrorResult('github', 'get_repo', 'Missing required params: owner, repo', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      const response = await fetchWithRetry(`https://api.github.com/repos/${owner}/${repo}`, {
         headers: {
           'Authorization': `Bearer ${creds.token}`,
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'APIClaw',
         },
-      });
+      }, { provider: 'github', action: 'get_repo' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'github', action: 'get_repo', error: (data.message as string) || 'Get repo failed' };
+        return createErrorResult('github', 'get_repo', (data.message as string) || 'Get repo failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -855,21 +999,21 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { owner, repo, state = 'open', limit = 10 } = params;
       
       if (!owner || !repo) {
-        return { success: false, provider: 'github', action: 'list_issues', error: 'Missing required params: owner, repo' };
+        return createErrorResult('github', 'list_issues', 'Missing required params: owner, repo', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?state=${state}&per_page=${limit}`, {
+      const response = await fetchWithRetry(`https://api.github.com/repos/${owner}/${repo}/issues?state=${state}&per_page=${limit}`, {
         headers: {
           'Authorization': `Bearer ${creds.token}`,
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'APIClaw',
         },
-      });
+      }, { provider: 'github', action: 'list_issues' });
 
       const data = await response.json() as unknown[];
       
       if (!response.ok) {
-        return { success: false, provider: 'github', action: 'list_issues', error: 'List issues failed' };
+        return createErrorResult('github', 'list_issues', 'List issues failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -893,10 +1037,10 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { owner, repo, title, body = '' } = params;
       
       if (!owner || !repo || !title) {
-        return { success: false, provider: 'github', action: 'create_issue', error: 'Missing required params: owner, repo, title' };
+        return createErrorResult('github', 'create_issue', 'Missing required params: owner, repo, title', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
+      const response = await fetchWithRetry(`https://api.github.com/repos/${owner}/${repo}/issues`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${creds.token}`,
@@ -905,12 +1049,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ title, body }),
-      });
+      }, { provider: 'github', action: 'create_issue' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'github', action: 'create_issue', error: (data.message as string) || 'Create issue failed' };
+        return createErrorResult('github', 'create_issue', (data.message as string) || 'Create issue failed', statusToErrorCode(response.status));
       }
 
       return { 
@@ -928,21 +1072,21 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { owner, repo, path } = params;
       
       if (!owner || !repo || !path) {
-        return { success: false, provider: 'github', action: 'get_file', error: 'Missing required params: owner, repo, path' };
+        return createErrorResult('github', 'get_file', 'Missing required params: owner, repo, path', ERROR_CODES.INVALID_PARAMS);
       }
 
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      const response = await fetchWithRetry(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
         headers: {
           'Authorization': `Bearer ${creds.token}`,
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'APIClaw',
         },
-      });
+      }, { provider: 'github', action: 'get_file' });
 
       const data = await response.json() as Record<string, unknown>;
       
       if (!response.ok) {
-        return { success: false, provider: 'github', action: 'get_file', error: (data.message as string) || 'Get file failed' };
+        return createErrorResult('github', 'get_file', (data.message as string) || 'Get file failed', statusToErrorCode(response.status));
       }
 
       // Decode base64 content
@@ -969,7 +1113,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { code, language = 'python' } = params;
       
       if (!code) {
-        return { success: false, provider: 'e2b', action: 'run_code', error: 'Missing required param: code' };
+        return createErrorResult('e2b', 'run_code', 'Missing required param: code', ERROR_CODES.INVALID_PARAMS);
       }
 
       try {
@@ -998,12 +1142,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           await sandbox.kill().catch(() => {});
         }
       } catch (error: any) {
-        return { 
-          success: false, 
-          provider: 'e2b', 
-          action: 'run_code', 
-          error: error.message || 'Code execution failed' 
-        };
+        return createErrorResult('e2b', 'run_code', error.message || 'Code execution failed', ERROR_CODES.PROVIDER_ERROR);
       }
     },
 
@@ -1011,7 +1150,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { command } = params;
       
       if (!command) {
-        return { success: false, provider: 'e2b', action: 'run_shell', error: 'Missing required param: command' };
+        return createErrorResult('e2b', 'run_shell', 'Missing required param: command', ERROR_CODES.INVALID_PARAMS);
       }
 
       try {
@@ -1038,12 +1177,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           await sandbox.kill().catch(() => {});
         }
       } catch (error: any) {
-        return { 
-          success: false, 
-          provider: 'e2b', 
-          action: 'run_shell', 
-          error: error.message || 'Shell execution failed' 
-        };
+        return createErrorResult('e2b', 'run_shell', error.message || 'Shell execution failed', ERROR_CODES.PROVIDER_ERROR);
       }
     },
   },
@@ -1098,30 +1232,30 @@ export async function executeAPICall(
     // Check if it might be a dynamic provider without userId
     const dynamicActions = await listDynamicActions(providerId);
     if (dynamicActions.length > 0) {
-      return {
-        success: false,
-        provider: providerId,
+      return createErrorResult(
+        providerId,
         action,
-        error: `Provider '${providerId}' requires userId for dynamic execution. Available actions: ${dynamicActions.join(', ')}`,
-      };
+        `Provider '${providerId}' requires userId for dynamic execution. Available actions: ${dynamicActions.join(', ')}`,
+        ERROR_CODES.INVALID_PARAMS
+      );
     }
-    return {
-      success: false,
-      provider: providerId,
+    return createErrorResult(
+      providerId,
       action,
-      error: `Provider '${providerId}' not connected. Available: ${Object.keys(handlers).join(', ')}`,
-    };
+      `Provider '${providerId}' not connected. Available: ${Object.keys(handlers).join(', ')}`,
+      ERROR_CODES.UNKNOWN_PROVIDER
+    );
   }
 
   // Check if action exists
   const handler = providerHandlers[action];
   if (!handler) {
-    return {
-      success: false,
-      provider: providerId,
+    return createErrorResult(
+      providerId,
       action,
-      error: `Action '${action}' not available for ${providerId}. Available: ${Object.keys(providerHandlers).join(', ')}`,
-    };
+      `Action '${action}' not available for ${providerId}. Available: ${Object.keys(providerHandlers).join(', ')}`,
+      ERROR_CODES.UNKNOWN_ACTION
+    );
   }
 
   // Providers that don't require credentials (free/open APIs)
@@ -1149,20 +1283,15 @@ export async function executeAPICall(
           data: proxyResult,
         });
       } catch (e: any) {
-        return {
-          success: false,
-          provider: providerId,
-          action,
-          error: e.message || 'Proxy call failed',
-        };
+        return createErrorResult(providerId, action, e.message || 'Proxy call failed', ERROR_CODES.PROVIDER_ERROR);
       }
     }
-    return {
-      success: false,
-      provider: providerId,
+    return createErrorResult(
+      providerId,
       action,
-      error: `No credentials configured for ${providerId}. Set up ~/.secrets/${providerId}.env`,
-    };
+      `No credentials configured for ${providerId}. Set up ~/.secrets/${providerId}.env`,
+      ERROR_CODES.NO_CREDENTIALS
+    );
   }
 
   // Execute and normalize response
@@ -1170,11 +1299,18 @@ export async function executeAPICall(
     const result = await handler(params, creds);
     return normalizeResponse(result);
   } catch (error: any) {
-    return {
-      success: false,
-      provider: providerId,
-      action,
-      error: error.message || 'Unknown error',
-    };
+    // Check if it's a network/timeout error
+    const errorMessage = error.message || 'Unknown error';
+    let errorCode: ErrorCode = ERROR_CODES.PROVIDER_ERROR;
+    
+    if (errorMessage.includes('Max retries exceeded')) {
+      errorCode = ERROR_CODES.MAX_RETRIES_EXCEEDED;
+    } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
+      errorCode = ERROR_CODES.TIMEOUT;
+    } else if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('ENOTFOUND') || errorMessage.includes('fetch')) {
+      errorCode = ERROR_CODES.NETWORK_ERROR;
+    }
+    
+    return createErrorResult(providerId, action, errorMessage, errorCode);
   }
 }
