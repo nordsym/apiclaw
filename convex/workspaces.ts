@@ -876,3 +876,50 @@ export const getWorkspaceStatus = query({
     };
   },
 });
+
+// Admin functions for Hivr integration
+export const adminActivateWorkspace = mutation({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, { workspaceId }) => {
+    const workspace = await ctx.db.get(workspaceId);
+    if (!workspace) {
+      return { success: false, error: "not_found" };
+    }
+    
+    await ctx.db.patch(workspaceId, {
+      status: "active",
+      tier: "backer",
+      weeklyUsageLimit: 999999,
+      updatedAt: Date.now(),
+    });
+    
+    return { success: true };
+  },
+});
+
+export const adminCreateSession = mutation({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, { workspaceId }) => {
+    const workspace = await ctx.db.get(workspaceId);
+    if (!workspace || workspace.status !== "active") {
+      return { success: false, error: "workspace_not_active" };
+    }
+    
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let token = '';
+    for (let i = 0; i < 32; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const sessionToken = "apiclaw_" + token;
+    
+    await ctx.db.insert("agentSessions", {
+      workspaceId,
+      sessionToken,
+      fingerprint: "hivr-bees",
+      lastUsedAt: Date.now(),
+      createdAt: Date.now(),
+    });
+    
+    return { success: true, sessionToken };
+  },
+});

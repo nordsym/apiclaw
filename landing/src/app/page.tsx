@@ -364,11 +364,11 @@ Docs: https://apiclaw.nordsym.com/docs`;
               </a>
             ) : (
               <a
-                href="/workspace?tab=my-apis"
+                href="/workspace"
                 className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
               >
-                <FileText className="w-4 h-4" />
-                Add Your API
+                <Zap className="w-4 h-4" />
+                Workspace
               </a>
             )}
             <button
