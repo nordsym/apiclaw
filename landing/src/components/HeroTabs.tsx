@@ -162,7 +162,7 @@ export function HeroTabs() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Users className="w-5 h-5 text-accent flex-shrink-0" />
-                  <span>Get discovered by AI agents</span>
+                  <span>Get your API in front of AI agents</span>
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Zap className="w-5 h-5 text-accent flex-shrink-0" />
