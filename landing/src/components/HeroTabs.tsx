@@ -153,7 +153,7 @@ export function HeroTabs() {
           {activeTab === "add" && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-bold mb-2">Make your API available to AI agents</h3>
+                <h3 className="text-xl font-bold mb-2">Get your API in front of AI agents</h3>
                 <p className="text-text-secondary">
                   Self-service onboarding. Live in minutes. Free to list.
                 </p>
@@ -162,7 +162,7 @@ export function HeroTabs() {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Users className="w-5 h-5 text-accent flex-shrink-0" />
-                  <span>Get your API in front of AI agents</span>
+                  <span>Listed in our searchable API index</span>
                 </li>
                 <li className="flex items-center gap-3 text-text-secondary">
                   <Zap className="w-5 h-5 text-accent flex-shrink-0" />
