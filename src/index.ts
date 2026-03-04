@@ -51,12 +51,22 @@ import {
   METERED_BILLING 
 } from './stripe.js';
 import { estimateCost } from './metered.js';
+import { 
+  executeChain, 
+  getChainStatus, 
+  resumeChain,
+  type ChainDefinition,
+  type ChainResult,
+  type Credentials as ChainCredentials,
+  type ChainOptions,
+  type ChainStepUnion
+} from './chainExecutor.js';
 
 // Default agent ID for MVP (in production, this would come from auth)
 const DEFAULT_AGENT_ID = 'agent_default';
 
 // Convex client for workspace management
-const CONVEX_URL = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
+const CONVEX_URL = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
 const convex = new ConvexHttpClient(CONVEX_URL);
 
 // Global workspace context (set on startup if session is valid)
@@ -233,6 +243,14 @@ const tools: Tool[] = [
         region: {
           type: 'string',
           description: 'Filter by region (e.g., "SE", "EU", "global")'
+        },
+        subagent_id: {
+          type: 'string',
+          description: 'Optional subagent identifier for multi-agent tracking'
+        },
+        ai_backend: {
+          type: 'string',
+          description: 'AI backend making this request (e.g., "claude-3-sonnet", "gpt-4"). Used for analytics.'
         }
       },
       required: ['query']
@@ -320,10 +338,28 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: 'Execute an API call through APIClaw. For actions that cost money (invoices, SMS), you will get a preview first and must confirm with the returned token. For free actions, executes immediately.',
+    description: `Execute an API call through APIClaw. Supports single calls AND multi-step chains.
+
+SINGLE CALL: Provide provider + action + params
+CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
+
+Chain features:
+- Sequential: Steps execute in order, each can reference previous results via $stepId.property
+- Parallel: Use { parallel: [...steps] } to run concurrently
+- Conditional: Use { if: "$step.success", then: {...}, else: {...} }
+- Loops: Use { forEach: "$step.results", as: "item", do: {...} }
+- Error handling: Per-step retry/fallback via onError
+- Async: Set async: true to get chainId immediately, poll or use webhook
+
+Example chain:
+  chain: [
+    { id: "search", provider: "brave_search", action: "search", params: { query: "AI agents" } },
+    { id: "summarize", provider: "openrouter", action: "chat", params: { message: "Summarize: $search.results" } }
+  ]`,
     inputSchema: {
       type: 'object',
       properties: {
+        // Single call params
         provider: {
           type: 'string',
           description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio", "coaccept", "frankfurter")'
@@ -347,9 +383,70 @@ const tools: Tool[] = [
         dry_run: {
           type: 'boolean',
           description: 'If true, shows what WOULD be sent without making actual API calls. Returns mock response and request details. Great for testing and debugging.'
+        },
+        // Chain execution params
+        chain: {
+          type: 'array',
+          description: 'Execute multiple API calls as a single chain. Each step can reference previous results via $stepId.property',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', description: 'Step identifier for cross-step references' },
+              provider: { type: 'string', description: 'API provider' },
+              action: { type: 'string', description: 'Action to execute' },
+              params: { type: 'object', description: 'Action parameters. Use $stepId.path for references.' },
+              parallel: { type: 'array', description: 'Steps to run in parallel' },
+              if: { type: 'string', description: 'Condition for conditional execution (e.g., "$step1.success")' },
+              then: { type: 'object', description: 'Step to execute if condition is true' },
+              else: { type: 'object', description: 'Step to execute if condition is false' },
+              forEach: { type: 'string', description: 'Array reference to iterate (e.g., "$search.results")' },
+              as: { type: 'string', description: 'Variable name for current item in loop' },
+              do: { type: 'object', description: 'Step to execute for each item' },
+              onError: {
+                type: 'object',
+                description: 'Error handling configuration',
+                properties: {
+                  retry: {
+                    type: 'object',
+                    properties: {
+                      attempts: { type: 'number', description: 'Max retry attempts' },
+                      backoff: { type: 'string', description: '"exponential" or "linear" or array of ms delays' }
+                    }
+                  },
+                  fallback: { type: 'object', description: 'Fallback step if this fails' },
+                  abort: { type: 'boolean', description: 'Abort entire chain on failure' }
+                }
+              }
+            }
+          }
+        },
+        // Chain options
+        continueOnError: {
+          type: 'boolean',
+          description: 'Continue chain execution even if a step fails (default: false)'
+        },
+        timeout: {
+          type: 'number',
+          description: 'Maximum execution time for the entire chain in milliseconds'
+        },
+        async: {
+          type: 'boolean',
+          description: 'Return immediately with chainId. Use get_chain_status to poll or provide webhook.'
+        },
+        webhook: {
+          type: 'string',
+          description: 'URL to POST results when async chain completes'
+        },
+        subagent_id: {
+          type: 'string',
+          description: 'Optional subagent identifier for multi-agent tracking'
+        },
+        ai_backend: {
+          type: 'string',
+          description: 'AI backend making this request (e.g., "claude-3-sonnet", "gpt-4"). Used for analytics.'
         }
       },
-      required: ['provider', 'action']
+      required: []
     }
   },
   {
@@ -387,6 +484,14 @@ const tools: Tool[] = [
             preferredProvider: { type: 'string', description: 'Hint to prefer a specific provider' },
             fallback: { type: 'boolean', description: 'Enable fallback to other providers (default: true)' }
           }
+        },
+        subagent_id: {
+          type: 'string',
+          description: 'Optional subagent identifier for multi-agent tracking'
+        },
+        ai_backend: {
+          type: 'string',
+          description: 'AI backend making this request (e.g., "claude-3-sonnet", "gpt-4"). Used for analytics.'
         }
       },
       required: ['capability', 'action', 'params']
@@ -485,6 +590,46 @@ const tools: Tool[] = [
       },
       required: ['call_count']
     }
+  },
+  // ============================================
+  // CHAIN MANAGEMENT TOOLS
+  // ============================================
+  {
+    name: 'get_chain_status',
+    description: 'Check the status of an async chain execution. Use the chainId returned from call_api with async: true.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        chain_id: {
+          type: 'string',
+          description: 'Chain ID returned from async chain execution'
+        }
+      },
+      required: ['chain_id']
+    }
+  },
+  {
+    name: 'resume_chain',
+    description: 'Resume a failed chain from the point of failure. Use the resumeToken from the error response. Requires the original chain definition.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        resume_token: {
+          type: 'string',
+          description: 'Resume token from a failed chain (e.g., "chain_xyz_step_2")'
+        },
+        original_chain: {
+          type: 'array',
+          description: 'The original chain definition that failed. Required to resume execution.',
+          items: { type: 'object' }
+        },
+        overrides: {
+          type: 'object',
+          description: 'Optional parameter overrides for specific steps. Format: { "stepId": { ...newParams } }'
+        }
+      },
+      required: ['resume_token', 'original_chain']
+    }
   }
 ];
 
@@ -557,10 +702,50 @@ Docs: https://apiclaw.nordsym.com
         const category = args?.category as string | undefined;
         const maxResults = (args?.max_results as number) || 5;
         const region = args?.region as string | undefined;
+        const subagentId = args?.subagent_id as string | undefined;
+        const aiBackend = args?.ai_backend as string | undefined;
 
         const startTime = Date.now();
         const results = discoverAPIs(query, { category, maxResults, region });
-        trackSearch(query, results.length, Date.now() - startTime);
+        const responseTimeMs = Date.now() - startTime;
+        trackSearch(query, results.length, responseTimeMs);
+
+        // Log search to Convex for analytics
+        if (workspaceContext?.sessionToken) {
+          const searchLogPayload = {
+            path: 'searchLogs:log',
+            args: {
+              sessionToken: workspaceContext.sessionToken,
+              subagentId: subagentId || undefined,
+              query,
+              resultCount: results.length,
+              matchedProviders: results.slice(0, 10).map(r => r.provider.id),
+              responseTimeMs,
+            },
+          };
+          
+          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(searchLogPayload),
+          }).catch(() => {}); // Fire and forget
+        }
+
+        // Update AI backend tracking if provided
+        if (aiBackend && workspaceContext?.sessionToken) {
+          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: 'agents:updateAIBackend',
+              args: {
+                token: workspaceContext.sessionToken,
+                subagentId: subagentId || undefined,
+                aiBackend,
+              },
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
 
         if (results.length === 0) {
           return {
@@ -775,6 +960,148 @@ Docs: https://apiclaw.nordsym.com
         const params = (args?.params as Record<string, any>) || {};
         const confirmToken = args?.confirm_token as string | undefined;
         const dryRun = args?.dry_run as boolean | undefined;
+        const chain = args?.chain as ChainStepUnion[] | undefined;
+        const subagentId = args?.subagent_id as string | undefined;
+        const aiBackend = args?.ai_backend as string | undefined;
+        
+        // Track AI backend if provided
+        if (aiBackend && workspaceContext?.sessionToken) {
+          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: 'agents:updateAIBackend',
+              args: {
+                token: workspaceContext.sessionToken,
+                subagentId: subagentId || undefined,
+                aiBackend,
+              },
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
+        
+        // ============================================
+        // CHAIN EXECUTION MODE
+        // ============================================
+        if (chain && Array.isArray(chain) && chain.length > 0) {
+          // Check workspace access for chains
+          const access = checkWorkspaceAccess();
+          if (!access.allowed) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: access.error,
+                  hint: 'Use register_owner to authenticate your workspace.',
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+          
+          try {
+            // Construct ChainDefinition from the input
+            const chainDefinition: ChainDefinition = {
+              steps: chain as ChainStepUnion[],
+              timeout: args?.timeout as number | undefined,
+              errorPolicy: args?.continueOnError 
+                ? { mode: 'best-effort' as const }
+                : { mode: 'fail-fast' as const },
+            };
+            
+            const chainCredentials: ChainCredentials = {
+              userId: DEFAULT_AGENT_ID,
+              customerKeys: {},
+            };
+            
+            // Add customer key if provided
+            const customerKey = args?.customer_key as string | undefined;
+            if (customerKey) {
+              // Apply to all providers (or could be provider-specific)
+              chainCredentials.customerKeys = { default: customerKey };
+            }
+            
+            const chainOptions: ChainOptions = {
+              verbose: false,
+            };
+            
+            // Execute the chain
+            const chainResult = await executeChain(
+              chainDefinition,
+              chainCredentials,
+              {}, // inputs
+              chainOptions
+            );
+            
+            // Track usage for chain (count completed steps)
+            if (chainResult.success && workspaceContext) {
+              const completedCount = chainResult.completedSteps.length;
+              
+              for (let i = 0; i < completedCount; i++) {
+                try {
+                  await convex.mutation("workspaces:incrementUsage" as any, {
+                    workspaceId: workspaceContext.workspaceId as any,
+                  });
+                } catch (e) {
+                  console.error('[APIClaw] Failed to track chain usage:', e);
+                }
+              }
+            }
+            
+            // Format response to match expected chain response format
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: chainResult.success ? 'success' : 'error',
+                  mode: 'chain',
+                  chainId: chainResult.chainId,
+                  steps: chainResult.trace.map(t => ({
+                    id: t.stepId,
+                    status: t.success ? 'completed' : 'failed',
+                    result: t.output,
+                    error: t.error,
+                    latencyMs: t.latencyMs,
+                    cost: t.cost,
+                  })),
+                  finalResult: chainResult.finalResult,
+                  totalLatencyMs: chainResult.totalLatencyMs,
+                  totalCost: chainResult.totalCost,
+                  tokensSaved: (chain.length - 1) * 500, // Estimate tokens saved
+                  ...(chainResult.error ? {
+                    completedSteps: chainResult.completedSteps,
+                    failedStep: chainResult.failedStep ? {
+                      id: chainResult.failedStep.stepId,
+                      error: chainResult.failedStep.error,
+                      code: chainResult.failedStep.errorCode,
+                    } : undefined,
+                    partialResults: chainResult.results,
+                    canResume: chainResult.canResume,
+                    resumeToken: chainResult.resumeToken,
+                  } : {}),
+                }, null, 2)
+              }],
+              isError: !chainResult.success
+            };
+          } catch (error) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  mode: 'chain',
+                  error: error instanceof Error ? error.message : String(error),
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+        }
+        
+        // ============================================
+        // SINGLE CALL MODE (existing logic)
+        // ============================================
         
         // Handle dry-run mode - no actual API calls, just show what would happen
         if (dryRun) {
@@ -1010,6 +1337,24 @@ Docs: https://apiclaw.nordsym.com
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
         const preferences = (args?.preferences as Record<string, any>) || {};
+        const subagentId = args?.subagent_id as string | undefined;
+        const aiBackend = args?.ai_backend as string | undefined;
+        
+        // Track AI backend if provided
+        if (aiBackend && workspaceContext?.sessionToken) {
+          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: 'agents:updateAIBackend',
+              args: {
+                token: workspaceContext.sessionToken,
+                subagentId: subagentId || undefined,
+                aiBackend,
+              },
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
 
         // Check if capability exists
         const exists = await hasCapability(capabilityId);
@@ -1482,6 +1827,182 @@ Docs: https://apiclaw.nordsym.com
             }, null, 2)
           }]
         };
+      }
+
+      // ============================================
+      // CHAIN MANAGEMENT TOOLS
+      // ============================================
+      
+      case 'get_chain_status': {
+        const chainId = args?.chain_id as string;
+        
+        if (!chainId) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'chain_id is required'
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        const chainStatus = await getChainStatus(chainId);
+        
+        if (chainStatus.status === 'not_found') {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: `Chain not found: ${chainId}`,
+                hint: 'Chain states expire after 1 hour. The chain may have completed or expired.'
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'success',
+              chain: {
+                chainId: chainStatus.chainId,
+                executionStatus: chainStatus.status,
+                ...(chainStatus.result ? {
+                  result: {
+                    success: chainStatus.result.success,
+                    completedSteps: chainStatus.result.completedSteps,
+                    totalLatencyMs: chainStatus.result.totalLatencyMs,
+                    totalCost: chainStatus.result.totalCost,
+                    finalResult: chainStatus.result.finalResult,
+                    error: chainStatus.result.error,
+                    canResume: chainStatus.result.canResume,
+                    resumeToken: chainStatus.result.resumeToken,
+                  }
+                } : {})
+              }
+            }, null, 2)
+          }]
+        };
+      }
+      
+      case 'resume_chain': {
+        const resumeToken = args?.resume_token as string;
+        const overrides = args?.overrides as Record<string, Record<string, any>> | undefined;
+        const originalChain = args?.original_chain as ChainStepUnion[] | undefined;
+        
+        if (!resumeToken) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'resume_token is required'
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        // Check workspace access
+        const access = checkWorkspaceAccess();
+        if (!access.allowed) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: access.error,
+                hint: 'Use register_owner to authenticate your workspace.',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+        
+        try {
+          // Note: The resume_chain function requires the original chain definition
+          // In practice, you'd store this or require the caller to provide it
+          if (!originalChain) {
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: 'original_chain is required to resume. Please provide the original chain definition.',
+                  hint: 'Pass original_chain: [...] with the same chain array used in the failed execution.'
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+          
+          const chainDefinition: ChainDefinition = {
+            steps: originalChain,
+          };
+          
+          const chainCredentials: ChainCredentials = {
+            userId: DEFAULT_AGENT_ID,
+            customerKeys: {},
+          };
+          
+          const customerKey = args?.customer_key as string | undefined;
+          if (customerKey) {
+            chainCredentials.customerKeys = { default: customerKey };
+          }
+          
+          const result = await resumeChain(
+            resumeToken,
+            chainDefinition,
+            chainCredentials,
+            {}, // inputs
+            overrides,
+            { verbose: false }
+          );
+          
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: result.success ? 'success' : 'error',
+                mode: 'chain_resumed',
+                chainId: result.chainId,
+                steps: result.trace.map(t => ({
+                  id: t.stepId,
+                  status: t.success ? 'completed' : 'failed',
+                  result: t.output,
+                  error: t.error,
+                  latencyMs: t.latencyMs,
+                })),
+                finalResult: result.finalResult,
+                totalLatencyMs: result.totalLatencyMs,
+                totalCost: result.totalCost,
+                ...(result.error ? {
+                  error: result.error,
+                  canResume: result.canResume,
+                  resumeToken: result.resumeToken,
+                } : {}),
+              }, null, 2)
+            }],
+            isError: !result.success
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: error instanceof Error ? error.message : String(error),
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
       }
 
       default:

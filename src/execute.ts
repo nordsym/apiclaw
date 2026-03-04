@@ -6,6 +6,29 @@ import { getCredentials } from './credentials.js';
 import { callProxy, PROXY_PROVIDERS } from './proxy.js';
 import { executeDynamicAction, hasDynamicConfig, listDynamicActions } from './execute-dynamic.js';
 
+// Re-export chain execution
+export { executeChain } from './chainExecutor.js';
+export type {
+  ChainDefinition,
+  ChainResult,
+  ChainOptions,
+  Credentials,
+  StepTrace,
+  ChainError,
+} from './chainExecutor.js';
+export {
+  resolveReferences,
+  validateReferences,
+  extractReferences,
+} from './chainResolver.js';
+export type {
+  ChainContext,
+  ChainStep,
+  ChainStepUnion,
+  Reference,
+  ValidationResult,
+} from './chainResolver.js';
+
 interface ExecuteResult {
   success: boolean;
   provider: string;

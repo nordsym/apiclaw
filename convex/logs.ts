@@ -409,3 +409,97 @@ export const getProviders = query({
     return providers;
   },
 });
+
+/**
+ * Get logs for a specific subagent
+ */
+export const getBySubagent = query({
+  args: {
+    token: v.string(),
+    subagentId: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, subagentId, limit = 20 }) => {
+    // Verify session
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    
+    if (!session) return null;
+    
+    // Get API logs for this subagent
+    const apiLogs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_subagentId", (q) => q.eq("subagentId", subagentId))
+      .order("desc")
+      .take(limit);
+    
+    // Get search logs for this subagent  
+    const searchLogs = await ctx.db
+      .query("searchLogs")
+      .filter((q) => q.eq(q.field("subagentId"), subagentId))
+      .order("desc")
+      .take(limit);
+    
+    // Merge and sort by timestamp
+    const combined = [
+      ...apiLogs.map(l => ({ 
+        ...l, 
+        type: "direct_call" as const,
+        timestamp: l.createdAt 
+      })),
+      ...searchLogs.map(l => ({ 
+        ...l, 
+        type: "search" as const,
+        timestamp: l.timestamp 
+      })),
+    ].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    
+    return combined.slice(0, limit);
+  },
+});
+
+/**
+ * Clear all logs for a workspace (admin cleanup)
+ */
+export const clearWorkspaceLogs = mutation({
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    
+    if (!session) throw new Error("Invalid session");
+    
+    // Delete all apiLogs
+    const apiLogs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+    
+    for (const log of apiLogs) {
+      await ctx.db.delete(log._id);
+    }
+    
+    // Delete all searchLogs
+    const searchLogs = await ctx.db
+      .query("searchLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+    
+    for (const log of searchLogs) {
+      await ctx.db.delete(log._id);
+    }
+    
+    return { 
+      deleted: { 
+        apiLogs: apiLogs.length, 
+        searchLogs: searchLogs.length 
+      } 
+    };
+  },
+});

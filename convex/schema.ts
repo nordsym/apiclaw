@@ -61,6 +61,9 @@ export default defineSchema({
     // Main agent identification
     mainAgentId: v.optional(v.string()), // UUID, auto-generated on first call
     mainAgentName: v.optional(v.string()), // Auto-generated name (e.g., "Crimson Phoenix")
+    // AI Backend tracking
+    aiBackend: v.optional(v.string()), // "claude-3-opus", "gpt-4", etc.
+    aiBackendLastSeen: v.optional(v.number()), // timestamp of last AI backend header
     // Stripe billing fields
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
@@ -139,6 +142,9 @@ export default defineSchema({
     workspaceId: v.id("workspaces"),
     subagentId: v.string(), // from X-APIClaw-Subagent header
     name: v.optional(v.string()), // optional display name
+    description: v.optional(v.string()), // user-provided description
+    aiBackend: v.optional(v.string()), // "claude-3-opus", "gpt-4", etc.
+    isRegistered: v.optional(v.boolean()), // true if pre-registered (not implicit)
     callCount: v.number(),
     firstSeenAt: v.number(),
     lastActiveAt: v.number(),
@@ -146,6 +152,38 @@ export default defineSchema({
     .index("by_workspaceId", ["workspaceId"])
     .index("by_workspaceId_subagentId", ["workspaceId", "subagentId"])
     .index("by_lastActiveAt", ["lastActiveAt"]),
+
+  // Search logs (analytics for workspace searches)
+  searchLogs: defineTable({
+    workspaceId: v.id("workspaces"),
+    subagentId: v.optional(v.string()),
+    query: v.string(),
+    resultCount: v.number(),
+    hasResults: v.boolean(),
+    matchedProviders: v.optional(v.array(v.string())),
+    responseTimeMs: v.number(),
+    timestamp: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_hasResults", ["hasResults"])
+    .index("by_workspaceId_timestamp", ["workspaceId", "timestamp"]),
+
+  // Workspace team members (invite-based access)
+  workspaceMembers: defineTable({
+    workspaceId: v.id("workspaces"),
+    email: v.string(),
+    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member")),
+    invitedBy: v.optional(v.string()), // email of inviter
+    inviteToken: v.optional(v.string()),
+    status: v.union(v.literal("pending"), v.literal("active"), v.literal("revoked")),
+    createdAt: v.number(),
+    acceptedAt: v.optional(v.number()),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_email", ["email"])
+    .index("by_inviteToken", ["inviteToken"])
+    .index("by_workspaceId_email", ["workspaceId", "email"]),
 
   // Magic links for workspace email verification
   workspaceMagicLinks: defineTable({
@@ -596,6 +634,107 @@ export default defineSchema({
   // ============================================
   // FEEDBACK SYSTEM
   // ============================================
+
+  // ============================================
+  // CHAIN ORCHESTRATION TABLES
+  // ============================================
+
+  // Chain executions (main orchestration record)
+  chains: defineTable({
+    workspaceId: v.id("workspaces"),
+    // Chain definition
+    steps: v.array(v.any()), // Array of step definitions (raw, unresolved)
+    // Execution state
+    status: v.union(
+      v.literal("pending"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("paused")
+    ),
+    currentStep: v.number(), // Index of current step (0-based)
+    // Results storage
+    results: v.any(), // Record<stepId, result>
+    // Error tracking
+    error: v.optional(v.object({
+      stepId: v.string(),
+      code: v.string(),
+      message: v.string(),
+      retryAfter: v.optional(v.number()),
+    })),
+    // Execution options
+    continueOnError: v.optional(v.boolean()),
+    timeout: v.optional(v.number()), // ms
+    // Resume capability
+    resumeToken: v.optional(v.string()),
+    canResume: v.optional(v.boolean()),
+    // Cost tracking
+    totalCostCents: v.optional(v.number()),
+    totalLatencyMs: v.optional(v.number()),
+    // Timestamps
+    createdAt: v.number(),
+    startedAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_status", ["status"])
+    .index("by_workspaceId_status", ["workspaceId", "status"])
+    .index("by_resumeToken", ["resumeToken"]),
+
+  // Chain templates (reusable chain definitions)
+  chainTemplates: defineTable({
+    workspaceId: v.id("workspaces"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    // Input schema for the template
+    inputs: v.optional(v.any()), // JSON Schema for inputs
+    // Chain definition
+    chain: v.array(v.any()), // Array of step definitions
+    // Usage tracking
+    useCount: v.optional(v.number()),
+    lastUsedAt: v.optional(v.number()),
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_name", ["workspaceId", "name"]),
+
+  // Chain step executions (detailed trace per step)
+  chainExecutions: defineTable({
+    chainId: v.id("chains"),
+    stepId: v.string(), // The id from step definition
+    stepIndex: v.number(), // Position in chain
+    // Execution state
+    status: v.union(
+      v.literal("pending"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("skipped")
+    ),
+    // I/O
+    input: v.optional(v.any()), // Resolved params sent to provider
+    output: v.optional(v.any()), // Result from provider
+    // Metrics
+    latencyMs: v.optional(v.number()),
+    costCents: v.optional(v.number()),
+    // Error info
+    error: v.optional(v.object({
+      code: v.string(),
+      message: v.string(),
+      retryCount: v.optional(v.number()),
+    })),
+    // Parallel execution tracking
+    parallelGroup: v.optional(v.string()), // Group ID if part of parallel batch
+    // Timestamps
+    createdAt: v.number(),
+    startedAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_chainId", ["chainId"])
+    .index("by_chainId_stepId", ["chainId", "stepId"])
+    .index("by_chainId_stepIndex", ["chainId", "stepIndex"]),
 
   // User feedback with voting
   feedback: defineTable({

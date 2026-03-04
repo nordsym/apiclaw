@@ -56,6 +56,9 @@ import {
   Play,
   Star,
   Twitter,
+  ClipboardList,
+  Bot,
+  Link as LinkIcon,
 } from "lucide-react";
 import {
   LineChart,
@@ -139,7 +142,7 @@ interface ProviderAnalytics {
 }
 
 type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "analytics" | "webhooks" | "api-keys" | "earn" | "docs" | "feedback" | "settings" | "billing";
-type AnalyticsSubtab = "overview" | "usage" | "logs";
+type AnalyticsSubtab = "overview" | "usage" | "logs" | "chains";
 
 // Generate preview analytics data for demo
 function generatePreviewAnalytics(): ProviderAnalytics {
@@ -241,7 +244,7 @@ export default function WorkspacePage() {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
         setAnalyticsExpanded(true);
-        if (subFromUrl && ["overview", "usage", "logs"].includes(subFromUrl)) {
+        if (subFromUrl && ["overview", "usage", "logs", "chains"].includes(subFromUrl)) {
           setAnalyticsSubtab(subFromUrl);
         }
       }
@@ -552,6 +555,7 @@ export default function WorkspacePage() {
         overview: "Agent Analytics",
         usage: "API Analytics",
         logs: "Logs",
+        chains: "Chain Traces",
       };
       return subLabels[analyticsSubtab] || "Analytics";
     }
@@ -1412,6 +1416,28 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
 // AGENTS TAB - Agent-first hierarchy view
 // ============================================
 
+interface MainAgentData {
+  workspaceId: string;
+  email: string;
+  mainAgentId: string | null;
+  mainAgentName: string | null;
+  aiBackend?: string | null;
+  usageCount: number;
+  createdAt: number;
+}
+
+interface SubagentData {
+  id: string;
+  subagentId: string;
+  name: string;
+  description?: string;
+  aiBackend?: string;
+  isRegistered?: boolean;
+  callCount: number;
+  firstSeenAt: number;
+  lastActiveAt: number;
+}
+
 function AgentsTab({
   agents,
   onRevoke,
@@ -1429,6 +1455,73 @@ function AgentsTab({
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [copied, setCopied] = useState(false);
+  
+  // Main agent data from backend
+  const [mainAgent, setMainAgent] = useState<MainAgentData | null>(null);
+  const [subagents, setSubagents] = useState<SubagentData[]>([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(true);
+  
+  // Modal states
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [editingSubagent, setEditingSubagent] = useState<SubagentData | null>(null);
+  const [expandedSubagent, setExpandedSubagent] = useState<string | null>(null);
+  
+  // Register form state
+  const [registerForm, setRegisterForm] = useState({
+    subagentId: "",
+    name: "",
+    description: "",
+  });
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  // Fetch main agent and subagents data
+  useEffect(() => {
+    const fetchAgentData = async () => {
+      if (!sessionToken) {
+        setIsLoadingAgents(false);
+        return;
+      }
+
+      try {
+        // Fetch main agent
+        const mainRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "agents:getMainAgent",
+            args: { token: sessionToken },
+          }),
+        });
+        const mainData = await mainRes.json();
+        const mainResult = mainData.value || mainData;
+        if (mainResult && !mainResult.error) {
+          setMainAgent(mainResult);
+        }
+
+        // Fetch subagents
+        const subRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "agents:getSubagents",
+            args: { token: sessionToken, limit: 50 },
+          }),
+        });
+        const subData = await subRes.json();
+        const subResult = subData.value || subData;
+        if (subResult && Array.isArray(subResult.subagents)) {
+          setSubagents(subResult.subagents);
+        }
+      } catch (err) {
+        console.error("Error fetching agent data:", err);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    fetchAgentData();
+  }, [sessionToken]);
 
   // Get the primary agent (current session or first agent)
   const primaryAgent = agents.find(a => a.isCurrent) || agents[0];
@@ -1462,14 +1555,134 @@ function AgentsTab({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Handle register new agent
+  const handleRegisterAgent = async () => {
+    if (!sessionToken || !registerForm.subagentId.trim()) {
+      setRegisterError("Subagent ID is required");
+      return;
+    }
+
+    setRegisterLoading(true);
+    setRegisterError(null);
+
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "agents:registerTaskAgent",
+          args: {
+            token: sessionToken,
+            subagentId: registerForm.subagentId.trim(),
+            name: registerForm.name.trim() || undefined,
+            description: registerForm.description.trim() || undefined,
+          },
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.error) {
+        setRegisterError(data.error);
+        return;
+      }
+
+      // Add to subagents list
+      const newSubagent: SubagentData = {
+        id: data.value?.id || data.id,
+        subagentId: registerForm.subagentId.trim(),
+        name: registerForm.name.trim() || registerForm.subagentId.trim(),
+        description: registerForm.description.trim() || undefined,
+        isRegistered: true,
+        callCount: 0,
+        firstSeenAt: Date.now(),
+        lastActiveAt: Date.now(),
+      };
+      
+      setSubagents(prev => [newSubagent, ...prev]);
+      setShowRegisterModal(false);
+      setRegisterForm({ subagentId: "", name: "", description: "" });
+    } catch (err) {
+      console.error("Error registering agent:", err);
+      setRegisterError("Failed to register agent");
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
+
+  // Handle update subagent
+  const handleUpdateSubagent = async (subagentId: string, name: string, description?: string) => {
+    if (!sessionToken) return;
+
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "agents:renameSubagent",
+          args: {
+            token: sessionToken,
+            subagentId,
+            name: name.trim(),
+          },
+        }),
+      });
+
+      // Update local state
+      setSubagents(prev => prev.map(s => 
+        s.subagentId === subagentId 
+          ? { ...s, name: name.trim(), description: description?.trim() } 
+          : s
+      ));
+      setEditingSubagent(null);
+    } catch (err) {
+      console.error("Error updating subagent:", err);
+    }
+  };
+
+  // Handle rename main agent
+  const handleRenameMainAgent = async (name: string) => {
+    if (!sessionToken) return;
+
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "agents:renameMainAgent",
+          args: { token: sessionToken, name: name.trim() },
+        }),
+      });
+
+      setMainAgent(prev => prev ? { ...prev, mainAgentName: name.trim() } : prev);
+    } catch (err) {
+      console.error("Error renaming main agent:", err);
+    }
+  };
+
+  // Format relative time
+  const formatRelativeTime = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} min ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)} days ago`;
+    
+    return new Date(timestamp).toLocaleDateString();
+  };
+
   const mcpCommand = "npx @nordsym/apiclaw mcp-install";
 
   return (
     <div className="space-y-6">
-      {/* Your Agent - Primary Card */}
+      {/* Primary Agent Card */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Your Agent</span>
+          <div className="flex items-center gap-2">
+            <Bot className="w-6 h-6 text-[#ef4444]" />
+            <span className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">Primary Agent</span>
+          </div>
           {primaryAgent && (
             <button
               onClick={() => handleRevoke(primaryAgent.id)}
@@ -1485,71 +1698,109 @@ function AgentsTab({
           )}
         </div>
         
-        {primaryAgent ? (
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
-              <Cpu className="w-7 h-7 text-white" />
+        {isLoadingAgents ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" />
+          </div>
+        ) : primaryAgent ? (
+          <div className="space-y-4">
+            {/* Agent name with edit */}
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
+                  <Cpu className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  {editingAgent === "main" ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Agent name..."
+                        className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleRenameMainAgent(editName);
+                            onRename(primaryAgent.id, editName);
+                            setEditingAgent(null);
+                          } else if (e.key === "Escape") {
+                            setEditingAgent(null);
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          handleRenameMainAgent(editName);
+                          onRename(primaryAgent.id, editName);
+                          setEditingAgent(null);
+                        }}
+                        className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingAgent(null)}
+                        className="px-3 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-bold">
+                        {mainAgent?.mainAgentName || getAgentDisplayName(primaryAgent)}
+                      </h3>
+                      <button
+                        onClick={() => {
+                          setEditingAgent("main");
+                          setEditName(mainAgent?.mainAgentName || getAgentDisplayName(primaryAgent));
+                        }}
+                        className="px-2 py-1 rounded text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      Connected
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              {editingAgent === primaryAgent.id ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Agent name..."
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        onRename(primaryAgent.id, editName);
-                        setEditingAgent(null);
-                      } else if (e.key === "Escape") {
-                        setEditingAgent(null);
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      onRename(primaryAgent.id, editName);
-                      setEditingAgent(null);
-                    }}
-                    className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingAgent(null)}
-                    className="px-3 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold">{getAgentDisplayName(primaryAgent)}</h3>
-                  <button
-                    onClick={() => {
-                      setEditingAgent(primaryAgent.id);
-                      setEditName(primaryAgent.name || getAgentDisplayName(primaryAgent));
-                    }}
-                    className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
-                    title="Rename agent"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-              <div className="flex items-center gap-3 mt-1 text-sm text-[var(--text-muted)]">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  Connected
-                </span>
-                <span className="text-[var(--border)]">•</span>
-                <span className="flex items-center gap-1">
-                  <Activity className="w-3.5 h-3.5" />
-                  Active {new Date(primaryAgent.lastUsedAt).toLocaleDateString()}
-                </span>
+
+            {/* Agent details grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[var(--border)]">
+              <div>
+                <p className="text-xs text-[var(--text-muted)] mb-1">Agent ID</p>
+                <p className="font-mono text-sm truncate" title={mainAgent?.mainAgentId || primaryAgent.fingerprint}>
+                  {(mainAgent?.mainAgentId || primaryAgent.fingerprint)?.slice(0, 12)}...
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] mb-1">AI Backend</p>
+                <p className="text-sm">
+                  {mainAgent?.aiBackend ? (
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#ef4444]" />
+                      {mainAgent.aiBackend}
+                    </span>
+                  ) : (
+                    <span className="text-[var(--text-muted)]">Not detected</span>
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] mb-1">Total Calls</p>
+                <p className="text-sm font-semibold">{(mainAgent?.usageCount || 0).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-xs text-[var(--text-muted)] mb-1">Last Active</p>
+                <p className="text-sm">{formatRelativeTime(primaryAgent.lastUsedAt)}</p>
               </div>
             </div>
           </div>
@@ -1569,22 +1820,85 @@ function AgentsTab({
       {/* Subagents Section */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Subagents</span>
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-[#ef4444]" />
+            <span className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">
+              SUBAGENTS ({subagents.length})
+            </span>
+          </div>
         </div>
         
-        {/* Empty state - subagents will come from backend later */}
-        <div className="py-8 text-center">
-          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] mx-auto mb-3 flex items-center justify-center">
-            <Users className="w-6 h-6 text-[var(--text-muted)]" />
+        {isLoadingAgents ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" />
           </div>
-          <p className="text-sm text-[var(--text-muted)] max-w-sm mx-auto">
-            Subagents will appear here when your agent makes calls with the{" "}
-            <code className="px-1.5 py-0.5 rounded bg-[var(--surface)] text-[#ef4444] font-mono text-xs">
-              X-APIClaw-Subagent
-            </code>{" "}
-            header.
-          </p>
-        </div>
+        ) : subagents.length > 0 ? (
+          <div className="space-y-3">
+            {subagents.map((subagent) => (
+              <div
+                key={subagent.id}
+                className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] cursor-pointer hover:bg-white/5 transition-colors"
+                onClick={() => setExpandedSubagent(
+                  expandedSubagent === subagent.subagentId ? null : subagent.subagentId
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[var(--background)] flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5 text-[var(--text-muted)]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{subagent.name || subagent.subagentId}</p>
+                        {subagent.isRegistered && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-[#ef4444]/10 text-[#ef4444] font-medium">
+                            Registered
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-[var(--text-muted)]">
+                        Calls: {subagent.callCount.toLocaleString()} • Last: {formatRelativeTime(subagent.lastActiveAt)}
+                      </p>
+                      {subagent.aiBackend && (
+                        <p className="text-sm text-[var(--text-muted)]">
+                          AI Backend: {subagent.aiBackend}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronDown 
+                    className={`w-5 h-5 text-[var(--text-muted)] transition-transform duration-200 ${
+                      expandedSubagent === subagent.subagentId ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </div>
+                
+                {/* Expanded content */}
+                {expandedSubagent === subagent.subagentId && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border)]" onClick={(e) => e.stopPropagation()}>
+                    <SubagentActivityLog 
+                      token={sessionToken || ''} 
+                      subagentId={subagent.subagentId} 
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-8 text-center">
+            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] mx-auto mb-3 flex items-center justify-center">
+              <Users className="w-6 h-6 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-sm text-[var(--text-muted)] max-w-sm mx-auto">
+              Subagents appear here when your agent makes calls with the{" "}
+              <code className="px-1.5 py-0.5 rounded bg-[var(--background)] text-[#ef4444] font-mono text-xs">
+                X-APIClaw-Subagent
+              </code>{" "}
+              header.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Quick Setup - Collapsed at bottom */}
@@ -1615,6 +1929,280 @@ function AgentsTab({
             X-APIClaw-Subagent: name
           </code>
         </p>
+      </div>
+
+      {/* Register New Agent Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
+              <h3 className="text-lg font-bold">Register New Agent</h3>
+              <button
+                onClick={() => {
+                  setShowRegisterModal(false);
+                  setRegisterForm({ subagentId: "", name: "", description: "" });
+                  setRegisterError(null);
+                }}
+                className="p-1 rounded hover:bg-[var(--surface)] transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">
+                  Subagent ID <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={registerForm.subagentId}
+                  onChange={(e) => setRegisterForm(f => ({ ...f, subagentId: e.target.value }))}
+                  placeholder="research-agent"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                />
+                <p className="text-xs text-[var(--text-muted)] mt-1">
+                  This will be sent in the X-APIClaw-Subagent header
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Display Name</label>
+                <input
+                  type="text"
+                  value={registerForm.name}
+                  onChange={(e) => setRegisterForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Research Agent"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Description</label>
+                <textarea
+                  value={registerForm.description}
+                  onChange={(e) => setRegisterForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Researches topics and competitors"
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
+                />
+              </div>
+
+              {registerError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
+                  {registerError}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-[var(--border)]">
+              <button
+                onClick={() => {
+                  setShowRegisterModal(false);
+                  setRegisterForm({ subagentId: "", name: "", description: "" });
+                  setRegisterError(null);
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRegisterAgent}
+                disabled={registerLoading || !registerForm.subagentId.trim()}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {registerLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Register Agent
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Subagent Modal */}
+      {editingSubagent && (
+        <EditSubagentModal
+          subagent={editingSubagent}
+          onClose={() => setEditingSubagent(null)}
+          onSave={handleUpdateSubagent}
+        />
+      )}
+    </div>
+  );
+}
+
+// Subagent Activity Log Component
+const SubagentActivityLog = ({ token, subagentId }: { token: string; subagentId: string }) => {
+  const [activity, setActivity] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchActivity = async () => {
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            path: 'logs:getBySubagent',
+            args: { token, subagentId, limit: 10 }
+          }),
+        });
+        const data = await res.json();
+        if (data.value) {
+          setActivity(data.value);
+        }
+      } catch (e) {
+        console.error('Failed to fetch subagent activity', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchActivity();
+  }, [token, subagentId]);
+  
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Loading activity...
+      </div>
+    );
+  }
+  
+  if (activity.length === 0) {
+    return <p className="text-sm text-[var(--text-muted)]">No activity yet</p>;
+  }
+  
+  // Local TypeBadge for activity log
+  const ActivityTypeBadge = ({ type }: { type: string }) => {
+    const badges: Record<string, { bg: string; text: string; label: string }> = {
+      search: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Search' },
+      call: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Call' },
+      direct_call: { bg: 'bg-[#ef4444]/20', text: 'text-[#ef4444]', label: 'Direct' },
+      error: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Error' },
+    };
+    const badge = badges[type] || { bg: 'bg-gray-500/20', text: 'text-gray-400', label: type };
+    return (
+      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
+  
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-[var(--text-muted)] uppercase">Recent Activity</p>
+      <div className="space-y-1">
+        {activity.map((item, i) => (
+          <div key={i} className="flex items-center justify-between text-sm py-1">
+            <div className="flex items-center gap-2">
+              <ActivityTypeBadge type={item.type} />
+              <span className="text-[var(--text-secondary)]">
+                {item.type === 'search' ? item.query : `${item.provider || 'API'}.${item.action || 'call'}`}
+              </span>
+            </div>
+            <span className="text-[var(--text-muted)]">
+              {item.latencyMs || item.responseTimeMs || '-'}ms
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Edit Subagent Modal Component
+function EditSubagentModal({
+  subagent,
+  onClose,
+  onSave,
+}: {
+  subagent: SubagentData;
+  onClose: () => void;
+  onSave: (subagentId: string, name: string, description?: string) => void;
+}) {
+  const [name, setName] = useState(subagent.name);
+  const [description, setDescription] = useState(subagent.description || "");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await onSave(subagent.subagentId, name, description);
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
+          <h3 className="text-lg font-bold">Edit Agent</h3>
+          <button onClick={onClose} className="p-1 rounded hover:bg-[var(--surface)] transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Subagent ID</label>
+            <input
+              type="text"
+              value={subagent.subagentId}
+              disabled
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--text-muted)] cursor-not-allowed"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">ID cannot be changed</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Display Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Agent name"
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What does this agent do?"
+              rows={2}
+              className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
+            />
+          </div>
+
+          {subagent.aiBackend && (
+            <div>
+              <label className="block text-sm font-medium mb-1.5">AI Backend</label>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">
+                <Sparkles className="w-4 h-4 text-[#ef4444]" />
+                {subagent.aiBackend}
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Auto-detected from API calls</p>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-[var(--border)]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !name.trim()}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Save Changes
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1723,17 +2311,782 @@ function AnalyticsTab({
           <ScrollText className="w-4 h-4" />
           Logs
         </button>
+        <button
+          onClick={() => {
+            setActiveSubtab("chains");
+            router.push("/workspace?tab=analytics&sub=chains");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "chains"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          Chains
+        </button>
       </div>
 
       {/* Subtab Content */}
       {activeSubtab === "overview" && (
-        <AnalyticsOverviewTab apis={apis} analytics={analytics} workspace={workspace} agents={agents} usage={usage} />
+        <AnalyticsOverviewTab apis={apis} analytics={analytics} workspace={workspace} agents={agents} usage={usage} sessionToken={sessionToken} />
       )}
       {activeSubtab === "usage" && (
-        <UsageTab workspace={workspace} usage={usage} />
+        <UsageTab workspace={workspace} usage={usage} sessionToken={sessionToken} />
       )}
       {activeSubtab === "logs" && (
         <LogsTab sessionToken={sessionToken} />
+      )}
+      {activeSubtab === "chains" && (
+        <ChainsTab sessionToken={sessionToken} />
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// SEARCH ANALYTICS TAB
+// ============================================
+
+interface SearchStats {
+  totalSearches: number;
+  zeroResults: number;
+  zeroResultRate: number;
+  avgResponseTime: number;
+  topQueries: { query: string; count: number }[];
+  topZeroResults: { query: string; count: number }[];
+  bySubagent: Record<string, number>;
+}
+
+interface RecentSearch {
+  _id: string;
+  subagentId?: string;
+  query: string;
+  resultCount: number;
+  hasResults: boolean;
+  responseTimeMs: number;
+  timestamp: number;
+}
+
+function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
+  const [stats, setStats] = useState<SearchStats | null>(null);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hoursBack, setHoursBack] = useState(24);
+
+  const fetchSearchData = useCallback(async () => {
+    if (!sessionToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch stats
+      const statsRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "searchLogs:getStats",
+          args: { token: sessionToken, hoursBack },
+        }),
+      });
+      const statsData = await statsRes.json();
+      const statsResult = statsData.value || statsData;
+      if (statsResult && !statsResult.error) {
+        setStats(statsResult);
+      }
+
+      // Fetch recent searches
+      const recentRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "searchLogs:getRecent",
+          args: { token: sessionToken, limit: 50 },
+        }),
+      });
+      const recentData = await recentRes.json();
+      const recentResult = recentData.value || recentData;
+      if (Array.isArray(recentResult)) {
+        setRecentSearches(recentResult);
+      }
+    } catch (err) {
+      console.error("Error fetching search analytics:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sessionToken, hoursBack]);
+
+  useEffect(() => {
+    fetchSearchData();
+  }, [fetchSearchData]);
+
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (!sessionToken) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
+          <Search className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+          <h3 className="font-semibold text-xl mb-2">Not Logged In</h3>
+          <p className="text-[var(--text-muted)]">Please log in to view search analytics.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
+      </div>
+    );
+  }
+
+  // Check if we have any data
+  const hasData = stats && stats.totalSearches > 0;
+
+  // Preview data for empty state
+  const previewStats: SearchStats = {
+    totalSearches: 247,
+    zeroResults: 18,
+    zeroResultRate: 7.3,
+    avgResponseTime: 89,
+    topQueries: [
+      { query: "send sms", count: 45 },
+      { query: "generate image", count: 38 },
+      { query: "web search", count: 31 },
+      { query: "email api", count: 24 },
+      { query: "transcribe audio", count: 19 },
+    ],
+    topZeroResults: [
+      { query: "blockchain validator", count: 8 },
+      { query: "calendar integration", count: 5 },
+      { query: "video editing", count: 3 },
+    ],
+    bySubagent: {
+      primary: 156,
+      "research-agent": 58,
+      "content-writer": 33,
+    },
+  };
+
+  const displayStats = hasData ? stats : previewStats;
+
+  return (
+    <div className="space-y-6">
+      {/* Preview Banner */}
+      {!hasData && (
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+          <div>
+            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real search analytics will appear once your agents start searching for APIs.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Time Filter */}
+      <div className="flex items-center gap-3">
+        <select
+          value={hoursBack}
+          onChange={(e) => setHoursBack(Number(e.target.value))}
+          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          <option value={1}>Last hour</option>
+          <option value={6}>Last 6 hours</option>
+          <option value={24}>Last 24 hours</option>
+          <option value={168}>Last 7 days</option>
+          <option value={720}>Last 30 days</option>
+        </select>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className="rounded-xl sm:rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-3 sm:p-5">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-xs sm:text-sm text-[var(--text-muted)]">Total Searches</span>
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#ef4444]" />
+          </div>
+          <span className="text-xl sm:text-3xl font-bold text-[#ef4444]">{displayStats.totalSearches.toLocaleString()}</span>
+        </div>
+
+        <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${
+          displayStats.zeroResultRate > 20 
+            ? "border-red-500/30 bg-red-500/10" 
+            : "border-[var(--border)] bg-[var(--surface-elevated)]"
+        }`}>
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-xs sm:text-sm text-[var(--text-muted)]">Zero-Result Rate</span>
+            <AlertCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${displayStats.zeroResultRate > 20 ? "text-red-500" : "text-[var(--text-muted)]"}`} />
+          </div>
+          <span className={`text-xl sm:text-3xl font-bold ${displayStats.zeroResultRate > 20 ? "text-red-500" : ""}`}>
+            {displayStats.zeroResultRate.toFixed(1)}%
+          </span>
+        </div>
+
+        <div className="rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-3 sm:p-5">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-xs sm:text-sm text-[var(--text-muted)]">Avg Response Time</span>
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-muted)]" />
+          </div>
+          <span className="text-xl sm:text-3xl font-bold">{displayStats.avgResponseTime}ms</span>
+        </div>
+      </div>
+
+      {/* Two Column Layout */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Top Queries */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-[#ef4444]" />
+            Top Queries
+          </h3>
+          {displayStats.topQueries.length > 0 ? (
+            <div className="space-y-3">
+              {displayStats.topQueries.slice(0, 10).map((item, i) => (
+                <div key={item.query} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">
+                      {i + 1}
+                    </span>
+                    <code className="text-sm font-mono">{item.query}</code>
+                  </div>
+                  <span className="text-sm text-[var(--text-muted)]">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[var(--text-muted)] text-sm text-center py-4">No queries yet</p>
+          )}
+        </div>
+
+        {/* Zero-Result Queries */}
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2 text-red-500">
+            <AlertCircle className="w-5 h-5" />
+            Zero-Result Queries
+            <span className="text-xs font-normal text-[var(--text-muted)] ml-2">API Gap Opportunities</span>
+          </h3>
+          {displayStats.topZeroResults.length > 0 ? (
+            <div className="space-y-3">
+              {displayStats.topZeroResults.slice(0, 10).map((item) => (
+                <div key={item.query} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    <code className="text-sm font-mono">{item.query}</code>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-[var(--text-muted)]">{item.count}x</span>
+                    <a
+                      href={`/providers/register?suggested=${encodeURIComponent(item.query)}`}
+                      className="px-2 py-1 rounded bg-[#ef4444] text-white text-xs font-medium hover:bg-[#dc2626] transition"
+                    >
+                      Request API
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[var(--text-muted)] text-sm text-center py-4">No zero-result queries</p>
+          )}
+        </div>
+      </div>
+
+      {/* Search by Agent */}
+      {Object.keys(displayStats.bySubagent).length > 0 && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#ef4444]" />
+            Searches by Agent
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {Object.entries(displayStats.bySubagent).map(([agent, count]) => (
+              <div key={agent} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    agent === "primary" ? "bg-[#ef4444]/20" : "bg-[var(--background)]"
+                  }`}>
+                    {agent === "primary" ? (
+                      <Cpu className="w-4 h-4 text-[#ef4444]" />
+                    ) : (
+                      <Users className="w-4 h-4 text-[var(--text-muted)]" />
+                    )}
+                  </div>
+                  <span className="font-mono text-sm">{agent}</span>
+                </div>
+                <span className="text-lg font-semibold">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Searches */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+        <div className="p-4 border-b border-[var(--border)]">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Activity className="w-5 h-5 text-[#ef4444]" />
+            Recent Searches
+          </h3>
+        </div>
+        
+        {recentSearches.length > 0 || !hasData ? (
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[var(--surface)]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Time</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Agent</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Query</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Results</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Latency</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {(hasData ? recentSearches : [
+                    { _id: "1", timestamp: Date.now() - 120000, subagentId: undefined, query: "send sms", resultCount: 3, hasResults: true, responseTimeMs: 67 },
+                    { _id: "2", timestamp: Date.now() - 300000, subagentId: "research-agent", query: "web search api", resultCount: 5, hasResults: true, responseTimeMs: 82 },
+                    { _id: "3", timestamp: Date.now() - 600000, subagentId: undefined, query: "video editing", resultCount: 0, hasResults: false, responseTimeMs: 45 },
+                    { _id: "4", timestamp: Date.now() - 900000, subagentId: "content-writer", query: "image generation", resultCount: 4, hasResults: true, responseTimeMs: 91 },
+                    { _id: "5", timestamp: Date.now() - 1200000, subagentId: undefined, query: "email service", resultCount: 2, hasResults: true, responseTimeMs: 58 },
+                  ]).slice(0, 20).map((search) => (
+                    <tr key={search._id} className="hover:bg-[var(--surface)] transition">
+                      <td className="px-4 py-3 text-sm text-[var(--text-muted)]">
+                        {formatTime(search.timestamp)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-sm">
+                          {search.subagentId || "primary"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <code className="px-2 py-1 rounded bg-[var(--surface)] text-sm font-mono">
+                          {search.query}
+                        </code>
+                      </td>
+                      <td className="px-4 py-3">
+                        {search.hasResults ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                            <Check className="w-3 h-3" />
+                            {search.resultCount} found
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium">
+                            <AlertCircle className="w-3 h-3" />
+                            No results
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={search.responseTimeMs > 200 ? "text-yellow-500" : "text-[var(--text-muted)]"}>
+                          {search.responseTimeMs}ms
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden divide-y divide-[var(--border)]">
+              {(hasData ? recentSearches : [
+                { _id: "1", timestamp: Date.now() - 120000, subagentId: undefined, query: "send sms", resultCount: 3, hasResults: true, responseTimeMs: 67 },
+                { _id: "2", timestamp: Date.now() - 300000, subagentId: "research-agent", query: "web search api", resultCount: 5, hasResults: true, responseTimeMs: 82 },
+                { _id: "3", timestamp: Date.now() - 600000, subagentId: undefined, query: "video editing", resultCount: 0, hasResults: false, responseTimeMs: 45 },
+              ]).slice(0, 10).map((search) => (
+                <div key={search._id} className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <code className="font-mono text-sm font-medium">{search.query}</code>
+                    {search.hasResults ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                        {search.resultCount} found
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium">
+                        No results
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
+                    <span>{search.subagentId || "primary"}</span>
+                    <span>{search.responseTimeMs}ms</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)]">{formatTime(search.timestamp)}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="p-12 text-center">
+            <Search className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No searches yet</h3>
+            <p className="text-[var(--text-muted)]">
+              Search activity will appear here when your agents start searching for APIs.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// CHAINS TAB (Chain Execution Traces)
+// ============================================
+
+interface ChainExecution {
+  _id: string;
+  status: "pending" | "running" | "completed" | "failed" | "paused";
+  currentStep: number;
+  stepsCount: number;
+  totalCostCents: number;
+  totalLatencyMs: number;
+  error?: { stepId: string; code: string; message: string };
+  canResume?: boolean;
+  createdAt: number;
+  startedAt?: number;
+  completedAt?: number;
+}
+
+interface ChainStep {
+  _id: string;
+  stepId: string;
+  stepIndex: number;
+  status: "pending" | "running" | "completed" | "failed" | "skipped";
+  input?: any;
+  output?: any;
+  latencyMs?: number;
+  costCents?: number;
+  error?: { code: string; message: string; retryCount?: number };
+  parallelGroup?: string;
+  startedAt?: number;
+  completedAt?: number;
+}
+
+interface ChainDetail {
+  chain: {
+    _id: string;
+    status: string;
+    steps: any[];
+    totalCostCents: number;
+    totalLatencyMs: number;
+    startedAt?: number;
+    completedAt?: number;
+  };
+  executions: ChainStep[];
+  tokensSaved: number;
+}
+
+function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
+  const [chains, setChains] = useState<ChainExecution[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [expandedChainId, setExpandedChainId] = useState<string | null>(null);
+  const [chainDetail, setChainDetail] = useState<ChainDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [stats, setStats] = useState<{ total: number; completed: number; failed: number; running: number; successRate: number; totalCostCents: number } | null>(null);
+
+  const fetchChains = useCallback(async () => {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "chains:getChainExecutions",
+          args: { token: sessionToken, limit: 50, status: statusFilter },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+      if (Array.isArray(result)) setChains(result);
+    } catch (err) {
+      console.error("Fetch chains error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionToken, statusFilter]);
+
+  const fetchStats = useCallback(async () => {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "chains:getChainStatsAuth",
+          args: { token: sessionToken },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+      if (result && !result.error) setStats(result);
+    } catch (err) {
+      console.error("Fetch stats error:", err);
+    }
+  }, [sessionToken]);
+
+  const fetchChainDetail = useCallback(async (chainId: string) => {
+    if (!sessionToken) return;
+    setLoadingDetail(true);
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "chains:getChainTraceAuth",
+          args: { token: sessionToken, chainId },
+        }),
+      });
+      const data = await res.json();
+      const result = data.value || data;
+      if (result && !result.error) setChainDetail(result);
+    } catch (err) {
+      console.error("Fetch chain detail error:", err);
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, [sessionToken]);
+
+  const handleResume = async (chainId: string) => {
+    if (!sessionToken) return;
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "chains:resumeChainAuth",
+          args: { token: sessionToken, chainId },
+        }),
+      });
+      fetchChains();
+    } catch (err) {
+      console.error("Resume chain error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchChains();
+    fetchStats();
+  }, [fetchChains, fetchStats]);
+
+  useEffect(() => {
+    if (expandedChainId) {
+      fetchChainDetail(expandedChainId);
+    } else {
+      setChainDetail(null);
+    }
+  }, [expandedChainId, fetchChainDetail]);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed": return <Check className="w-4 h-4 text-green-500" />;
+      case "running": return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
+      case "failed": return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case "paused": return <Clock className="w-4 h-4 text-yellow-500" />;
+      default: return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const formatDuration = (ms: number) => ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
+  const formatCost = (cents: number) => cents === 0 ? "$0.00" : `$${(cents / 100).toFixed(2)}`;
+  const formatTime = (ts: number) => {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return "just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return new Date(ts).toLocaleDateString();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard title="Total Chains" value={stats.total.toString()} icon={Zap} />
+          <StatCard title="Success Rate" value={`${stats.successRate}%`} icon={Check} accent={stats.successRate >= 90} />
+          <StatCard title="Running" value={stats.running.toString()} icon={Activity} />
+          <StatCard title="Total Cost" value={formatCost(stats.totalCostCents)} icon={CreditCard} />
+        </div>
+      )}
+
+      {/* Filter */}
+      <div className="flex items-center gap-3">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          <option value="all">All Status</option>
+          <option value="running">Running</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+          <option value="paused">Paused</option>
+        </select>
+        <span className="text-[var(--text-muted)] text-sm">{chains.length} chain{chains.length !== 1 ? "s" : ""}</span>
+      </div>
+
+      {/* Chains List */}
+      {chains.length === 0 ? (
+        <div className="bg-[var(--surface)] rounded-xl border border-[var(--border)] p-12 text-center">
+          <Activity className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4 opacity-50" />
+          <h3 className="text-lg font-medium mb-2">No Chain Executions Yet</h3>
+          <p className="text-[var(--text-muted)] max-w-md mx-auto">
+            Chain executions will appear here when you start orchestrating multi-step API workflows.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {chains.map((chain) => (
+            <div
+              key={chain._id}
+              className={`bg-[var(--surface)] rounded-xl border transition-all ${
+                expandedChainId === chain._id ? "border-[#ef4444]/50" : "border-[var(--border)] hover:border-[var(--border-hover)]"
+              }`}
+            >
+              {/* Chain Row */}
+              <button
+                onClick={() => setExpandedChainId(expandedChainId === chain._id ? null : chain._id)}
+                className="w-full p-4 flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-4">
+                  {expandedChainId === chain._id ? <ChevronDown className="w-4 h-4 text-[var(--text-muted)]" /> : <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />}
+                  {getStatusIcon(chain.status)}
+                  <span className="text-sm font-medium capitalize">{chain.status}</span>
+                  <code className="text-xs text-[var(--text-muted)] font-mono">{chain._id.slice(0, 12)}...</code>
+                </div>
+                <div className="flex items-center gap-6 text-sm text-[var(--text-muted)]">
+                  <span>{chain.stepsCount} steps</span>
+                  <span>{formatDuration(chain.totalLatencyMs)}</span>
+                  <span>{formatCost(chain.totalCostCents)}</span>
+                  <span>{formatTime(chain.createdAt)}</span>
+                </div>
+              </button>
+
+              {/* Expanded Detail */}
+              {expandedChainId === chain._id && (
+                <div className="border-t border-[var(--border)] p-4">
+                  {loadingDetail ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" />
+                    </div>
+                  ) : chainDetail ? (
+                    <div className="space-y-4">
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pb-4 border-b border-[var(--border)]">
+                        {chain.canResume && (
+                          <button
+                            onClick={() => handleResume(chain._id)}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef4444] hover:bg-[#ef4444]/80 text-white text-sm font-medium transition-colors"
+                          >
+                            <Play className="w-3.5 h-3.5" />
+                            Resume
+                          </button>
+                        )}
+                        <button
+                          onClick={() => navigator.clipboard.writeText(chain._id)}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface-elevated)] hover:bg-[var(--border)] text-sm transition-colors"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Copy ID
+                        </button>
+                      </div>
+
+                      {/* Gantt Timeline */}
+                      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm font-medium">Execution Timeline</span>
+                          <span className="text-xs text-[var(--text-muted)]">
+                            Total: {formatDuration(chainDetail.chain.totalLatencyMs)} • Cost: {formatCost(chainDetail.chain.totalCostCents)} • Tokens Saved: ~{chainDetail.tokensSaved.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {chainDetail.executions.map((step) => {
+                            const totalMs = chainDetail.chain.totalLatencyMs || 1;
+                            const widthPct = Math.max(5, ((step.latencyMs || 0) / totalMs) * 100);
+                            return (
+                              <div key={step._id} className="flex items-center gap-3">
+                                <div className="w-24 flex items-center gap-2 flex-shrink-0">
+                                  {getStatusIcon(step.status)}
+                                  <span className="text-xs font-mono truncate">{step.stepId}</span>
+                                </div>
+                                <div className="flex-1 h-5 bg-[var(--surface)] rounded relative overflow-hidden">
+                                  <div
+                                    className={`absolute left-0 top-0 h-full rounded ${
+                                      step.status === "completed" ? "bg-green-500" :
+                                      step.status === "running" ? "bg-blue-500 animate-pulse" :
+                                      step.status === "failed" ? "bg-red-500" : "bg-gray-500"
+                                    }`}
+                                    style={{ width: `${widthPct}%` }}
+                                  />
+                                  <span className="absolute left-2 top-0.5 text-xs font-mono text-white drop-shadow-sm">
+                                    {formatDuration(step.latencyMs || 0)}
+                                  </span>
+                                </div>
+                                <span className="w-14 text-right text-xs text-[var(--text-muted)]">
+                                  {formatCost(step.costCents || 0)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* Legend */}
+                        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">
+                          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-500" /> Completed</div>
+                          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-blue-500" /> Running</div>
+                          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500" /> Failed</div>
+                          <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-500" /> Paused</div>
+                        </div>
+                      </div>
+
+                      {/* Error Display */}
+                      {chain.error && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <AlertCircle className="w-4 h-4 text-red-500" />
+                            <span className="font-medium text-red-500">Error at step: {chain.error.stepId}</span>
+                            <code className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">{chain.error.code}</code>
+                          </div>
+                          <p className="text-sm text-red-400">{chain.error.message}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center text-[var(--text-muted)] py-4">Failed to load chain details</div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -1749,16 +3102,49 @@ function AnalyticsOverviewTab({
   workspace,
   agents,
   usage,
+  sessionToken,
 }: {
   apis: ProviderAPI[];
   analytics: ProviderAnalytics | null;
   workspace: Workspace | null;
   agents: Agent[];
   usage: UsageData | null;
+  sessionToken: string | null;
 }) {
+  const [searchStats, setSearchStats] = useState<{ totalSearches: number; zeroResultRate: number } | null>(null);
+  
+  // Fetch search stats
+  useEffect(() => {
+    const fetchSearchStats = async () => {
+      if (!sessionToken) return;
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "searchLogs:getStats",
+            args: { token: sessionToken, hoursBack: 168 }, // Last 7 days
+          }),
+        });
+        const data = await res.json();
+        const result = data.value || data;
+        if (result && !result.error) {
+          setSearchStats({
+            totalSearches: result.totalSearches || 0,
+            zeroResultRate: result.zeroResultRate || 0,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching search stats:", err);
+      }
+    };
+    fetchSearchStats();
+  }, [sessionToken]);
+
   const totalCalls = analytics?.totalCalls || workspace?.usageCount || 0;
   const uniqueAgents = analytics?.uniqueAgents || agents.length || 0;
   const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
+  const totalSearches = searchStats?.totalSearches || (analytics?.isPreview ? 247 : 0);
 
   return (
     <div className="space-y-8">
@@ -1774,8 +3160,9 @@ function AnalyticsOverviewTab({
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
+        <StatCard title="Total Searches" value={totalSearches.toLocaleString()} icon={Search} />
         <StatCard title="Connected Agents" value={uniqueAgents.toString()} icon={Users} />
         <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
         <StatCard title="Success Rate" value={`${(analytics?.successRate || 98.2).toFixed(1)}%`} icon={Check} />
@@ -1878,10 +3265,48 @@ function AnalyticsOverviewTab({
 function UsageTab({
   workspace,
   usage,
+  sessionToken,
 }: {
   workspace: Workspace | null;
   usage: UsageData | null;
+  sessionToken: string | null;
 }) {
+  const [searchStats, setSearchStats] = useState<{ 
+    totalSearches: number; 
+    searchesByProvider: Record<string, number>;
+  } | null>(null);
+
+  // Fetch search stats to correlate with API usage
+  useEffect(() => {
+    const fetchSearchStats = async () => {
+      if (!sessionToken) return;
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "searchLogs:getStats",
+            args: { token: sessionToken, hoursBack: 720 }, // Last 30 days
+          }),
+        });
+        const data = await res.json();
+        const result = data.value || data;
+        if (result && !result.error) {
+          // Build provider search counts from top queries that matched providers
+          const searchesByProvider: Record<string, number> = {};
+          // Estimate based on result counts - in real implementation this would come from matchedProviders
+          setSearchStats({
+            totalSearches: result.totalSearches || 0,
+            searchesByProvider,
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching search stats:", err);
+      }
+    };
+    fetchSearchStats();
+  }, [sessionToken]);
+
   const hasRealData = usage && (usage.byProvider.length > 0 || usage.byDay.length > 0);
   
   // Preview data for empty state (provider perspective - how others use YOUR APIs)
@@ -1897,15 +3322,18 @@ function UsageTab({
   
   // Preview shows YOUR listed APIs and agents using them
   const previewByApi = [
-    { provider: "Your API Name", calls: 89, cost: 4.45 },
-    { provider: "Another API", calls: 42, cost: 2.10 },
-    { provider: "Third API", calls: 17, cost: 0.85 },
+    { provider: "46elks", calls: 847, cost: 42.35, searchCount: 12 },
+    { provider: "openrouter", calls: 623, cost: 31.15, searchCount: 45 },
+    { provider: "replicate", calls: 512, cost: 25.60, searchCount: 8 },
   ];
   
   const isPreview = !hasRealData;
   const displayByDay = hasRealData ? usage!.byDay : previewByDay;
-  const displayByProvider = hasRealData ? usage!.byProvider : previewByApi;
-  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 148;
+  const displayByProvider = hasRealData 
+    ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
+    : previewByApi;
+  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 1982;
+  const displaySearchTotal = searchStats?.totalSearches || (isPreview ? 156 : 0);
 
   return (
     <div className="space-y-8">
@@ -1920,7 +3348,8 @@ function UsageTab({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+      {/* Stats Grid - Now with 4 cards including Search */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-[#ef4444]" />
@@ -1934,9 +3363,19 @@ function UsageTab({
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
-            <span className="text-sm sm:text-base text-[var(--text-muted)]">Your APIs</span>
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique APIs</span>
           </div>
           <p className="text-2xl sm:text-4xl font-bold">{displayByProvider.length}</p>
+        </div>
+
+        <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+            <Search className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Found via Search</span>
+          </div>
+          <p className="text-2xl sm:text-4xl font-bold text-blue-500">
+            {displaySearchTotal.toLocaleString()}
+          </p>
         </div>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
@@ -1944,7 +3383,7 @@ function UsageTab({
             <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique Agents</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "12" : "0"}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "23" : "0"}</p>
         </div>
       </div>
 
@@ -1974,9 +3413,9 @@ function UsageTab({
         </div>
       </div>
 
-      {/* Calls to Your APIs */}
+      {/* Top APIs - Now with Search column */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Calls to Your APIs</h3>
+        <h3 className="font-semibold mb-4">Top APIs</h3>
         <div className="space-y-3">
           {displayByProvider.map((p, i) => (
             <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
@@ -1984,11 +3423,21 @@ function UsageTab({
                 <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
                   {i + 1}
                 </span>
-                <span className="font-medium">{p.provider}</span>
+                <div>
+                  <span className="font-medium">{p.provider}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm text-[var(--text-muted)]">{p.calls.toLocaleString()} calls</span>
+                    {p.cost > 0 && <span className="text-sm text-[var(--text-muted)]">• ${p.cost.toFixed(2)}</span>}
+                  </div>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold">{p.calls.toLocaleString()} calls</p>
-                {p.cost > 0 && <p className="text-sm text-[var(--text-muted)]">${p.cost.toFixed(2)}</p>}
+              <div className="flex items-center gap-2">
+                {(p as any).searchCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-500 text-xs font-medium">
+                    <Search className="w-3 h-3" />
+                    {(p as any).searchCount} found
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -2002,8 +3451,39 @@ function UsageTab({
 // LOGS TAB
 // ============================================
 
-interface LogEntry {
+// Type badges for log entries
+const typeBadges: Record<string, { icon: typeof Search; label: string; className: string }> = {
+  search: {
+    icon: Search,
+    label: "Search",
+    className: "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+  },
+  direct_call: {
+    icon: Zap,
+    label: "Direct Call",
+    className: "bg-green-500/10 text-green-500 border border-green-500/20"
+  },
+  chain: {
+    icon: LinkIcon,
+    label: "Chain",
+    className: "bg-purple-500/10 text-purple-500 border border-purple-500/20"
+  },
+};
+
+const TypeBadge = ({ type }: { type: string }) => {
+  const badge = typeBadges[type] || typeBadges.direct_call;
+  const Icon = badge.icon;
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${badge.className}`}>
+      <Icon className="w-3.5 h-3.5" />
+      {badge.label}
+    </span>
+  );
+};
+
+interface ApiLogEntry {
   id: string;
+  type: "direct_call";
   provider: string;
   action: string;
   status: "success" | "error";
@@ -2011,6 +3491,18 @@ interface LogEntry {
   errorMessage?: string;
   createdAt: number;
 }
+
+interface SearchLogEntry {
+  id: string;
+  type: "search";
+  query: string;
+  resultCount: number;
+  hasResults: boolean;
+  responseTimeMs: number;
+  createdAt: number;
+}
+
+type CombinedLogEntry = ApiLogEntry | SearchLogEntry;
 
 interface LogStats {
   totalCalls: number;
@@ -2022,7 +3514,7 @@ interface LogStats {
 }
 
 function LogsTab({ sessionToken }: { sessionToken: string | null }) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState<CombinedLogEntry[]>([]);
   const [stats, setStats] = useState<LogStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"all" | "success" | "error">("all");
@@ -2044,6 +3536,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
     try {
       const cursor = append ? nextCursor : undefined;
       
+      // Fetch API logs
       const logsRes = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2060,15 +3553,52 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
       });
 
       const logsData = await logsRes.json();
-      const result = logsData.value || logsData;
+      const apiResult = logsData.value || logsData;
+      const apiLogs: ApiLogEntry[] = (apiResult.logs || []).map((log: any) => ({
+        ...log,
+        type: "direct_call" as const,
+      }));
+
+      // Fetch search logs (only on initial load, not on "load more")
+      let searchLogs: SearchLogEntry[] = [];
+      if (!append && providerFilter === "all") {
+        try {
+          const searchRes = await fetch(`${CONVEX_URL}/api/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: "searchLogs:getRecent",
+              args: { token: sessionToken, limit: 50 },
+            }),
+          });
+          const searchData = await searchRes.json();
+          const searchResult = searchData.value || searchData;
+          if (Array.isArray(searchResult)) {
+            searchLogs = searchResult.map((log: any) => ({
+              id: log._id,
+              type: "search" as const,
+              query: log.query,
+              resultCount: log.resultCount,
+              hasResults: log.hasResults,
+              responseTimeMs: log.responseTimeMs,
+              createdAt: log.timestamp,
+            }));
+          }
+        } catch (err) {
+          console.error("Error fetching search logs:", err);
+        }
+      }
+
+      // Merge and sort by timestamp (newest first)
+      const combinedLogs = [...apiLogs, ...searchLogs].sort((a, b) => b.createdAt - a.createdAt);
 
       if (append) {
-        setLogs(prev => [...prev, ...(result.logs || [])]);
+        setLogs(prev => [...prev, ...apiLogs].sort((a, b) => b.createdAt - a.createdAt));
       } else {
-        setLogs(result.logs || []);
+        setLogs(combinedLogs);
       }
-      setHasMore(result.hasMore || false);
-      setNextCursor(result.nextCursor);
+      setHasMore(apiResult.hasMore || false);
+      setNextCursor(apiResult.nextCursor);
     } catch (err) {
       console.error("Error fetching logs:", err);
     } finally {
@@ -2225,6 +3755,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             <table className="w-full">
               <thead className="bg-[var(--surface)]">
                 <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Type</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Time</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Provider</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Action</th>
@@ -2235,34 +3766,65 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
               <tbody className="divide-y divide-[var(--border)]">
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-[var(--surface)] transition">
+                    <td className="px-4 py-3">
+                      <TypeBadge type={log.type} />
+                    </td>
                     <td className="px-4 py-3 text-sm text-[var(--text-muted)]">
                       {formatTime(log.createdAt)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-medium">{log.provider}</span>
+                      {log.type === "search" ? (
+                        <span className="font-medium text-[var(--text-muted)]">—</span>
+                      ) : (
+                        <span className="font-medium">{(log as ApiLogEntry).provider}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
-                      <code className="px-2 py-1 rounded bg-[var(--surface)] text-sm font-mono">
-                        {log.action}
-                      </code>
+                      {log.type === "search" ? (
+                        <code className="px-2 py-1 rounded bg-blue-500/10 text-blue-500 text-sm font-mono">
+                          &quot;{(log as SearchLogEntry).query}&quot;
+                        </code>
+                      ) : (
+                        <code className="px-2 py-1 rounded bg-[var(--surface)] text-sm font-mono">
+                          {(log as ApiLogEntry).action}
+                        </code>
+                      )}
                     </td>
                     <td className="px-4 py-3">
-                      {log.status === "success" ? (
+                      {log.type === "search" ? (
+                        (log as SearchLogEntry).hasResults ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                            <Check className="w-3 h-3" />
+                            {(log as SearchLogEntry).resultCount} results
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 text-xs font-medium">
+                            <AlertCircle className="w-3 h-3" />
+                            No results
+                          </span>
+                        )
+                      ) : (log as ApiLogEntry).status === "success" ? (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
                           <Check className="w-3 h-3" />
                           Success
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium" title={log.errorMessage}>
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 text-red-500 text-xs font-medium" title={(log as ApiLogEntry).errorMessage}>
                           <AlertCircle className="w-3 h-3" />
                           Error
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span className={log.latencyMs > 1000 ? "text-yellow-500" : "text-[var(--text-muted)]"}>
-                        {log.latencyMs}ms
-                      </span>
+                      {log.type === "search" ? (
+                        <span className={(log as SearchLogEntry).responseTimeMs > 200 ? "text-yellow-500" : "text-[var(--text-muted)]"}>
+                          {(log as SearchLogEntry).responseTimeMs}ms
+                        </span>
+                      ) : (
+                        <span className={(log as ApiLogEntry).latencyMs > 1000 ? "text-yellow-500" : "text-[var(--text-muted)]"}>
+                          {(log as ApiLogEntry).latencyMs}ms
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -2275,8 +3837,23 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             {logs.map((log) => (
               <div key={log.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">{log.provider}</span>
-                  {log.status === "success" ? (
+                  <div className="flex items-center gap-2">
+                    <TypeBadge type={log.type} />
+                    {log.type === "direct_call" && (
+                      <span className="font-medium text-sm">{(log as ApiLogEntry).provider}</span>
+                    )}
+                  </div>
+                  {log.type === "search" ? (
+                    (log as SearchLogEntry).hasResults ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
+                        {(log as SearchLogEntry).resultCount} results
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-500 text-xs font-medium">
+                        No results
+                      </span>
+                    )
+                  ) : (log as ApiLogEntry).status === "success" ? (
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
                       <Check className="w-3 h-3" />
                       Success
@@ -2289,14 +3866,22 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
                   )}
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <code className="px-2 py-1 rounded bg-[var(--surface)] font-mono text-xs">
-                    {log.action}
-                  </code>
-                  <span className="text-[var(--text-muted)]">{log.latencyMs}ms</span>
+                  {log.type === "search" ? (
+                    <code className="px-2 py-1 rounded bg-blue-500/10 text-blue-500 font-mono text-xs">
+                      &quot;{(log as SearchLogEntry).query}&quot;
+                    </code>
+                  ) : (
+                    <code className="px-2 py-1 rounded bg-[var(--surface)] font-mono text-xs">
+                      {(log as ApiLogEntry).action}
+                    </code>
+                  )}
+                  <span className="text-[var(--text-muted)]">
+                    {log.type === "search" ? (log as SearchLogEntry).responseTimeMs : (log as ApiLogEntry).latencyMs}ms
+                  </span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)]">{formatTime(log.createdAt)}</p>
-                {log.errorMessage && (
-                  <p className="text-xs text-red-500 truncate">{log.errorMessage}</p>
+                {log.type === "direct_call" && (log as ApiLogEntry).errorMessage && (
+                  <p className="text-xs text-red-500 truncate">{(log as ApiLogEntry).errorMessage}</p>
                 )}
               </div>
             ))}
@@ -4056,6 +5641,98 @@ function SettingsSection({ title, icon: Icon, children, defaultOpen = false }: S
   );
 }
 
+// Team Section Component
+function TeamSection({ workspace }: { workspace: Workspace | null }) {
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [notifyClicked, setNotifyClicked] = useState(false);
+
+  return (
+    <SettingsSection title="Team" icon={Users}>
+      <div className="space-y-4 pt-4">
+        {/* Team Members List */}
+        <div className="space-y-3">
+          {/* Owner - always shown */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-[#ef4444]" />
+              </div>
+              <div>
+                <p className="font-medium">{workspace?.email || "Loading..."}</p>
+                <p className="text-sm text-[var(--text-muted)]">Account owner</p>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium">
+              Owner
+            </span>
+          </div>
+        </div>
+
+        {/* Invite Button */}
+        <button
+          onClick={() => setShowComingSoon(true)}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-[var(--border)] text-[var(--text-secondary)] font-medium hover:border-[#ef4444]/50 hover:text-[#ef4444] transition"
+        >
+          <Plus className="w-5 h-5" />
+          Invite Team Member
+        </button>
+
+        {/* Coming Soon Card */}
+        {showComingSoon && (
+          <div className="p-5 rounded-xl bg-gradient-to-br from-[#ef4444]/5 to-[#ef4444]/10 border border-[#ef4444]/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-5 h-5 text-[#ef4444]" />
+              <h4 className="font-semibold text-[#ef4444]">Team invites coming soon!</h4>
+            </div>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Share your workspace with team members. They&apos;ll have their own login but share your API access and billing.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setNotifyClicked(true);
+                  setTimeout(() => setNotifyClicked(false), 3000);
+                }}
+                disabled={notifyClicked}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  notifyClicked
+                    ? "bg-green-500/20 text-green-500"
+                    : "bg-[#ef4444] text-white hover:bg-[#dc2626]"
+                }`}
+              >
+                {notifyClicked ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    We&apos;ll notify you!
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4" />
+                    Get Notified When Ready
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowComingSoon(false)}
+                className="px-4 py-2 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Info text */}
+        {!showComingSoon && (
+          <p className="text-xs text-[var(--text-muted)] text-center">
+            Team collaboration features are coming soon
+          </p>
+        )}
+      </div>
+    </SettingsSection>
+  );
+}
+
 function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
@@ -4196,6 +5873,8 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
           </div>
         </div>
       </SettingsSection>
+
+      <TeamSection workspace={workspace} />
 
       <SettingsSection title="Billing" icon={CreditCard}>
         <div className="space-y-4 pt-4">

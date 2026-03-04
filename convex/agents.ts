@@ -66,6 +66,7 @@ export const getMainAgent = query({
       email: workspace.email,
       mainAgentId: workspace.mainAgentId || null,
       mainAgentName: workspace.mainAgentName || null,
+      aiBackend: workspace.aiBackend || null,
       usageCount: workspace.usageCount,
       createdAt: workspace.createdAt,
     };
@@ -345,6 +346,119 @@ export const trackSubagentCall = mutation({
 // AGGREGATE STATS
 // ============================================
 
+// ============================================
+// AGENT REGISTRATION & AI BACKEND TRACKING
+// ============================================
+
+/**
+ * Pre-register a task agent (subagent)
+ * Allows agents to be registered before they make their first call
+ */
+export const registerTaskAgent = mutation({
+  args: {
+    token: v.string(),
+    subagentId: v.string(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, subagentId, name, description }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) {
+      throw new Error("Invalid session");
+    }
+
+    // Validate subagentId
+    const trimmedId = subagentId.trim();
+    if (trimmedId.length < 1 || trimmedId.length > 100) {
+      throw new Error("Subagent ID must be between 1 and 100 characters");
+    }
+
+    const now = Date.now();
+
+    // Check if already exists
+    const existing = await ctx.db
+      .query("subagents")
+      .withIndex("by_workspaceId_subagentId", (q) =>
+        q.eq("workspaceId", session.workspaceId).eq("subagentId", trimmedId)
+      )
+      .first();
+
+    if (existing) {
+      // Update existing record
+      await ctx.db.patch(existing._id, {
+        name: name || existing.name,
+        description: description || existing.description,
+        isRegistered: true,
+        lastActiveAt: now,
+      });
+      return { id: existing._id, created: false };
+    }
+
+    // Create new subagent record
+    const id = await ctx.db.insert("subagents", {
+      workspaceId: session.workspaceId,
+      subagentId: trimmedId,
+      name: name,
+      description: description,
+      callCount: 0,
+      isRegistered: true,
+      firstSeenAt: now,
+      lastActiveAt: now,
+    });
+
+    return { id, created: true };
+  },
+});
+
+/**
+ * Update AI backend for workspace or subagent
+ * Called when X-APIClaw-AI-Backend header is present
+ */
+export const updateAIBackend = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    subagentId: v.optional(v.string()),
+    aiBackend: v.string(),
+  },
+  handler: async (ctx, { workspaceId, subagentId, aiBackend }) => {
+    const now = Date.now();
+
+    if (subagentId) {
+      // Update subagent's AI backend
+      const subagent = await ctx.db
+        .query("subagents")
+        .withIndex("by_workspaceId_subagentId", (q) =>
+          q.eq("workspaceId", workspaceId).eq("subagentId", subagentId)
+        )
+        .first();
+
+      if (subagent) {
+        await ctx.db.patch(subagent._id, {
+          aiBackend,
+          lastActiveAt: now,
+        });
+      }
+    } else {
+      // Update workspace's main agent AI backend
+      await ctx.db.patch(workspaceId, {
+        aiBackend,
+        aiBackendLastSeen: now,
+        updatedAt: now,
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+// ============================================
+// AGGREGATE STATS
+// ============================================
+
 /**
  * Get agent overview for workspace (main + subagents summary)
  */
@@ -399,5 +513,79 @@ export const getAgentOverview = query({
       },
       totalCalls: workspace.usageCount,
     };
+  },
+});
+
+/**
+ * Delete a subagent
+ */
+export const deleteSubagent = mutation({
+  args: {
+    token: v.string(),
+    subagentId: v.string(),
+  },
+  handler: async (ctx, { token, subagentId }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) {
+      throw new Error("Invalid session");
+    }
+
+    const subagent = await ctx.db
+      .query("subagents")
+      .withIndex("by_workspaceId_subagentId", (q) =>
+        q.eq("workspaceId", session.workspaceId).eq("subagentId", subagentId)
+      )
+      .first();
+
+    if (!subagent) {
+      throw new Error("Subagent not found");
+    }
+
+    await ctx.db.delete(subagent._id);
+    return { success: true };
+  },
+});
+
+/**
+ * Update subagent stats (call count, last active)
+ * Internal helper for tracking
+ */
+export const updateSubagentStats = mutation({
+  args: {
+    token: v.string(),
+    subagentId: v.string(),
+    incrementCalls: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, subagentId, incrementCalls = 1 }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) {
+      throw new Error("Invalid session");
+    }
+
+    const subagent = await ctx.db
+      .query("subagents")
+      .withIndex("by_workspaceId_subagentId", (q) =>
+        q.eq("workspaceId", session.workspaceId).eq("subagentId", subagentId)
+      )
+      .first();
+
+    if (!subagent) {
+      throw new Error("Subagent not found");
+    }
+
+    await ctx.db.patch(subagent._id, {
+      callCount: (subagent.callCount || 0) + incrementCalls,
+      lastActiveAt: Date.now(),
+    });
+
+    return { success: true, newCallCount: (subagent.callCount || 0) + incrementCalls };
   },
 });
