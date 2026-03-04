@@ -203,7 +203,7 @@ export default function RegisterPage() {
       
       // If logged in, add API to existing account
       if (token && isLoggedIn) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud'}/api/mutation`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud'}/api/mutation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -233,7 +233,7 @@ export default function RegisterPage() {
       }
       
       // Submit to Convex (new provider)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud'}/api/mutation`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud'}/api/mutation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

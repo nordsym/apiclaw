@@ -239,7 +239,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
     
     setWaitlistStatus("loading");
     try {
-      const res = await fetch("https://adventurous-avocet-799.convex.cloud/api/mutation", {
+      const res = await fetch("https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

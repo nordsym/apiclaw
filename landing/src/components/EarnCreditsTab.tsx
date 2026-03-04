@@ -19,7 +19,7 @@ import {
   Key,
 } from "lucide-react";
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://brilliant-puffin-712.eu-west-1.convex.cloud";
 
 // ============================================
 // TYPES
