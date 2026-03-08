@@ -1,96 +1,85 @@
-# APIClaw — The API Layer for AI Agents
+# APIClaw
 
-> Universal API access. No keys needed.
+> The API layer for AI agents
 
-## What This Is
+## What is APIClaw?
 
-APIClaw is an MCP server that gives AI agents direct access to APIs. Not documentation — execution.
+APIClaw provides unified API access for AI agents. One SDK, one API key, thousands of APIs.
+
+**For AI agents:** Discover and call APIs instantly
+**For API providers:** Get your API in front of AI agents
+
+## Three Access Layers
+
+### 1. Direct Call (18 Providers → 1000s of Capabilities)
+Zero config. APIClaw handles authentication. These 18 providers include 1000+ ML models via Replicate, 100+ LLMs via OpenRouter, and more.
+
+**AI & LLM:**
+- Replicate (1000+ ML models)
+- OpenRouter (100+ LLMs)
+- Groq
+- Mistral
+- Cohere
+- Together AI
+- Stability AI
+
+**Voice & TTS:**
+- ElevenLabs (29 languages)
+- Deepgram
+- AssemblyAI
+
+**SMS:**
+- 46elks
+- Twilio
+
+**Email:**
+- Resend
+
+**Search:**
+- Brave Search
+- Firecrawl
+- Serper
+
+**Code:**
+- E2B
+
+**Dev:**
+- GitHub
+
+### 2. Open APIs (1,636 APIs)
+No auth needed. Call directly through APIClaw.
+
+### 3. Discovery (22,392 APIs)
+Full API index. Search, explore, integrate.
 
 ## Quick Start
 
 ```bash
-npx @nordsym/apiclaw mcp-install
+npm install apiclaw
 ```
 
-This auto-configures Claude Desktop or Claude Code. Restart and you're live.
+```javascript
+import { APIClaw } from 'apiclaw';
 
-## What You Can Do
+const claw = new APIClaw('your-api-key');
 
-### Direct Call (No API Keys)
-18 providers work through our proxy:
+// Direct Call - zero config
+const result = await claw.call('replicate', 'predictions.create', {
+  model: 'stability-ai/sdxl',
+  input: { prompt: 'A futuristic city' }
+});
 
-- **AI/LLM:** Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
-- **Voice:** ElevenLabs, Deepgram, AssemblyAI
-- **SMS:** 46elks, Twilio
-- **Email:** Resend
-- **Search:** Brave Search, Serper, Firecrawl
-- **Code:** E2B
-- **Dev:** GitHub
+// Search APIs
+const apis = await claw.search('weather forecast');
 
-Example:
+// Discover capabilities
+const providers = await claw.providers();
 ```
-call_api({ provider: "elevenlabs", action: "text_to_speech", params: { text: "Hello", voice: "rachel" }})
-→ Returns audio URL
-```
-
-### API Discovery
-Search 22,000+ APIs by capability:
-```
-discover_apis({ query: "GDPR-compliant email with analytics" })
-→ Ranked results with pricing, auth, specs
-```
-
-## Stats (Live)
-- 22,392 APIs indexed
-- 1,636 Open APIs
-- 18 Direct Call providers
-- Sub-200ms responses
-
-## MCP Config
-
-```json
-{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
-    }
-  }
-}
-```
-
-## Tools Available
-
-| Tool | Purpose |
-|------|---------|
-| `discover_apis` | Search APIs by capability |
-| `get_api_details` | Full specs, pricing, auth |
-| `call_api` | Execute via Direct Call (no keys) |
-| `list_connected` | See available providers |
-
-## For API Providers
-
-Want agents to find your API?
-- **Free listing:** https://apiclaw.nordsym.com/providers
-- **Direct Call partnership:** gustav@nordsym.com
 
 ## Links
 
-- Website: https://apiclaw.nordsym.com
-- Docs: https://apiclaw.nordsym.com/docs
+- Website: https://apiclaw.com
+- Dashboard: https://apiclaw.com/dashboard
+- Docs: https://apiclaw.com/docs
+- npm: https://npmjs.com/package/apiclaw
 - GitHub: https://github.com/nordsym/apiclaw
-- npm: https://npmjs.com/package/@nordsym/apiclaw
-
-## Contact
-
-- Symbot (the agent): https://t.me/Symbot_nordsym_bot?start=apiclaw
-- Gustav (the human): gustav@nordsym.com
-
-## Built By
-
-NordSym AB — Full Stack AI Partner
-https://nordsym.com
-
----
-
-🦞 APIClaw — APIs for agents, not just humans.

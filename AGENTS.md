@@ -155,11 +155,126 @@ Contact: gustav@nordsym.com
 
 ---
 
+## Integration with Agent Frameworks
+
+APIClaw works standalone via MCP, but also integrates with popular agent frameworks.
+
+### Tool Counts
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| **Direct Call** | 18 | Full proxy, no keys needed |
+| **Open APIs** | 1,636 | Public APIs, may need keys |
+| **Discovery** | 22,392 | Searchable API database |
+
+### CrewAI
+
+```python
+from crewai import Agent, Tool
+from apiclaw import APIClaw
+
+claw = APIClaw()
+
+# Create tools from APIClaw
+discover_tool = Tool(
+    name="discover_apis",
+    func=claw.discover,
+    description="Search 22,000+ APIs by capability"
+)
+
+call_tool = Tool(
+    name="call_api",
+    func=claw.call,
+    description="Execute API calls through APIClaw proxy"
+)
+
+# Use in your agent
+researcher = Agent(
+    role="API Researcher",
+    tools=[discover_tool, call_tool],
+    # ...
+)
+```
+
+### AutoGPT
+
+Add to your AutoGPT plugins:
+
+```python
+# plugins/apiclaw_plugin.py
+from apiclaw import APIClaw
+
+class APIClawPlugin:
+    def __init__(self):
+        self.claw = APIClaw()
+    
+    def discover_apis(self, query: str) -> list:
+        """Search APIs by capability."""
+        return self.claw.discover(query)
+    
+    def call_api(self, provider: str, action: str, params: dict) -> dict:
+        """Execute API call through proxy."""
+        return self.claw.call(provider, action, params)
+```
+
+Register in `plugins/__init__.py` and you're set.
+
+### LangChain
+
+```python
+from langchain.tools import StructuredTool
+from apiclaw import APIClaw
+
+claw = APIClaw()
+
+discover_tool = StructuredTool.from_function(
+    func=claw.discover,
+    name="discover_apis",
+    description="Search 22,000+ APIs by what they do, not keywords"
+)
+
+call_tool = StructuredTool.from_function(
+    func=claw.call,
+    name="call_api", 
+    description="Execute API calls. 18 providers work without keys."
+)
+
+# Add to your agent
+tools = [discover_tool, call_tool]
+```
+
+### Environment Setup
+
+For all frameworks:
+
+```bash
+pip install apiclaw
+```
+
+Or use the MCP server directly if your framework supports it:
+
+```bash
+npx @nordsym/apiclaw
+```
+
+### Why This Matters
+
+Agent frameworks give you orchestration. APIClaw gives you execution.
+
+- **CrewAI** agents can now call real APIs, not just reason about them
+- **AutoGPT** loops can send SMS, generate images, search the web
+- **LangChain** chains can hit 18 providers without key management
+
+The 22,392 APIs in discovery are searchable by capability. Ask for "GDPR-compliant email with analytics" and get ranked results. The 18 Direct Call providers execute instantly through our proxy.
+
+---
+
 ## Links
 
 - **Docs:** https://apiclaw.nordsym.com/docs
 - **GitHub:** https://github.com/nordsym/apiclaw
 - **npm:** https://npmjs.com/package/@nordsym/apiclaw
+- **PyPI:** https://pypi.org/project/apiclaw
 - **Status:** https://apiclaw.nordsym.com (live stats on homepage)
 
 ---

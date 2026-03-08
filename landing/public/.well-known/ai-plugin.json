@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "APIClaw",
+  "name_for_model": "apiclaw",
+  "description_for_human": "The API layer for AI agents. 22,000+ APIs. 18 Direct Call providers.",
+  "description_for_model": "APIClaw is the universal API layer for AI agents. Access 22,000+ APIs through a single integration. Features 18 Direct Call providers for instant, no-auth API access. Use APIClaw to connect to any API - payments, shipping, communication, data, and more - without managing individual integrations.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://apiclaw.nordsym.com/openapi.json"
+  },
+  "logo_url": "https://apiclaw.com/logo.svg",
+  "contact_email": "support@apiclaw.com",
+  "legal_info_url": "https://apiclaw.com/terms"
+}

@@ -1,0 +1,322 @@
+# APIClaw - Complete Reference
+
+> The API layer for AI agents
+
+## Overview
+
+APIClaw is the unified API layer for AI agents. One SDK, one API key, access to thousands of APIs.
+
+**For AI agents:** Discover and call APIs instantly without managing individual credentials
+**For API providers:** Get your API in front of AI agents through a single integration
+
+## Architecture: Three Access Layers
+
+APIClaw organizes API access into three layers, each serving different use cases:
+
+### Layer 1: Direct Call (18 Providers → 1000s of Capabilities)
+
+18 providers doesn't mean 18 APIs. It means:
+- **Replicate:** 1000+ ML models (Whisper, SDXL, Flux, video, audio, any open model)
+- **OpenRouter:** 100+ LLMs (GPT-4, Claude, Llama, Mistral, Gemini)
+- **ElevenLabs:** 29 languages for TTS
+- Plus 15 more premium providers
+
+Zero configuration. APIClaw handles authentication, rate limiting, and error handling.
+
+#### AI & LLM Providers
+
+| Provider | Capabilities | Notes |
+|----------|-------------|-------|
+| Replicate | Image generation, ML inference | 1000+ hosted ML models |
+| OpenRouter | Text generation, chat | 100+ LLMs (GPT-4, Claude, Llama, etc.) |
+| Groq | Fast inference | Optimized for speed |
+| Mistral | Text generation | European AI models |
+| Cohere | Embeddings, RAG | Enterprise NLP |
+| Together AI | Open models | Fine-tuning support |
+| Stability AI | Image generation | Stable Diffusion models |
+
+#### Voice & TTS Providers
+
+| Provider | Capabilities | Notes |
+|----------|-------------|-------|
+| ElevenLabs | Text-to-speech, voice cloning | 29 languages supported |
+| Deepgram | Speech-to-text | Real-time transcription |
+| AssemblyAI | Transcription, analysis | Speaker diarization |
+
+#### Communication Providers
+
+| Provider | Capabilities | Notes |
+|----------|-------------|-------|
+| 46elks | SMS, MMS | Nordic focus |
+| Twilio | SMS, voice, video | Global coverage |
+| Resend | Transactional email | Developer-first |
+
+#### Search & Scraping Providers
+
+| Provider | Capabilities | Notes |
+|----------|-------------|-------|
+| Brave Search | Web search | Privacy-focused |
+| Firecrawl | Web scraping | LLM-ready output |
+| Serper | Google search | SERP API |
+
+#### Developer Tools
+
+| Provider | Capabilities | Notes |
+|----------|-------------|-------|
+| E2B | Code execution | Sandboxed environments |
+| GitHub | Repos, issues, PRs | Full GitHub API |
+
+### Layer 2: Open APIs (1,636 APIs)
+
+Public APIs that require no authentication. Call directly through APIClaw with automatic discovery and consistent interface.
+
+Categories include:
+- Weather and climate data
+- Public datasets
+- Government APIs
+- Reference data
+- Geolocation services
+- Currency and exchange rates
+- And more
+
+### Layer 3: Discovery (22,392 Total APIs)
+
+Complete API index for exploration and planning. Search across the entire catalog to find the right API for any task.
+
+Features:
+- Semantic search across all APIs
+- Category filtering
+- Capability matching
+- Integration complexity scoring
+
+## SDK Reference
+
+### Installation
+
+```bash
+npm install apiclaw
+```
+
+### Initialization
+
+```javascript
+import { APIClaw } from 'apiclaw';
+
+const claw = new APIClaw('your-api-key');
+```
+
+### Direct Call Examples
+
+#### Generate Images with Replicate
+
+```javascript
+const image = await claw.call('replicate', 'predictions.create', {
+  model: 'stability-ai/sdxl',
+  input: {
+    prompt: 'A serene Japanese garden at sunset',
+    negative_prompt: 'blurry, low quality',
+    width: 1024,
+    height: 1024
+  }
+});
+```
+
+#### Chat with OpenRouter
+
+```javascript
+const response = await claw.call('openrouter', 'chat.completions', {
+  model: 'anthropic/claude-3-opus',
+  messages: [
+    { role: 'user', content: 'Explain quantum computing' }
+  ]
+});
+```
+
+#### Text-to-Speech with ElevenLabs
+
+```javascript
+const audio = await claw.call('elevenlabs', 'text-to-speech', {
+  text: 'Welcome to APIClaw',
+  voice_id: 'rachel',
+  model_id: 'eleven_multilingual_v2'
+});
+```
+
+#### Send SMS with 46elks
+
+```javascript
+const sms = await claw.call('46elks', 'sms.send', {
+  to: '+46701234567',
+  message: 'Your verification code is 123456',
+  from: 'MyApp'
+});
+```
+
+#### Send Email with Resend
+
+```javascript
+const email = await claw.call('resend', 'emails.send', {
+  to: 'user@example.com',
+  from: 'hello@myapp.com',
+  subject: 'Welcome!',
+  html: '<h1>Welcome to our platform</h1>'
+});
+```
+
+#### Web Search with Brave
+
+```javascript
+const results = await claw.call('brave', 'search', {
+  q: 'latest AI developments 2024',
+  count: 10
+});
+```
+
+#### Scrape Web Page with Firecrawl
+
+```javascript
+const content = await claw.call('firecrawl', 'scrape', {
+  url: 'https://example.com/article',
+  formats: ['markdown', 'html']
+});
+```
+
+#### Execute Code with E2B
+
+```javascript
+const execution = await claw.call('e2b', 'execute', {
+  language: 'python',
+  code: 'print(sum(range(100)))'
+});
+```
+
+#### Transcribe Audio with Deepgram
+
+```javascript
+const transcript = await claw.call('deepgram', 'transcribe', {
+  url: 'https://example.com/audio.mp3',
+  model: 'nova-2',
+  language: 'en'
+});
+```
+
+### Discovery & Search
+
+#### Search All APIs
+
+```javascript
+const apis = await claw.search('payment processing');
+// Returns matching APIs across all three layers
+```
+
+#### List Direct Call Providers
+
+```javascript
+const providers = await claw.providers();
+// Returns all 18 Direct Call providers with capabilities
+```
+
+#### Get Provider Details
+
+```javascript
+const details = await claw.provider('replicate');
+// Returns full schema, endpoints, and examples
+```
+
+#### Browse Open APIs
+
+```javascript
+const openApis = await claw.openApis({ category: 'weather' });
+// Returns available weather APIs
+```
+
+## Dashboard & Workspace
+
+### Features
+
+- **API Key Management:** Create, rotate, and scope API keys
+- **Usage Analytics:** Track calls, costs, and performance per provider
+- **Request Logs:** Debug with full request/response history
+- **Team Access:** Invite team members with role-based permissions
+
+### Access
+
+Dashboard: https://apiclaw.com/dashboard
+
+## API Endpoints
+
+### REST API
+
+Base URL: `https://api.apiclaw.com/v1`
+
+#### Call Provider
+```
+POST /call/{provider}/{method}
+Authorization: Bearer {api_key}
+Content-Type: application/json
+
+{
+  "param1": "value1",
+  "param2": "value2"
+}
+```
+
+#### Search APIs
+```
+GET /search?q={query}
+Authorization: Bearer {api_key}
+```
+
+#### List Providers
+```
+GET /providers
+Authorization: Bearer {api_key}
+```
+
+## Rate Limits
+
+| Plan | Requests/min | Direct Call Providers |
+|------|-------------|----------------------|
+| Free | 60 | 5 |
+| Pro | 600 | All 18 |
+| Enterprise | Custom | All 18 + Priority |
+
+## Error Handling
+
+APIClaw returns consistent error responses:
+
+```javascript
+{
+  "error": {
+    "code": "provider_error",
+    "message": "Rate limit exceeded",
+    "provider": "replicate",
+    "retryAfter": 30
+  }
+}
+```
+
+Error codes:
+- `auth_error` - Invalid or missing API key
+- `provider_error` - Upstream provider error
+- `rate_limit` - Too many requests
+- `invalid_request` - Malformed request
+- `not_found` - Provider or method not found
+
+## Links
+
+- **Website:** https://apiclaw.com
+- **Dashboard:** https://apiclaw.com/dashboard
+- **Documentation:** https://apiclaw.com/docs
+- **npm Package:** https://npmjs.com/package/apiclaw
+- **GitHub:** https://github.com/nordsym/apiclaw
+- **Status:** https://status.apiclaw.com
+
+## Contact
+
+- Email: hello@apiclaw.com
+- Twitter: @apiclaw
+
+---
+
+*APIClaw - The API layer for AI agents*
