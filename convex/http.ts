@@ -195,6 +195,7 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
+      const startTime = Date.now();
       const body = await request.json();
       const query = (body.query || "").toLowerCase();
       
@@ -217,13 +218,17 @@ http.route({
           ...provider,
         }));
 
+      const responseTimeMs = Date.now() - startTime;
+
       // Log the search (fire and forget)
       if (query) {
         ctx.runMutation(internal.searchLogs.logSearch, {
           query: body.query || "", // Original query (not lowercased)
           resultsCount: results.length,
+          matchedProviders: results.map(r => r.providerId),
           sessionToken: sessionToken || undefined,
           userAgent: userAgent || undefined,
+          responseTimeMs,
         }).catch(() => {}); // Ignore errors, don't block response
       }
 

@@ -1,42 +1,52 @@
 import { internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
 
-// Log a search query
+// Log a search query (uses existing searchLogs table schema)
 export const logSearch = internalMutation({
   args: {
     query: v.string(),
     resultsCount: v.number(),
+    matchedProviders: v.optional(v.array(v.string())),
     sessionToken: v.optional(v.string()),
     userAgent: v.optional(v.string()),
-    ip: v.optional(v.string()),
+    responseTimeMs: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     // Try to get workspaceId from session token
     let workspaceId = undefined;
+    let subagentId = undefined;
+    
     if (args.sessionToken) {
       try {
+        const token = args.sessionToken;
         const session = await ctx.db
           .query("agentSessions")
-          .withIndex("by_token", (q) => q.eq("token", args.sessionToken))
+          .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
           .first();
         if (session) {
           workspaceId = session.workspaceId;
+          // No agentId in agentSessions, subagentId stays undefined
         }
       } catch (e) {
-        // Ignore - just log without workspace
+        // Ignore - just skip workspace linking
       }
     }
 
-    await ctx.db.insert("searchLogs", {
-      query: args.query,
-      resultsCount: args.resultsCount,
-      workspaceId,
-      sessionToken: args.sessionToken,
-      userAgent: args.userAgent,
-      ip: args.ip,
-      createdAt: Date.now(),
-    });
+    // Only log if we have a workspace (existing schema requires it)
+    if (workspaceId) {
+      await ctx.db.insert("searchLogs", {
+        workspaceId,
+        subagentId,
+        query: args.query,
+        resultCount: args.resultsCount,
+        hasResults: args.resultsCount > 0,
+        matchedProviders: args.matchedProviders,
+        responseTimeMs: args.responseTimeMs || 0,
+        timestamp: Date.now(),
+      });
+    }
+    
+    // TODO: Also log anonymous searches somewhere (for product insights)
   },
 });
 
@@ -52,8 +62,8 @@ export const getTopQueries = query({
 
     const logs = await ctx.db
       .query("searchLogs")
-      .withIndex("by_createdAt")
-      .filter((q) => q.gte(q.field("createdAt"), since))
+      .withIndex("by_timestamp")
+      .filter((q) => q.gte(q.field("timestamp"), since))
       .collect();
 
     // Aggregate by query
@@ -67,7 +77,7 @@ export const getTopQueries = query({
         queryCounts[q] = { count: 0, avgResults: 0, totalResults: 0 };
       }
       queryCounts[q].count++;
-      queryCounts[q].totalResults += log.resultsCount;
+      queryCounts[q].totalResults += log.resultCount;
     }
 
     // Calculate averages and sort
@@ -105,11 +115,11 @@ export const getZeroResultQueries = query({
 
     const logs = await ctx.db
       .query("searchLogs")
-      .withIndex("by_createdAt")
+      .withIndex("by_hasResults")
       .filter((q) => 
         q.and(
-          q.gte(q.field("createdAt"), since),
-          q.eq(q.field("resultsCount"), 0)
+          q.eq(q.field("hasResults"), false),
+          q.gte(q.field("timestamp"), since)
         )
       )
       .collect();

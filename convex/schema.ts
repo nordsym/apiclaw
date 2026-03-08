@@ -11,22 +11,6 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_agentId", ["agentId"]),
 
-  // Search logs (what people search for)
-  searchLogs: defineTable({
-    query: v.string(),
-    resultsCount: v.number(),
-    // Optional: who searched (if authenticated)
-    workspaceId: v.optional(v.id("workspaces")),
-    sessionToken: v.optional(v.string()),
-    // Context
-    userAgent: v.optional(v.string()),
-    ip: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index("by_query", ["query"])
-    .index("by_createdAt", ["createdAt"])
-    .index("by_workspaceId", ["workspaceId"]),
-
   // Purchases (API access bought by agents)
   purchases: defineTable({
     agentId: v.string(),
