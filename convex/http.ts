@@ -111,6 +111,53 @@ function jsonResponse(data: unknown, status = 200) {
   });
 }
 
+// Helper to validate session and log API usage
+async function validateAndLogProxyCall(
+  ctx: any,
+  request: Request,
+  provider: string,
+  action: string
+): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string }> {
+  const sessionToken = request.headers.get("X-APIClaw-Session");
+  const subagentId = request.headers.get("X-APIClaw-Subagent") || "unknown";
+  
+  if (!sessionToken) {
+    // Allow calls without session but don't log to workspace
+    return { valid: true, subagentId };
+  }
+  
+  try {
+    // Validate session
+    const session = await ctx.runQuery(api.workspaces.getSession, { token: sessionToken });
+    
+    if (!session) {
+      // Allow call anyway but log warning
+      console.warn("[Proxy] Invalid session token, allowing call but not logging");
+      return { valid: true, subagentId };
+    }
+    
+    // Log the API call
+    await ctx.runMutation(api.logs.createProxyLog, {
+      workspaceId: session.workspaceId,
+      provider,
+      action,
+      subagentId,
+      sessionToken,
+    });
+    
+    // Increment usage
+    await ctx.runMutation(api.workspaces.incrementUsage, {
+      workspaceId: session.workspaceId,
+    });
+    
+    return { valid: true, workspaceId: session.workspaceId, subagentId };
+  } catch (e: any) {
+    console.error("[Proxy] Session validation error:", e);
+    // Allow call but don't log on error
+    return { valid: true, subagentId };
+  }
+}
+
 // OPTIONS handler for CORS
 http.route({
   path: "/api/discover",
@@ -373,6 +420,9 @@ http.route({
   path: "/proxy/openrouter",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "openrouter", "chat");
+    
     const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
     if (!OPENROUTER_KEY) {
       return jsonResponse({ error: "OpenRouter not configured" }, 500);
@@ -405,6 +455,9 @@ http.route({
   path: "/proxy/brave_search",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "brave_search", "search");
+    
     const BRAVE_KEY = process.env.BRAVE_API_KEY;
     if (!BRAVE_KEY) {
       return jsonResponse({ error: "Brave Search not configured" }, 500);
@@ -435,6 +488,9 @@ http.route({
   path: "/proxy/resend",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "resend", "send_email");
+    
     const RESEND_KEY = process.env.RESEND_API_KEY;
     if (!RESEND_KEY) {
       return jsonResponse({ error: "Resend not configured" }, 500);
@@ -465,6 +521,9 @@ http.route({
   path: "/proxy/elevenlabs",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "elevenlabs", "text_to_speech");
+    
     const ELEVENLABS_KEY = process.env.ELEVENLABS_API_KEY;
     if (!ELEVENLABS_KEY) {
       return jsonResponse({ error: "ElevenLabs not configured" }, 500);
@@ -534,6 +593,9 @@ http.route({
   path: "/proxy/46elks",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "46elks", "send_sms");
+    
     const ELKS_USER = process.env.ELKS_API_USER;
     const ELKS_PASS = process.env.ELKS_API_PASSWORD;
     if (!ELKS_USER || !ELKS_PASS) {
@@ -568,6 +630,9 @@ http.route({
   path: "/proxy/twilio",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    await validateAndLogProxyCall(ctx, request, "twilio", "send_sms");
+    
     const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
     const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
     if (!TWILIO_SID || !TWILIO_TOKEN) {
@@ -640,27 +705,27 @@ http.route({
         fingerprint,
       });
 
-      // Send email directly (bypassing action)
-      var verifyUrl = "https://apiclaw.nordsym.com/auth/verify?token=" + result.token;
-      var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
-      html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
-      html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
-      html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
-      html += "<tr><td style='padding:32px;text-align:center;'>";
-      html += "<div style='font-size:48px;'>🦞</div>";
-      html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw</h1>";
-      html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
-      html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
-      html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-      html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
-      html += "</td></tr></table>";
-      html += "</td></tr></table></body></html>";
+      // Send email directly - SIMPLE HTML (complex tables get stripped by Gmail)
+      const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${result.token}`;
+      const html = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+<h1>🦞 APIClaw</h1>
+<h2>An AI Agent Wants to Connect</h2>
+<p>Click below to verify your email and activate your workspace.</p>
+<p><a href="${verifyUrl}" style="background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;display:inline-block;">Verify Email</a></p>
+<p style="color:#666;font-size:13px;">Free tier: 50 API calls. This link expires in 1 hour.</p>
+<p style="color:#999;font-size:11px;">Or copy this link: ${verifyUrl}</p>
+</div>`;
       
-      var RESEND_KEY = process.env.RESEND_API_KEY;
-      await fetch("https://api.resend.com/emails", {
+      const RESEND_KEY = process.env.RESEND_API_KEY;
+      if (!RESEND_KEY) {
+        console.error("RESEND_API_KEY not configured");
+        return jsonResponse({ error: "Email service not configured" }, 500);
+      }
+      
+      const emailResponse = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + RESEND_KEY,
+          "Authorization": `Bearer ${RESEND_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -670,12 +735,22 @@ http.route({
           html: html,
         }),
       });
+      
+      if (!emailResponse.ok) {
+        const errorText = await emailResponse.text();
+        console.error("Resend error:", emailResponse.status, errorText);
+        return jsonResponse({ error: "Failed to send email", details: errorText }, 500);
+      }
+      
+      const emailResult = await emailResponse.json();
+      console.log("Email sent successfully:", emailResult.id);
 
       return jsonResponse({
         success: true,
         token: result.token,
         expiresAt: result.expiresAt,
         message: "Magic link sent! Check your email.",
+        emailId: emailResult.id,
       });
     } catch (e: any) {
       console.error("Magic link error:", e);

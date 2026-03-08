@@ -22,6 +22,7 @@ import type * as email from "../email.js";
 import type * as feedback from "../feedback.js";
 import type * as http from "../http.js";
 import type * as logs from "../logs.js";
+import type * as mou from "../mou.js";
 import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   feedback: typeof feedback;
   http: typeof http;
   logs: typeof logs;
+  mou: typeof mou;
   providerKeys: typeof providerKeys;
   providers: typeof providers;
   purchases: typeof purchases;

@@ -751,4 +751,24 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_votes", ["votes"])
     .index("by_createdAt", ["createdAt"]),
+
+  // ============================================
+  // MOU SIGNATURES
+  // ============================================
+  
+  mouDocuments: defineTable({
+    partnerId: v.string(), // e.g., "apilayer"
+    partnerName: v.string(),
+    partnerEmail: v.string(),
+    documentHtml: v.string(),
+    status: v.string(), // "pending" | "signed"
+    signedAt: v.optional(v.number()),
+    signatureDataUrl: v.optional(v.string()), // base64 signature image
+    signerName: v.optional(v.string()),
+    signerTitle: v.optional(v.string()),
+    signerIp: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_partnerId", ["partnerId"])
+    .index("by_status", ["status"]),
 });

@@ -923,3 +923,32 @@ export const adminCreateSession = mutation({
     return { success: true, sessionToken };
   },
 });
+
+// TEMP: Admin query to debug workspace data
+export const adminGetFullWorkspace = query({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", email.toLowerCase()))
+      .first();
+
+    if (!workspace) {
+      return null;
+    }
+
+    return {
+      _id: workspace._id,
+      email: workspace.email,
+      status: workspace.status,
+      tier: workspace.tier,
+      mainAgentId: workspace.mainAgentId || null,
+      mainAgentName: workspace.mainAgentName || null,
+      aiBackend: workspace.aiBackend || null,
+      usageCount: workspace.usageCount,
+      usageLimit: workspace.usageLimit,
+      createdAt: workspace.createdAt,
+      updatedAt: workspace.updatedAt,
+    };
+  },
+});

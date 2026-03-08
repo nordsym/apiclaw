@@ -43,6 +43,37 @@ export const metadata: Metadata = {
   robots: "index, follow",
 };
 
+// Schema.org JSON-LD
+const schemaOrg = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "APIClaw",
+      "url": "https://apiclaw.nordsym.com",
+      "description": "The API layer for AI agents. Discover and call APIs via MCP with structured data and ranked results."
+    },
+    {
+      "@type": "Organization",
+      "name": "NordSym AB",
+      "url": "https://nordsym.com"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "APIClaw",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "description": "API discovery and execution layer for AI agents. 22,000+ APIs indexed. MCP native. Direct Call providers.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free tier available"
+      }
+    }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +88,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#ef4444" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+        />
       </head>
       <body className="antialiased bg-background text-text-primary">
         {children}

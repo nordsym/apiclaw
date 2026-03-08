@@ -503,3 +503,28 @@ export const clearWorkspaceLogs = mutation({
     };
   },
 });
+
+// Log proxy API calls from external agents (Hivr bees)
+export const createProxyLog = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    provider: v.string(),
+    action: v.string(),
+    subagentId: v.optional(v.string()),
+    sessionToken: v.optional(v.string()),
+  },
+  handler: async (ctx, { workspaceId, provider, action, subagentId, sessionToken }) => {
+    await ctx.db.insert("apiLogs", {
+      workspaceId,
+      provider,
+      action,
+      subagentId: subagentId || "unknown",
+      sessionToken: sessionToken || "proxy",
+      status: "success",
+      latencyMs: 0, // Proxy calls don't track latency
+      createdAt: Date.now(),
+    });
+    
+    return { success: true };
+  },
+});
