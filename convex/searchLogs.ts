@@ -1,141 +1,136 @@
+import { internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
 
-// ============================================
-// SEARCH LOGGING
-// ============================================
-
-/**
- * Log a search (called from MCP server)
- */
-export const log = mutation({
+// Log a search query
+export const logSearch = internalMutation({
   args: {
-    sessionToken: v.string(),
-    subagentId: v.optional(v.string()),
     query: v.string(),
-    resultCount: v.number(),
-    matchedProviders: v.optional(v.array(v.string())),
-    responseTimeMs: v.number(),
+    resultsCount: v.number(),
+    sessionToken: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    ip: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Get workspace from session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    // Try to get workspaceId from session token
+    let workspaceId = undefined;
+    if (args.sessionToken) {
+      try {
+        const session = await ctx.db
+          .query("agentSessions")
+          .withIndex("by_token", (q) => q.eq("token", args.sessionToken))
+          .first();
+        if (session) {
+          workspaceId = session.workspaceId;
+        }
+      } catch (e) {
+        // Ignore - just log without workspace
+      }
+    }
 
-    if (!session) return null;
-
-    return await ctx.db.insert("searchLogs", {
-      workspaceId: session.workspaceId,
-      subagentId: args.subagentId,
+    await ctx.db.insert("searchLogs", {
       query: args.query,
-      resultCount: args.resultCount,
-      hasResults: args.resultCount > 0,
-      matchedProviders: args.matchedProviders,
-      responseTimeMs: args.responseTimeMs,
-      timestamp: Date.now(),
+      resultsCount: args.resultsCount,
+      workspaceId,
+      sessionToken: args.sessionToken,
+      userAgent: args.userAgent,
+      ip: args.ip,
+      createdAt: Date.now(),
     });
   },
 });
 
-/**
- * Get search stats for workspace
- */
-export const getStats = query({
+// Get top search queries (for analytics)
+export const getTopQueries = query({
   args: {
-    token: v.string(),
-    hoursBack: v.optional(v.number()),
+    limit: v.optional(v.number()),
+    since: v.optional(v.number()), // timestamp
   },
-  handler: async (ctx, { token, hoursBack = 24 }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
-
-    if (!session) return null;
-
-    const since = Date.now() - hoursBack * 3600000;
+  handler: async (ctx, args) => {
+    const limit = args.limit || 50;
+    const since = args.since || Date.now() - 7 * 24 * 60 * 60 * 1000; // Last 7 days
 
     const logs = await ctx.db
       .query("searchLogs")
-      .withIndex("by_workspaceId_timestamp", (q) =>
-        q.eq("workspaceId", session.workspaceId).gte("timestamp", since)
-      )
+      .withIndex("by_createdAt")
+      .filter((q) => q.gte(q.field("createdAt"), since))
       .collect();
 
-    // Aggregate
-    const totalSearches = logs.length;
-    const zeroResults = logs.filter((l) => !l.hasResults).length;
-    const avgResponseTime =
-      logs.reduce((a, l) => a + l.responseTimeMs, 0) / logs.length || 0;
-
-    // Top queries
-    const queryCounts: Record<string, number> = {};
+    // Aggregate by query
+    const queryCounts: Record<string, { count: number; avgResults: number; totalResults: number }> = {};
+    
     for (const log of logs) {
-      queryCounts[log.query] = (queryCounts[log.query] || 0) + 1;
+      const q = log.query.toLowerCase().trim();
+      if (!q) continue;
+      
+      if (!queryCounts[q]) {
+        queryCounts[q] = { count: 0, avgResults: 0, totalResults: 0 };
+      }
+      queryCounts[q].count++;
+      queryCounts[q].totalResults += log.resultsCount;
     }
-    const topQueries = Object.entries(queryCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 20)
-      .map(([query, count]) => ({ query, count }));
 
-    // Zero-result queries (gold data for improvement)
-    const zeroResultQueries = logs
-      .filter((l) => !l.hasResults)
-      .reduce(
-        (acc, l) => {
-          acc[l.query] = (acc[l.query] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
-    const topZeroResults = Object.entries(zeroResultQueries)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 20)
-      .map(([query, count]) => ({ query, count }));
-
-    // By subagent
-    const bySubagent: Record<string, number> = {};
-    for (const log of logs) {
-      const key = log.subagentId || "primary";
-      bySubagent[key] = (bySubagent[key] || 0) + 1;
-    }
+    // Calculate averages and sort
+    const sorted = Object.entries(queryCounts)
+      .map(([query, data]) => ({
+        query,
+        count: data.count,
+        avgResults: Math.round(data.totalResults / data.count * 10) / 10,
+        noResults: data.totalResults === 0,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
 
     return {
-      totalSearches,
-      zeroResults,
-      zeroResultRate: totalSearches > 0 ? zeroResults / totalSearches : 0,
-      avgResponseTime: Math.round(avgResponseTime),
-      topQueries,
-      topZeroResults,
-      bySubagent,
+      queries: sorted,
+      totalSearches: logs.length,
+      uniqueQueries: Object.keys(queryCounts).length,
+      period: {
+        since: new Date(since).toISOString(),
+        until: new Date().toISOString(),
+      },
     };
   },
 });
 
-/**
- * Get recent searches
- */
-export const getRecent = query({
+// Get searches with no results (API gaps)
+export const getZeroResultQueries = query({
   args: {
-    token: v.string(),
     limit: v.optional(v.number()),
+    since: v.optional(v.number()),
   },
-  handler: async (ctx, { token, limit = 50 }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+  handler: async (ctx, args) => {
+    const limit = args.limit || 20;
+    const since = args.since || Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-    if (!session) return [];
-
-    return await ctx.db
+    const logs = await ctx.db
       .query("searchLogs")
-      .withIndex("by_workspaceId_timestamp", (q) =>
-        q.eq("workspaceId", session.workspaceId)
+      .withIndex("by_createdAt")
+      .filter((q) => 
+        q.and(
+          q.gte(q.field("createdAt"), since),
+          q.eq(q.field("resultsCount"), 0)
+        )
       )
-      .order("desc")
-      .take(limit);
+      .collect();
+
+    // Aggregate
+    const queryCounts: Record<string, number> = {};
+    for (const log of logs) {
+      const q = log.query.toLowerCase().trim();
+      if (!q) continue;
+      queryCounts[q] = (queryCounts[q] || 0) + 1;
+    }
+
+    const sorted = Object.entries(queryCounts)
+      .map(([query, count]) => ({ query, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+
+    return {
+      gaps: sorted,
+      totalZeroResults: logs.length,
+      message: "These queries returned no results - potential APIs to add",
+    };
   },
 });

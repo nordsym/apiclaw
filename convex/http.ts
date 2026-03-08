@@ -197,6 +197,10 @@ http.route({
     try {
       const body = await request.json();
       const query = (body.query || "").toLowerCase();
+      
+      // Get optional auth context
+      const sessionToken = request.headers.get("X-APIClaw-Session");
+      const userAgent = request.headers.get("User-Agent");
 
       const results = Object.entries(PROVIDERS)
         .filter(([id, provider]) => {
@@ -212,6 +216,16 @@ http.route({
           providerId: id,
           ...provider,
         }));
+
+      // Log the search (fire and forget)
+      if (query) {
+        ctx.runMutation(internal.searchLogs.logSearch, {
+          query: body.query || "", // Original query (not lowercased)
+          resultsCount: results.length,
+          sessionToken: sessionToken || undefined,
+          userAgent: userAgent || undefined,
+        }).catch(() => {}); // Ignore errors, don't block response
+      }
 
       return jsonResponse({ providers: results, total: results.length });
     } catch (e) {
