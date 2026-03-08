@@ -1,0 +1,295 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "APIClaw API",
+    "description": "The API layer for AI agents. Discover and execute 22,000+ APIs. Search for APIs by describing what you need, get structured documentation, and execute calls through our proxy.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "NordSym AB",
+      "email": "gustav@nordsym.com",
+      "url": "https://nordsym.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://brilliant-puffin-712.convex.site",
+      "description": "APIClaw Production API"
+    }
+  ],
+  "paths": {
+    "/api/discover": {
+      "post": {
+        "operationId": "discoverAPIs",
+        "summary": "Search for APIs",
+        "description": "Search the APIClaw catalog for APIs matching your needs. Describe what you want to do (e.g., 'send SMS', 'generate images', 'transcribe audio') and get matching providers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Natural language search query. Describe what you want to do.",
+                    "example": "send SMS to Europe"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of matching API providers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "providers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "providerId": { "type": "string" },
+                          "name": { "type": "string" },
+                          "description": { "type": "string" },
+                          "category": { "type": "string" },
+                          "pricing": { "type": "string" },
+                          "regions": { "type": "array", "items": { "type": "string" } },
+                          "tags": { "type": "array", "items": { "type": "string" } }
+                        }
+                      }
+                    },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/details": {
+      "post": {
+        "operationId": "getAPIDetails",
+        "summary": "Get API provider details",
+        "description": "Get detailed information about a specific API provider, including documentation and usage examples.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["providerId"],
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "description": "The provider ID from the discover endpoint",
+                    "example": "openrouter"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "providerId": { "type": "string" },
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "category": { "type": "string" },
+                    "pricing": { "type": "string" },
+                    "credentials": { "type": "object" },
+                    "documentation": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/openrouter": {
+      "post": {
+        "operationId": "proxyOpenRouter",
+        "summary": "Call OpenRouter (LLM API)",
+        "description": "Execute LLM completions via OpenRouter. Access GPT-4, Claude, Llama, and 100+ models through a single endpoint.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["model", "messages"],
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "example": "anthropic/claude-3-haiku"
+                  },
+                  "messages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": { "type": "string", "enum": ["system", "user", "assistant"] },
+                        "content": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "LLM completion response"
+          }
+        }
+      }
+    },
+    "/proxy/46elks": {
+      "post": {
+        "operationId": "proxySMS46Elks",
+        "summary": "Send SMS via 46elks",
+        "description": "Send SMS messages to European/Nordic numbers. GDPR compliant.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["to", "message"],
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "description": "Phone number in E.164 format",
+                    "example": "+46701234567"
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "SMS message content"
+                  },
+                  "from": {
+                    "type": "string",
+                    "description": "Sender name or number",
+                    "example": "NordSym"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SMS sent successfully"
+          }
+        }
+      }
+    },
+    "/proxy/resend": {
+      "post": {
+        "operationId": "proxyEmail",
+        "summary": "Send email via Resend",
+        "description": "Send transactional emails via Resend API.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["to", "subject"],
+                "properties": {
+                  "to": { "type": "string" },
+                  "subject": { "type": "string" },
+                  "html": { "type": "string" },
+                  "text": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully"
+          }
+        }
+      }
+    },
+    "/proxy/brave_search": {
+      "post": {
+        "operationId": "proxyWebSearch",
+        "summary": "Web search via Brave",
+        "description": "Privacy-focused web search. Get search results without tracking.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "description": "Number of results",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results"
+          }
+        }
+      }
+    },
+    "/proxy/elevenlabs": {
+      "post": {
+        "operationId": "proxyTTS",
+        "summary": "Text-to-speech via ElevenLabs",
+        "description": "Convert text to high-quality speech audio.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text to convert to speech"
+                  },
+                  "voice_id": {
+                    "type": "string",
+                    "description": "Voice ID to use"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Audio data"
+          }
+        }
+      }
+    }
+  }
+}
