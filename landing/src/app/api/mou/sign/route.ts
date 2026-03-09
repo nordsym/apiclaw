@@ -18,6 +18,7 @@ const partnerConfig: Record<string, PartnerConfig> = {
   test3: { name: "Test Partner 3", email: "gustav@nordsym.com", type: "integration" },
   test4: { name: "Test Partner 4", email: "gustav@nordsym.com", type: "integration" },
   test5: { name: "Test5 Gmail", email: "gustav@nordsym.com", type: "integration" },
+  test6: { name: "Test6 Final", email: "gustav@nordsym.com", type: "integration" },
 };
 
 function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle: string, signatureDataUrl: string, signedDate: string): string {
@@ -124,14 +125,62 @@ function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle
 </html>`;
 }
 
+function generateEmailBody(partner: PartnerConfig, signerName: string, signerTitle: string, signedDate: string): string {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin: 0; padding: 40px; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+  <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <div style="background: #dc2626; color: white; padding: 24px; text-align: center;">
+      <div style="font-size: 36px;">🦞</div>
+      <h1 style="margin: 8px 0 0; font-size: 20px;">APIClaw x ${partner.name}</h1>
+    </div>
+    <div style="padding: 32px;">
+      <p style="color: #166534; background: #f0fdf4; padding: 12px 16px; border-radius: 8px; margin: 0 0 24px;">
+        ✓ MOU has been signed successfully
+      </p>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0; color: #737373;">Signed by</td>
+          <td style="padding: 8px 0; font-weight: 600;">${signerName}, ${signerTitle}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #737373;">Date</td>
+          <td style="padding: 8px 0; font-weight: 600;">${signedDate}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #737373;">Document</td>
+          <td style="padding: 8px 0; font-weight: 600;">Attached as HTML file</td>
+        </tr>
+      </table>
+    </div>
+    <div style="padding: 16px 32px; background: #fafafa; border-top: 1px solid #e5e5e5; text-align: center;">
+      <p style="margin: 0; font-size: 12px; color: #737373;">APIClaw - The API Layer for AI Agents</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 async function sendEmailWithAttachment(
   to: string,
   subject: string,
-  htmlBody: string,
+  partner: PartnerConfig,
+  signerName: string,
+  signerTitle: string,
+  signedDate: string,
   attachmentHtml: string,
   filename: string
 ): Promise<boolean> {
   try {
+    // Use TextEncoder for proper UTF-8 base64 encoding
+    const encoder = new TextEncoder();
+    const uint8Array = encoder.encode(attachmentHtml);
+    let binary = '';
+    uint8Array.forEach(byte => binary += String.fromCharCode(byte));
+    const base64Data = btoa(binary);
+
+    const emailBody = generateEmailBody(partner, signerName, signerTitle, signedDate);
+
     const response = await fetch("https://nordsym.app.n8n.cloud/webhook/symbot-gmail", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -139,11 +188,11 @@ async function sendEmailWithAttachment(
         action: "send",
         to,
         subject,
-        message: htmlBody,
+        message: emailBody,
         attachments: [
           {
-            filename: filename.replace('.pdf', '.html'),
-            data: btoa(unescape(encodeURIComponent(attachmentHtml))),
+            filename: filename,
+            data: base64Data,
           },
         ],
       }),
@@ -251,17 +300,11 @@ export async function POST(request: NextRequest) {
     
     const filename = `APIClaw_MOU_${partner.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
     const emailSubject = `Signed MOU: APIClaw x ${partner.name}`;
-    const emailBody = `
-      <p>The MOU between APIClaw and ${partner.name} has been signed.</p>
-      <p><strong>Signed by:</strong> ${signerName}, ${signerTitle}</p>
-      <p><strong>Date:</strong> ${signedDate}</p>
-      <p>The signed document is attached.</p>
-    `;
 
     // Send to both parties
     await Promise.all([
-      sendEmailWithAttachment("gustav@nordsym.com", emailSubject, emailBody, mouHtml, filename),
-      sendEmailWithAttachment(partner.email, emailSubject, emailBody, mouHtml, filename),
+      sendEmailWithAttachment("gustav@nordsym.com", emailSubject, partner, signerName, signerTitle, signedDate, mouHtml, filename),
+      sendEmailWithAttachment(partner.email, emailSubject, partner, signerName, signerTitle, signedDate, mouHtml, filename),
     ]);
 
     return NextResponse.json({ success: true });
