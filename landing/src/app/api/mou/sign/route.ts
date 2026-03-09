@@ -133,7 +133,7 @@ async function sendEmailWithAttachment(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "send",
+        action: "smtp",
         to,
         subject,
         message: htmlBody,
