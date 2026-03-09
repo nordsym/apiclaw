@@ -72,3 +72,20 @@ export const list = query({
     return await ctx.db.query("mouDocuments").collect();
   },
 });
+
+// Delete MOU (admin)
+export const remove = mutation({
+  args: { partnerId: v.string() },
+  handler: async (ctx, args) => {
+    const mou = await ctx.db
+      .query("mouDocuments")
+      .withIndex("by_partnerId", (q) => q.eq("partnerId", args.partnerId))
+      .first();
+
+    if (mou) {
+      await ctx.db.delete(mou._id);
+      return { success: true, deleted: args.partnerId };
+    }
+    return { success: false, message: "MOU not found" };
+  },
+});

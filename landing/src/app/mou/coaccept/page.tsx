@@ -116,7 +116,7 @@ export default function CoAcceptMOU() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 py-8 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="text-5xl mb-4">🦞</div>
+          <div className="text-3xl font-bold text-red-600 mb-4">APIClaw</div>
           <h1 className="text-2xl font-bold text-gray-900">APIClaw × CoAccept</h1>
           <p className="text-gray-600 mt-1">Integration Partnership</p>
           <div className="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
@@ -136,7 +136,7 @@ export default function CoAcceptMOU() {
               </h2>
               <div className="space-y-3 text-gray-600">
                 <p><strong className="text-gray-900">APIClaw / NordSym AB</strong> (org.nr 559535-5768), represented by Gustav Hemmingsson, CEO</p>
-                <p><strong className="text-gray-900">CoAccept</strong>, represented by Gustav Frändfors and Alexander Nystedt</p>
+                <p><strong className="text-gray-900">CoAccept</strong>, represented by Gustav Frändfors</p>
               </div>
             </div>
 
@@ -229,15 +229,15 @@ export default function CoAcceptMOU() {
               <h2 className="text-lg font-semibold text-red-600 border-b-2 border-gray-100 pb-2 mb-4">
                 7. Commercial Terms
               </h2>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-gray-700">
-                <p className="font-medium text-amber-800 mb-2">To Be Determined</p>
-                <p className="text-sm">Specific pricing and revenue sharing will be agreed upon separately based on:</p>
-                <ul className="list-disc pl-6 mt-2 text-sm space-y-1">
-                  <li>Volume expectations and growth projections</li>
-                  <li>Support and maintenance responsibilities</li>
-                  <li>Co-marketing opportunities</li>
+              <div className="space-y-3 text-gray-600">
+                <p>Based on previous discussions:</p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li><strong className="text-gray-900">Pricing Model:</strong> Flat fee per invoice (not percentage of invoice amount)</li>
+                  <li><strong className="text-gray-900">Partner Pricing:</strong> Max 6 kr per invoice for CoAccept customers</li>
+                  <li><strong className="text-gray-900">APIClaw Margin:</strong> 20% of distribution price</li>
+                  <li><strong className="text-gray-900">Support:</strong> CoAccept owns customer support (your tool, our rails)</li>
                 </ul>
-                <p className="text-sm mt-2 italic">Previous discussions have indicated flat-fee pricing per invoice. Final terms to be documented in a separate agreement.</p>
+                <p className="text-sm mt-2 italic">Final commercial terms to be documented in a separate agreement after pilot validation.</p>
               </div>
             </div>
 
@@ -365,7 +365,7 @@ export default function CoAcceptMOU() {
                         type="text"
                         value={signerName}
                         onChange={(e) => setSignerName(e.target.value)}
-                        placeholder="Gustav Frändfors / Alexander Nystedt"
+                        placeholder="Gustav Frändfors"
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-500"
                       />
                     </div>
@@ -375,7 +375,7 @@ export default function CoAcceptMOU() {
                         type="text"
                         value={signerTitle}
                         onChange={(e) => setSignerTitle(e.target.value)}
-                        placeholder="CEO / CTO, CoAccept"
+                        placeholder="CEO, CoAccept"
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-red-500"
                       />
                     </div>
