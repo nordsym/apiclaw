@@ -16,6 +16,7 @@ const partnerConfig: Record<string, PartnerConfig> = {
   test: { name: "Test Partner", email: "gustav@nordsym.com", type: "integration" },
   test2: { name: "Test Partner 2", email: "gustav@nordsym.com", type: "integration" },
   test3: { name: "Test Partner 3", email: "gustav@nordsym.com", type: "integration" },
+  test4: { name: "Test Partner 4", email: "gustav@nordsym.com", type: "integration" },
 };
 
 function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle: string, signatureDataUrl: string, signedDate: string): string {
@@ -134,7 +135,7 @@ async function sendEmailWithAttachment(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "smtp",
+        action: "send",
         to,
         subject,
         message: htmlBody,
