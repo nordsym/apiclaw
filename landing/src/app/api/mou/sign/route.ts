@@ -14,6 +14,7 @@ const partnerConfig: Record<string, PartnerConfig> = {
   cqtinvest: { name: "CQT Invest", email: "molle@cqtinvest.com", type: "advisory" },
   coaccept: { name: "CoAccept", email: "gustav@coaccept.com", type: "integration" },
   test: { name: "Test Partner", email: "gustav@nordsym.com", type: "integration" },
+  test2: { name: "Test Partner 2", email: "gustav@nordsym.com", type: "integration" },
 };
 
 function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle: string, signatureDataUrl: string, signedDate: string): string {
