@@ -120,7 +120,7 @@ export default function CoAcceptMOU() {
           <h1 className="text-2xl font-bold text-gray-900">APIClaw × CoAccept</h1>
           <p className="text-gray-600 mt-1">Integration Partnership</p>
           <div className="h-1 w-20 bg-red-600 mx-auto mt-4 rounded-full"></div>
-          <p className="mt-4 text-sm text-gray-500">Memorandum of Understanding • Draft</p>
+          <p className="mt-4 text-sm text-gray-500">Memorandum of Understanding</p>
         </div>
       </header>
 
