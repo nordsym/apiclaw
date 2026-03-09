@@ -139,7 +139,7 @@ async function sendEmailWithAttachment(
         attachments: [
           {
             filename: filename.replace('.pdf', '.html'),
-            data: Buffer.from(attachmentHtml).toString("base64"),
+            data: btoa(unescape(encodeURIComponent(attachmentHtml))),
           },
         ],
       }),
