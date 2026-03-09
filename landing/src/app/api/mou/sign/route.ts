@@ -13,12 +13,6 @@ const partnerConfig: Record<string, PartnerConfig> = {
   apilayer: { name: "APILayer", email: "pratham.kumar@apilayer.com", type: "integration" },
   cqtinvest: { name: "CQT Invest", email: "molle@cqtinvest.com", type: "advisory" },
   coaccept: { name: "CoAccept", email: "gustav@coaccept.com", type: "integration" },
-  test: { name: "Test Partner", email: "gustav@nordsym.com", type: "integration" },
-  test2: { name: "Test Partner 2", email: "gustav@nordsym.com", type: "integration" },
-  test3: { name: "Test Partner 3", email: "gustav@nordsym.com", type: "integration" },
-  test4: { name: "Test Partner 4", email: "gustav@nordsym.com", type: "integration" },
-  test5: { name: "Test5 Gmail", email: "gustav@nordsym.com", type: "integration" },
-  test6: { name: "Test6 Final", email: "gustav@nordsym.com", type: "integration" },
 };
 
 function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle: string, signatureDataUrl: string, signedDate: string): string {
@@ -29,7 +23,7 @@ function generateMouHtml(partner: PartnerConfig, signerName: string, signerTitle
 <body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 700px; margin: 0 auto; padding: 40px; background: #fafafa;">
   <div style="background: white; border-radius: 16px; padding: 40px; border: 1px solid #e5e5e5;">
     <div style="text-align: center; margin-bottom: 30px;">
-      <div style="font-size: 48px;">🦞</div>
+      <div style="font-size: 36px; font-weight: bold; color: #dc2626;">APIClaw</div>
       <h1 style="margin: 10px 0; color: #1a1a1a;">APIClaw x ${partner.name}</h1>
       <p style="color: #dc2626; font-weight: 600;">SIGNED MEMORANDUM OF UNDERSTANDING</p>
       <p style="color: #737373;">${isAdvisory ? 'Advisory Partnership - ' : ''}Signed on ${signedDate}</p>
@@ -131,7 +125,7 @@ function generateEmailBody(partner: PartnerConfig, signerName: string, signerTit
 <body style="margin: 0; padding: 40px; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
   <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
     <div style="background: #dc2626; color: white; padding: 24px; text-align: center;">
-      <div style="font-size: 36px;">🦞</div>
+      <div style="font-size: 28px; font-weight: bold;">APIClaw</div>
       <h1 style="margin: 8px 0 0; font-size: 20px;">APIClaw x ${partner.name}</h1>
     </div>
     <div style="padding: 32px;">
