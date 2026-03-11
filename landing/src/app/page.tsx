@@ -596,7 +596,6 @@ Docs: https://apiclaw.nordsym.com/docs`;
                 </div>
               ))}
             </div>
-            <p className="text-sm text-text-muted mt-4 text-center">New providers added weekly</p>
           </div>
         </div>
       )}
