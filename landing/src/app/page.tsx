@@ -1258,8 +1258,8 @@ Docs: https://apiclaw.nordsym.com/docs`;
         </div>
       </footer>
 
-      {/* Telegram Chat Bubble */}
-      <a
+      {/* Telegram Chat Bubble - TEMPORARILY DISABLED */}
+      {/* <a
         href="https://t.me/Symbot_nordsym_bot?start=apiclaw"
         target="_blank"
         rel="noopener noreferrer"
@@ -1272,7 +1272,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
         <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs whitespace-nowrap shadow-lg">
           <span className="text-text-primary font-medium">Talk to the Clawdbot building this</span>
         </div>
-      </a>
+      </a> */}
 
       {/* Direct Call Providers Modal */}
       {showProvidersModal && (
