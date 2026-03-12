@@ -2,8 +2,8 @@
 import Stripe from 'stripe';
 import { config } from 'dotenv';
 
-// Load environment
-config({ path: '.env.local' });
+// Load environment quietly to avoid polluting MCP stdio output.
+config({ path: '.env.local', quiet: true });
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
