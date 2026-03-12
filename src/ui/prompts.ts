@@ -249,7 +249,7 @@ export function showSuccess(configuredClients: string[]): void {
   ], 2));
   
   console.log(colors.secondary('\nNeed help?'));
-  console.log(`  ${colors.link('https://docs.apiclaw.com/setup')}\n`);
+  console.log(`  ${colors.link('https://apiclaw.nordsym.com/docs/setup')}\n`);
 }
 
 /**

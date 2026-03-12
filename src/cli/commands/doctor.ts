@@ -171,44 +171,57 @@ function checkClient(client: MCPClient, serverName = 'apiclaw'): CheckResult {
  */
 async function checkConnectivity(): Promise<CheckResult> {
   const apiUrl = getApiUrl();
-  const testUrl = `${apiUrl}/health`;
-  
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(testUrl, {
-      method: 'GET',
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeout);
-    
-    if (response.ok) {
-      return {
-        category: 'Connectivity',
-        name: 'API Server',
-        status: 'pass',
-        message: `${apiUrl} reachable`,
-      };
+  const convexUrl = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
+  const candidates = [
+    `${apiUrl}/health`,
+    'https://apiclaw.nordsym.com',
+    `${convexUrl.replace('.cloud', '.site')}/workspace/poll`,
+  ];
+  const failures: string[] = [];
+
+  for (const testUrl of candidates) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(testUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      // Any HTTP response proves network + host reachability.
+      if (response.ok) {
+        return {
+          category: 'Connectivity',
+          name: 'API Server',
+          status: 'pass',
+          message: `${testUrl} reachable`,
+        };
+      }
+
+      if (testUrl.includes('/workspace/poll') && response.status === 400) {
+        return {
+          category: 'Connectivity',
+          name: 'API Server',
+          status: 'pass',
+          message: `${testUrl} reachable (auth endpoint responding)`,
+        };
+      }
+
+      failures.push(`${testUrl} -> HTTP ${response.status}`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown error';
+      failures.push(`${testUrl} -> ${reason}`);
     }
-    
-    return {
-      category: 'Connectivity',
-      name: 'API Server',
-      status: 'warn',
-      message: `${apiUrl} returned ${response.status}`,
-    };
-  } catch (error) {
-    // For now, skip connectivity check if fetch fails (might be offline mode)
-    return {
-      category: 'Connectivity',
-      name: 'API Server',
-      status: 'skip',
-      message: 'Could not reach API (offline?)',
-      details: `URL: ${testUrl}`,
-    };
   }
+
+  return {
+    category: 'Connectivity',
+    name: 'API Server',
+    status: 'skip',
+    message: 'Could not reach API (offline or DNS/TLS issue?)',
+    details: failures.join(' | '),
+  };
 }
 
 /**

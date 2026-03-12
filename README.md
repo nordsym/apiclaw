@@ -316,7 +316,7 @@ Returns the exact request that *would* be sent, with mock response data.
 ## Links
 
 - **Platform:** [apiclaw.com](https://apiclaw.com)
-- **Docs:** [docs.apiclaw.com](https://docs.apiclaw.com)
+- **Docs:** [apiclaw.nordsym.com/docs](https://apiclaw.nordsym.com/docs)
 - **GitHub:** [github.com/nordsym/apiclaw](https://github.com/nordsym/apiclaw)
 - **npm:** [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)
 

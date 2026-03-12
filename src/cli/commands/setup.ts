@@ -263,14 +263,14 @@ export async function setupCommand(options: SetupOptions): Promise<void> {
       console.log('Next steps:');
       console.log('  1. Restart your AI coding assistant');
       console.log('  2. Ask your agent: "List available APIs"\n');
-      console.log('Need help? https://docs.apiclaw.com/setup\n');
+      console.log('Need help? https://apiclaw.nordsym.com/docs/setup\n');
     } else if (skipped === results.length) {
       console.log('\n✅ APIClaw already configured in all clients.\n');
       console.log('Use --force to reconfigure.\n');
     }
   } else {
     console.log(`\n⚠️  Setup completed with ${failed} error(s).\n`);
-    console.log('For troubleshooting, visit: https://docs.apiclaw.com/setup/troubleshooting\n');
+    console.log('For troubleshooting, visit: https://apiclaw.nordsym.com/docs/setup/troubleshooting\n');
     process.exit(1);
   }
 }

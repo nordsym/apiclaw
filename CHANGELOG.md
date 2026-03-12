@@ -4,6 +4,14 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+### Fixed
+- `doctor` connectivity check now uses resilient fallbacks:
+  - `${APICLAW_API_URL}/health`
+  - `https://apiclaw.nordsym.com`
+  - Convex auth endpoint (`/workspace/poll`)
+- Convex auth endpoint `HTTP 400` is now treated as a valid reachability signal in `doctor`.
+- Setup/network guidance now points to live docs and domain paths on `apiclaw.nordsym.com`.
+
 ---
 
 ## [0.4.0] - 2026-03

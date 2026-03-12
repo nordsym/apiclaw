@@ -80,7 +80,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'npx @nordsym/apiclaw setup --client cursor',
       'npx @nordsym/apiclaw setup --config /path/to/config.json',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/config-not-found',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/config-not-found',
   },
   
   [ErrorCode.PERMISSION_DENIED]: {
@@ -95,7 +95,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'sudo npx @nordsym/apiclaw setup',
       'chmod 644 <config-path>',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/permissions',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/permissions',
   },
   
   [ErrorCode.INVALID_JSON]: {
@@ -110,7 +110,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'npx @nordsym/apiclaw restore --list',
       'npx @nordsym/apiclaw restore',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/invalid-json',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/invalid-json',
   },
   
   [ErrorCode.WRITE_FAILED]: {
@@ -121,7 +121,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Ensure the config directory exists',
       'Verify write permissions',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/write-failed',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/write-failed',
   },
   
   [ErrorCode.BACKUP_FAILED]: {
@@ -132,7 +132,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Verify write permissions in config directory',
       'Use --no-backup to skip backup (not recommended)',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/backup-failed',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/backup-failed',
   },
   
   [ErrorCode.ALREADY_CONFIGURED]: {
@@ -146,7 +146,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'npx @nordsym/apiclaw setup --force',
       'npx @nordsym/apiclaw doctor',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/already-configured',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/already-configured',
   },
   
   [ErrorCode.INVALID_CONFIG]: {
@@ -156,7 +156,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Ensure the config follows the MCP specification',
       'Check for required fields like "mcpServers"',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/invalid-config',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/invalid-config',
   },
   
   [ErrorCode.MERGE_CONFLICT]: {
@@ -167,7 +167,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Use --force to overwrite',
       'Create a backup and try again',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/merge-conflict',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/merge-conflict',
   },
   
   [ErrorCode.CLIENT_NOT_FOUND]: {
@@ -182,7 +182,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'npx @nordsym/apiclaw setup --client claude-desktop',
       'npx @nordsym/apiclaw doctor',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/client-not-found',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/client-not-found',
   },
   
   [ErrorCode.UNSUPPORTED_CLIENT]: {
@@ -193,7 +193,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Use --config to manually specify the config path',
       'Request support at github.com/nordsym/apiclaw',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/supported-clients',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/supported-clients',
   },
   
   [ErrorCode.NETWORK_ERROR]: {
@@ -202,13 +202,13 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
     suggestions: [
       'Check your internet connection',
       'Setup works offline - verify connectivity later',
-      'Check if api.apiclaw.com is reachable',
+      'Check if APIClaw is reachable',
     ],
     commands: [
-      'curl -I https://api.apiclaw.com/health',
+      'curl -I https://apiclaw.nordsym.com',
       'npx @nordsym/apiclaw doctor',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/network-error',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/network-error',
   },
   
   [ErrorCode.AUTH_FAILED]: {
@@ -219,7 +219,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Verify your API key is valid',
       'Setup works without auth - configure credentials later',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/auth-failed',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/auth-failed',
   },
   
   [ErrorCode.UNSUPPORTED_OS]: {
@@ -229,7 +229,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'Supported: macOS, Windows 10/11, Linux',
       'Manual setup instructions available',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/manual',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/manual',
   },
   
   [ErrorCode.NODE_VERSION]: {
@@ -243,7 +243,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
       'nvm install 18',
       'nvm use 18',
     ],
-    helpUrl: 'https://docs.apiclaw.com/setup/node-version',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/setup/node-version',
   },
   
   [ErrorCode.UNKNOWN]: {
@@ -257,7 +257,7 @@ const errorMeta: Record<ErrorCode, ErrorMeta> = {
     commands: [
       'npx @nordsym/apiclaw setup --verbose',
     ],
-    helpUrl: 'https://docs.apiclaw.com/support',
+    helpUrl: 'https://apiclaw.nordsym.com/docs/support',
   },
 };
 
