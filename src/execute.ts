@@ -1487,12 +1487,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
   },
 
   // Together AI - Open-source model inference
-  together_ai: {
+  together: {
     chat: async (params, creds) => {
       const { messages, model = 'meta-llama/Llama-3-8b-chat-hf', max_tokens = 1024 } = params;
 
       if (!messages || !Array.isArray(messages)) {
-        return createErrorResult('together_ai', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
+        return createErrorResult('together', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
       }
 
       const response = await fetchWithRetry('https://api.together.xyz/v1/chat/completions', {
@@ -1502,13 +1502,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ model, messages, max_tokens }),
-      }, { provider: 'together_ai', action: 'chat' });
+      }, { provider: 'together', action: 'chat' });
 
       const data = await response.json() as Record<string, unknown>;
 
       if (!response.ok) {
         const err = data.error as Record<string, unknown> | undefined;
-        return createErrorResult('together_ai', 'chat', (err?.message as string) || 'Chat failed', statusToErrorCode(response.status));
+        return createErrorResult('together', 'chat', (err?.message as string) || 'Chat failed', statusToErrorCode(response.status));
       }
 
       const choices = data.choices as Array<Record<string, unknown>> | undefined;
@@ -1516,7 +1516,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
 
       return {
         success: true,
-        provider: 'together_ai',
+        provider: 'together',
         action: 'chat',
         data: {
           content: message?.content,
@@ -1528,12 +1528,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
   },
 
   // Stability AI - Image generation
-  stability_ai: {
+  stability: {
     generate_image: async (params, creds) => {
       const { prompt, model = 'stable-diffusion-xl-1024-v1-0', width = 1024, height = 1024, steps = 30 } = params;
 
       if (!prompt) {
-        return createErrorResult('stability_ai', 'generate_image', 'Missing required param: prompt', ERROR_CODES.INVALID_PARAMS);
+        return createErrorResult('stability', 'generate_image', 'Missing required param: prompt', ERROR_CODES.INVALID_PARAMS);
       }
 
       const response = await fetchWithRetry(`https://api.stability.ai/v1/generation/${model}/text-to-image`, {
@@ -1550,12 +1550,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           steps,
           samples: 1,
         }),
-      }, { provider: 'stability_ai', action: 'generate_image' });
+      }, { provider: 'stability', action: 'generate_image' });
 
       const data = await response.json() as Record<string, unknown>;
 
       if (!response.ok) {
-        return createErrorResult('stability_ai', 'generate_image', (data.message as string) || 'Image generation failed', statusToErrorCode(response.status));
+        return createErrorResult('stability', 'generate_image', (data.message as string) || 'Image generation failed', statusToErrorCode(response.status));
       }
 
       const artifacts = data.artifacts as Array<Record<string, unknown>> | undefined;
@@ -1563,7 +1563,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
 
       return {
         success: true,
-        provider: 'stability_ai',
+        provider: 'stability',
         action: 'generate_image',
         data: {
           image_base64: image?.base64,
