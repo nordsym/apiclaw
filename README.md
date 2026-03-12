@@ -166,6 +166,22 @@ npx @nordsym/apiclaw mcp-install --client claude-code
 npx @nordsym/apiclaw mcp-install --dry-run
 ```
 
+### Codex (OpenAI) Setup
+
+Use Codex's native MCP manager:
+
+```bash
+# Recommended for local APIClaw development (strict stdio-safe)
+codex mcp add apiclaw -- node /absolute/path/to/apiclaw/dist/index.js
+
+# Example
+codex mcp add apiclaw -- node /Users/gustavhemmingsson/Projects/apiclaw/dist/index.js
+
+# Verify
+codex mcp get apiclaw
+codex mcp list
+```
+
 ### Global Install
 
 ```bash
@@ -249,6 +265,7 @@ npx @nordsym/apiclaw uninstall --client cursor
 | **Windsurf** | ✅ | ✅ | ✅ |
 | **Cline** | ✅ | ✅ | ✅ |
 | **Continue** | ✅ | ✅ | ✅ |
+| **Codex (OpenAI)** | ✅ | ✅ | ✅ |
 
 <details>
 <summary>Config Locations</summary>
@@ -270,6 +287,9 @@ npx @nordsym/apiclaw uninstall --client cursor
 
 **Continue**
 - All: `~/.continue/config.json`
+
+**Codex (OpenAI)**
+- All: `~/.codex/config.toml` (managed via `codex mcp add/get/list/remove`)
 
 </details>
 
