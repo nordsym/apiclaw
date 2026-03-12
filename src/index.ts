@@ -1441,23 +1441,23 @@ Docs: https://apiclaw.nordsym.com
         
         try {
           // Check if workspace already exists
-          const existing = await convex.query("workspaces:getByEmail" as any, { email }) as { _id: string; status: string; tier: string; usageCount: number; usageLimit: number } | null;
-          
+          const existing = await convex.query("workspaces:getByEmail" as any, { email }) as { id: string; status: string; tier: string; usageCount: number; usageLimit: number } | null;
+
           if (existing && existing.status === 'active') {
             // Workspace exists and is active - create session directly
             const fingerprint = getMachineFingerprint();
             const sessionResult = await convex.mutation("workspaces:createAgentSession" as any, {
-              workspaceId: existing._id,
+              workspaceId: existing.id,
               fingerprint,
             }) as { success: boolean; sessionToken?: string };
-            
+
             if (sessionResult.success) {
-              writeSession(sessionResult.sessionToken!, existing._id, email);
+              writeSession(sessionResult.sessionToken!, existing.id, email);
               
               // Update global context
               workspaceContext = {
                 sessionToken: sessionResult.sessionToken!,
-                workspaceId: existing._id,
+                workspaceId: existing.id,
                 email,
                 tier: existing.tier,
                 usageRemaining: existing.usageLimit - existing.usageCount,
