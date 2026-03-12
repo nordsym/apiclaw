@@ -1204,6 +1204,446 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       }
     },
   },
+
+  // Groq - Ultra-fast LLM inference
+  groq: {
+    chat: async (params, creds) => {
+      const { messages, model = 'llama3-8b-8192', max_tokens = 1024 } = params;
+
+      if (!messages || !Array.isArray(messages)) {
+        return createErrorResult('groq', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, max_tokens }),
+      }, { provider: 'groq', action: 'chat' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        const err = data.error as Record<string, unknown> | undefined;
+        return createErrorResult('groq', 'chat', (err?.message as string) || 'Chat failed', statusToErrorCode(response.status));
+      }
+
+      const choices = data.choices as Array<Record<string, unknown>> | undefined;
+      const message = choices?.[0]?.message as Record<string, unknown> | undefined;
+
+      return {
+        success: true,
+        provider: 'groq',
+        action: 'chat',
+        data: {
+          content: message?.content,
+          model: data.model,
+          usage: data.usage,
+        },
+      };
+    },
+  },
+
+  // Deepgram - Speech-to-text transcription
+  deepgram: {
+    transcribe: async (params, creds) => {
+      const { url, model = 'nova-2', language = 'en' } = params;
+
+      if (!url) {
+        return createErrorResult('deepgram', 'transcribe', 'Missing required param: url (audio file URL)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry(`https://api.deepgram.com/v1/listen?model=${model}&language=${language}&smart_format=true`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      }, { provider: 'deepgram', action: 'transcribe' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('deepgram', 'transcribe', (data.err_msg as string) || 'Transcription failed', statusToErrorCode(response.status));
+      }
+
+      const results = data.results as Record<string, unknown> | undefined;
+      const channels = results?.channels as Array<Record<string, unknown>> | undefined;
+      const alternatives = channels?.[0]?.alternatives as Array<Record<string, unknown>> | undefined;
+      const transcript = alternatives?.[0]?.transcript as string | undefined;
+
+      return {
+        success: true,
+        provider: 'deepgram',
+        action: 'transcribe',
+        data: {
+          transcript,
+          confidence: alternatives?.[0]?.confidence,
+          duration: (data.metadata as Record<string, unknown> | undefined)?.duration,
+        },
+      };
+    },
+  },
+
+  // Serper - Google Search API for AI
+  serper: {
+    search: async (params, creds) => {
+      const { query, num = 10, gl = 'us', hl = 'en' } = params;
+
+      if (!query) {
+        return createErrorResult('serper', 'search', 'Missing required param: query', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry('https://google.serper.dev/search', {
+        method: 'POST',
+        headers: {
+          'X-API-KEY': creds.api_key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ q: query, num, gl, hl }),
+      }, { provider: 'serper', action: 'search' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('serper', 'search', (data.message as string) || 'Search failed', statusToErrorCode(response.status));
+      }
+
+      const organic = (data.organic as Array<Record<string, unknown>>) || [];
+
+      return {
+        success: true,
+        provider: 'serper',
+        action: 'search',
+        data: {
+          query,
+          results: organic.map(r => ({
+            title: r.title,
+            url: r.link,
+            snippet: r.snippet,
+            position: r.position,
+          })),
+          total: organic.length,
+          answerBox: data.answerBox,
+          knowledgeGraph: data.knowledgeGraph,
+        },
+      };
+    },
+  },
+
+  // Mistral - Open-weight LLMs
+  mistral: {
+    chat: async (params, creds) => {
+      const { messages, model = 'mistral-small-latest', max_tokens = 1024 } = params;
+
+      if (!messages || !Array.isArray(messages)) {
+        return createErrorResult('mistral', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry('https://api.mistral.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, max_tokens }),
+      }, { provider: 'mistral', action: 'chat' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        const err = data.message as string | undefined;
+        return createErrorResult('mistral', 'chat', err || 'Chat failed', statusToErrorCode(response.status));
+      }
+
+      const choices = data.choices as Array<Record<string, unknown>> | undefined;
+      const message = choices?.[0]?.message as Record<string, unknown> | undefined;
+
+      return {
+        success: true,
+        provider: 'mistral',
+        action: 'chat',
+        data: {
+          content: message?.content,
+          model: data.model,
+          usage: data.usage,
+        },
+      };
+    },
+
+    embed: async (params, creds) => {
+      const { input, model = 'mistral-embed' } = params;
+
+      if (!input) {
+        return createErrorResult('mistral', 'embed', 'Missing required param: input (string or array)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const inputs = Array.isArray(input) ? input : [input];
+
+      const response = await fetchWithRetry('https://api.mistral.ai/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, input: inputs }),
+      }, { provider: 'mistral', action: 'embed' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('mistral', 'embed', (data.message as string) || 'Embedding failed', statusToErrorCode(response.status));
+      }
+
+      const embedData = data.data as Array<Record<string, unknown>> | undefined;
+
+      return {
+        success: true,
+        provider: 'mistral',
+        action: 'embed',
+        data: {
+          embeddings: embedData?.map(d => d.embedding),
+          model: data.model,
+          usage: data.usage,
+        },
+      };
+    },
+  },
+
+  // Cohere - Enterprise NLP and embeddings
+  cohere: {
+    chat: async (params, creds) => {
+      const { message, model = 'command-r', max_tokens = 1024, preamble } = params;
+
+      if (!message) {
+        return createErrorResult('cohere', 'chat', 'Missing required param: message', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const body: Record<string, unknown> = { model, message, max_tokens };
+      if (preamble) body.preamble = preamble;
+
+      const response = await fetchWithRetry('https://api.cohere.com/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      }, { provider: 'cohere', action: 'chat' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('cohere', 'chat', (data.message as string) || 'Chat failed', statusToErrorCode(response.status));
+      }
+
+      return {
+        success: true,
+        provider: 'cohere',
+        action: 'chat',
+        data: {
+          content: data.text,
+          generation_id: data.generation_id,
+          usage: data.meta,
+        },
+      };
+    },
+
+    embed: async (params, creds) => {
+      const { texts, model = 'embed-english-v3.0', input_type = 'search_document' } = params;
+
+      if (!texts || !Array.isArray(texts)) {
+        return createErrorResult('cohere', 'embed', 'Missing required param: texts (array of strings)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry('https://api.cohere.com/v1/embed', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, texts, input_type }),
+      }, { provider: 'cohere', action: 'embed' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('cohere', 'embed', (data.message as string) || 'Embedding failed', statusToErrorCode(response.status));
+      }
+
+      return {
+        success: true,
+        provider: 'cohere',
+        action: 'embed',
+        data: {
+          embeddings: data.embeddings,
+          model: data.model,
+        },
+      };
+    },
+  },
+
+  // Together AI - Open-source model inference
+  together_ai: {
+    chat: async (params, creds) => {
+      const { messages, model = 'meta-llama/Llama-3-8b-chat-hf', max_tokens = 1024 } = params;
+
+      if (!messages || !Array.isArray(messages)) {
+        return createErrorResult('together_ai', 'chat', 'Missing required param: messages (array)', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry('https://api.together.xyz/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, max_tokens }),
+      }, { provider: 'together_ai', action: 'chat' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        const err = data.error as Record<string, unknown> | undefined;
+        return createErrorResult('together_ai', 'chat', (err?.message as string) || 'Chat failed', statusToErrorCode(response.status));
+      }
+
+      const choices = data.choices as Array<Record<string, unknown>> | undefined;
+      const message = choices?.[0]?.message as Record<string, unknown> | undefined;
+
+      return {
+        success: true,
+        provider: 'together_ai',
+        action: 'chat',
+        data: {
+          content: message?.content,
+          model: data.model,
+          usage: data.usage,
+        },
+      };
+    },
+  },
+
+  // Stability AI - Image generation
+  stability_ai: {
+    generate_image: async (params, creds) => {
+      const { prompt, model = 'stable-diffusion-xl-1024-v1-0', width = 1024, height = 1024, steps = 30 } = params;
+
+      if (!prompt) {
+        return createErrorResult('stability_ai', 'generate_image', 'Missing required param: prompt', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      const response = await fetchWithRetry(`https://api.stability.ai/v1/generation/${model}/text-to-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${creds.api_key}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          text_prompts: [{ text: prompt, weight: 1 }],
+          width,
+          height,
+          steps,
+          samples: 1,
+        }),
+      }, { provider: 'stability_ai', action: 'generate_image' });
+
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        return createErrorResult('stability_ai', 'generate_image', (data.message as string) || 'Image generation failed', statusToErrorCode(response.status));
+      }
+
+      const artifacts = data.artifacts as Array<Record<string, unknown>> | undefined;
+      const image = artifacts?.[0];
+
+      return {
+        success: true,
+        provider: 'stability_ai',
+        action: 'generate_image',
+        data: {
+          image_base64: image?.base64,
+          finish_reason: image?.finishReason,
+          seed: image?.seed,
+        },
+      };
+    },
+  },
+
+  // AssemblyAI - Audio transcription and intelligence
+  assemblyai: {
+    transcribe: async (params, creds) => {
+      const { audio_url, language_code = 'en', speaker_labels = false, sentiment_analysis = false } = params;
+
+      if (!audio_url) {
+        return createErrorResult('assemblyai', 'transcribe', 'Missing required param: audio_url', ERROR_CODES.INVALID_PARAMS);
+      }
+
+      // Submit transcription job
+      const submitResponse = await fetchWithRetry('https://api.assemblyai.com/v2/transcript', {
+        method: 'POST',
+        headers: {
+          'Authorization': creds.api_key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ audio_url, language_code, speaker_labels, sentiment_analysis }),
+      }, { provider: 'assemblyai', action: 'transcribe' });
+
+      const submitData = await submitResponse.json() as Record<string, unknown>;
+
+      if (!submitResponse.ok) {
+        return createErrorResult('assemblyai', 'transcribe', (submitData.error as string) || 'Submit failed', statusToErrorCode(submitResponse.status));
+      }
+
+      const transcriptId = submitData.id as string;
+
+      // Poll until complete (max 120 seconds)
+      const startTime = Date.now();
+      while (Date.now() - startTime < 120000) {
+        await sleep(3000);
+
+        const pollResponse = await fetchWithRetry(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+          headers: { 'Authorization': creds.api_key },
+        }, { provider: 'assemblyai', action: 'transcribe_poll' });
+
+        const pollData = await pollResponse.json() as Record<string, unknown>;
+
+        if (pollData.status === 'completed') {
+          return {
+            success: true,
+            provider: 'assemblyai',
+            action: 'transcribe',
+            data: {
+              transcript: pollData.text,
+              words: pollData.words,
+              utterances: pollData.utterances,
+              sentiment_analysis_results: pollData.sentiment_analysis_results,
+              audio_duration: pollData.audio_duration,
+            },
+          };
+        }
+
+        if (pollData.status === 'error') {
+          return createErrorResult('assemblyai', 'transcribe', (pollData.error as string) || 'Transcription failed', ERROR_CODES.PROVIDER_ERROR);
+        }
+      }
+
+      return {
+        success: true,
+        provider: 'assemblyai',
+        action: 'transcribe',
+        data: {
+          status: 'processing',
+          transcript_id: transcriptId,
+          message: 'Transcription still processing. Use transcript_id to poll manually.',
+        },
+      };
+    },
+  },
 };
 
 // Get available actions for a provider (static handlers only)
