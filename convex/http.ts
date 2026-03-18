@@ -130,23 +130,31 @@ async function validateAndLogProxyCall(
       metadata: { action, subagentId },
     });
     
-    // If authenticated (workspace ID format), increment usage
-    if (identifier.startsWith("anon:")) {
-      // Anonymous user - track for rate limiting but don't increment workspace usage
-      return { valid: true, subagentId };
+    // If authenticated (workspace ID format), also log to apiLogs for dashboard
+    if (!identifier.startsWith("anon:")) {
+      try {
+        await ctx.runMutation(api.logs.createProxyLog, {
+          workspaceId: identifier,
+          provider,
+          action,
+          subagentId,
+        });
+        
+        // Increment workspace usage
+        await ctx.runMutation(api.workspaces.incrementUsage, {
+          workspaceId: identifier,
+        });
+        
+        return { valid: true, workspaceId: identifier, subagentId };
+      } catch (e) {
+        // Workspace doesn't exist or error - allow call anyway
+        console.warn("[Proxy] Could not log to workspace:", e);
+        return { valid: true, subagentId };
+      }
     }
     
-    // Try to increment workspace usage
-    try {
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: identifier,
-      });
-      return { valid: true, workspaceId: identifier, subagentId };
-    } catch (e) {
-      // Workspace doesn't exist or error - allow call anyway
-      console.warn("[Proxy] Could not increment workspace usage:", e);
-      return { valid: true, subagentId };
-    }
+    // Anonymous user - track for rate limiting but don't increment workspace usage
+    return { valid: true, subagentId };
   } catch (e: any) {
     console.error("[Proxy] Logging error:", e);
     // Always allow call even if logging fails
