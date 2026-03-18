@@ -760,7 +760,9 @@ export default defineSchema({
     partnerId: v.string(), // e.g., "apilayer"
     partnerName: v.string(),
     partnerEmail: v.string(),
-    documentHtml: v.string(),
+    partnerRepresentative: v.optional(v.string()),
+    documentHtml: v.optional(v.string()),
+    sections: v.optional(v.any()), // Alternative document format
     status: v.string(), // "pending" | "signed"
     signedAt: v.optional(v.number()),
     signatureDataUrl: v.optional(v.string()), // base64 signature image
