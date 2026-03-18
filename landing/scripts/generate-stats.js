@@ -93,9 +93,19 @@ try {
     !api.auth || api.auth === '' || api.auth.toLowerCase() === 'none'
   ).length;
   
+  // Direct Call providers: Groq, Deepgram, Mistral, Cohere, Together, Stability, 
+  // AssemblyAI, Serper, OpenAI, Anthropic, ElevenLabs, Replicate, Brave, Resend, 
+  // Twilio, 46elks, Stripe, SendGrid, GitHub
+  const directCallCount = 19;
+  
+  // npm downloads (static for now, can migrate to real-time when cashflow)
+  const npmDownloads = 4232;
+  
   const stats = {
     apiCount: registry.count,
     openApiCount: openApiCount,
+    directCallCount: directCallCount,
+    npmDownloads: npmDownloads,
     categoryCount: uniqueCategories.length,
     generatedAt: new Date().toISOString(),
     categoryBreakdown: categoryBreakdown
@@ -115,6 +125,8 @@ try {
   const fallback = {
     apiCount: 22392,
     openApiCount: 996,
+    directCallCount: 19,
+    npmDownloads: 4232,
     categoryCount: 14,
     generatedAt: new Date().toISOString(),
     categoryBreakdown: {}

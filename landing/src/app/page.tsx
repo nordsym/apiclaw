@@ -16,6 +16,8 @@ import { AITestimonials } from "@/components/AITestimonials";
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
+  { number: statsData.directCallCount?.toString() || "19", label: "Direct Call", live: false },
+  { number: (statsData.npmDownloads || 4232).toLocaleString(), label: "npm Installs", live: false },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
