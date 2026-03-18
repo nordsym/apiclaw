@@ -81,6 +81,7 @@
     "typescript": "^5.3.0"
   },
   "bin": {
-    "apiclaw": "./dist/bin.js"
+    "apiclaw": "./dist/bin.js",
+    "apiclaw-http": "./dist/bin-http.js"
   }
 }
