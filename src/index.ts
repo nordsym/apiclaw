@@ -865,7 +865,33 @@ Docs: https://apiclaw.nordsym.com
         const responseTimeMs = Date.now() - startTime;
         trackSearch(query, results.length, responseTimeMs);
 
-        // Log search to Convex for analytics
+        // Log search to Convex analytics (authenticated + anonymous)
+        const analyticsUserId = workspaceContext?.workspaceId || `anon:${getMachineFingerprint()}`;
+        const convexUrl = process.env.APICLAW_CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
+        if (convexUrl) {
+          fetch(`${convexUrl}/api/mutation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: 'analytics:log',
+              args: {
+                event: 'search_query',
+                provider: undefined,
+                query,
+                identifier: analyticsUserId,
+                metadata: {
+                  resultCount: results.length,
+                  matchedProviders: results.slice(0, 10).map(r => r.provider.id),
+                  responseTimeMs,
+                  category,
+                  authenticated: !!workspaceContext,
+                },
+              },
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
+
+        // Log search to searchLogs table (authenticated only - requires workspace)
         if (workspaceContext?.sessionToken) {
           const searchLogPayload = {
             path: 'searchLogs:log',
@@ -879,7 +905,7 @@ Docs: https://apiclaw.nordsym.com
             },
           };
           
-          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+          fetch(`${convexUrl}/api/mutation`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(searchLogPayload),
