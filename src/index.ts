@@ -33,6 +33,7 @@ import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
+import { PROXY_PROVIDERS } from './proxy.js';
 import { 
   requiresConfirmation,
   requiresConfirmationAsync, 
@@ -80,6 +81,111 @@ interface WorkspaceContext {
 }
 
 let workspaceContext: WorkspaceContext | null = null;
+// Anonymous rate limit tracking (in-memory, per machine fingerprint)
+interface AnonymousRateLimitState {
+  hourlyCount: number;
+  hourlyResetTime: number;
+  weeklyCount: number;
+  weeklyResetTime: number;
+}
+
+const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
+
+// Rate limit constants
+const ANONYMOUS_HOURLY_LIMIT = 5;
+const ANONYMOUS_WEEKLY_LIMIT = 10;
+const FREE_WEEKLY_LIMIT = 50;
+
+/**
+ * Calculate minutes until next hour
+ */
+function calculateMinutesUntilNextHour(): number {
+  const now = new Date();
+  const nextHour = new Date(now);
+  nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+  return Math.ceil((nextHour.getTime() - now.getTime()) / 60000);
+}
+
+/**
+ * Get next Monday 00:00 UTC as ISO string
+ */
+function getNextMondayUTC(): string {
+  const now = new Date();
+  const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+  const nextMonday = new Date(now);
+  nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+  nextMonday.setUTCHours(0, 0, 0, 0);
+  return nextMonday.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+}
+
+/**
+ * Check anonymous rate limits for proxy provider usage
+ */
+function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error?: string; isAnonymous?: boolean } {
+  const now = Date.now();
+  const hourInMs = 60 * 60 * 1000;
+  const weekInMs = 7 * 24 * hourInMs;
+  
+  // Get or initialize rate limit state
+  let state = anonymousRateLimits.get(fingerprint);
+  if (!state) {
+    state = {
+      hourlyCount: 0,
+      hourlyResetTime: now + hourInMs,
+      weeklyCount: 0,
+      weeklyResetTime: now + weekInMs,
+    };
+    anonymousRateLimits.set(fingerprint, state);
+  }
+  
+  // Reset hourly counter if time elapsed
+  if (now >= state.hourlyResetTime) {
+    state.hourlyCount = 0;
+    state.hourlyResetTime = now + hourInMs;
+  }
+  
+  // Reset weekly counter if time elapsed
+  if (now >= state.weeklyResetTime) {
+    state.weeklyCount = 0;
+    state.weeklyResetTime = now + weekInMs;
+  }
+  
+  // Check hourly limit
+  if (state.hourlyCount >= ANONYMOUS_HOURLY_LIMIT) {
+    return {
+      allowed: false,
+      error: JSON.stringify({
+        success: false,
+        error: `Hourly rate limit (${ANONYMOUS_HOURLY_LIMIT} calls/hour)`,
+        retry_after_minutes: calculateMinutesUntilNextHour(),
+        hint: "Rate limit resets at top of hour",
+        action: "Register to get higher limits: register_owner({ email: 'you@example.com' })"
+      }, null, 2)
+    };
+  }
+  
+  // Check weekly limit
+  if (state.weeklyCount >= ANONYMOUS_WEEKLY_LIMIT) {
+    return {
+      allowed: false,
+      error: JSON.stringify({
+        success: false,
+        error: `Weekly limit reached (${ANONYMOUS_WEEKLY_LIMIT} calls)`,
+        hint: "Register to get 50 calls/week",
+        action: "Run: register_owner({ email: 'you@example.com' })",
+        retry_after: getNextMondayUTC()
+      }, null, 2)
+    };
+  }
+  
+  // Increment counters
+  state.hourlyCount++;
+  state.weeklyCount++;
+  
+ 
+  return { allowed: true };
+}
 
 /**
  * Validate session on startup
@@ -155,9 +261,43 @@ async function trackEarnProgress(workspaceId: string, provider: string, action: 
 }
 
 /**
- * Check if workspace is active and has usage remaining
+ * Rate limiting for anonymous proxy usage
+ * Limits: 10 calls/week, 5 calls/hour (anonymous)
+ *         50 calls/week, 10 calls/hour (authenticated)
  */
-function checkWorkspaceAccess(): { allowed: boolean; error?: string } {
+interface RateLimitState {
+  hourly: { count: number; resetAt: number };
+  weekly: { count: number; resetAt: number };
+}
+
+const rateLimitStore = new Map<string, RateLimitState>();
+
+/**
+ * For proxy providers, allow anonymous usage with rate limiting
+ */
+function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: string; isAnonymous?: boolean } {
+  // Allow anonymous access for proxy providers
+  if (providerId && PROXY_PROVIDERS.includes(providerId)) {
+    if (!workspaceContext) {
+      // Anonymous user - check rate limits
+      const fingerprint = getMachineFingerprint();
+      const rateLimitCheck = checkAnonymousRateLimit(fingerprint);
+      
+      if (!rateLimitCheck.allowed) {
+        return {
+          allowed: false,
+          error: rateLimitCheck.error,
+          isAnonymous: true
+        };
+      }
+      
+      return { allowed: true, isAnonymous: true };
+    }
+    // Authenticated user using proxy provider - allow with higher limits
+    return { allowed: true, isAnonymous: false };
+  }
+  
+  // Non-proxy providers require authentication
   if (!workspaceContext) {
     return { 
       allowed: false, 
@@ -173,13 +313,28 @@ function checkWorkspaceAccess(): { allowed: boolean; error?: string } {
   }
   
   if (workspaceContext.usageRemaining === 0) {
+    // Free tier hit weekly limit
+    if (workspaceContext.tier === 'free') {
+      return { 
+        allowed: false, 
+        error: JSON.stringify({
+          success: false,
+          error: `Weekly limit reached (${FREE_WEEKLY_LIMIT} calls)`,
+          hint: "Upgrade to Backer for unlimited calls",
+          upgrade_url: "https://apiclaw.nordsym.com/upgrade",
+          retry_after: getNextMondayUTC()
+        }, null, 2)
+      };
+    }
+    
+    // Other tiers (shouldn't happen, but handle gracefully)
     return { 
       allowed: false, 
-      error: `Usage limit reached. Upgrade to ${workspaceContext.tier === 'free' ? 'Pro' : 'Enterprise'} for more calls.` 
+      error: `Usage limit reached. Contact support or check your plan at https://apiclaw.nordsym.com/account` 
     };
   }
   
-  return { allowed: true };
+  return { allowed: true, isAnonymous: false };
 }
 
 /**
@@ -987,6 +1142,18 @@ Docs: https://apiclaw.nordsym.com
           // Check workspace access for chains
           const access = checkWorkspaceAccess();
           if (!access.allowed) {
+            // If error is already formatted JSON (from rate limit checks), return as-is
+            if (access.error?.startsWith('{')) {
+              return {
+                content: [{
+                  type: 'text',
+                  text: access.error
+                }],
+                isError: true
+              };
+            }
+            
+            // Otherwise, wrap in standard error format
             return {
               content: [{
                 type: 'text',
@@ -1526,20 +1693,37 @@ Docs: https://apiclaw.nordsym.com
             fingerprint,
           }) as { token: string; expiresAt: number };
           
-          // TODO: Agent 2 will implement actual email sending
-          // For now, return the verification link
+          // Send magic link via email
           const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'APIClaw <noreply@apiclaw.nordsym.com>',
+              to: email,
+              subject: 'Verify your APIClaw workspace',
+              html: `<p>Click to verify: <a href="${verifyUrl}">${verifyUrl}</a></p><p>Expires in 15 minutes.</p>`
+            })
+          });
+          
+          if (!emailResponse.ok) {
+            const errorData = await emailResponse.text();
+            throw new Error(`Failed to send verification email: ${errorData}`);
+          }
           
           return {
             content: [{
               type: 'text',
               text: JSON.stringify({
                 status: 'pending_verification',
-                message: 'Workspace created! Please verify your email.',
+                message: 'Workspace created! Check your email for verification link.',
                 email,
-                verification_url: verifyUrl,
                 expires_in_minutes: 15,
-                next_step: 'Click the verification link, then run check_workspace_status',
+                next_step: 'Check your email, click the verification link, then run check_workspace_status',
               }, null, 2)
             }]
           };
