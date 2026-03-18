@@ -356,12 +356,15 @@ export default defineSchema({
     provider: v.optional(v.string()),
     query: v.optional(v.string()),
     identifier: v.string(),
+    workspaceId: v.optional(v.id("workspaces")), // Claimed workspace (null = anonymous)
     metadata: v.optional(v.any()),
     timestamp: v.number(),
   })
     .index("by_event", ["event"])
     .index("by_timestamp", ["timestamp"])
-    .index("by_provider", ["provider"]),
+    .index("by_provider", ["provider"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_identifier", ["identifier"]),
 
   // MCP Server telemetry (anonymous usage tracking)
   telemetry: defineTable({
@@ -760,7 +763,9 @@ export default defineSchema({
     partnerId: v.string(), // e.g., "apilayer"
     partnerName: v.string(),
     partnerEmail: v.string(),
-    documentHtml: v.string(),
+    partnerRepresentative: v.optional(v.string()),
+    documentHtml: v.optional(v.string()),
+    sections: v.optional(v.any()), // Alternative document format
     status: v.string(), // "pending" | "signed"
     signedAt: v.optional(v.number()),
     signatureDataUrl: v.optional(v.string()), // base64 signature image
