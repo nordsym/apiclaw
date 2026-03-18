@@ -33,6 +33,7 @@ import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
+import { PROXY_PROVIDERS } from './proxy.js';
 import { 
   requiresConfirmation,
   requiresConfirmationAsync, 
@@ -1501,20 +1502,37 @@ Docs: https://apiclaw.nordsym.com
             fingerprint,
           }) as { token: string; expiresAt: number };
           
-          // TODO: Agent 2 will implement actual email sending
-          // For now, return the verification link
+          // Send magic link via email
           const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'APIClaw <noreply@apiclaw.nordsym.com>',
+              to: email,
+              subject: 'Verify your APIClaw workspace',
+              html: `<p>Click to verify: <a href="${verifyUrl}">${verifyUrl}</a></p><p>Expires in 15 minutes.</p>`
+            })
+          });
+          
+          if (!emailResponse.ok) {
+            const errorData = await emailResponse.text();
+            throw new Error(`Failed to send verification email: ${errorData}`);
+          }
           
           return {
             content: [{
               type: 'text',
               text: JSON.stringify({
                 status: 'pending_verification',
-                message: 'Workspace created! Please verify your email.',
+                message: 'Workspace created! Check your email for verification link.',
                 email,
-                verification_url: verifyUrl,
                 expires_in_minutes: 15,
-                next_step: 'Click the verification link, then run check_workspace_status',
+                next_step: 'Check your email, click the verification link, then run check_workspace_status',
               }, null, 2)
             }]
           };
