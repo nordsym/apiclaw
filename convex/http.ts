@@ -118,23 +118,32 @@ async function validateAndLogProxyCall(
   provider: string,
   action: string
 ): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string }> {
-  const identifier = request.headers.get("X-APIClaw-Identifier") || "unknown";
+  const identifier = request.headers.get("X-APIClaw-Identifier");
   const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
   
+  console.log("[Proxy] Call received", { provider, action, identifier, subagentId });
+  
+  // ALWAYS log to analytics (even if identifier is missing)
   try {
-    // Always log to analytics (anonymous or authenticated)
-    await ctx.runMutation(api.analytics.log, {
+    const result = await ctx.runMutation(api.analytics.log, {
       event: "api_call",
       provider,
-      identifier,
+      identifier: identifier || "unknown",
       metadata: { action, subagentId },
     });
-    
-    // If authenticated (workspace ID format), also log to apiLogs for dashboard
-    if (!identifier.startsWith("anon:")) {
-      try {
+    console.log("[Proxy] Analytics logged:", result);
+  } catch (e: any) {
+    console.error("[Proxy] Analytics logging failed:", e.message, e.stack);
+    // Continue even if analytics fails
+  }
+  
+  // If we have an identifier and it's a workspace ID (not anon:), log to workspace
+  if (identifier && !identifier.startsWith("anon:") && identifier !== "unknown") {
+    try {
+      // Validate it's actually a workspace ID by checking format
+      if (identifier.length > 20) {
         await ctx.runMutation(api.logs.createProxyLog, {
-          workspaceId: identifier,
+          workspaceId: identifier as any,
           provider,
           action,
           subagentId,
@@ -142,24 +151,20 @@ async function validateAndLogProxyCall(
         
         // Increment workspace usage
         await ctx.runMutation(api.workspaces.incrementUsage, {
-          workspaceId: identifier,
+          workspaceId: identifier as any,
         });
         
+        console.log("[Proxy] Workspace logged for:", identifier);
         return { valid: true, workspaceId: identifier, subagentId };
-      } catch (e) {
-        // Workspace doesn't exist or error - allow call anyway
-        console.warn("[Proxy] Could not log to workspace:", e);
-        return { valid: true, subagentId };
       }
+    } catch (e: any) {
+      console.error("[Proxy] Workspace logging failed:", e.message);
+      // Continue even if workspace logging fails
     }
-    
-    // Anonymous user - track for rate limiting but don't increment workspace usage
-    return { valid: true, subagentId };
-  } catch (e: any) {
-    console.error("[Proxy] Logging error:", e);
-    // Always allow call even if logging fails
-    return { valid: true, subagentId };
   }
+  
+  // Return success regardless (don't block API calls)
+  return { valid: true, subagentId };
 }
 
 // OPTIONS handler for CORS
@@ -1014,4 +1019,35 @@ http.route({
   path: "/api/webhooks/stripe",
   method: "OPTIONS",
   handler: webhookOptions,
+});
+
+// Test endpoint to debug logging
+http.route({
+  path: "/proxy/test-logging",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const identifier = request.headers.get("X-APIClaw-Identifier");
+    
+    try {
+      const logId = await ctx.runMutation(api.analytics.log, {
+        event: "test_endpoint",
+        provider: "test",
+        identifier: identifier || "test",
+        metadata: { test: true },
+      });
+      
+      return jsonResponse({
+        success: true,
+        identifier,
+        logId,
+        message: "Logged successfully"
+      });
+    } catch (e: any) {
+      return jsonResponse({
+        success: false,
+        error: e.message,
+        stack: e.stack
+      }, 500);
+    }
+  }),
 });
