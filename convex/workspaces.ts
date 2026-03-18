@@ -226,6 +226,15 @@ export const getWorkspaceDashboard = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
+    // Count agents: 1 main agent (if exists) + subagents
+    const hasMainAgent = workspace.mainAgentId ? 1 : 0;
+    const subagents = await ctx.db
+      .query("subagents")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+    
+    const totalAgentCount = hasMainAgent + subagents.length;
+
     // Get usage logs for this workspace (via agent credits or purchases)
     const credits = await ctx.db
       .query("agentCredits")
@@ -271,7 +280,7 @@ export const getWorkspaceDashboard = query({
         createdAt: workspace.createdAt,
       },
       stats: {
-        totalAgents: agentSessions.length,
+        totalAgents: totalAgentCount,
         totalCredits: workspaceCredits.reduce((sum, c) => sum + c.balanceUsd, 0),
         totalPurchases: workspacePurchases.length,
       },

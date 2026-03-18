@@ -514,6 +514,8 @@ export const createProxyLog = mutation({
     sessionToken: v.optional(v.string()),
   },
   handler: async (ctx, { workspaceId, provider, action, subagentId, sessionToken }) => {
+    const now = Date.now();
+    
     await ctx.db.insert("apiLogs", {
       workspaceId,
       provider,
@@ -522,8 +524,21 @@ export const createProxyLog = mutation({
       sessionToken: sessionToken || "proxy",
       status: "success",
       latencyMs: 0, // Proxy calls don't track latency
-      createdAt: Date.now(),
+      createdAt: now,
     });
+    
+    // If this is a subagent call, update that subagent's timestamp
+    if (subagentId && subagentId !== "unknown" && subagentId !== "main") {
+      const subagent = await ctx.db
+        .query("subagents")
+        .withIndex("by_workspaceId_subagentId", (q) => 
+          q.eq("workspaceId", workspaceId).eq("subagentId", subagentId))
+        .first();
+      
+      if (subagent) {
+        await ctx.db.patch(subagent._id, { lastActiveAt: now });
+      }
+    }
     
     return { success: true };
   },

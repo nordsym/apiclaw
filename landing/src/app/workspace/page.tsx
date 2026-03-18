@@ -401,12 +401,12 @@ export default function WorkspacePage() {
           if (analytics && typeof analytics === "object" && !analytics.status) {
             setProviderAnalytics(analytics);
           } else {
-            // Generate preview data if no analytics
-            setProviderAnalytics(generatePreviewAnalytics());
+            // No analytics available - will show empty state
+            setProviderAnalytics(null);
           }
         } catch {
-          // Generate preview data on error
-          setProviderAnalytics(generatePreviewAnalytics());
+          // Error fetching analytics - will show empty state
+          setProviderAnalytics(null);
         }
       }
     } catch (err) {
@@ -429,9 +429,6 @@ export default function WorkspacePage() {
         
         // Check provider session and fetch APIs
         await fetchProviderData();
-        
-        // Always ensure preview analytics exist for Analytics tab
-        setProviderAnalytics(prev => prev || generatePreviewAnalytics());
         
         // If neither session type, redirect to login
         if (!token && !localStorage.getItem("apiclaw_session")) {
@@ -524,7 +521,7 @@ export default function WorkspacePage() {
   // Main navigation tabs
   const mainTabs = [
     { id: "overview" as TabType, label: "Overview", icon: Home },
-    { id: "api-catalog" as TabType, label: "Direct Call", icon: Zap },
+    { id: "api-catalog" as TabType, label: "API Catalog", icon: Zap },
     { id: "my-agents" as TabType, label: "My Agents", icon: Users },
     { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
     { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
@@ -3460,7 +3457,7 @@ const typeBadges: Record<string, { icon: typeof Search; label: string; className
   },
   direct_call: {
     icon: Zap,
-    label: "Direct Call",
+    label: "API Catalog",
     className: "bg-green-500/10 text-green-500 border border-green-500/20"
   },
   chain: {
