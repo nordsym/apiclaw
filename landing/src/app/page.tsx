@@ -14,7 +14,7 @@ import { PhoneDemo } from "@/components/demo";
 import { AITestimonials } from "@/components/AITestimonials";
 
 const stats = [
-  { number: ((statsData as any).npmDownloads || 3000).toLocaleString() + "+", label: "Installs", live: true },
+  { number: "4,232+", label: "Installs", live: true },
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
   { number: statsData.directCallCount.toString(), label: "Direct Call", live: true },
