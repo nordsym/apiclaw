@@ -84,6 +84,8 @@ export default defineSchema({
     pauseOnBudgetExceeded: v.optional(v.boolean()), // If true, block execution when budget exceeded
     monthlySpendCents: v.optional(v.number()), // Current month's spend in cents
     lastSpendResetAt: v.optional(v.number()), // When monthly spend was last reset
+    // Activity tracking
+    lastActiveAt: v.optional(v.number()), // Last API call timestamp (main agent)
     createdAt: v.number(),
     updatedAt: v.number(),
   })

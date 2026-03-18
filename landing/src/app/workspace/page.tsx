@@ -3486,6 +3486,7 @@ interface ApiLogEntry {
   status: "success" | "error";
   latencyMs: number;
   errorMessage?: string;
+  subagentId?: string;
   createdAt: number;
 }
 
@@ -3516,7 +3517,9 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<"all" | "success" | "error">("all");
   const [providerFilter, setProviderFilter] = useState<string>("all");
+  const [agentFilter, setAgentFilter] = useState<string>("all");
   const [providers, setProviders] = useState<string[]>([]);
+  const [agents, setAgents] = useState<string[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<number | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
@@ -3545,6 +3548,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             cursor,
             status: statusFilter,
             provider: providerFilter === "all" ? undefined : providerFilter,
+            subagentId: agentFilter === "all" ? undefined : agentFilter,
           },
         }),
       });
@@ -3602,7 +3606,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
       setIsLoading(false);
       setLoadingMore(false);
     }
-  }, [sessionToken, statusFilter, providerFilter, nextCursor]);
+  }, [sessionToken, statusFilter, providerFilter, agentFilter, nextCursor]);
 
   const fetchStats = useCallback(async () => {
     if (!sessionToken) return;
@@ -3621,6 +3625,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
       const result = statsData.value || statsData;
       setStats(result);
       setProviders(result.providers || []);
+      setAgents(result.agents || []);
     } catch (err) {
       console.error("Error fetching stats:", err);
     }
@@ -3692,6 +3697,18 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
+        
+        <select
+          value={agentFilter}
+          onChange={(e) => setAgentFilter(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+        >
+          <option value="all">All Agents</option>
+          <option value="main">Main Agent</option>
+          {agents.filter(a => a !== "main" && a !== "unknown").map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </select>
       </div>
 
       {/* Stats Cards */}
@@ -3753,6 +3770,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
               <thead className="bg-[var(--surface)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Type</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Agent</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Time</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Provider</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-[var(--text-muted)]">Action</th>
@@ -3765,6 +3783,13 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
                   <tr key={log.id} className="hover:bg-[var(--surface)] transition">
                     <td className="px-4 py-3">
                       <TypeBadge type={log.type} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm font-mono text-[var(--text-muted)]">
+                        {log.type === "direct_call" 
+                          ? ((log as ApiLogEntry).subagentId || "main")
+                          : "—"}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-[var(--text-muted)]">
                       {formatTime(log.createdAt)}

@@ -14,10 +14,8 @@ import { PhoneDemo } from "@/components/demo";
 import { AITestimonials } from "@/components/AITestimonials";
 
 const stats = [
-  { number: "4,232+", label: "Installs", live: true },
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
-  { number: statsData.directCallCount.toString(), label: "Direct Call", live: true },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
@@ -211,7 +209,7 @@ Instant highlights:
 • Code sandbox (E2B)
 • Multi-LLM routing (OpenRouter)
 
-${statsData.directCallCount}+ Direct Call providers across categories:
+Direct Call providers across categories:
 AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
 Voice: ElevenLabs, Deepgram, AssemblyAI
 Search: Brave Search, Serper, Firecrawl

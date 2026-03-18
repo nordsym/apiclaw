@@ -364,8 +364,9 @@ export const getLogStats = query({
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Get unique providers for filter dropdown
+    // Get unique providers and agents for filter dropdowns
     const providers = [...new Set(logs.map((l) => l.provider))].sort();
+    const agents = [...new Set(logs.map((l) => l.subagentId || "main"))].sort();
 
     return {
       totalCalls,
@@ -376,6 +377,7 @@ export const getLogStats = query({
       byProvider,
       byDay,
       providers,
+      agents,
     };
   },
 });
@@ -526,6 +528,9 @@ export const createProxyLog = mutation({
       latencyMs: 0, // Proxy calls don't track latency
       createdAt: now,
     });
+    
+    // Update workspace lastActiveAt (main agent activity)
+    await ctx.db.patch(workspaceId, { lastActiveAt: now });
     
     // If this is a subagent call, update that subagent's timestamp
     if (subagentId && subagentId !== "unknown" && subagentId !== "main") {
