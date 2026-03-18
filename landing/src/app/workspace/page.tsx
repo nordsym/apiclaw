@@ -5868,7 +5868,7 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
               <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
             </div>
             <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
-              {workspace?.tier || "Free"}
+              {workspace?.tier === "backer" ? "Founding Backer" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
             </span>
           </div>
         </div>
@@ -5889,15 +5889,17 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
             <div>
               <p className="font-medium">Current Plan</p>
               <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+                {workspace?.tier === "backer" ? "Unlimited until 2027" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              workspace?.tier === "pro" || workspace?.tier === "usage_based"
+              workspace?.tier === "backer"
+                ? "bg-[#ef4444]/20 text-[#ef4444]"
+                : workspace?.tier === "pro" || workspace?.tier === "usage_based"
                 ? "bg-green-500/20 text-green-500"
                 : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
             }`}>
-              {workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Active" : "Free"}
+              {workspace?.tier === "backer" ? "Active" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Active" : "Free"}
             </span>
           </div>
 
