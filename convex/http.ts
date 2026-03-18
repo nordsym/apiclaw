@@ -701,6 +701,85 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
+// GitHub API proxy
+http.route({
+  path: "/proxy/github",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    // Validate session and log usage
+    const body = await request.json();
+    const action = body.action || "search_repos";
+    await validateAndLogProxyCall(ctx, request, "github", action);
+    
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    if (!GITHUB_TOKEN) {
+      return jsonResponse({ error: "GitHub not configured" }, 500);
+    }
+
+    try {
+      const { action, ...params } = body;
+      let url: string;
+      let method = "GET";
+      let fetchBody: string | undefined;
+
+      // Route based on action
+      switch (action) {
+        case "search_repos":
+          const { query, sort = "stars", limit = 10 } = params;
+          url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=${limit}`;
+          break;
+        
+        case "get_repo":
+          const { owner, repo } = params;
+          url = `https://api.github.com/repos/${owner}/${repo}`;
+          break;
+        
+        case "list_issues":
+          const { owner: issueOwner, repo: issueRepo, state = "open", limit: issueLimit = 10 } = params;
+          url = `https://api.github.com/repos/${issueOwner}/${issueRepo}/issues?state=${state}&per_page=${issueLimit}`;
+          break;
+        
+        case "create_issue":
+          const { owner: createOwner, repo: createRepo, title, body: issueBody = "" } = params;
+          url = `https://api.github.com/repos/${createOwner}/${createRepo}/issues`;
+          method = "POST";
+          fetchBody = JSON.stringify({ title, body: issueBody });
+          break;
+        
+        case "get_file":
+          const { owner: fileOwner, repo: fileRepo, path } = params;
+          url = `https://api.github.com/repos/${fileOwner}/${fileRepo}/contents/${path}`;
+          break;
+        
+        default:
+          return jsonResponse({ error: `Unknown action: ${action}` }, 400);
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "User-Agent": "APIClaw",
+          ...(fetchBody ? { "Content-Type": "application/json" } : {}),
+        },
+        ...(fetchBody ? { body: fetchBody } : {}),
+      });
+
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/github",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
 // ==============================================
 // WORKSPACE / MAGIC LINK ENDPOINTS
 // ==============================================
