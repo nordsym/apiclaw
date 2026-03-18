@@ -118,42 +118,38 @@ async function validateAndLogProxyCall(
   provider: string,
   action: string
 ): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string }> {
-  const sessionToken = request.headers.get("X-APIClaw-Session");
-  const subagentId = request.headers.get("X-APIClaw-Subagent") || "unknown";
-  
-  if (!sessionToken) {
-    // Allow calls without session but don't log to workspace
-    return { valid: true, subagentId };
-  }
+  const identifier = request.headers.get("X-APIClaw-Identifier") || "unknown";
+  const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
   
   try {
-    // Validate session
-    const session = await ctx.runQuery(api.workspaces.getSession, { token: sessionToken });
+    // Always log to analytics (anonymous or authenticated)
+    await ctx.runMutation(api.analytics.log, {
+      event: "api_call",
+      provider,
+      identifier,
+      metadata: { action, subagentId },
+    });
     
-    if (!session) {
-      // Allow call anyway but log warning
-      console.warn("[Proxy] Invalid session token, allowing call but not logging");
+    // If authenticated (workspace ID format), increment usage
+    if (identifier.startsWith("anon:")) {
+      // Anonymous user - track for rate limiting but don't increment workspace usage
       return { valid: true, subagentId };
     }
     
-    // Log the API call
-    await ctx.runMutation(api.logs.createProxyLog, {
-      workspaceId: session.workspaceId,
-      provider,
-      action,
-      subagentId,
-      sessionToken,
-    });
-    
-    // Increment usage
-    await ctx.runMutation(api.workspaces.incrementUsage, {
-      workspaceId: session.workspaceId,
-    });
-    
-    return { valid: true, workspaceId: session.workspaceId, subagentId };
+    // Try to increment workspace usage
+    try {
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: identifier,
+      });
+      return { valid: true, workspaceId: identifier, subagentId };
+    } catch (e) {
+      // Workspace doesn't exist or error - allow call anyway
+      console.warn("[Proxy] Could not increment workspace usage:", e);
+      return { valid: true, subagentId };
+    }
   } catch (e: any) {
-    console.error("[Proxy] Session validation error:", e);
-    // Allow call but don't log on error
+    console.error("[Proxy] Logging error:", e);
+    // Always allow call even if logging fails
     return { valid: true, subagentId };
   }
 }
