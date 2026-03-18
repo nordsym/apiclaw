@@ -1,10 +1,10 @@
 {
   "apiCount": 22392,
   "openApiCount": 1636,
-  "directCallCount": 19,
+  "directCallCount": 18,
   "npmDownloads": 4232,
   "categoryCount": 13,
-  "generatedAt": "2026-03-18T11:52:49.548Z",
+  "generatedAt": "2026-03-18T12:30:05.958Z",
   "categoryBreakdown": {
     "Finance": 1179,
     "Auth & Security": 491,
