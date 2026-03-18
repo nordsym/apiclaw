@@ -134,6 +134,29 @@ export const verifyMagicLink = mutation({
       createdAt: Date.now(),
     });
 
+    // Claim anonymous usage history
+    const userFingerprint = fingerprint || magicLink.sessionFingerprint;
+    if (userFingerprint) {
+      try {
+        // Find all analytics records with matching fingerprint and no workspaceId
+        const analyticsRecords = await ctx.db
+          .query("analytics")
+          .withIndex("by_identifier", (q) => q.eq("identifier", userFingerprint))
+          .collect();
+
+        // Filter to only unclaimed records
+        const unclaimedRecords = analyticsRecords.filter((r) => !r.workspaceId);
+
+        // Update each record to link it to the workspace
+        for (const record of unclaimedRecords) {
+          await ctx.db.patch(record._id, { workspaceId: workspace!._id });
+        }
+      } catch (err) {
+        // Non-critical error, just log it
+        console.error('Failed to claim anonymous usage:', err);
+      }
+    }
+
     return {
       success: true,
       sessionToken,
@@ -949,6 +972,46 @@ export const adminGetFullWorkspace = query({
       usageLimit: workspace.usageLimit,
       createdAt: workspace.createdAt,
       updatedAt: workspace.updatedAt,
+    };
+  },
+});
+
+/**
+ * Claim anonymous usage history when a user registers
+ * Links all analytics records with matching fingerprint to the workspace
+ */
+export const claimAnonymousUsage = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    machineFingerprint: v.string(),
+  },
+  handler: async (ctx, { workspaceId, machineFingerprint }) => {
+    // Verify workspace exists
+    const workspace = await ctx.db.get(workspaceId);
+    if (!workspace) {
+      return { success: false, error: "Workspace not found" };
+    }
+
+    // Find all analytics records with matching fingerprint and no workspaceId
+    const analyticsRecords = await ctx.db
+      .query("analytics")
+      .withIndex("by_identifier", (q) => q.eq("identifier", machineFingerprint))
+      .collect();
+
+    // Filter to only unclaimed records
+    const unclaimedRecords = analyticsRecords.filter((r) => !r.workspaceId);
+
+    // Update each record to link it to the workspace
+    let claimedCount = 0;
+    for (const record of unclaimedRecords) {
+      await ctx.db.patch(record._id, { workspaceId });
+      claimedCount++;
+    }
+
+    return {
+      success: true,
+      claimedCount,
+      message: `Claimed ${claimedCount} anonymous usage records`,
     };
   },
 });

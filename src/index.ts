@@ -1119,7 +1119,7 @@ Docs: https://apiclaw.nordsym.com
         // Check workspace access (skip for free/open APIs)
         const isFreeAPI = isOpenAPI(provider);
         if (!isFreeAPI) {
-          const access = checkWorkspaceAccess();
+          const access = checkWorkspaceAccess(provider);
           if (!access.allowed) {
             return {
               content: [{
@@ -1127,7 +1127,9 @@ Docs: https://apiclaw.nordsym.com
                 text: JSON.stringify({
                   status: 'error',
                   error: access.error,
-                  hint: 'Use register_owner to authenticate your workspace.',
+                  hint: access.isAnonymous 
+                    ? 'Rate limit reached. Use register_owner to authenticate for higher limits.'
+                    : 'Use register_owner to authenticate your workspace.',
                 }, null, 2)
               }],
               isError: true
@@ -1166,13 +1168,17 @@ Docs: https://apiclaw.nordsym.com
             userId: DEFAULT_AGENT_ID,
           });
 
-          // Log the confirmed API call
+          // Log the confirmed API call (with fingerprint for anonymous users)
+          const analyticsUserId = workspaceContext 
+            ? workspaceContext.workspaceId 
+            : `anon:${getMachineFingerprint()}`;
+          
           logAPICall({
             timestamp: new Date().toISOString(),
             provider: pending.provider,
             action: pending.action,
             type: apiType,
-            userId: DEFAULT_AGENT_ID,
+            userId: analyticsUserId,
             success: result.success,
             latencyMs: Date.now() - startTime,
             error: result.error,
@@ -1259,13 +1265,17 @@ Docs: https://apiclaw.nordsym.com
           });
         }
 
-        // Log the API call for analytics
+        // Log the API call for analytics (with fingerprint for anonymous users)
+        const analyticsUserId = workspaceContext 
+          ? workspaceContext.workspaceId 
+          : `anon:${getMachineFingerprint()}`;
+        
         logAPICall({
           timestamp: new Date().toISOString(),
           provider,
           action,
           type: apiType,
-          userId: DEFAULT_AGENT_ID,
+          userId: analyticsUserId,
           success: result.success,
           latencyMs: Date.now() - startTime,
           error: result.error,
@@ -1453,6 +1463,21 @@ Docs: https://apiclaw.nordsym.com
 
             if (sessionResult.success) {
               writeSession(sessionResult.sessionToken!, existing.id, email);
+              
+              // Claim anonymous usage history
+              try {
+                const claimResult = await convex.mutation("workspaces:claimAnonymousUsage" as any, {
+                  workspaceId: existing.id,
+                  machineFingerprint: fingerprint,
+                }) as { success: boolean; claimedCount?: number; message?: string };
+                
+                if (claimResult.success && claimResult.claimedCount) {
+                  console.error(`[APIClaw] ✓ Claimed ${claimResult.claimedCount} anonymous usage records`);
+                }
+              } catch (err) {
+                // Non-critical error, just log it
+                console.error('[APIClaw] Warning: Failed to claim anonymous usage:', err);
+              }
               
               // Update global context
               workspaceContext = {

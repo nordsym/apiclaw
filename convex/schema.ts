@@ -356,12 +356,15 @@ export default defineSchema({
     provider: v.optional(v.string()),
     query: v.optional(v.string()),
     identifier: v.string(),
+    workspaceId: v.optional(v.id("workspaces")), // Claimed workspace (null = anonymous)
     metadata: v.optional(v.any()),
     timestamp: v.number(),
   })
     .index("by_event", ["event"])
     .index("by_timestamp", ["timestamp"])
-    .index("by_provider", ["provider"]),
+    .index("by_provider", ["provider"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_identifier", ["identifier"]),
 
   // MCP Server telemetry (anonymous usage tracking)
   telemetry: defineTable({
