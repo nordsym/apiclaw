@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        path: "workspaces:getSessionWorkspace",
-        args: { token },
+        path: "workspaces:verifySession",
+        args: { sessionToken: token },
       }),
     });
 
