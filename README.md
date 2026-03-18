@@ -27,11 +27,27 @@ One `mcp-install` connects your agent to all of it.
 
 ## Quick Start
 
+**No signup required — just install and use.**
+
 ```bash
+# Install
 npx @nordsym/apiclaw mcp-install
+
+# Restart your AI assistant
+# Immediately use any API (10 calls/week)
+
+# Optional: Register for 50 calls/week
+register_owner({ email: "you@example.com" })
 ```
 
-That's it. Restart your AI assistant. Ask it to *"Send an SMS"* or *"Generate an image"* — it works.
+That's it. All 18 Direct Call providers work instantly through NordSym's infrastructure. Your API calls are proxied, authenticated, and rate-limited automatically.
+
+**Usage Limits:**
+- **Anonymous:** 10 calls/week (no registration)
+- **Registered:** 50 calls/week (5x more)
+- **Upgrade:** Contact us for higher limits
+
+Start calling APIs immediately. No setup, no API keys, no configuration.
 
 ---
 
@@ -313,6 +329,30 @@ npx @nordsym/apiclaw uninstall --client cursor
 3. Agent calls `send_sms`, `generate_image`, `search_web`
 4. APIClaw handles auth, rate limits, execution
 5. Results flow back to the agent
+
+---
+
+## Proxy Architecture
+
+**All 18 Direct Call providers work through NordSym's infrastructure.**
+
+You don't manage API keys. You don't configure auth. You don't worry about rate limits.
+
+**How it works:**
+- Your API calls go through NordSym's proxy
+- We handle authentication with each provider
+- Usage is tracked and limited (fair use)
+- 10 calls/week anonymous, 50 with registration
+- No setup required — just install and use
+
+**What you get:**
+- Instant access to 18 premium APIs
+- No API key management
+- Automatic rate limiting
+- Usage analytics in your workspace
+- Production-ready from day one
+
+**Want higher limits?** Upgrade at [apiclaw.com](https://apiclaw.com) or contact us.
 
 ---
 
