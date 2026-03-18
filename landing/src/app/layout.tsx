@@ -5,7 +5,7 @@ import statsData from "@/lib/stats.json";
 
 export const metadata: Metadata = {
   title: "APIClaw | The API Layer for AI Agents",
-  description: `Agents discover and evaluate APIs via MCP. Structured data. Ranked results. ${statsData.apiCount.toLocaleString()}+ APIs across ${statsData.categoryCount}+ categories.`,
+  description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
   metadataBase: new URL("https://apiclaw.nordsym.com"),
   icons: {
     icon: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "APIClaw | The API Layer for AI Agents",
-    description: `${statsData.apiCount.toLocaleString()}+ APIs. MCP native. Direct Call: providers self-serve their APIs for AI agents.`,
+    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "APIClaw | The API Layer for AI Agents",
-    description: `Agents discover and evaluate APIs via MCP. ${statsData.apiCount.toLocaleString()}+ APIs. MCP native.`,
+    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
     images: ["/api/og"],
     creator: "@nordsym",
   },
@@ -51,7 +51,7 @@ const schemaOrg = {
       "@type": "WebSite",
       "name": "APIClaw",
       "url": "https://apiclaw.nordsym.com",
-      "description": "The API layer for AI agents. Discover and call APIs via MCP with structured data and ranked results."
+      "description": "Your agent's API encyclopedia. Search by capability, call instantly. 22,392 APIs indexed • 1,636 Open APIs • 18 Direct Call • MCP native"
     },
     {
       "@type": "Organization",
@@ -63,7 +63,7 @@ const schemaOrg = {
       "name": "APIClaw",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
-      "description": "API discovery and execution layer for AI agents. 22,000+ APIs indexed. MCP native. Direct Call providers.",
+      "description": "The API layer for AI agents. 22,392 APIs indexed, 1,636 Open APIs, 18 Direct Call providers. MCP native.",
       "offers": {
         "@type": "Offer",
         "price": "0",
