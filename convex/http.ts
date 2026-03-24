@@ -94,6 +94,14 @@ const PROVIDERS = {
     regions: ["Global"],
     tags: ["sandbox", "code", "python", "execution", "ai", "agents"],
   },
+  apilayer: {
+    name: "APILayer",
+    description: "14 APIs: exchange rates, market data, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping, and more.",
+    category: "multi",
+    pricing: "Free tier available, paid plans per API",
+    regions: ["Global"],
+    tags: ["exchange", "stocks", "aviation", "pdf", "screenshot", "verification", "vat", "news", "scraping"],
+  },
 } as const;
 
 // CORS headers

@@ -167,6 +167,22 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  apilayer: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      const env = loadEnvFile('apilayer.env');
+      // Return all keys — handler picks the right one per action
+      const keys: Record<string, string> = {};
+      for (const [k, v] of Object.entries(env)) {
+        if (k.startsWith('APILAYER_') && v) {
+          keys[k] = v;
+        }
+      }
+      if (Object.keys(keys).length === 0) return null;
+      return { type: 'api_key', api_key: keys.APILAYER_EXCHANGERATE_KEY || '', ...keys } as any;
+    },
+  },
 };
 
 /**
@@ -214,6 +230,10 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'e2b') {
     const env = loadEnvFile('e2b.env');
     return !!(env.E2B_API_KEY || process.env.E2B_API_KEY);
+  }
+  if (providerId === 'apilayer') {
+    const env = loadEnvFile('apilayer.env');
+    return !!(env.APILAYER_EXCHANGERATE_KEY || process.env.APILAYER_EXCHANGERATE_KEY);
   }
   return false;
 }

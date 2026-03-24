@@ -402,6 +402,22 @@ const apiEndpoints: Record<string, Record<string, { url: string; method: string;
     run_code: { url: 'https://api.e2b.dev/v1/sandboxes', method: 'POST' },
     run_shell: { url: 'https://api.e2b.dev/v1/sandboxes', method: 'POST' },
   },
+  apilayer: {
+    exchange_rates: { url: 'https://api.apilayer.com/exchangerates_data/latest', method: 'GET' },
+    market_data: { url: 'http://api.marketstack.com/v1/eod', method: 'GET' },
+    aviation: { url: 'http://api.aviationstack.com/v1/flights', method: 'GET' },
+    pdf_generate: { url: 'https://api.pdflayer.com/api', method: 'POST' },
+    screenshot: { url: 'https://api.screenshotlayer.com/api/capture', method: 'GET' },
+    verify_email: { url: 'https://api.apilayer.com/email_verification/check', method: 'GET' },
+    verify_number: { url: 'https://api.apilayer.com/number_verification/validate', method: 'GET' },
+    vat_check: { url: 'https://apilayer.net/api/validate', method: 'GET' },
+    world_news: { url: 'https://api.apilayer.com/world_news/extract-news', method: 'GET' },
+    finance_news: { url: 'https://api.apilayer.com/financelayer/news', method: 'GET' },
+    scrape: { url: 'https://api.apilayer.com/adv_scraper/scraper', method: 'GET' },
+    image_crop: { url: 'https://api.apilayer.com/smart_crop/url', method: 'POST' },
+    skills: { url: 'https://api.apilayer.com/skills', method: 'GET' },
+    form_submit: { url: 'https://api.apilayer.com/form_api/{endpoint}', method: 'POST' },
+  },
 };
 
 /**
@@ -1642,6 +1658,263 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           message: 'Transcription still processing. Use transcript_id to poll manually.',
         },
       };
+    },
+  },
+
+  // APILayer - 14 APIs via one provider
+  apilayer: {
+    // Helper to pick the right key per action
+    exchange_rates: async (params, creds) => {
+      const key = creds.APILAYER_EXCHANGERATE_KEY || creds.api_key;
+      const { base = 'USD', symbols, date } = params;
+      const endpoint = date ? 'historical' : 'latest';
+      const url = new URL(`https://api.apilayer.com/exchangerates_data/${endpoint}`);
+      url.searchParams.set('base', base);
+      if (symbols) url.searchParams.set('symbols', symbols);
+      if (date) url.searchParams.set('date', date);
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'exchange_rates' });
+
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'exchange_rates', (data.message as string) || 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'exchange_rates', data };
+    },
+
+    market_data: async (params, creds) => {
+      const key = creds.APILAYER_MARKETSTACK_KEY || creds.api_key;
+      const { symbols, date_from, date_to, limit = 10 } = params;
+      if (!symbols) return createErrorResult('apilayer', 'market_data', 'Missing required param: symbols', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('http://api.marketstack.com/v1/eod');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('symbols', symbols);
+      url.searchParams.set('limit', limit.toString());
+      if (date_from) url.searchParams.set('date_from', date_from);
+      if (date_to) url.searchParams.set('date_to', date_to);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'market_data' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'market_data', (data.error as any)?.message || 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'market_data', data };
+    },
+
+    aviation: async (params, creds) => {
+      const key = creds.APILAYER_AVIATIONSTACK_KEY || creds.api_key;
+      const { flight_iata, dep_iata, arr_iata, airline_iata } = params;
+      const url = new URL('http://api.aviationstack.com/v1/flights');
+      url.searchParams.set('access_key', key);
+      if (flight_iata) url.searchParams.set('flight_iata', flight_iata);
+      if (dep_iata) url.searchParams.set('dep_iata', dep_iata);
+      if (arr_iata) url.searchParams.set('arr_iata', arr_iata);
+      if (airline_iata) url.searchParams.set('airline_iata', airline_iata);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'aviation' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'aviation', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'aviation', data };
+    },
+
+    pdf_generate: async (params, creds) => {
+      const key = creds.APILAYER_PDFLAYER_KEY || creds.api_key;
+      const { document_url, document_html, page_size = 'A4' } = params;
+      if (!document_url && !document_html) return createErrorResult('apilayer', 'pdf_generate', 'Missing: document_url or document_html', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.pdflayer.com/api');
+      url.searchParams.set('page_size', page_size);
+      if (document_url) url.searchParams.set('document_url', document_url);
+      if (document_html) url.searchParams.set('document_html', document_html);
+
+      const response = await fetchWithRetry(url.toString(), { method: 'POST', headers: { 'apikey': key } }, { provider: 'apilayer', action: 'pdf_generate' });
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/pdf')) {
+        return { success: true, provider: 'apilayer', action: 'pdf_generate', data: { message: 'PDF generated', content_type: 'application/pdf', size: response.headers.get('content-length') } };
+      }
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'pdf_generate', (data.error as any)?.info || 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'pdf_generate', data };
+    },
+
+    screenshot: async (params, creds) => {
+      const key = creds.APILAYER_SCREENSHOTLAYER_KEY || creds.api_key;
+      const { url: targetUrl, viewport = '1440x900', fullpage = 0 } = params;
+      if (!targetUrl) return createErrorResult('apilayer', 'screenshot', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.screenshotlayer.com/api/capture');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('url', targetUrl);
+      url.searchParams.set('viewport', viewport);
+      url.searchParams.set('fullpage', fullpage.toString());
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'screenshot' });
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('image/')) {
+        return { success: true, provider: 'apilayer', action: 'screenshot', data: { message: 'Screenshot captured', content_type: contentType, url: url.toString() } };
+      }
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'screenshot', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'screenshot', data };
+    },
+
+    verify_email: async (params, creds) => {
+      const key = creds.APILAYER_EMAILVERIFY_KEY || creds.api_key;
+      const { email } = params;
+      if (!email) return createErrorResult('apilayer', 'verify_email', 'Missing required param: email', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.apilayer.com/email_verification/check');
+      url.searchParams.set('email', email);
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'verify_email' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'verify_email', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'verify_email', data };
+    },
+
+    verify_number: async (params, creds) => {
+      const key = creds.APILAYER_NUMVERIFY_KEY || creds.api_key;
+      const { number } = params;
+      if (!number) return createErrorResult('apilayer', 'verify_number', 'Missing required param: number', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.apilayer.com/number_verification/validate');
+      url.searchParams.set('number', number);
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'verify_number' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'verify_number', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'verify_number', data };
+    },
+
+    vat_check: async (params, creds) => {
+      const key = creds.APILAYER_VATLAYER_KEY || creds.api_key;
+      const { vat_number } = params;
+      if (!vat_number) return createErrorResult('apilayer', 'vat_check', 'Missing required param: vat_number', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('http://apilayer.net/api/validate');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('vat_number', vat_number);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'vat_check' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'vat_check', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'vat_check', data };
+    },
+
+    world_news: async (params, creds) => {
+      const key = creds.APILAYER_WORLDNEWS_KEY || creds.api_key;
+      const { url: newsUrl, analyze = true } = params;
+      if (!newsUrl) return createErrorResult('apilayer', 'world_news', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.apilayer.com/world_news/extract-news');
+      url.searchParams.set('url', newsUrl);
+      url.searchParams.set('analyze', analyze ? 'true' : 'false');
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'world_news' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'world_news', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'world_news', data };
+    },
+
+    finance_news: async (params, creds) => {
+      const key = creds.APILAYER_FINANCENEWS_KEY || creds.api_key;
+      const { tickers, text, number = 5 } = params;
+
+      const url = new URL('https://api.apilayer.com/financelayer/news');
+      if (tickers) url.searchParams.set('tickers', tickers);
+      if (text) url.searchParams.set('keywords', text);
+      url.searchParams.set('limit', number.toString());
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'finance_news' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'finance_news', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'finance_news', data };
+    },
+
+    scrape: async (params, creds) => {
+      const key = creds.APILAYER_SCRAPER_KEY || creds.api_key;
+      const { url: targetUrl } = params;
+      if (!targetUrl) return createErrorResult('apilayer', 'scrape', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.apilayer.com/adv_scraper/scraper');
+      url.searchParams.set('url', targetUrl);
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'scrape' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'scrape', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'scrape', data };
+    },
+
+    image_crop: async (params, creds) => {
+      const key = creds.APILAYER_IMAGECROP_KEY || creds.api_key;
+      const { url: imageUrl, width, height } = params;
+      if (!imageUrl) return createErrorResult('apilayer', 'image_crop', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
+
+      // APILayer smart_crop expects POST with form data
+      const formData = new URLSearchParams();
+      formData.set('url', imageUrl);
+      if (width) formData.set('width', width.toString());
+      if (height) formData.set('height', height.toString());
+
+      const response = await fetchWithRetry('https://api.apilayer.com/smart_crop/url', {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }, { provider: 'apilayer', action: 'image_crop' });
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('image/')) {
+        return { success: true, provider: 'apilayer', action: 'image_crop', data: { message: 'Image cropped', content_type: contentType } };
+      }
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'image_crop', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'image_crop', data };
+    },
+
+    skills: async (params, creds) => {
+      const key = creds.APILAYER_SKILLAPI_KEY || creds.api_key;
+      const { q } = params;
+      if (!q) return createErrorResult('apilayer', 'skills', 'Missing required param: q', ERROR_CODES.INVALID_PARAMS);
+
+      const url = new URL('https://api.apilayer.com/skills');
+      url.searchParams.set('q', q);
+      if (params.count) url.searchParams.set('count', String(params.count));
+
+      const response = await fetchWithRetry(url.toString(), {
+        headers: { 'apikey': key },
+      }, { provider: 'apilayer', action: 'skills' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'skills', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'skills', data };
+    },
+
+    form_submit: async (params, creds) => {
+      const key = creds.APILAYER_FORMAPI_KEY || creds.api_key;
+      const { endpoint, data: formData } = params;
+      if (!endpoint) return createErrorResult('apilayer', 'form_submit', 'Missing required param: endpoint', ERROR_CODES.INVALID_PARAMS);
+
+      const response = await fetchWithRetry(`https://api.apilayer.com/form_api/${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'apikey': key,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData || {}),
+      }, { provider: 'apilayer', action: 'form_submit' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'form_submit', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'form_submit', data };
     },
   },
 };
