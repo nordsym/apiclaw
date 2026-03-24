@@ -415,7 +415,7 @@ const apiEndpoints: Record<string, Record<string, { url: string; method: string;
     finance_news: { url: 'https://api.apilayer.com/financelayer/news', method: 'GET' },
     scrape: { url: 'https://api.apilayer.com/adv_scraper/scraper', method: 'GET' },
     image_crop: { url: 'https://api.apilayer.com/smart_crop/url', method: 'POST' },
-    skills: { url: 'https://api.apilayer.com/skills', method: 'GET' },
+    skills: { url: 'https://api.promptapi.com/skills', method: 'GET' },
     form_submit: { url: 'https://api.apilayer.com/form_api/{endpoint}', method: 'POST' },
   },
 };
@@ -1883,11 +1883,12 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
     },
 
     skills: async (params, creds) => {
-      const key = creds.APILAYER_SKILLAPI_KEY || creds.api_key;
+      // Skills API is on PromptAPI domain, uses master key
+      const key = creds.APILAYER_EXCHANGERATE_KEY || creds.api_key;
       const { q } = params;
       if (!q) return createErrorResult('apilayer', 'skills', 'Missing required param: q', ERROR_CODES.INVALID_PARAMS);
 
-      const url = new URL('https://api.apilayer.com/skills');
+      const url = new URL('https://api.promptapi.com/skills');
       url.searchParams.set('q', q);
       if (params.count) url.searchParams.set('count', String(params.count));
 
