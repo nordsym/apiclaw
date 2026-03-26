@@ -13,3 +13,7 @@ dist/
 # Convex
 .convex/
 .vercel
+# Convex build artifacts
+convex/*.d.ts
+convex/*.js
+convex/*.bak
