@@ -798,6 +798,207 @@ http.route({
 });
 
 // ==============================================
+// SERPER (Google Search) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/serper",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "serper", "search");
+    const SERPER_KEY = process.env.SERPER_API_KEY;
+    if (!SERPER_KEY) {
+      return jsonResponse({ error: "Serper not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { query, q, num = 10, gl = "us", hl = "en" } = body;
+      const searchQuery = query || q;
+      if (!searchQuery) {
+        return jsonResponse({ error: "query required" }, 400);
+      }
+      const response = await fetch("https://google.serper.dev/search", {
+        method: "POST",
+        headers: {
+          "X-API-KEY": SERPER_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ q: searchQuery, num, gl, hl }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/serper",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// FIRECRAWL (Web Scraping) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/firecrawl",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "firecrawl", "scrape");
+    const FIRECRAWL_KEY = process.env.FIRECRAWL_API_KEY;
+    if (!FIRECRAWL_KEY) {
+      return jsonResponse({ error: "Firecrawl not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { url, formats = ["markdown"], onlyMainContent = true } = body;
+      if (!url) {
+        return jsonResponse({ error: "url required" }, 400);
+      }
+      const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url, formats, onlyMainContent }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/firecrawl",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// GROQ (LLM) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/groq",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "groq", "chat");
+    const GROQ_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_KEY) {
+      return jsonResponse({ error: "Groq not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "llama-3.3-70b-versatile", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages) {
+        return jsonResponse({ error: "messages required" }, 400);
+      }
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GROQ_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/groq",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// MISTRAL (LLM/Embeddings) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/mistral",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "mistral", "chat");
+    const MISTRAL_KEY = process.env.MISTRAL_API_KEY;
+    if (!MISTRAL_KEY) {
+      return jsonResponse({ error: "Mistral not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "mistral-small-latest", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages) {
+        return jsonResponse({ error: "messages required" }, 400);
+      }
+      const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${MISTRAL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/mistral",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// COHERE (LLM/Rerank) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/cohere",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "cohere", "chat");
+    const COHERE_KEY = process.env.COHERE_API_KEY;
+    if (!COHERE_KEY) {
+      return jsonResponse({ error: "Cohere not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "command-a-03-2025", message, chat_history, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!message) {
+        return jsonResponse({ error: "message required" }, 400);
+      }
+      const response = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${COHERE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, message, chat_history, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/cohere",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
 // WORKSPACE / MAGIC LINK ENDPOINTS
 // ==============================================
 
