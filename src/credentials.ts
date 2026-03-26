@@ -183,6 +183,104 @@ const providers: Record<string, ProviderCredential> = {
       return { type: 'api_key', api_key: keys.APILAYER_EXCHANGERATE_KEY || '', ...keys } as any;
     },
   },
+
+  groq: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('groq.env');
+      const key = env.GROQ_API_KEY || process.env.GROQ_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  mistral: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('mistral.env');
+      const key = env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  cohere: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('cohere.env');
+      const key = env.COHERE_API_KEY || process.env.COHERE_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  together: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('together.env');
+      const key = env.TOGETHER_API_KEY || process.env.TOGETHER_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  stability: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      const env = loadEnvFile('stability.env');
+      const key = env.STABILITY_API_KEY || process.env.STABILITY_API_KEY;
+      if (key) {
+        return { type: 'api_key', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  deepgram: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      const env = loadEnvFile('deepgram.env');
+      const key = env.DEEPGRAM_API_KEY || process.env.DEEPGRAM_API_KEY;
+      if (key) {
+        return { type: 'api_key', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  assemblyai: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      const env = loadEnvFile('assemblyai.env');
+      const key = env.ASSEMBLYAI_API_KEY || process.env.ASSEMBLYAI_API_KEY;
+      if (key) {
+        return { type: 'api_key', api_key: key };
+      }
+      return null;
+    },
+  },
+
+  serper: {
+    type: 'api_key',
+    get(): APICredentials | null {
+      // Note: local file is serpapi.env for historical reasons
+      const env = loadEnvFile('serper.env');
+      const envAlt = loadEnvFile('serpapi.env');
+      const key = env.SERPER_API_KEY || envAlt.SERPAPI_API_KEY || envAlt.SERPER_API_KEY || process.env.SERPER_API_KEY;
+      if (key) {
+        return { type: 'api_key', api_key: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**
@@ -234,6 +332,39 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'apilayer') {
     const env = loadEnvFile('apilayer.env');
     return !!(env.APILAYER_EXCHANGERATE_KEY || process.env.APILAYER_EXCHANGERATE_KEY);
+  }
+  if (providerId === 'groq') {
+    const env = loadEnvFile('groq.env');
+    return !!(env.GROQ_API_KEY || process.env.GROQ_API_KEY);
+  }
+  if (providerId === 'mistral') {
+    const env = loadEnvFile('mistral.env');
+    return !!(env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY);
+  }
+  if (providerId === 'cohere') {
+    const env = loadEnvFile('cohere.env');
+    return !!(env.COHERE_API_KEY || process.env.COHERE_API_KEY);
+  }
+  if (providerId === 'together') {
+    const env = loadEnvFile('together.env');
+    return !!(env.TOGETHER_API_KEY || process.env.TOGETHER_API_KEY);
+  }
+  if (providerId === 'stability') {
+    const env = loadEnvFile('stability.env');
+    return !!(env.STABILITY_API_KEY || process.env.STABILITY_API_KEY);
+  }
+  if (providerId === 'deepgram') {
+    const env = loadEnvFile('deepgram.env');
+    return !!(env.DEEPGRAM_API_KEY || process.env.DEEPGRAM_API_KEY);
+  }
+  if (providerId === 'assemblyai') {
+    const env = loadEnvFile('assemblyai.env');
+    return !!(env.ASSEMBLYAI_API_KEY || process.env.ASSEMBLYAI_API_KEY);
+  }
+  if (providerId === 'serper') {
+    const env = loadEnvFile('serper.env');
+    const envAlt = loadEnvFile('serpapi.env');
+    return !!(env.SERPER_API_KEY || envAlt.SERPAPI_API_KEY || envAlt.SERPER_API_KEY || process.env.SERPER_API_KEY);
   }
   return false;
 }
