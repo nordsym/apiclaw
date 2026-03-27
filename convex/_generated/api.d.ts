@@ -29,6 +29,7 @@ import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
 import type * as searchLogs from "../searchLogs.js";
+import type * as seedAPILayerAPIs from "../seedAPILayerAPIs.js";
 import type * as seedPratham from "../seedPratham.js";
 import type * as spendAlerts from "../spendAlerts.js";
 import type * as stripeActions from "../stripeActions.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;
   searchLogs: typeof searchLogs;
+  seedAPILayerAPIs: typeof seedAPILayerAPIs;
   seedPratham: typeof seedPratham;
   spendAlerts: typeof spendAlerts;
   stripeActions: typeof stripeActions;
