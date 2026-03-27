@@ -1,3 +1,9 @@
+---
+nord_type: SKILL
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # TOOLS.md - Local Notes
 
 Skills define *how* tools work. This file is for *your* specifics — the stuff that's unique to your setup.
@@ -34,3 +40,6 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ---
 
 Add whatever helps you do your job. This is your cheat sheet.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

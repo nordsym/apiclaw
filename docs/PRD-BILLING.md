@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Billing System
 
 **Status:** Draft  
@@ -224,3 +230,6 @@ Månad 2: 50/månad (bonus är one-time)
 - **Backers:** 10 första månaden, 50 till EOY
 - **Pay-per-usage conversion:** 20% av free users
 - **Revenue target:** $5k MRR EOY 2026
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

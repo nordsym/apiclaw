@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Final Polish
 
 Samlar alla återstående issues för en sista polish-runda.
@@ -115,3 +121,6 @@ STRIPE_PRICE_ID_USAGE=price_...
 2. **Stripe config** — Gustav gör manuellt med guide
 3. **Logging hook** — Kräver research i MCP-servern
 4. **Auto-Configure** — Future feature, PRD först
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

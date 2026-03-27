@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: Workspace Navigation & Error Fixes
 
 **Date:** 2026-02-28  
@@ -176,3 +182,6 @@ Delete `/providers/dashboard/page.tsx` and update layout to not render when at r
 | Update header | 20 min |
 | Testing | 15 min |
 | **Total** | **~1 hour** |
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

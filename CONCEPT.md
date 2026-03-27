@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Agent-Native API Discovery Platform
 
 **Vision:** The place where AI agents discover, evaluate, and purchase API access directly. No dashboard. No manual signup. Apps are dead. API-first. Agent-native.
@@ -492,3 +498,6 @@ The infrastructure for autonomous agent commerce is being built RIGHT NOW:
 ---
 
 *Research compiled by Symbot | 2026-02-16*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

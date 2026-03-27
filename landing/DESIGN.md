@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw Design System
 
 > "If Jason Calacanis would see this, it should look like a $10M funded startup."
@@ -341,3 +347,6 @@ Colors are defined in `tailwind.config.ts` and CSS variables in `globals.css`.
 ---
 
 *Design System v1.0 — APIClaw by NordSym*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

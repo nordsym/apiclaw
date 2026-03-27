@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Mobile Responsiveness
 
 ## Scope
@@ -54,3 +60,6 @@ Jag gör allt själv — inga subagenter. Estimat: ~20 min.
 ## Attestera?
 
 Svara **"kör"** för att starta.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

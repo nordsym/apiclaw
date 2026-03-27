@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Enterprise Deployment Guide
 
 Deploy APIClaw MCP server across your organization with MDM, Group Policy, or configuration management tools.

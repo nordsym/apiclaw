@@ -1,8 +1,36 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Changelog
 
 All notable changes to APIClaw.
 
 ## [Unreleased]
+
+---
+
+## [1.6.0] - 2026-03-27
+
+### Added
+- **APILayer Legacy APIs** — 13 new APIs integrated:
+  - **Finance (6):** Fixer, Currencylayer, Coinlayer, Exchangerate.host
+  - **Geolocation (5):** Weatherstack, IPstack, IPapi, Positionstack, Languagelayer
+  - **Scraping (2):** Scrapestack, Serpstack
+  - **News (1):** Mediastack
+  - **DevTools (1):** Userstack
+- Total APILayer expansion: 14 → 27 APIs
+
+### Changed
+- `credentials.ts` now reads both `apilayer.env` and `apilayer-legacy.env`
+- All legacy APIs consolidated under single `apilayer` provider
+- 20 new actions added to APILayer handler
+
+---
+
+## [1.5.19] - 2026-03-26
 
 ### Fixed
 - `doctor` connectivity check now uses resilient fallbacks:
@@ -84,3 +112,6 @@ We use [SemVer](https://semver.org/). Given version `MAJOR.MINOR.PATCH`:
 - [Documentation](https://apiclaw.nordsym.com/docs)
 - [GitHub](https://github.com/nordsym/apiclaw)
 - [npm](https://npmjs.com/package/@nordsym/apiclaw)
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

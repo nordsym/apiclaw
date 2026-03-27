@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw Vision
 
 **One-liner:** AWS är där compute bor. APIClaw är där APIs bor.
@@ -121,3 +127,6 @@ Not cold outreach — **"We're building something that benefits you."**
 
 *Last updated: 2026-02-22*
 *Authors: Gustav + Symbot*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

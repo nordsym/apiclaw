@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # USER.md - About Your Human
 
 *Learn about the person you're helping. Update this as you go.*
@@ -15,3 +21,6 @@
 ---
 
 The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

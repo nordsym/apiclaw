@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Earn System
 
 **Status:** Draft  
@@ -259,3 +265,6 @@ Earn bonus is **one-time**. Monthly free refreshes.
 2. **Referral cap:** Unlimited or max 50 referrals?
 3. **Expiration:** Do earned calls expire or persist?
 4. **Existing users:** Retroactive credit for already-completed actions?
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

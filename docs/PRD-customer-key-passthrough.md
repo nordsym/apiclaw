@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: Customer Key Passthrough
 
 **Status:** ✅ IMPLEMENTED  
@@ -182,3 +188,6 @@ Logga `customer_key_used: true/false` i usage logs (inte själva nyckeln).
 ---
 
 *Väntar på din feedback, Gustav.* 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

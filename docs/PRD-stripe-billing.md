@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Stripe Billing
 
 ## Sammanfattning
@@ -310,3 +316,6 @@ STRIPE_PRICE_ID_SCALE=price_...
 - Enterprise invoicing (PO, net-30)
 - Usage alerts/budgets
 - Prepaid credits with auto-topup
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

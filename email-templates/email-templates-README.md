@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: DRAFT
+---
+
 # APIClaw Email Templates
 
 Official HTML email templates for APIClaw communications.
@@ -102,3 +108,6 @@ Or use `action: "smtp"` for sending from `Symbot@nordsym.com`.
 Design is production-ready. Copy/content templates can be improved iteratively.
 
 Each email should feel like it came from the same visual system as apiclaw.nordsym.com.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

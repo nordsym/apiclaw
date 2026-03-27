@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # 🦞 APIClaw
 
 The API layer for AI agents. 18 providers → 1000s of capabilities. Workspace → Dashboard → Ship.
@@ -383,3 +389,6 @@ Returns the exact request that *would* be sent, with mock response data.
 ---
 
 MIT © [NordSym](https://nordsym.com)
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*
