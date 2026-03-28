@@ -147,7 +147,7 @@ const terminalLines = [
 const directCallProviders = [
   { name: "Replicate", desc: "1000+ ML models" },
   { name: "OpenRouter", desc: "100+ LLMs" },
-  { name: "APILayer", desc: "14 APIs" },
+  { name: "APILayer", desc: "27 APIs" },
   { name: "Firecrawl", desc: "Web scraping" },
   { name: "E2B", desc: "Code sandbox" },
   { name: "GitHub", desc: "Repos & Issues" },
@@ -174,7 +174,7 @@ export default function Home() {
 
   const directCallProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
     // Multi-API providers (top)
-    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 14 },
+    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 27 },
     { name: "Replicate", desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API", apis: 1000 },
     { name: "OpenRouter", desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "Multi-API", apis: 100 },
     // Single-purpose
@@ -220,7 +220,7 @@ Voice: ElevenLabs, Deepgram, AssemblyAI
 Search: Brave Search, Serper, Firecrawl
 Code: E2B, GitHub
 Utility: Resend (email), 46elks & Twilio (SMS)
-Multi-API: APILayer (exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping — 14 APIs)
+Multi-API: APILayer (exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping — 27 APIs)
 
 Your Tools:
 • call_api(provider, action, params) – Execute immediately (leave auth fields empty – APIClaw handles it)
