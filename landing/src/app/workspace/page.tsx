@@ -5319,13 +5319,14 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                path: "providerDirectCall:get",
-                args: { token: sessionToken, apiId: api._id },
+                path: "directCall:getDirectCallConfigByApiId",
+                args: { apiId: api._id },
               }),
             });
             const data = await res.json();
-            const config = data.value || data;
-            if (config && config.status) {
+            const config = data.value;
+            // Only store if a real config exists (not null, not an error)
+            if (config && config.status && config.status !== "error") {
               configs[api._id] = {
                 status: config.status,
                 keyHint: config.encryptedMasterKey ? "••••" + config.encryptedMasterKey.slice(-4) : "Not set",
@@ -5449,12 +5450,12 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
                     }`}>
                       {config.status}
                     </span>
-                    <a
-                      href={`/providers/dashboard/${api._id}/direct-call`}
+                    <button
+                      onClick={() => window.location.href = `/workspace?tab=my-apis`}
                       className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
                     >
                       Manage →
-                    </a>
+                    </button>
                   </div>
                 </div>
               );
@@ -5482,9 +5483,9 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <div className="flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-[var(--text-muted)]">
-            <p className="mb-2"><strong>Workspace API Key:</strong> Authenticate your agent's requests to APIClaw.</p>
-            <p><strong>Direct Call Service Keys:</strong> Your API credentials for provider integrations. Manage these in each API's Direct Call settings.</p>
+          <div className="text-sm text-[var(--text-muted)] space-y-1">
+            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — used by your AI agent to authenticate with APIClaw. Put this in your agent's MCP config.</p>
+            <p><strong className="text-[var(--text-primary)]">Direct Call Service Keys</strong> — your API credentials (e.g. APILayer key) for each integration you've enabled. Once configured, agents calling your APIs will use these behind the scenes. Set them up under <strong>My APIs → Direct Call</strong>.</p>
           </div>
         </div>
       </div>
