@@ -95,7 +95,7 @@ function BookForm() {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
     try {
-      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/apiclaw-booking", {
+      const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,8 +108,8 @@ function BookForm() {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
           source: "apiclaw-enterprise",
           meetingTitle: `APIClaw Enterprise${company ? ` — ${company}` : ""}`,
-          hostName: "Gustav",
-          hostEmail: "gustav@nordsym.com",
+          hostName: "Molle",
+          hostEmail: "molle@nordsym.com",
         }),
       });
       if (!res.ok) throw new Error();
