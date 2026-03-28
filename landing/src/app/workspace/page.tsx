@@ -885,7 +885,7 @@ export default function WorkspacePage() {
             <APICatalogTab apis={approvedApis} />
           )}
           {activeTab === "my-agents" && (
-            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
+            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} isProvider={isProvider} />
           )}
           {activeTab === "my-apis" && (
             <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} />
@@ -1529,12 +1529,14 @@ function AgentsTab({
   onRename,
   workspaceEmail,
   sessionToken,
+  isProvider = false,
 }: {
   agents: Agent[];
   onRevoke: (agentId: string) => void;
   onRename: (agentId: string, name: string) => void;
   workspaceEmail?: string;
   sessionToken?: string;
+  isProvider?: boolean;
 }) {
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
@@ -1887,6 +1889,16 @@ function AgentsTab({
                 <p className="text-xs text-[var(--text-muted)] mb-1">Last Active</p>
                 <p className="text-sm">{formatRelativeTime(primaryAgent.lastUsedAt)}</p>
               </div>
+            </div>
+          </div>
+        ) : isProvider ? (
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-[var(--surface)] border-2 border-dashed border-[var(--border)] flex items-center justify-center">
+              <Cpu className="w-7 h-7 text-[var(--text-muted)]" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[var(--text-muted)]">Provider account</h3>
+              <p className="text-sm text-[var(--text-muted)]">This workspace lists APIs — no agent required. If you want to test your own APIs directly, connect one below.</p>
             </div>
           </div>
         ) : (
@@ -2366,7 +2378,7 @@ function AnalyticsTab({
           }`}
         >
           <BarChart3 className="w-4 h-4" />
-          Overview
+          Agent Analytics
         </button>
         <button
           onClick={() => {
@@ -2380,7 +2392,7 @@ function AnalyticsTab({
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          Usage
+          API Analytics
         </button>
         <button
           onClick={() => {
@@ -2417,7 +2429,7 @@ function AnalyticsTab({
         <AnalyticsOverviewTab apis={apis} analytics={analytics} workspace={workspace} agents={agents} usage={usage} sessionToken={sessionToken} />
       )}
       {activeSubtab === "usage" && (
-        <UsageTab workspace={workspace} usage={usage} sessionToken={sessionToken} />
+        <UsageTab apis={apis} workspace={workspace} usage={usage} sessionToken={sessionToken} />
       )}
       {activeSubtab === "logs" && (
         <LogsTab sessionToken={sessionToken} />
@@ -3316,29 +3328,6 @@ function AnalyticsOverviewTab({
         </div>
       )}
 
-      {/* My APIs Performance */}
-      {apis.length > 0 && (
-        <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
-          <h3 className="font-semibold text-lg mb-4">My APIs Performance</h3>
-          <div className="space-y-4">
-            {apis.map((api) => (
-              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-5 h-5 text-[#ef4444]" />
-                  <div>
-                    <p className="font-medium">{api.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
-                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -3348,10 +3337,12 @@ function AnalyticsOverviewTab({
 // ============================================
 
 function UsageTab({
+  apis,
   workspace,
   usage,
   sessionToken,
 }: {
+  apis: ProviderAPI[];
   workspace: Workspace | null;
   usage: UsageData | null;
   sessionToken: string | null;
@@ -3497,6 +3488,30 @@ function UsageTab({
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* My APIs Performance */}
+      {apis.length > 0 && (
+        <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
+          <h3 className="font-semibold text-lg mb-4">My APIs Performance</h3>
+          <div className="space-y-3">
+            {apis.map((api) => (
+              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-[#ef4444]" />
+                  <div>
+                    <p className="font-medium">{api.name}</p>
+                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
+                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Top APIs - Now with Search column */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
