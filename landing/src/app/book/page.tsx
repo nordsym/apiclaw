@@ -152,7 +152,7 @@ function BookForm() {
           </div>
           <h1 className="text-2xl font-bold mb-3">Meeting booked</h1>
           <p className="text-[var(--text-muted)] mb-2">Check <strong>{email}</strong> for confirmation.</p>
-          <p className="text-sm text-[var(--text-muted)]">Gustav will be in touch before the meeting.</p>
+          <p className="text-sm text-[var(--text-muted)]">The team will be in touch to confirm details.</p>
           <a href="https://apiclaw.nordsym.com" className="inline-flex items-center gap-2 mt-8 text-[#ef4444] text-sm hover:underline">
             Back to APIClaw <ArrowRight className="w-3.5 h-3.5" />
           </a>
@@ -180,7 +180,7 @@ function BookForm() {
       <main className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-10">
           <h1 className="text-3xl font-bold mb-3">Book a call</h1>
-          <p className="text-[var(--text-muted)]">Tell us about your setup and pick a time. Gustav will reach out to confirm.</p>
+          <p className="text-[var(--text-muted)]">Tell us about your setup and pick a time. The team will reach out to confirm.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
