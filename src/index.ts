@@ -43,7 +43,7 @@ import {
   validateParams 
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
-import { readSession, writeSession, clearSession, getMachineFingerprint, SessionData } from './session.js';
+import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
   getOrCreateCustomer, 
@@ -81,6 +81,8 @@ interface WorkspaceContext {
 }
 
 let workspaceContext: WorkspaceContext | null = null;
+let currentAgentId: string | null = null; // Agent ID from agents table (set on startup)
+
 // Anonymous rate limit tracking (in-memory, per machine fingerprint)
 interface AnonymousRateLimitState {
   hourlyCount: number;
@@ -2298,6 +2300,26 @@ async function main() {
   
   // Validate session on startup
   const hasValidSession = await validateSession();
+
+  // Register/update agent identity (fire-and-forget)
+  try {
+    const fingerprint = getMachineFingerprint();
+    const mcpClient = detectMCPClient();
+    const result = await convex.mutation("agents:ensureAgent" as any, {
+      fingerprint,
+      mcpClient,
+      platform: process.platform,
+    });
+    if (result?.agentId) {
+      currentAgentId = result.agentId;
+    }
+    // If we got a new session token and don't have one, write it
+    if (result?.isNew && result?.sessionToken && !hasValidSession) {
+      writeSession(result.sessionToken, result.workspaceId, "");
+    }
+  } catch (e) {
+    console.error('[APIClaw] Agent registration failed (non-blocking):', e);
+  }
   
   // Welcome message with onboarding
   console.error(`

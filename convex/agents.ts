@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "./_generated/server";
+import { mutation, query, internalMutation, internalAction } from "./_generated/server";
 
 // ============================================
 // AGENT NAME GENERATION
@@ -587,5 +587,228 @@ export const updateSubagentStats = mutation({
     });
 
     return { success: true, newCallCount: (subagent.callCount || 0) + incrementCalls };
+  },
+});
+
+// ============================================
+// AGENT IDENTITY (agents table — NOT agentSessions)
+// An agent = unique (fingerprint, mcpClient) pair
+// ============================================
+
+function generateSessionToken(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 48; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "CLAW-";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+/**
+ * Ensure agent exists for this (fingerprint, mcpClient) pair.
+ * Auto-provisions a free-tier workspace if none exists.
+ * Called on every MCP server startup.
+ */
+export const ensureAgent = mutation({
+  args: {
+    fingerprint: v.string(),
+    mcpClient: v.string(),
+    platform: v.optional(v.string()),
+  },
+  handler: async (ctx, { fingerprint, mcpClient, platform }) => {
+    const now = Date.now();
+
+    // 1. Check if agent already exists
+    const existing = await ctx.db
+      .query("agents")
+      .withIndex("by_fingerprint_client", (q) =>
+        q.eq("fingerprint", fingerprint).eq("mcpClient", mcpClient)
+      )
+      .first();
+
+    if (existing) {
+      // Update last active + platform
+      await ctx.db.patch(existing._id, {
+        lastActiveAt: now,
+        ...(platform ? { platform } : {}),
+      });
+
+      // Find session for this workspace
+      const session = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", existing.workspaceId))
+        .first();
+
+      return {
+        agentId: existing._id,
+        workspaceId: existing.workspaceId,
+        sessionToken: session?.sessionToken || null,
+        isNew: false,
+      };
+    }
+
+    // 2. No agent exists — check if there's a workspace for this fingerprint (from another mcpClient)
+    const siblingAgent = await ctx.db
+      .query("agents")
+      .filter((q) => q.eq(q.field("fingerprint"), fingerprint))
+      .first();
+
+    let workspaceId;
+
+    if (siblingAgent) {
+      // Reuse existing workspace (same machine, different client)
+      workspaceId = siblingAgent.workspaceId;
+    } else {
+      // 3. No workspace at all — auto-provision free tier
+      workspaceId = await ctx.db.insert("workspaces", {
+        email: "", // no email yet — added when user registers
+        status: "active",
+        tier: "free",
+        usageCount: 0,
+        usageLimit: 50,
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50,
+        hourlyUsageCount: 0,
+        referralCode: generateReferralCode(),
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    // 4. Create agent record
+    const agentId = await ctx.db.insert("agents", {
+      fingerprint,
+      mcpClient,
+      workspaceId,
+      name: generateAgentName(),
+      platform: platform || undefined,
+      callCount: 0,
+      firstSeenAt: now,
+      lastActiveAt: now,
+    });
+
+    // 5. Create session
+    const sessionToken = generateSessionToken();
+    await ctx.db.insert("agentSessions", {
+      workspaceId,
+      sessionToken,
+      fingerprint,
+      lastUsedAt: now,
+      createdAt: now,
+    });
+
+    return {
+      agentId,
+      workspaceId,
+      sessionToken,
+      isNew: true,
+    };
+  },
+});
+
+/**
+ * Link email to an existing workspace (called by register_owner + verifyMagicLink)
+ */
+export const linkEmailToWorkspace = mutation({
+  args: {
+    fingerprint: v.string(),
+    email: v.string(),
+  },
+  handler: async (ctx, { fingerprint, email }) => {
+    // Find agent by fingerprint → get workspace
+    const agent = await ctx.db
+      .query("agents")
+      .filter((q) => q.eq(q.field("fingerprint"), fingerprint))
+      .first();
+
+    if (agent) {
+      const workspace = await ctx.db.get(agent.workspaceId);
+      if (workspace && (!workspace.email || workspace.email === "")) {
+        // Add email to existing workspace
+        await ctx.db.patch(workspace._id, {
+          email,
+          updatedAt: Date.now(),
+        });
+        return { workspaceId: workspace._id, linked: true };
+      }
+    }
+
+    return { workspaceId: null, linked: false };
+  },
+});
+
+/**
+ * Increment call count for an agent
+ */
+export const incrementAgentCalls = mutation({
+  args: { agentId: v.id("agents") },
+  handler: async (ctx, { agentId }) => {
+    const agent = await ctx.db.get(agentId);
+    if (!agent) return;
+
+    await ctx.db.patch(agentId, {
+      callCount: agent.callCount + 1,
+      lastActiveAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Get all agents for a workspace (for dashboard "My Agents")
+ */
+export const getWorkspaceAgents = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) return [];
+
+    const agents = await ctx.db
+      .query("agents")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+
+    return agents.map((a) => ({
+      id: a._id,
+      fingerprint: a.fingerprint,
+      mcpClient: a.mcpClient,
+      name: a.name,
+      hostname: a.fingerprint.split(":")[0],
+      aiBackend: a.aiBackend,
+      platform: a.platform,
+      callCount: a.callCount,
+      firstSeenAt: a.firstSeenAt,
+      lastActiveAt: a.lastActiveAt,
+    }));
+  },
+});
+
+/**
+ * Get total agent count (for landing page / admin)
+ */
+export const getTotalAgentCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const agents = await ctx.db.query("agents").collect();
+    const byClient: Record<string, number> = {};
+    for (const a of agents) {
+      byClient[a.mcpClient] = (byClient[a.mcpClient] || 0) + 1;
+    }
+    return {
+      total: agents.length,
+      byClient,
+    };
   },
 });

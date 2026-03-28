@@ -48,6 +48,7 @@ export interface MergeOptions {
   force?: boolean;
   workspace?: string;
   serverName?: string;
+  clientName?: string; // MCP client identifier (e.g., "cursor", "claude-desktop")
 }
 
 /**
@@ -188,13 +189,15 @@ export function generateApiclawConfig(options: MergeOptions = {}): MCPServerConf
     command: 'npx',
     args: ['-y', '@nordsym/apiclaw'],
   };
-  
-  if (options.workspace) {
-    config.env = {
-      APICLAW_WORKSPACE: options.workspace,
-    };
+
+  const env: Record<string, string> = {};
+  if (options.workspace) env.APICLAW_WORKSPACE = options.workspace;
+  if (options.clientName) env.APICLAW_MCP_CLIENT = options.clientName;
+
+  if (Object.keys(env).length > 0) {
+    config.env = env;
   }
-  
+
   return config;
 }
 

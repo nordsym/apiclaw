@@ -124,16 +124,47 @@ export const verifyMagicLink = mutation({
       }
     }
 
-    // Create agent session
+    // Reuse existing session for same machine (fix: no more duplicate sessions per login)
     const sessionToken = generateToken();
+    const userFingerprint2 = fingerprint || magicLink.sessionFingerprint;
 
-    await ctx.db.insert("agentSessions", {
-      workspaceId: workspace!._id,
-      sessionToken,
-      fingerprint: fingerprint || magicLink.sessionFingerprint,
-      lastUsedAt: Date.now(),
-      createdAt: Date.now(),
-    });
+    const existingSession = userFingerprint2
+      ? await ctx.db
+          .query("agentSessions")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace!._id))
+          .filter((q) => q.eq(q.field("fingerprint"), userFingerprint2))
+          .first()
+      : null;
+
+    if (existingSession) {
+      // Refresh existing session instead of creating duplicate
+      await ctx.db.patch(existingSession._id, {
+        sessionToken,
+        lastUsedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("agentSessions", {
+        workspaceId: workspace!._id,
+        sessionToken,
+        fingerprint: userFingerprint2 || undefined,
+        lastUsedAt: Date.now(),
+        createdAt: Date.now(),
+      });
+    }
+
+    // Link agent record to workspace (if agent exists for this fingerprint)
+    if (userFingerprint2) {
+      const agentForFingerprint = await ctx.db
+        .query("agents")
+        .filter((q) => q.eq(q.field("fingerprint"), userFingerprint2))
+        .first();
+
+      if (agentForFingerprint && !agentForFingerprint.workspaceId) {
+        await ctx.db.patch(agentForFingerprint._id, {
+          workspaceId: workspace!._id,
+        });
+      }
+    }
 
     // Claim anonymous usage history
     const userFingerprint = fingerprint || magicLink.sessionFingerprint;

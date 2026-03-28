@@ -139,6 +139,24 @@ export default defineSchema({
     .index("by_sessionToken", ["sessionToken"])
     .index("by_workspaceId", ["workspaceId"]),
 
+  // Agents — one per unique (fingerprint, mcpClient) pair
+  // An agent = an MCP client installation, NOT a login session
+  agents: defineTable({
+    fingerprint: v.string(), // hostname:username
+    mcpClient: v.string(), // "claude-desktop" | "claude-code" | "cursor" | "windsurf" | "cline" | "continue" | "unknown"
+    workspaceId: v.id("workspaces"), // always linked — auto-created on first call
+    name: v.optional(v.string()), // auto-generated or user-set
+    aiBackend: v.optional(v.string()), // "claude-3-opus" etc
+    platform: v.optional(v.string()), // "darwin" | "linux" | "win32"
+    callCount: v.number(),
+    firstSeenAt: v.number(),
+    lastActiveAt: v.number(),
+  })
+    .index("by_fingerprint_client", ["fingerprint", "mcpClient"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_lastActiveAt", ["lastActiveAt"])
+    .index("by_mcpClient", ["mcpClient"]),
+
   // Subagent tracking (tasks spawned by main agent)
   subagents: defineTable({
     workspaceId: v.id("workspaces"),

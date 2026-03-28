@@ -199,6 +199,7 @@ export abstract class BaseAdapter implements MCPClientAdapter {
         workspace: options.workspaceId,
         serverName,
         force: options.force,
+        clientName: this.name === 'custom' ? undefined : this.name,
       };
       
       const newConfig = this.mergeConfig(config, mergeOptions);

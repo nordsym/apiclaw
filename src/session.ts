@@ -101,3 +101,18 @@ export function getMachineFingerprint(): string {
   const username = os.userInfo().username;
   return `${hostname}:${username}`;
 }
+
+/**
+ * Detect which MCP client is running the server
+ * Priority: explicit env (set by mcp-install) → known env hints → fallback
+ */
+export function detectMCPClient(): string {
+  // 1. Explicit env (injected by mcp-install adapters)
+  if (process.env.APICLAW_MCP_CLIENT) return process.env.APICLAW_MCP_CLIENT;
+  // 2. Known environment variable hints
+  if (process.env.CURSOR_TRACE_DIR) return 'cursor';
+  if (process.env.CLAUDE_CODE) return 'claude-code';
+  if (process.env.WINDSURF_SESSION) return 'windsurf';
+  // 3. Fallback
+  return 'unknown';
+}
