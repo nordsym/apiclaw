@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
 import { PhoneDemo } from "@/components/demo";
 import { AITestimonials } from "@/components/AITestimonials";
+import { VideoDemo } from "@/components/VideoDemo";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
@@ -1029,7 +1030,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  18 Direct Call providers
+                  19 Direct Call providers
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
@@ -1132,7 +1133,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               },
               {
                 q: "How does Direct Call work?",
-                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 18 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
+                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 19 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
               },
               {
                 q: "How are API credentials secured?",
@@ -1327,6 +1328,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
           </div>
         </div>
       )}
+      <VideoDemo />
     </main>
   );
 }
