@@ -4507,7 +4507,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
       features: ["Everything in Scale", "Custom call limits", "Private deployment options", "Dedicated account manager"],
       cta: "Book a call",
       ctaDisabled: false,
-      link: "https://nordsym.app.n8n.cloud/webhook/hivr-booking",
+      link: "/book",
       highlight: false,
     },
   ];
@@ -4572,7 +4572,11 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
                 ))}
               </ul>
               <button
-                onClick={() => plan.link && !plan.ctaDisabled && window.open(plan.link, "_blank")}
+                onClick={() => {
+                  if (!plan.link || plan.ctaDisabled) return;
+                  if (plan.link.startsWith("/")) window.location.href = plan.link;
+                  else window.open(plan.link, "_blank");
+                }}
                 disabled={plan.ctaDisabled || isCurrentPlan}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${
                   isCurrentPlan || plan.ctaDisabled
