@@ -301,17 +301,27 @@ export default function WorkspacePage() {
         setWorkspace(dashboard.workspace);
       }
 
+      // Load connected agents from new agents table
       const agentsRes = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          path: "workspaces:getConnectedAgents",
+          path: "agents:getWorkspaceAgents",
           args: { token },
         }),
       });
-      
+
       const agentsData = await agentsRes.json();
-      setAgents(agentsData.value || agentsData || []);
+      const connectedAgents = agentsData.value || agentsData || [];
+      // Map to legacy Agent interface for Overview compatibility
+      setAgents(connectedAgents.map((a: ConnectedAgent) => ({
+        id: a.id,
+        fingerprint: a.fingerprint,
+        name: a.name,
+        lastUsedAt: a.lastActiveAt,
+        createdAt: a.firstSeenAt,
+        isCurrent: false,
+      })));
 
       const usageRes = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST",
@@ -1955,14 +1965,11 @@ function AgentsTab({
   };
 
   const handleRevoke = (agentId: string) => {
-    const agent = agents.find(a => a.id === agentId);
     if (confirmRevoke === agentId) {
       onRevoke(agentId);
       setConfirmRevoke(null);
-      if (agent?.isCurrent) {
-        localStorage.removeItem("apiclaw_workspace_session");
-        window.location.href = "/login";
-      }
+      // Remove from local connected agents list (no logout)
+      setConnectedAgents(prev => prev.filter(a => a.id !== agentId));
     } else {
       setConfirmRevoke(agentId);
     }
