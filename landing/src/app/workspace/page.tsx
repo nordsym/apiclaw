@@ -132,6 +132,8 @@ interface ApprovedAPI {
   status: string;
   hasDirectCall?: boolean;
   icon?: string;
+  openApiUrl?: string;
+  docsUrl?: string;
 }
 
 interface ProviderAnalytics {
@@ -1148,108 +1150,203 @@ function OverviewTab({
 // API CATALOG TAB (All Approved APIs)
 // ============================================
 
+const DIRECT_CALL_PROVIDERS = [
+  { name: "APILayer", apis: 27, desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API" },
+  { name: "Replicate", apis: 1000, desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API" },
+  { name: "OpenRouter", apis: 100, desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "AI & LLM" },
+  { name: "ElevenLabs", apis: 1, desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
+  { name: "Groq", apis: 1, desc: "Ultra-fast LLM inference", category: "AI & LLM" },
+  { name: "Deepgram", apis: 1, desc: "Speech-to-text transcription", category: "Voice & TTS" },
+  { name: "Firecrawl", apis: 1, desc: "Web scraping to LLM-ready markdown", category: "Search" },
+  { name: "Brave Search", apis: 1, desc: "Privacy-focused web search", category: "Search" },
+  { name: "Serper", apis: 1, desc: "Google search API for AI", category: "Search" },
+  { name: "E2B", apis: 1, desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
+  { name: "GitHub", apis: 1, desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
+  { name: "Resend", apis: 1, desc: "Modern email API for developers", category: "Email" },
+  { name: "46elks", apis: 1, desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
+  { name: "Twilio", apis: 1, desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
+  { name: "Mistral", apis: 1, desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
+  { name: "Cohere", apis: 1, desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
+  { name: "Together AI", apis: 1, desc: "Open-source model inference", category: "AI & LLM" },
+  { name: "Stability AI", apis: 1, desc: "Stable Diffusion image generation", category: "AI & LLM" },
+  { name: "AssemblyAI", apis: 1, desc: "Audio transcription and intelligence", category: "Voice & TTS" },
+];
+
 function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [activeSection, setActiveSection] = useState<"direct-call" | "search" | "open-api">("direct-call");
+  const [dcFilter, setDcFilter] = useState("all");
+  const [openApiFilter, setOpenApiFilter] = useState("all");
 
-  // Get unique categories
-  const categories = ["all", ...Array.from(new Set(apis.map(a => a.category)))];
+  const dcCategories = ["all", ...Array.from(new Set(DIRECT_CALL_PROVIDERS.map(p => p.category)))];
+  const filteredDc = dcFilter === "all" ? DIRECT_CALL_PROVIDERS : DIRECT_CALL_PROVIDERS.filter(p => p.category === dcFilter);
 
-  // Filter APIs
-  const filteredApis = apis.filter(api => {
-    const matchesSearch = !searchQuery || 
-      api.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      api.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || api.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const openApiCategories = ["all", ...Array.from(new Set(apis.map(a => a.category)))];
+  const filteredOpenApis = openApiFilter === "all" ? apis : apis.filter(a => a.category === openApiFilter);
 
-  // Get icon component for category
-  const CategoryIcon = ({ category }: { category: string }) => {
-    const iconClass = "w-5 h-5 text-[#ef4444]";
-    switch (category) {
-      case "Search": return <Search className={iconClass} />;
-      case "AI & LLM": return <Cpu className={iconClass} />;
-      case "Communication": return <MessageSquare className={iconClass} />;
-      case "Email": return <Mail className={iconClass} />;
-      case "Voice & Audio": return <Activity className={iconClass} />;
-      case "Code Execution": return <Terminal className={iconClass} />;
-      case "Web Scraping": return <Globe className={iconClass} />;
-      case "Image": return <Sparkles className={iconClass} />;
-      case "Media": return <Play className={iconClass} />;
-      case "SMS & Messaging": return <MessageSquare className={iconClass} />;
-      case "Voice & TTS": return <Activity className={iconClass} />;
-      case "Crypto & Blockchain": return <Database className={iconClass} />;
-      default: return <Zap className={iconClass} />;
-    }
-  };
+  const totalDcApis = DIRECT_CALL_PROVIDERS.reduce((sum, p) => sum + p.apis, 0);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Direct Call</h2>
-          <p className="text-[var(--text-muted)]">{apis.length} APIs available for Direct Call</p>
-        </div>
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold">API Catalog</h2>
+        <p className="text-[var(--text-muted)] mt-1">Everything your agent can access via APIClaw MCP. Agents discover and call APIs — this is the reference view.</p>
       </div>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search APIs..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-          />
-        </div>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+      {/* Section Selector */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* Direct Call */}
+        <button
+          onClick={() => setActiveSection("direct-call")}
+          className={`rounded-2xl border p-4 text-left transition ${activeSection === "direct-call" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
-          {categories.map(cat => (
-            <option key={cat} value={cat}>
-              {cat === "all" ? "All Categories" : cat}
-            </option>
-          ))}
-        </select>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-[#ef4444]" />
+            </div>
+            <span className="font-semibold text-sm">Direct Call</span>
+          </div>
+          <p className="text-2xl font-bold">{DIRECT_CALL_PROVIDERS.length}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">providers · {totalDcApis.toLocaleString()}+ APIs</p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">No keys needed. Agent calls via APIClaw proxy.</p>
+          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-green-400 font-mono">call_api(provider, action, params)</code>
+        </button>
+
+        {/* Search Index */}
+        <button
+          onClick={() => setActiveSection("search")}
+          className={`rounded-2xl border p-4 text-left transition ${activeSection === "search" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Search className="w-4 h-4 text-blue-400" />
+            </div>
+            <span className="font-semibold text-sm">Search Index</span>
+          </div>
+          <p className="text-2xl font-bold">22k+</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">APIs indexed</p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Semantic search by capability. Agent finds what it needs.</p>
+          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-blue-400 font-mono">discover_apis(query)</code>
+        </button>
+
+        {/* Open API */}
+        <button
+          onClick={() => setActiveSection("open-api")}
+          className={`rounded-2xl border p-4 text-left transition ${activeSection === "open-api" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <ScrollText className="w-4 h-4 text-purple-400" />
+            </div>
+            <span className="font-semibold text-sm">Open API</span>
+          </div>
+          <p className="text-2xl font-bold">{apis.length}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">APIs with full schema</p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Community-registered with OpenAPI specs. Agent gets full schema.</p>
+          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-purple-400 font-mono">get_api_details(id)</code>
+        </button>
       </div>
 
-      {/* API Grid */}
-      {filteredApis.length === 0 ? (
-        <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50">
-          <Search className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No APIs Found</h3>
-          <p className="text-[var(--text-muted)]">Try adjusting your search or filter.</p>
+      {/* DIRECT CALL SECTION */}
+      {activeSection === "direct-call" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-muted)]">{filteredDc.length} providers shown</p>
+            <select value={dcFilter} onChange={e => setDcFilter(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+              {dcCategories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            {filteredDc.map(provider => (
+              <div key={provider.name} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[#ef4444]/30 transition">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-[#ef4444]" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{provider.name}</p>
+                    <p className="text-xs text-[var(--text-muted)] max-w-md truncate">{provider.desc}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 ml-4 shrink-0">
+                  <span className="text-xs text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded">{provider.category}</span>
+                  <span className="text-xs font-medium text-green-400 bg-green-500/10 px-2 py-0.5 rounded">{provider.apis > 1 ? `${provider.apis}+ APIs` : "Ready"}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredApis.map((api) => (
-            <div
-              key={api._id}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 hover:border-[#ef4444]/50 transition group"
-            >
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
-                  <CategoryIcon category={api.category} />
+      )}
+
+      {/* SEARCH INDEX SECTION */}
+      {activeSection === "search" && (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2"><Search className="w-4 h-4 text-blue-400" />How agents use the search index</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-4">The agent doesn&apos;t browse — it searches by capability. APIClaw returns ranked matches with specs and pricing. The agent decides which API fits and calls it.</p>
+            <div className="space-y-2">
+              {[
+                { q: "convert speech to text", comment: "→ returns Deepgram, AssemblyAI, Whisper" },
+                { q: "send SMS to Swedish number", comment: "→ returns 46elks, Twilio" },
+                { q: "get current exchange rates", comment: "→ returns ExchangeRate API, Fixer, Currencylayer" },
+                { q: "generate image from prompt", comment: "→ returns Replicate/SDXL, Stability AI, Flux" },
+              ].map(ex => (
+                <div key={ex.q} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2.5">
+                  <code className="text-sm text-blue-400 font-mono">discover_apis(&quot;{ex.q}&quot;)</code>
+                  <span className="text-xs text-[var(--text-muted)] ml-3">{ex.comment}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">{api.name}</h3>
-                  <span className="text-sm text-[var(--text-muted)]">{api.category}</span>
-                </div>
-              </div>
-              <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-4">{api.description}</p>
-              <div className="flex items-center">
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                  <Check className="w-3 h-3" />
-                  Direct Call Ready
-                </span>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+          <div className="rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium">22,000+ APIs indexed</p>
+              <p className="text-sm text-[var(--text-muted)]">Updated continuously. Semantic vector search across name, description, category, and tags.</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-blue-400">22k+</p>
+              <p className="text-xs text-[var(--text-muted)]">APIs indexed</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OPEN API SECTION */}
+      {activeSection === "open-api" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-muted)]">{filteredOpenApis.length} APIs with schema</p>
+            <select value={openApiFilter} onChange={e => setOpenApiFilter(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+              {openApiCategories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
+            </select>
+          </div>
+          {filteredOpenApis.length === 0 ? (
+            <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)]">
+              <ScrollText className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-3" />
+              <p className="font-medium">No APIs yet</p>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Register your API to appear here.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredOpenApis.map(api => (
+                <div key={api._id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-purple-500/30 transition">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <ScrollText className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{api.name}</p>
+                      <p className="text-xs text-[var(--text-muted)] max-w-md truncate">{api.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4 shrink-0">
+                    <span className="text-xs text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded">{api.category}</span>
+                    {api.openApiUrl && <span className="text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Schema ✓</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
