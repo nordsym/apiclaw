@@ -819,7 +819,7 @@ export const createWorkspace = mutation({
       status: "pending",
       tier: "free",
       usageCount: 0,
-      usageLimit: 100, // Free tier limit
+      usageLimit: 50, // Free tier limit
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

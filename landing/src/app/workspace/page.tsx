@@ -958,195 +958,140 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
+  const isBacker = workspace?.tier === "backer";
+  const usagePct = workspace ? Math.min((workspace.usageCount / workspace.usageLimit) * 100, 100) : 0;
   return (
-    <div className="space-y-8">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Zap className="w-6 h-6 text-[#ef4444]" />
-            <span className="text-[var(--text-muted)]">API Catalog</span>
-          </div>
-          <p className="text-4xl font-bold text-[#ef4444]">{statsData.apiCount.toLocaleString()}</p>
-        </div>
+    <div className="space-y-6">
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <BarChart3 className={`w-6 h-6 ${workspace ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
-            <span className="text-[var(--text-muted)]">API Calls</span>
-          </div>
-          <p className={`text-4xl font-bold ${workspace ? "text-[#ef4444]" : ""}`}>
-            {workspace?.usageCount.toLocaleString() || 0}
-          </p>
-          {workspace && (
-            <p className="text-sm text-[var(--text-muted)] mt-1">
-              of {workspace.usageLimit.toLocaleString()} limit
-            </p>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Users className="w-6 h-6 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">My Agents</span>
-          </div>
-          <p className="text-4xl font-bold">{agents.length}</p>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <Terminal className="w-6 h-6 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">My APIs</span>
-          </div>
-          <p className="text-4xl font-bold">{providerApis.length}</p>
-        </div>
-      </div>
-
-      {/* Usage Progress */}
-      {workspace && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Monthly Usage</h3>
-            <span className="text-sm text-[var(--text-muted)]">
-              {workspace.usagePercentage.toFixed(1)}% used
-            </span>
-          </div>
-          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                workspace.usagePercentage > 90 ? "bg-red-500" :
-                workspace.usagePercentage > 70 ? "bg-yellow-500" : "bg-[#ef4444]"
-              }`}
-              style={{ width: `${Math.min(workspace.usagePercentage, 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between mt-4 text-sm text-[var(--text-muted)]">
-            <span>{workspace.usageCount.toLocaleString()} calls used</span>
-            <span>{workspace.usageRemaining.toLocaleString()} remaining</span>
-          </div>
-          
-          {workspace.usagePercentage > 80 && workspace.tier === "free" && (
-            <div className="mt-4 p-4 rounded-xl bg-[#ef4444]/10 border border-[#ef4444]/30">
-              <div className="flex items-center gap-2 text-[#ef4444] mb-2">
-                <AlertCircle className="w-5 h-5" />
-                <span className="font-medium">Running low on API calls</span>
-              </div>
-              <p className="text-sm text-[var(--text-muted)] mb-3">
-                Upgrade to Pro for 10,000 API calls/month.
-              </p>
-              <button onClick={() => setActiveTab("billing")} className="btn-primary !py-2 !px-4 text-sm">
-                Upgrade to Pro
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Available APIs Preview */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Direct Call</h3>
-          <button onClick={() => setActiveTab("api-catalog")} className="text-sm text-[#ef4444] hover:underline">
-            View all {approvedApis.length} APIs
-          </button>
+      {/* ── WORLD 1: AGENT SIDE ─────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <Bot className="w-4 h-4 text-[var(--text-muted)]" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">Your Agent</span>
+          <div className="flex-1 h-px bg-[var(--border)]" />
         </div>
         <div className="grid md:grid-cols-3 gap-3">
-          {approvedApis.slice(0, 3).map((api) => (
-            <div
-              key={api._id}
-              className="p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-5 h-5 text-[#ef4444]" />
-                <p className="font-medium">{api.name}</p>
-              </div>
-              <p className="text-sm text-[var(--text-muted)] line-clamp-2">{api.description}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="px-2 py-0.5 rounded-full bg-[var(--background)] text-xs text-[var(--text-muted)]">
-                  {api.category}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                  Direct Call
-                </span>
-              </div>
+          {/* Agents card */}
+          <button onClick={() => setActiveTab("my-agents")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+            <div className="flex items-center justify-between mb-3">
+              <Bot className="w-5 h-5 text-[#ef4444]" />
+              {agents.length > 0 && <span className="flex items-center gap-1.5 text-xs text-green-400"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Connected</span>}
             </div>
-          ))}
+            <p className="text-2xl font-bold">{agents.length}</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">{agents.length === 1 ? "agent" : "agents"} connected</p>
+            {agents.length > 0 && (
+              <div className="mt-3 space-y-1">
+                {agents.slice(0, 2).map(a => (
+                  <p key={a.id} className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--border)] shrink-0" />
+                    {a.isCurrent ? <span className="text-[#ef4444]">{a.fingerprint} (current)</span> : a.fingerprint}
+                  </p>
+                ))}
+              </div>
+            )}
+            {agents.length === 0 && <p className="text-xs text-[var(--text-muted)] mt-2">Run <code className="font-mono bg-[var(--surface)] px-1 rounded">mcp-install</code> to connect</p>}
+          </button>
+
+          {/* Usage card */}
+          <button onClick={() => setActiveTab("analytics")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+            <div className="flex items-center justify-between mb-3">
+              <BarChart3 className="w-5 h-5 text-[#ef4444]" />
+              <span className={`text-xs px-2 py-0.5 rounded-full ${isBacker ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
+                {isBacker ? "Backer" : workspace?.tier || "free"}
+              </span>
+            </div>
+            <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">
+              {isBacker ? "calls (unlimited)" : `of ${workspace?.usageLimit || 50} this month`}
+            </p>
+            {!isBacker && workspace && (
+              <div className="mt-3">
+                <div className="h-1.5 bg-[var(--surface)] rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${usagePct > 90 ? "bg-red-500" : usagePct > 70 ? "bg-yellow-500" : "bg-[#ef4444]"}`}
+                    style={{ width: `${usagePct}%` }} />
+                </div>
+                <p className="text-xs text-[var(--text-muted)] mt-1">{workspace.usageRemaining} remaining</p>
+              </div>
+            )}
+          </button>
+
+          {/* API Catalog access card */}
+          <button onClick={() => setActiveTab("api-catalog")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+            <div className="flex items-center justify-between mb-3">
+              <ScanSearch className="w-5 h-5 text-blue-400" />
+            </div>
+            <p className="text-2xl font-bold">{statsData.apiCount.toLocaleString()}</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">APIs in catalog</p>
+            <div className="mt-3 space-y-1">
+              <p className="text-xs flex items-center gap-1.5 text-green-400"><Check className="w-3 h-3" />Search always available</p>
+              <p className="text-xs flex items-center gap-1.5 text-green-400"><Check className="w-3 h-3" />Open APIs always available</p>
+              <p className={`text-xs flex items-center gap-1.5 ${isBacker || (workspace?.usageRemaining ?? 1) > 0 ? "text-green-400" : "text-red-400"}`}>
+                {(isBacker || (workspace?.usageRemaining ?? 1) > 0) ? <Check className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                Direct Call {(!isBacker && (workspace?.usageRemaining ?? 1) <= 0) ? "blocked (limit reached)" : "available"}
+              </p>
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* My APIs Preview */}
+      {/* ── WORLD 2: PROVIDER SIDE ──────────────────────────────── */}
       {providerApis.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">My APIs</h3>
-            <button onClick={() => setActiveTab("my-apis")} className="text-sm text-[#ef4444] hover:underline">
-              Manage APIs
-            </button>
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Layers className="w-4 h-4 text-[var(--text-muted)]" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">Your APIs</span>
+            <div className="flex-1 h-px bg-[var(--border)]" />
           </div>
-          <div className="space-y-3">
-            {providerApis.slice(0, 3).map((api) => (
-              <div
-                key={api._id}
-                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]"
-              >
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+              <div className="flex items-center gap-3">
+                <Terminal className="w-5 h-5 text-[#ef4444]" />
                 <div>
-                  <p className="font-medium">{api.name}</p>
-                  <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {api.hasDirectCall && (
-                    <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                      Direct Call
-                    </span>
-                  )}
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    api.status === "approved" ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"
-                  }`}>
-                    {api.status}
-                  </span>
+                  <p className="font-semibold">{providerApis.length} APIs registered</p>
+                  <p className="text-xs text-[var(--text-muted)]">Agents can discover and call these via APIClaw</p>
                 </div>
               </div>
-            ))}
+              <button onClick={() => setActiveTab("my-apis")} className="text-sm text-[#ef4444] hover:underline shrink-0">Manage</button>
+            </div>
+            <div className="divide-y divide-[var(--border)]">
+              {providerApis.slice(0, 5).map(api => (
+                <div key={api._id} className="flex items-center justify-between px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-[#ef4444]/10 flex items-center justify-center shrink-0">
+                      <Zap className="w-3.5 h-3.5 text-[#ef4444]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{api.name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{api.category}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {api.hasDirectCall && <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded">Direct Call</span>}
+                    <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"}`}>{api.status}</span>
+                  </div>
+                </div>
+              ))}
+              {providerApis.length > 5 && (
+                <div className="px-5 py-3 text-sm text-[var(--text-muted)]">
+                  +{providerApis.length - 5} more APIs
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Recent Agents */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">My Agents</h3>
-          <button onClick={() => setActiveTab("my-agents")} className="text-sm text-[#ef4444] hover:underline">
-            View all
-          </button>
-        </div>
-        {agents.length > 0 ? (
-          <div className="space-y-3">
-            {agents.slice(0, 3).map((agent) => (
-              <div key={agent.id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[#ef4444]" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{agent.fingerprint}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
-                      Last active: {new Date(agent.lastUsedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                {agent.isCurrent && (
-                  <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                    Current
-                  </span>
-                )}
-              </div>
-            ))}
+      {/* Upgrade nudge for free tier running low */}
+      {!isBacker && workspace && usagePct > 80 && (
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5 flex items-start gap-4">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium text-[#ef4444]">Running low on Direct Call usage</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Search and Open APIs always work. Direct Call APIs need usage credits.</p>
           </div>
-        ) : (
-          <p className="text-[var(--text-muted)] text-center py-8">No agents connected yet</p>
-        )}
-      </div>
+          <button onClick={() => setActiveTab("billing")} className="px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition shrink-0">Upgrade</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -4661,7 +4606,7 @@ function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; 
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "100"} / month</span>
+              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "50"} / month</span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
               <span className="text-[var(--text-muted)]">Support</span>
@@ -5759,11 +5704,15 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
         </div>
       </div>
 
-      {/* Direct Call Service Keys */}
+      {/* Direct Call API Credentials */}
+      {providerApis.length > 0 && (
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
         <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-          <h3 className="font-semibold">Direct Call Service Keys</h3>
-          <span className="text-sm text-[var(--text-muted)]">{directCallApis.length} configured</span>
+          <div>
+            <h3 className="font-semibold">API Credentials</h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Master keys stored for your Direct Call integrations. Never exposed to agents.</p>
+          </div>
+          <span className="text-sm text-[var(--text-muted)]">{directCallApis.length} of {providerApis.length} configured</span>
         </div>
         
         {directCallApis.length > 0 ? (
@@ -5771,10 +5720,7 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
             {directCallApis.map((api) => {
               const config = directCallConfigs[api._id];
               return (
-                <div
-                  key={api._id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3"
-                >
+                <div key={api._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center">
                       <Zap className="w-5 h-5 text-[#ef4444]" />
@@ -5788,20 +5734,11 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
                     <span className="px-3 py-1 rounded-full bg-[var(--surface)] text-sm font-mono text-[var(--text-muted)]">
                       {config.keyHint}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      config.status === "live"
-                        ? "bg-green-500/20 text-green-500"
-                        : config.status === "testing"
-                        ? "bg-yellow-500/20 text-yellow-500"
-                        : "bg-[var(--surface)] text-[var(--text-muted)]"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.status === "live" ? "bg-green-500/20 text-green-500" : config.status === "testing" ? "bg-yellow-500/20 text-yellow-500" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
                       {config.status}
                     </span>
-                    <button
-                      onClick={() => window.location.href = `/workspace?tab=my-apis`}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
-                    >
-                      Manage →
+                    <button onClick={() => window.location.href = `/workspace?tab=my-apis`} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition">
+                      Edit <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -5809,30 +5746,27 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
             })}
           </div>
         ) : (
-          <div className="p-8 text-center">
-            <Key className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-4" />
-            <h4 className="font-semibold mb-2">No Direct Call APIs</h4>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Service keys appear here when you set up Direct Call for your APIs.
-            </p>
-            <a
-              href="/workspace?tab=my-apis"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#ef4444]/50 text-[#ef4444] font-medium hover:bg-[#ef4444]/10 transition"
-            >
-              <Plus className="w-4 h-4" />
-              Set Up Direct Call
-            </a>
+          <div className="p-6 flex items-start gap-4">
+            <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-sm">No credentials configured yet</p>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Your {providerApis.length} APIs are registered but have no Direct Call config. Add your master API key under My APIs to enable proxying.</p>
+              <button onClick={() => window.location.href = `/workspace?tab=my-apis`} className="mt-3 flex items-center gap-1.5 text-sm text-[#ef4444] hover:underline">
+                Set up Direct Call <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
+      )}
 
       {/* Info Box */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-        <div className="flex items-start gap-4">
-          <AlertCircle className="w-5 h-5 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-[var(--text-muted)] space-y-1">
-            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — used by your AI agent to authenticate with APIClaw. Put this in your agent's MCP config.</p>
-            <p><strong className="text-[var(--text-primary)]">Direct Call Service Keys</strong> — your API credentials (e.g. APILayer key) for each integration you've enabled. Once configured, agents calling your APIs will use these behind the scenes. Set them up under <strong>My APIs → Direct Call</strong>.</p>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-[var(--text-muted)] space-y-1.5">
+            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — this is how your AI agent authenticates with APIClaw. It goes in your MCP config. Your agent uses it once to connect, then APIClaw handles all downstream API keys on your behalf.</p>
+            {providerApis.length > 0 && <p><strong className="text-[var(--text-primary)]">API Credentials</strong> — the master keys you store here are used by APIClaw to proxy calls to your registered APIs. Agents calling your APIs never see these keys.</p>}
           </div>
         </div>
       </div>
