@@ -113,6 +113,19 @@ interface Agent {
   isCurrent: boolean;
 }
 
+interface ConnectedAgent {
+  id: string;
+  fingerprint: string;
+  mcpClient: string;
+  name?: string;
+  hostname: string;
+  aiBackend?: string;
+  platform?: string;
+  callCount: number;
+  firstSeenAt: number;
+  lastActiveAt: number;
+}
+
 interface UsageData {
   byProvider: { provider: string; calls: number; cost: number }[];
   byDay: { date: string; calls: number }[];
@@ -1843,17 +1856,20 @@ function AgentsTab({
   const [editingAgent, setEditingAgent] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [copied, setCopied] = useState(false);
-  
-  // Main agent data from backend
+
+  // Connected agents from agents table (not agentSessions)
+  const [connectedAgents, setConnectedAgents] = useState<ConnectedAgent[]>([]);
+
+  // Main agent data from backend (legacy)
   const [mainAgent, setMainAgent] = useState<MainAgentData | null>(null);
   const [subagents, setSubagents] = useState<SubagentData[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
-  
+
   // Modal states
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [editingSubagent, setEditingSubagent] = useState<SubagentData | null>(null);
   const [expandedSubagent, setExpandedSubagent] = useState<string | null>(null);
-  
+
   // Register form state
   const [registerForm, setRegisterForm] = useState({
     subagentId: "",
@@ -1863,7 +1879,7 @@ function AgentsTab({
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
-  // Fetch main agent and subagents data
+  // Fetch connected agents + subagents
   useEffect(() => {
     const fetchAgentData = async () => {
       if (!sessionToken) {
@@ -1872,7 +1888,22 @@ function AgentsTab({
       }
 
       try {
-        // Fetch main agent
+        // Fetch connected agents (from agents table)
+        const agentsRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "agents:getWorkspaceAgents",
+            args: { token: sessionToken },
+          }),
+        });
+        const agentsData = await agentsRes.json();
+        const agentsResult = agentsData.value || agentsData;
+        if (Array.isArray(agentsResult)) {
+          setConnectedAgents(agentsResult);
+        }
+
+        // Fetch main agent (legacy — for backward compat)
         const mainRes = await fetch(`${CONVEX_URL}/api/query`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -2062,9 +2093,118 @@ function AgentsTab({
 
   const mcpCommand = "npx @nordsym/apiclaw mcp-install";
 
+  const getMCPClientIcon = (client: string) => {
+    switch (client) {
+      case "claude-desktop": return "Claude Desktop";
+      case "claude-code": return "Claude Code";
+      case "cursor": return "Cursor";
+      case "windsurf": return "Windsurf";
+      case "cline": return "Cline";
+      case "continue": return "Continue";
+      case "vscode": return "VS Code";
+      default: return client || "Unknown";
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Primary Agent Card */}
+      {/* Connected Agents — compact cards from agents table */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-[#ef4444]" />
+            <span className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">
+              Connected Agents ({connectedAgents.length})
+            </span>
+          </div>
+        </div>
+
+        {isLoadingAgents ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" />
+          </div>
+        ) : connectedAgents.length > 0 ? (
+          <div className="space-y-2">
+            {connectedAgents.map((agent) => (
+              <div
+                key={agent.id}
+                className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[#ef4444]/30 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
+                    <Cpu className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">
+                        {getMCPClientIcon(agent.mcpClient)}
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">{agent.hostname}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                        <span className="text-xs text-green-600">Connected</span>
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        Last: {formatRelativeTime(agent.lastActiveAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    {agent.callCount.toLocaleString()} calls
+                  </span>
+                  {agent.aiBackend && (
+                    <p className="text-xs text-[var(--text-muted)]">{agent.aiBackend}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="w-12 h-12 rounded-full bg-[var(--surface)] flex items-center justify-center mx-auto mb-3">
+              <Bot className="w-6 h-6 text-[var(--text-muted)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
+              No MCP agents connected yet
+            </p>
+            <p className="text-xs text-[var(--text-muted)] mb-4">
+              Connect your first agent to start using APIClaw
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Setup */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Quick Setup</p>
+        <p className="text-xs text-[var(--text-muted)] mb-2">Add to your MCP config:</p>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg px-3 py-2 text-[var(--text-primary)] font-mono">
+            {mcpCommand}
+          </code>
+          <button
+            onClick={() => copyToClipboard(mcpCommand)}
+            className="p-2 rounded-lg border border-[var(--border)] hover:border-[#ef4444]/30 transition"
+            title="Copy to clipboard"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-green-500" />
+            ) : (
+              <Copy className="w-4 h-4 text-[var(--text-muted)]" />
+            )}
+          </button>
+        </div>
+        <p className="text-xs text-[var(--text-muted)] mt-2">
+          Or use header: <code className="text-[#ef4444]">X-APIClaw-Subagent: name</code>
+        </p>
+      </div>
+
+      {/* Legacy Primary Agent Card — hidden if connected agents exist */}
+      {connectedAgents.length === 0 && agents.length > 0 && (
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -2214,6 +2354,7 @@ function AgentsTab({
           </div>
         )}
       </div>
+      )}
 
       {/* Subagents Section */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
