@@ -4520,13 +4520,13 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
         <p className="text-[var(--text-muted)] mt-1">Help us stay 100% user funded — no VC, no ads, no compromises.</p>
       </div>
 
-      {/* Backer / Partner banner */}
-      {(isBacker || isPartner) && (
+      {/* Backer banner */}
+      {isBacker && (
         <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5 flex items-center gap-4">
           <Check className="w-5 h-5 text-green-400 shrink-0" />
           <div>
-            <p className="font-semibold text-green-400">{isPartner ? "Partner account" : "Founding Backer"}</p>
-            <p className="text-sm text-[var(--text-muted)] mt-0.5">{isPartner ? "Partner access — no billing needed." : "Unlimited access until end of 2026. Thank you for backing APIClaw early."}</p>
+            <p className="font-semibold text-green-400">Founding Backer</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">Unlimited access until end of 2026. Thank you for backing APIClaw early.</p>
           </div>
         </div>
       )}
