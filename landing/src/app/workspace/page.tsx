@@ -958,7 +958,7 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isBacker = workspace?.tier === "backer" || workspace?.usageLimit === -1;
+  const isBacker = workspace?.tier === "backer" || workspace?.tier === "partner" || workspace?.usageLimit === -1;
   const usagePct = isBacker ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
@@ -997,7 +997,7 @@ function OverviewTab({
             <div className="flex items-center justify-between mb-3">
               <BarChart3 className="w-5 h-5 text-[#ef4444]" />
               <span className={`text-xs px-2 py-0.5 rounded-full ${isBacker ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
-                {isBacker ? "Backer" : workspace?.tier || "free"}
+                {isBacker ? (workspace?.tier === "partner" ? "Partner" : "Backer") : workspace?.tier || "free"}
               </span>
             </div>
             <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
@@ -5704,69 +5704,12 @@ function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Work
         </div>
       </div>
 
-      {/* Direct Call API Credentials */}
-      {providerApis.length > 0 && (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold">API Credentials</h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">Master keys stored for your Direct Call integrations. Never exposed to agents.</p>
-          </div>
-          <span className="text-sm text-[var(--text-muted)]">{directCallApis.length} of {providerApis.length} configured</span>
-        </div>
-        
-        {directCallApis.length > 0 ? (
-          <div className="divide-y divide-[var(--border)]">
-            {directCallApis.map((api) => {
-              const config = directCallConfigs[api._id];
-              return (
-                <div key={api._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-[var(--surface)] transition gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center">
-                      <Zap className="w-5 h-5 text-[#ef4444]" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{api.name}</p>
-                      <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 ml-13 sm:ml-0">
-                    <span className="px-3 py-1 rounded-full bg-[var(--surface)] text-sm font-mono text-[var(--text-muted)]">
-                      {config.keyHint}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.status === "live" ? "bg-green-500/20 text-green-500" : config.status === "testing" ? "bg-yellow-500/20 text-yellow-500" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
-                      {config.status}
-                    </span>
-                    <button onClick={() => window.location.href = `/workspace?tab=my-apis`} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition">
-                      Edit <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="p-6 flex items-start gap-4">
-            <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">No credentials configured yet</p>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Your {providerApis.length} APIs are registered but have no Direct Call config. Add your master API key under My APIs to enable proxying.</p>
-              <button onClick={() => window.location.href = `/workspace?tab=my-apis`} className="mt-3 flex items-center gap-1.5 text-sm text-[#ef4444] hover:underline">
-                Set up Direct Call <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      )}
-
-      {/* Info Box */}
+            {/* Info Box */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
         <div className="flex items-start gap-3">
           <AlertCircle className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-[var(--text-muted)] space-y-1.5">
-            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — this is how your AI agent authenticates with APIClaw. It goes in your MCP config. Your agent uses it once to connect, then APIClaw handles all downstream API keys on your behalf.</p>
-            {providerApis.length > 0 && <p><strong className="text-[var(--text-primary)]">API Credentials</strong> — the master keys you store here are used by APIClaw to proxy calls to your registered APIs. Agents calling your APIs never see these keys.</p>}
+          <div className="text-sm text-[var(--text-muted)]">
+            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — your agent uses this key to authenticate with APIClaw. Put it in your MCP config once, and APIClaw handles all upstream API calls on your behalf. You never manage individual API keys.</p>
           </div>
         </div>
       </div>
@@ -6364,7 +6307,7 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
               <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
             </div>
             <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
-              {workspace?.tier === "backer" ? "Founding Backer" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
+              {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "backer" ? "Founding Backer" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
             </span>
           </div>
         </div>
@@ -6385,17 +6328,17 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
             <div>
               <p className="font-medium">Current Plan</p>
               <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "backer" ? "Unlimited until 2027" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+                {workspace?.tier === "partner" ? "Partner — Unlimited" : workspace?.tier === "backer" ? "Founding Backer — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              workspace?.tier === "backer"
+              (workspace?.tier === "backer" || workspace?.tier === "partner")
                 ? "bg-[#ef4444]/20 text-[#ef4444]"
                 : workspace?.tier === "pro" || workspace?.tier === "usage_based"
                 ? "bg-green-500/20 text-green-500"
                 : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
             }`}>
-              {workspace?.tier === "backer" ? "Active" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Active" : "Free"}
+              {(workspace?.tier === "backer" || workspace?.tier === "partner" || workspace?.tier === "pro" || workspace?.tier === "usage_based") ? "Active" : "Free"}
             </span>
           </div>
 
