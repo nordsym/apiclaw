@@ -95,7 +95,7 @@ function BookForm() {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
     try {
-      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/hivr-booking", {
+      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/aeo-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ function BookForm() {
           requestedDate: formatDate(selectedDate),
           requestedTime: selectedTime,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
-          source: "hivr-booking-booking",
+          source: "aeo-booking-booking",
         }),
       });
       if (!res.ok) throw new Error();
