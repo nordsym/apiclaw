@@ -856,9 +856,9 @@ export default function WorkspacePage() {
             <button
               onClick={toggleTheme}
               className="hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
+              title={isDark ? "Light Mode" : "Dark Mode"}
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
             </button>
             <button
               onClick={handleLogout}
@@ -987,11 +987,6 @@ function OverviewTab({
 
       {/* ── WORLD 1: AGENT SIDE ─────────────────────────────────── */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Bot className="w-4 h-4 text-[var(--text-muted)]" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)]">Your Agent</span>
-          <div className="flex-1 h-px bg-[var(--border)]" />
-        </div>
         <div className="grid md:grid-cols-3 gap-3">
           {/* Agents card */}
           <button onClick={() => setActiveTab("my-agents")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
@@ -1223,7 +1218,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
       {activeSection === "direct-call" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-[var(--text-muted)]">{filteredDc.length} providers shown</p>
+            <p className="text-sm text-[var(--text-muted)]">{filteredDc.length} Direct Call providers</p>
             <select value={dcFilter} onChange={e => setDcFilter(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
               {dcCategories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
             </select>
@@ -3794,7 +3789,7 @@ function AnalyticsOverviewTab({
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Total Searches" value={totalSearches.toLocaleString()} icon={Search} />
-        <StatCard title="My Agents" value={agents.length.toString()} icon={Users} />
+        <StatCard title="Connected Agents" value={agents.length.toString()} icon={Users} />
         <StatCard title="Avg Latency" value={analytics?.avgLatency ? `${analytics.avgLatency}ms` : "—"} icon={Clock} />
         <StatCard title="Success Rate" value={analytics?.successRate ? `${analytics.successRate.toFixed(1)}%` : "—"} icon={Check} />
       </div>
@@ -3993,7 +3988,7 @@ function UsageTab({
             <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique Agents</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "23" : "0"}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "—" : "0"}</p>
         </div>
       </div>
 
@@ -4639,7 +4634,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
       period: "/month",
       calls: "5,000 Direct Call",
       callsSub: "calls per month",
-      features: ["Everything in Free", "Search + Open API always available", "Unlimited agents", "Priority support"],
+      features: ["Everything in Free", "Search + Open API always available", "All Direct Call providers", "Priority support"],
       cta: currentTier === "pro" ? "Current plan" : "Upgrade to Pro",
       ctaDisabled: currentTier === "pro",
       link: "https://buy.stripe.com/7sY7sN78gfX43yAchqcMM0z",
@@ -4665,7 +4660,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
       period: "",
       calls: "Unlimited",
       callsSub: "calls",
-      features: ["Everything in Scale", "Custom call limits", "Private deployment options", "Dedicated account manager"],
+      features: ["Everything in Scale", "Custom call limits", "Private deployment options", "SLA & onboarding support"],
       cta: "Book a call",
       ctaDisabled: false,
       link: "/book",
@@ -4921,7 +4916,7 @@ function DocsTab() {
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
         <div className="grid gap-2 md:grid-cols-2">
-          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Web Scraper", "Screenshot"].map((p) => (
+          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer (27 APIs)"].map((p) => (
             <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
           ))}
         </div>

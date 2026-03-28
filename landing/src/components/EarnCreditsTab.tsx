@@ -138,19 +138,6 @@ const TASKS: TaskConfig[] = [
       navigateTo: "/providers/register",
     },
   },
-  {
-    id: "setup-byok",
-    title: "Set up Direct Call/BYOK",
-    credits: 5,
-    icon: Key,
-    category: "usage",
-    getState: (p) => (p.byokSetup ? "completed" : "open"),
-    action: {
-      type: "navigate",
-      label: "Add key",
-      navigateTo: "/workspace?tab=api-keys",
-    },
-  },
   // GROWTH TASKS
   {
     id: "star-github",
