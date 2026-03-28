@@ -107,6 +107,7 @@ function BookForm() {
           requestedTime: selectedTime,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
           source: "apiclaw-enterprise",
+          bookedVia: "APIClaw Enterprise",
           meetingTitle: `APIClaw Enterprise${company ? ` — ${company}` : ""}`,
           hostName: "Molle",
           hostEmail: "molle@nordsym.com",

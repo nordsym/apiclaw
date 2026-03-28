@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const N8N_WEBHOOK = "https://nordsym.app.n8n.cloud/webhook/apiclaw-booking";
+const N8N_WEBHOOK = "https://nordsym.app.n8n.cloud/webhook/aeo-booking";
 
 export async function POST(req: NextRequest) {
   try {
