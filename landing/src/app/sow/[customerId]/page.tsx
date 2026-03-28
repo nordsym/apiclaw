@@ -230,7 +230,7 @@ export default function SowPage() {
           <div className="flex flex-wrap gap-3 pt-3 border-t border-neutral-100">
             {[
               { color: "bg-green-500", label: "Live" },
-              { color: "bg-red-400", label: "Blocked \u2014 subscription tier" },
+              { color: "bg-red-400", label: "Blocked — subscription tier" },
               { color: "bg-neutral-300", label: "Unavailable at integration" },
             ].map((leg) => (
               <div
@@ -259,7 +259,7 @@ export default function SowPage() {
             <span className="text-4xl">{"\uD83E\uDD9E"}</span>
             <div className="text-left">
               <span className="text-2xl font-bold text-neutral-900">
-                APIClaw \u00d7 {customer.customerName.split("/")[0].trim()}
+                APIClaw × {customer.customerName.split("/")[0].trim()}
               </span>
               <p className="text-sm text-neutral-500">
                 The API Layer for AI Agents
@@ -400,9 +400,9 @@ export default function SowPage() {
 
           <div className="bg-neutral-50 border-t border-neutral-200 px-8 py-4 text-center text-xs text-neutral-400">
             <p>
-              {"\uD83E\uDD9E"} APIClaw \u00d7{" "}
+              {"\uD83E\uDD9E"} APIClaw ×{" "}
               {customer.customerName.split("/")[0].trim()} Partnership Agreement
-              \u00b7 {today}
+              · {today}
             </p>
             <p className="mt-1">
               Questions?{" "}

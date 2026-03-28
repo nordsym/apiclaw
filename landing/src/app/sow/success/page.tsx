@@ -88,7 +88,7 @@ function SuccessContent() {
 
           <div className="bg-neutral-50 border-t border-neutral-200 px-8 py-4 text-center text-xs text-neutral-400">
             {"\uD83E\uDD9E"} APIClaw Partnership{" "}
-            {customerId ? `\u00b7 ${customerId}` : ""} \u00b7{" "}
+            {customerId ? `· ${customerId}` : ""} ·{" "}
             <a
               href="mailto:gustav@nordsym.com"
               className="text-red-600 hover:underline"

@@ -181,6 +181,7 @@ export async function POST(request: NextRequest) {
     const subject = `Signed: APIClaw \u00d7 ${customer.customerName} Partnership Agreement`;
 
     await Promise.all([
+      sendEmail("gustav@nordsym.com", subject, emailBody, sowHtml, filename),
       sendEmail("molle@nordsym.com", subject, emailBody, sowHtml, filename),
       sendEmail(customer.partnerEmail, subject, emailBody, sowHtml, filename),
     ]);
