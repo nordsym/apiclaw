@@ -3261,8 +3261,8 @@ function AnalyticsOverviewTab({
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Total Searches" value={totalSearches.toLocaleString()} icon={Search} />
         <StatCard title="Connected Agents" value={uniqueAgents.toString()} icon={Users} />
-        <StatCard title="Avg Latency" value={`${analytics?.avgLatency || 145}ms`} icon={Clock} />
-        <StatCard title="Success Rate" value={`${(analytics?.successRate || 98.2).toFixed(1)}%`} icon={Check} />
+        <StatCard title="Avg Latency" value={analytics?.avgLatency ? `${analytics.avgLatency}ms` : "—"} icon={Clock} />
+        <StatCard title="Success Rate" value={analytics?.successRate ? `${analytics.successRate.toFixed(1)}%` : "—"} icon={Check} />
       </div>
 
       {/* Charts */}
