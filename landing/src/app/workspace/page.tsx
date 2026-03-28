@@ -900,6 +900,7 @@ export default function WorkspacePage() {
               activeSubtab={analyticsSubtab}
               setActiveSubtab={setAnalyticsSubtab}
               sessionToken={sessionToken}
+              isProvider={isProvider}
             />
           )}
           {activeTab === "webhooks" && (
@@ -2350,6 +2351,7 @@ function AnalyticsTab({
   activeSubtab,
   setActiveSubtab,
   sessionToken,
+  isProvider,
 }: {
   apis: ProviderAPI[];
   analytics: ProviderAnalytics | null;
@@ -2359,6 +2361,7 @@ function AnalyticsTab({
   activeSubtab: AnalyticsSubtab;
   setActiveSubtab: (tab: AnalyticsSubtab) => void;
   sessionToken: string | null;
+  isProvider?: boolean;
 }) {
   const router = useRouter();
 
@@ -2435,7 +2438,7 @@ function AnalyticsTab({
         <LogsTab sessionToken={sessionToken} />
       )}
       {activeSubtab === "chains" && (
-        <ChainsTab sessionToken={sessionToken} />
+        <ChainsTab sessionToken={sessionToken} isProvider={isProvider} />
       )}
     </div>
   );
@@ -2894,7 +2897,17 @@ interface ChainDetail {
   tokensSaved: number;
 }
 
-function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
+interface InboundCall {
+  _id: string;
+  apiName: string;
+  agentId: string;
+  statusCode?: number;
+  latencyMs?: number;
+  costUsd: number;
+  timestamp: number;
+}
+
+function ChainsTab({ sessionToken, isProvider }: { sessionToken: string | null; isProvider?: boolean }) {
   const [chains, setChains] = useState<ChainExecution[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -2902,6 +2915,9 @@ function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
   const [chainDetail, setChainDetail] = useState<ChainDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [stats, setStats] = useState<{ total: number; completed: number; failed: number; running: number; successRate: number; totalCostCents: number } | null>(null);
+  const [inboundCalls, setInboundCalls] = useState<InboundCall[]>([]);
+  const [inboundUniqueAgents, setInboundUniqueAgents] = useState(0);
+  const [loadingInbound, setLoadingInbound] = useState(true);
 
   const fetchChains = useCallback(async () => {
     if (!sessionToken) return;
@@ -2987,6 +3003,27 @@ function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
     fetchStats();
   }, [fetchChains, fetchStats]);
 
+  // Fetch inbound API activity (others calling my APIs)
+  useEffect(() => {
+    const fetchInbound = async () => {
+      if (!sessionToken) { setLoadingInbound(false); return; }
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: "chains:getInboundAPIActivity", args: { token: sessionToken, limit: 50 } }),
+        });
+        const data = await res.json();
+        const result = data.value || data;
+        if (result?.calls) {
+          setInboundCalls(result.calls);
+          setInboundUniqueAgents(result.uniqueAgents || 0);
+        }
+      } catch { /* ignore */ } finally { setLoadingInbound(false); }
+    };
+    fetchInbound();
+  }, [sessionToken]);
+
   useEffect(() => {
     if (expandedChainId) {
       fetchChainDetail(expandedChainId);
@@ -3024,7 +3061,53 @@ function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+
+      {/* ── INBOUND: Other agents calling MY APIs ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <h2 className="text-lg font-semibold">Inbound — Calls on my APIs</h2>
+          <span className="text-sm text-[var(--text-muted)]">Other agents using your listed APIs</span>
+          {inboundUniqueAgents > 0 && (
+            <span className="ml-auto text-sm text-[var(--text-muted)]">{inboundUniqueAgents} unique agent{inboundUniqueAgents !== 1 ? "s" : ""}</span>
+          )}
+        </div>
+        {loadingInbound ? (
+          <div className="flex items-center justify-center py-6"><Loader2 className="w-5 h-5 text-[#ef4444] animate-spin" /></div>
+        ) : inboundCalls.length === 0 ? (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 text-center">
+            <p className="text-sm text-[var(--text-muted)]">No inbound calls yet. Activity appears here when other agents call your listed APIs.</p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] divide-y divide-[var(--border)]">
+            {inboundCalls.map((call) => (
+              <div key={call._id} className="flex items-center justify-between px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <span className={`w-2 h-2 rounded-full ${call.statusCode && call.statusCode < 300 ? "bg-green-500" : "bg-red-500"}`} />
+                  <div>
+                    <p className="text-sm font-medium">{call.apiName}</p>
+                    <p className="text-xs text-[var(--text-muted)] font-mono">{call.agentId.slice(0, 20)}...</p>
+                  </div>
+                </div>
+                <div className="text-right text-xs text-[var(--text-muted)]">
+                  {call.latencyMs && <span>{call.latencyMs}ms · </span>}
+                  {formatTime(call.timestamp)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── OUTBOUND: My chains calling other APIs ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
+          <h2 className="text-lg font-semibold">Outbound — My chains</h2>
+          <span className="text-sm text-[var(--text-muted)]">Chains your agents execute on external APIs</span>
+        </div>
+
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -3185,6 +3268,8 @@ function ChainsTab({ sessionToken }: { sessionToken: string | null }) {
           ))}
         </div>
       )}
+
+      </div> {/* end outbound section */}
     </div>
   );
 }
@@ -3260,10 +3345,17 @@ function AnalyticsOverviewTab({
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Total Searches" value={totalSearches.toLocaleString()} icon={Search} />
-        <StatCard title="Connected Agents" value={uniqueAgents.toString()} icon={Users} />
+        <StatCard title="My Agents" value={agents.length.toString()} icon={Users} />
         <StatCard title="Avg Latency" value={analytics?.avgLatency ? `${analytics.avgLatency}ms` : "—"} icon={Clock} />
         <StatCard title="Success Rate" value={analytics?.successRate ? `${analytics.successRate.toFixed(1)}%` : "—"} icon={Check} />
       </div>
+      {/* Agents using my APIs */}
+      {analytics?.uniqueAgents && analytics.uniqueAgents !== agents.length ? (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+          <Users className="w-4 h-4 text-green-500 flex-shrink-0" />
+          <p className="text-sm"><span className="font-semibold text-green-500">{analytics.uniqueAgents}</span> external agent{analytics.uniqueAgents !== 1 ? "s" : ""} have called your APIs</p>
+        </div>
+      ) : null}
 
       {/* Charts */}
       {hasChartData && (

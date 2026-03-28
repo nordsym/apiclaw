@@ -1246,3 +1246,73 @@ async function executeProviderCall(
     costCents: Math.ceil(Math.random() * 5),
   };
 }
+
+// ============================================
+// INBOUND: Calls by other agents on MY APIs
+// ============================================
+
+export const getInboundAPIActivity = query({
+  args: {
+    token: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
+      .first();
+    if (!session) return { error: "Invalid session" };
+
+    const workspace = await ctx.db.get(session.workspaceId);
+    if (!workspace?.email) return { calls: [], providerFound: false };
+
+    // Find provider by workspace email
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_email", (q) => q.eq("email", workspace.email!))
+      .first();
+
+    if (!provider) return { calls: [], providerFound: false };
+
+    // Get my APIs
+    const myAPIs = await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_providerId", (q) => q.eq("providerId", provider._id))
+      .collect();
+    const apiNames = new Set(myAPIs.map(a => a.name));
+
+    // Get inbound calls to my provider
+    const limit = args.limit || 50;
+    const rawCalls = await ctx.db
+      .query("apiCalls")
+      .withIndex("by_providerId_timestamp", (q) => q.eq("providerId", provider._id))
+      .order("desc")
+      .take(limit);
+
+    // Enrich with API name
+    const calls = await Promise.all(rawCalls.map(async (call) => {
+      const api = await ctx.db.get(call.apiId);
+      return {
+        _id: call._id,
+        apiId: call.apiId,
+        apiName: api?.name || "Unknown API",
+        agentId: call.agentId,
+        statusCode: call.statusCode,
+        latencyMs: call.latencyMs,
+        costUsd: call.costUsd,
+        timestamp: call.timestamp,
+      };
+    }));
+
+    // Unique agents
+    const uniqueAgents = new Set(calls.map(c => c.agentId)).size;
+
+    return {
+      calls,
+      providerFound: true,
+      apiCount: apiNames.size,
+      uniqueAgents,
+      totalCalls: calls.length,
+    };
+  },
+});
