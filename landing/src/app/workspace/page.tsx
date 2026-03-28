@@ -644,7 +644,7 @@ export default function WorkspacePage() {
               </span>
               {workspace && (
                 <span className="text-xs text-[var(--text-muted)]">
-                  {workspace.usageRemaining}/{workspace.usageLimit} calls
+                  {workspace.usageLimit === -1 ? "Unlimited calls" : `${workspace.usageRemaining}/${workspace.usageLimit} calls`}
                 </span>
               )}
             </div>
@@ -958,8 +958,8 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isBacker = workspace?.tier === "backer";
-  const usagePct = workspace ? Math.min((workspace.usageCount / workspace.usageLimit) * 100, 100) : 0;
+  const isBacker = workspace?.tier === "backer" || workspace?.usageLimit === -1;
+  const usagePct = isBacker ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
 

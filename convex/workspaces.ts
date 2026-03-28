@@ -254,9 +254,13 @@ export const getWorkspaceDashboard = query({
       agentSessions.some(s => p.agentId === s.sessionToken)
     );
 
-    // Calculate usage remaining
-    const usageRemaining = workspace.usageLimit - workspace.usageCount;
-    const usagePercentage = (workspace.usageCount / workspace.usageLimit) * 100;
+    // Calculate usage remaining — backer tier is unlimited
+    const now = Date.now();
+    const isBackerTier = workspace.tier === "backer" ||
+      (workspace.backerUntil && workspace.backerUntil > now);
+    const effectiveLimit = isBackerTier ? -1 : workspace.usageLimit; // -1 = unlimited
+    const usageRemaining = isBackerTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
+    const usagePercentage = isBackerTier ? 0 : (workspace.usageCount / workspace.usageLimit) * 100;
 
     // Budget status (PRD 2.6)
     const monthStart = getMonthStartForBudget();
@@ -273,7 +277,7 @@ export const getWorkspaceDashboard = query({
         tier: workspace.tier,
         status: workspace.status,
         usageCount: workspace.usageCount,
-        usageLimit: workspace.usageLimit,
+        usageLimit: effectiveLimit,
         usageRemaining,
         usagePercentage,
         stripeCustomerId: workspace.stripeCustomerId,
