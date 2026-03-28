@@ -955,7 +955,7 @@ export default function WorkspacePage() {
             <FeedbackTab />
           )}
           {activeTab === "settings" && (
-            <SettingsTab workspace={workspace} sessionToken={sessionToken} />
+            <SettingsTab workspace={workspace} sessionToken={sessionToken} onWorkspaceUpdate={(patch) => setWorkspace(prev => prev ? { ...prev, ...patch } : prev)} />
           )}
         </div>
       </main>
@@ -5313,7 +5313,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
   );
 }
 
-function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
+function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace: Workspace | null; sessionToken: string | null; onWorkspaceUpdate?: (patch: Partial<Workspace>) => void }) {
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
   const router = useRouter();
@@ -5449,7 +5449,7 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
                       args: { token: sessionToken, name },
                     }),
                   });
-                  input.dataset.saved = "true";
+                  onWorkspaceUpdate?.({ workspaceName: name });
                   input.style.borderColor = "#22c55e";
                   setTimeout(() => { input.style.borderColor = ""; }, 2000);
                 } catch {
@@ -5462,7 +5462,7 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
               <input
                 name="wsName"
                 type="text"
-                placeholder="e.g. APILayer, My Team"
+                placeholder="e.g. My Company, Team Name"
                 defaultValue={workspace?.workspaceName || ""}
                 className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
               />
