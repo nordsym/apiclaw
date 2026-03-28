@@ -1,4 +1,5 @@
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 // ============================================
@@ -156,6 +157,15 @@ export const verifyMagicLink = mutation({
         console.error('Failed to claim anonymous usage:', err);
       }
     }
+
+    // Notify Inbound Net (ALERTS) — async, non-blocking
+    await ctx.scheduler.runAfter(0, internal.inbound.notifySignup, {
+      email: workspace!.email,
+      workspaceId: workspace!._id,
+      tier: workspace!.tier,
+      isNewUser,
+      timestamp: Date.now(),
+    });
 
     return {
       success: true,
