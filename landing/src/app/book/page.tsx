@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Check, ArrowRight, Sun, Moon } from "lucide-react";
+import { Check, ArrowRight, Sun, Moon } from "lucide-react";
 
 const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
@@ -96,7 +96,7 @@ export default function BookPage() {
     <div key={`dow-${i}`} className="text-center text-xs text-[var(--text-muted)] font-medium py-1">{d}</div>
   ));
   for (let i = 0; i < firstDow; i++) {
-    calCells.push(<div key={`prev-${i}`} className="text-center text-xs text-[var(--border)] py-1">{prevDays - firstDow + i + 1}</div>);
+    calCells.push(<div key={`prev-${i}`} className="text-center text-xs text-[var(--text-muted)] opacity-30 py-1">{prevDays - firstDow + i + 1}</div>);
   }
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(calYear, calMonth, day);
@@ -104,14 +104,15 @@ export default function BookPage() {
     const isSel = selectedDate?.toDateString() === d.toDateString();
     calCells.push(
       <button key={`day-${day}`} disabled={isPast} onClick={() => { setSelectedDate(d); setSelectedTime(null); }}
-        className={`w-full text-center text-xs py-1.5 rounded-lg transition-colors ${isSel ? "bg-[#ef4444] text-white font-bold" : isPast ? "text-[var(--border)] cursor-not-allowed" : "text-[var(--text-primary)] hover:bg-[#ef4444]/20"}`}>
+        className={`w-full text-center text-xs py-1.5 rounded-lg transition-colors font-medium
+          ${isSel ? "bg-[#ef4444] text-white" : isPast ? "text-[var(--text-muted)] opacity-30 cursor-not-allowed" : "text-[var(--text-primary)] hover:bg-[#ef4444]/20 dark:hover:bg-[#ef4444]/30"}`}>
         {day}
       </button>
     );
   }
   const trailing = (7 - ((firstDow + daysInMonth) % 7)) % 7;
   for (let i = 1; i <= trailing; i++) {
-    calCells.push(<div key={`next-${i}`} className="text-center text-xs text-[var(--border)] py-1">{i}</div>);
+    calCells.push(<div key={`next-${i}`} className="text-center text-xs text-[var(--text-muted)] opacity-30 py-1">{i}</div>);
   }
 
   if (status === "done") {
@@ -138,9 +139,7 @@ export default function BookPage() {
       <header className="border-b border-[var(--border)] px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#ef4444] flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
+            <span className="text-2xl">🦞</span>
             <span className="font-bold text-lg">APIClaw</span>
             <span className="text-[var(--text-muted)] ml-2 text-sm">Enterprise</span>
           </div>
