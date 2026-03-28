@@ -12,11 +12,12 @@ import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
 import { PhoneDemo } from "@/components/demo";
 import { AITestimonials } from "@/components/AITestimonials";
+import { VideoDemo } from "@/components/VideoDemo";
 
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
-  { number: statsData.directCallCount?.toString() || "19", label: "Direct Call", live: false },
+  { number: "19", label: "Direct Call", live: false },
   { number: (statsData.npmDownloads || 4232).toLocaleString(), label: "Installs", live: false },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
@@ -146,6 +147,7 @@ const terminalLines = [
 const directCallProviders = [
   { name: "Replicate", desc: "1000+ ML models" },
   { name: "OpenRouter", desc: "100+ LLMs" },
+  { name: "APILayer", desc: "14 APIs" },
   { name: "Firecrawl", desc: "Web scraping" },
   { name: "E2B", desc: "Code sandbox" },
   { name: "GitHub", desc: "Repos & Issues" },
@@ -170,22 +172,23 @@ export default function Home() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const directCallProviders = [
-    // Original 10
-    { name: "Replicate", desc: "Whisper, Stable Diffusion, 1000+ ML models", category: "AI & LLM" },
-    { name: "OpenRouter", desc: "GPT-4, Claude, Llama, 100+ LLMs", category: "AI & LLM" },
+  const directCallProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
+    // Multi-API providers (top)
+    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 14 },
+    { name: "Replicate", desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API", apis: 1000 },
+    { name: "OpenRouter", desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "Multi-API", apis: 100 },
+    // Single-purpose
     { name: "ElevenLabs", desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
-    { name: "46elks", desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
-    { name: "Twilio", desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
-    { name: "Resend", desc: "Modern email API for developers", category: "Email" },
-    { name: "Brave Search", desc: "Privacy-focused web search", category: "Search" },
-    { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
-    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
-    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
-    // New 8
     { name: "Groq", desc: "Ultra-fast LLM inference", category: "AI & LLM" },
     { name: "Deepgram", desc: "Speech-to-text transcription", category: "Voice & TTS" },
+    { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
+    { name: "Brave Search", desc: "Privacy-focused web search", category: "Search" },
     { name: "Serper", desc: "Google search API for AI", category: "Search" },
+    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
+    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
+    { name: "Resend", desc: "Modern email API for developers", category: "Email" },
+    { name: "46elks", desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
+    { name: "Twilio", desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
     { name: "Mistral", desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
     { name: "Cohere", desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
     { name: "Together AI", desc: "Open-source model inference", category: "AI & LLM" },
@@ -217,6 +220,7 @@ Voice: ElevenLabs, Deepgram, AssemblyAI
 Search: Brave Search, Serper, Firecrawl
 Code: E2B, GitHub
 Utility: Resend (email), 46elks & Twilio (SMS)
+Multi-API: APILayer (exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping — 14 APIs)
 
 Your Tools:
 • call_api(provider, action, params) – Execute immediately (leave auth fields empty – APIClaw handles it)
@@ -587,12 +591,26 @@ Docs: https://apiclaw.nordsym.com/docs`;
             <p className="text-text-muted mb-4">These APIs work through APIClaw's proxy. Your agent calls them without needing API keys.</p>
             <div className="space-y-3">
               {directCallProviders.map((provider, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                  provider.featured
+                    ? 'bg-gradient-to-r from-accent/5 to-purple-500/5 border-accent/30 hover:border-accent/50 hover:shadow-[0_0_20px_rgba(0,212,255,0.08)]'
+                    : provider.apis
+                    ? 'bg-surface border-border/80'
+                    : 'bg-surface border-border'
+                }`}>
                   <div>
-                    <div className="font-medium">{provider.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{provider.name}</span>
+                      {provider.featured && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-accent/20 text-accent">Partner</span>
+                      )}
+                      {provider.apis && (
+                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">{provider.apis >= 1000 ? `${Math.floor(provider.apis/1000)}k+` : `${provider.apis}`} APIs</span>
+                      )}
+                    </div>
                     <div className="text-sm text-text-muted">{provider.desc}</div>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent">{provider.category}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent flex-shrink-0 ml-3">{provider.category}</span>
                 </div>
               ))}
             </div>
@@ -1029,7 +1047,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  18 Direct Call providers
+                  19 Direct Call providers
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
@@ -1144,7 +1162,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               },
               {
                 q: "How do I add my API?",
-                a: "Go to the Provider Dashboard, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a Direct Call partner? Set that up in the dashboard too."
+                a: "Go to your Workspace, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a Direct Call partner? Set that up in your Workspace too."
               },
               {
                 q: "What's MCP?",
@@ -1327,6 +1345,9 @@ Docs: https://apiclaw.nordsym.com/docs`;
           </div>
         </div>
       )}
+
+      {/* Video Demo Bubble - Always visible */}
+      <VideoDemo />
     </main>
   );
 }

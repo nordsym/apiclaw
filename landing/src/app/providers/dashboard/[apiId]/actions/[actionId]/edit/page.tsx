@@ -47,6 +47,12 @@ const PARAM_LOCATIONS = ["body", "query", "path"] as const;
 export default function EditActionPage() {
   const params = useParams();
   const router = useRouter();
+  
+  // Handle null params
+  if (!params || !params.apiId || !params.actionId) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const apiId = params.apiId as string;
   const actionId = params.actionId as string;
 

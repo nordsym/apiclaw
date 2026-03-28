@@ -8,6 +8,12 @@ import Link from "next/link";
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Handle null searchParams
+  if (!searchParams) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const token = searchParams.get("token");
 
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");

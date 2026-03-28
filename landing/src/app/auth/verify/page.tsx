@@ -22,6 +22,12 @@ interface VerifyResult {
 
 function VerifyContent() {
   const searchParams = useSearchParams();
+  
+  // Handle null searchParams (shouldn't happen in client component, but TypeScript requires it)
+  if (!searchParams) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const token = searchParams.get("token");
   const referralCode = searchParams.get("ref"); // Referral code from signup URL
   

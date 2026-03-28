@@ -18,6 +18,10 @@ export interface APICallLog {
   success: boolean;
   latencyMs?: number;
   error?: string;
+  metadata?: {
+    product?: string;
+    [key: string]: any;
+  };
 }
 
 // Log directory
@@ -86,6 +90,7 @@ async function sendToConvex(log: APICallLog): Promise<void> {
         latencyMs: log.latencyMs,
         error: log.error,
         timestamp: log.timestamp,
+        ...log.metadata, // Include product and any other metadata
       },
     });
   } catch (e) {

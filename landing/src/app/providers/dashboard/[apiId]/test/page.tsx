@@ -61,6 +61,11 @@ const methodColors: Record<string, string> = {
 
 export default function TestConsolePage() {
   const params = useParams();
+  
+  // Handle null params
+  if (!params || !params.apiId) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
   const router = useRouter();
   const apiId = params.apiId as string;
 

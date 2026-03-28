@@ -184,6 +184,12 @@ function generatePreviewAnalytics(): ProviderAnalytics {
 export default function WorkspacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // Handle null searchParams
+  if (!searchParams) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const tabFromUrl = searchParams.get("tab") as TabType | null;
   const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
   
@@ -207,6 +213,7 @@ export default function WorkspacePage() {
   const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
+  const [showAddApi, setShowAddApi] = useState(false);
   
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
@@ -317,97 +324,62 @@ export default function WorkspacePage() {
     }
   }, []);
 
-  const fetchProviderData = useCallback(async () => {
+  const fetchProviderData = useCallback(async (_workspaceId?: string, email?: string) => {
+    if (!email) {
+      setIsProvider(false);
+      return;
+    }
     try {
-      const providerData = localStorage.getItem("apiclaw_provider");
-      const providerSession = localStorage.getItem("apiclaw_session");
-      
-      // Need at least the session token
-      if (!providerSession) {
-        setIsProvider(false);
-        return;
-      }
-      
-      // First, get session to obtain providerId
-      const sessionRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "providers:getSession",
-          args: { token: providerSession },
-        }),
-      });
-      
-      const sessionData = await sessionRes.json();
-      const session = sessionData.value || sessionData;
-      
-      if (!session || !session.providerId) {
-        console.log("No valid provider session");
-        // Try stored provider data as fallback for name
-        if (providerData) {
-          try {
-            const parsed = JSON.parse(providerData);
-            setProviderName(parsed.name || parsed.email || "Provider");
-          } catch {
-            // ignore
-          }
-        }
-        return;
-      }
-      
-      setProviderName(session.name || session.email || "Provider");
-      
-      // Now fetch provider APIs using providerId
-      const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "providers:getProviderAPIsWithStatus",
-          args: { providerId: session.providerId },
-        }),
-      });
-      
-      const apisData = await apisRes.json();
-      console.log("Provider APIs response:", apisData);
-      
-      // Check for error response
-      if (apisData.status === "error") {
-        console.error("Provider API error:", apisData.errorMessage);
-        return;
-      }
-      
-      const apis = apisData.value || apisData || [];
-      
-      // Set provider APIs (even empty array is OK)
-      if (Array.isArray(apis)) {
-        setProviderApis(apis);
-        setIsProvider(true);
-        console.log("Provider APIs loaded:", apis.length);
-        
-        // Fetch provider analytics
-        try {
-          const analyticsRes = await fetch(`${CONVEX_URL}/api/query`, {
+      const resolvedEmail = email;
+      let apis: ProviderAPI[] = [];
+      if (resolvedEmail) {
+        const provRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: "providers:getProviderByEmail", args: { email: resolvedEmail } }),
+        });
+        const provData = await provRes.json();
+        const provider = provData.value || provData;
+        if (provider?._id) {
+          const legacyRes = await fetch(`${CONVEX_URL}/api/query`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              path: "providers:getAnalytics",
-              args: { token: providerSession },
-            }),
+            body: JSON.stringify({ path: "providers:getProviderAPIsWithStatus", args: { providerId: provider._id } }),
           });
-          
-          const analyticsData = await analyticsRes.json();
-          const analytics = analyticsData.value || analyticsData;
-          
-          if (analytics && typeof analytics === "object" && !analytics.status) {
-            setProviderAnalytics(analytics);
-          } else {
-            // No analytics available - will show empty state
-            setProviderAnalytics(null);
-          }
-        } catch {
-          // Error fetching analytics - will show empty state
+          const legacyData = await legacyRes.json();
+          const all = legacyData.value || legacyData || [];
+          // Deduplicate by name
+          const seen = new Set<string>();
+          apis = (Array.isArray(all) ? all : []).filter((a: ProviderAPI) => {
+            if (seen.has(a.name)) return false;
+            seen.add(a.name);
+            return true;
+          });
+        }
+      }
+      if (apis.length > 0) {
+        setProviderApis(apis);
+        setIsProvider(true);
+      }
+      // Analytics — live data as calls come in
+      try {
+        const analyticsRes = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "providers:getAnalytics",
+            args: { workspaceId: _workspaceId },
+          }),
+        });
+        const analyticsData = await analyticsRes.json();
+        const analytics = analyticsData.value || analyticsData;
+        if (analytics && typeof analytics === "object" && !analytics.status) {
+          setProviderAnalytics(analytics);
+        } else {
           setProviderAnalytics(null);
         }
+      } catch {
+        setProviderAnalytics(null);
       }
     } catch (err) {
       console.error("Fetch provider error:", err);
@@ -422,16 +394,24 @@ export default function WorkspacePage() {
         if (token) {
           setSessionToken(token);
           await fetchWorkspaceData(token);
+          // Fetch provider APIs — get email directly from dashboard (no extra round-trip needed)
+          try {
+            const dashRes = await fetch(`${CONVEX_URL}/api/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ path: "workspaces:getWorkspaceDashboard", args: { token } }),
+            });
+            const dashData = await dashRes.json();
+            const email = (dashData.value || dashData)?.workspace?.email;
+            if (email) await fetchProviderData(undefined, email);
+          } catch { /* ignore — provider APIs not critical for workspace load */ }
         }
-        
+
         // Fetch all approved APIs for the catalog
         await fetchApprovedAPIs();
-        
-        // Check provider session and fetch APIs
-        await fetchProviderData();
-        
-        // If neither session type, redirect to login
-        if (!token && !localStorage.getItem("apiclaw_session")) {
+
+        // If no session, redirect to login
+        if (!token) {
           router.push("/login");
           return;
         }
@@ -452,6 +432,14 @@ export default function WorkspacePage() {
     init();
   }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs]);
 
+  // Reactively load provider APIs when workspace email becomes available
+  useEffect(() => {
+    if (workspace?.email) {
+      fetchProviderData(undefined, workspace.email);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace?.email]);
+
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
@@ -463,8 +451,6 @@ export default function WorkspacePage() {
     try {
       await fetch("/api/workspace-auth/session", { method: "DELETE" });
       localStorage.removeItem("apiclaw_workspace_session");
-      localStorage.removeItem("apiclaw_session");
-      localStorage.removeItem("apiclaw_provider");
       router.push("/login");
     } catch (err) {
       console.error("Logout error:", err);
@@ -474,9 +460,12 @@ export default function WorkspacePage() {
   const handleRefresh = async () => {
     setIsLoading(true);
     try {
-      if (sessionToken) await fetchWorkspaceData(sessionToken);
+      if (sessionToken) {
+        await fetchWorkspaceData(sessionToken);
+        const email = workspace?.email;
+        if (email) await fetchProviderData(undefined, email);
+      }
       await fetchApprovedAPIs();
-      await fetchProviderData();
     } catch (err) {
       setError("Failed to refresh");
     } finally {
@@ -736,6 +725,22 @@ export default function WorkspacePage() {
                           <ScrollText className="w-4 h-4" />
                           <span>Logs</span>
                         </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab("analytics");
+                            setAnalyticsSubtab("chains");
+                            setSidebarOpen(false);
+                            router.push(`/workspace?tab=analytics&sub=chains`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                            activeTab === "analytics" && analyticsSubtab === "chains"
+                              ? "bg-[#ef4444]/20 text-[#ef4444]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                          <span>Chains</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -840,10 +845,10 @@ export default function WorkspacePage() {
               <RefreshCw className="w-5 h-5 text-[var(--text-muted)]" />
             </button>
             {activeTab === "my-apis" && (
-              <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
+              <button onClick={() => setShowAddApi(true)} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 List New API
-              </Link>
+              </button>
             )}
           </div>
         </header>
@@ -883,7 +888,7 @@ export default function WorkspacePage() {
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} />
           )}
           {activeTab === "my-apis" && (
-            <MyAPIsTab apis={providerApis} />
+            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} />
           )}
           {activeTab === "analytics" && (
             <AnalyticsTab 
@@ -1250,7 +1255,96 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
 // MY APIs TAB (Provider)
 // ============================================
 
-function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
+function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void }) {
+  const [form, setForm] = useState({ name: "", description: "", category: "DevTools", openApiUrl: "", docsUrl: "", pricingModel: "freemium" });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.description) return;
+    setSubmitting(true);
+    try {
+      const session = localStorage.getItem("apiclaw_workspace_session");
+      const wsRes = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/query`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "workspaces:getSession", args: { token: session || "" } }),
+      });
+      const wsData = await wsRes.json();
+      const ws = wsData.value || wsData;
+      const wsId = ws?.workspaceId || ws?.id || ws?._id;
+      if (!wsId) throw new Error("No workspace");
+      await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/mutation`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "providers:createForWorkspace", args: { workspaceId: wsId, ...form } }),
+      });
+      setSubmitted(true);
+      setTimeout(() => { onCloseForm(); window.location.reload(); }, 1500);
+    } catch { /* ignore */ } finally { setSubmitting(false); }
+  };
+
+  const CATEGORIES = ["DevTools","Finance","Geolocation","News","Transport","AI & LLM","Email","SMS","Search","Payments","Auth","Weather","Maps","Other"];
+
+  if (showAddForm) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">List an API</h2>
+            <p className="text-[var(--text-muted)]">Add your API to the APIClaw catalog.</p>
+          </div>
+          <button onClick={onCloseForm} className="p-2 rounded-lg hover:bg-[var(--surface)] transition text-[var(--text-muted)] hover:text-[var(--text-primary)]">✕</button>
+        </div>
+        {submitted ? (
+          <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-8 text-center">
+            <p className="text-green-400 font-semibold">API listed successfully.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 space-y-4">
+            {[
+              { label: "API Name", key: "name", placeholder: "e.g. Exchange Rates" },
+              { label: "Description", key: "description", placeholder: "What does this API do?" },
+              { label: "OpenAPI Spec URL", key: "openApiUrl", placeholder: "https://..." },
+              { label: "Documentation URL", key: "docsUrl", placeholder: "https://..." },
+            ].map(({ label, key, placeholder }) => (
+              <div key={key}>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">{label}</label>
+                <input value={(form as any)[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444] outline-none" />
+              </div>
+            ))}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Category</label>
+                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                  className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none">
+                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Pricing Model</label>
+                <select value={form.pricingModel} onChange={e => setForm(f => ({ ...f, pricingModel: e.target.value }))}
+                  className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none">
+                  <option value="free">Free</option>
+                  <option value="freemium">Freemium</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={onCloseForm} className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">Cancel</button>
+              <button type="submit" disabled={submitting || !form.name || !form.description}
+                className="px-6 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-semibold hover:bg-[#dc2626] disabled:opacity-50 transition">
+                {submitting ? "Listing..." : "List API"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    );
+  }
+
   if (!apis || apis.length === 0) {
     return (
       <div className="space-y-6">
@@ -1261,11 +1355,7 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
 
         {/* Three integration options */}
         <div className="grid gap-4 md:grid-cols-3">
-          {/* Option 1: List API */}
-          <Link
-            href="/providers/register?type=list"
-            className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left"
-          >
+          <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
             <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
               <Search className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
             </div>
@@ -1277,43 +1367,35 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
             <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
-          </Link>
+          </button>
 
-          {/* Option 2: Open API */}
-          <Link
-            href="/providers/register?type=open"
-            className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left"
-          >
+          <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
             <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
               <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
             </div>
             <h3 className="font-semibold text-lg mb-1">Open API</h3>
-            <p className="text-[#ef4444] text-sm font-medium mb-3">Agents call directly</p>
+            <p className="text-[#ef4444] text-sm font-medium mb-3">Indexed & callable</p>
             <p className="text-sm text-[var(--text-muted)] mb-4">
-              Provide your public OpenAPI spec. Agents call your endpoint with their own keys.
+              Provide your public OpenAPI spec. APIClaw indexes it so agents can discover and call your endpoint through the platform.
             </p>
             <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
-          </Link>
+          </button>
 
-          {/* Option 3: Direct Call */}
-          <Link
-            href="/providers/register?type=direct"
-            className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden"
-          >
+          <button onClick={onAdd} className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden">
             <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
               <Zap className="w-6 h-6 text-[#ef4444]" />
             </div>
             <h3 className="font-semibold text-lg mb-1">Direct Call</h3>
             <p className="text-[#ef4444] text-sm font-medium mb-3">We handle keys</p>
             <p className="text-sm text-[var(--text-muted)] mb-4">
-              APIClaw manages authentication. Agents pay per call, you earn revenue share.
+              APIClaw manages authentication and billing. Agents call your API without handling keys.
             </p>
             <div className="flex items-center justify-end">
               <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
             </div>
-          </Link>
+          </button>
         </div>
 
         {/* Why list section */}
@@ -1354,10 +1436,10 @@ function MyAPIsTab({ apis }: { apis: ProviderAPI[] }) {
           <h2 className="text-2xl font-bold">My APIs</h2>
           <p className="text-[var(--text-muted)]">{apis.length} API{apis.length !== 1 ? "s" : ""} listed</p>
         </div>
-        <Link href="/providers/register" className="btn-primary !py-2 !px-4 text-sm">
+        <button onClick={onAdd} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2">
           <Plus className="w-4 h-4" />
           List New API
-        </Link>
+        </button>
       </div>
 
       <div className="grid gap-4">

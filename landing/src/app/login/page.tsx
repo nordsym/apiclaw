@@ -199,7 +199,7 @@ export default function LoginPage() {
             <p className="text-sm text-[var(--text-muted)]">
               Are you an API provider?{" "}
               <Link href="/providers/dashboard/login" className="text-accent hover:underline">
-                Provider Dashboard
+                Workspace
               </Link>
             </p>
           </div>

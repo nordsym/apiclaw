@@ -1,0 +1,189 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const CONVEX_URL = "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+const N8N_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
+
+function generateSoWHtml(
+  signerName: string,
+  signerTitle: string,
+  signatureDataUrl: string,
+  signedDate: string
+): string {
+  return `<!DOCTYPE html>
+<html>
+<body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:700px;margin:0 auto;padding:40px;background:#fafafa;">
+  <div style="background:white;border-radius:16px;padding:40px;border:1px solid #e5e5e5;">
+    <div style="text-align:center;margin-bottom:30px;">
+      <div style="font-size:32px;font-weight:800;color:#dc2626;">APIClaw<span style="color:#0a0a0a;">.</span></div>
+      <h1 style="margin:10px 0;color:#1a1a1a;">APIClaw × APILayer</h1>
+      <p style="color:#dc2626;font-weight:600;">SIGNED PARTNERSHIP AGREEMENT</p>
+      <p style="color:#737373;">Signed on ${signedDate}</p>
+    </div>
+    <div style="border-top:2px solid #dc2626;padding-top:30px;">
+      <h2 style="color:#dc2626;">Parties</h2>
+      <p><strong>APIClaw / NordSym AB</strong> (org.nr 559535-5768) — Gustav Hemmingsson, CEO</p>
+      <p><strong>APILayer / Zyla Labs Inc.</strong> — ${signerName}, ${signerTitle}</p>
+
+      <h2 style="color:#dc2626;">Integration Status</h2>
+      <p>27 APILayer APIs live in APIClaw Direct Call tier (finance, geolocation, scraping, news, devtools). Zero key management required for end users.</p>
+
+      <h2 style="color:#dc2626;">Partnership Scope</h2>
+      <ol>
+        <li><strong>Customer announcement</strong> — APILayer communicates the APIClaw integration to its customer base.</li>
+        <li><strong>Joint content</strong> — One blog post or case study on apilayer.com.</li>
+        <li><strong>Documentation feature</strong> — APIClaw referenced in APILayer docs for all 27 APIs.</li>
+        <li><strong>Volume incentives</strong> — Tiered discount or revenue share tied to call volume. Structure agreed within 14 days.</li>
+      </ol>
+
+      <h2 style="color:#dc2626;">Partner Dashboard</h2>
+      <p>APILayer receives access to the APIClaw Partner Dashboard upon signing: real-time usage stats, discovery data, and call performance across all 27 APIs.</p>
+
+      <h2 style="color:#dc2626;">Duration</h2>
+      <p>12-month initial term from effective date. Week 1 checkpoint to review integration performance. Auto-renews monthly. 30 days notice to terminate.</p>
+
+      <h2 style="color:#dc2626;">Confidentiality</h2>
+      <p>Commercial terms, usage data, and technical integration details are confidential. Public announcements require mutual approval.</p>
+    </div>
+    <div style="border-top:2px solid #e5e5e5;margin-top:30px;padding-top:30px;">
+      <h2 style="color:#dc2626;">Signatures</h2>
+      <table width="100%">
+        <tr>
+          <td style="width:50%;vertical-align:top;">
+            <p style="color:#737373;font-size:12px;">APICLAW / NORDSYM AB</p>
+            <p style="font-family:'Brush Script MT',cursive;font-size:24px;">Gustav Hemmingsson</p>
+            <p><strong>Gustav Hemmingsson</strong><br>CEO, NordSym AB<br>${signedDate}</p>
+          </td>
+          <td style="width:50%;vertical-align:top;">
+            <p style="color:#737373;font-size:12px;">APILAYER / ZYLA LABS INC.</p>
+            <img src="${signatureDataUrl}" style="max-width:200px;max-height:80px;" alt="Signature"/>
+            <p><strong>${signerName}</strong><br>${signerTitle}<br>${signedDate}</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div style="margin-top:30px;padding:20px;background:#f0fdf4;border-radius:8px;text-align:center;">
+      <p style="color:#166534;margin:0;">This document has been digitally signed by both parties.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function generateEmailBody(signerName: string, signedDate: string): string {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:40px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+  <div style="max-width:500px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <div style="background:#dc2626;color:white;padding:24px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;">APIClaw.</div>
+      <h1 style="margin:8px 0 0;font-size:18px;">Partnership Agreement Signed</h1>
+    </div>
+    <div style="padding:32px;">
+      <p style="color:#166534;background:#f0fdf4;padding:12px 16px;border-radius:8px;margin:0 0 24px;">
+        Partnership Agreement between APIClaw and APILayer has been signed.
+      </p>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:8px 0;color:#737373;">Signed by</td><td style="padding:8px 0;font-weight:600;">${signerName}</td></tr>
+        <tr><td style="padding:8px 0;color:#737373;">Date</td><td style="padding:8px 0;font-weight:600;">${signedDate}</td></tr>
+        <tr><td style="padding:8px 0;color:#737373;">APIs live</td><td style="padding:8px 0;font-weight:600;">27 APILayer APIs in Direct Call</td></tr>
+        <tr><td style="padding:8px 0;color:#737373;">Document</td><td style="padding:8px 0;font-weight:600;">Attached as HTML file</td></tr>
+      </table>
+    </div>
+    <div style="padding:16px 32px;background:#fafafa;border-top:1px solid #e5e5e5;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#737373;">APIClaw — The API Layer for AI Agents · apiclaw.nordsym.com</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+async function sendEmail(
+  to: string,
+  subject: string,
+  message: string,
+  attachmentHtml: string,
+  filename: string
+): Promise<void> {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(attachmentHtml);
+  let binary = "";
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  const base64Data = btoa(binary);
+
+  await fetch(N8N_GMAIL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "send",
+      to,
+      subject,
+      message,
+      attachments: [{ filename, data: base64Data }],
+    }),
+  });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { signatureDataUrl, signerName, signerTitle } = body;
+
+    if (!signatureDataUrl || !signerName || !signerTitle) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const signedDate = new Date().toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const signerIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+
+    // Save to Convex (reuse mou table with partnerId: apilayer-sow)
+    await fetch(`${CONVEX_URL}/api/mutation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "mou:create",
+        args: {
+          partnerId: "apilayer-sow",
+          partnerName: "APILayer",
+          partnerEmail: "pratham@apilayer.com",
+          documentHtml: "",
+        },
+      }),
+    }).catch(() => null); // Non-blocking
+
+    await fetch(`${CONVEX_URL}/api/mutation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: "mou:sign",
+        args: {
+          partnerId: "apilayer-sow",
+          signatureDataUrl,
+          signerName,
+          signerTitle,
+          signerIp,
+        },
+      }),
+    }).catch(() => null); // Non-blocking
+
+    const sowHtml = generateSoWHtml(signerName, signerTitle, signatureDataUrl, signedDate);
+    const emailBody = generateEmailBody(signerName, signedDate);
+    const filename = `APIClaw_Partnership_APILayer_${new Date().toISOString().split("T")[0]}.html`;
+    const subject = "Signed: APIClaw × APILayer Partnership Agreement";
+
+    await Promise.all([
+      sendEmail("gustav@nordsym.com", subject, emailBody, sowHtml, filename),
+      sendEmail("pratham@apilayer.com", subject, emailBody, sowHtml, filename),
+    ]);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("SoW signing error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

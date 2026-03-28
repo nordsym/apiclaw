@@ -847,3 +847,59 @@ export const debugUpdateAPI = mutation({
     return { updated: true };
   },
 });
+
+// ─── Workspace-native API management (no provider account needed) ─────────────
+
+// Get all APIs listed by a workspace
+export const getByWorkspaceId = query({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, { workspaceId }) => {
+    return await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+      .collect();
+  },
+});
+
+// List a new API directly from a workspace — no provider registration
+export const createForWorkspace = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    name: v.string(),
+    description: v.string(),
+    category: v.string(),
+    openApiUrl: v.optional(v.string()),
+    docsUrl: v.optional(v.string()),
+    pricingModel: v.string(),
+    pricingNotes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("providerAPIs", {
+      workspaceId: args.workspaceId,
+      name: args.name,
+      description: args.description,
+      category: args.category,
+      openApiUrl: args.openApiUrl,
+      docsUrl: args.docsUrl,
+      pricingModel: args.pricingModel,
+      pricingNotes: args.pricingNotes,
+      status: "active",
+      createdAt: Date.now(),
+      discoveryCount: 0,
+    });
+    return { id };
+  },
+});
+
+// Delete an API owned by a workspace
+export const deleteForWorkspace = mutation({
+  args: { apiId: v.id("providerAPIs"), workspaceId: v.id("workspaces") },
+  handler: async (ctx, { apiId, workspaceId }) => {
+    const api = await ctx.db.get(apiId);
+    if (!api || api.workspaceId !== workspaceId) {
+      throw new Error("Not found or unauthorized");
+    }
+    await ctx.db.delete(apiId);
+    return { deleted: true };
+  },
+});

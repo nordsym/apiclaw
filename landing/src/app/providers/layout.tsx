@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Provider Dashboard | APIClaw",
+  title: "Workspace | APIClaw",
   description: "Manage your APIs, view analytics, and track earnings on APIClaw.",
 };
 

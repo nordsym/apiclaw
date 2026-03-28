@@ -179,10 +179,10 @@ export function HeroTabs() {
               </ul>
 
               <a
-                href="/providers/dashboard"
+                href="/workspace"
                 className="btn-primary w-full justify-center"
               >
-                Open Provider Dashboard
+                Open Workspace
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>

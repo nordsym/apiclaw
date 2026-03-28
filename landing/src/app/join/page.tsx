@@ -7,6 +7,12 @@ import { Suspense } from "react";
 function JoinContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  // Handle null searchParams
+  if (!searchParams) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const refCode = searchParams.get("ref");
 
   useEffect(() => {

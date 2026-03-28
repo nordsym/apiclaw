@@ -7,6 +7,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { platform, homedir } from 'os';
+import { execSync } from 'child_process';
 import chalk from 'chalk';
 
 export interface MCPInstallOptions {
@@ -74,6 +75,15 @@ function getClientConfigs(): ClientConfig[] {
         return join(home, '.claude.json');
       },
     },
+    {
+      name: 'codex',
+      displayName: 'Codex (OpenAI)',
+      configKey: 'mcp',
+      getConfigPath: () => {
+        // Codex uses ~/.codex/config.toml
+        return join(home, '.codex', 'config.toml');
+      },
+    },
   ];
   
   return clients;
@@ -139,9 +149,61 @@ function writeConfig(path: string, config: any, createBackup = true): { success:
 }
 
 /**
+ * Check if Codex CLI is available
+ */
+function isCodexAvailable(): boolean {
+  try {
+    execSync('codex --version', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Install APIClaw to Codex using CLI
+ */
+function installToCodex(dryRun: boolean): { success: boolean; message: string; skipped?: boolean } {
+  if (!isCodexAvailable()) {
+    return { success: false, message: 'Codex CLI not found' };
+  }
+  
+  try {
+    // Check if already installed
+    try {
+      const output = execSync('codex mcp get apiclaw', { encoding: 'utf-8', stdio: 'pipe' });
+      if (output.includes('apiclaw')) {
+        return { success: true, message: 'Already installed', skipped: true };
+      }
+    } catch {
+      // Not installed, continue
+    }
+    
+    if (dryRun) {
+      console.log(chalk.cyan('\n  Would run: codex mcp add apiclaw -- npx -y @nordsym/apiclaw'));
+      return { success: true, message: 'Dry run - no changes made', skipped: true };
+    }
+    
+    // Install
+    execSync('codex mcp add apiclaw -- npx -y @nordsym/apiclaw', { stdio: 'pipe' });
+    return { success: true, message: 'Installed via CLI' };
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
+
+/**
  * Install APIClaw into a client config
  */
 function installToClient(client: ClientConfig, dryRun: boolean): { success: boolean; message: string; skipped?: boolean } {
+  // Special handling for Codex
+  if (client.name === 'codex') {
+    return installToCodex(dryRun);
+  }
+  
   const configPath = client.getConfigPath();
   
   // Read existing config
@@ -207,12 +269,14 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
       'code': 'claude-code',
       'claude-code': 'claude-code',
       'claudecode': 'claude-code',
+      'codex': 'codex',
+      'openai': 'codex',
     };
     
     const targetName = aliases[normalizedClient];
     if (!targetName) {
       console.log(chalk.red(`❌ Unknown client: ${options.client}`));
-      console.log('   Supported: claude-desktop, claude-code');
+      console.log('   Supported: claude-desktop, claude-code, codex');
       process.exit(1);
     }
     
@@ -224,9 +288,17 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
   
   const detectedClients: ClientConfig[] = [];
   for (const client of targetClients) {
-    const configPath = client.getConfigPath();
-    const configDir = dirname(configPath);
-    const exists = existsSync(configPath) || existsSync(configDir);
+    let exists = false;
+    
+    // Special detection for Codex (check CLI availability)
+    if (client.name === 'codex') {
+      exists = isCodexAvailable();
+    } else {
+      // For JSON-based configs, check file/dir existence
+      const configPath = client.getConfigPath();
+      const configDir = dirname(configPath);
+      exists = existsSync(configPath) || existsSync(configDir);
+    }
     
     const icon = exists ? chalk.green('✓') : chalk.gray('✗');
     const status = exists ? 'found' : 'not found';
@@ -275,13 +347,23 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
       console.log(chalk.cyan('\n✅ Dry run complete! Run without --dry-run to apply changes.\n'));
     } else if (successCount > 0) {
       console.log(chalk.green('\n✅ APIClaw installed successfully!\n'));
-      console.log('Next steps:');
-      console.log('  1. Restart your MCP client (Claude Desktop/Code)');
-      console.log('  2. Ask: "List available APIs"');
+      console.log(chalk.bold('What you get:\n'));
+      console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
+      console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
+      console.log(chalk.cyan('  🔑 Direct Call') + ' 1,500+ premium (APIClaw manages keys)');
       console.log('');
-      console.log('Need help? https://apiclaw.com/docs\n');
+      console.log('Next:');
+      console.log('  1. Restart your MCP client');
+      console.log('  2. Try: "Find weather APIs"');
+      console.log('');
+      console.log('Docs: https://apiclaw.com/docs\n');
     } else {
       console.log(chalk.yellow('\n✅ APIClaw already installed in all clients.\n'));
+      console.log(chalk.bold('What you have:\n'));
+      console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
+      console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
+      console.log(chalk.cyan('  🔑 Direct Call') + ' 1,500+ premium (APIClaw manages keys)');
+      console.log('');
       console.log('Run with --force to reinstall (coming soon).\n');
     }
   } else {

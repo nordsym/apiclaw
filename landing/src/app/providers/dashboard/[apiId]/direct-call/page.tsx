@@ -50,6 +50,11 @@ const authTypes = [
 
 export default function DirectCallSetupPage() {
   const params = useParams();
+  
+  // Handle null params
+  if (!params || !params.apiId) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
   const router = useRouter();
   const apiId = params.apiId as string;
 
@@ -440,7 +445,7 @@ export default function DirectCallSetupPage() {
                 <label className="block text-sm font-medium mb-2">Service Account Key</label>
                 <p className="text-xs text-text-muted mb-3">
                   The API key APIClaw uses to make requests on behalf of your users. 
-                  This is typically a privileged key from your provider dashboard.
+                  This is typically a privileged key from your workspace.
                 </p>
                 <div className="relative">
                   <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />

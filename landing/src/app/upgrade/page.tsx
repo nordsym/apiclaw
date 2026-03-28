@@ -40,6 +40,12 @@ async function actionConvex<T>(path: string, args: Record<string, unknown>): Pro
 function UpgradeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  // Handle null searchParams
+  if (!searchParams) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
   const workspaceId = searchParams.get("ws");
   const success = searchParams.get("success");
   

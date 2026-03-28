@@ -1,4 +1,4 @@
-// Mock data for the provider dashboard demo
+// Mock data for the workspace demo
 // This simulates what would come from Convex in production
 
 export interface Provider {

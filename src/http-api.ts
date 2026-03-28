@@ -17,38 +17,13 @@ import { isOpenAPI, executeOpenAPI } from './open-apis.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './analytics.js';
 import { getMachineFingerprint } from './session.js';
-
-// Hivr bees whitelist - these agents get free unlimited access
-const HIVR_BEES_WHITELIST = [
-  'bytebee',
-  'analyzerbee',
-  'buildbee',
-  'buzzwriter',
-  'hivemind',
-  'hivesage',
-  'symbot',
-  'hivrqueen',
-  'marketmaven',
-  'reconbee',
-  'sprintbee',
-  'quillbee',
-  // Add more as Hivr grows
-];
+import { isAuthorized, getProduct } from './product-whitelist.js';
 
 interface APIRequest {
   provider: string;
   action: string;
   params: Record<string, any>;
   agentId: string;
-}
-
-/**
- * Check if agent is authorized (Hivr bee)
- */
-function isAuthorized(agentId: string | undefined): boolean {
-  if (!agentId) return false;
-  const normalized = agentId.toLowerCase().trim();
-  return HIVR_BEES_WHITELIST.includes(normalized);
 }
 
 /**
@@ -97,7 +72,7 @@ async function handleDiscover(req: IncomingMessage, res: ServerResponse, url: UR
     return;
   }
   
-  if (!isAuthorized(agentId || undefined)) {
+  if (!(await isAuthorized(agentId || undefined))) {
     sendJSON(res, 403, { 
       error: 'Unauthorized', 
       message: 'This endpoint is restricted to Hivr bees. Contact admin@nordsym.com for access.',
@@ -109,15 +84,17 @@ async function handleDiscover(req: IncomingMessage, res: ServerResponse, url: UR
   const results = discoverAPIs(query, { category, maxResults });
   const responseTimeMs = Date.now() - startTime;
   
-  // Log to analytics
+  // Log to analytics with product info
+  const product = agentId ? getProduct(agentId) : null;
   logAPICall({
     timestamp: new Date().toISOString(),
     provider: 'apiclaw_discovery',
     action: 'discover',
     type: 'open',
-    userId: `hivr:${agentId}`,
+    userId: agentId || 'unknown',
     success: true,
     latencyMs: responseTimeMs,
+    metadata: product ? { product } : undefined,
   });
   
   sendJSON(res, 200, {
@@ -158,10 +135,15 @@ async function handleCallAPI(req: IncomingMessage, res: ServerResponse): Promise
     return;
   }
   
-  if (!isAuthorized(agentId)) {
+  // Check whitelist + access control
+  const { isAllowed } = await import('./access-control.js');
+  const accessCheck = await isAllowed(agentId, provider);
+  
+  if (!accessCheck.allowed) {
     sendJSON(res, 403, { 
-      error: 'Unauthorized', 
-      message: 'This endpoint is restricted to Hivr bees. Contact admin@nordsym.com for access.',
+      error: 'Access Denied', 
+      message: accessCheck.reason || 'Not authorized',
+      hint: 'Contact admin@nordsym.com for access',
     });
     return;
   }
@@ -201,16 +183,18 @@ async function handleCallAPI(req: IncomingMessage, res: ServerResponse): Promise
   
   const latencyMs = Date.now() - startTime;
   
-  // Log to analytics
+  // Log to analytics with product info
+  const product = getProduct(agentId);
   logAPICall({
     timestamp: new Date().toISOString(),
     provider,
     action,
     type: apiType!,
-    userId: `hivr:${agentId}`,
+    userId: agentId,
     success,
     latencyMs,
     error,
+    metadata: product ? { product } : undefined,
   });
   
   sendJSON(res, success ? 200 : 500, {

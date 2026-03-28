@@ -107,6 +107,14 @@ program
   .option('-f, --force', 'Remove even if not configured')
   .action(uninstallCommand);
 
+// MCP Uninstall alias - same as uninstall but for consistency with mcp-install
+program
+  .command('mcp-uninstall')
+  .description('Remove APIClaw from Claude Desktop or Claude Code MCP config')
+  .option('-c, --client <client>', 'Target specific client (claude-desktop, claude-code)')
+  .option('--dry-run', 'Show what would be done without making changes')
+  .action(uninstallCommand);
+
 // Parse and execute
 program.parse();
 

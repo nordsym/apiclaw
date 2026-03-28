@@ -239,7 +239,8 @@ export default defineSchema({
 
   // APIs listed by providers (self-service onboarding)
   providerAPIs: defineTable({
-    providerId: v.id("providers"),
+    providerId: v.optional(v.id("providers")), // legacy — prefer workspaceId
+    workspaceId: v.optional(v.id("workspaces")), // new — workspace owns this API
     name: v.string(),
     description: v.string(),
     category: v.string(),
@@ -247,7 +248,7 @@ export default defineSchema({
     docsUrl: v.optional(v.string()),
     pricingModel: v.string(), // free, freemium, paid
     pricingNotes: v.optional(v.string()),
-    status: v.string(), // pending, approved, rejected, suspended
+    status: v.string(), // active, paused
     createdAt: v.number(),
     approvedAt: v.optional(v.number()),
     // Analytics
@@ -255,6 +256,7 @@ export default defineSchema({
     lastDiscoveredAt: v.optional(v.number()),
   })
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_category", ["category"])
     .index("by_status", ["status"])
     .index("by_status_category", ["status", "category"]),

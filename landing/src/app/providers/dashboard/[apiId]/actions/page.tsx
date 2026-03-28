@@ -41,6 +41,11 @@ const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puff
 
 export default function ActionsPage() {
   const params = useParams();
+  
+  // Handle null params
+  if (!params || !params.apiId) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
   const router = useRouter();
   const apiId = params.apiId as string;
   

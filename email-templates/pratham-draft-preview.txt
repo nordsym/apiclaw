@@ -1,0 +1,57 @@
+═══════════════════════════════════════════════════════════════
+📧 DRAFT EMAIL TO PRATHAM (APILayer Partnership)
+═══════════════════════════════════════════════════════════════
+
+To: pratham@apilayer.com
+Subject: APIClaw × APILayer Partnership - Direct Call Integration Ready
+
+───────────────────────────────────────────────────────────────
+
+Hi Pratham,
+
+I've been building APIClaw as an API gateway for AI agents, and APILayer's suite is a perfect fit for Direct Call integration. I'd love to partner up and make APILayer's 14 services seamlessly accessible to thousands of AI agents.
+
+What is Direct Call?
+Direct Call means agents call APIClaw, and APIClaw handles all authentication with your services. No API keys needed on the agent side. APIClaw manages:
+
+• Authentication & rate limiting
+• Request routing & error handling  
+• Usage tracking & analytics
+• Billing & revenue share
+
+🎯 Current Status
+10 out of 14 APILayer services are live and working in Direct Call:
+Exchange Rates, Aviation, VAT Check, Market Data, Screenshot, Scraper, PDF Generate, Finance News, Skills, Email Verification
+
+The Partnership
+I'm proposing we formalize this as an official partnership:
+
+• Revenue share: Fair split on Direct Call usage
+• Co-marketing: Featured placement in APIClaw catalog
+• Analytics access: Real-time usage dashboards for both parties
+• Legacy API migration: Help modernize your older endpoints
+
+This gives your APIs massive distribution while keeping full control and visibility.
+
+Next Steps
+The analytics dashboard is ready - just fine-tuning the API listing and usage logging before I send you the invite. Should be good to go this week.
+
+Looking forward to your legacy APIs list. It'll help us prioritize which services to spotlight in Direct Call.
+
+Let's keep the momentum going!
+
+Best,
+Gustav Hemmingsson
+CEO, NordSym AB
+
+───────────────────────────────────────────────────────────────
+
+📎 Files:
+✅ HTML version: ~/Projects/apiclaw/email-templates/pratham-partnership-draft.html
+✅ Preview: ~/Projects/apiclaw/email-templates/pratham-draft-preview.txt
+
+🔍 Em dash scan: CLEAN (0 found)
+🎨 Design: Professional light mode, APIClaw branding
+📊 Status: 10/14 APIs verified working
+
+═══════════════════════════════════════════════════════════════

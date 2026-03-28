@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import DealRoom from "@/components/DealRoom";
 
 // Type definitions
 type MOUSection = {
@@ -126,6 +127,12 @@ const mouContent: Record<string, MOUPartner> = {
 
 export default function MOUPage() {
   const params = useParams();
+  
+  // Handle null params
+  if (!params || !params.partnerId) {
+    return <div className="min-h-screen flex items-center justify-center">Invalid partner ID</div>;
+  }
+  
   const partnerId = params.partnerId as string;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -288,8 +295,10 @@ export default function MOUPage() {
         </div>
       </header>
 
+      <DealRoom partnerId={partnerId} current="mou" />
+
       {/* Content */}
-      <main className="max-w-3xl mx-auto py-8 px-4">
+      <main className="max-w-3xl mx-auto py-2 px-4">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="p-8 space-y-8">
             {mou.sections.map((section, idx) => (

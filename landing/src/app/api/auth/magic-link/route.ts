@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
             </div>
             
             <p style="color: #525252; font-size: 16px; line-height: 1.6; text-align: center;">
-              Click the button below to sign in to your provider dashboard.
+              Click the button below to sign in to your workspace.
             </p>
             
             <div style="text-align: center; margin: 32px 0;">

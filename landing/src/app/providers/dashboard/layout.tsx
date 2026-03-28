@@ -80,12 +80,12 @@ export default function DashboardLayout({
   };
 
   // Check if current route is API detail page
-  const apiIdMatch = pathname.match(/\/providers\/dashboard\/([^/]+)/);
+  const apiIdMatch = pathname?.match(/\/providers\/dashboard\/([^/]+)/);
   const currentApiId = apiIdMatch ? apiIdMatch[1] : null;
   const isApiDetailPage = currentApiId && currentApiId !== "login" && currentApiId !== "verify";
 
   // Don't show layout for login/verify pages
-  if (pathname.includes("/login") || pathname.includes("/verify")) {
+  if (pathname?.includes("/login") || pathname?.includes("/verify")) {
     return <>{children}</>;
   }
 
@@ -167,7 +167,7 @@ export default function DashboardLayout({
                 key={item.label}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                  (item.exact ? pathname === item.href : pathname.startsWith(item.href.split('?')[0])) && !isApiDetailPage
+                  (item.exact ? pathname === item.href : pathname?.startsWith(item.href.split('?')[0])) && !isApiDetailPage
                     ? "bg-accent text-white"
                     : "text-text-secondary hover:bg-surface hover:text-text-primary"
                 }`}
@@ -200,7 +200,7 @@ export default function DashboardLayout({
                 <Link
                   href={`/providers/dashboard/${currentApiId}/direct-call`}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    pathname.includes("/direct-call")
+                    pathname?.includes("/direct-call")
                       ? "bg-accent text-white"
                       : "text-text-secondary hover:bg-surface hover:text-text-primary"
                   }`}
@@ -212,7 +212,7 @@ export default function DashboardLayout({
                 <Link
                   href={`/providers/dashboard/${currentApiId}/actions`}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    pathname.includes("/actions")
+                    pathname?.includes("/actions")
                       ? "bg-accent text-white"
                       : "text-text-secondary hover:bg-surface hover:text-text-primary"
                   }`}
@@ -224,7 +224,7 @@ export default function DashboardLayout({
                 <Link
                   href={`/providers/dashboard/${currentApiId}/test`}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    pathname.includes("/test")
+                    pathname?.includes("/test")
                       ? "bg-accent text-white"
                       : "text-text-secondary hover:bg-surface hover:text-text-primary"
                   }`}

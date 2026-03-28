@@ -17,73 +17,13 @@ const apisData = JSON.parse(
 const apis: APIProvider[] = apisData.apis;
 
 // Direct Call provider specs (hardcoded handlers with params)
+// Ordered: AI-first (models, LLM routing, audio), then infrastructure (code, web, search, email, SMS)
 const DIRECT_CALL_SPECS: Record<string, {
   description: string;
   auth: string;
   docs: string;
   actions: Record<string, { params: { name: string; required: boolean; desc: string }[]; desc: string }>;
 }> = {
-  '46elks': {
-    description: 'Swedish SMS and voice API',
-    auth: 'basic',
-    docs: 'https://46elks.com/docs',
-    actions: {
-      send_sms: {
-        desc: 'Send SMS message',
-        params: [
-          { name: 'to', required: true, desc: 'Phone number (+46...)' },
-          { name: 'message', required: true, desc: 'SMS text (max 160 chars for 1 segment)' },
-          { name: 'from', required: false, desc: 'Sender ID (default: APIClaw)' },
-        ],
-      },
-    },
-  },
-  twilio: {
-    description: 'Global SMS and voice API',
-    auth: 'basic',
-    docs: 'https://www.twilio.com/docs',
-    actions: {
-      send_sms: {
-        desc: 'Send SMS message',
-        params: [
-          { name: 'to', required: true, desc: 'Phone number (E.164 format)' },
-          { name: 'message', required: true, desc: 'SMS text' },
-          { name: 'from', required: false, desc: 'Sender phone number' },
-        ],
-      },
-    },
-  },
-  brave_search: {
-    description: 'Web search API',
-    auth: 'api_key',
-    docs: 'https://api.search.brave.com/docs',
-    actions: {
-      search: {
-        desc: 'Search the web',
-        params: [
-          { name: 'query', required: true, desc: 'Search query' },
-          { name: 'count', required: false, desc: 'Number of results (default: 5)' },
-        ],
-      },
-    },
-  },
-  resend: {
-    description: 'Email API',
-    auth: 'bearer',
-    docs: 'https://resend.com/docs',
-    actions: {
-      send_email: {
-        desc: 'Send email',
-        params: [
-          { name: 'to', required: true, desc: 'Recipient email' },
-          { name: 'subject', required: true, desc: 'Email subject' },
-          { name: 'html', required: false, desc: 'HTML body' },
-          { name: 'text', required: false, desc: 'Plain text body' },
-          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.nordsym.com)' },
-        ],
-      },
-    },
-  },
   openrouter: {
     description: 'LLM routing (100+ models)',
     auth: 'bearer',
@@ -95,21 +35,6 @@ const DIRECT_CALL_SPECS: Record<string, {
           { name: 'messages', required: true, desc: 'Array of {role, content}' },
           { name: 'model', required: false, desc: 'Model ID (default: claude-3-haiku)' },
           { name: 'max_tokens', required: false, desc: 'Max response tokens (default: 1000)' },
-        ],
-      },
-    },
-  },
-  elevenlabs: {
-    description: 'Text-to-speech',
-    auth: 'api_key',
-    docs: 'https://elevenlabs.io/docs',
-    actions: {
-      text_to_speech: {
-        desc: 'Generate audio from text',
-        params: [
-          { name: 'text', required: true, desc: 'Text to speak' },
-          { name: 'voice_id', required: false, desc: 'Voice ID (default: Rachel)' },
-          { name: 'model_id', required: false, desc: 'Model ID' },
         ],
       },
     },
@@ -129,6 +54,41 @@ const DIRECT_CALL_SPECS: Record<string, {
       list_models: {
         desc: 'List available models',
         params: [],
+      },
+    },
+  },
+  elevenlabs: {
+    description: 'Text-to-speech',
+    auth: 'api_key',
+    docs: 'https://elevenlabs.io/docs',
+    actions: {
+      text_to_speech: {
+        desc: 'Generate audio from text',
+        params: [
+          { name: 'text', required: true, desc: 'Text to speak' },
+          { name: 'voice_id', required: false, desc: 'Voice ID (default: Rachel)' },
+          { name: 'model_id', required: false, desc: 'Model ID' },
+        ],
+      },
+    },
+  },
+  e2b: {
+    description: 'Code sandbox for AI agents',
+    auth: 'api_key',
+    docs: 'https://e2b.dev/docs',
+    actions: {
+      run_code: {
+        desc: 'Execute code in sandbox',
+        params: [
+          { name: 'code', required: true, desc: 'Code to run' },
+          { name: 'language', required: false, desc: 'Language (default: python)' },
+        ],
+      },
+      run_shell: {
+        desc: 'Execute shell command',
+        params: [
+          { name: 'command', required: true, desc: 'Shell command' },
+        ],
       },
     },
   },
@@ -206,22 +166,171 @@ const DIRECT_CALL_SPECS: Record<string, {
       },
     },
   },
-  e2b: {
-    description: 'Code sandbox for AI agents',
+  brave_search: {
+    description: 'Web search API',
     auth: 'api_key',
-    docs: 'https://e2b.dev/docs',
+    docs: 'https://api.search.brave.com/docs',
     actions: {
-      run_code: {
-        desc: 'Execute code in sandbox',
+      search: {
+        desc: 'Search the web',
         params: [
-          { name: 'code', required: true, desc: 'Code to run' },
-          { name: 'language', required: false, desc: 'Language (default: python)' },
+          { name: 'query', required: true, desc: 'Search query' },
+          { name: 'count', required: false, desc: 'Number of results (default: 5)' },
         ],
       },
-      run_shell: {
-        desc: 'Execute shell command',
+    },
+  },
+  resend: {
+    description: 'Email API',
+    auth: 'bearer',
+    docs: 'https://resend.com/docs',
+    actions: {
+      send_email: {
+        desc: 'Send email',
         params: [
-          { name: 'command', required: true, desc: 'Shell command' },
+          { name: 'to', required: true, desc: 'Recipient email' },
+          { name: 'subject', required: true, desc: 'Email subject' },
+          { name: 'html', required: false, desc: 'HTML body' },
+          { name: 'text', required: false, desc: 'Plain text body' },
+          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.nordsym.com)' },
+        ],
+      },
+    },
+  },
+  '46elks': {
+    description: 'Swedish SMS and voice API',
+    auth: 'basic',
+    docs: 'https://46elks.com/docs',
+    actions: {
+      send_sms: {
+        desc: 'Send SMS message',
+        params: [
+          { name: 'to', required: true, desc: 'Phone number (+46...)' },
+          { name: 'message', required: true, desc: 'SMS text (max 160 chars for 1 segment)' },
+          { name: 'from', required: false, desc: 'Sender ID (default: APIClaw)' },
+        ],
+      },
+    },
+  },
+  twilio: {
+    description: 'Global SMS and voice API',
+    auth: 'basic',
+    docs: 'https://www.twilio.com/docs',
+    actions: {
+      send_sms: {
+        desc: 'Send SMS message',
+        params: [
+          { name: 'to', required: true, desc: 'Phone number (E.164 format)' },
+          { name: 'message', required: true, desc: 'SMS text' },
+          { name: 'from', required: false, desc: 'Sender phone number' },
+        ],
+      },
+    },
+  },
+  apilayer: {
+    description: 'APILayer marketplace — currency, news, scraping, PDFs, verification & more',
+    auth: 'api_key',
+    docs: 'https://apilayer.com',
+    actions: {
+      exchange_rates: {
+        desc: 'Get live or historical currency exchange rates',
+        params: [
+          { name: 'base', required: false, desc: 'Base currency (default: USD)' },
+          { name: 'symbols', required: false, desc: 'Comma-separated target currencies' },
+          { name: 'date', required: false, desc: 'Historical date YYYY-MM-DD (omit for live)' },
+        ],
+      },
+      market_data: {
+        desc: 'End-of-day stock market data',
+        params: [
+          { name: 'symbols', required: true, desc: 'Stock ticker(s), comma-separated e.g. AAPL,MSFT' },
+          { name: 'date_from', required: false, desc: 'Start date YYYY-MM-DD' },
+          { name: 'date_to', required: false, desc: 'End date YYYY-MM-DD' },
+        ],
+      },
+      aviation: {
+        desc: 'Real-time flight data and tracking',
+        params: [
+          { name: 'flight_iata', required: false, desc: 'IATA flight number e.g. AA100' },
+          { name: 'dep_iata', required: false, desc: 'Departure airport IATA code' },
+          { name: 'arr_iata', required: false, desc: 'Arrival airport IATA code' },
+        ],
+      },
+      pdf_generate: {
+        desc: 'Generate PDF from URL or HTML',
+        params: [
+          { name: 'document_url', required: false, desc: 'URL to convert to PDF' },
+          { name: 'document_html', required: false, desc: 'HTML string to convert (alternative to URL)' },
+          { name: 'page_size', required: false, desc: 'Page size: A4, Letter, etc (default: A4)' },
+        ],
+      },
+      screenshot: {
+        desc: 'Capture full-page screenshot of any URL',
+        params: [
+          { name: 'url', required: true, desc: 'URL to screenshot' },
+          { name: 'viewport', required: false, desc: 'Viewport size e.g. 1440x900 (default)' },
+          { name: 'fullpage', required: false, desc: '1 for full page, 0 for viewport only (default: 0)' },
+        ],
+      },
+      verify_email: {
+        desc: 'Validate email address format and deliverability',
+        params: [
+          { name: 'email', required: true, desc: 'Email address to verify' },
+        ],
+      },
+      verify_number: {
+        desc: 'Validate and lookup phone number details',
+        params: [
+          { name: 'number', required: true, desc: 'Phone number in E.164 format e.g. +46701234567' },
+        ],
+      },
+      vat_check: {
+        desc: 'Validate EU VAT number',
+        params: [
+          { name: 'vat_number', required: true, desc: 'EU VAT number e.g. SE556012345601' },
+        ],
+      },
+      world_news: {
+        desc: 'Extract and analyze news articles from a URL',
+        params: [
+          { name: 'url', required: true, desc: 'URL of the news article to analyze' },
+          { name: 'analyze', required: false, desc: 'Whether to analyze the news (default: true)' },
+        ],
+      },
+      finance_news: {
+        desc: 'Latest financial and stock market news',
+        params: [
+          { name: 'tickers', required: false, desc: 'Stock tickers comma-separated e.g. AAPL,TSLA' },
+          { name: 'text', required: false, desc: 'Keyword filter' },
+          { name: 'number', required: false, desc: 'Number of results (default: 5)' },
+        ],
+      },
+      scrape: {
+        desc: 'Advanced web scraper — returns clean page content',
+        params: [
+          { name: 'url', required: true, desc: 'URL to scrape' },
+        ],
+      },
+      image_crop: {
+        desc: 'Smart crop an image to specified dimensions',
+        params: [
+          { name: 'url', required: true, desc: 'Image URL to crop' },
+          { name: 'width', required: false, desc: 'Target width in pixels' },
+          { name: 'height', required: false, desc: 'Target height in pixels' },
+        ],
+      },
+      skills: {
+        desc: 'Search 7000+ professional skills database',
+        params: [
+          { name: 'q', required: true, desc: 'Skill search query e.g. "machine learning"' },
+          { name: 'count', required: false, desc: 'Number of results (default: 10)' },
+        ],
+      },
+      form_submit: {
+        desc: 'Submit form data to a FormAPI endpoint',
+        params: [
+          { name: 'endpoint', required: true, desc: 'FormAPI endpoint path' },
+          { name: 'data', required: false, desc: 'Form data object to submit' },
         ],
       },
     },
