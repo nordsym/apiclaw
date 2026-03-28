@@ -152,7 +152,7 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "analytics" | "webhooks" | "api-keys" | "earn" | "docs" | "feedback" | "settings" | "billing";
+type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "analytics" | "webhooks" | "earn" | "docs" | "feedback" | "settings" | "billing";
 type AnalyticsSubtab = "overview" | "usage" | "logs" | "chains";
 
 // Generate preview analytics data for demo
@@ -257,7 +257,7 @@ export default function WorkspacePage() {
   }, [searchParams, showToast]);
 
   useEffect(() => {
-    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "analytics", "webhooks", "api-keys", "earn", "docs", "feedback", "settings", "billing"];
+    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "analytics", "webhooks", "earn", "docs", "feedback", "settings", "billing"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
@@ -525,8 +525,7 @@ export default function WorkspacePage() {
     { id: "my-agents" as TabType, label: "My Agents", icon: Users },
     { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
     { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
-    { id: "webhooks" as TabType, label: "Webhooks", icon: Webhook },
-    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
+    { id: "webhooks" as TabType, label: "Notifications", icon: Bell },
   ];
 
   // Secondary navigation tabs
@@ -915,13 +914,10 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "webhooks" && (
-            <WebhooksTab />
-          )}
-          {activeTab === "api-keys" && (
-            <ApiKeysTab workspace={workspace} providerApis={providerApis} sessionToken={sessionToken} />
+            <WebhooksTab sessionToken={sessionToken} />
           )}
           {activeTab === "billing" && (
-            <BillingTab workspace={workspace} sessionToken={sessionToken} />
+            <BillingTab workspace={workspace} />
           )}
           {activeTab === "earn" && (
             <EarnCreditsTab showToast={showToast} />
@@ -4456,497 +4452,149 @@ interface PaymentMethod {
   expYear: number;
 }
 
-function BillingTab({ workspace, sessionToken }: { workspace: Workspace | null; sessionToken: string | null }) {
-  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+function BillingTab({ workspace }: { workspace: Workspace | null }) {
+  const currentTier = workspace?.tier || "free";
+  const isBacker = currentTier === "backer";
+  const isPartner = currentTier === "partner";
 
-  // Fetch billing info
-  useEffect(() => {
-    const fetchBillingData = async () => {
-      if (!sessionToken || !workspace?.id) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch billing info
-        const infoRes = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "billing:getInfo",
-            args: { workspaceId: workspace.id },
-          }),
-        });
-        const infoData = await infoRes.json();
-        const info = infoData.value || infoData;
-        
-        if (info && !info.error) {
-          setBillingInfo(info);
-          setInvoices(info.invoices || []);
-        }
-
-        // If user has Stripe customer, try to get payment method
-        if (info?.stripeCustomerId) {
-          try {
-            const pmRes = await fetch("/api/billing/payment-method", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token: sessionToken }),
-            });
-            const pmData = await pmRes.json();
-            if (pmData.paymentMethod) {
-              setPaymentMethod(pmData.paymentMethod);
-            }
-          } catch {
-            // Payment method fetch is optional
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch billing info:", err);
-        setError("Failed to load billing information");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBillingData();
-  }, [sessionToken, workspace?.id]);
-
-  // Open Stripe billing portal
-  const openBillingPortal = async () => {
-    if (!sessionToken) return;
-    
-    setIsLoadingPortal(true);
-    try {
-      const res = await fetch("/api/billing/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: sessionToken }),
-      });
-      const data = await res.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || "Failed to open billing portal");
-      }
-    } catch {
-      setError("Failed to open billing portal");
-    } finally {
-      setIsLoadingPortal(false);
-    }
-  };
-
-  const tier = billingInfo?.tier || workspace?.tier || "free";
-  const plan = billingInfo?.plan || "free";
-  const hasPaymentMethod = !!billingInfo?.stripeCustomerId;
-
-  // Calculate estimated cost
-  const FREE_CALLS = 100;
-  const COST_PER_CALL = 0.002;
-  const currentUsage = billingInfo?.currentPeriodUsage || workspace?.usageCount || 0;
-  const billableCalls = Math.max(0, currentUsage - FREE_CALLS);
-  const estimatedCost = billableCalls * COST_PER_CALL;
-
-  // Plan display names
-  const planDisplayNames: Record<string, string> = {
-    free: "Free",
-    usage_based: "Usage-Based",
-    starter: "Starter",
-    pro: "Pro",
-    scale: "Scale",
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <h2 className="text-2xl font-bold">Billing</h2>
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  const plans = [
+    {
+      id: "free",
+      name: "Free",
+      price: "$0",
+      period: "",
+      calls: "50 Direct Call",
+      callsSub: "calls per month",
+      features: ["Search Index always available", "Open API always available", "1 connected agent"],
+      cta: "Current plan",
+      ctaDisabled: true,
+      link: null,
+      highlight: false,
+    },
+    {
+      id: "pro",
+      name: "Pro",
+      price: "$79",
+      period: "/month",
+      calls: "5,000 Direct Call",
+      callsSub: "calls per month",
+      features: ["Everything in Free", "Search + Open API always available", "Unlimited agents", "Priority support"],
+      cta: currentTier === "pro" ? "Current plan" : "Upgrade to Pro",
+      ctaDisabled: currentTier === "pro",
+      link: "https://buy.stripe.com/7sY7sN78gfX43yAchqcMM0z",
+      highlight: true,
+    },
+    {
+      id: "scale",
+      name: "Scale",
+      price: "$249",
+      period: "/month",
+      calls: "25,000 Direct Call",
+      callsSub: "calls per month",
+      features: ["Everything in Pro", "Volume pricing on calls", "Dedicated onboarding", "SLA available"],
+      cta: currentTier === "scale" ? "Current plan" : "Upgrade to Scale",
+      ctaDisabled: currentTier === "scale",
+      link: "https://buy.stripe.com/14A3cx78geT00modlucMM0A",
+      highlight: false,
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: "Custom",
+      period: "",
+      calls: "Unlimited",
+      callsSub: "calls",
+      features: ["Everything in Scale", "Custom call limits", "Private deployment options", "Dedicated account manager"],
+      cta: "Book a call",
+      ctaDisabled: false,
+      link: "https://nordsym.app.n8n.cloud/webhook/hivr-booking",
+      highlight: false,
+    },
+  ];
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Billing</h2>
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold">Billing</h2>
+        <p className="text-[var(--text-muted)] mt-1">Help us stay 100% user funded — no VC, no ads, no compromises.</p>
+      </div>
 
-      {error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <p className="text-red-500">{error}</p>
-        </div>
-      )}
-
-      {/* Current Plan */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-6">
+      {/* Backer / Partner banner */}
+      {(isBacker || isPartner) && (
+        <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5 flex items-center gap-4">
+          <Check className="w-5 h-5 text-green-400 shrink-0" />
           <div>
-            <h3 className="font-bold text-lg">Current Plan</h3>
-            <p className="text-[var(--text-muted)]">Your workspace subscription</p>
+            <p className="font-semibold text-green-400">{isPartner ? "Partner account" : "Founding Backer"}</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">{isPartner ? "Partner access — no billing needed." : "Unlimited access until end of 2026. Thank you for backing APIClaw early."}</p>
           </div>
-          <div className={`px-4 py-2 rounded-full font-semibold ${
-            plan === "usage_based" 
-              ? "bg-green-500/20 text-green-500" 
-              : plan === "free" 
-                ? "bg-[var(--surface)] text-[var(--text-muted)]"
-                : "bg-[#ef4444]/20 text-[#ef4444]"
-          }`}>
-            {planDisplayNames[plan] || plan}
-          </div>
-        </div>
-
-        {plan === "free" ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "50"} / month</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Support</span>
-              <span className="font-medium">Community</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[var(--text-muted)]">Price</span>
-              <span className="font-medium">Free</span>
-            </div>
-          </div>
-        ) : plan === "usage_based" ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium flex items-center gap-2">
-                Unlimited
-                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs">Active</span>
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Free Tier</span>
-              <span className="font-medium">50 calls / month</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Rate</span>
-              <span className="font-medium">$0.002 / call (after free tier)</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[var(--text-muted)]">Support</span>
-              <span className="font-medium">Priority</span>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">API Calls</span>
-              <span className="font-medium">{workspace?.usageLimit?.toLocaleString() || "10,000"} / month</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-[var(--border)]">
-              <span className="text-[var(--text-muted)]">Support</span>
-              <span className="font-medium">Priority</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-[var(--text-muted)]">Price</span>
-              <span className="font-medium">$99 / month</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Usage This Month */}
-      {workspace && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Usage This Month</h3>
-            {plan === "usage_based" && (
-              <div className="text-right">
-                <p className="text-sm text-[var(--text-muted)]">Estimated Cost</p>
-                <p className="text-2xl font-bold text-[#ef4444]">${estimatedCost.toFixed(2)}</p>
-              </div>
-            )}
-          </div>
-          
-          <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden mb-4">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                plan === "usage_based" 
-                  ? "bg-green-500"
-                  : workspace.usagePercentage > 90 
-                    ? "bg-red-500" 
-                    : workspace.usagePercentage > 70 
-                      ? "bg-yellow-500" 
-                      : "bg-[#ef4444]"
-              }`}
-              style={{ width: plan === "usage_based" ? "100%" : `${Math.min(workspace.usagePercentage, 100)}%` }}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[var(--text-muted)]">
-              {currentUsage.toLocaleString()} {plan === "usage_based" ? "calls this period" : `of ${workspace.usageLimit.toLocaleString()} calls used`}
-            </span>
-            {plan === "usage_based" ? (
-              <span className="text-green-500 font-medium">
-                {billableCalls > 0 ? `${billableCalls.toLocaleString()} billable` : "Within free tier"}
-              </span>
-            ) : (
-              <span className="text-[var(--text-muted)]">{workspace.usagePercentage.toFixed(1)}%</span>
-            )}
-          </div>
-
-          {plan === "usage_based" && (
-            <div className="mt-4 pt-4 border-t border-[var(--border)] grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold">{currentUsage.toLocaleString()}</p>
-                <p className="text-sm text-[var(--text-muted)]">Total Calls</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-500">{Math.min(currentUsage, FREE_CALLS)}</p>
-                <p className="text-sm text-[var(--text-muted)]">Free Calls</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[#ef4444]">{billableCalls.toLocaleString()}</p>
-                <p className="text-sm text-[var(--text-muted)]">Billable</p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Payment Method */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Payment Method</h3>
-          {hasPaymentMethod && (
-            <button
-              onClick={openBillingPortal}
-              disabled={isLoadingPortal}
-              className="text-sm text-[#ef4444] hover:underline flex items-center gap-1"
-            >
-              {isLoadingPortal ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  Manage
-                  <ExternalLink className="w-3 h-3" />
-                </>
+      {/* Current plan summary */}
+      {!isBacker && !isPartner && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-[var(--text-muted)]">Current plan</p>
+            <p className="text-xl font-bold capitalize mt-0.5">{currentTier}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-[var(--text-muted)]">Direct Call usage this month</p>
+            <p className="text-xl font-bold mt-0.5">
+              {workspace?.usageLimit === -1 ? "Unlimited" : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || 50}`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Plans grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {plans.map(plan => {
+          const isCurrentPlan = currentTier === plan.id || (isBacker && plan.id === "free") || (isPartner && plan.id === "free");
+          return (
+            <div key={plan.id} className={`rounded-2xl border p-5 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
+              {plan.highlight && (
+                <span className="self-start text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ef4444] text-white mb-3">Most popular</span>
               )}
-            </button>
-          )}
-        </div>
-
-        {paymentMethod ? (
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-[var(--surface)]">
-            <div className="w-12 h-8 rounded bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-              <CreditCard className="w-6 h-4 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium capitalize">{paymentMethod.brand} •••• {paymentMethod.last4}</p>
-              <p className="text-sm text-[var(--text-muted)]">Expires {paymentMethod.expMonth}/{paymentMethod.expYear}</p>
-            </div>
-            <Check className="w-5 h-5 text-green-500" />
-          </div>
-        ) : hasPaymentMethod ? (
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-[var(--surface)]">
-            <div className="w-12 h-8 rounded bg-green-500/20 flex items-center justify-center">
-              <Check className="w-5 h-5 text-green-500" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">Payment method on file</p>
-              <p className="text-sm text-[var(--text-muted)]">Managed through Stripe</p>
-            </div>
-            <button
-              onClick={openBillingPortal}
-              disabled={isLoadingPortal}
-              className="text-sm text-[#ef4444] hover:underline"
-            >
-              View details
-            </button>
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="w-8 h-8 text-[var(--text-muted)]" />
-            </div>
-            <p className="text-[var(--text-muted)] mb-4">No payment method on file</p>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Add a payment method to unlock unlimited API calls
-            </p>
-            {sessionToken && (
-              <CheckoutButton sessionToken={sessionToken} variant="outline">
-                <CreditCard className="w-4 h-4" />
-                Add Payment Method
-              </CheckoutButton>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Upgrade CTA - Only for free tier */}
-      {plan === "free" && sessionToken && (
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-[#ef4444]/5 p-8">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-[#ef4444]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-xl mb-2">Unlock Unlimited API Calls</h3>
-              <p className="text-[var(--text-muted)]">
-                Pay only for what you use. First 50 calls free every month, then just $0.002 per call.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>50 free calls / month</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>$0.002 per additional call</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>No monthly minimum</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Cancel anytime</span>
-            </div>
-          </div>
-
-          <CheckoutButton sessionToken={sessionToken} variant="primary">
-            <CreditCard className="w-5 h-5" />
-            Add Payment Method
-            <ChevronRight className="w-5 h-5" />
-          </CheckoutButton>
-          
-          <p className="mt-4 text-sm text-[var(--text-muted)]">
-            You&apos;ll only be charged for usage beyond 50 free calls. Billed monthly.
-          </p>
-        </div>
-      )}
-
-      {/* Invoices */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-lg">Invoices</h3>
-          {invoices.length > 0 && hasPaymentMethod && (
-            <button
-              onClick={openBillingPortal}
-              disabled={isLoadingPortal}
-              className="text-sm text-[#ef4444] hover:underline flex items-center gap-1"
-            >
-              View all in Stripe
-              <ExternalLink className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-
-        {invoices.length > 0 ? (
-          <div className="space-y-3">
-            {invoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[var(--background)] flex items-center justify-center">
-                    <ScrollText className="w-5 h-5 text-[var(--text-muted)]" />
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      {new Date(invoice.periodStart).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                    </p>
-                    <p className="text-sm text-[var(--text-muted)]">
-                      {invoice.callCount?.toLocaleString() || 0} API calls
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-semibold">${(invoice.amount / 100).toFixed(2)}</p>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                      invoice.status === "paid" 
-                        ? "bg-green-500/20 text-green-500"
-                        : invoice.status === "open" || invoice.status === "pending"
-                          ? "bg-yellow-500/20 text-yellow-500"
-                          : "bg-red-500/20 text-red-500"
-                    }`}>
-                      {invoice.status === "paid" && <Check className="w-3 h-3" />}
-                      {invoice.status === "paid" ? "Paid" : invoice.status === "open" ? "Pending" : invoice.status}
-                    </span>
-                  </div>
-                  {invoice.pdfUrl && (
-                    <a
-                      href={invoice.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-lg hover:bg-[var(--background)] transition"
-                      title="View PDF"
-                    >
-                      <ExternalLink className="w-4 h-4 text-[var(--text-muted)]" />
-                    </a>
-                  )}
-                </div>
+              <p className="font-bold text-lg">{plan.name}</p>
+              <div className="flex items-baseline gap-1 mt-1 mb-1">
+                <span className="text-3xl font-bold">{plan.price}</span>
+                {plan.period && <span className="text-sm text-[var(--text-muted)]">{plan.period}</span>}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] flex items-center justify-center mx-auto mb-4">
-              <ScrollText className="w-8 h-8 text-[var(--text-muted)]" />
+              <p className="text-sm font-medium text-[#ef4444]">{plan.calls}</p>
+              <p className="text-xs text-[var(--text-muted)] mb-4">{plan.callsSub}</p>
+              <ul className="space-y-2 mb-6 flex-1">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-[var(--text-muted)]">
+                    <Check className="w-3.5 h-3.5 text-green-400 shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => plan.link && !plan.ctaDisabled && window.open(plan.link, "_blank")}
+                disabled={plan.ctaDisabled || isCurrentPlan}
+                className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${
+                  isCurrentPlan || plan.ctaDisabled
+                    ? "bg-[var(--surface)] text-[var(--text-muted)] cursor-default"
+                    : plan.highlight
+                    ? "bg-[#ef4444] text-white hover:bg-[#dc2626]"
+                    : "border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface)]"
+                }`}
+              >
+                {isCurrentPlan ? "Current plan" : plan.cta}
+              </button>
             </div>
-            <p className="text-[var(--text-muted)] mb-2">No invoices yet</p>
-            <p className="text-sm text-[var(--text-muted)]">
-              {plan === "free" 
-                ? "Invoices will appear here once you upgrade to a paid plan"
-                : "Your first invoice will appear at the end of the billing period"}
-            </p>
-          </div>
-        )}
+          );
+        })}
       </div>
 
-      {/* Credit Balance (if applicable) */}
-      {billingInfo?.creditBalance && billingInfo.creditBalance > 0 && (
-        <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-              <Crown className="w-6 h-6 text-green-500" />
-            </div>
-            <div>
-              <p className="text-sm text-green-500 font-medium">Credit Balance</p>
-              <p className="text-2xl font-bold text-green-500">${(billingInfo.creditBalance / 100).toFixed(2)}</p>
-            </div>
-          </div>
-          <p className="mt-4 text-sm text-[var(--text-muted)]">
-            This credit will be applied to your next invoice automatically.
-          </p>
-        </div>
-      )}
+      {/* Fine print */}
+      <p className="text-xs text-center text-[var(--text-muted)]">
+        All plans include unlimited Search Index and Open API access. Direct Call APIs require usage credits. Prices in USD, tax inclusive.
+      </p>
     </div>
   );
-}
-
-// ============================================
-// WEBHOOKS TAB
-// ============================================
-
-interface WebhookData {
-  id: string;
-  url: string;
-  events: string[];
-  enabled: boolean;
-  lastTriggeredAt?: number;
-  lastStatus?: string;
-  failCount: number;
-  createdAt: number;
-  secretHint: string;
 }
 
 const WEBHOOK_EVENTS = [
@@ -4957,772 +4605,95 @@ const WEBHOOK_EVENTS = [
   { id: "agent.revoked", label: "Agent Revoked", description: "Triggered when an agent is revoked" },
 ];
 
-function WebhooksTab() {
-  const [webhooks, setWebhooks] = useState<WebhookData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState<WebhookData | null>(null);
-  const [showSecretModal, setShowSecretModal] = useState<{ id: string; secret: string } | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [testingWebhook, setTestingWebhook] = useState<string | null>(null);
-  const [testResult, setTestResult] = useState<{ id: string; success: boolean; message: string } | null>(null);
-  
-  // Add modal state
-  const [newUrl, setNewUrl] = useState("");
-  const [newEvents, setNewEvents] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+function WebhooksTab({ sessionToken }: { sessionToken: string | null }) {
+  const [enabled, setEnabled] = useState<Record<string, boolean>>({
+    "usage.threshold.80": false,
+    "usage.threshold.100": false,
+    "agent.connected": false,
+  });
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
 
-  // Fetch webhooks on mount
-  useEffect(() => {
-    fetchWebhooks();
-  }, []);
+  const events = [
+    {
+      id: "usage.threshold.80",
+      label: "Usage at 80%",
+      description: "Email when 80% of your monthly Direct Call quota is used.",
+      icon: AlertCircle,
+      color: "text-yellow-400",
+    },
+    {
+      id: "usage.threshold.100",
+      label: "Usage limit reached",
+      description: "Email when Direct Call is blocked. Search and Open APIs still work.",
+      icon: AlertCircle,
+      color: "text-red-400",
+    },
+    {
+      id: "agent.connected",
+      label: "New agent connected",
+      description: "Email when a new agent authenticates with your workspace.",
+      icon: Bot,
+      color: "text-blue-400",
+    },
+  ];
 
-  const fetchWebhooks = async () => {
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const res = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "webhooks:getWebhooks",
-          args: { token },
-        }),
-      });
-      const data = await res.json();
-      const result = data.value || data;
-      if (result.webhooks) {
-        setWebhooks(result.webhooks);
-      }
-    } catch (err) {
-      console.error("Failed to fetch webhooks:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCreateWebhook = async () => {
-    if (!newUrl.trim() || newEvents.length === 0) {
-      setError("URL and at least one event are required");
-      return;
-    }
-
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "webhooks:createWebhook",
-          args: { token, url: newUrl, events: newEvents },
-        }),
-      });
-      const data = await res.json();
-      const result = data.value || data;
-
-      if (result.error) {
-        setError(result.error);
-      } else if (result.success) {
-        // Show secret modal
-        setShowSecretModal({ id: result.webhookId, secret: result.secret });
-        setShowAddModal(false);
-        setNewUrl("");
-        setNewEvents([]);
-        // Refresh webhooks
-        await fetchWebhooks();
-      }
-    } catch (err) {
-      setError("Failed to create webhook");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleUpdateWebhook = async (webhookId: string, updates: { enabled?: boolean; events?: string[] }) => {
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
-    try {
-      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "webhooks:updateWebhook",
-          args: { token, webhookId, ...updates },
-        }),
-      });
-      const data = await res.json();
-      const result = data.value || data;
-
-      if (result.success) {
-        await fetchWebhooks();
-        setShowEditModal(null);
-      }
-    } catch (err) {
-      console.error("Failed to update webhook:", err);
-    }
-  };
-
-  const handleDeleteWebhook = async (webhookId: string) => {
-    if (confirmDelete !== webhookId) {
-      setConfirmDelete(webhookId);
-      return;
-    }
-
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
+  const toggle = async (eventId: string) => {
+    const newVal = !enabled[eventId];
+    setSaving(eventId);
+    setEnabled(prev => ({ ...prev, [eventId]: newVal }));
+    // Fire-and-forget to Convex
     try {
       await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "webhooks:deleteWebhook",
-          args: { token, webhookId },
-        }),
+        body: JSON.stringify({ path: "workspaces:setWebhookEvent", args: { token: sessionToken, eventId, enabled: newVal } }),
       });
-      setWebhooks(webhooks.filter((w) => w.id !== webhookId));
-      setConfirmDelete(null);
-    } catch (err) {
-      console.error("Failed to delete webhook:", err);
-    }
+      setSaved(eventId);
+      setTimeout(() => setSaved(null), 2000);
+    } catch { /* ignore */ }
+    setSaving(null);
   };
-
-  const handleTestWebhook = async (webhookId: string) => {
-    const token = localStorage.getItem("apiclaw_workspace_session");
-    if (!token) return;
-
-    setTestingWebhook(webhookId);
-    setTestResult(null);
-
-    try {
-      const res = await fetch(`${CONVEX_URL}/api/action`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "webhooks:testWebhook",
-          args: { token, webhookId },
-        }),
-      });
-      const data = await res.json();
-      const result = data.value || data;
-
-      setTestResult({
-        id: webhookId,
-        success: result.success,
-        message: result.message || (result.success ? "Delivered successfully" : "Failed to deliver"),
-      });
-
-      // Clear result after 5 seconds
-      setTimeout(() => setTestResult(null), 5000);
-    } catch (err) {
-      setTestResult({
-        id: webhookId,
-        success: false,
-        message: "Failed to test webhook",
-      });
-    } finally {
-      setTestingWebhook(null);
-    }
-  };
-
-  const toggleEvent = (eventId: string, currentEvents: string[], setEvents: (events: string[]) => void) => {
-    if (currentEvents.includes(eventId)) {
-      setEvents(currentEvents.filter((e) => e !== eventId));
-    } else {
-      setEvents([...currentEvents, eventId]);
-    }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Webhooks</h2>
-          <p className="text-[var(--text-muted)]">Get notified when events happen in your workspace</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Add Webhook
-        </button>
-      </div>
-
-      {/* Webhooks list */}
-      {webhooks.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 p-12 text-center">
-          <Webhook className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
-          <h3 className="font-semibold text-xl mb-2">No Webhooks Configured</h3>
-          <p className="text-[var(--text-muted)] max-w-md mx-auto mb-6">
-            Add a webhook to get notified about events in your workspace.
-          </p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="btn-primary"
-          >
-            <Plus className="w-5 h-5" />
-            Add Webhook
-          </button>
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">URL</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Events</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Status</th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-[var(--text-muted)]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {webhooks.map((webhook) => (
-                  <tr key={webhook.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface)]">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2 max-w-xs">
-                        <span className="truncate font-mono text-sm">{webhook.url}</span>
-                      </div>
-                      {webhook.lastTriggeredAt && (
-                        <p className="text-xs text-[var(--text-muted)] mt-1">
-                          Last triggered: {new Date(webhook.lastTriggeredAt).toLocaleDateString()}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {webhook.events.slice(0, 2).map((event) => (
-                          <span key={event} className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-xs">
-                            {event.split(".").slice(-1)[0]}
-                          </span>
-                        ))}
-                        {webhook.events.length > 2 && (
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] text-xs text-[var(--text-muted)]">
-                            +{webhook.events.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      {webhook.enabled ? (
-                        <span className="flex items-center gap-1 text-green-500 text-sm">
-                          <Check className="w-4 h-4" />
-                          Active
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-[var(--text-muted)] text-sm">
-                          <AlertCircle className="w-4 h-4" />
-                          Disabled
-                        </span>
-                      )}
-                      {webhook.failCount > 0 && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {webhook.failCount} failure{webhook.failCount > 1 ? "s" : ""}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* Test result indicator */}
-                        {testResult?.id === webhook.id && (
-                          <span className={`text-xs px-2 py-1 rounded ${testResult.success ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"}`}>
-                            {testResult.success ? "✓ Delivered" : `✗ ${testResult.message}`}
-                          </span>
-                        )}
-                        <button
-                          onClick={() => handleTestWebhook(webhook.id)}
-                          disabled={testingWebhook === webhook.id}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition disabled:opacity-50"
-                        >
-                          {testingWebhook === webhook.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            "Test"
-                          )}
-                        </button>
-                        <button
-                          onClick={() => setShowEditModal(webhook)}
-                          className="px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteWebhook(webhook.id)}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                            confirmDelete === webhook.id
-                              ? "bg-red-500 text-white"
-                              : "text-red-500 hover:bg-red-500/10"
-                          }`}
-                        >
-                          {confirmDelete === webhook.id ? "Confirm" : "Delete"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Add Webhook Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-lg">Add Webhook</h3>
-              <button onClick={() => { setShowAddModal(false); setError(null); }} className="p-2 rounded-lg hover:bg-[var(--surface)]">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Webhook URL</label>
-                <input
-                  type="url"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://your-server.com/webhook"
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-                />
-                <p className="text-xs text-[var(--text-muted)] mt-1">Must use HTTPS</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Events</label>
-                <div className="space-y-2">
-                  {WEBHOOK_EVENTS.map((event) => (
-                    <label key={event.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] cursor-pointer transition">
-                      <input
-                        type="checkbox"
-                        checked={newEvents.includes(event.id)}
-                        onChange={() => toggleEvent(event.id, newEvents, setNewEvents)}
-                        className="mt-0.5 w-4 h-4 rounded border-[var(--border)] text-[#ef4444] focus:ring-[#ef4444]"
-                      />
-                      <div>
-                        <p className="font-medium text-sm">{event.label}</p>
-                        <p className="text-xs text-[var(--text-muted)]">{event.description}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {error && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => { setShowAddModal(false); setError(null); setNewUrl(""); setNewEvents([]); }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateWebhook}
-                  disabled={!newUrl.trim() || newEvents.length === 0 || isSaving}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Webhook"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Webhook Modal */}
-      {showEditModal && (
-        <EditWebhookModal
-          webhook={showEditModal}
-          onClose={() => setShowEditModal(null)}
-          onUpdate={handleUpdateWebhook}
-        />
-      )}
-
-      {/* Secret Display Modal */}
-      {showSecretModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <Check className="w-6 h-6 text-green-500" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Webhook Created!</h3>
-                <p className="text-sm text-[var(--text-muted)]">Save your signing secret now</p>
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-[var(--background)] border border-[var(--border)] p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-[var(--text-muted)]">Signing Secret</span>
-                <button
-                  onClick={() => copyToClipboard(showSecretModal.secret)}
-                  className="flex items-center gap-1 text-sm text-[#ef4444] hover:underline"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy
-                </button>
-              </div>
-              <code className="block font-mono text-sm break-all">{showSecretModal.secret}</code>
-            </div>
-
-            <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-4 mb-6">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-yellow-500">Save this secret now!</p>
-                  <p className="text-sm text-[var(--text-muted)]">
-                    This is the only time you&apos;ll see this secret. Use it to verify webhook signatures.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowSecretModal(null)}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition"
-            >
-              I&apos;ve Saved My Secret
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EditWebhookModal({
-  webhook,
-  onClose,
-  onUpdate,
-}: {
-  webhook: WebhookData;
-  onClose: () => void;
-  onUpdate: (id: string, updates: { enabled?: boolean; events?: string[] }) => void;
-}) {
-  const [enabled, setEnabled] = useState(webhook.enabled);
-  const [events, setEvents] = useState(webhook.events);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    await onUpdate(webhook.id, { enabled, events });
-    setIsSaving(false);
-  };
-
-  const toggleEvent = (eventId: string) => {
-    if (events.includes(eventId)) {
-      setEvents(events.filter((e) => e !== eventId));
-    } else {
-      setEvents([...events, eventId]);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-lg">Edit Webhook</h3>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--surface)]">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Webhook URL</label>
-            <input
-              type="url"
-              value={webhook.url}
-              disabled
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-muted)] opacity-60"
-            />
-            <p className="text-xs text-[var(--text-muted)] mt-1">URL cannot be changed for security reasons</p>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Enabled</p>
-              <p className="text-sm text-[var(--text-muted)]">Receive webhook notifications</p>
-            </div>
-            <button
-              onClick={() => setEnabled(!enabled)}
-              className={`w-12 h-6 rounded-full transition relative ${enabled ? "bg-[#ef4444]" : "bg-[var(--border)]"}`}
-            >
-              <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all shadow ${enabled ? "left-6" : "left-0.5"}`} />
-            </button>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Events</label>
-            <div className="space-y-2">
-              {WEBHOOK_EVENTS.map((event) => (
-                <label key={event.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-elevated)] cursor-pointer transition">
-                  <input
-                    type="checkbox"
-                    checked={events.includes(event.id)}
-                    onChange={() => toggleEvent(event.id)}
-                    className="mt-0.5 w-4 h-4 rounded border-[var(--border)] text-[#ef4444] focus:ring-[#ef4444]"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">{event.label}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{event.description}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface)] transition"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={events.length === 0 || isSaving}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// API KEYS TAB (BYOK)
-// ============================================
-
-interface ProviderKey {
-  provider: string;
-  keyHint: string;
-  isCustom: boolean;
-  createdAt: number;
-  updatedAt: number;
-}
-
-interface BYOKProvider {
-  id: string;
-  name: string;
-  icon: string;
-}
-
-const BYOK_PROVIDERS: BYOKProvider[] = [
-  { id: "46elks", name: "46elks", icon: "phone" },
-  { id: "twilio", name: "Twilio", icon: "phone" },
-  { id: "resend", name: "Resend", icon: "mail" },
-  { id: "openrouter", name: "OpenRouter", icon: "cpu" },
-  { id: "elevenlabs", name: "ElevenLabs", icon: "activity" },
-  { id: "replicate", name: "Replicate", icon: "sparkles" },
-  { id: "firecrawl", name: "Firecrawl", icon: "globe" },
-  { id: "brave_search", name: "Brave Search", icon: "search" },
-  { id: "e2b", name: "E2B", icon: "terminal" },
-  { id: "github", name: "GitHub", icon: "database" },
-];
-
-const ProviderIcon = ({ iconName, className = "w-6 h-6" }: { iconName: string; className?: string }) => {
-  switch (iconName) {
-    case "search": return <Search className={className} />;
-    case "cpu": return <Cpu className={className} />;
-    case "activity": return <Activity className={className} />;
-    case "phone": return <Phone className={className} />;
-    case "mail": return <Mail className={className} />;
-    case "terminal": return <Terminal className={className} />;
-    case "sparkles": return <Sparkles className={className} />;
-    case "globe": return <Globe className={className} />;
-    case "database": return <Database className={className} />;
-    default: return <Zap className={className} />;
-  }
-};
-
-function ApiKeysTab({ workspace, providerApis, sessionToken }: { workspace: Workspace | null; providerApis: ProviderAPI[]; sessionToken: string | null }) {
-  const [copied, setCopied] = useState(false);
-  const [directCallConfigs, setDirectCallConfigs] = useState<Record<string, { status: string; keyHint: string }>>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Generate workspace API key from email (simple hash for display)
-  const workspaceKey = workspace?.email
-    ? `claw_${btoa(workspace.email).replace(/[^a-zA-Z0-9]/g, "").substring(0, 24)}`
-    : null;
-
-  useEffect(() => {
-    const fetchDirectCallConfigs = async () => {
-      if (!sessionToken || providerApis.length === 0) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch Direct Call configs for each API
-        const configs: Record<string, { status: string; keyHint: string }> = {};
-        for (const api of providerApis) {
-          try {
-            const res = await fetch(`${CONVEX_URL}/api/query`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                path: "directCall:getDirectCallConfigByApiId",
-                args: { apiId: api._id },
-              }),
-            });
-            const data = await res.json();
-            const config = data.value;
-            // Only store if a real config exists (not null, not an error)
-            if (config && config.status && config.status !== "error") {
-              configs[api._id] = {
-                status: config.status,
-                keyHint: config.encryptedMasterKey ? "••••" + config.encryptedMasterKey.slice(-4) : "Not set",
-              };
-            }
-          } catch (e) {
-            // Skip this API if config fetch fails
-          }
-        }
-        setDirectCallConfigs(configs);
-      } catch (err) {
-        console.error("Failed to fetch Direct Call configs:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDirectCallConfigs();
-  }, [sessionToken, providerApis]);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const directCallApis = providerApis.filter((api) => directCallConfigs[api._id]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">API Keys</h2>
-        <p className="text-[var(--text-muted)]">
-          Manage your workspace API key and Direct Call service credentials.
-        </p>
+        <h2 className="text-2xl font-bold">Notifications</h2>
+        <p className="text-[var(--text-muted)] mt-1">APIClaw sends email notifications to your workspace email when these events trigger.</p>
       </div>
 
-      {/* Workspace API Key */}
-      <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0">
-            <Key className="w-6 h-6 text-[#ef4444]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg mb-1">Workspace API Key</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Use this key to authenticate API calls from your agents.
-            </p>
-            {workspaceKey ? (
-              <div className="flex items-center gap-3">
-                <code className="flex-1 px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] font-mono text-sm">
-                  {workspaceKey}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(workspaceKey)}
-                  className="px-4 py-3 rounded-xl border border-[var(--border)] hover:bg-[var(--surface)] transition flex items-center gap-2"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span className="text-green-500">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
+      <div className="space-y-3">
+        {events.map(ev => {
+          const Icon = ev.icon;
+          const isOn = enabled[ev.id];
+          return (
+            <div key={ev.id} className="flex items-center justify-between px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)]">
+              <div className="flex items-start gap-3">
+                <Icon className={`w-5 h-5 mt-0.5 shrink-0 ${ev.color}`} />
+                <div>
+                  <p className="font-medium text-sm">{ev.label}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{ev.description}</p>
+                </div>
               </div>
-            ) : (
-              <p className="text-[var(--text-muted)]">Log in to see your API key.</p>
-            )}
-          </div>
-        </div>
+              <button
+                onClick={() => toggle(ev.id)}
+                disabled={saving === ev.id}
+                className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${isOn ? "bg-[#ef4444]" : "bg-[var(--border)]"}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isOn ? "translate-x-5" : "translate-x-0"}`} />
+              </button>
+            </div>
+          );
+        })}
       </div>
 
-            {/* Info Box */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-[var(--text-muted)]">
-            <p><strong className="text-[var(--text-primary)]">Workspace API Key</strong> — your agent uses this key to authenticate with APIClaw. Put it in your MCP config once, and APIClaw handles all upstream API calls on your behalf. You never manage individual API keys.</p>
-          </div>
-        </div>
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 flex items-start gap-3">
+        <AlertCircle className="w-4 h-4 text-[var(--text-muted)] shrink-0 mt-0.5" />
+        <p className="text-xs text-[var(--text-muted)]">Notifications are sent to your workspace email address. No external webhook URL needed.</p>
       </div>
     </div>
   );
 }
-
-// EarnTab moved to components/EarnCreditsTab.tsx
-
-// ============================================
-// DOCS TAB
-// ============================================
-
 function DocsTab() {
   return (
     <div className="space-y-6">

@@ -1474,6 +1474,19 @@ Docs: https://apiclaw.nordsym.com
           error: result.error,
         });
 
+        // Log to apiLogs (single source of truth for logs + analytics)
+        if (workspaceContext) {
+          convex.mutation("logs:createLogInternal" as any, {
+            workspaceId: workspaceContext.workspaceId as any,
+            sessionToken: workspaceContext.sessionToken || "",
+            provider,
+            action,
+            status: result.success ? "success" : "error",
+            latencyMs: Date.now() - startTime,
+            errorMessage: result.success ? undefined : (result.error || "Unknown error"),
+          }).catch(() => {}); // fire-and-forget
+        }
+
         // Increment usage for workspace (non-free APIs only)
         if (result.success && workspaceContext && !isFreeAPI) {
           try {
