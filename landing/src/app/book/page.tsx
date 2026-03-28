@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, ArrowRight, Sun, Moon } from "lucide-react";
+import { Check, ArrowRight, Sun, Moon, ChevronLeft } from "lucide-react";
 
 const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
@@ -166,10 +166,19 @@ function BookForm() {
       {/* Header */}
       <header className="border-b border-[var(--border)] px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* Back button — goes to workspace if came from there, else homepage */}
+            <a
+              href={searchParams?.get("email") ? "/workspace" : "/"}
+              className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition mr-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              {searchParams?.get("email") ? "Workspace" : "Home"}
+            </a>
+            <div className="w-px h-4 bg-[var(--border)]" />
             <span className="text-2xl">🦞</span>
             <span className="font-bold text-lg">APIClaw</span>
-            <span className="text-[var(--text-muted)] ml-2 text-sm">Enterprise</span>
+            <span className="text-[var(--text-muted)] ml-1 text-sm">Enterprise</span>
           </div>
           <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" aria-label="Toggle theme">
             {isDark ? <Sun className="w-4 h-4 text-[var(--text-muted)]" /> : <Moon className="w-4 h-4 text-[var(--text-muted)]" />}
