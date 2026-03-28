@@ -95,15 +95,21 @@ function BookForm() {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
     try {
-      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/aeo-booking", {
+      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/apiclaw-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name, email, company, message,
+          name, email, company,
+          notes: message, message,
+          date: formatDate(selectedDate),
+          time: selectedTime,
           requestedDate: formatDate(selectedDate),
           requestedTime: selectedTime,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
-          source: "aeo-booking-booking",
+          source: "apiclaw-enterprise",
+          meetingTitle: `APIClaw Enterprise${company ? ` — ${company}` : ""}`,
+          hostName: "Gustav",
+          hostEmail: "gustav@nordsym.com",
         }),
       });
       if (!res.ok) throw new Error();
