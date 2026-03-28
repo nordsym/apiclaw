@@ -223,6 +223,7 @@ export default function WorkspacePage() {
   const [approvedApis, setApprovedApis] = useState<ApprovedAPI[]>([]);
   const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
+  const [providerId, setProviderId] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
   const [showAddApi, setShowAddApi] = useState(false);
   
@@ -352,6 +353,7 @@ export default function WorkspacePage() {
         const provData = await provRes.json();
         const provider = provData.value || provData;
         if (provider?._id) {
+          setProviderId(provider._id);
           const legacyRes = await fetch(`${CONVEX_URL}/api/query`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -898,7 +900,7 @@ export default function WorkspacePage() {
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} isProvider={isProvider} />
           )}
           {activeTab === "my-apis" && (
-            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} />
+            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} providerId={providerId} />
           )}
           {activeTab === "analytics" && (
             <AnalyticsTab 
@@ -1304,7 +1306,10 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
 // MY APIs TAB (Provider)
 // ============================================
 
-function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void; sessionToken: string | null }) {
+const APICLAW_MANAGED_PROVIDER = "k97cvcvadnyz8x8m4we7xqmh1s83p0ph";
+
+function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, providerId }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void; sessionToken: string | null; providerId: string | null }) {
+  const isManagedByAPIClaw = providerId === APICLAW_MANAGED_PROVIDER;
   const [form, setForm] = useState({ name: "", description: "", category: "DevTools", openApiUrl: "", docsUrl: "", pricingModel: "freemium" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -1642,7 +1647,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken }: { ap
                   {apiDetailTab === "direct-call" && (
                     dcLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
                       <div className="space-y-4">
-                        <p className="text-sm text-[var(--text-muted)]">Configure how agents call this API. The master key is stored encrypted and never exposed to agents.</p>
+                        <p className="text-sm text-[var(--text-muted)]">Configure how agents call this API. The service provider key is stored encrypted and never exposed to agents.</p>
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Base URL</label>
@@ -1662,13 +1667,20 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken }: { ap
                             <input value={dcConfig.authHeader} onChange={e => setDcConfig(p => ({...p, authHeader: e.target.value}))} placeholder="apikey" className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Master API Key</label>
-                            <div className="relative">
-                              <input type={showMasterKey ? "text" : "password"} value={dcConfig.masterApiKey} onChange={e => setDcConfig(p => ({...p, masterApiKey: e.target.value}))} placeholder={dcConfigId ? "Leave blank to keep existing" : "Paste your APILayer key here"} className="w-full px-3 py-2 pr-10 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
-                              <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                                {showMasterKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                              </button>
-                            </div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Service Provider Key</label>
+                            {isManagedByAPIClaw ? (
+                              <div className="relative">
+                                <input type="password" readOnly value="managed-by-apiclaw-proxy-key" className="w-full px-3 py-2 pr-24 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono opacity-40 cursor-not-allowed select-none" />
+                                <span className="absolute right-2 top-1.5 text-xs text-[#ef4444] font-semibold bg-[var(--surface)] px-2 py-0.5 rounded border border-[#ef4444]/30">Managed by APIClaw</span>
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <input type={showMasterKey ? "text" : "password"} value={dcConfig.masterApiKey} onChange={e => setDcConfig(p => ({...p, masterApiKey: e.target.value}))} placeholder={dcConfigId ? "Leave blank to keep existing" : "Paste your service provider key here"} className="w-full px-3 py-2 pr-10 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                                <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                                  {showMasterKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Rate Limit / User / Min</label>
