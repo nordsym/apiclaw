@@ -958,7 +958,7 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isBacker = workspace?.tier === "backer" || workspace?.tier === "partner" || workspace?.usageLimit === -1;
+  const isBacker = workspace?.tier === "backer" || workspace?.usageLimit === -1;
   const usagePct = isBacker ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
@@ -997,7 +997,7 @@ function OverviewTab({
             <div className="flex items-center justify-between mb-3">
               <BarChart3 className="w-5 h-5 text-[#ef4444]" />
               <span className={`text-xs px-2 py-0.5 rounded-full ${isBacker ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
-                {isBacker ? (workspace?.tier === "partner" ? "Partner" : "Backer") : workspace?.tier || "free"}
+                {workspace?.tier === "partner" ? "Partner" : isBacker ? "Backer" : workspace?.tier || "free"}
               </span>
             </div>
             <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
@@ -6328,7 +6328,7 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
             <div>
               <p className="font-medium">Current Plan</p>
               <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "partner" ? "Partner — Unlimited" : workspace?.tier === "backer" ? "Founding Backer — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+                {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "backer" ? "Founding Backer — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
