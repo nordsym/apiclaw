@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Check, ArrowRight, Sun, Moon } from "lucide-react";
 
 const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
@@ -22,7 +23,8 @@ function formatDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default function BookPage() {
+function BookForm() {
+  const searchParams = useSearchParams();
   const now = new Date();
   const defaultDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
 
@@ -42,6 +44,25 @@ export default function BookPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
+  // Pre-fill from URL params (passed from workspace) or localStorage session
+  useEffect(() => {
+    const urlEmail = searchParams?.get("email");
+    if (urlEmail) { setEmail(urlEmail); return; }
+    // Fallback: try to get workspace email from session in localStorage
+    try {
+      const token = localStorage.getItem("apiclaw_workspace_session");
+      if (token) {
+        fetch(`https://brilliant-puffin-712.eu-west-1.convex.cloud/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: "workspaces:getWorkspaceByToken", args: { token } }),
+        }).then(r => r.json()).then(d => {
+          if (d?.value?.email) setEmail(d.value.email);
+        }).catch(() => {});
+      }
+    } catch { /* ignore */ }
+  }, [searchParams]);
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(defaultDate);
@@ -74,7 +95,7 @@ export default function BookPage() {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
     try {
-      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/apiclaw-enterprise", {
+      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/hivr-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,7 +103,7 @@ export default function BookPage() {
           requestedDate: formatDate(selectedDate),
           requestedTime: selectedTime,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
-          source: "apiclaw-enterprise-booking",
+          source: "hivr-booking-booking",
         }),
       });
       if (!res.ok) throw new Error();
@@ -238,5 +259,13 @@ export default function BookPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function BookPage() {
+  return (
+    <Suspense>
+      <BookForm />
+    </Suspense>
   );
 }

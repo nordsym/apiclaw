@@ -4574,8 +4574,13 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
               <button
                 onClick={() => {
                   if (!plan.link || plan.ctaDisabled) return;
-                  if (plan.link.startsWith("/")) window.location.href = plan.link;
-                  else window.open(plan.link, "_blank");
+                  if (plan.link.startsWith("/")) {
+                    const params = new URLSearchParams();
+                    if (workspace?.email) params.set("email", workspace.email);
+                    window.location.href = `${plan.link}?${params.toString()}`;
+                  } else {
+                    window.open(plan.link, "_blank");
+                  }
                 }}
                 disabled={plan.ctaDisabled || isCurrentPlan}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${
