@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SOW_CUSTOMERS } from "@/lib/sow-data";
 import { mcMutation } from "@/lib/mc-convex";
+import { generatePdfFromHtml } from "@/lib/pdf";
 
 const N8N_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
 
@@ -103,15 +104,9 @@ async function sendEmail(
   to: string,
   subject: string,
   message: string,
-  attachmentHtml: string,
+  pdfBase64: string,
   filename: string
 ): Promise<void> {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(attachmentHtml);
-  let binary = "";
-  bytes.forEach((b) => (binary += String.fromCharCode(b)));
-  const base64Data = btoa(binary);
-
   await fetch(N8N_GMAIL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -120,7 +115,7 @@ async function sendEmail(
       to,
       subject,
       message,
-      attachments: [{ filename, data: base64Data }],
+      attachments: [{ filename, data: pdfBase64 }],
     }),
   });
 }
@@ -176,14 +171,18 @@ export async function POST(request: NextRequest) {
       signerName,
       signedDate
     );
+    // Generate PDF from signed SoW HTML
+    const pdfBuffer = await generatePdfFromHtml(sowHtml);
+    const pdfBase64 = pdfBuffer.toString("base64");
+
     const safeName = customer.customerName.replace(/[^a-zA-Z0-9]/g, "_");
-    const filename = `APIClaw_Partnership_${safeName}_${new Date().toISOString().split("T")[0]}.html`;
-    const subject = `Signed: APIClaw \u00d7 ${customer.customerName} Partnership Agreement`;
+    const filename = `APIClaw_Partnership_${safeName}_${new Date().toISOString().split("T")[0]}.pdf`;
+    const subject = `Signed: APIClaw × ${customer.customerName} Partnership Agreement`;
 
     await Promise.all([
-      sendEmail("gustav@nordsym.com", subject, emailBody, sowHtml, filename),
-      sendEmail("molle@nordsym.com", subject, emailBody, sowHtml, filename),
-      sendEmail(customer.partnerEmail, subject, emailBody, sowHtml, filename),
+      sendEmail("gustav@nordsym.com", subject, emailBody, pdfBase64, filename),
+      sendEmail("molle@nordsym.com", subject, emailBody, pdfBase64, filename),
+      sendEmail(customer.partnerEmail, subject, emailBody, pdfBase64, filename),
     ]);
 
     return NextResponse.json({
