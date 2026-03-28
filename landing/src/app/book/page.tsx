@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, Check, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Zap, Check, ArrowRight, Sun, Moon } from "lucide-react";
 
 const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
 
@@ -25,6 +25,20 @@ function formatDate(d: Date): string {
 export default function BookPage() {
   const now = new Date();
   const defaultDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
+
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const dark = saved === "dark";
+    setIsDark(dark);
+    document.documentElement.classList.toggle("dark", dark);
+  }, []);
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  };
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -122,12 +136,17 @@ export default function BookPage() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
       {/* Header */}
       <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#ef4444] flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#ef4444] flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-lg">APIClaw</span>
+            <span className="text-[var(--text-muted)] ml-2 text-sm">Enterprise</span>
           </div>
-          <span className="font-bold text-lg">APIClaw</span>
-          <span className="text-[var(--text-muted)] ml-2 text-sm">Enterprise</span>
+          <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" aria-label="Toggle theme">
+            {isDark ? <Sun className="w-4 h-4 text-[var(--text-muted)]" /> : <Moon className="w-4 h-4 text-[var(--text-muted)]" />}
+          </button>
         </div>
       </header>
 
