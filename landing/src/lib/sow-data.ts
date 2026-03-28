@@ -25,7 +25,7 @@ export interface SowCustomer {
 
 export const SOW_CUSTOMERS: Record<string, SowCustomer> = {
   apilayer: {
-    customerName: "APILayer / Zyla Labs Inc.",
+    customerName: "APILayer (apilayer.com)",
     customerRep: "Pratham Shah",
     vertical: "API Infrastructure × Distribution — Joint Growth Framework",
     pricing: { fixed: 0, nectar: "Partnership — revenue share on volume" },
@@ -37,7 +37,7 @@ export const SOW_CUSTOMERS: Record<string, SowCustomer> = {
         title: "1. Parties",
         content: [
           "<strong>APIClaw</strong> (operated by NordSym AB, org.nr 559535-5768), represented by Gustav Hemmingsson, CEO",
-          "<strong>APILayer / Zyla Labs Inc.</strong>, represented by Pratham Shah",
+          "<strong>APILayer (apilayer.com)</strong>, represented by Pratham Shah",
         ],
       },
       {
