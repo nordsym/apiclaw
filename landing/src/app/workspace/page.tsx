@@ -63,6 +63,11 @@ import {
   EyeOff,
   Save,
   PlayCircle,
+  ScanSearch,
+  FileCode2,
+  Layers,
+  ArrowRight,
+  ChevronRight as ChevronRightIcon,
 } from "lucide-react";
 import {
   LineChart,
@@ -1198,52 +1203,52 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
         {/* Direct Call */}
         <button
           onClick={() => setActiveSection("direct-call")}
-          className={`rounded-2xl border p-4 text-left transition ${activeSection === "direct-call" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "direct-call" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-[#ef4444]" />
-            </div>
-            <span className="font-semibold text-sm">Direct Call</span>
+          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-3">
+            <Zap className="w-5 h-5 text-[#ef4444]" />
           </div>
-          <p className="text-2xl font-bold">{DIRECT_CALL_PROVIDERS.length}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">providers · {totalDcApis.toLocaleString()}+ APIs</p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">No keys needed. Agent calls via APIClaw proxy.</p>
-          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-green-400 font-mono">call_api(provider, action, params)</code>
+          <p className="font-semibold text-base">Direct Call</p>
+          <p className="text-2xl font-bold mt-1">{DIRECT_CALL_PROVIDERS.length} <span className="text-sm font-normal text-[var(--text-muted)]">providers</span></p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">No API keys needed. APIClaw proxies every call for your agent.</p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-green-400 bg-green-500/5 border border-green-500/20 rounded-lg px-2.5 py-1.5">
+            <Layers className="w-3 h-3 shrink-0" />
+            call_api(provider, action, params)
+          </div>
         </button>
 
         {/* Search Index */}
         <button
           onClick={() => setActiveSection("search")}
-          className={`rounded-2xl border p-4 text-left transition ${activeSection === "search" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "search" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Search className="w-4 h-4 text-blue-400" />
-            </div>
-            <span className="font-semibold text-sm">Search Index</span>
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3">
+            <ScanSearch className="w-5 h-5 text-blue-400" />
           </div>
-          <p className="text-2xl font-bold">22k+</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">APIs indexed</p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Semantic search by capability. Agent finds what it needs.</p>
-          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-blue-400 font-mono">discover_apis(query)</code>
+          <p className="font-semibold text-base">Search Index</p>
+          <p className="text-2xl font-bold mt-1">22k+ <span className="text-sm font-normal text-[var(--text-muted)]">APIs indexed</span></p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Semantic search by capability. Agent describes what it needs — APIClaw finds the match.</p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-blue-400 bg-blue-500/5 border border-blue-500/20 rounded-lg px-2.5 py-1.5">
+            <ScanSearch className="w-3 h-3 shrink-0" />
+            discover_apis(query)
+          </div>
         </button>
 
         {/* Open API */}
         <button
           onClick={() => setActiveSection("open-api")}
-          className={`rounded-2xl border p-4 text-left transition ${activeSection === "open-api" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "open-api" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <ScrollText className="w-4 h-4 text-purple-400" />
-            </div>
-            <span className="font-semibold text-sm">Open API</span>
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3">
+            <FileCode2 className="w-5 h-5 text-purple-400" />
           </div>
-          <p className="text-2xl font-bold">{apis.length}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">APIs with full schema</p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Community-registered with OpenAPI specs. Agent gets full schema.</p>
-          <code className="block mt-2 text-xs bg-[var(--surface)] rounded px-2 py-1 text-purple-400 font-mono">get_api_details(id)</code>
+          <p className="font-semibold text-base">Open API</p>
+          <p className="text-2xl font-bold mt-1">{apis.length} <span className="text-sm font-normal text-[var(--text-muted)]">with schema</span></p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Community-registered APIs with full OpenAPI specs. Agent gets schema and calls with confidence.</p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-purple-400 bg-purple-500/5 border border-purple-500/20 rounded-lg px-2.5 py-1.5">
+            <FileCode2 className="w-3 h-3 shrink-0" />
+            get_api_details(id)
+          </div>
         </button>
       </div>
 
@@ -1282,18 +1287,19 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
       {activeSection === "search" && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6">
-            <h3 className="font-semibold mb-2 flex items-center gap-2"><Search className="w-4 h-4 text-blue-400" />How agents use the search index</h3>
+            <h3 className="font-semibold mb-2 flex items-center gap-2"><ScanSearch className="w-4 h-4 text-blue-400" />How agents use the search index</h3>
             <p className="text-sm text-[var(--text-muted)] mb-4">The agent doesn&apos;t browse — it searches by capability. APIClaw returns ranked matches with specs and pricing. The agent decides which API fits and calls it.</p>
             <div className="space-y-2">
               {[
-                { q: "convert speech to text", comment: "→ returns Deepgram, AssemblyAI, Whisper" },
-                { q: "send SMS to Swedish number", comment: "→ returns 46elks, Twilio" },
-                { q: "get current exchange rates", comment: "→ returns ExchangeRate API, Fixer, Currencylayer" },
-                { q: "generate image from prompt", comment: "→ returns Replicate/SDXL, Stability AI, Flux" },
+                { q: "convert speech to text", returns: "Deepgram, AssemblyAI, Whisper" },
+                { q: "send SMS to Swedish number", returns: "46elks, Twilio" },
+                { q: "get current exchange rates", returns: "ExchangeRate API, Fixer, Currencylayer" },
+                { q: "generate image from prompt", returns: "Replicate/SDXL, Stability AI, Flux" },
               ].map(ex => (
-                <div key={ex.q} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2.5">
-                  <code className="text-sm text-blue-400 font-mono">discover_apis(&quot;{ex.q}&quot;)</code>
-                  <span className="text-xs text-[var(--text-muted)] ml-3">{ex.comment}</span>
+                <div key={ex.q} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2.5 flex items-center gap-3">
+                  <code className="text-sm text-blue-400 font-mono shrink-0">discover_apis(&quot;{ex.q}&quot;)</code>
+                  <ArrowRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                  <span className="text-xs text-[var(--text-muted)]">{ex.returns}</span>
                 </div>
               ))}
             </div>
@@ -1341,7 +1347,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
                   </div>
                   <div className="flex items-center gap-2 ml-4 shrink-0">
                     <span className="text-xs text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded">{api.category}</span>
-                    {api.openApiUrl && <span className="text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Schema ✓</span>}
+                    {api.openApiUrl && <span className="flex items-center gap-1 text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded"><Check className="w-3 h-3" />Schema</span>}
                   </div>
                 </div>
               ))}
