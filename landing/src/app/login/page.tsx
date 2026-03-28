@@ -126,9 +126,9 @@ export default function LoginPage() {
             <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-6">
               <Zap className="w-8 h-8 text-accent" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">Agent Workspace</h1>
+            <h1 className="text-3xl font-bold mb-2">Workspace</h1>
             <p className="text-[var(--text-secondary)]">
-              Sign in to manage your AI agents and view usage
+              Sign in to manage your APIs, agents and usage
             </p>
           </div>
 
@@ -195,14 +195,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-[var(--text-muted)]">
-              Are you an API provider?{" "}
-              <Link href="/providers/dashboard/login" className="text-accent hover:underline">
-                Workspace
-              </Link>
-            </p>
-          </div>
+
         </div>
       </div>
     </main>

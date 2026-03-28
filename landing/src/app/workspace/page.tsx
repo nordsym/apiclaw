@@ -1470,18 +1470,24 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm }: { apis: ProviderAP
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">
-                <Link
-                  href={`/providers/dashboard/${api._id}`}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface)] transition"
+                <span
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] opacity-40 cursor-not-allowed"
+                  title="Edit coming soon"
                 >
                   Edit
-                </Link>
-                <Link
-                  href={`/providers/dashboard/${api._id}`}
+                </span>
+                <button
+                  onClick={() => {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set("tab", "analytics");
+                    params.set("sub", "overview");
+                    window.history.pushState({}, "", `/workspace?${params.toString()}`);
+                    window.location.reload();
+                  }}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition"
                 >
                   Analytics
-                </Link>
+                </button>
               </div>
             </div>
           </div>
