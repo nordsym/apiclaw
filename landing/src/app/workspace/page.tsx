@@ -3396,20 +3396,13 @@ function UsageTab({
     { date: new Date().toISOString().split('T')[0], calls: 21 },
   ];
   
-  // Preview shows YOUR listed APIs and agents using them
-  const previewByApi = [
-    { provider: "46elks", calls: 847, cost: 42.35, searchCount: 12 },
-    { provider: "openrouter", calls: 623, cost: 31.15, searchCount: 45 },
-    { provider: "replicate", calls: 512, cost: 25.60, searchCount: 8 },
-  ];
-  
   const isPreview = !hasRealData;
   const displayByDay = hasRealData ? usage!.byDay : previewByDay;
   const displayByProvider = hasRealData 
     ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
-    : previewByApi;
-  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 1982;
-  const displaySearchTotal = searchStats?.totalSearches || (isPreview ? 156 : 0);
+    : [];
+  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 0;
+  const displaySearchTotal = searchStats?.totalSearches || 0;
 
   return (
     <div className="space-y-8">
@@ -3513,35 +3506,39 @@ function UsageTab({
         </div>
       )}
 
-      {/* Top APIs - Now with Search column */}
+      {/* Top APIs */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Top APIs</h3>
-        <div className="space-y-3">
-          {displayByProvider.map((p, i) => (
-            <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
-                  {i + 1}
-                </span>
-                <div>
-                  <span className="font-medium">{p.provider}</span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-sm text-[var(--text-muted)]">{p.calls.toLocaleString()} calls</span>
-                    {p.cost > 0 && <span className="text-sm text-[var(--text-muted)]">• ${p.cost.toFixed(2)}</span>}
+        {displayByProvider.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API usage data yet. Calls will appear here once agents start using your APIs.</p>
+        ) : (
+          <div className="space-y-3">
+            {displayByProvider.map((p, i) => (
+              <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <span className="font-medium">{p.provider}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-[var(--text-muted)]">{p.calls.toLocaleString()} calls</span>
+                      {p.cost > 0 && <span className="text-sm text-[var(--text-muted)]">• ${p.cost.toFixed(2)}</span>}
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  {(p as any).searchCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-500 text-xs font-medium">
+                      <Search className="w-3 h-3" />
+                      {(p as any).searchCount} found
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {(p as any).searchCount > 0 && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-500 text-xs font-medium">
-                    <Search className="w-3 h-3" />
-                    {(p as any).searchCount} found
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
