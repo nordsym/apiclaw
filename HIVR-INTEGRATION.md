@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Hivr → APIClaw Integration
 
 Instructions for injecting APIClaw HTTP API access into Hivr bee agents.
@@ -279,3 +285,6 @@ To add more bees, update `HIVR_BEES_WHITELIST` in `src/http-api.ts`.
 ---
 
 MIT © [NordSym](https://nordsym.com)
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

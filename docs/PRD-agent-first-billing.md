@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: Agent-First Onboarding & Billing
 
 **Version:** 1.0  
@@ -523,3 +529,6 @@ APIClaw
 ---
 
 *PRD created 2026-02-28 by Symbot*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

@@ -172,13 +172,25 @@ const providers: Record<string, ProviderCredential> = {
     type: 'api_key',
     get(): APICredentials | null {
       const env = loadEnvFile('apilayer.env');
-      // Return all keys — handler picks the right one per action
+      const legacy = loadEnvFile('apilayer-legacy.env');
+      
+      // Merge unified + legacy keys
       const keys: Record<string, string> = {};
+      
+      // Unified APILayer keys (APILAYER_*)
       for (const [k, v] of Object.entries(env)) {
         if (k.startsWith('APILAYER_') && v) {
           keys[k] = v;
         }
       }
+      
+      // Legacy keys (separate API domains)
+      for (const [k, v] of Object.entries(legacy)) {
+        if (v && k.endsWith('_API_KEY')) {
+          keys[k] = v;
+        }
+      }
+      
       if (Object.keys(keys).length === 0) return null;
       return { type: 'api_key', api_key: keys.APILAYER_EXCHANGERATE_KEY || '', ...keys } as any;
     },
@@ -337,7 +349,45 @@ export function hasRealCredentials(providerId: string): boolean {
   }
   if (providerId === 'apilayer') {
     const env = loadEnvFile('apilayer.env');
-    return !!(env.APILAYER_EXCHANGERATE_KEY || process.env.APILAYER_EXCHANGERATE_KEY);
+    const legacy = loadEnvFile('apilayer-legacy.env');
+    return !!(
+      env.APILAYER_EXCHANGERATE_KEY || 
+      process.env.APILAYER_EXCHANGERATE_KEY ||
+      Object.keys(legacy).length > 0
+    );
+  }
+  if (providerId === 'groq') {
+    const env = loadEnvFile('groq.env');
+    return !!(env.GROQ_API_KEY || process.env.GROQ_API_KEY);
+  }
+  if (providerId === 'mistral') {
+    const env = loadEnvFile('mistral.env');
+    return !!(env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY);
+  }
+  if (providerId === 'cohere') {
+    const env = loadEnvFile('cohere.env');
+    return !!(env.COHERE_API_KEY || process.env.COHERE_API_KEY);
+  }
+  if (providerId === 'together') {
+    const env = loadEnvFile('together.env');
+    return !!(env.TOGETHER_API_KEY || process.env.TOGETHER_API_KEY);
+  }
+  if (providerId === 'stability') {
+    const env = loadEnvFile('stability.env');
+    return !!(env.STABILITY_API_KEY || process.env.STABILITY_API_KEY);
+  }
+  if (providerId === 'deepgram') {
+    const env = loadEnvFile('deepgram.env');
+    return !!(env.DEEPGRAM_API_KEY || process.env.DEEPGRAM_API_KEY);
+  }
+  if (providerId === 'assemblyai') {
+    const env = loadEnvFile('assemblyai.env');
+    return !!(env.ASSEMBLYAI_API_KEY || process.env.ASSEMBLYAI_API_KEY);
+  }
+  if (providerId === 'serper') {
+    const env = loadEnvFile('serper.env');
+    const envAlt = loadEnvFile('serpapi.env');
+    return !!(env.SERPER_API_KEY || envAlt.SERPAPI_API_KEY || envAlt.SERPER_API_KEY || process.env.SERPER_API_KEY);
   }
   if (providerId === 'groq') {
     const env = loadEnvFile('groq.env');

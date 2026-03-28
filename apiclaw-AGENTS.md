@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # AGENTS.md — For AI Agents
 
 *You found the API layer. Welcome home.*
@@ -294,3 +300,6 @@ We respond. We're building this for you.
 ---
 
 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

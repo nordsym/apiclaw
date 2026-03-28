@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw HTTP API
 
 REST endpoints for headless agents (Hivr bees, webhooks, serverless functions).
@@ -304,3 +310,6 @@ tsx watch src/bin-http.ts
 ---
 
 MIT © [NordSym](https://nordsym.com)
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

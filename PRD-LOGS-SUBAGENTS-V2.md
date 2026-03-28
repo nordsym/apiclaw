@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: Logs & Subagents Enhancement v2
 
 **Date:** 2026-03-03
@@ -265,3 +271,6 @@ Test:
 - **Konsistent färgschema** — använd APIClaw's röda accent (#ef4444) för primary actions
 - **Type badges** — subtila, färgkodade, med ikon + text
 - **Expand animation** — smooth rotate på chevron, fade-in på content
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw Dashboard Fix Plan
 
 ## Issues Found:
@@ -27,3 +33,6 @@
 5. Rename "Direct Call" → "API Catalog"
 
 Time estimate: 30 mins
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

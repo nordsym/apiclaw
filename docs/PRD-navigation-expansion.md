@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Navigation & Feature Expansion
 
 ## Vision
@@ -293,3 +299,6 @@ Ikoner: Lucide React (redan installerat)
 Svara **"kör fas 1"** för att starta med navigation expansion.
 
 Eller **"kör alla"** för att köra fas 1-5 sekventiellt.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

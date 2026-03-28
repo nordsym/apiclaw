@@ -798,6 +798,522 @@ http.route({
 });
 
 // ==============================================
+// SERPER (Google Search) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/serper",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "serper", "search");
+    const SERPER_KEY = process.env.SERPER_API_KEY;
+    if (!SERPER_KEY) {
+      return jsonResponse({ error: "Serper not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { query, q, num = 10, gl = "us", hl = "en" } = body;
+      const searchQuery = query || q;
+      if (!searchQuery) {
+        return jsonResponse({ error: "query required" }, 400);
+      }
+      const response = await fetch("https://google.serper.dev/search", {
+        method: "POST",
+        headers: {
+          "X-API-KEY": SERPER_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ q: searchQuery, num, gl, hl }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/serper",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// FIRECRAWL (Web Scraping) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/firecrawl",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "firecrawl", "scrape");
+    const FIRECRAWL_KEY = process.env.FIRECRAWL_API_KEY;
+    if (!FIRECRAWL_KEY) {
+      return jsonResponse({ error: "Firecrawl not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { url, formats = ["markdown"], onlyMainContent = true } = body;
+      if (!url) {
+        return jsonResponse({ error: "url required" }, 400);
+      }
+      const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url, formats, onlyMainContent }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/firecrawl",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// GROQ (LLM) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/groq",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "groq", "chat");
+    const GROQ_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_KEY) {
+      return jsonResponse({ error: "Groq not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "llama-3.3-70b-versatile", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages) {
+        return jsonResponse({ error: "messages required" }, 400);
+      }
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GROQ_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/groq",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// MISTRAL (LLM/Embeddings) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/mistral",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "mistral", "chat");
+    const MISTRAL_KEY = process.env.MISTRAL_API_KEY;
+    if (!MISTRAL_KEY) {
+      return jsonResponse({ error: "Mistral not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "mistral-small-latest", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages) {
+        return jsonResponse({ error: "messages required" }, 400);
+      }
+      const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${MISTRAL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/mistral",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// COHERE (LLM/Rerank) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/cohere",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "cohere", "chat");
+    const COHERE_KEY = process.env.COHERE_API_KEY;
+    if (!COHERE_KEY) {
+      return jsonResponse({ error: "Cohere not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "command-a-03-2025", message, chat_history, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!message) {
+        return jsonResponse({ error: "message required" }, 400);
+      }
+      const response = await fetch("https://api.cohere.com/v2/chat", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${COHERE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, message, chat_history, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/cohere",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// REPLICATE (ML Models) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/replicate",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "replicate", "prediction");
+    const REPLICATE_KEY = process.env.REPLICATE_API_TOKEN;
+    if (!REPLICATE_KEY) {
+      return jsonResponse({ error: "Replicate not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model, input, version } = body;
+      if (!model && !version) {
+        return jsonResponse({ error: "model or version required" }, 400);
+      }
+      const endpoint = version
+        ? "https://api.replicate.com/v1/predictions"
+        : `https://api.replicate.com/v1/models/${model}/predictions`;
+      const payload = version ? { version, input } : { input };
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${REPLICATE_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "wait",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/replicate",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// DEEPGRAM (Speech-to-Text) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/deepgram",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "deepgram", "transcribe");
+    const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;
+    if (!DEEPGRAM_KEY) {
+      return jsonResponse({ error: "Deepgram not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { url, model = "nova-3", language = "en", smart_format = true } = body;
+      if (!url) {
+        return jsonResponse({ error: "url required (audio file URL)" }, 400);
+      }
+      const params = new URLSearchParams({
+        model,
+        language,
+        smart_format: String(smart_format),
+      });
+      const response = await fetch(
+        `https://api.deepgram.com/v1/listen?${params}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Token ${DEEPGRAM_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
+        }
+      );
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/deepgram",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// E2B (Code Sandbox) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/e2b",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "e2b", "execute");
+    const E2B_KEY = process.env.E2B_API_KEY;
+    if (!E2B_KEY) {
+      return jsonResponse({ error: "E2B not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { code, language = "python", template = "base" } = body;
+      if (!code) {
+        return jsonResponse({ error: "code required" }, 400);
+      }
+      const response = await fetch("https://api.e2b.dev/sandboxes", {
+        method: "POST",
+        headers: {
+          "X-API-Key": E2B_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ templateID: template, metadata: { language } }),
+      });
+      const sandbox = await response.json();
+      if (!response.ok) {
+        return jsonResponse(sandbox, response.status);
+      }
+      const execResponse = await fetch(
+        `https://api.e2b.dev/sandboxes/${sandbox.sandboxID}/code/execution`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-Key": E2B_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code, language }),
+        }
+      );
+      const result = await execResponse.json();
+      return jsonResponse(result, execResponse.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/e2b",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// TOGETHER AI (Open-source LLM Inference) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/together",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "together", "chat");
+    const TOGETHER_KEY = process.env.TOGETHER_API_KEY;
+    if (!TOGETHER_KEY) {
+      return jsonResponse({ error: "Together AI not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "meta-llama/Llama-3.3-70B-Instruct-Turbo", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages || !Array.isArray(messages)) {
+        return jsonResponse({ error: "messages array required" }, 400);
+      }
+      const response = await fetch("https://api.together.xyz/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TOGETHER_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/together",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// STABILITY AI (Image Generation) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/stability",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "stability", "generate");
+    const STABILITY_KEY = process.env.STABILITY_API_KEY;
+    if (!STABILITY_KEY) {
+      return jsonResponse({ error: "Stability AI not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { prompt, model = "sd3.5-large", output_format = "png", aspect_ratio = "1:1" } = body;
+      if (!prompt) {
+        return jsonResponse({ error: "prompt required" }, 400);
+      }
+      const formData = new FormData();
+      formData.append("prompt", prompt);
+      formData.append("output_format", output_format);
+      formData.append("aspect_ratio", aspect_ratio);
+      const response = await fetch(
+        `https://api.stability.ai/v2beta/stable-image/generate/${model}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${STABILITY_KEY}`,
+            Accept: "application/json",
+          },
+          body: formData,
+        }
+      );
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/stability",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// ASSEMBLYAI (Audio Intelligence) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/assemblyai",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "assemblyai", "transcribe");
+    const ASSEMBLYAI_KEY = process.env.ASSEMBLYAI_API_KEY;
+    if (!ASSEMBLYAI_KEY) {
+      return jsonResponse({ error: "AssemblyAI not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { audio_url, language_detection = true, speaker_labels = true } = body;
+      if (!audio_url) {
+        return jsonResponse({ error: "audio_url required" }, 400);
+      }
+      const response = await fetch("https://api.assemblyai.com/v2/transcript", {
+        method: "POST",
+        headers: {
+          Authorization: ASSEMBLYAI_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ audio_url, language_detection, speaker_labels }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/assemblyai",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// APILAYER (Multi-API: Exchange, Stocks, Aviation, etc.) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/apilayer",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "apilayer", "call");
+    const APILAYER_KEY = process.env.APILAYER_API_KEY;
+    if (!APILAYER_KEY) {
+      return jsonResponse({ error: "APILayer not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { service, endpoint, params = {} } = body;
+      if (!service || !endpoint) {
+        return jsonResponse({ error: "service and endpoint required (e.g. service:'exchangerates', endpoint:'/latest')" }, 400);
+      }
+      const queryString = new URLSearchParams(params).toString();
+      const url = `https://api.apilayer.com/${service}${endpoint}${queryString ? '?' + queryString : ''}`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          apikey: APILAYER_KEY,
+        },
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/apilayer",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
 // WORKSPACE / MAGIC LINK ENDPOINTS
 // ==============================================
 

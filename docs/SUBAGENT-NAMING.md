@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Subagent Naming Convention
 
 **Principle:** Names describe FUNCTION, not implementation.
@@ -92,3 +98,6 @@ X-APIClaw-Subagent: audio-transcriber
 ```
 
 APIClaw auto-creates entry with this ID. No manual registration needed.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw MCP Auto-Setup
 
 **Version:** 1.0  
@@ -621,3 +627,6 @@ Need help? https://docs.apiclaw.com/setup/permissions
 ---
 
 *Last updated: 2026-02-28*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

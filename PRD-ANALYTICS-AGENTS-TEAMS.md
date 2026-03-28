@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw PRD — Analytics, Agents & Teams
 
 **Datum:** 2026-03-03  
@@ -708,3 +714,6 @@ I `~/.clawdbot/clawdbot.json`, säkerställ APIClaw headers:
 ---
 
 *Ready for implementation. Spawn agents when approved.*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

@@ -4,7 +4,7 @@
 
 import { readSession, getMachineFingerprint } from './session.js';
 
-const PROXY_BASE = "https://brilliant-puffin-712.eu-west-1.convex.site/proxy";
+const PROXY_BASE = "https://adventurous-avocet-799.convex.site/proxy";
 
 export async function callProxy(provider: string, params: any): Promise<any> {
   const url = `${PROXY_BASE}/${provider}`;

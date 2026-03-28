@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: APIClaw Organic Distribution
 
 > **The API layer for AI agents.** 22,000+ APIs. Direct Call. Works with any MCP-compatible agent.
@@ -345,3 +351,6 @@ Varje ny Direct Call provider = deras audience får veta om APIClaw.
 
 *Last updated: 2026-03-01*
 *Owner: Symbot / NordSym*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

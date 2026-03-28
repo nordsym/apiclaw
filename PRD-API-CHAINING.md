@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw: Orchestration Layer
 
 **Status:** SPEC
@@ -481,3 +487,6 @@ Recursive. Distributed. Autonomous.
 *Just execution.*
 
 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

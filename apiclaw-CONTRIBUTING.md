@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Contributing to APIClaw
 
 Thanks for wanting to contribute! We keep this simple.
@@ -82,3 +88,6 @@ MIT. Your contributions will be too.
 ---
 
 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

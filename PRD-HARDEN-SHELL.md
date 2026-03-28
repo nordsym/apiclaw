@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # APIClaw PRD: Harden The Shell
 
 **Status:** DRAFT
@@ -276,3 +282,6 @@ Settings → Billing → Monthly budget cap: $____
 *"Harden the shell. Turn every critique into a moat."*
 
 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

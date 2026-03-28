@@ -80,7 +80,7 @@
     "@types/node": "^20.10.0",
     "@vercel/node": "^5.6.16",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "glob": "^13.0.0"

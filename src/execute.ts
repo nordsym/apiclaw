@@ -403,6 +403,7 @@ const apiEndpoints: Record<string, Record<string, { url: string; method: string;
     run_shell: { url: 'https://api.e2b.dev/v1/sandboxes', method: 'POST' },
   },
   apilayer: {
+    // Unified APILayer APIs (apilayer.com)
     exchange_rates: { url: 'https://api.apilayer.com/exchangerates_data/latest', method: 'GET' },
     market_data: { url: 'http://api.marketstack.com/v1/eod', method: 'GET' },
     aviation: { url: 'http://api.aviationstack.com/v1/flights', method: 'GET' },
@@ -417,6 +418,34 @@ const apiEndpoints: Record<string, Record<string, { url: string; method: string;
     image_crop: { url: 'https://api.apilayer.com/smart_crop/url', method: 'POST' },
     skills: { url: 'https://api.promptapi.com/skills', method: 'GET' },
     form_submit: { url: 'https://api.apilayer.com/form_api/{endpoint}', method: 'POST' },
+    
+    // Legacy APIs (separate domains, each with own key)
+    // FINANCE
+    fixer_convert: { url: 'http://data.fixer.io/api/convert', method: 'GET' },
+    fixer_latest: { url: 'http://data.fixer.io/api/latest', method: 'GET' },
+    currencylayer_live: { url: 'http://api.currencylayer.com/live', method: 'GET' },
+    currencylayer_convert: { url: 'http://api.currencylayer.com/convert', method: 'GET' },
+    coinlayer_live: { url: 'http://api.coinlayer.com/live', method: 'GET' },
+    exchangeratehost_latest: { url: 'https://api.exchangerate.host/latest', method: 'GET' },
+    
+    // GEOLOCATION
+    weatherstack_current: { url: 'http://api.weatherstack.com/current', method: 'GET' },
+    weatherstack_forecast: { url: 'http://api.weatherstack.com/forecast', method: 'GET' },
+    ipstack_lookup: { url: 'http://api.ipstack.com/{ip}', method: 'GET' },
+    ipapi_lookup: { url: 'https://ipapi.co/{ip}/json/', method: 'GET' },
+    positionstack_forward: { url: 'http://api.positionstack.com/v1/forward', method: 'GET' },
+    positionstack_reverse: { url: 'http://api.positionstack.com/v1/reverse', method: 'GET' },
+    languagelayer_detect: { url: 'https://api.languagelayer.com/detect', method: 'POST' },
+    
+    // SCRAPING
+    scrapestack_scrape: { url: 'http://api.scrapestack.com/scrape', method: 'GET' },
+    serpstack_search: { url: 'http://api.serpstack.com/search', method: 'GET' },
+    
+    // NEWS
+    mediastack_news: { url: 'http://api.mediastack.com/v1/news', method: 'GET' },
+    
+    // DEVTOOLS
+    userstack_detect: { url: 'http://api.userstack.com/detect', method: 'GET' },
   },
 };
 
@@ -1912,10 +1941,286 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData || {}),
-      }, { provider: 'apilayer', action: 'form_submit' });
+      }, { provider: 'apilayer', 'action': 'form_submit' });
       const data = await response.json() as Record<string, unknown>;
       if (!response.ok) return createErrorResult('apilayer', 'form_submit', 'Request failed', statusToErrorCode(response.status));
       return { success: true, provider: 'apilayer', action: 'form_submit', data };
+    },
+
+    // ========== LEGACY APIs (separate domains, each with own key) ==========
+
+    // FINANCE
+    fixer_convert: async (params, creds) => {
+      const key = creds.FIXER_API_KEY || creds.api_key;
+      const { from, to, amount, date } = params;
+      if (!from || !to || !amount) return createErrorResult('apilayer', 'fixer_convert', 'Missing required params: from, to, amount', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://data.fixer.io/api/convert');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('from', from);
+      url.searchParams.set('to', to);
+      url.searchParams.set('amount', amount.toString());
+      if (date) url.searchParams.set('date', date);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'fixer_convert' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'fixer_convert', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'fixer_convert', data };
+    },
+
+    fixer_latest: async (params, creds) => {
+      const key = creds.FIXER_API_KEY || creds.api_key;
+      const { base = 'EUR', symbols } = params;
+      
+      const url = new URL('http://data.fixer.io/api/latest');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('base', base);
+      if (symbols) url.searchParams.set('symbols', symbols);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'fixer_latest' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'fixer_latest', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'fixer_latest', data };
+    },
+
+    currencylayer_live: async (params, creds) => {
+      const key = creds.CURRENCYLAYER_API_KEY || creds.api_key;
+      const { currencies, source = 'USD' } = params;
+      
+      const url = new URL('http://api.currencylayer.com/live');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('source', source);
+      if (currencies) url.searchParams.set('currencies', currencies);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'currencylayer_live' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'currencylayer_live', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'currencylayer_live', data };
+    },
+
+    currencylayer_convert: async (params, creds) => {
+      const key = creds.CURRENCYLAYER_API_KEY || creds.api_key;
+      const { from, to, amount, date } = params;
+      if (!from || !to || !amount) return createErrorResult('apilayer', 'currencylayer_convert', 'Missing required params: from, to, amount', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.currencylayer.com/convert');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('from', from);
+      url.searchParams.set('to', to);
+      url.searchParams.set('amount', amount.toString());
+      if (date) url.searchParams.set('date', date);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'currencylayer_convert' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'currencylayer_convert', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'currencylayer_convert', data };
+    },
+
+    coinlayer_live: async (params, creds) => {
+      const key = creds.COINLAYER_API_KEY || creds.api_key;
+      const { symbols, target = 'USD' } = params;
+      
+      const url = new URL('http://api.coinlayer.com/live');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('target', target);
+      if (symbols) url.searchParams.set('symbols', symbols);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'coinlayer_live' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'coinlayer_live', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'coinlayer_live', data };
+    },
+
+    exchangeratehost_latest: async (params, creds) => {
+      const key = creds.EXCHANGERATEHOST_API_KEY || creds.api_key;
+      const { base = 'EUR', symbols } = params;
+      
+      const url = new URL('https://api.exchangerate.host/latest');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('base', base);
+      if (symbols) url.searchParams.set('symbols', symbols);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'exchangeratehost_latest' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'exchangeratehost_latest', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'exchangeratehost_latest', data };
+    },
+
+    // GEOLOCATION
+    weatherstack_current: async (params, creds) => {
+      const key = creds.WEATHERSTACK_API_KEY || creds.api_key;
+      const { query, units = 'm' } = params;
+      if (!query) return createErrorResult('apilayer', 'weatherstack_current', 'Missing required param: query (city name or coordinates)', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.weatherstack.com/current');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+      url.searchParams.set('units', units);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'weatherstack_current' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'weatherstack_current', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'weatherstack_current', data };
+    },
+
+    weatherstack_forecast: async (params, creds) => {
+      const key = creds.WEATHERSTACK_API_KEY || creds.api_key;
+      const { query, forecast_days = 1, units = 'm' } = params;
+      if (!query) return createErrorResult('apilayer', 'weatherstack_forecast', 'Missing required param: query', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.weatherstack.com/forecast');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+      url.searchParams.set('forecast_days', forecast_days.toString());
+      url.searchParams.set('units', units);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'weatherstack_forecast' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'weatherstack_forecast', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'weatherstack_forecast', data };
+    },
+
+    ipstack_lookup: async (params, creds) => {
+      const key = creds.IPSTACK_API_KEY || creds.api_key;
+      const { ip } = params;
+      if (!ip) return createErrorResult('apilayer', 'ipstack_lookup', 'Missing required param: ip', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL(`http://api.ipstack.com/${ip}`);
+      url.searchParams.set('access_key', key);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'ipstack_lookup' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'ipstack_lookup', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'ipstack_lookup', data };
+    },
+
+    ipapi_lookup: async (params, creds) => {
+      const key = creds.IPAPI_API_KEY || creds.api_key;
+      const { ip } = params;
+      if (!ip) return createErrorResult('apilayer', 'ipapi_lookup', 'Missing required param: ip', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = `https://ipapi.co/${ip}/json/?key=${key}`;
+
+      const response = await fetchWithRetry(url, {}, { provider: 'apilayer', action: 'ipapi_lookup' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'ipapi_lookup', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'ipapi_lookup', data };
+    },
+
+    positionstack_forward: async (params, creds) => {
+      const key = creds.POSITIONSTACK_API_KEY || creds.api_key;
+      const { query, limit = 1 } = params;
+      if (!query) return createErrorResult('apilayer', 'positionstack_forward', 'Missing required param: query (address)', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.positionstack.com/v1/forward');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+      url.searchParams.set('limit', limit.toString());
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'positionstack_forward' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'positionstack_forward', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'positionstack_forward', data };
+    },
+
+    positionstack_reverse: async (params, creds) => {
+      const key = creds.POSITIONSTACK_API_KEY || creds.api_key;
+      const { query, limit = 1 } = params;
+      if (!query) return createErrorResult('apilayer', 'positionstack_reverse', 'Missing required param: query (lat,lng)', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.positionstack.com/v1/reverse');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+      url.searchParams.set('limit', limit.toString());
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'positionstack_reverse' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'positionstack_reverse', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'positionstack_reverse', data };
+    },
+
+    languagelayer_detect: async (params, creds) => {
+      const key = creds.LANGUAGELAYER_API_KEY || creds.api_key;
+      const { query } = params;
+      if (!query) return createErrorResult('apilayer', 'languagelayer_detect', 'Missing required param: query (text to analyze)', ERROR_CODES.INVALID_PARAMS);
+      
+      const response = await fetchWithRetry('https://api.languagelayer.com/detect', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ access_key: key, query }).toString(),
+      }, { provider: 'apilayer', action: 'languagelayer_detect' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'languagelayer_detect', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'languagelayer_detect', data };
+    },
+
+    // SCRAPING
+    scrapestack_scrape: async (params, creds) => {
+      const key = creds.SCRAPESTACK_API_KEY || creds.api_key;
+      const { url: targetUrl } = params;
+      if (!targetUrl) return createErrorResult('apilayer', 'scrapestack_scrape', 'Missing required param: url', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.scrapestack.com/scrape');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('url', targetUrl);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'scrapestack_scrape' });
+      const data = await response.text();
+      if (!response.ok) return createErrorResult('apilayer', 'scrapestack_scrape', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'scrapestack_scrape', data: { html: data } };
+    },
+
+    serpstack_search: async (params, creds) => {
+      const key = creds.SERPSTACK_API_KEY || creds.api_key;
+      const { query, num = 10 } = params;
+      if (!query) return createErrorResult('apilayer', 'serpstack_search', 'Missing required param: query', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.serpstack.com/search');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+      url.searchParams.set('num', num.toString());
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'serpstack_search' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'serpstack_search', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'serpstack_search', data };
+    },
+
+    // NEWS
+    mediastack_news: async (params, creds) => {
+      const key = creds.MEDIASTACK_API_KEY || creds.api_key;
+      const { keywords, categories, countries, languages, limit = 25 } = params;
+      
+      const url = new URL('http://api.mediastack.com/v1/news');
+      url.searchParams.set('access_key', key);
+      if (keywords) url.searchParams.set('keywords', keywords);
+      if (categories) url.searchParams.set('categories', categories);
+      if (countries) url.searchParams.set('countries', countries);
+      if (languages) url.searchParams.set('languages', languages);
+      url.searchParams.set('limit', limit.toString());
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'mediastack_news' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'mediastack_news', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'mediastack_news', data };
+    },
+
+    // DEVTOOLS
+    userstack_detect: async (params, creds) => {
+      const key = creds.USERSTACK_API_KEY || creds.api_key;
+      const { ua } = params;
+      if (!ua) return createErrorResult('apilayer', 'userstack_detect', 'Missing required param: ua (user agent string)', ERROR_CODES.INVALID_PARAMS);
+      
+      const url = new URL('http://api.userstack.com/detect');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('ua', ua);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'userstack_detect' });
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) return createErrorResult('apilayer', 'userstack_detect', 'Request failed', statusToErrorCode(response.status));
+      return { success: true, provider: 'apilayer', action: 'userstack_detect', data };
     },
   },
 };

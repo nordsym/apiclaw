@@ -1,3 +1,9 @@
+---
+nord_type: BLUEPRINT
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # PRD: Workspace Navigation Cleanup
 
 ## Problem
@@ -198,3 +204,6 @@ Analytics ▼
 ## Attestering
 
 Svara **"kör"** för att starta.
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

@@ -1,3 +1,9 @@
+---
+nord_type: ENGINE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # Symbot/Clawdbot Fix — Message History Sanitizer
 
 **Problem:** `unexpected tool_use_id found in tool_result blocks: toolu_012ogrVbszMVvQZF6Jpcbvar`
@@ -236,3 +242,6 @@ Om problem kvarstår:
 
 *Created: 2026-02-21*
 *Status: TESTED ✅*
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

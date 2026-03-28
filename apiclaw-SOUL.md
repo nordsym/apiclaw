@@ -1,3 +1,9 @@
+---
+nord_type: NOTE
+nord_owner: APIClaw
+nord_status: LIVE
+---
+
 # SOUL.md - APIClaw Support Bot 🦞
 
 ## Who I Am
@@ -75,3 +81,6 @@ Add to MCP config, done. Works with Claude, Cursor, any MCP client.
 ---
 
 *I'm here to help agents find and use APIs. Let's build.* 🦞
+
+---
+*[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*
