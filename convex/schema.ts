@@ -44,6 +44,7 @@ export default defineSchema({
   // Workspaces (agent owner accounts)
   workspaces: defineTable({
     email: v.string(),
+    workspaceName: v.optional(v.string()), // Display name (e.g., "APILayer", "My Team")
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
     tier: v.string(), // "free" | "pro" | "enterprise" | "backer"

@@ -315,6 +315,7 @@ export const getWorkspaceDashboard = query({
       workspace: {
         id: workspace._id,
         email: workspace.email,
+        workspaceName: workspace.workspaceName,
         tier: workspace.tier,
         status: workspace.status,
         usageCount: workspace.usageCount,
@@ -870,6 +871,33 @@ export const createWorkspace = mutation({
     });
     
     return { success: true, workspaceId };
+  },
+});
+
+// Update workspace name
+export const updateWorkspaceName = mutation({
+  args: {
+    token: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, { token, name }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid session");
+
+    const trimmed = name.trim();
+    if (trimmed.length < 1 || trimmed.length > 100) {
+      throw new Error("Name must be between 1 and 100 characters");
+    }
+
+    await ctx.db.patch(session.workspaceId, {
+      workspaceName: trimmed,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true, name: trimmed };
   },
 });
 

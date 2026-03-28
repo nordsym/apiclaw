@@ -94,6 +94,7 @@ const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://brilliant-puff
 interface Workspace {
   id: string;
   email: string;
+  workspaceName?: string;
   tier: string;
   status: string;
   usageCount: number;
@@ -610,7 +611,7 @@ export default function WorkspacePage() {
     );
   }
 
-  const displayEmail = workspace?.email || providerName || "User";
+  const displayEmail = workspace?.workspaceName || workspace?.email || providerName || "User";
   const displayTier = workspace?.tier || "free";
   
   // Usage thresholds for banners
@@ -5433,13 +5434,46 @@ function SettingsTab({ workspace, sessionToken }: { workspace: Workspace | null;
         <div className="space-y-4 pt-4">
           <div>
             <label className="block text-sm text-[var(--text-muted)] mb-2">Workspace Name</label>
-            <input
-              type="text"
-              placeholder="My Workspace"
-              disabled
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
-            />
-            <p className="text-xs text-[var(--text-muted)] mt-1">Coming soon</p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const input = (e.target as HTMLFormElement).elements.namedItem("wsName") as HTMLInputElement;
+                const name = input.value.trim();
+                if (!name || !sessionToken) return;
+                try {
+                  await fetch(`${CONVEX_URL}/api/mutation`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      path: "workspaces:updateWorkspaceName",
+                      args: { token: sessionToken, name },
+                    }),
+                  });
+                  input.dataset.saved = "true";
+                  input.style.borderColor = "#22c55e";
+                  setTimeout(() => { input.style.borderColor = ""; }, 2000);
+                } catch {
+                  input.style.borderColor = "#ef4444";
+                  setTimeout(() => { input.style.borderColor = ""; }, 2000);
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                name="wsName"
+                type="text"
+                placeholder="e.g. APILayer, My Team"
+                defaultValue={workspace?.workspaceName || ""}
+                className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition"
+              >
+                Save
+              </button>
+            </form>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Shown in sidebar instead of email</p>
           </div>
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
             <div>
