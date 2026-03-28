@@ -59,6 +59,10 @@ import {
   ClipboardList,
   Bot,
   Link as LinkIcon,
+  Eye,
+  EyeOff,
+  Save,
+  PlayCircle,
 } from "lucide-react";
 import {
   LineChart,
@@ -888,7 +892,7 @@ export default function WorkspacePage() {
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} isProvider={isProvider} />
           )}
           {activeTab === "my-apis" && (
-            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} />
+            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} />
           )}
           {activeTab === "analytics" && (
             <AnalyticsTab 
@@ -1256,10 +1260,120 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
 // MY APIs TAB (Provider)
 // ============================================
 
-function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void }) {
+function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void; sessionToken: string | null }) {
   const [form, setForm] = useState({ name: "", description: "", category: "DevTools", openApiUrl: "", docsUrl: "", pricingModel: "freemium" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [selectedApi, setSelectedApi] = useState<ProviderAPI | null>(null);
+  const [apiDetailTab, setApiDetailTab] = useState<"direct-call" | "actions" | "test">("direct-call");
+
+  // Direct Call config state
+  const [dcConfig, setDcConfig] = useState({ baseUrl: "", authType: "bearer", authHeader: "Authorization", authPrefix: "Bearer ", masterApiKey: "", rateLimitPerUser: 60, rateLimitPerDay: 1000, pricePerRequest: 0, status: "draft", allowCustomerKeys: true, requireCustomerKeys: false });
+  const [dcConfigId, setDcConfigId] = useState<string | null>(null);
+  const [dcSaving, setDcSaving] = useState(false);
+  const [dcSaved, setDcSaved] = useState(false);
+  const [dcLoading, setDcLoading] = useState(false);
+  const [showMasterKey, setShowMasterKey] = useState(false);
+
+  // Actions state
+  const [actions, setActions] = useState<{_id: string; name: string; displayName: string; description: string; method: string; path: string; enabled: boolean}[]>([]);
+  const [actionsLoading, setActionsLoading] = useState(false);
+  const [showAddAction, setShowAddAction] = useState(false);
+  const [actionForm, setActionForm] = useState({ name: "", displayName: "", description: "", method: "GET", path: "" });
+  const [actionSaving, setActionSaving] = useState(false);
+
+  // Test state
+  const [testAction, setTestAction] = useState("");
+  const [testParams, setTestParams] = useState<Record<string, string>>({});
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
+
+  const loadDirectCallConfig = useCallback(async (api: ProviderAPI) => {
+    setDcLoading(true);
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "directCall:getDirectCallConfigByApiId", args: { apiId: api._id } }),
+      });
+      const data = await res.json();
+      const config = data.value;
+      if (config) {
+        setDcConfigId(config._id);
+        setDcConfig({ baseUrl: config.baseUrl || "", authType: config.authType || "bearer", authHeader: config.authHeader || "Authorization", authPrefix: config.authPrefix || "Bearer ", masterApiKey: "", rateLimitPerUser: config.rateLimitPerUser || 60, rateLimitPerDay: config.rateLimitPerDay || 1000, pricePerRequest: config.pricePerRequest || 0, status: config.status || "draft", allowCustomerKeys: config.allowCustomerKeys ?? true, requireCustomerKeys: config.requireCustomerKeys ?? false });
+      } else {
+        setDcConfigId(null);
+        setDcConfig({ baseUrl: "", authType: "bearer", authHeader: "Authorization", authPrefix: "Bearer ", masterApiKey: "", rateLimitPerUser: 60, rateLimitPerDay: 1000, pricePerRequest: 0, status: "draft", allowCustomerKeys: true, requireCustomerKeys: false });
+      }
+    } catch { /* ignore */ } finally { setDcLoading(false); }
+  }, []);
+
+  const loadActions = useCallback(async (api: ProviderAPI) => {
+    setActionsLoading(true);
+    try {
+      const cfgRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "directCall:getDirectCallConfigByApiId", args: { apiId: api._id } }),
+      });
+      const cfgData = await cfgRes.json();
+      const config = cfgData.value;
+      if (config?._id) {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: "directCall:getActions", args: { directCallId: config._id } }),
+        });
+        const data = await res.json();
+        setActions(Array.isArray(data.value) ? data.value : []);
+      } else {
+        setActions([]);
+      }
+    } catch { /* ignore */ } finally { setActionsLoading(false); }
+  }, []);
+
+  const handleSelectApi = useCallback((api: ProviderAPI) => {
+    setSelectedApi(api);
+    setApiDetailTab("direct-call");
+    setDcSaved(false);
+    loadDirectCallConfig(api);
+    loadActions(api);
+  }, [loadDirectCallConfig, loadActions]);
+
+  const saveDcConfig = async () => {
+    if (!selectedApi) return;
+    setDcSaving(true);
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "directCall:saveConfig", args: { apiId: selectedApi._id, ...dcConfig } }),
+      });
+      setDcSaved(true);
+      setTimeout(() => setDcSaved(false), 3000);
+      loadDirectCallConfig(selectedApi);
+    } catch { /* ignore */ } finally { setDcSaving(false); }
+  };
+
+  const saveAction = async () => {
+    if (!dcConfigId) return;
+    setActionSaving(true);
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "directCall:saveAction", args: { directCallId: dcConfigId, ...actionForm } }),
+      });
+      setActionForm({ name: "", displayName: "", description: "", method: "GET", path: "" });
+      setShowAddAction(false);
+      if (selectedApi) loadActions(selectedApi);
+    } catch { /* ignore */ } finally { setActionSaving(false); }
+  };
+
+  const deleteAction = async (actionId: string) => {
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "directCall:deleteAction", args: { actionId } }),
+      });
+      if (selectedApi) loadActions(selectedApi);
+    } catch { /* ignore */ }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1445,52 +1559,182 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm }: { apis: ProviderAP
 
       <div className="grid gap-4">
         {apis.map((api) => (
-          <div
-            key={api._id}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition"
-          >
-            <div className="flex items-center justify-between">
+          <div key={api._id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden hover:border-[#ef4444]/30 transition">
+            {/* Row */}
+            <div
+              className="flex items-center justify-between p-6 cursor-pointer"
+              onClick={() => selectedApi?._id === api._id ? setSelectedApi(null) : handleSelectApi(api)}
+            >
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-semibold text-lg">{api.name}</h3>
-                  {api.hasDirectCall && (
-                    <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">
-                      Direct Call
-                    </span>
-                  )}
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    api.status === "approved" ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"
-                  }`}>
-                    {api.status}
-                  </span>
+                  {api.hasDirectCall && <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Direct Call</span>}
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${api.status === "approved" ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"}`}>{api.status}</span>
                 </div>
-                <p className="text-[var(--text-muted)]">{api.description}</p>
-                <div className="flex items-center gap-4 mt-3 text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-[var(--text-muted)]">{api.description}</p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-[var(--text-muted)]">
                   <span>{api.category}</span>
                   <span>{api.discoveryCount || 0} discoveries</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 ml-4">
-                <span
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] opacity-40 cursor-not-allowed"
-                  title="Edit coming soon"
-                >
-                  Edit
-                </span>
-                <button
-                  onClick={() => {
-                    const params = new URLSearchParams(window.location.search);
-                    params.set("tab", "analytics");
-                    params.set("sub", "overview");
-                    window.history.pushState({}, "", `/workspace?${params.toString()}`);
-                    window.location.reload();
-                  }}
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition"
-                >
-                  Analytics
-                </button>
-              </div>
+              <ChevronDown className={`w-5 h-5 text-[var(--text-muted)] ml-4 transition-transform ${selectedApi?._id === api._id ? "rotate-180" : ""}`} />
             </div>
+
+            {/* Detail Panel */}
+            {selectedApi?._id === api._id && (
+              <div className="border-t border-[var(--border)] bg-[var(--background)]">
+                {/* Sub-tabs */}
+                <div className="flex border-b border-[var(--border)] px-6">
+                  {(["direct-call", "actions", "test"] as const).map(tab => (
+                    <button key={tab} onClick={() => setApiDetailTab(tab)}
+                      className={`px-4 py-3 text-sm font-medium border-b-2 transition -mb-px ${apiDetailTab === tab ? "border-[#ef4444] text-[#ef4444]" : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+                      {tab === "direct-call" ? "Direct Call" : tab === "actions" ? "Actions" : "Test"}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-6 space-y-4">
+                  {/* DIRECT CALL TAB */}
+                  {apiDetailTab === "direct-call" && (
+                    dcLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
+                      <div className="space-y-4">
+                        <p className="text-sm text-[var(--text-muted)]">Configure how agents call this API. The master key is stored encrypted and never exposed to agents.</p>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Base URL</label>
+                            <input value={dcConfig.baseUrl} onChange={e => setDcConfig(p => ({...p, baseUrl: e.target.value}))} placeholder="https://api.apilayer.com/exchangerates_data" className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Auth Type</label>
+                            <select value={dcConfig.authType} onChange={e => setDcConfig(p => ({...p, authType: e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                              <option value="bearer">Bearer Token</option>
+                              <option value="api_key">API Key Header</option>
+                              <option value="basic">Basic Auth</option>
+                              <option value="none">No Auth</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Auth Header</label>
+                            <input value={dcConfig.authHeader} onChange={e => setDcConfig(p => ({...p, authHeader: e.target.value}))} placeholder="apikey" className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Master API Key</label>
+                            <div className="relative">
+                              <input type={showMasterKey ? "text" : "password"} value={dcConfig.masterApiKey} onChange={e => setDcConfig(p => ({...p, masterApiKey: e.target.value}))} placeholder={dcConfigId ? "Leave blank to keep existing" : "Paste your APILayer key here"} className="w-full px-3 py-2 pr-10 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                              <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                                {showMasterKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Rate Limit / User / Min</label>
+                            <input type="number" value={dcConfig.rateLimitPerUser} onChange={e => setDcConfig(p => ({...p, rateLimitPerUser: +e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Status</label>
+                            <select value={dcConfig.status} onChange={e => setDcConfig(p => ({...p, status: e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                              <option value="draft">Draft</option>
+                              <option value="testing">Testing</option>
+                              <option value="live">Live</option>
+                            </select>
+                          </div>
+                        </div>
+                        <button onClick={saveDcConfig} disabled={dcSaving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">
+                          {dcSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : dcSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                          {dcSaving ? "Saving..." : dcSaved ? "Saved!" : "Save Config"}
+                        </button>
+                      </div>
+                    )
+                  )}
+
+                  {/* ACTIONS TAB */}
+                  {apiDetailTab === "actions" && (
+                    actionsLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
+                      <div className="space-y-4">
+                        {!dcConfigId && <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm text-yellow-400">Configure Direct Call first before adding actions.</div>}
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-[var(--text-muted)]">{actions.length} action{actions.length !== 1 ? "s" : ""} defined</p>
+                          {dcConfigId && <button onClick={() => setShowAddAction(v => !v)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef4444]/10 text-[#ef4444] text-sm font-medium hover:bg-[#ef4444]/20 transition"><Plus className="w-4 h-4" />Add Action</button>}
+                        </div>
+                        {showAddAction && (
+                          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 space-y-3">
+                            <div className="grid md:grid-cols-2 gap-3">
+                              <input value={actionForm.name} onChange={e => setActionForm(p => ({...p, name: e.target.value}))} placeholder="action_name (machine)" className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                              <input value={actionForm.displayName} onChange={e => setActionForm(p => ({...p, displayName: e.target.value}))} placeholder="Display Name" className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                              <select value={actionForm.method} onChange={e => setActionForm(p => ({...p, method: e.target.value}))} className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                                {["GET","POST","PUT","PATCH","DELETE"].map(m => <option key={m}>{m}</option>)}
+                              </select>
+                              <input value={actionForm.path} onChange={e => setActionForm(p => ({...p, path: e.target.value}))} placeholder="/endpoint/path" className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                              <input value={actionForm.description} onChange={e => setActionForm(p => ({...p, description: e.target.value}))} placeholder="Description" className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm col-span-2 focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={saveAction} disabled={actionSaving || !actionForm.name || !actionForm.path} className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">{actionSaving ? "Saving..." : "Add"}</button>
+                              <button onClick={() => setShowAddAction(false)} className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition">Cancel</button>
+                            </div>
+                          </div>
+                        )}
+                        {actions.length === 0 && !showAddAction && <p className="text-sm text-[var(--text-muted)] py-4 text-center">No actions yet. Add an action to define what endpoints agents can call.</p>}
+                        <div className="space-y-2">
+                          {actions.map(action => (
+                            <div key={action._id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+                              <div className="flex items-center gap-3">
+                                <span className={`px-2 py-0.5 rounded text-xs font-mono font-medium ${action.method === "GET" ? "bg-green-500/20 text-green-400" : "bg-blue-500/20 text-blue-400"}`}>{action.method}</span>
+                                <div>
+                                  <p className="text-sm font-medium">{action.displayName}</p>
+                                  <p className="text-xs text-[var(--text-muted)] font-mono">{action.path}</p>
+                                </div>
+                              </div>
+                              <button onClick={() => deleteAction(action._id)} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 transition"><Trash2 className="w-4 h-4" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+
+                  {/* TEST TAB */}
+                  {apiDetailTab === "test" && (
+                    <div className="space-y-4">
+                      {actions.length === 0 ? (
+                        <p className="text-sm text-[var(--text-muted)] py-4 text-center">No actions configured. Add actions in the Actions tab first.</p>
+                      ) : (
+                        <>
+                          <div>
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Select Action</label>
+                            <select value={testAction} onChange={e => { setTestAction(e.target.value); setTestParams({}); setTestResult(null); }} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                              <option value="">— choose —</option>
+                              {actions.map(a => <option key={a._id} value={a._id}>{a.displayName} ({a.method} {a.path})</option>)}
+                            </select>
+                          </div>
+                          {testAction && (
+                            <button onClick={async () => {
+                              setTestLoading(true); setTestResult(null);
+                              try {
+                                const action = actions.find(a => a._id === testAction);
+                                if (!action || !dcConfig.baseUrl) { setTestResult("Configure Direct Call first."); return; }
+                                const url = dcConfig.baseUrl.replace(/\/$/, "") + action.path;
+                                const headers: Record<string, string> = { "Content-Type": "application/json" };
+                                if (dcConfig.authType !== "none" && dcConfig.masterApiKey) headers[dcConfig.authHeader] = (dcConfig.authPrefix + dcConfig.masterApiKey).trim();
+                                const res = await fetch(url, { method: action.method, headers });
+                                const body = await res.text();
+                                setTestResult(`HTTP ${res.status}\n${body.substring(0, 2000)}`);
+                              } catch (e: unknown) { setTestResult("Error: " + (e instanceof Error ? e.message : String(e))); }
+                              finally { setTestLoading(false); }
+                            }} disabled={testLoading} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">
+                              {testLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
+                              {testLoading ? "Running..." : "Run Test"}
+                            </button>
+                          )}
+                          {testResult && (
+                            <pre className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap">{testResult}</pre>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
