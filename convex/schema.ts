@@ -488,18 +488,21 @@ export default defineSchema({
   apiLogs: defineTable({
     workspaceId: v.id("workspaces"),
     sessionToken: v.string(),
-    subagentId: v.optional(v.string()), // from X-APIClaw-Subagent header
+    subagentId: v.optional(v.string()),
     provider: v.string(),
     action: v.string(),
     status: v.union(v.literal("success"), v.literal("error")),
     latencyMs: v.number(),
     errorMessage: v.optional(v.string()),
+    direction: v.optional(v.string()), // "outbound" (I called) or "inbound" (someone called my API)
+    callerWorkspaceId: v.optional(v.string()), // who made the call (for inbound logs)
     createdAt: v.number(),
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_createdAt", ["createdAt"])
     .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"])
-    .index("by_subagentId", ["subagentId"]),
+    .index("by_subagentId", ["subagentId"])
+    .index("by_provider", ["provider"]),
 
   // ============================================
   // WAITLIST (for Direct Call provider leads)

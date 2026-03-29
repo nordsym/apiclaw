@@ -3701,10 +3701,43 @@ function UsageTab({
   usage: UsageData | null;
   sessionToken: string | null;
 }) {
-  const [searchStats, setSearchStats] = useState<{ 
-    totalSearches: number; 
+  const [timeRange, setTimeRange] = useState("7d");
+  const [searchStats, setSearchStats] = useState<{
+    totalSearches: number;
     searchesByProvider: Record<string, number>;
   } | null>(null);
+  const [liveAnalytics, setLiveAnalytics] = useState<{
+    totalCalls: number;
+    inboundCalls: number;
+    outboundCalls: number;
+    uniqueCallers: number;
+    byDay: { date: string; calls: number }[];
+    byProvider: { provider: string; calls: number; success: number }[];
+    successRate: number;
+    avgLatency: number;
+  } | null>(null);
+
+  // Fetch live provider analytics
+  useEffect(() => {
+    const fetchLiveAnalytics = async () => {
+      if (!sessionToken) return;
+      try {
+        const hoursMap: Record<string, number> = { "7d": 168, "30d": 720, "90d": 2160, "All": 87600 };
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "logs:getProviderAnalytics",
+            args: { token: sessionToken, hoursBack: hoursMap[timeRange] || 168 },
+          }),
+        });
+        const data = await res.json();
+        const result = data.value || data;
+        if (result && !result.error) setLiveAnalytics(result);
+      } catch { /* ignore */ }
+    };
+    fetchLiveAnalytics();
+  }, [sessionToken, timeRange]);
 
   // Fetch search stats to correlate with API usage
   useEffect(() => {
@@ -3716,7 +3749,7 @@ function UsageTab({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             path: "searchLogs:getStats",
-            args: { token: sessionToken, hoursBack: 720 }, // Last 30 days
+            args: { token: sessionToken, hoursBack: 720 },
           }),
         });
         const data = await res.json();
@@ -3737,8 +3770,8 @@ function UsageTab({
     fetchSearchStats();
   }, [sessionToken]);
 
-  const [timeRange, setTimeRange] = useState("7d");
-  const hasRealData = usage && (usage.byProvider.length > 0 || usage.byDay.length > 0);
+  const hasLiveData = liveAnalytics && liveAnalytics.totalCalls > 0;
+  const hasRealData = hasLiveData || (usage && (usage.byProvider.length > 0 || usage.byDay.length > 0));
   
   // Preview data for empty state (provider perspective - how others use YOUR APIs)
   const previewByDay = [
@@ -3754,13 +3787,14 @@ function UsageTab({
   const isPreview = !hasRealData;
   const rangeDays = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : timeRange === "90d" ? 90 : 9999;
   const rangeStart = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-  const allByDay = hasRealData ? usage!.byDay : previewByDay;
+  const allByDay = hasLiveData ? liveAnalytics!.byDay : hasRealData ? usage!.byDay : previewByDay;
   const displayByDay = timeRange === "All" ? allByDay : allByDay.filter(d => d.date >= rangeStart);
   const displayByProvider = hasRealData 
     ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
     : [];
-  const displayTotal = hasRealData ? (usage?.total || workspace?.usageCount || 0) : 0;
+  const displayTotal = hasLiveData ? liveAnalytics!.totalCalls : hasRealData ? (usage?.total || workspace?.usageCount || 0) : 0;
   const displaySearchTotal = searchStats?.totalSearches || 0;
+  const displayUniqueCallers = hasLiveData ? liveAnalytics!.uniqueCallers : 0;
 
   return (
     <div className="space-y-8">
@@ -3810,7 +3844,7 @@ function UsageTab({
             <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique Agents</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{isPreview ? "—" : "0"}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{displayUniqueCallers || (isPreview ? "—" : "0")}</p>
         </div>
       </div>
 

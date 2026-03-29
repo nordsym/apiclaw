@@ -76,6 +76,118 @@ export const createLogInternal = mutation({
   },
 });
 
+/**
+ * Log an inbound call to a provider's workspace
+ * Called when someone uses an API that belongs to another workspace
+ */
+export const logProviderCall = mutation({
+  args: {
+    provider: v.string(),
+    action: v.string(),
+    status: v.union(v.literal("success"), v.literal("error")),
+    latencyMs: v.number(),
+    callerWorkspaceId: v.string(),
+    subagentId: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Map provider to workspace email
+    const providerEmailMap: Record<string, string> = {
+      apilayer: "gustav_hemmingsson@hotmail.com",
+    };
+
+    const providerEmail = providerEmailMap[args.provider];
+    if (!providerEmail) return null; // no workspace for this provider
+
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", providerEmail))
+      .first();
+    if (!workspace) return null;
+
+    return await ctx.db.insert("apiLogs", {
+      workspaceId: workspace._id,
+      sessionToken: "",
+      provider: args.provider,
+      action: args.action,
+      status: args.status,
+      latencyMs: args.latencyMs,
+      direction: "inbound",
+      callerWorkspaceId: args.callerWorkspaceId,
+      subagentId: args.subagentId,
+      errorMessage: args.errorMessage,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Get analytics for a provider workspace (inbound calls to their APIs)
+ * Used by API Analytics tab in workspace dashboard
+ */
+export const getProviderAnalytics = query({
+  args: {
+    token: v.string(),
+    hoursBack: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, hoursBack = 168 }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) return null;
+
+    const since = Date.now() - hoursBack * 60 * 60 * 1000;
+
+    // Get all logs for this workspace
+    const allLogs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+
+    const periodLogs = allLogs.filter((l) => l.createdAt >= since);
+    const inboundLogs = periodLogs.filter((l) => l.direction === "inbound");
+    const outboundLogs = periodLogs.filter((l) => l.direction !== "inbound");
+
+    // Daily buckets
+    const byDay: Record<string, number> = {};
+    periodLogs.forEach((l) => {
+      const day = new Date(l.createdAt).toISOString().split("T")[0];
+      byDay[day] = (byDay[day] || 0) + 1;
+    });
+
+    // By provider
+    const byProvider: Record<string, { calls: number; success: number }> = {};
+    periodLogs.forEach((l) => {
+      if (!byProvider[l.provider]) byProvider[l.provider] = { calls: 0, success: 0 };
+      byProvider[l.provider].calls++;
+      if (l.status === "success") byProvider[l.provider].success++;
+    });
+
+    // Unique callers (for inbound)
+    const uniqueCallers = new Set(inboundLogs.map((l) => l.callerWorkspaceId).filter(Boolean)).size;
+
+    return {
+      totalCalls: periodLogs.length,
+      inboundCalls: inboundLogs.length,
+      outboundCalls: outboundLogs.length,
+      uniqueCallers,
+      byDay: Object.entries(byDay)
+        .map(([date, calls]) => ({ date, calls }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+      byProvider: Object.entries(byProvider)
+        .map(([provider, stats]) => ({ provider, ...stats }))
+        .sort((a, b) => b.calls - a.calls),
+      successRate: periodLogs.length > 0
+        ? (periodLogs.filter((l) => l.status === "success").length / periodLogs.length) * 100
+        : 100,
+      avgLatency: periodLogs.length > 0
+        ? periodLogs.reduce((sum, l) => sum + l.latencyMs, 0) / periodLogs.length
+        : 0,
+    };
+  },
+});
+
 // ============================================
 // HELPER: Get month start
 // ============================================

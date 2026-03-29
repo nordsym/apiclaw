@@ -1487,6 +1487,16 @@ Docs: https://apiclaw.nordsym.com
             latencyMs: Date.now() - startTime,
             errorMessage: result.success ? undefined : (result.error || "Unknown error"),
           }).catch(() => {}); // fire-and-forget
+
+          // Dual-log: also log to provider workspace (inbound)
+          convex.mutation("logs:logProviderCall" as any, {
+            provider,
+            action,
+            status: result.success ? "success" : "error",
+            latencyMs: Date.now() - startTime,
+            callerWorkspaceId: workspaceContext.workspaceId,
+            errorMessage: result.success ? undefined : (result.error || "Unknown error"),
+          }).catch(() => {}); // fire-and-forget
         }
 
         // Increment usage for workspace (non-free APIs only)
