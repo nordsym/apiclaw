@@ -914,22 +914,28 @@ Docs: https://apiclaw.nordsym.com
           }).catch(() => {}); // Fire and forget
 
           // Log discovery to provider workspaces (so they see search activity)
-          const matchedProviderIds = new Set(results.slice(0, 10).map(r => r.provider.id));
-          for (const pid of matchedProviderIds) {
-            fetch(`${convexUrl}/api/mutation`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                path: 'logs:logProviderCall',
-                args: {
-                  provider: pid,
-                  action: `discovery:${query.substring(0, 50)}`,
-                  status: 'success' as const,
-                  latencyMs: responseTimeMs,
-                  callerWorkspaceId: workspaceContext.workspaceId,
-                },
-              }),
-            }).catch(() => {});
+          // Map search results to known Direct Call providers
+          const PROVIDER_KEYWORDS: Record<string, string[]> = {
+            apilayer: ['exchange', 'currency', 'fixer', 'weather', 'ip', 'geo', 'flight', 'aviation', 'vat', 'news', 'scrape', 'screenshot', 'pdf', 'email verif', 'phone verif', 'language', 'user agent', 'coinlayer', 'marketstack', 'positionstack', 'ipstack', 'mediastack', 'serpstack', 'userstack', 'scrapestack', 'weatherstack'],
+          };
+          const queryLower = query.toLowerCase();
+          for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
+            if (keywords.some(kw => queryLower.includes(kw))) {
+              fetch(`${convexUrl}/api/mutation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: 'logs:logProviderCall',
+                  args: {
+                    provider,
+                    action: `discovery:${query.substring(0, 50)}`,
+                    status: 'success' as const,
+                    latencyMs: responseTimeMs,
+                    callerWorkspaceId: workspaceContext.workspaceId,
+                  },
+                }),
+              }).catch(() => {});
+            }
           }
         }
 
