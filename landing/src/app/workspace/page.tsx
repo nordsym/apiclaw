@@ -3792,7 +3792,7 @@ function UsageTab({
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Active APIs</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{displayByProvider.length}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{apis.filter(a => a.status === "approved").length || displayByProvider.length}</p>
         </div>
 
         <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 sm:p-6">
