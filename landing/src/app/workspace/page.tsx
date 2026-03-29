@@ -3793,8 +3793,21 @@ function UsageTab({
     ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
     : [];
   const displayTotal = hasLiveData ? liveAnalytics!.totalCalls : hasRealData ? (usage?.total || workspace?.usageCount || 0) : 0;
-  const displaySearchTotal = searchStats?.totalSearches || 0;
+  const displaySearchTotal = hasLiveData
+    ? liveAnalytics!.byDay.reduce((sum, d) => sum, 0) || searchStats?.totalSearches || 0
+    : searchStats?.totalSearches || 0;
   const displayUniqueCallers = hasLiveData ? liveAnalytics!.uniqueCallers : 0;
+
+  // Separate calls vs discoveries from live data
+  const liveCallCount = hasLiveData
+    ? (liveAnalytics!.byProvider || []).filter(p => !p.provider.startsWith("discovery:")).reduce((sum, p) => sum + p.calls, 0)
+    : 0;
+  const liveDiscoveryCount = hasLiveData
+    ? (liveAnalytics!.byProvider || []).filter(p => p.provider.startsWith("discovery:") || p.provider === "discover").reduce((sum, p) => sum + p.calls, 0)
+    : 0;
+  const liveTopAPIs = hasLiveData
+    ? (liveAnalytics!.byProvider || []).filter(p => !p.provider.startsWith("discovery:"))
+    : [];
 
   return (
     <div className="space-y-8">
@@ -3835,7 +3848,7 @@ function UsageTab({
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Found via Search</span>
           </div>
           <p className="text-2xl sm:text-4xl font-bold text-blue-500">
-            {displaySearchTotal.toLocaleString()}
+            {(liveDiscoveryCount || displaySearchTotal).toLocaleString()}
           </p>
         </div>
 
@@ -3914,11 +3927,11 @@ function UsageTab({
       {/* Top APIs */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Top APIs</h3>
-        {displayByProvider.length === 0 ? (
+        {liveTopAPIs.length === 0 && displayByProvider.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API usage data yet. Calls will appear here once agents start using your APIs.</p>
         ) : (
           <div className="space-y-3">
-            {displayByProvider.map((p, i) => (
+            {(liveTopAPIs.length > 0 ? liveTopAPIs : displayByProvider).map((p, i) => (
               <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
@@ -3928,17 +3941,13 @@ function UsageTab({
                     <span className="font-medium">{p.provider}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-sm text-[var(--text-muted)]">{p.calls.toLocaleString()} calls</span>
-                      {p.cost > 0 && <span className="text-sm text-[var(--text-muted)]">• ${p.cost.toFixed(2)}</span>}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {(p as any).searchCount > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-500 text-xs font-medium">
-                      <Search className="w-3 h-3" />
-                      {(p as any).searchCount} found
-                    </span>
-                  )}
+                  <span className={`text-xs px-2 py-0.5 rounded ${(p as any).success === p.calls ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"}`}>
+                    {(((p as any).success || p.calls) / Math.max(p.calls, 1) * 100).toFixed(0)}% success
+                  </span>
                 </div>
               </div>
             ))}
