@@ -156,27 +156,35 @@ export const getProviderAnalytics = query({
       byDay[day] = (byDay[day] || 0) + 1;
     });
 
-    // By provider
-    const byProvider: Record<string, { calls: number; success: number }> = {};
+    // By action (individual API endpoints, not just provider name)
+    const byAction: Record<string, { calls: number; success: number; type: string }> = {};
     periodLogs.forEach((l) => {
-      if (!byProvider[l.provider]) byProvider[l.provider] = { calls: 0, success: 0 };
-      byProvider[l.provider].calls++;
-      if (l.status === "success") byProvider[l.provider].success++;
+      const isDiscovery = l.action.startsWith("discovery:");
+      const key = isDiscovery ? l.action : `${l.provider}:${l.action}`;
+      const displayName = isDiscovery ? l.action.replace("discovery:", "Search: ") : l.action;
+      if (!byAction[displayName]) byAction[displayName] = { calls: 0, success: 0, type: isDiscovery ? "discovery" : "call" };
+      byAction[displayName].calls++;
+      if (l.status === "success") byAction[displayName].success++;
     });
 
     // Unique callers (for inbound)
     const uniqueCallers = new Set(inboundLogs.map((l) => l.callerWorkspaceId).filter(Boolean)).size;
 
+    // Counts
+    const callLogs = periodLogs.filter((l) => !l.action.startsWith("discovery:"));
+    const discoveryLogs = periodLogs.filter((l) => l.action.startsWith("discovery:"));
+
     return {
-      totalCalls: periodLogs.length,
-      inboundCalls: inboundLogs.length,
+      totalCalls: callLogs.length,
+      totalDiscoveries: discoveryLogs.length,
+      inboundCalls: inboundLogs.filter((l) => !l.action.startsWith("discovery:")).length,
       outboundCalls: outboundLogs.length,
       uniqueCallers,
       byDay: Object.entries(byDay)
         .map(([date, calls]) => ({ date, calls }))
         .sort((a, b) => a.date.localeCompare(b.date)),
-      byProvider: Object.entries(byProvider)
-        .map(([provider, stats]) => ({ provider, ...stats }))
+      byAction: Object.entries(byAction)
+        .map(([action, stats]) => ({ action, ...stats }))
         .sort((a, b) => b.calls - a.calls),
       successRate: periodLogs.length > 0
         ? (periodLogs.filter((l) => l.status === "success").length / periodLogs.length) * 100

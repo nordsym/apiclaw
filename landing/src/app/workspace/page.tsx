@@ -3799,15 +3799,11 @@ function UsageTab({
   const displayUniqueCallers = hasLiveData ? liveAnalytics!.uniqueCallers : 0;
 
   // Separate calls vs discoveries from live data
-  const liveCallCount = hasLiveData
-    ? (liveAnalytics!.byProvider || []).filter(p => !p.provider.startsWith("discovery:")).reduce((sum, p) => sum + p.calls, 0)
-    : 0;
-  const liveDiscoveryCount = hasLiveData
-    ? (liveAnalytics!.byProvider || []).filter(p => p.provider.startsWith("discovery:") || p.provider === "discover").reduce((sum, p) => sum + p.calls, 0)
-    : 0;
-  const liveTopAPIs = hasLiveData
-    ? (liveAnalytics!.byProvider || []).filter(p => !p.provider.startsWith("discovery:"))
-    : [];
+  const liveByAction = (liveAnalytics as any)?.byAction || [];
+  const liveCallCount = hasLiveData ? (liveAnalytics as any).totalCalls || 0 : 0;
+  const liveDiscoveryCount = hasLiveData ? (liveAnalytics as any).totalDiscoveries || 0 : 0;
+  const liveTopAPIs = liveByAction.filter((a: any) => a.type === "call");
+  const liveTopSearches = liveByAction.filter((a: any) => a.type === "discovery");
 
   return (
     <div className="space-y-8">
@@ -3927,33 +3923,53 @@ function UsageTab({
       {/* Top APIs */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Top APIs</h3>
-        {liveTopAPIs.length === 0 && displayByProvider.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API usage data yet. Calls will appear here once agents start using your APIs.</p>
+        {liveTopAPIs.length === 0 && liveTopSearches.length === 0 && displayByProvider.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API usage data yet. Calls and searches will appear here once agents start using your APIs.</p>
         ) : (
-          <div className="space-y-3">
-            {(liveTopAPIs.length > 0 ? liveTopAPIs : displayByProvider).map((p, i) => (
-              <div key={p.provider} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
+          <div className="space-y-2">
+            {liveTopAPIs.map((p: any, i: number) => (
+              <div key={p.action} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
                 <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-sm font-medium">
+                  <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">
                     {i + 1}
                   </span>
                   <div>
-                    <span className="font-medium">{p.provider}</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-[var(--text-muted)]">{p.calls.toLocaleString()} calls</span>
-                    </div>
+                    <span className="font-medium text-sm">{p.action}</span>
+                    <span className="text-xs text-[var(--text-muted)] ml-2">{p.calls} call{p.calls !== 1 ? "s" : ""}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-0.5 rounded ${(p as any).success === p.calls ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"}`}>
-                    {(((p as any).success || p.calls) / Math.max(p.calls, 1) * 100).toFixed(0)}% success
-                  </span>
+                <span className={`text-xs px-2 py-0.5 rounded ${p.success === p.calls ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}>
+                  {((p.success / Math.max(p.calls, 1)) * 100).toFixed(0)}%
+                </span>
+              </div>
+            ))}
+            {liveTopSearches.length > 0 && (
+              <>
+                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider pt-2">Discovered via Search</p>
+                {liveTopSearches.map((s: any, i: number) => (
+                  <div key={s.action} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                    <div className="flex items-center gap-3">
+                      <Search className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-sm text-[var(--text-primary)]">{s.action}</span>
+                    </div>
+                    <span className="text-xs text-blue-500">{s.calls}x</span>
+                  </div>
+                ))}
+              </>
+            )}
+            {liveTopAPIs.length === 0 && displayByProvider.map((p, i) => (
+              <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
+                <div className="flex items-center gap-3">
+                  <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                  <span className="font-medium text-sm">{p.provider}</span>
                 </div>
+                <span className="text-xs text-[var(--text-muted)]">{p.calls} calls</span>
               </div>
             ))}
           </div>
         )}
       </div>
+
     </div>
   );
 }
