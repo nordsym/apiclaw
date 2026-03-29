@@ -1084,7 +1084,7 @@ function OverviewTab({
                   </div>
                   <div className="flex items-center gap-2">
                     {api.hasDirectCall && <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded">Direct Call</span>}
-                    <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"}`}>{api.status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-400" : api.status === "blocked" ? "bg-red-500/10 text-red-400" : api.status === "rate_limited" ? "bg-yellow-500/10 text-yellow-400" : "bg-yellow-500/10 text-yellow-400"}`}>{api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}</span>
                   </div>
                 </div>
               ))}
@@ -1638,7 +1638,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-semibold text-lg">{api.name}</h3>
                   {api.hasDirectCall && <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Direct Call</span>}
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${api.status === "approved" ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"}`}>{api.status}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${api.status === "approved" ? "bg-green-500/20 text-green-500" : api.status === "blocked" ? "bg-red-500/20 text-red-500" : api.status === "rate_limited" ? "bg-yellow-500/20 text-yellow-500" : "bg-yellow-500/20 text-yellow-500"}`}>{api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}</span>
                 </div>
                 <p className="text-sm text-[var(--text-muted)]">{api.description}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-[var(--text-muted)]">

@@ -15,7 +15,7 @@ import { URL } from 'url';
 import { discoverAPIs } from './discovery.js';
 import { isOpenAPI, executeOpenAPI } from './open-apis.js';
 import { executeMetered } from './metered.js';
-import { logAPICall } from './analytics.js';
+import { logAPICall } from './mcp-analytics.js';
 import { getMachineFingerprint } from './session.js';
 import { isAuthorized, getProduct } from './product-whitelist.js';
 

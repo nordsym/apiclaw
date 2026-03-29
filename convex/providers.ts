@@ -832,17 +832,21 @@ function generateToken(): string {
 
 // Debug: Update API name/description
 export const debugUpdateAPI = mutation({
-  args: { 
+  args: {
     apiId: v.string(),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
+    status: v.optional(v.string()),
+    hasDirectCall: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const updates: any = {};
     if (args.name) updates.name = args.name;
     if (args.description) updates.description = args.description;
     if (args.category) updates.category = args.category;
+    if (args.status) updates.status = args.status;
+    if (args.hasDirectCall !== undefined) updates.hasDirectCall = args.hasDirectCall;
     await ctx.db.patch(args.apiId as any, updates);
     return { updated: true };
   },

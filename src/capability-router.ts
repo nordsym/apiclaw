@@ -4,7 +4,7 @@
  */
 
 import { executeAPICall } from './execute.js';
-import { logAPICall } from './analytics.js';
+import { logAPICall } from './mcp-analytics.js';
 
 // Convex HTTP API for capability queries
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';

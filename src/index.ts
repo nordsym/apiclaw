@@ -31,7 +31,7 @@ import {
 import { hasRealCredentials } from './credentials.js';
 import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
-import { logAPICall } from './analytics.js';
+import { logAPICall } from './mcp-analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
