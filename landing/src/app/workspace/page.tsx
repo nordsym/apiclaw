@@ -1253,10 +1253,10 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
             <p className="text-sm text-[var(--text-muted)] mb-4">The agent doesn&apos;t browse — it searches by capability. APIClaw returns ranked matches with specs and pricing. The agent decides which API fits and calls it.</p>
             <div className="space-y-2">
               {[
-                { q: "convert speech to text", returns: "Deepgram, AssemblyAI, Whisper" },
-                { q: "send SMS to Swedish number", returns: "46elks, Twilio" },
-                { q: "get current exchange rates", returns: "ExchangeRate API, Fixer, Currencylayer" },
-                { q: "generate image from prompt", returns: "Replicate/SDXL, Stability AI, Flux" },
+                { q: "weather forecast API", returns: "Weatherstack, Open-Meteo, WeatherAPI" },
+                { q: "translate text between languages", returns: "Languagelayer, LibreTranslate, DeepL" },
+                { q: "geocode an address", returns: "Positionstack, Nominatim, Google Maps" },
+                { q: "validate EU VAT number", returns: "VAT Layer, VIES, Apilayer VAT" },
               ].map(ex => (
                 <div key={ex.q} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-4 py-2.5 flex items-center gap-3">
                   <code className="text-sm text-blue-400 font-mono shrink-0">discover_apis(&quot;{ex.q}&quot;)</code>
@@ -2360,216 +2360,6 @@ function AgentsTab({
       </div>
       )}
 
-      {/* Subagents Section */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-[#ef4444]" />
-            <span className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">
-              SUBAGENTS ({subagents.length})
-            </span>
-          </div>
-        </div>
-        
-        {isLoadingAgents ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" />
-          </div>
-        ) : subagents.length > 0 ? (
-          <div className="space-y-3">
-            {subagents.map((subagent) => (
-              <div
-                key={subagent.id}
-                className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] cursor-pointer hover:bg-white/5 transition-colors"
-                onClick={() => setExpandedSubagent(
-                  expandedSubagent === subagent.subagentId ? null : subagent.subagentId
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[var(--background)] flex items-center justify-center flex-shrink-0">
-                      <Users className="w-5 h-5 text-[var(--text-muted)]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{subagent.name || subagent.subagentId}</p>
-                        {subagent.isRegistered && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-[#ef4444]/10 text-[#ef4444] font-medium">
-                            Registered
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-[var(--text-muted)]">
-                        Calls: {subagent.callCount.toLocaleString()} • Last: {formatRelativeTime(subagent.lastActiveAt)}
-                      </p>
-                      {subagent.aiBackend && (
-                        <p className="text-sm text-[var(--text-muted)]">
-                          AI Backend: {subagent.aiBackend}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronDown 
-                    className={`w-5 h-5 text-[var(--text-muted)] transition-transform duration-200 ${
-                      expandedSubagent === subagent.subagentId ? 'rotate-180' : ''
-                    }`} 
-                  />
-                </div>
-                
-                {/* Expanded content */}
-                {expandedSubagent === subagent.subagentId && (
-                  <div className="mt-4 pt-4 border-t border-[var(--border)]" onClick={(e) => e.stopPropagation()}>
-                    <SubagentActivityLog 
-                      token={sessionToken || ''} 
-                      subagentId={subagent.subagentId} 
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-8 text-center">
-            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] mx-auto mb-3 flex items-center justify-center">
-              <Users className="w-6 h-6 text-[var(--text-muted)]" />
-            </div>
-            <p className="text-sm text-[var(--text-muted)] max-w-sm mx-auto">
-              Subagents appear here when your agent makes calls with the{" "}
-              <code className="px-1.5 py-0.5 rounded bg-[var(--background)] text-[#ef4444] font-mono text-xs">
-                X-APIClaw-Subagent
-              </code>{" "}
-              header.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Quick Setup - Collapsed at bottom */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">Quick Setup</span>
-        </div>
-        
-        <p className="text-sm text-[var(--text-muted)] mb-3">
-          Add to your agent&apos;s MCP config:
-        </p>
-        
-        <div className="flex items-center gap-2 bg-[var(--background)] rounded-lg px-4 py-3 font-mono text-sm">
-          <Terminal className="w-4 h-4 text-[#ef4444] flex-shrink-0" />
-          <code className="flex-1 text-[var(--text-primary)]">{mcpCommand}</code>
-          <button
-            onClick={() => copyToClipboard(mcpCommand)}
-            className="p-1.5 rounded hover:bg-[var(--surface)] transition text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="Copy"
-          >
-            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-          </button>
-        </div>
-        
-        <p className="text-xs text-[var(--text-muted)] mt-3">
-          Or use header:{" "}
-          <code className="px-1.5 py-0.5 rounded bg-[var(--surface)] font-mono">
-            X-APIClaw-Subagent: name
-          </code>
-        </p>
-      </div>
-
-      {/* Register New Agent Modal */}
-      {showRegisterModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
-              <h3 className="text-lg font-bold">Register New Agent</h3>
-              <button
-                onClick={() => {
-                  setShowRegisterModal(false);
-                  setRegisterForm({ subagentId: "", name: "", description: "" });
-                  setRegisterError(null);
-                }}
-                className="p-1 rounded hover:bg-[var(--surface)] transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1.5">
-                  Subagent ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={registerForm.subagentId}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, subagentId: e.target.value }))}
-                  placeholder="research-agent"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-                />
-                <p className="text-xs text-[var(--text-muted)] mt-1">
-                  This will be sent in the X-APIClaw-Subagent header
-                </p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Display Name</label>
-                <input
-                  type="text"
-                  value={registerForm.name}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Research Agent"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1.5">Description</label>
-                <textarea
-                  value={registerForm.description}
-                  onChange={(e) => setRegisterForm(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Researches topics and competitors"
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
-                />
-              </div>
-
-              {registerError && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm">
-                  {registerError}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-[var(--border)]">
-              <button
-                onClick={() => {
-                  setShowRegisterModal(false);
-                  setRegisterForm({ subagentId: "", name: "", description: "" });
-                  setRegisterError(null);
-                }}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRegisterAgent}
-                disabled={registerLoading || !registerForm.subagentId.trim()}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {registerLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Register Agent
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Subagent Modal */}
-      {editingSubagent && (
-        <EditSubagentModal
-          subagent={editingSubagent}
-          onClose={() => setEditingSubagent(null)}
-          onSave={handleUpdateSubagent}
-        />
-      )}
     </div>
   );
 }
@@ -3521,8 +3311,9 @@ function ChainsTab({ sessionToken, isProvider }: { sessionToken: string | null; 
         {loadingInbound ? (
           <div className="flex items-center justify-center py-6"><Loader2 className="w-5 h-5 text-[#ef4444] animate-spin" /></div>
         ) : inboundCalls.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 text-center">
-            <p className="text-sm text-[var(--text-muted)]">No inbound calls yet. Activity appears here when other agents call your listed APIs.</p>
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-8 text-center">
+            <p className="font-medium mb-1">No Inbound Calls Yet</p>
+            <p className="text-sm text-[var(--text-muted)]">Inbound activity appears here when other agents discover and call your listed APIs through APIClaw.</p>
           </div>
         ) : (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] divide-y divide-[var(--border)]">
@@ -4885,12 +4676,15 @@ function DocsTab() {
             </pre>
           </div>
           <div>
-            <p className="text-sm text-[var(--text-muted)] mb-2">2. Or run directly:</p>
+            <p className="text-sm text-[var(--text-muted)] mb-2">2. Or auto-install for your client:</p>
             <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw mcp-install</pre>
+            <p className="text-xs text-[var(--text-muted)] mt-2">Supports: Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, Codex (OpenAI)</p>
           </div>
           <div>
-            <p className="text-sm text-[var(--text-muted)] mb-2">3. Interactive CLI mode:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw --cli</pre>
+            <p className="text-sm text-[var(--text-muted)] mb-2">3. Or install for a specific client:</p>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm space-y-1">{`npx @nordsym/apiclaw setup --client cursor
+npx @nordsym/apiclaw setup --client windsurf
+npx @nordsym/apiclaw setup --client codex`}</pre>
           </div>
         </div>
       </div>
@@ -4899,7 +4693,7 @@ function DocsTab() {
         <h3 className="font-semibold mb-4">MCP Tools</h3>
         <div className="space-y-3">
           {[
-            { name: "discover_apis", desc: "Search 19,000+ APIs by capability" },
+            { name: "discover_apis", desc: "Search 22,000+ APIs by capability" },
             { name: "get_api_details", desc: "Get full details for a specific API" },
             { name: "call_api", desc: "Execute a Direct Call API" },
             { name: "list_connected", desc: "Show available Direct Call providers" },
@@ -4917,7 +4711,7 @@ function DocsTab() {
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
         <div className="grid gap-2 md:grid-cols-2">
-          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer (27 APIs)"].map((p) => (
+          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
             <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
           ))}
         </div>
