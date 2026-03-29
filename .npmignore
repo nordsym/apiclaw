@@ -1,0 +1,16 @@
+landing/
+convex/
+scripts/
+data/
+*.py
+*.sh
+*.md
+!apiclaw-README.md
+night-expansion-*
+bulk-add-*
+add-all-*
+add-apilayer-*
+api/
+.vercel/
+.env*
+!.env.prod
