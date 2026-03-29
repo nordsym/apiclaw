@@ -1172,7 +1172,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
           </div>
           <p className="font-semibold text-base">Direct Call</p>
           <p className="text-2xl font-bold mt-1">{DIRECT_CALL_PROVIDERS.length} <span className="text-sm font-normal text-[var(--text-muted)]">providers</span></p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">No API keys needed. APIClaw proxies every call for your agent.</p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">APIClaw handles all API keys. Your agent just calls — zero config.</p>
           <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-green-400 bg-green-500/5 border border-green-500/20 rounded-lg px-2.5 py-1.5">
             <Layers className="w-3 h-3 shrink-0" />
             call_api(provider, action, params)
@@ -1204,9 +1204,9 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3">
             <FileCode2 className="w-5 h-5 text-purple-400" />
           </div>
-          <p className="font-semibold text-base">Open API</p>
-          <p className="text-2xl font-bold mt-1">{apis.length} <span className="text-sm font-normal text-[var(--text-muted)]">with schema</span></p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Community-registered APIs with full OpenAPI specs. Agent gets schema and calls with confidence.</p>
+          <p className="font-semibold text-base">Open APIs</p>
+          <p className="text-2xl font-bold mt-1">1,636 <span className="text-sm font-normal text-[var(--text-muted)]">no key needed</span></p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">APIs that require no authentication. Your agent discovers and calls them directly through APIClaw.</p>
           <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-purple-400 bg-purple-500/5 border border-purple-500/20 rounded-lg px-2.5 py-1.5">
             <FileCode2 className="w-3 h-3 shrink-0" />
             get_api_details(id)
@@ -1282,39 +1282,40 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
       {/* OPEN API SECTION */}
       {activeSection === "open-api" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[var(--text-muted)]">{filteredOpenApis.length} APIs with schema</p>
-            <select value={openApiFilter} onChange={e => setOpenApiFilter(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
-              {openApiCategories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
-            </select>
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2"><FileCode2 className="w-4 h-4 text-purple-400" />1,636 Open APIs — No API Key Required</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-2">These APIs require no authentication. Your agent discovers them via <code className="text-purple-400">discover_apis()</code> and calls them directly through APIClaw.</p>
           </div>
-          {filteredOpenApis.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-[var(--border)]">
-              <ScrollText className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-3" />
-              <p className="font-medium">No APIs yet</p>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Register your API to appear here.</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[
+              { cat: "Utilities", count: 529 },
+              { cat: "Entertainment", count: 271 },
+              { cat: "Analytics", count: 248 },
+              { cat: "Development", count: 123 },
+              { cat: "Location", count: 120 },
+              { cat: "Finance", count: 66 },
+              { cat: "AI & ML", count: 61 },
+              { cat: "Business", count: 50 },
+              { cat: "Health", count: 49 },
+              { cat: "Communication", count: 36 },
+              { cat: "Cloud", count: 35 },
+              { cat: "Security", count: 32 },
+              { cat: "Social", count: 10 },
+              { cat: "Commerce", count: 6 },
+            ].map(({ cat, count }) => (
+              <div key={cat} className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 hover:border-purple-500/30 transition">
+                <p className="text-2xl font-bold text-purple-400">{count}</p>
+                <p className="text-sm text-[var(--text-muted)] mt-1">{cat}</p>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] p-4 flex items-center justify-between">
+            <div>
+              <p className="font-medium">Total Open APIs</p>
+              <p className="text-sm text-[var(--text-muted)]">All callable through APIClaw without any API key setup.</p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredOpenApis.map(api => (
-                <div key={api._id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-purple-500/30 transition">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <ScrollText className="w-4 h-4 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{api.name}</p>
-                      <p className="text-xs text-[var(--text-muted)] max-w-md truncate">{api.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4 shrink-0">
-                    <span className="text-xs text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded">{api.category}</span>
-                    {api.openApiUrl && <span className="flex items-center gap-1 text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded"><Check className="w-3 h-3" />Schema</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            <p className="text-2xl font-bold text-purple-400">1,636</p>
+          </div>
         </div>
       )}
     </div>
@@ -5257,7 +5258,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
           <div className="p-5 rounded-xl bg-gradient-to-br from-[#ef4444]/5 to-[#ef4444]/10 border border-[#ef4444]/20">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-5 h-5 text-[#ef4444]" />
-              <h4 className="font-semibold text-[#ef4444]">Team invites coming soon!</h4>
+              <h4 className="font-semibold text-[#ef4444]">Invite Team Members</h4>
             </div>
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Share your workspace with team members. They&apos;ll have their own login but share your API access and billing.
@@ -5300,7 +5301,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
         {/* Info text */}
         {!showComingSoon && (
           <p className="text-xs text-[var(--text-muted)] text-center">
-            Team collaboration features are coming soon
+            Each team member connects their own MCP agent to this workspace
           </p>
         )}
       </div>
@@ -5368,7 +5369,6 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               disabled
               className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
             />
-            <p className="text-xs text-[var(--text-muted)] mt-1">Coming soon</p>
           </div>
         </div>
       </SettingsSection>
