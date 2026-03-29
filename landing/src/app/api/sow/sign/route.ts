@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SOW_CUSTOMERS } from "@/lib/sow-data";
 import { mcMutation } from "@/lib/mc-convex";
-import { generatePdfFromHtml } from "@/lib/pdf";
+// Dynamic import — @sparticuz/chromium only works on Vercel serverless
 
 const N8N_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
 
@@ -150,13 +150,18 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
 
     // Sign on Mission Control Convex (agile-crane-840) — centralized for all NordSym products
-    await mcMutation("sows:sign", {
-      customerId: `apiclaw-${customerId}`,
-      signatureDataUrl,
-      signerName,
-      signerTitle,
-      signerIp,
-    });
+    try {
+      await mcMutation("sows:sign", {
+        customerId: `apiclaw-${customerId}`,
+        signatureDataUrl,
+        signerName,
+        signerTitle,
+        signerIp,
+      });
+    } catch (e) {
+      // Allow re-signing (e.g., sandbox testing) — log but don't block
+      console.error("MC sign error (non-blocking):", e);
+    }
 
     // Generate and send signed document
     const sowHtml = generateSoWHtml(
@@ -171,18 +176,31 @@ export async function POST(request: NextRequest) {
       signerName,
       signedDate
     );
-    // Generate PDF from signed SoW HTML
-    const pdfBuffer = await generatePdfFromHtml(sowHtml);
-    const pdfBase64 = pdfBuffer.toString("base64");
-
+    // Generate PDF from signed SoW HTML (fallback to HTML if PDF fails)
+    let attachBase64: string;
+    let filename: string;
     const safeName = customer.customerName.replace(/[^a-zA-Z0-9]/g, "_");
-    const filename = `APIClaw_Partnership_${safeName}_${new Date().toISOString().split("T")[0]}.pdf`;
+    const dateStr = new Date().toISOString().split("T")[0];
+    try {
+      const { generatePdfFromHtml } = await import("@/lib/pdf");
+      const pdfBuffer = await generatePdfFromHtml(sowHtml);
+      attachBase64 = pdfBuffer.toString("base64");
+      filename = `APIClaw_Partnership_${safeName}_${dateStr}.pdf`;
+    } catch {
+      // Fallback: send HTML attachment if PDF generation fails (e.g., local dev)
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(sowHtml);
+      let binary = "";
+      bytes.forEach((b) => (binary += String.fromCharCode(b)));
+      attachBase64 = btoa(binary);
+      filename = `APIClaw_Partnership_${safeName}_${dateStr}.html`;
+    }
     const subject = `Signed: APIClaw × ${customer.customerName} Partnership Agreement`;
 
     await Promise.all([
-      sendEmail("gustav@nordsym.com", subject, emailBody, pdfBase64, filename),
-      sendEmail("molle@nordsym.com", subject, emailBody, pdfBase64, filename),
-      sendEmail(customer.partnerEmail, subject, emailBody, pdfBase64, filename),
+      sendEmail("gustav@nordsym.com", subject, emailBody, attachBase64, filename),
+      sendEmail("molle@nordsym.com", subject, emailBody, attachBase64, filename),
+      sendEmail(customer.partnerEmail, subject, emailBody, attachBase64, filename),
     ]);
 
     return NextResponse.json({

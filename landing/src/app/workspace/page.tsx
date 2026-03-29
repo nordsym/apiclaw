@@ -3735,6 +3735,7 @@ function UsageTab({
     fetchSearchStats();
   }, [sessionToken]);
 
+  const [timeRange, setTimeRange] = useState("7d");
   const hasRealData = usage && (usage.byProvider.length > 0 || usage.byDay.length > 0);
   
   // Preview data for empty state (provider perspective - how others use YOUR APIs)
@@ -3749,7 +3750,10 @@ function UsageTab({
   ];
   
   const isPreview = !hasRealData;
-  const displayByDay = hasRealData ? usage!.byDay : previewByDay;
+  const rangeDays = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : timeRange === "90d" ? 90 : 9999;
+  const rangeStart = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const allByDay = hasRealData ? usage!.byDay : previewByDay;
+  const displayByDay = timeRange === "All" ? allByDay : allByDay.filter(d => d.date >= rangeStart);
   const displayByProvider = hasRealData 
     ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
     : [];
@@ -3813,12 +3817,13 @@ function UsageTab({
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Usage Over Time</h3>
           <div className="flex gap-1 bg-[var(--surface)] rounded-lg p-0.5">
-            {["7d", "30d", "90d", "All"].map((range) => (
+            {["7d", "30d", "90d", "All"].map((r) => (
               <button
-                key={range}
-                className="px-3 py-1 rounded-md text-xs font-medium transition text-[var(--text-muted)] hover:text-[var(--text-primary)] first:bg-[var(--surface-elevated)] first:text-[var(--text-primary)] first:shadow-sm"
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition ${timeRange === r ? "bg-[var(--surface-elevated)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               >
-                {range}
+                {r}
               </button>
             ))}
           </div>

@@ -142,4 +142,29 @@ export const SOW_CUSTOMERS: Record<string, SowCustomer> = {
       },
     ],
   },
+
+  sandbox: {
+    customerName: "Test Company",
+    customerRep: "Test User",
+    vertical: "Sandbox — Testing Environment",
+    pricing: { fixed: 0, nectar: "No charges — test mode" },
+    paymentLink: null,
+    partnerEmail: "gustav@nordsym.com",
+    showDealRoom: false,
+    sections: [
+      {
+        title: "1. Parties",
+        content: [
+          "<strong>APIClaw</strong> (NordSym AB) — Gustav Hemmingsson, CEO",
+          "<strong>Test Company</strong> — Test User",
+        ],
+      },
+      {
+        title: "2. Purpose",
+        content: [
+          "This is a sandbox SoW for testing the signing flow, PDF generation, and onboarding wizard. No real agreement is created.",
+        ],
+      },
+    ],
+  },
 };
