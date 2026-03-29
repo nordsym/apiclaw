@@ -3564,6 +3564,14 @@ function AnalyticsOverviewTab({
   const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
   const totalSearches = searchStats?.totalSearches || (analytics?.isPreview ? 247 : 0);
 
+  // Preview chart data when no real data exists
+  const previewChartData = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return { date: d.toISOString().split("T")[0], calls: 0 };
+  });
+  const chartData = hasChartData ? analytics!.callsByDay : previewChartData;
+
   return (
     <div className="space-y-8">
       {/* Preview Banner */}
@@ -3594,14 +3602,14 @@ function AnalyticsOverviewTab({
       ) : null}
 
       {/* Charts */}
-      {hasChartData && (
+      {(hasChartData || !hasChartData) && (
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Line Chart */}
           <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Calls Over Time</h3>
+            <h3 className="font-semibold mb-4">Calls Over Time {!hasChartData && <span className="text-xs font-normal text-[var(--text-muted)] ml-2">Preview</span>}</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analytics!.callsByDay}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     dataKey="date"
@@ -3786,7 +3794,19 @@ function UsageTab({
 
       {/* Usage Over Time Chart */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Usage Over Time</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Usage Over Time</h3>
+          <div className="flex gap-1 bg-[var(--surface)] rounded-lg p-0.5">
+            {["7d", "30d", "90d", "All"].map((range) => (
+              <button
+                key={range}
+                className="px-3 py-1 rounded-md text-xs font-medium transition text-[var(--text-muted)] hover:text-[var(--text-primary)] first:bg-[var(--surface-elevated)] first:text-[var(--text-primary)] first:shadow-sm"
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={displayByDay}>
