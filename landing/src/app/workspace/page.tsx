@@ -3775,13 +3775,13 @@ function UsageTab({
   
   // Preview data for empty state (provider perspective - how others use YOUR APIs)
   const previewByDay = [
-    { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 8 },
-    { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 15 },
-    { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 23 },
-    { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 19 },
-    { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 34 },
-    { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 28 },
-    { date: new Date().toISOString().split('T')[0], calls: 21 },
+    { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 8, searches: 3 },
+    { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 15, searches: 7 },
+    { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 23, searches: 12 },
+    { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 19, searches: 8 },
+    { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 34, searches: 15 },
+    { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 28, searches: 11 },
+    { date: new Date().toISOString().split('T')[0], calls: 21, searches: 9 },
   ];
   
   const isPreview = !hasRealData;
@@ -3850,10 +3850,10 @@ function UsageTab({
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
-            <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique Agents</span>
+            <Check className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Success Rate</span>
           </div>
-          <p className="text-2xl sm:text-4xl font-bold">{displayUniqueCallers || (isPreview ? "—" : "0")}</p>
+          <p className="text-2xl sm:text-4xl font-bold">{hasLiveData && liveCallCount > 0 ? `${((liveAnalytics as any)?.successRate || 100).toFixed(0)}%` : isPreview ? "—" : "—"}</p>
         </div>
       </div>
 
@@ -3890,7 +3890,8 @@ function UsageTab({
                   borderRadius: "8px",
                 }}
               />
-              <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} name="API Calls" />
+              <Line type="monotone" dataKey="searches" stroke="#3b82f6" strokeWidth={2} dot={false} name="Searches" />
             </LineChart>
           </ResponsiveContainer>
         </div>

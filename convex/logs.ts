@@ -149,11 +149,16 @@ export const getProviderAnalytics = query({
     const inboundLogs = periodLogs.filter((l) => l.direction === "inbound");
     const outboundLogs = periodLogs.filter((l) => l.direction !== "inbound");
 
-    // Daily buckets
-    const byDay: Record<string, number> = {};
+    // Daily buckets — separate calls and searches
+    const byDay: Record<string, { calls: number; searches: number }> = {};
     periodLogs.forEach((l) => {
       const day = new Date(l.createdAt).toISOString().split("T")[0];
-      byDay[day] = (byDay[day] || 0) + 1;
+      if (!byDay[day]) byDay[day] = { calls: 0, searches: 0 };
+      if (l.action.startsWith("discovery:")) {
+        byDay[day].searches++;
+      } else {
+        byDay[day].calls++;
+      }
     });
 
     // By action (individual API endpoints, not just provider name)
@@ -179,9 +184,8 @@ export const getProviderAnalytics = query({
       totalDiscoveries: discoveryLogs.length,
       inboundCalls: inboundLogs.filter((l) => !l.action.startsWith("discovery:")).length,
       outboundCalls: outboundLogs.length,
-      uniqueCallers,
       byDay: Object.entries(byDay)
-        .map(([date, calls]) => ({ date, calls }))
+        .map(([date, data]) => ({ date, calls: data.calls, searches: data.searches }))
         .sort((a, b) => a.date.localeCompare(b.date)),
       byAction: Object.entries(byAction)
         .map(([action, stats]) => ({ action, ...stats }))
