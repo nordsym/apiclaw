@@ -748,22 +748,6 @@ export default function WorkspacePage() {
                         <button
                           onClick={() => {
                             setActiveTab("analytics");
-                            setAnalyticsSubtab("logs");
-                            setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=logs`);
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "logs"
-                              ? "bg-[#ef4444]/20 text-[#ef4444]"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          <ScrollText className="w-4 h-4" />
-                          <span>Logs</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab("analytics");
                             setAnalyticsSubtab("chains");
                             setSidebarOpen(false);
                             router.push(`/workspace?tab=analytics&sub=chains`);
@@ -776,6 +760,22 @@ export default function WorkspacePage() {
                         >
                           <LinkIcon className="w-4 h-4" />
                           <span>Chains</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab("analytics");
+                            setAnalyticsSubtab("logs");
+                            setSidebarOpen(false);
+                            router.push(`/workspace?tab=analytics&sub=logs`);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
+                            activeTab === "analytics" && analyticsSubtab === "logs"
+                              ? "bg-[#ef4444]/20 text-[#ef4444]"
+                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          <ScrollText className="w-4 h-4" />
+                          <span>Logs</span>
                         </button>
                       </div>
                     )}
@@ -2644,20 +2644,6 @@ function AnalyticsTab({
         </button>
         <button
           onClick={() => {
-            setActiveSubtab("logs");
-            router.push("/workspace?tab=analytics&sub=logs");
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeSubtab === "logs"
-              ? "bg-[#ef4444] text-white"
-              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          <ScrollText className="w-4 h-4" />
-          Logs
-        </button>
-        <button
-          onClick={() => {
             setActiveSubtab("chains");
             router.push("/workspace?tab=analytics&sub=chains");
           }}
@@ -2669,6 +2655,20 @@ function AnalyticsTab({
         >
           <Activity className="w-4 h-4" />
           Chains
+        </button>
+        <button
+          onClick={() => {
+            setActiveSubtab("logs");
+            router.push("/workspace?tab=analytics&sub=logs");
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeSubtab === "logs"
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <ScrollText className="w-4 h-4" />
+          Logs
         </button>
       </div>
 
@@ -3790,7 +3790,7 @@ function UsageTab({
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--text-muted)]" />
-            <span className="text-sm sm:text-base text-[var(--text-muted)]">Unique APIs</span>
+            <span className="text-sm sm:text-base text-[var(--text-muted)]">Active APIs</span>
           </div>
           <p className="text-2xl sm:text-4xl font-bold">{displayByProvider.length}</p>
         </div>
