@@ -297,7 +297,7 @@ export const getWorkspaceDashboard = query({
 
     // Calculate usage remaining — backer tier is unlimited
     const now = Date.now();
-    const isBackerTier = workspace.tier === "backer" ||
+    const isBackerTier = workspace.tier === "backer" || workspace.tier === "founder" ||
       (workspace.backerUntil && workspace.backerUntil > now);
     const effectiveLimit = isBackerTier ? -1 : workspace.usageLimit; // -1 = unlimited
     const usageRemaining = isBackerTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
@@ -648,7 +648,7 @@ export const incrementUsage = mutation({
     const hourStart = getHourStart();
     
     // Check if Backer (unlimited until end of 2026)
-    const isBacker = workspace.tier === "backer" ||
+    const isBacker = workspace.tier === "backer" || workspace.tier === "founder" ||
                      (workspace.backerUntil && workspace.backerUntil > now);
     
     // Initialize weekly/hourly counters if needed

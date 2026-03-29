@@ -980,7 +980,7 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isBacker = workspace?.tier === "backer" || workspace?.usageLimit === -1;
+  const isBacker = (workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.usageLimit === -1;
   const usagePct = isBacker ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
@@ -4430,7 +4430,7 @@ interface PaymentMethod {
 
 function BillingTab({ workspace }: { workspace: Workspace | null }) {
   const currentTier = workspace?.tier || "free";
-  const isBacker = currentTier === "backer";
+  const isBacker = (currentTier === "backer" || currentTier === "founder");
   const isPartner = currentTier === "partner";
 
   const plans = [
@@ -4501,7 +4501,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
         <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5 flex items-center gap-4">
           <Check className="w-5 h-5 text-green-400 shrink-0" />
           <div>
-            <p className="font-semibold text-green-400">Founding Backer</p>
+            <p className="font-semibold text-green-400">Founder</p>
             <p className="text-sm text-[var(--text-muted)] mt-0.5">Unlimited access until end of 2026. Thank you for backing APIClaw early.</p>
           </div>
         </div>
@@ -5298,7 +5298,7 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
             </div>
             <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
-              {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "backer" ? "Founding Backer" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
+              {workspace?.tier === "partner" ? "Partner" : (workspace?.tier === "backer" || workspace?.tier === "founder") ? "Founder" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
             </span>
           </div>
         </div>
@@ -5319,17 +5319,17 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
             <div>
               <p className="font-medium">Current Plan</p>
               <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "backer" ? "Founding Backer — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+                {workspace?.tier === "partner" ? "Partner" : (workspace?.tier === "backer" || workspace?.tier === "founder") ? "Founder — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              (workspace?.tier === "backer" || workspace?.tier === "partner")
+              ((workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.tier === "partner")
                 ? "bg-[#ef4444]/20 text-[#ef4444]"
                 : workspace?.tier === "pro" || workspace?.tier === "usage_based"
                 ? "bg-green-500/20 text-green-500"
                 : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
             }`}>
-              {(workspace?.tier === "backer" || workspace?.tier === "partner" || workspace?.tier === "pro" || workspace?.tier === "usage_based") ? "Active" : "Free"}
+              {((workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.tier === "partner" || workspace?.tier === "pro" || workspace?.tier === "usage_based") ? "Active" : "Free"}
             </span>
           </div>
 
