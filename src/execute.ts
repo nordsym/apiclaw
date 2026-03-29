@@ -426,16 +426,16 @@ const apiEndpoints: Record<string, Record<string, { url: string; method: string;
     currencylayer_live: { url: 'http://api.currencylayer.com/live', method: 'GET' },
     currencylayer_convert: { url: 'http://api.currencylayer.com/convert', method: 'GET' },
     coinlayer_live: { url: 'http://api.coinlayer.com/live', method: 'GET' },
-    exchangeratehost_latest: { url: 'https://api.exchangerate.host/latest', method: 'GET' },
+    exchangeratehost_latest: { url: 'https://api.exchangerate.host/live', method: 'GET' },
     
     // GEOLOCATION
     weatherstack_current: { url: 'http://api.weatherstack.com/current', method: 'GET' },
     weatherstack_forecast: { url: 'http://api.weatherstack.com/forecast', method: 'GET' },
     ipstack_lookup: { url: 'http://api.ipstack.com/{ip}', method: 'GET' },
-    ipapi_lookup: { url: 'https://ipapi.co/{ip}/json/', method: 'GET' },
+    ipapi_lookup: { url: 'http://api.ipapi.com/{ip}', method: 'GET' },
     positionstack_forward: { url: 'http://api.positionstack.com/v1/forward', method: 'GET' },
     positionstack_reverse: { url: 'http://api.positionstack.com/v1/reverse', method: 'GET' },
-    languagelayer_detect: { url: 'https://api.languagelayer.com/detect', method: 'POST' },
+    languagelayer_detect: { url: 'http://api.languagelayer.com/detect', method: 'GET' },
     
     // SCRAPING
     scrapestack_scrape: { url: 'http://api.scrapestack.com/scrape', method: 'GET' },
@@ -1924,8 +1924,8 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
     },
 
     skills: async (params, creds) => {
-      // Skills API is on PromptAPI domain, uses master key
-      const key = creds.APILAYER_EXCHANGERATE_KEY || creds.api_key;
+      // Skills API is on PromptAPI domain, uses unified APILayer key
+      const key = creds.APILAYER_SKILLAPI_KEY || creds.APILAYER_EXCHANGERATE_KEY || creds.api_key;
       const { q } = params;
       if (!q) return createErrorResult('apilayer', 'skills', 'Missing required param: q', ERROR_CODES.INVALID_PARAMS);
 
@@ -2047,7 +2047,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const key = creds.EXCHANGERATEHOST_API_KEY || creds.api_key;
       const { base = 'EUR', symbols } = params;
       
-      const url = new URL('https://api.exchangerate.host/latest');
+      const url = new URL('https://api.exchangerate.host/live');
       url.searchParams.set('access_key', key);
       url.searchParams.set('base', base);
       if (symbols) url.searchParams.set('symbols', symbols);
@@ -2107,13 +2107,15 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
     },
 
     ipapi_lookup: async (params, creds) => {
-      const key = creds.IPAPI_API_KEY || creds.api_key;
+      const key = creds.IPAPI_API_KEY || creds.APILAYER_IPSTACK_KEY || creds.api_key;
       const { ip } = params;
       if (!ip) return createErrorResult('apilayer', 'ipapi_lookup', 'Missing required param: ip', ERROR_CODES.INVALID_PARAMS);
-      
-      const url = `https://ipapi.co/${ip}/json/?key=${key}`;
 
-      const response = await fetchWithRetry(url, {}, { provider: 'apilayer', action: 'ipapi_lookup' });
+      // ipapi uses same format as ipstack — access_key query param
+      const url = new URL(`http://api.ipapi.com/${ip}`);
+      url.searchParams.set('access_key', key);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'ipapi_lookup' });
       const data = await response.json() as Record<string, unknown>;
       if (!response.ok) return createErrorResult('apilayer', 'ipapi_lookup', 'Request failed', statusToErrorCode(response.status));
       return { success: true, provider: 'apilayer', action: 'ipapi_lookup', data };
@@ -2155,14 +2157,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const key = creds.LANGUAGELAYER_API_KEY || creds.api_key;
       const { query } = params;
       if (!query) return createErrorResult('apilayer', 'languagelayer_detect', 'Missing required param: query (text to analyze)', ERROR_CODES.INVALID_PARAMS);
-      
-      const response = await fetchWithRetry('https://api.languagelayer.com/detect', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ access_key: key, query }).toString(),
-      }, { provider: 'apilayer', action: 'languagelayer_detect' });
+
+      // Languagelayer uses access_key as query param (like other legacy APIs)
+      const url = new URL('http://api.languagelayer.com/detect');
+      url.searchParams.set('access_key', key);
+      url.searchParams.set('query', query);
+
+      const response = await fetchWithRetry(url.toString(), {}, { provider: 'apilayer', action: 'languagelayer_detect' });
       const data = await response.json() as Record<string, unknown>;
       if (!response.ok) return createErrorResult('apilayer', 'languagelayer_detect', 'Request failed', statusToErrorCode(response.status));
       return { success: true, provider: 'apilayer', action: 'languagelayer_detect', data };
