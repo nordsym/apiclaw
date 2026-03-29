@@ -2256,11 +2256,26 @@ export async function getProviderActionsAsync(providerId: string): Promise<strin
 }
 
 // Get all connected providers with their actions (static handlers only)
-export function getConnectedProviders(): { provider: string; actions: string[] }[] {
-  return Object.entries(handlers).map(([provider, actions]) => ({
-    provider,
-    actions: Object.keys(actions),
-  }));
+// APILayer actions blocked by subscription tier
+const BLOCKED_ACTIONS = ['verify_number', 'world_news', 'image_crop', 'form_submit'];
+const RATE_LIMITED_ACTIONS = ['pdf_generate'];
+
+export function getConnectedProviders(): { provider: string; actions: string[]; blocked?: string[]; rate_limited?: string[] }[] {
+  return Object.entries(handlers).map(([provider, actions]) => {
+    const allActions = Object.keys(actions);
+    if (provider === 'apilayer') {
+      const live = allActions.filter(a => !BLOCKED_ACTIONS.includes(a) && !RATE_LIMITED_ACTIONS.includes(a));
+      const blocked = allActions.filter(a => BLOCKED_ACTIONS.includes(a));
+      const rateLimited = allActions.filter(a => RATE_LIMITED_ACTIONS.includes(a));
+      return {
+        provider,
+        actions: live,
+        ...(blocked.length > 0 ? { blocked } : {}),
+        ...(rateLimited.length > 0 ? { rate_limited: rateLimited } : {}),
+      };
+    }
+    return { provider, actions: allActions };
+  });
 }
 
 // Execute an API call

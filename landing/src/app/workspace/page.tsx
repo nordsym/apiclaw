@@ -877,9 +877,6 @@ export default function WorkspacePage() {
         <header className="hidden lg:flex items-center justify-between px-8 py-4 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl sticky top-0 z-40">
           <h1 className="text-xl font-bold">{getTabLabel()}</h1>
           <div className="flex items-center gap-4">
-            <button onClick={handleRefresh} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" title="Refresh">
-              <RefreshCw className="w-5 h-5 text-[var(--text-muted)]" />
-            </button>
             {activeTab === "my-apis" && (
               <button onClick={() => setShowAddApi(true)} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2">
                 <Plus className="w-4 h-4" />
@@ -1620,10 +1617,6 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
           <h2 className="text-2xl font-bold">My APIs</h2>
           <p className="text-[var(--text-muted)]">{apis.length} API{apis.length !== 1 ? "s" : ""} listed</p>
         </div>
-        <button onClick={onAdd} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          List New API
-        </button>
       </div>
 
       <div className="grid gap-4">
