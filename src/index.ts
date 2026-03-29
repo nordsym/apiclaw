@@ -912,6 +912,25 @@ Docs: https://apiclaw.nordsym.com
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(searchLogPayload),
           }).catch(() => {}); // Fire and forget
+
+          // Log discovery to provider workspaces (so they see search activity)
+          const matchedProviderIds = new Set(results.slice(0, 10).map(r => r.provider.id));
+          for (const pid of matchedProviderIds) {
+            fetch(`${convexUrl}/api/mutation`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: 'logs:logProviderCall',
+                args: {
+                  provider: pid,
+                  action: `discovery:${query.substring(0, 50)}`,
+                  status: 'success' as const,
+                  latencyMs: responseTimeMs,
+                  callerWorkspaceId: workspaceContext.workspaceId,
+                },
+              }),
+            }).catch(() => {});
+          }
         }
 
         // Update AI backend tracking if provided
