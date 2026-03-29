@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SOW_CUSTOMERS } from "@/lib/sow-data";
 import { mcMutation } from "@/lib/mc-convex";
-// Dynamic import — @sparticuz/chromium only works on Vercel serverless
+const PDFLAYER_KEY = process.env.PDFLAYER_KEY || process.env.APILAYER_PDFLAYER_KEY || "";
 
 const N8N_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
 
@@ -176,18 +176,28 @@ export async function POST(request: NextRequest) {
       signerName,
       signedDate
     );
-    // Generate PDF from signed SoW HTML (fallback to HTML if PDF fails)
+    // Generate PDF via PDFLayer API (APIClaw's own Direct Call provider)
     let attachBase64: string;
     let filename: string;
     const safeName = customer.customerName.replace(/[^a-zA-Z0-9]/g, "_");
     const dateStr = new Date().toISOString().split("T")[0];
     try {
-      const { generatePdfFromHtml } = await import("@/lib/pdf");
-      const pdfBuffer = await generatePdfFromHtml(sowHtml);
+      if (!PDFLAYER_KEY) throw new Error("No PDFLayer key");
+      const pdfUrl = new URL("https://api.pdflayer.com/api/convert");
+      pdfUrl.searchParams.set("access_key", PDFLAYER_KEY);
+      pdfUrl.searchParams.set("page_size", "A4");
+      const pdfRes = await fetch(pdfUrl.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `document_html=${encodeURIComponent(sowHtml)}`,
+      });
+      const contentType = pdfRes.headers.get("content-type") || "";
+      if (!contentType.includes("application/pdf")) throw new Error("PDFLayer did not return PDF");
+      const pdfBuffer = Buffer.from(await pdfRes.arrayBuffer());
       attachBase64 = pdfBuffer.toString("base64");
       filename = `APIClaw_Partnership_${safeName}_${dateStr}.pdf`;
-    } catch {
-      // Fallback: send HTML attachment if PDF generation fails (e.g., local dev)
+    } catch (pdfErr) {
+      console.error("PDF generation failed, using HTML fallback:", pdfErr);
       const encoder = new TextEncoder();
       const bytes = encoder.encode(sowHtml);
       let binary = "";

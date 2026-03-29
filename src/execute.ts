@@ -1750,15 +1750,27 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
       const { document_url, document_html, page_size = 'A4' } = params;
       if (!document_url && !document_html) return createErrorResult('apilayer', 'pdf_generate', 'Missing: document_url or document_html', ERROR_CODES.INVALID_PARAMS);
 
-      const url = new URL('https://api.pdflayer.com/api');
+      // PDFLayer uses access_key as query param (not header)
+      const url = new URL('https://api.pdflayer.com/api/convert');
+      url.searchParams.set('access_key', key);
       url.searchParams.set('page_size', page_size);
       if (document_url) url.searchParams.set('document_url', document_url);
-      if (document_html) url.searchParams.set('document_html', document_html);
 
-      const response = await fetchWithRetry(url.toString(), { method: 'POST', headers: { 'apikey': key } }, { provider: 'apilayer', action: 'pdf_generate' });
+      const fetchOptions: RequestInit = { method: 'GET' };
+      // For document_html, use POST with form body
+      if (document_html && !document_url) {
+        fetchOptions.method = 'POST';
+        fetchOptions.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+        fetchOptions.body = `document_html=${encodeURIComponent(document_html)}`;
+      }
+
+      const response = await fetchWithRetry(url.toString(), fetchOptions, { provider: 'apilayer', action: 'pdf_generate' });
       const contentType = response.headers.get('content-type') || '';
       if (contentType.includes('application/pdf')) {
-        return { success: true, provider: 'apilayer', action: 'pdf_generate', data: { message: 'PDF generated', content_type: 'application/pdf', size: response.headers.get('content-length') } };
+        // Return base64-encoded PDF for downstream use
+        const buffer = await response.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        return { success: true, provider: 'apilayer', action: 'pdf_generate', data: { message: 'PDF generated', content_type: 'application/pdf', size: buffer.byteLength, pdf_base64: base64 } };
       }
       const data = await response.json() as Record<string, unknown>;
       if (!response.ok) return createErrorResult('apilayer', 'pdf_generate', (data.error as any)?.info || 'Request failed', statusToErrorCode(response.status));
