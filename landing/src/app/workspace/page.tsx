@@ -3896,31 +3896,7 @@ function UsageTab({
         </div>
       </div>
 
-      {/* My APIs Performance */}
-      {apis.length > 0 && (
-        <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
-          <h3 className="font-semibold text-lg mb-4">My APIs Performance</h3>
-          <div className="space-y-3">
-            {apis.map((api) => (
-              <div key={api._id} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-5 h-5 text-[#ef4444]" />
-                  <div>
-                    <p className="font-medium">{api.name}</p>
-                    <p className="text-sm text-[var(--text-muted)]">{api.category}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{api.discoveryCount || 0} discoveries</p>
-                  <p className="text-sm text-[var(--text-muted)]">{api.status === "approved" ? "Live" : api.status}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Top APIs */}
+      {/* Top APIs — moved above My APIs list */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Top APIs</h3>
         {liveTopAPIs.length === 0 && liveTopSearches.length === 0 && displayByProvider.length === 0 ? (
@@ -3969,6 +3945,37 @@ function UsageTab({
           </div>
         )}
       </div>
+
+      {/* My APIs — full list with live call/discovery counts */}
+      {apis.length > 0 && (
+        <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
+          <h3 className="font-semibold text-lg mb-4">All APIs ({apis.length})</h3>
+          <div className="space-y-2">
+            {apis.map((api) => {
+              const actionCalls = liveTopAPIs.find((a: any) => api.name.toLowerCase().includes(a.action.split("_")[0]));
+              return (
+                <div key={api._id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
+                  <div className="flex items-center gap-3">
+                    <Zap className="w-4 h-4 text-[var(--text-muted)]" />
+                    <div>
+                      <p className="font-medium text-sm">{api.name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{api.category}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(actionCalls as any)?.calls > 0 && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444]">{(actionCalls as any).calls} calls</span>
+                    )}
+                    <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-500" : api.status === "blocked" ? "bg-red-500/10 text-red-500" : "bg-yellow-500/10 text-yellow-500"}`}>
+                      {api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
     </div>
   );
