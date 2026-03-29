@@ -1667,15 +1667,21 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                   {apiDetailTab === "direct-call" && (
                     dcLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
                       <div className="space-y-4">
-                        <p className="text-sm text-[var(--text-muted)]">Configure how agents call this API. The service provider key is stored encrypted and never exposed to agents.</p>
+                        <p className="text-sm text-[var(--text-muted)]">{isManagedByAPIClaw ? "This API is managed by APIClaw. Configuration is handled automatically." : "Configure how agents call this API. The service provider key is stored encrypted and never exposed to agents."}</p>
+                        {isManagedByAPIClaw && dcConfig.status === "live" && (
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                            <Check className="w-4 h-4 text-green-500" />
+                            <span className="text-sm font-medium text-green-500">Live — agents can call this API now</span>
+                          </div>
+                        )}
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Base URL</label>
-                            <input value={dcConfig.baseUrl} onChange={e => setDcConfig(p => ({...p, baseUrl: e.target.value}))} placeholder="https://api.apilayer.com/exchangerates_data" className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                            <input value={dcConfig.baseUrl} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, baseUrl: e.target.value}))} readOnly={isManagedByAPIClaw} placeholder="https://api.example.com" className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`} />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Auth Type</label>
-                            <select value={dcConfig.authType} onChange={e => setDcConfig(p => ({...p, authType: e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                            <select value={dcConfig.authType} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, authType: e.target.value}))} disabled={isManagedByAPIClaw} className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`}>
                               <option value="bearer">Bearer Token</option>
                               <option value="api_key">API Key Header</option>
                               <option value="basic">Basic Auth</option>
@@ -1684,7 +1690,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Auth Header</label>
-                            <input value={dcConfig.authHeader} onChange={e => setDcConfig(p => ({...p, authHeader: e.target.value}))} placeholder="apikey" className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                            <input value={dcConfig.authHeader} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, authHeader: e.target.value}))} readOnly={isManagedByAPIClaw} placeholder="apikey" className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`} />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Service Provider Key</label>
@@ -1704,21 +1710,23 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Rate Limit / User / Min</label>
-                            <input type="number" value={dcConfig.rateLimitPerUser} onChange={e => setDcConfig(p => ({...p, rateLimitPerUser: +e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                            <input type="number" value={dcConfig.rateLimitPerUser} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, rateLimitPerUser: +e.target.value}))} readOnly={isManagedByAPIClaw} className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`} />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Status</label>
-                            <select value={dcConfig.status} onChange={e => setDcConfig(p => ({...p, status: e.target.value}))} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
+                            <select value={dcConfig.status} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, status: e.target.value}))} disabled={isManagedByAPIClaw} className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`}>
                               <option value="draft">Draft</option>
                               <option value="testing">Testing</option>
                               <option value="live">Live</option>
                             </select>
                           </div>
                         </div>
+                        {!isManagedByAPIClaw && (
                         <button onClick={saveDcConfig} disabled={dcSaving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">
                           {dcSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : dcSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                           {dcSaving ? "Saving..." : dcSaved ? "Saved!" : "Save Config"}
                         </button>
+                        )}
                       </div>
                     )
                   )}
@@ -5197,29 +5205,38 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
 
       <SettingsSection title="Security" icon={Lock}>
         <div className="space-y-4 pt-4">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Two-Factor Authentication</p>
-              <p className="text-sm text-[var(--text-muted)]">Add an extra layer of security</p>
-            </div>
-            <button
-              disabled
-              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium opacity-50 cursor-not-allowed"
+          <div className="p-4 rounded-xl bg-[var(--surface)]">
+            <p className="font-medium mb-1">Change Password</p>
+            <p className="text-sm text-[var(--text-muted)] mb-3">Set or update your password. You can always use magic link to sign in.</p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const pw = (form.elements.namedItem("newPassword") as HTMLInputElement).value;
+                const confirm = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
+                if (pw.length < 8) { alert("Password must be at least 8 characters"); return; }
+                if (pw !== confirm) { alert("Passwords do not match"); return; }
+                try {
+                  await fetch(`${CONVEX_URL}/api/mutation`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      path: "workspaces:setPassword",
+                      args: { token: sessionToken, password: pw },
+                    }),
+                  });
+                  form.reset();
+                  alert("Password updated");
+                } catch {
+                  alert("Failed to update password");
+                }
+              }}
+              className="space-y-3"
             >
-              Enable
-            </button>
-          </div>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Active Sessions</p>
-              <p className="text-sm text-[var(--text-muted)]">Manage your active login sessions</p>
-            </div>
-            <button
-              disabled
-              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium opacity-50 cursor-not-allowed"
-            >
-              View
-            </button>
+              <input name="newPassword" type="password" placeholder="New password (min 8 chars)" className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+              <input name="confirmPassword" type="password" placeholder="Confirm password" className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+              <button type="submit" className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">Update Password</button>
+            </form>
           </div>
         </div>
       </SettingsSection>

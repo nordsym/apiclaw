@@ -901,6 +901,37 @@ export const updateWorkspaceName = mutation({
   },
 });
 
+// Set or update password
+export const setPassword = mutation({
+  args: {
+    token: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, { token, password }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid session");
+
+    if (password.length < 8) throw new Error("Password must be at least 8 characters");
+
+    // Simple hash using built-in crypto
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + "apiclaw-salt-v1");
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    await ctx.db.patch(session.workspaceId, {
+      passwordHash: hashHex,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
 // Create agent session for workspace (called from MCP after verification)
 export const createAgentSession = mutation({
   args: { 
