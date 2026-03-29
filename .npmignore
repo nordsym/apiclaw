@@ -1,5 +1,6 @@
 landing/
 convex/
+!convex/_generated/
 scripts/
 data/
 *.py
