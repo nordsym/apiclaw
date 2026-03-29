@@ -3627,21 +3627,29 @@ function AnalyticsOverviewTab({
             </div>
           </div>
 
-          {/* Top Agents */}
+          {/* Agent Status */}
           <div className="bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Top Agents</h3>
-            <div className="space-y-3">
-              {(analytics?.topAgents || []).slice(0, 6).map((agent, i) => (
-                <div key={agent.agentId} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] flex items-center justify-center text-xs font-medium text-[var(--text-muted)]">{i + 1}</span>
-                    <span className="text-sm font-mono truncate max-w-[140px]">{agent.agentId.replace("agent_", "")}</span>
+            <h3 className="font-semibold mb-4">Agent Status</h3>
+            {agents.length > 0 ? (
+              <div className="space-y-3">
+                {agents.map((agent) => (
+                  <div key={agent.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                      <span className="text-sm font-medium">{agent.name || agent.fingerprint}</span>
+                    </div>
+                    <span className="text-xs text-[var(--text-muted)]">Connected</span>
                   </div>
-                  <span className="text-sm text-[var(--text-muted)]">{agent.calls.toLocaleString()}</span>
-                </div>
-              ))}
-              {(!analytics?.topAgents || analytics.topAgents.length === 0) && <p className="text-[var(--text-muted)] text-sm">No agent activity yet</p>}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Bot className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
+                <p className="text-sm font-medium mb-1">No agents connected</p>
+                <p className="text-xs text-[var(--text-muted)] mb-3">Connect an MCP agent to see your call activity here.</p>
+                <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-1.5 font-mono text-[#ef4444]">npx @nordsym/apiclaw mcp-install</code>
+              </div>
+            )}
           </div>
         </div>
       )}
