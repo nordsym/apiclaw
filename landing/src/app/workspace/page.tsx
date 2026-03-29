@@ -1779,7 +1779,16 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                   {/* TEST TAB */}
                   {apiDetailTab === "test" && (
                     <div className="space-y-4">
-                      {actions.length === 0 ? (
+                      {isManagedByAPIClaw ? (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-3">
+                            <Check className="w-6 h-6 text-green-500" />
+                          </div>
+                          <p className="font-medium mb-1">Managed by APIClaw</p>
+                          <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto mb-4">This API is tested and verified by APIClaw. Agents call it through the MCP proxy — no direct testing needed from the dashboard.</p>
+                          <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 font-mono text-[#ef4444]">call_api(&#123; provider: &quot;apilayer&quot;, action: &quot;...&quot; &#125;)</code>
+                        </div>
+                      ) : actions.length === 0 ? (
                         <p className="text-sm text-[var(--text-muted)] py-4 text-center">No actions configured. Add actions in the Actions tab first.</p>
                       ) : (
                         <>
