@@ -1115,7 +1115,7 @@ function OverviewTab({
 // ============================================
 
 const DIRECT_CALL_PROVIDERS = [
-  { name: "APILayer", apis: 27, desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API" },
+  { name: "APILayer", apis: 27, desc: "Exchange rates, stocks, aviation, weather, geolocation, email verification, VAT, news, scraping", category: "Multi-API" },
   { name: "Replicate", apis: 1000, desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API" },
   { name: "OpenRouter", apis: 100, desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "AI & LLM" },
   { name: "ElevenLabs", apis: 1, desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
