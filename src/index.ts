@@ -927,38 +927,25 @@ Docs: https://apiclaw.nordsym.com
             body: JSON.stringify(searchLogPayload),
           }).catch(() => {}); // Fire and forget
 
-          // Log discovery to provider workspaces (so they see search activity)
-          // Map search results to known Direct Call providers
+          // Log discovery to provider workspaces
+          // Single mutation handles both apiLogs + discoveryCount
           const PROVIDER_KEYWORDS: Record<string, string[]> = {
             apilayer: ['exchange', 'currency', 'fixer', 'weather', 'ip', 'geo', 'flight', 'aviation', 'vat', 'news', 'scrape', 'screenshot', 'pdf', 'email verif', 'phone verif', 'language', 'user agent', 'coinlayer', 'marketstack', 'positionstack', 'ipstack', 'mediastack', 'serpstack', 'userstack', 'scrapestack', 'weatherstack'],
           };
           const queryLower = query.toLowerCase();
           for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
             if (keywords.some(kw => queryLower.includes(kw))) {
-              // Log to apiLogs (for analytics timeline)
+              // Single call: logs to apiLogs + increments discoveryCount on matching APIs
               fetch(`${convexUrl}/api/mutation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  path: 'logs:logProviderCall',
-                  args: {
-                    provider,
-                    action: `discovery:${query.substring(0, 50)}`,
-                    status: 'success' as const,
-                    latencyMs: responseTimeMs,
-                    callerWorkspaceId: workspaceContext?.workspaceId || 'anonymous',
-                  },
-                }),
-              }).catch(() => {});
-              // Increment discoveryCount on provider APIs (for dashboard counters)
-              fetch(`${convexUrl}/api/mutation`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  path: 'providers:trackDiscoveryByProvider',
+                  path: 'providers:logDiscovery',
                   args: {
                     provider,
                     query: query.substring(0, 100),
+                    latencyMs: responseTimeMs,
+                    callerWorkspaceId: workspaceContext?.workspaceId || 'anonymous',
                   },
                 }),
               }).catch(() => {});

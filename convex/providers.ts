@@ -159,8 +159,63 @@ export const trackDiscovery = mutation({
   },
 });
 
-// Track discovery by provider name + query keyword matching
-// Called from MCP server when discover_apis matches provider keywords
+// Unified discovery logging: apiLogs entry + discoveryCount increment
+// Single source of truth for both Analytics view and My APIs view
+export const logDiscovery = mutation({
+  args: {
+    provider: v.string(),
+    query: v.string(),
+    latencyMs: v.number(),
+    callerWorkspaceId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const providerEmailMap: Record<string, string> = {
+      apilayer: "gustav_hemmingsson@hotmail.com",
+    };
+    const email = providerEmailMap[args.provider];
+    if (!email) return { logged: false };
+
+    // Find provider workspace
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
+    if (!workspace) return { logged: false };
+
+    // 1. Create apiLogs entry (for Analytics timeline + Found via Search counter)
+    await ctx.db.insert("apiLogs", {
+      workspaceId: workspace._id,
+      sessionToken: "",
+      provider: args.provider,
+      action: `discovery:${args.query}`,
+      status: "success",
+      latencyMs: args.latencyMs,
+      direction: "inbound",
+      callerWorkspaceId: args.callerWorkspaceId,
+      createdAt: Date.now(),
+    });
+
+    // 2. Find provider and increment discoveryCount on ALL their APIs
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
+    if (provider) {
+      const apis = await ctx.db.query("providerAPIs").collect();
+      const providerApis = apis.filter((a) => a.providerId === provider._id);
+      for (const api of providerApis) {
+        await ctx.db.patch(api._id, {
+          discoveryCount: ((api as any).discoveryCount || 0) + 1,
+          lastDiscoveredAt: Date.now(),
+        });
+      }
+    }
+
+    return { logged: true };
+  },
+});
+
+// Legacy: Track discovery by provider name (kept for backwards compat)
 export const trackDiscoveryByProvider = mutation({
   args: { provider: v.string(), query: v.string() },
   handler: async (ctx, args) => {
