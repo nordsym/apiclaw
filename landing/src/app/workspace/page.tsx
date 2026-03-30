@@ -3802,8 +3802,20 @@ function UsageTab({
   const liveByAction = (liveAnalytics as any)?.byAction || [];
   const liveCallCount = hasLiveData ? (liveAnalytics as any).totalCalls || 0 : 0;
   const liveDiscoveryCount = hasLiveData ? (liveAnalytics as any).totalDiscoveries || 0 : 0;
-  const liveTopAPIs = liveByAction.filter((a: any) => a.type === "call");
-  const liveTopSearches = liveByAction.filter((a: any) => a.type === "discovery");
+  const liveTopAPIs = liveByAction.filter((a: any) => a.type === "call").slice(0, 5);
+  // Group searches by keyword similarity - aggregate discovery counts
+  const rawSearches = liveByAction.filter((a: any) => a.type === "discovery");
+  const searchAggregated: Record<string, number> = {};
+  rawSearches.forEach((s: any) => {
+    // Extract first meaningful word from "Search: weather forecast temperature"
+    const query = s.action.replace("Search: ", "");
+    const key = query.split(" ")[0];
+    searchAggregated[key] = (searchAggregated[key] || 0) + s.calls;
+  });
+  const liveTopSearches = Object.entries(searchAggregated)
+    .map(([keyword, count]) => ({ action: keyword, calls: count }))
+    .sort((a, b) => b.calls - a.calls)
+    .slice(0, 5);
 
   return (
     <div className="space-y-8">
