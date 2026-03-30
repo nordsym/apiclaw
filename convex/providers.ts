@@ -159,8 +159,8 @@ export const trackDiscovery = mutation({
   },
 });
 
-// Unified discovery logging: apiLogs entry + discoveryCount increment
-// Single source of truth for both Analytics view and My APIs view
+// Unified discovery logging
+// Single source of truth: apiLogs. discoveryCount on My APIs is derived from apiLogs.
 export const logDiscovery = mutation({
   args: {
     provider: v.string(),
@@ -175,14 +175,13 @@ export const logDiscovery = mutation({
     const email = providerEmailMap[args.provider];
     if (!email) return { logged: false };
 
-    // Find provider workspace
     const workspace = await ctx.db
       .query("workspaces")
       .withIndex("by_email", (q) => q.eq("email", email))
       .first();
     if (!workspace) return { logged: false };
 
-    // 1. Create apiLogs entry (for Analytics timeline + Found via Search counter)
+    // Single log entry in apiLogs - this is the source of truth
     await ctx.db.insert("apiLogs", {
       workspaceId: workspace._id,
       sessionToken: "",
@@ -194,22 +193,6 @@ export const logDiscovery = mutation({
       callerWorkspaceId: args.callerWorkspaceId,
       createdAt: Date.now(),
     });
-
-    // 2. Find provider and increment discoveryCount on ALL their APIs
-    const provider = await ctx.db
-      .query("providers")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .first();
-    if (provider) {
-      const apis = await ctx.db.query("providerAPIs").collect();
-      const providerApis = apis.filter((a) => a.providerId === provider._id);
-      for (const api of providerApis) {
-        await ctx.db.patch(api._id, {
-          discoveryCount: ((api as any).discoveryCount || 0) + 1,
-          lastDiscoveredAt: Date.now(),
-        });
-      }
-    }
 
     return { logged: true };
   },

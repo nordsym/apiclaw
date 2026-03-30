@@ -1636,7 +1636,6 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                 <p className="text-sm text-[var(--text-muted)]">{api.description}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-[var(--text-muted)]">
                   <span>{api.category}</span>
-                  <span>{api.discoveryCount || 0} discoveries</span>
                 </div>
               </div>
               <ChevronDown className={`w-5 h-5 text-[var(--text-muted)] ml-4 transition-transform ${selectedApi?._id === api._id ? "rotate-180" : ""}`} />
@@ -4213,39 +4212,16 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      {/* Filter */}
+      <div className="flex gap-3">
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as "all" | "success" | "error")}
           className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
         >
-          <option value="all">All Status</option>
+          <option value="all">All</option>
           <option value="success">Success</option>
           <option value="error">Error</option>
-        </select>
-        
-        <select
-          value={providerFilter}
-          onChange={(e) => setProviderFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-        >
-          <option value="all">All Providers</option>
-          {providers.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
-        
-        <select
-          value={agentFilter}
-          onChange={(e) => setAgentFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-        >
-          <option value="all">All Agents</option>
-          <option value="main">Main Agent</option>
-          {agents.filter(a => a !== "main" && a !== "unknown").map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
         </select>
       </div>
 
