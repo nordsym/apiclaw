@@ -107,3 +107,11 @@ export const cleanupWorkspaces = mutation({
     return { deleted };
   },
 });
+
+export const updateProviderEmail = mutation({
+  args: { providerId: v.string(), email: v.string() },
+  handler: async (ctx, { providerId, email }) => {
+    await ctx.db.patch(providerId as any, { email });
+    return { success: true };
+  },
+});

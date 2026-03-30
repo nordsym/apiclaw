@@ -93,7 +93,7 @@ export const logProviderCall = mutation({
   handler: async (ctx, args) => {
     // Map provider to workspace email
     const providerEmailMap: Record<string, string> = {
-      apilayer: "gustav_hemmingsson@hotmail.com",
+      apilayer: "pratham@apilayer.com",
     };
 
     const providerEmail = providerEmailMap[args.provider];

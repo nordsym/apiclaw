@@ -1128,3 +1128,11 @@ export const claimAnonymousUsage = mutation({
     };
   },
 });
+
+export const adminUpdateEmail = mutation({
+  args: { workspaceId: v.id("workspaces"), newEmail: v.string() },
+  handler: async (ctx, { workspaceId, newEmail }) => {
+    await ctx.db.patch(workspaceId, { email: newEmail });
+    return { success: true, email: newEmail };
+  },
+});
