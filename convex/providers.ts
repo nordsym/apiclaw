@@ -164,32 +164,28 @@ export const trackDiscovery = mutation({
 export const trackDiscoveryByProvider = mutation({
   args: { provider: v.string(), query: v.string() },
   handler: async (ctx, args) => {
-    // Find all APIs belonging to this provider's workspace
+    // Find provider by email mapping
     const providerEmailMap: Record<string, string> = {
       apilayer: "gustav_hemmingsson@hotmail.com",
     };
     const email = providerEmailMap[args.provider];
-    if (!email) return;
+    if (!email) return { updated: 0, error: "no email mapping" };
 
-    const workspace = await ctx.db
-      .query("workspaces")
-      .withIndex("by_email", (q: any) => q.eq("email", email))
+    // Find provider record by email
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_email", (q) => q.eq("email", email))
       .first();
-    if (!workspace) return;
-
-    // Find provider record
-    const providers = await ctx.db.query("providers").collect();
-    const provider = providers.find((p: any) => p.workspaceId === workspace._id);
-    if (!provider) return;
+    if (!provider) return { updated: 0, error: "provider not found" };
 
     // Get all APIs for this provider
     const apis = await ctx.db.query("providerAPIs").collect();
-    const providerApis = apis.filter((a: any) => a.providerId === provider._id);
+    const providerApis = apis.filter((a) => a.providerId === provider._id);
 
-    // Increment discoveryCount on ALL provider APIs (the whole catalog was discovered)
+    // Increment discoveryCount on ALL provider APIs
     for (const api of providerApis) {
       await ctx.db.patch(api._id, {
-        discoveryCount: (api.discoveryCount || 0) + 1,
+        discoveryCount: ((api as any).discoveryCount || 0) + 1,
         lastDiscoveredAt: Date.now(),
       });
     }
