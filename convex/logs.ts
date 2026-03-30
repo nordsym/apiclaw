@@ -91,19 +91,38 @@ export const logProviderCall = mutation({
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Map provider to workspace email
+    // Map provider to workspace email (for providers with workspaces)
     const providerEmailMap: Record<string, string> = {
       apilayer: "pratham@apilayer.com",
     };
 
     const providerEmail = providerEmailMap[args.provider];
-    if (!providerEmail) return null; // no workspace for this provider
+    let workspace = null;
 
-    const workspace = await ctx.db
-      .query("workspaces")
-      .withIndex("by_email", (q) => q.eq("email", providerEmail))
-      .first();
-    if (!workspace) return null;
+    if (providerEmail) {
+      workspace = await ctx.db
+        .query("workspaces")
+        .withIndex("by_email", (q) => q.eq("email", providerEmail))
+        .first();
+    }
+
+    // Always log to global provider analytics (even without workspace)
+    await ctx.db.insert("apiLogs", {
+      workspaceId: workspace?._id || ("global" as any),
+      sessionToken: "",
+      provider: args.provider,
+      action: args.action,
+      status: args.status,
+      latencyMs: args.latencyMs,
+      direction: "provider-call",
+      callerWorkspaceId: args.callerWorkspaceId,
+      subagentId: args.subagentId,
+      errorMessage: args.errorMessage,
+      createdAt: Date.now(),
+    });
+
+    // If provider has workspace, also log as inbound to their workspace
+    if (!workspace) return { logged: "global" };
 
     return await ctx.db.insert("apiLogs", {
       workspaceId: workspace._id,
