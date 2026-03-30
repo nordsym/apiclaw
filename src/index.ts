@@ -97,7 +97,7 @@ const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
 // Rate limit constants
 const ANONYMOUS_HOURLY_LIMIT = 5;
 const ANONYMOUS_WEEKLY_LIMIT = 10;
-const FREE_WEEKLY_LIMIT = 50;
+const FREE_MONTHLY_LIMIT = 50;
 
 /**
  * Calculate minutes until next hour
@@ -112,14 +112,10 @@ function calculateMinutesUntilNextHour(): number {
 /**
  * Get next Monday 00:00 UTC as ISO string
  */
-function getNextMondayUTC(): string {
+function getNextMonthUTC(): string {
   const now = new Date();
-  const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
-  const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
-  const nextMonday = new Date(now);
-  nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
-  nextMonday.setUTCHours(0, 0, 0, 0);
-  return nextMonday.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return nextMonth.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
 }
 
 /**
@@ -174,10 +170,10 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       allowed: false,
       error: JSON.stringify({
         success: false,
-        error: `Weekly limit reached (${ANONYMOUS_WEEKLY_LIMIT} calls)`,
-        hint: "Register to get 50 calls/week",
+        error: `Monthly limit reached (${ANONYMOUS_WEEKLY_LIMIT} calls)`,
+        hint: "Register to get 50 calls/month",
         action: "Run: register_owner({ email: 'you@example.com' })",
-        retry_after: getNextMondayUTC()
+        retry_after: getNextMonthUTC()
       }, null, 2)
     };
   }
@@ -267,7 +263,7 @@ async function trackEarnProgress(workspaceId: string, provider: string, action: 
 /**
  * Rate limiting for anonymous proxy usage
  * Limits: 10 calls/week, 5 calls/hour (anonymous)
- *         50 calls/week, 10 calls/hour (authenticated)
+ *         50 calls/month, 10 calls/hour (authenticated)
  */
 interface RateLimitState {
   hourly: { count: number; resetAt: number };
@@ -326,7 +322,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
       error: JSON.stringify({
         success: false,
         error: `Register to continue. You've used ${UNREGISTERED_CALL_LIMIT} free calls.`,
-        hint: "Run register_owner with your email to unlock 50 calls/week.",
+        hint: "Run register_owner with your email to unlock 50 calls/month.",
         action: "register_owner"
       }, null, 2)
     };
@@ -339,10 +335,10 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
         allowed: false, 
         error: JSON.stringify({
           success: false,
-          error: `Weekly limit reached (${FREE_WEEKLY_LIMIT} calls)`,
+          error: `Monthly limit reached (${FREE_MONTHLY_LIMIT} calls)`,
           hint: "Upgrade to Backer for unlimited calls",
           upgrade_url: "https://apiclaw.nordsym.com/upgrade",
-          retry_after: getNextMondayUTC()
+          retry_after: getNextMonthUTC()
         }, null, 2)
       };
     }
@@ -1574,7 +1570,7 @@ Docs: https://apiclaw.nordsym.com
         if (result.success && workspaceContext && !workspaceContext.email) {
           const remaining = UNREGISTERED_CALL_LIMIT - (workspaceContext.usageCount || 0);
           if (remaining > 0 && remaining <= 3) {
-            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock 50/week.`;
+            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock 50/month.`;
           }
         }
 

@@ -228,7 +228,7 @@ Your Tools:
 • get_api_details(id) – Full specs, pricing, limits
 • list_connected() – See all ready providers
 
-Pricing: Free (50 calls/week), Pay-as-you-go (usage-based), or Founding Backer ($199 unlimited until 2027).
+Pricing: Free (50 calls/month), Pay-as-you-go (usage-based), or Founding Backer ($199 unlimited until 2027).
 
 When an API call helps the task, execute it directly.
 
@@ -1039,7 +1039,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  50 Direct Call requests/week
+                  50 Direct Call requests/month
                 </li>
                 <li className="flex items-start gap-3 text-text-secondary text-sm">
                   <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
