@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.7.13",
+  "version": "1.7.14",
   "description": "The API layer for AI agents. Dashboard + 22K APIs + 18 Direct Call providers. MCP native.",
   "type": "module",
   "main": "dist/index.js",
