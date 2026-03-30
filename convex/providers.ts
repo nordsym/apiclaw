@@ -181,7 +181,7 @@ export const logDiscovery = mutation({
       .first();
     if (!workspace) return { logged: false };
 
-    // Single log entry in apiLogs - this is the source of truth
+    // 1. Log to apiLogs (source of truth for Analytics)
     await ctx.db.insert("apiLogs", {
       workspaceId: workspace._id,
       sessionToken: "",
@@ -194,7 +194,32 @@ export const logDiscovery = mutation({
       createdAt: Date.now(),
     });
 
-    return { logged: true };
+    // 2. Increment discoveryCount on MATCHING APIs only
+    const providerRecord = await ctx.db
+      .query("providers")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
+    if (providerRecord) {
+      const apis = await ctx.db.query("providerAPIs").collect();
+      const providerApis = apis.filter((a) => a.providerId === providerRecord._id);
+      const queryLower = args.query.toLowerCase();
+      const queryWords = queryLower.split(/\s+/).filter((w: string) => w.length > 2);
+
+      let matched = 0;
+      for (const api of providerApis) {
+        const apiText = `${api.name} ${api.description || ""}`.toLowerCase();
+        if (queryWords.some((w: string) => apiText.includes(w))) {
+          await ctx.db.patch(api._id, {
+            discoveryCount: ((api as any).discoveryCount || 0) + 1,
+            lastDiscoveredAt: Date.now(),
+          });
+          matched++;
+        }
+      }
+      return { logged: true, matched };
+    }
+
+    return { logged: true, matched: 0 };
   },
 });
 
@@ -978,5 +1003,21 @@ export const deleteForWorkspace = mutation({
     }
     await ctx.db.delete(apiId);
     return { deleted: true };
+  },
+});
+
+// Reset all discoveryCount to 0 (admin cleanup)
+export const resetDiscoveryCounts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const apis = await ctx.db.query("providerAPIs").collect();
+    let reset = 0;
+    for (const api of apis) {
+      if ((api as any).discoveryCount > 0) {
+        await ctx.db.patch(api._id, { discoveryCount: 0 } as any);
+        reset++;
+      }
+    }
+    return { reset };
   },
 });

@@ -3705,6 +3705,7 @@ function UsageTab({
     totalSearches: number;
     searchesByProvider: Record<string, number>;
   } | null>(null);
+  const [topApiView, setTopApiView] = useState<"calls" | "searches">("calls");
   const [liveAnalytics, setLiveAnalytics] = useState<{
     totalCalls: number;
     inboundCalls: number;
@@ -3896,56 +3897,65 @@ function UsageTab({
         </div>
       </div>
 
-      {/* Top APIs — moved above My APIs list */}
+      {/* Top APIs — toggle between calls and searches */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Top APIs</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Top APIs</h3>
+          {(liveTopAPIs.length > 0 || liveTopSearches.length > 0) && (
+            <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-xs">
+              <button
+                onClick={() => setTopApiView?.("calls")}
+                className={`px-3 py-1.5 font-medium transition-colors ${topApiView === "calls" ? "bg-[#ef4444] text-white" : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              >
+                Top Called
+              </button>
+              <button
+                onClick={() => setTopApiView?.("searches")}
+                className={`px-3 py-1.5 font-medium transition-colors ${topApiView === "searches" ? "bg-blue-500 text-white" : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+              >
+                Top Searched
+              </button>
+            </div>
+          )}
+        </div>
         {liveTopAPIs.length === 0 && liveTopSearches.length === 0 && displayByProvider.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API usage data yet. Calls and searches will appear here once agents start using your APIs.</p>
         ) : (
           <div className="space-y-2">
-            {liveTopAPIs.map((p: any, i: number) => (
-              <div key={p.action} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <span className="font-medium text-sm">{p.action}</span>
-                    <span className="text-xs text-[var(--text-muted)] ml-2">{p.calls} call{p.calls !== 1 ? "s" : ""}</span>
-                  </div>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded ${p.success === p.calls ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}>
-                  {((p.success / Math.max(p.calls, 1)) * 100).toFixed(0)}%
-                </span>
-              </div>
-            ))}
-            {liveTopSearches.length > 0 && (
-              <details className="pt-2">
-                <summary className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none">
-                  Discovered via Search ({liveTopSearches.length})
-                </summary>
-                <div className="space-y-2 mt-2">
-                  {liveTopSearches.map((s: any) => (
-                    <div key={s.action} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                      <div className="flex items-center gap-3">
-                        <Search className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <span className="text-sm text-[var(--text-primary)]">{s.action}</span>
+            {topApiView === "calls" ? (
+              <>
+                {liveTopAPIs.length > 0 ? liveTopAPIs.map((p: any, i: number) => (
+                  <div key={p.action} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
+                    <div className="flex items-center gap-3">
+                      <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      <div>
+                        <span className="font-medium text-sm">{p.action}</span>
+                        <span className="text-xs text-[var(--text-muted)] ml-2">{p.calls} call{p.calls !== 1 ? "s" : ""}</span>
                       </div>
-                      <span className="text-xs text-blue-500">{s.calls}x</span>
                     </div>
-                  ))}
-                </div>
-              </details>
+                    <span className={`text-xs px-2 py-0.5 rounded ${p.success === p.calls ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"}`}>
+                      {((p.success / Math.max(p.calls, 1)) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                )) : (
+                  <p className="text-sm text-[var(--text-muted)] py-4 text-center">No API calls yet.</p>
+                )}
+              </>
+            ) : (
+              <>
+                {liveTopSearches.length > 0 ? liveTopSearches.map((s: any, i: number) => (
+                  <div key={s.action} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                    <div className="flex items-center gap-3">
+                      <span className="w-7 h-7 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      <span className="text-sm text-[var(--text-primary)]">{s.action}</span>
+                    </div>
+                    <span className="text-xs text-blue-500">{s.calls}x</span>
+                  </div>
+                )) : (
+                  <p className="text-sm text-[var(--text-muted)] py-4 text-center">No search discoveries yet.</p>
+                )}
+              </>
             )}
-            {liveTopAPIs.length === 0 && displayByProvider.map((p, i) => (
-              <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
-                <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                  <span className="font-medium text-sm">{p.provider}</span>
-                </div>
-                <span className="text-xs text-[var(--text-muted)]">{p.calls} calls</span>
-              </div>
-            ))}
           </div>
         )}
       </div>
