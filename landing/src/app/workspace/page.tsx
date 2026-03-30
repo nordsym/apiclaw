@@ -3920,18 +3920,22 @@ function UsageTab({
               </div>
             ))}
             {liveTopSearches.length > 0 && (
-              <>
-                <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider pt-2">Discovered via Search</p>
-                {liveTopSearches.map((s: any, i: number) => (
-                  <div key={s.action} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                    <div className="flex items-center gap-3">
-                      <Search className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                      <span className="text-sm text-[var(--text-primary)]">{s.action}</span>
+              <details className="pt-2">
+                <summary className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider cursor-pointer hover:text-[var(--text-primary)] transition-colors select-none">
+                  Discovered via Search ({liveTopSearches.length})
+                </summary>
+                <div className="space-y-2 mt-2">
+                  {liveTopSearches.map((s: any) => (
+                    <div key={s.action} className="flex items-center justify-between p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                      <div className="flex items-center gap-3">
+                        <Search className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                        <span className="text-sm text-[var(--text-primary)]">{s.action}</span>
+                      </div>
+                      <span className="text-xs text-blue-500">{s.calls}x</span>
                     </div>
-                    <span className="text-xs text-blue-500">{s.calls}x</span>
-                  </div>
-                ))}
-              </>
+                  ))}
+                </div>
+              </details>
             )}
             {liveTopAPIs.length === 0 && displayByProvider.map((p, i) => (
               <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
@@ -3950,29 +3954,55 @@ function UsageTab({
       {apis.length > 0 && (
         <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-2xl p-6">
           <h3 className="font-semibold text-lg mb-4">All APIs ({apis.length})</h3>
-          <div className="space-y-2">
-            {apis.map((api) => {
-              const actionCalls = liveTopAPIs.find((a: any) => api.name.toLowerCase().includes(a.action.split("_")[0]));
-              return (
-                <div key={api._id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
-                  <div className="flex items-center gap-3">
-                    <Zap className="w-4 h-4 text-[var(--text-muted)]" />
-                    <div>
-                      <p className="font-medium text-sm">{api.name}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{api.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {(actionCalls as any)?.calls > 0 && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444]">{(actionCalls as any).calls} calls</span>
-                    )}
-                    <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-500" : api.status === "blocked" ? "bg-red-500/10 text-red-500" : "bg-yellow-500/10 text-yellow-500"}`}>
-                      {api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-[var(--text-muted)] uppercase tracking-wider">
+                  <th className="pb-3 font-medium">API</th>
+                  <th className="pb-3 font-medium text-center">Calls</th>
+                  <th className="pb-3 font-medium text-center">Discoveries</th>
+                  <th className="pb-3 font-medium text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {apis.map((api) => {
+                  const apiNameLower = api.name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                  const matchedCall = liveTopAPIs.find((a: any) => {
+                    const actionLower = a.action.toLowerCase();
+                    return apiNameLower.includes(actionLower.split("_")[0]) || actionLower.includes(apiNameLower.split("_")[0]);
+                  });
+                  const callCount = (matchedCall as any)?.calls || 0;
+                  const discoveryCount = api.discoveryCount || 0;
+                  return (
+                    <tr key={api._id} className="hover:bg-[var(--surface)]/50">
+                      <td className="py-3">
+                        <p className="font-medium">{api.name}</p>
+                        <p className="text-xs text-[var(--text-muted)]">{api.category}</p>
+                      </td>
+                      <td className="py-3 text-center">
+                        {callCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444] font-medium">{callCount}</span>
+                        ) : (
+                          <span className="text-xs text-[var(--text-muted)]">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 text-center">
+                        {discoveryCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 font-medium">{discoveryCount}</span>
+                        ) : (
+                          <span className="text-xs text-[var(--text-muted)]">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 text-right">
+                        <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-500" : api.status === "blocked" ? "bg-red-500/10 text-red-500" : "bg-yellow-500/10 text-yellow-500"}`}>
+                          {api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
