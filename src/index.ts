@@ -883,7 +883,7 @@ Docs: https://apiclaw.nordsym.com
 
         // Log search to Convex analytics (authenticated + anonymous)
         const analyticsUserId = workspaceContext?.workspaceId || `anon:${getMachineFingerprint()}`;
-        const convexUrl = process.env.APICLAW_CONVEX_URL || process.env.NEXT_PUBLIC_CONVEX_URL;
+        const convexUrl = CONVEX_URL;
         if (convexUrl) {
           fetch(`${convexUrl}/api/mutation`, {
             method: 'POST',
@@ -935,6 +935,7 @@ Docs: https://apiclaw.nordsym.com
           const queryLower = query.toLowerCase();
           for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
             if (keywords.some(kw => queryLower.includes(kw))) {
+              // Log to apiLogs (for analytics timeline)
               fetch(`${convexUrl}/api/mutation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -945,7 +946,19 @@ Docs: https://apiclaw.nordsym.com
                     action: `discovery:${query.substring(0, 50)}`,
                     status: 'success' as const,
                     latencyMs: responseTimeMs,
-                    callerWorkspaceId: workspaceContext.workspaceId,
+                    callerWorkspaceId: workspaceContext?.workspaceId || 'anonymous',
+                  },
+                }),
+              }).catch(() => {});
+              // Increment discoveryCount on provider APIs (for dashboard counters)
+              fetch(`${convexUrl}/api/mutation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: 'providers:trackDiscoveryByProvider',
+                  args: {
+                    provider,
+                    query: query.substring(0, 100),
                   },
                 }),
               }).catch(() => {});

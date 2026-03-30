@@ -159,6 +159,45 @@ export const trackDiscovery = mutation({
   },
 });
 
+// Track discovery by provider name + query keyword matching
+// Called from MCP server when discover_apis matches provider keywords
+export const trackDiscoveryByProvider = mutation({
+  args: { provider: v.string(), query: v.string() },
+  handler: async (ctx, args) => {
+    // Find all APIs belonging to this provider's workspace
+    const providerEmailMap: Record<string, string> = {
+      apilayer: "gustav_hemmingsson@hotmail.com",
+    };
+    const email = providerEmailMap[args.provider];
+    if (!email) return;
+
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q: any) => q.eq("email", email))
+      .first();
+    if (!workspace) return;
+
+    // Find provider record
+    const providers = await ctx.db.query("providers").collect();
+    const provider = providers.find((p: any) => p.workspaceId === workspace._id);
+    if (!provider) return;
+
+    // Get all APIs for this provider
+    const apis = await ctx.db.query("providerAPIs").collect();
+    const providerApis = apis.filter((a: any) => a.providerId === provider._id);
+
+    // Increment discoveryCount on ALL provider APIs (the whole catalog was discovered)
+    for (const api of providerApis) {
+      await ctx.db.patch(api._id, {
+        discoveryCount: (api.discoveryCount || 0) + 1,
+        lastDiscoveredAt: Date.now(),
+      });
+    }
+
+    return { updated: providerApis.length };
+  },
+});
+
 // Admin: List pending providers
 export const getPendingProviders = query({
   handler: async (ctx) => {
