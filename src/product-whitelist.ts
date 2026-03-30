@@ -18,7 +18,7 @@ interface ProductSource {
 const PRODUCT_SOURCES: ProductSource[] = [
   {
     name: 'hivr',
-    convexUrl: 'https://sensible-quail-275.convex.cloud',
+    convexUrl: 'https://brilliant-puffin-712.eu-west-1.convex.cloud',
     queryPath: 'agents:list',
     agentIdField: 'handle', // ✅ Fixed: Hivr agents use 'handle', not 'agentId'
   },

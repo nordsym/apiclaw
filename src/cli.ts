@@ -10,7 +10,7 @@ import { discoverAPIs, getAPIDetails, getCategories } from './discovery.js';
 import { executeAPICall, getConnectedProviders } from './execute.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint } from './session.js';
 
-const CONVEX_URL = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
+const CONVEX_URL = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
 const convex = new ConvexHttpClient(CONVEX_URL);
 
 // Colors for terminal

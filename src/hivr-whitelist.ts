@@ -5,7 +5,7 @@
  */
 
 // Hivr PROD Convex deployment
-const HIVR_CONVEX_URL = "https://sensible-quail-275.convex.cloud";
+const HIVR_CONVEX_URL = "https://brilliant-puffin-712.eu-west-1.convex.cloud";
 
 // Fallback static whitelist (in case Convex is down)
 const STATIC_WHITELIST = [

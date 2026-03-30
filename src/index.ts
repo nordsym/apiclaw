@@ -77,6 +77,7 @@ interface WorkspaceContext {
   email: string;
   tier: string;
   usageRemaining: number;
+  usageCount: number;
   status: string;
 }
 
@@ -221,6 +222,7 @@ async function validateSession(): Promise<boolean> {
       email: result.email ?? '',
       tier: result.tier ?? 'free',
       usageRemaining: result.usageRemaining ?? 0,
+      usageCount: result.usageCount ?? 0,
       status: result.status ?? 'unknown',
     };
     
@@ -274,6 +276,9 @@ interface RateLimitState {
 
 const rateLimitStore = new Map<string, RateLimitState>();
 
+// Unregistered (auto-provisioned, no email) users get this many calls before signup required
+const UNREGISTERED_CALL_LIMIT = 5;
+
 /**
  * For proxy providers, allow anonymous usage with rate limiting
  */
@@ -308,12 +313,25 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
   }
   
   if (workspaceContext.status !== 'active') {
-    return { 
-      allowed: false, 
-      error: `Workspace status: ${workspaceContext.status}. Please verify your email.` 
+    return {
+      allowed: false,
+      error: `Workspace status: ${workspaceContext.status}. Please verify your email.`
     };
   }
-  
+
+  // Unregistered workspaces (auto-provisioned, no email) get limited calls then must register
+  if (!workspaceContext.email && workspaceContext.usageCount >= UNREGISTERED_CALL_LIMIT) {
+    return {
+      allowed: false,
+      error: JSON.stringify({
+        success: false,
+        error: `Register to continue. You've used ${UNREGISTERED_CALL_LIMIT} free calls.`,
+        hint: "Run register_owner with your email to unlock 50 calls/week.",
+        action: "register_owner"
+      }, null, 2)
+    };
+  }
+
   if (workspaceContext.usageRemaining === 0) {
     // Free tier hit weekly limit
     if (workspaceContext.tier === 'free') {
@@ -1532,6 +1550,7 @@ Docs: https://apiclaw.nordsym.com
             }) as { success: boolean; remaining?: number };
             if (usageResult.success) {
               workspaceContext.usageRemaining = usageResult.remaining ?? -1;
+              workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
             }
 
             // Track earn progress (first direct call + unique APIs)
@@ -1541,18 +1560,29 @@ Docs: https://apiclaw.nordsym.com
           }
         }
 
+        // Build response with signup nudge for unregistered users
+        const responseData: Record<string, unknown> = {
+          status: result.success ? 'success' : 'error',
+          provider: result.provider,
+          action: result.action,
+          type: apiType,
+          ...(result.success ? { data: result.data } : { error: result.error }),
+          ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
+        };
+
+        // Nudge unregistered users
+        if (result.success && workspaceContext && !workspaceContext.email) {
+          const remaining = UNREGISTERED_CALL_LIMIT - (workspaceContext.usageCount || 0);
+          if (remaining > 0 && remaining <= 3) {
+            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock 50/week.`;
+          }
+        }
+
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                status: result.success ? 'success' : 'error',
-                provider: result.provider,
-                action: result.action,
-                type: apiType,
-                ...(result.success ? { data: result.data } : { error: result.error }),
-                ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
-              }, null, 2)
+              text: JSON.stringify(responseData, null, 2)
             }
           ],
           isError: !result.success
@@ -1729,6 +1759,7 @@ Docs: https://apiclaw.nordsym.com
                 email,
                 tier: existing.tier,
                 usageRemaining: existing.usageLimit - existing.usageCount,
+                usageCount: existing.usageCount,
                 status: existing.status,
               };
               
@@ -1770,7 +1801,7 @@ Docs: https://apiclaw.nordsym.com
           }) as { token: string; expiresAt: number };
           
           // Send magic link via email
-          const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${magicLinkResult.token}`;
           
           const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -1860,6 +1891,7 @@ Docs: https://apiclaw.nordsym.com
             email: result.email ?? '',
             tier: result.tier ?? 'free',
             usageRemaining: result.usageRemaining ?? 0,
+            usageCount: result.usageCount ?? 0,
             status: result.status ?? 'unknown',
           };
           
@@ -1940,7 +1972,7 @@ Docs: https://apiclaw.nordsym.com
           }) as { token: string; expiresAt: number };
           
           // TODO: Agent 2 will implement actual email sending
-          const verifyUrl = `https://apiclaw.nordsym.com/verify?token=${magicLinkResult.token}`;
+          const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${magicLinkResult.token}`;
           
           return {
             content: [{

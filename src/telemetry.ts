@@ -10,7 +10,7 @@
  * Disable with APICLAW_TELEMETRY=false
  */
 
-const TELEMETRY_ENDPOINT = 'https://agile-crane-840.convex.cloud/api/mutation';
+const TELEMETRY_ENDPOINT = 'https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation';
 
 interface TelemetryEvent {
   type: 'startup' | 'search' | 'execute' | 'discovery';
