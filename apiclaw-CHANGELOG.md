@@ -77,7 +77,7 @@ All notable changes to APIClaw.
 ### Added
 - **Workspace & Dashboard** — Manage your API usage, view logs, configure settings
 - **Auth with Magic Link** — No passwords. Email link, you're in.
-- **`mcp-install` command** — One command setup: `npx @nordsym/apiclaw mcp-install`
+- **`mcp-install` command** — One command setup: `curl -fsSL https://apiclaw.nordsym.com/install.sh | bash`
 
 ### Improved
 - Simplified onboarding flow

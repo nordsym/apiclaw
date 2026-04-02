@@ -2106,7 +2106,7 @@ function AgentsTab({
     return new Date(timestamp).toLocaleDateString();
   };
 
-  const mcpCommand = "npx @nordsym/apiclaw mcp-install";
+  const mcpCommand = "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash";
 
   const getMCPClientIcon = (client: string) => {
     switch (client) {
@@ -3685,7 +3685,7 @@ function AnalyticsOverviewTab({
                 <Bot className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
                 <p className="text-sm font-medium mb-1">No agents connected</p>
                 <p className="text-xs text-[var(--text-muted)] mb-3">Connect an MCP agent to see your call activity here.</p>
-                <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-1.5 font-mono text-[#ef4444]">npx @nordsym/apiclaw mcp-install</code>
+                <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-1.5 font-mono text-[#ef4444]">curl -fsSL https://apiclaw.nordsym.com/install.sh | bash</code>
               </div>
             )}
           </div>
@@ -4795,7 +4795,7 @@ function DocsTab() {
           </div>
           <div>
             <p className="text-sm text-[var(--text-muted)] mb-2">2. Or auto-install for your client:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">npx @nordsym/apiclaw mcp-install</pre>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">curl -fsSL https://apiclaw.nordsym.com/install.sh | bash</pre>
             <p className="text-xs text-[var(--text-muted)] mt-2">Supports: Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, Codex (OpenAI)</p>
           </div>
           <div>

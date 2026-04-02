@@ -11,7 +11,7 @@ The API layer for AI agents. One install. Three tiers of access.
 ## Install
 
 ```bash
-npx @nordsym/apiclaw mcp-install
+curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
 ```
 
 Restart your AI assistant. First 5 API calls are free. Register your email to unlock 50/month.

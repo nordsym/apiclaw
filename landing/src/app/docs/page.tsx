@@ -79,7 +79,7 @@ export default function DocsPage() {
             <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
               <code className="text-sm">
                 <span className="text-[var(--text-muted)]"># Auto-install to Claude Desktop/Code</span>{'\n'}
-                <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span> mcp-install{'\n\n'}
+                curl -fsSL https://apiclaw.nordsym.com/install.sh | bash{'\n\n'}
                 <span className="text-[var(--text-muted)]"># Or run the MCP server directly</span>{'\n'}
                 <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span>
               </code>

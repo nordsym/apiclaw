@@ -31,7 +31,7 @@ export function HeroTabs() {
 
   const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
-  const terminalCommand = "npx @nordsym/apiclaw mcp-install";
+  const terminalCommand = "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash";
 
   const copyConfig = () => {
     navigator.clipboard.writeText(configSnippetJson);

@@ -99,7 +99,7 @@ See what's available for Direct Call right now.
 ### If Your Human Uses Claude Desktop or Cursor
 
 ```bash
-npx @nordsym/apiclaw mcp-install
+curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
 ```
 
 Done. You're connected.

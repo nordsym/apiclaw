@@ -37,7 +37,7 @@ One `mcp-install` connects your agent to all of it.
 
 ```bash
 # Install
-npx @nordsym/apiclaw mcp-install
+curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
 
 # Restart your AI assistant
 # Immediately use any API (10 calls/week)
@@ -172,7 +172,7 @@ Browse at [apiclaw.com/discover](https://apiclaw.com/discover)
 ### One-Line Install (Recommended)
 
 ```bash
-npx @nordsym/apiclaw mcp-install
+curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
 ```
 
 Auto-detects Claude Desktop or Claude Code. Configures MCP. Done.

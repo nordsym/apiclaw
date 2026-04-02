@@ -100,7 +100,7 @@ export default function FoundingBackerSuccessPage({ searchParams }: SuccessPageP
           </div>
           <div className="terminal-body">
             <p className="terminal-command">
-              <span className="terminal-prompt">$</span> npx @nordsym/apiclaw mcp-install
+              <span className="terminal-prompt">$</span> curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
             </p>
             <p className="terminal-output mt-2">Auto-configures supported MCP clients</p>
             <p className="terminal-command mt-4">
