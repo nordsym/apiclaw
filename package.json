@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.7.18",
+  "version": "1.7.24",
   "description": "The API layer for AI agents. Dashboard + 22K APIs + 18 Direct Call providers. MCP native.",
   "type": "module",
   "main": "dist/index.js",
@@ -21,7 +21,7 @@
     "test:e2e": "tsx src/test.ts",
     "webhook": "tsx src/webhook.ts",
     "convex:dev": "npx convex dev",
-    "convex:deploy": "npx convex deploy --yes"
+    "convex:deploy": "find convex -maxdepth 1 \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' \\) -delete && npx convex deploy --yes --typecheck=disable"
   },
   "keywords": [
     "mcp",

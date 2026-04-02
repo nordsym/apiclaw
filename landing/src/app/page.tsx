@@ -8,6 +8,7 @@ import {
   Menu, X
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
+import { PLANS } from "@/lib/plans";
 import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
 import { PhoneDemo } from "@/components/demo";
@@ -132,7 +133,7 @@ const providerBenefits = [
 ];
 
 const terminalLines = [
-  { type: "prompt", text: "npx @nordsym/apiclaw mcp-install" },
+  { type: "prompt", text: "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
   { type: "output", text: "🦞 APIClaw v1.2.2", delay: 100 },
   { type: "output", text: "", delay: 50 },
@@ -197,7 +198,7 @@ export default function Home() {
   ];
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText('npx @nordsym/apiclaw mcp-install');
+    navigator.clipboard.writeText('curl -fsSL https://apiclaw.nordsym.com/install.sh | bash');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
@@ -232,7 +233,7 @@ Pricing: Free (50 calls/month), Pay-as-you-go (usage-based), or Founding Backer 
 
 When an API call helps the task, execute it directly.
 
-Get started in seconds: npx @nordsym/apiclaw mcp-install
+Get started in seconds: curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
 Docs: https://apiclaw.nordsym.com/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
@@ -245,7 +246,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
     
     setWaitlistStatus("loading");
     try {
-      const res = await fetch("https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation", {
+      const res = await fetch("https://adventurous-avocet-799.convex.cloud/api/mutation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -778,7 +779,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               <div className="code-preview-body">
                 <pre className="text-sm whitespace-pre-wrap">
                   <span className="text-gray-500"># Auto-install MCP server</span>{"\n"}
-                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install{"\n\n"}
+                  <span className="text-green-400">$</span> curl -fsSL https://apiclaw.nordsym.com/install.sh | bash{"\n\n"}
                   <span className="text-gray-500"># Or start the server directly</span>{"\n"}
                   <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw serve
                 </pre>
@@ -1030,94 +1031,66 @@ Docs: https://apiclaw.nordsym.com/docs`;
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Free */}
-            <div className="rounded-2xl bg-surface-elevated border border-border p-6 relative">
-              <h3 className="text-xl font-bold mb-2">Free</h3>
-              <div className="text-3xl font-bold mb-1">$0</div>
-              <p className="text-text-muted text-sm mb-6">Forever</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  50 Direct Call requests/month
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Unlimited API discovery
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  19 Direct Call providers
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  MCP native
-                </li>
-              </ul>
-              <a href="/docs" className="btn-ghost w-full justify-center border border-border">
-                Get Started
-              </a>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {PLANS.map((plan) => {
+              const href = plan.isContact
+                ? "/book"
+                : plan.link === null
+                ? isLoggedIn ? "/workspace?tab=billing" : "/login"
+                : isLoggedIn
+                ? plan.link
+                : "/login";
 
-            {/* Pay as you go */}
-            <div className="rounded-2xl bg-surface-elevated border-2 border-accent p-6 relative glow">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
-                Recommended
-              </div>
-              <h3 className="text-xl font-bold mb-2">Pay as you go</h3>
-              <div className="text-3xl font-bold mb-1">Usage-based</div>
-              <p className="text-text-muted text-sm mb-6">Monthly invoice</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Unlimited Direct Call requests
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Add card, get monthly invoice
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  No commitment, cancel anytime
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Priority support
-                </li>
-              </ul>
-              <a href="/workspace?tab=billing" className="btn-primary w-full justify-center">
-                Add Payment Method
-              </a>
-            </div>
+              const ctaLabel = plan.isContact
+                ? "Book a call"
+                : plan.id === "free"
+                ? isLoggedIn ? "Go to Dashboard" : "Get Started"
+                : plan.cta;
 
-            {/* Founding Backer */}
-            <div className="rounded-2xl bg-surface-elevated border border-border p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-gradient-to-l from-accent/20 to-transparent w-32 h-32 blur-2xl" />
-              <h3 className="text-xl font-bold mb-2">Founding Backer</h3>
-              <div className="text-3xl font-bold mb-1">$199</div>
-              <p className="text-text-muted text-sm mb-6">One-time, unlimited until 2027</p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Unlimited everything until end of 2026
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Early access to new features
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Direct Slack with founders
-                </li>
-                <li className="flex items-start gap-3 text-text-secondary text-sm">
-                  <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  Shape the roadmap
-                </li>
-              </ul>
-              <a href="/workspace?tab=billing" className="btn-ghost w-full justify-center border border-accent text-accent hover:bg-accent hover:text-white">
-                Become a Backer
-              </a>
-            </div>
+              const isExternal = href.startsWith("http");
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`rounded-2xl p-6 flex flex-col relative ${
+                    plan.highlight
+                      ? "border-2 border-accent bg-surface-elevated glow"
+                      : "border border-border bg-surface-elevated"
+                  }`}
+                >
+                  {plan.highlight && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
+                      Most popular
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                  <div className="text-3xl font-bold mb-1">{plan.price}</div>
+                  <p className="text-text-muted text-sm mb-6">
+                    {plan.period || (plan.id === "free" ? "Forever" : plan.id === "enterprise" ? "Contact us" : "")}
+                  </p>
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-3 text-text-secondary text-sm">
+                        <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href={href}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    className={`w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold transition ${
+                      plan.highlight
+                        ? "btn-primary"
+                        : "btn-ghost border border-border"
+                    }`}
+                  >
+                    {ctaLabel}
+                  </a>
+                </div>
+              );
+            })}
           </div>
 
           {/* For API Providers - smaller section below */}

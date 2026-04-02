@@ -324,6 +324,8 @@ export const getWorkspaceDashboard = query({
         usagePercentage,
         stripeCustomerId: workspace.stripeCustomerId,
         createdAt: workspace.createdAt,
+        mainAgentName: workspace.mainAgentName,
+        mainAgentId: workspace.mainAgentId,
       },
       stats: {
         totalAgents: totalAgentCount,
@@ -1134,5 +1136,13 @@ export const adminUpdateEmail = mutation({
   handler: async (ctx, { workspaceId, newEmail }) => {
     await ctx.db.patch(workspaceId, { email: newEmail });
     return { success: true, email: newEmail };
+  },
+});
+
+export const adminSetTier = mutation({
+  args: { workspaceId: v.id("workspaces"), tier: v.string() },
+  handler: async (ctx, { workspaceId, tier }) => {
+    await ctx.db.patch(workspaceId, { tier, updatedAt: Date.now() });
+    return { success: true, tier };
   },
 });

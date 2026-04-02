@@ -16,6 +16,7 @@ export interface SessionData {
 
 const SESSION_DIR = path.join(os.homedir(), '.apiclaw');
 const SESSION_FILE = path.join(SESSION_DIR, 'session');
+const SESSION_FILE_LEGACY = path.join(SESSION_DIR, 'session.json');
 
 /**
  * Ensure the ~/.apiclaw directory exists
@@ -32,21 +33,31 @@ function ensureSessionDir(): void {
  */
 export function readSession(): SessionData | null {
   try {
-    if (!fs.existsSync(SESSION_FILE)) {
-      return null;
+    // Try primary session file first
+    if (fs.existsSync(SESSION_FILE)) {
+      const content = fs.readFileSync(SESSION_FILE, 'utf8');
+      const data = JSON.parse(content) as SessionData;
+      if (data.sessionToken && data.workspaceId && data.email) {
+        return data;
+      }
+      // Invalid (e.g. empty email from anonymous write) — clear and fall through
+      console.error('[APIClaw] Invalid session file, checking legacy...');
+      fs.unlinkSync(SESSION_FILE);
     }
-    
-    const content = fs.readFileSync(SESSION_FILE, 'utf8');
-    const data = JSON.parse(content) as SessionData;
-    
-    // Validate required fields
-    if (!data.sessionToken || !data.workspaceId || !data.email) {
-      console.error('[APIClaw] Invalid session file, clearing...');
-      clearSession();
-      return null;
+
+    // Fall back to session.json (written by CLI login in older versions)
+    if (fs.existsSync(SESSION_FILE_LEGACY)) {
+      const content = fs.readFileSync(SESSION_FILE_LEGACY, 'utf8');
+      const data = JSON.parse(content) as SessionData;
+      if (data.sessionToken && data.workspaceId && data.email) {
+        console.error(`[APIClaw] Migrating session.json → session for ${data.email}`);
+        // Migrate to canonical location
+        fs.writeFileSync(SESSION_FILE, JSON.stringify({ ...data, createdAt: data.createdAt || Date.now() }, null, 2), { mode: 0o600 });
+        return data;
+      }
     }
-    
-    return data;
+
+    return null;
   } catch (error) {
     console.error('[APIClaw] Error reading session:', error);
     return null;

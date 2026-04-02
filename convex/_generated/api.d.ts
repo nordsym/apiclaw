@@ -24,6 +24,7 @@ import type * as feedback from "../feedback.js";
 import type * as http from "../http.js";
 import type * as inbound from "../inbound.js";
 import type * as logs from "../logs.js";
+import type * as migratePratham from "../migratePratham.js";
 import type * as mou from "../mou.js";
 import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   inbound: typeof inbound;
   logs: typeof logs;
+  migratePratham: typeof migratePratham;
   mou: typeof mou;
   providerKeys: typeof providerKeys;
   providers: typeof providers;

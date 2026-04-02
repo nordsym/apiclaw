@@ -53,7 +53,7 @@ function BookForm() {
     try {
       const token = localStorage.getItem("apiclaw_workspace_session");
       if (token) {
-        fetch(`https://brilliant-puffin-712.eu-west-1.convex.cloud/api/query`, {
+        fetch(`https://adventurous-avocet-799.convex.cloud/api/query`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path: "workspaces:getWorkspaceByToken", args: { token } }),

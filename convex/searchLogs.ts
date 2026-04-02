@@ -1,5 +1,72 @@
-import { internalMutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+/**
+ * Public mutation called by MCP server (path: searchLogs:log)
+ */
+export const log = mutation({
+  args: {
+    sessionToken: v.string(),
+    query: v.string(),
+    resultCount: v.number(),
+    matchedProviders: v.optional(v.array(v.string())),
+    responseTimeMs: v.optional(v.number()),
+    subagentId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
+      .first();
+    if (!session) return { success: false };
+
+    await ctx.db.insert("searchLogs", {
+      workspaceId: session.workspaceId,
+      subagentId: args.subagentId,
+      query: args.query,
+      resultCount: args.resultCount,
+      hasResults: args.resultCount > 0,
+      matchedProviders: args.matchedProviders,
+      responseTimeMs: args.responseTimeMs || 0,
+      timestamp: Date.now(),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Get recent searches for a workspace (path: searchLogs:getRecent)
+ */
+export const getRecent = query({
+  args: {
+    token: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, limit = 50 }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) return [];
+
+    const logs = await ctx.db
+      .query("searchLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .order("desc")
+      .take(limit);
+
+    return logs.map((l) => ({
+      id: l._id,
+      query: l.query,
+      resultCount: l.resultCount,
+      hasResults: l.hasResults,
+      matchedProviders: l.matchedProviders || [],
+      responseTimeMs: l.responseTimeMs,
+      timestamp: l.timestamp,
+      subagentId: l.subagentId,
+    }));
+  },
+});
 
 // Log a search query (uses existing searchLogs table schema)
 export const logSearch = internalMutation({
@@ -100,6 +167,50 @@ export const getTopQueries = query({
         until: new Date().toISOString(),
       },
     };
+  },
+});
+
+// Get search stats for a workspace (path: searchLogs:getStats)
+export const getStats = query({
+  args: {
+    token: v.string(),
+    hoursBack: v.optional(v.number()),
+  },
+  handler: async (ctx, { token, hoursBack }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) return { totalSearches: 0, zeroResultSearches: 0, avgResponseTimeMs: 0, successRate: 0, byDay: [] };
+
+    const since = hoursBack ? Date.now() - hoursBack * 60 * 60 * 1000 : 0;
+
+    const logs = await ctx.db
+      .query("searchLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+
+    const filtered = since > 0 ? logs.filter((l) => l.timestamp >= since) : logs;
+    const totalSearches = filtered.length;
+    const zeroResultSearches = filtered.filter((l) => !l.hasResults).length;
+    const avgResponseTimeMs = totalSearches > 0
+      ? Math.round(filtered.reduce((sum, l) => sum + (l.responseTimeMs || 0), 0) / totalSearches)
+      : 0;
+    const successRate = totalSearches > 0
+      ? Math.round(((totalSearches - zeroResultSearches) / totalSearches) * 1000) / 10
+      : 0;
+
+    // Per-day breakdown for chart
+    const byDayMap: Record<string, number> = {};
+    for (const log of filtered) {
+      const day = new Date(log.timestamp).toISOString().split("T")[0];
+      byDayMap[day] = (byDayMap[day] || 0) + 1;
+    }
+    const byDay = Object.entries(byDayMap)
+      .map(([date, searches]) => ({ date, searches }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return { totalSearches, zeroResultSearches, avgResponseTimeMs, successRate, byDay };
   },
 });
 

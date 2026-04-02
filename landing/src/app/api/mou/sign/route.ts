@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// MOU functions deployed to brilliant-puffin-712.eu-west-1
-const CONVEX_URL = "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+
+const CONVEX_URL = "https://adventurous-avocet-799.convex.cloud";
 
 interface PartnerConfig {
   name: string;

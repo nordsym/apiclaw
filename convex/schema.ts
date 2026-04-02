@@ -47,7 +47,7 @@ export default defineSchema({
     workspaceName: v.optional(v.string()), // Display name (e.g., "APILayer", "My Team")
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
-    tier: v.string(), // "free" | "pro" | "enterprise" | "backer"
+    tier: v.string(), // "free" | "pro" | "enterprise" | "backer" | "founder"
     usageCount: v.number(), // total API calls made (lifetime)
     usageLimit: v.number(), // max API calls for tier
     // Weekly usage (resets every Monday 00:00 UTC)

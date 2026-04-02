@@ -79,6 +79,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Legend,
 } from "recharts";
 import {
   CheckoutButton,
@@ -88,8 +89,9 @@ import {
 import { Toast, useToast } from "@/components/Toast";
 import { EarnCreditsTab } from "@/components/EarnCreditsTab";
 import statsData from "@/lib/stats.json";
+import { PLANS } from "@/lib/plans";
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
 interface Workspace {
   id: string;
@@ -123,6 +125,7 @@ interface ConnectedAgent {
   aiBackend?: string;
   platform?: string;
   callCount: number;
+  searchCount?: number;
   firstSeenAt: number;
   lastActiveAt: number;
 }
@@ -299,6 +302,12 @@ export default function WorkspacePage() {
       const dashboard = dashboardData.value || dashboardData;
       
       if (dashboard?.workspace) {
+        // Guard: anonymous workspace (no email) means the browser session is stale — force re-login
+        if (!dashboard.workspace.email) {
+          localStorage.removeItem("apiclaw_workspace_session");
+          router.push("/login");
+          return;
+        }
         setWorkspace(dashboard.workspace);
       }
 
@@ -1526,60 +1535,64 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
     );
   }
 
-  if (!apis || apis.length === 0) {
-    return (
-      <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">My APIs</h2>
-          <p className="text-[var(--text-muted)]">Choose how you want AI agents to access your API.</p>
+          <p className="text-[var(--text-muted)]">
+            {(!apis || apis.length === 0) ? "Choose how you want AI agents to access your API." : `${apis.length} API${apis.length !== 1 ? "s" : ""} listed`}
+          </p>
         </div>
+      </div>
 
-        {/* Three integration options */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
-            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
-              <Search className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
-            </div>
-            <h3 className="font-semibold text-lg mb-1">List API</h3>
-            <p className="text-[#ef4444] text-sm font-medium mb-3">Get discovered</p>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Appear in the APIClaw catalog. AI agents find you when searching for capabilities.
-            </p>
-            <div className="flex items-center justify-end">
-              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
-            </div>
-          </button>
+      {/* Three integration options — always visible */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+            <Search className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
+          </div>
+          <h3 className="font-semibold text-lg mb-1">List API</h3>
+          <p className="text-[#ef4444] text-sm font-medium mb-3">Get discovered</p>
+          <p className="text-sm text-[var(--text-muted)] mb-4">
+            Appear in the APIClaw catalog. AI agents find you when searching for capabilities.
+          </p>
+          <div className="flex items-center justify-end">
+            <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+          </div>
+        </button>
 
-          <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
-            <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
-              <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
-            </div>
-            <h3 className="font-semibold text-lg mb-1">Open API</h3>
-            <p className="text-[#ef4444] text-sm font-medium mb-3">Indexed & callable</p>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              Provide your public OpenAPI spec. APIClaw indexes it so agents can discover and call your endpoint through the platform.
-            </p>
-            <div className="flex items-center justify-end">
-              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
-            </div>
-          </button>
+        <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+            <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
+          </div>
+          <h3 className="font-semibold text-lg mb-1">Open API</h3>
+          <p className="text-[#ef4444] text-sm font-medium mb-3">Indexed & callable</p>
+          <p className="text-sm text-[var(--text-muted)] mb-4">
+            Provide your public OpenAPI spec. APIClaw indexes it so agents can discover and call your endpoint through the platform.
+          </p>
+          <div className="flex items-center justify-end">
+            <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+          </div>
+        </button>
 
-          <button onClick={onAdd} className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden">
-            <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
-              <Zap className="w-6 h-6 text-[#ef4444]" />
-            </div>
-            <h3 className="font-semibold text-lg mb-1">Direct Call</h3>
-            <p className="text-[#ef4444] text-sm font-medium mb-3">We handle keys</p>
-            <p className="text-sm text-[var(--text-muted)] mb-4">
-              APIClaw manages authentication and billing. Agents call your API without handling keys.
-            </p>
-            <div className="flex items-center justify-end">
-              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
-            </div>
-          </button>
-        </div>
+        <button onClick={onAdd} className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
+            <Zap className="w-6 h-6 text-[#ef4444]" />
+          </div>
+          <h3 className="font-semibold text-lg mb-1">Direct Call</h3>
+          <p className="text-[#ef4444] text-sm font-medium mb-3">We handle keys</p>
+          <p className="text-sm text-[var(--text-muted)] mb-4">
+            APIClaw manages authentication and billing. Agents call your API without handling keys.
+          </p>
+          <div className="flex items-center justify-end">
+            <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
+          </div>
+        </button>
+      </div>
 
-        {/* Why list section */}
+      {/* Why list — only when no APIs yet */}
+      {(!apis || apis.length === 0) && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <h4 className="font-semibold mb-4">Why list your API on APIClaw?</h4>
           <div className="grid md:grid-cols-3 gap-4">
@@ -1606,18 +1619,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">My APIs</h2>
-          <p className="text-[var(--text-muted)]">{apis.length} API{apis.length !== 1 ? "s" : ""} listed</p>
-        </div>
-      </div>
+      )}
 
       <div className="grid gap-4">
         {apis.map((api) => (
@@ -2169,6 +2171,9 @@ function AgentsTab({
                   <span className="text-sm font-semibold text-[var(--text-primary)]">
                     {agent.callCount.toLocaleString()} calls
                   </span>
+                  {(agent.searchCount ?? 0) > 0 && (
+                    <p className="text-xs text-[var(--text-muted)]">{agent.searchCount!.toLocaleString()} searches</p>
+                  )}
                   {agent.aiBackend && (
                     <p className="text-xs text-[var(--text-muted)]">{agent.aiBackend}</p>
                   )}
@@ -2343,16 +2348,6 @@ function AgentsTab({
                 <p className="text-xs text-[var(--text-muted)] mb-1">Last Active</p>
                 <p className="text-sm">{formatRelativeTime(primaryAgent.lastUsedAt)}</p>
               </div>
-            </div>
-          </div>
-        ) : isProvider ? (
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-[var(--surface)] border-2 border-dashed border-[var(--border)] flex items-center justify-center">
-              <Cpu className="w-7 h-7 text-[var(--text-muted)]" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-[var(--text-muted)]">Provider account</h3>
-              <p className="text-sm text-[var(--text-muted)]">This workspace lists APIs — no agent required. If you want to test your own APIs directly, connect one below.</p>
             </div>
           </div>
         ) : (
@@ -3538,8 +3533,30 @@ function AnalyticsOverviewTab({
   usage: UsageData | null;
   sessionToken: string | null;
 }) {
-  const [searchStats, setSearchStats] = useState<{ totalSearches: number; zeroResultRate: number } | null>(null);
-  
+  const [searchStats, setSearchStats] = useState<{ totalSearches: number; zeroResultRate: number; avgResponseTimeMs: number; successRate: number; byDay: { date: string; searches: number }[] } | null>(null);
+  const [workspaceLogs, setWorkspaceLogs] = useState<{ byDay: { date: string; calls: number; searches: number }[]; totalCalls: number; avgLatency: number; successRate: number } | null>(null);
+
+  // Fetch workspace call analytics (from apiLogs)
+  useEffect(() => {
+    const fetchWorkspaceLogs = async () => {
+      if (!sessionToken) return;
+      try {
+        const res = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "logs:getProviderAnalytics",
+            args: { token: sessionToken, hoursBack: 240 }, // Last 10 days
+          }),
+        });
+        const data = await res.json();
+        const result = data.value || data;
+        if (result && !result.error) setWorkspaceLogs(result);
+      } catch { /* ignore */ }
+    };
+    fetchWorkspaceLogs();
+  }, [sessionToken]);
+
   // Fetch search stats
   useEffect(() => {
     const fetchSearchStats = async () => {
@@ -3550,7 +3567,7 @@ function AnalyticsOverviewTab({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             path: "searchLogs:getStats",
-            args: { token: sessionToken, hoursBack: 168 }, // Last 7 days
+            args: { token: sessionToken, hoursBack: 168 },
           }),
         });
         const data = await res.json();
@@ -3559,6 +3576,9 @@ function AnalyticsOverviewTab({
           setSearchStats({
             totalSearches: result.totalSearches || 0,
             zeroResultRate: result.zeroResultRate || 0,
+            avgResponseTimeMs: result.avgResponseTimeMs || 0,
+            successRate: result.successRate || 0,
+            byDay: result.byDay || [],
           });
         }
       } catch (err) {
@@ -3568,18 +3588,25 @@ function AnalyticsOverviewTab({
     fetchSearchStats();
   }, [sessionToken]);
 
-  const totalCalls = analytics?.totalCalls || workspace?.usageCount || 0;
+  const totalCalls = workspaceLogs?.totalCalls || analytics?.totalCalls || workspace?.usageCount || 0;
   const uniqueAgents = analytics?.uniqueAgents || agents.length || 0;
-  const hasChartData = analytics && analytics.callsByDay && analytics.callsByDay.length > 0;
+  const hasWorkspaceLogs = workspaceLogs && workspaceLogs.byDay && workspaceLogs.byDay.length > 0;
+  const hasChartData = hasWorkspaceLogs || (analytics && analytics.callsByDay && analytics.callsByDay.length > 0);
   const totalSearches = searchStats?.totalSearches || (analytics?.isPreview ? 247 : 0);
+  const avgLatency = workspaceLogs?.avgLatency || analytics?.avgLatency || searchStats?.avgResponseTimeMs || null;
+  const successRate = workspaceLogs?.successRate || analytics?.successRate || searchStats?.successRate || null;
 
-  // Preview chart data when no real data exists
-  const previewChartData = Array.from({ length: 7 }, (_, i) => {
+  // Build chart: 10 days base, merge calls from workspaceLogs + searches from searchStats
+  const last10Days = Array.from({ length: 10 }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return { date: d.toISOString().split("T")[0], calls: 0 };
+    d.setDate(d.getDate() - (9 - i));
+    return d.toISOString().split("T")[0];
   });
-  const chartData = hasChartData ? analytics!.callsByDay : previewChartData;
+  const callsByDay: Record<string, number> = {};
+  (workspaceLogs?.byDay || (analytics?.callsByDay || [])).forEach((d: { date: string; calls: number }) => { callsByDay[d.date] = d.calls; });
+  const searchByDay: Record<string, number> = {};
+  (searchStats?.byDay || []).forEach(({ date, searches }) => { searchByDay[date] = searches; });
+  const chartData = last10Days.map((date) => ({ date, calls: callsByDay[date] || 0, searches: searchByDay[date] || 0 }));
 
   return (
     <div className="space-y-8">
@@ -3599,8 +3626,8 @@ function AnalyticsOverviewTab({
         <StatCard title="Total Calls" value={totalCalls.toLocaleString()} icon={Zap} accent />
         <StatCard title="Total Searches" value={totalSearches.toLocaleString()} icon={Search} />
         <StatCard title="Connected Agents" value={agents.length.toString()} icon={Users} />
-        <StatCard title="Avg Latency" value={analytics?.avgLatency ? `${analytics.avgLatency}ms` : "—"} icon={Clock} />
-        <StatCard title="Success Rate" value={analytics?.successRate ? `${analytics.successRate.toFixed(1)}%` : "—"} icon={Check} />
+        <StatCard title="Avg Latency" value={avgLatency ? `${Math.round(avgLatency)}ms` : "—"} icon={Clock} />
+        <StatCard title="Success Rate" value={successRate ? `${Math.round(successRate)}%` : "—"} icon={Check} />
       </div>
       {/* Agents using my APIs */}
       {analytics?.uniqueAgents && analytics.uniqueAgents !== agents.length ? (
@@ -3615,7 +3642,7 @@ function AnalyticsOverviewTab({
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Line Chart */}
           <div className="lg:col-span-2 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--border)] p-6">
-            <h3 className="font-semibold mb-4">Calls Over Time {!hasChartData && <span className="text-xs font-normal text-[var(--text-muted)] ml-2">Preview</span>}</h3>
+            <h3 className="font-semibold mb-4">Activity Over Time {!hasChartData && <span className="text-xs font-normal text-[var(--text-muted)] ml-2">Preview</span>}</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
@@ -3630,7 +3657,9 @@ function AnalyticsOverviewTab({
                     contentStyle={{ background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: "8px" }}
                     labelFormatter={(d) => new Date(d).toLocaleDateString()}
                   />
-                  <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} />
+                  <Line type="monotone" dataKey="calls" stroke="#ef4444" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#ef4444" }} name="Calls" />
+                  <Line type="monotone" dataKey="searches" stroke="#00D4FF" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#00D4FF" }} name="Searches" />
+                  <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-muted)" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -4543,60 +4572,11 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
   const isBacker = (currentTier === "backer" || currentTier === "founder");
   const isPartner = currentTier === "partner";
 
-  const plans = [
-    {
-      id: "free",
-      name: "Free",
-      price: "$0",
-      period: "",
-      calls: "50 Direct Call",
-      callsSub: "calls per month",
-      features: ["Search Index always available", "Open API always available", "1 connected agent"],
-      cta: "Current plan",
-      ctaDisabled: true,
-      link: null,
-      highlight: false,
-    },
-    {
-      id: "pro",
-      name: "Pro",
-      price: "$79",
-      period: "/month",
-      calls: "5,000 Direct Call",
-      callsSub: "calls per month",
-      features: ["Everything in Free", "Search + Open API always available", "All Direct Call providers", "Priority support"],
-      cta: currentTier === "pro" ? "Current plan" : "Upgrade to Pro",
-      ctaDisabled: currentTier === "pro",
-      link: "https://buy.stripe.com/7sY7sN78gfX43yAchqcMM0z",
-      highlight: true,
-    },
-    {
-      id: "scale",
-      name: "Scale",
-      price: "$249",
-      period: "/month",
-      calls: "25,000 Direct Call",
-      callsSub: "calls per month",
-      features: ["Everything in Pro", "Volume pricing on calls", "Dedicated onboarding", "SLA available"],
-      cta: currentTier === "scale" ? "Current plan" : "Upgrade to Scale",
-      ctaDisabled: currentTier === "scale",
-      link: "https://buy.stripe.com/14A3cx78geT00modlucMM0A",
-      highlight: false,
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      calls: "Unlimited",
-      callsSub: "calls",
-      features: ["Everything in Scale", "Custom call limits", "Private deployment options", "SLA & onboarding support"],
-      cta: "Book a call",
-      ctaDisabled: false,
-      link: "/book",
-      highlight: false,
-    },
-  ];
+  const plans = PLANS.map((p) => ({
+    ...p,
+    cta: currentTier === p.id ? "Current plan" : p.ctaLoggedIn,
+    ctaDisabled: currentTier === p.id,
+  }));
 
   return (
     <div className="space-y-8">

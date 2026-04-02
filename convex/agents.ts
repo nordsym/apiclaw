@@ -76,6 +76,38 @@ export const getMainAgent = query({
 /**
  * Rename the main agent
  */
+/**
+ * Rename an agent by ID (patches agents table directly)
+ */
+export const renameAgent = mutation({
+  args: {
+    token: v.string(),
+    agentId: v.id("agents"),
+    name: v.string(),
+  },
+  handler: async (ctx, { token, agentId, name }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (!session) throw new Error("Invalid session");
+
+    const agent = await ctx.db.get(agentId);
+    if (!agent || agent.workspaceId.toString() !== session.workspaceId.toString()) {
+      throw new Error("Agent not found or not in your workspace");
+    }
+
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
+      throw new Error("Name must be between 2 and 50 characters");
+    }
+
+    await ctx.db.patch(agentId, { name: trimmedName });
+    return { success: true, name: trimmedName };
+  },
+});
+
 export const renameMainAgent = mutation({
   args: {
     token: v.string(),
@@ -623,9 +655,72 @@ export const ensureAgent = mutation({
     fingerprint: v.string(),
     mcpClient: v.string(),
     platform: v.optional(v.string()),
+    sessionToken: v.optional(v.string()),
   },
-  handler: async (ctx, { fingerprint, mcpClient, platform }) => {
+  handler: async (ctx, { fingerprint, mcpClient, platform, sessionToken }) => {
     const now = Date.now();
+
+    console.log(`[ensureAgent] fingerprint=${fingerprint} mcpClient=${mcpClient} hasSessionToken=${!!sessionToken}`);
+
+    // 0. If sessionToken provided, resolve to authenticated workspace and link agent there
+    if (sessionToken) {
+      const session = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", sessionToken))
+        .first();
+
+      if (session) {
+        console.log(`[ensureAgent] sessionToken resolved → workspaceId=${session.workspaceId}`);
+        // Check if agent already exists for this fingerprint+client
+        const existing = await ctx.db
+          .query("agents")
+          .withIndex("by_fingerprint_client", (q) =>
+            q.eq("fingerprint", fingerprint).eq("mcpClient", mcpClient)
+          )
+          .first();
+
+        if (existing) {
+          // Re-link to authenticated workspace if mismatched
+          if (existing.workspaceId.toString() !== session.workspaceId.toString()) {
+            await ctx.db.patch(existing._id, {
+              workspaceId: session.workspaceId,
+              lastActiveAt: now,
+              ...(platform ? { platform } : {}),
+            });
+          } else {
+            await ctx.db.patch(existing._id, {
+              lastActiveAt: now,
+              ...(platform ? { platform } : {}),
+            });
+          }
+          return {
+            agentId: existing._id,
+            workspaceId: session.workspaceId,
+            sessionToken,
+            isNew: false,
+          };
+        }
+
+        // Create agent linked to authenticated workspace
+        const agentId = await ctx.db.insert("agents", {
+          fingerprint,
+          mcpClient,
+          workspaceId: session.workspaceId,
+          name: generateAgentName(),
+          platform: platform || undefined,
+          callCount: 0,
+          firstSeenAt: now,
+          lastActiveAt: now,
+        });
+
+        return {
+          agentId,
+          workspaceId: session.workspaceId,
+          sessionToken,
+          isNew: false,
+        };
+      }
+    }
 
     // 1. Check if agent already exists
     const existing = await ctx.db
@@ -643,7 +738,7 @@ export const ensureAgent = mutation({
       });
 
       // Find session for this workspace
-      const session = await ctx.db
+      const existingSession = await ctx.db
         .query("agentSessions")
         .withIndex("by_workspaceId", (q) => q.eq("workspaceId", existing.workspaceId))
         .first();
@@ -651,7 +746,7 @@ export const ensureAgent = mutation({
       return {
         agentId: existing._id,
         workspaceId: existing.workspaceId,
-        sessionToken: session?.sessionToken || null,
+        sessionToken: existingSession?.sessionToken || null,
         isNew: false,
       };
     }
@@ -697,10 +792,10 @@ export const ensureAgent = mutation({
     });
 
     // 5. Create session
-    const sessionToken = generateSessionToken();
+    const newSessionToken = generateSessionToken();
     await ctx.db.insert("agentSessions", {
       workspaceId,
-      sessionToken,
+      sessionToken: newSessionToken,
       fingerprint,
       lastUsedAt: now,
       createdAt: now,
@@ -709,7 +804,7 @@ export const ensureAgent = mutation({
     return {
       agentId,
       workspaceId,
-      sessionToken,
+      sessionToken: newSessionToken,
       isNew: true,
     };
   },
@@ -780,6 +875,24 @@ export const getWorkspaceAgents = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
+    // Live-count outbound API calls for this workspace
+    const allLogs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+    const outboundCalls = allLogs.filter((l) => l.direction !== "inbound").length;
+
+    // Live-count searches for this workspace
+    const allSearches = await ctx.db
+      .query("searchLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+    const totalSearches = allSearches.length;
+
+    // If only one logical agent, give it all the counts.
+    // If multiple agents, distribute evenly (rare edge case — most workspaces have one).
+    const agentCount = agents.length || 1;
+
     return agents.map((a) => ({
       id: a._id,
       fingerprint: a.fingerprint,
@@ -788,10 +901,22 @@ export const getWorkspaceAgents = query({
       hostname: a.fingerprint.split(":")[0],
       aiBackend: a.aiBackend,
       platform: a.platform,
-      callCount: a.callCount,
+      callCount: Math.round(outboundCalls / agentCount),
+      searchCount: Math.round(totalSearches / agentCount),
       firstSeenAt: a.firstSeenAt,
       lastActiveAt: a.lastActiveAt,
     }));
+  },
+});
+
+/**
+ * Delete an agent record from the agents table (admin / cleanup)
+ */
+export const adminDeleteAgent = mutation({
+  args: { agentId: v.id("agents") },
+  handler: async (ctx, { agentId }) => {
+    await ctx.db.delete(agentId);
+    return { success: true };
   },
 });
 

@@ -67,7 +67,7 @@ import {
 const DEFAULT_AGENT_ID = 'agent_default';
 
 // Convex client for workspace management
-const CONVEX_URL = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
+const CONVEX_URL = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
 const convex = new ConvexHttpClient(CONVEX_URL);
 
 // Global workspace context (set on startup if session is valid)
@@ -955,7 +955,7 @@ Docs: https://apiclaw.nordsym.com
 
         // Update AI backend tracking if provided
         if (aiBackend && workspaceContext?.sessionToken) {
-          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+          fetch('https://adventurous-avocet-799.convex.cloud/api/mutation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1188,7 +1188,7 @@ Docs: https://apiclaw.nordsym.com
         
         // Track AI backend if provided
         if (aiBackend && workspaceContext?.sessionToken) {
-          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+          fetch('https://adventurous-avocet-799.convex.cloud/api/mutation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1549,6 +1549,11 @@ Docs: https://apiclaw.nordsym.com
               workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
             }
 
+            // Increment per-agent call counter
+            if (currentAgentId) {
+              convex.mutation("agents:incrementAgentCalls" as any, { agentId: currentAgentId as any }).catch(() => {});
+            }
+
             // Track earn progress (first direct call + unique APIs)
             await trackEarnProgress(workspaceContext.workspaceId, provider, action);
           } catch (e) {
@@ -1621,7 +1626,7 @@ Docs: https://apiclaw.nordsym.com
         
         // Track AI backend if provided
         if (aiBackend && workspaceContext?.sessionToken) {
-          fetch('https://brilliant-puffin-712.eu-west-1.convex.cloud/api/mutation', {
+          fetch('https://adventurous-avocet-799.convex.cloud/api/mutation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2368,10 +2373,12 @@ async function main() {
   try {
     const fingerprint = getMachineFingerprint();
     const mcpClient = detectMCPClient();
+    const existingSession = readSession();
     const result = await convex.mutation("agents:ensureAgent" as any, {
       fingerprint,
       mcpClient,
       platform: process.platform,
+      ...(existingSession?.sessionToken ? { sessionToken: existingSession.sessionToken } : {}),
     });
     if (result?.agentId) {
       currentAgentId = result.agentId;
