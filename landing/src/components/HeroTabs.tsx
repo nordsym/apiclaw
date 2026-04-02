@@ -136,7 +136,7 @@ export function HeroTabs() {
                     </div>
                     <div className="code-preview-body">
                       <pre className="text-sm">
-                        <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw mcp-install
+                        <span className="text-green-400">$</span> curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
                       </pre>
                     </div>
                   </div>
