@@ -171,6 +171,7 @@ export const logDiscovery = mutation({
   handler: async (ctx, args) => {
     const providerEmailMap: Record<string, string> = {
       apilayer: "pratham@apilayer.com",
+      filestack: "marketing@filestack.com",
     };
     const email = providerEmailMap[args.provider];
     if (!email) return { logged: false };
@@ -230,6 +231,7 @@ export const trackDiscoveryByProvider = mutation({
     // Find provider by email mapping
     const providerEmailMap: Record<string, string> = {
       apilayer: "pratham@apilayer.com",
+      filestack: "marketing@filestack.com",
     };
     const email = providerEmailMap[args.provider];
     if (!email) return { updated: 0, error: "no email mapping" };
