@@ -6,7 +6,7 @@ import statsData from "@/lib/stats.json";
 export const metadata: Metadata = {
   title: "APIClaw | The API Layer for AI Agents",
   description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
-  metadataBase: new URL("https://apiclaw.nordsym.com"),
+  metadataBase: new URL("https://apiclaw.cloud"),
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -50,7 +50,7 @@ const schemaOrg = {
     {
       "@type": "WebSite",
       "name": "APIClaw",
-      "url": "https://apiclaw.nordsym.com",
+      "url": "https://apiclaw.cloud",
       "description": "Your agent's API encyclopedia. Search by capability, call instantly. 22,392 APIs indexed • 1,636 Open APIs • 19 Direct Call • MCP native"
     },
     {

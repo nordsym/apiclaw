@@ -34,7 +34,7 @@ curl -s "$CONVEX_URL/api/mutation" \
 
 echo ""
 echo "API created! Now set up Direct Call via the dashboard:"
-echo "https://apiclaw.nordsym.com/providers/dashboard"
+echo "https://apiclaw.cloud/providers/dashboard"
 echo ""
 echo "Direct Call config for Stripe:"
 echo "  Base URL: https://api.stripe.com/v1"

@@ -356,7 +356,7 @@ export default function ProvidersPage() {
                   <Github className="w-5 h-5" />
                 </a>
                 <a
-                  href="https://twitter.com/nordsym"
+                  href="https://x.com/APIClaw"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-lg bg-surface-elevated border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:border-accent/50 transition"
@@ -380,7 +380,7 @@ export default function ProvidersPage() {
               <ul className="space-y-3 text-text-muted">
                 <li><a href="https://nordsym.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">NordSym</a></li>
                 <li><a href="https://github.com/nordsym" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">GitHub</a></li>
-                <li><a href="https://twitter.com/nordsym" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Twitter</a></li>
+                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Twitter</a></li>
               </ul>
             </div>
           </div>

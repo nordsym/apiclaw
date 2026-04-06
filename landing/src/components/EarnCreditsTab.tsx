@@ -162,7 +162,7 @@ const TASKS: TaskConfig[] = [
     action: {
       type: "link",
       label: "Follow",
-      href: "https://x.com/NordSym",
+      href: "https://x.com/APIClaw",
     },
   },
   {

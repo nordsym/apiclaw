@@ -82,14 +82,31 @@ export const saveConfig = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    // Verify session
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
+    // Verify session (unified: agentSessions first, fallback to legacy sessions)
+    let providerId: any = null;
+
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
       .first();
 
-    if (!session || session.expiresAt < Date.now()) {
-      throw new Error("Invalid or expired session");
+    if (agentSession) {
+      const provider = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+      if (!provider) throw new Error("No provider linked to workspace");
+      providerId = provider._id;
+    } else {
+      // Fallback: legacy sessions
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", args.token))
+        .first();
+      if (!session || session.expiresAt < Date.now()) {
+        throw new Error("Invalid or expired session");
+      }
+      providerId = session.providerId;
     }
 
     const now = Date.now();
@@ -128,7 +145,7 @@ export const saveConfig = mutation({
 
     // Create new config
     return await ctx.db.insert("providerDirectCall", {
-      providerId: session.providerId,
+      providerId,
       apiId: config.apiId as any,
       baseUrl: config.baseUrl,
       authType: config.authType,
@@ -536,13 +553,31 @@ export const testAction = mutation({
   handler: async (ctx, args) => {
     const startTime = Date.now();
     
-    // 1. Verify provider session
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
+    // 1. Verify provider session (unified: agentSessions first, fallback to legacy)
+    let sessionProviderId: any = null;
+
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
       .first();
-    
-    if (!session || session.expiresAt < Date.now()) {
+
+    if (agentSession) {
+      const provider = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+      if (provider) sessionProviderId = provider._id;
+    } else {
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", args.token))
+        .first();
+      if (session && session.expiresAt >= Date.now()) {
+        sessionProviderId = session.providerId;
+      }
+    }
+
+    if (!sessionProviderId) {
       return {
         success: false,
         error: "Unauthorized - invalid or expired session",
@@ -561,7 +596,7 @@ export const testAction = mutation({
     }
     
     // Verify ownership
-    if (config.providerId !== session.providerId) {
+    if (config.providerId !== sessionProviderId) {
       return {
         success: false,
         error: "Unauthorized - you don't own this config",

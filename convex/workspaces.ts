@@ -295,13 +295,12 @@ export const getWorkspaceDashboard = query({
       agentSessions.some(s => p.agentId === s.sessionToken)
     );
 
-    // Calculate usage remaining — backer tier is unlimited
+    // Calculate usage remaining -- paid tiers have high limits
     const now = Date.now();
-    const isBackerTier = workspace.tier === "backer" || workspace.tier === "founder" ||
-      (workspace.backerUntil && workspace.backerUntil > now);
-    const effectiveLimit = isBackerTier ? -1 : workspace.usageLimit; // -1 = unlimited
-    const usageRemaining = isBackerTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
-    const usagePercentage = isBackerTier ? 0 : (workspace.usageCount / workspace.usageLimit) * 100;
+    const isPaidTier = ["pro", "scale", "usage_based", "partner"].includes(workspace.tier);
+    const effectiveLimit = isPaidTier ? -1 : workspace.usageLimit; // -1 = unlimited
+    const usageRemaining = isPaidTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
+    const usagePercentage = isPaidTier ? 0 : (workspace.usageCount / workspace.usageLimit) * 100;
 
     // Budget status (PRD 2.6)
     const monthStart = getMonthStartForBudget();
@@ -614,7 +613,7 @@ export const updateTier = mutation({
 // Constants for rate limiting
 const FREE_WEEKLY_LIMIT = 50;
 const FREE_HOURLY_LIMIT = 10;
-const BACKER_END_DATE = new Date("2026-12-31T23:59:59Z").getTime();
+// Rate limiting constants
 
 // Helper: Get start of current week (Monday 00:00 UTC)
 function getWeekStart(): number {
@@ -649,9 +648,8 @@ export const incrementUsage = mutation({
     const weekStart = getWeekStart();
     const hourStart = getHourStart();
     
-    // Check if Backer (unlimited until end of 2026)
-    const isBacker = workspace.tier === "backer" || workspace.tier === "founder" ||
-                     (workspace.backerUntil && workspace.backerUntil > now);
+    // Check if paid tier (unlimited usage)
+    const isPaid = ["pro", "scale", "usage_based", "partner"].includes(workspace.tier);
     
     // Initialize weekly/hourly counters if needed
     let weeklyCount = workspace.weeklyUsageCount || 0;
@@ -668,15 +666,15 @@ export const incrementUsage = mutation({
     }
     
     // Check rate limits for free tier
-    if (!isBacker && workspace.tier !== "pro" && workspace.tier !== "enterprise") {
+    if (!isPaid && workspace.tier !== "enterprise") {
       // Check hourly limit (10/hour for free)
       if (hourlyCount + amount > FREE_HOURLY_LIMIT) {
-        throw new Error(`Hourly rate limit exceeded (${FREE_HOURLY_LIMIT}/hour). Upgrade to Backer for unlimited.`);
+        throw new Error(`Hourly rate limit exceeded (${FREE_HOURLY_LIMIT}/hour). Upgrade to Pro for unlimited.`);
       }
-      
+
       // Check weekly limit (50/week for free)
       if (weeklyCount + amount > FREE_WEEKLY_LIMIT) {
-        throw new Error(`Weekly limit exceeded (${FREE_WEEKLY_LIMIT}/week). Upgrade to Backer for unlimited.`);
+        throw new Error(`Weekly limit exceeded (${FREE_WEEKLY_LIMIT}/week). Upgrade to Pro for unlimited.`);
       }
     }
 
@@ -694,16 +692,16 @@ export const incrementUsage = mutation({
     });
 
     // Calculate remaining for free tier
-    const weeklyRemaining = isBacker ? Infinity : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
-    const hourlyRemaining = isBacker ? Infinity : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
+    const weeklyRemaining = isPaid ? Infinity : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
+    const hourlyRemaining = isPaid ? Infinity : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       usageCount: newTotalCount,
       weeklyUsageCount: newWeeklyCount,
       weeklyRemaining,
       hourlyRemaining,
-      isBacker,
+      isPaid,
     };
   },
 });
@@ -1026,7 +1024,7 @@ export const adminActivateWorkspace = mutation({
     
     await ctx.db.patch(workspaceId, {
       status: "active",
-      tier: "backer",
+      tier: "pro",
       weeklyUsageLimit: 999999,
       updatedAt: Date.now(),
     });

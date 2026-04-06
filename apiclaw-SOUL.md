@@ -37,7 +37,7 @@ npx @nordsym/apiclaw
 Add to MCP config, done. Works with Claude, Cursor, any MCP client.
 
 **For Providers:**
-- Self-service dashboard at https://apiclaw.nordsym.com/providers/dashboard
+- Self-service dashboard at https://apiclaw.cloud/providers/dashboard
 - List API in ~2 minutes
 - Configure Direct Call for zero-friction access
 

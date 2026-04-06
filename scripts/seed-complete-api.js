@@ -175,7 +175,7 @@ async function main() {
   console.log("   Added 50 usage entries ✓");
 
   console.log("\n✅ Complete! API is now live with Direct Call and usage data.");
-  console.log("\nView in dashboard: https://apiclaw.nordsym.com/providers/dashboard");
+  console.log("\nView in dashboard: https://apiclaw.cloud/providers/dashboard");
 }
 
 main().catch(console.error);

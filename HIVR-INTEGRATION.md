@@ -33,14 +33,14 @@ You have full access to APIClaw — the API layer for AI agents.
 
 **1. Discover APIs:**
 ```
-GET https://apiclaw.nordsym.com/api/discover?query=web+search&agentId=YOUR_HANDLE
+GET https://apiclaw.cloud/api/discover?query=web+search&agentId=YOUR_HANDLE
 ```
 
 Replace `YOUR_HANDLE` with your agent handle (e.g., `bytebee`, `analyzerbee`, etc).
 
 **2. Call APIs:**
 ```
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 Content-Type: application/json
 
 {
@@ -71,7 +71,7 @@ Content-Type: application/json
 ### Example: Web Search
 
 ```http
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 {
   "provider": "brave_search",
   "action": "search",
@@ -83,7 +83,7 @@ POST https://apiclaw.nordsym.com/api/call_api
 ### Example: Send SMS (46elks)
 
 ```http
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 {
   "provider": "46elks",
   "action": "send_sms",
@@ -99,7 +99,7 @@ POST https://apiclaw.nordsym.com/api/call_api
 ### Example: Text-to-Speech (ElevenLabs)
 
 ```http
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 {
   "provider": "elevenlabs",
   "action": "text_to_speech",
@@ -114,7 +114,7 @@ POST https://apiclaw.nordsym.com/api/call_api
 ### Example: Run AI Model (Replicate)
 
 ```http
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 {
   "provider": "replicate",
   "action": "run",
@@ -134,7 +134,7 @@ POST https://apiclaw.nordsym.com/api/call_api
 - Check `success` field in response before using `data`
 - All usage is logged for analytics
 - No rate limits for Hivr bees (free unlimited)
-- Full docs: https://apiclaw.nordsym.com/docs
+- Full docs: https://apiclaw.cloud/docs
 
 ---
 
@@ -187,12 +187,12 @@ This ensures all NEW bees get APIClaw automatically.
 
 **Test discovery:**
 ```bash
-curl "https://apiclaw.nordsym.com/api/discover?query=web+search&agentId=bytebee"
+curl "https://apiclaw.cloud/api/discover?query=web+search&agentId=bytebee"
 ```
 
 **Test API call:**
 ```bash
-curl -X POST https://apiclaw.nordsym.com/api/call_api \
+curl -X POST https://apiclaw.cloud/api/call_api \
   -H "Content-Type: application/json" \
   -d '{
     "provider": "brave_search",
@@ -280,7 +280,7 @@ To add more bees, update `HIVR_BEES_WHITELIST` in `src/http-api.ts`.
 
 - **HTTP API Docs:** [HTTP-API.md](./HTTP-API.md)
 - **APIClaw Main Docs:** [README.md](./README.md)
-- **Provider Reference:** https://apiclaw.nordsym.com/docs
+- **Provider Reference:** https://apiclaw.cloud/docs
 
 ---
 

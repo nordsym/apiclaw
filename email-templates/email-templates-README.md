@@ -107,7 +107,7 @@ Or use `action: "smtp"` for sending from `Symbot@nordsym.com`.
 
 Design is production-ready. Copy/content templates can be improved iteratively.
 
-Each email should feel like it came from the same visual system as apiclaw.nordsym.com.
+Each email should feel like it came from the same visual system as apiclaw.cloud.
 
 ---
 *[[03 - Products/Apiclaw/Apiclaw|APIClaw]] · [[MOC|Production Line]]*

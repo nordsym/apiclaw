@@ -11,6 +11,8 @@ import { mcpInstallCommand } from './commands/mcp-install.js';
 import { doctorCommand } from './commands/doctor.js';
 import { restoreCommand } from './commands/restore.js';
 import { uninstallCommand } from './commands/uninstall.js';
+import { loginCommand } from './commands/login.js';
+import { demoCommand } from './commands/demo.js';
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
@@ -106,6 +108,28 @@ program
   .option('--dry-run', 'Show what would be done without making changes')
   .option('-f, --force', 'Remove even if not configured')
   .action(uninstallCommand);
+
+// Login / signup command — in-terminal email verification
+program
+  .command('login')
+  .description('Sign in or create a free APIClaw workspace (no browser needed)')
+  .option('-e, --email <email>', 'Email address to use')
+  .option('-f, --force', 'Force re-login even if already signed in')
+  .option('--no-demo', 'Skip the demo after login')
+  .action(async (options) => {
+    const result = await loginCommand({ email: options.email, force: options.force });
+    if (result && options.demo !== false) {
+      await demoCommand();
+    }
+  });
+
+// Demo command — fire a live API call in the terminal
+program
+  .command('demo')
+  .description('Run a live API call to see APIClaw in action')
+  .action(async () => {
+    await demoCommand();
+  });
 
 // MCP Uninstall alias - same as uninstall but for consistency with mcp-install
 program

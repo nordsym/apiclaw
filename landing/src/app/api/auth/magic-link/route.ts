@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Send magic link email via n8n
-    const magicLinkUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.nordsym.com"}/providers/dashboard/verify?token=${token}`;
+    const magicLinkUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud"}/auth/verify?token=${token}`;
 
     await fetch("https://nordsym.app.n8n.cloud/webhook/symbot-gmail", {
       method: "POST",
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         action: "smtp",
         to: email,
-        subject: "🦞 Sign in to APIClaw Dashboard",
+        subject: "Sign in to APIClaw Dashboard",
         message: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
             <div style="text-align: center; margin-bottom: 32px;">

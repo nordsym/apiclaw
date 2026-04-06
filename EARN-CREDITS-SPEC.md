@@ -57,7 +57,7 @@ User signs up → Gets 500 base credits
 │                                         │
 │  ┌─────────────────────────────────┐   │
 │  │ 👥 Invite Friends       +500/ea │   │
-│  │ Your link: apiclaw.nordsym.com  │   │
+│  │ Your link: apiclaw.cloud  │   │
 │  │            ?ref=abc123          │   │
 │  │ [Copy Link]                     │   │
 │  └─────────────────────────────────┘   │
@@ -100,7 +100,7 @@ GET /api/verify/github-star
 ```typescript
 // Generate unique referral code per user
 const referralCode = generateCode(userId); // e.g., "abc123"
-const referralLink = `https://apiclaw.nordsym.com?ref=${referralCode}`;
+const referralLink = `https://apiclaw.cloud?ref=${referralCode}`;
 
 // On new signup with ref code:
 1. New user gets normal signup credits

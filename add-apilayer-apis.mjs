@@ -96,7 +96,7 @@ async function main() {
   console.log(`   Created: ${created}`);
   console.log(`   Skipped: ${skipped}`);
   console.log(`   Total: ${apis.length}`);
-  console.log(`\nRefresh dashboard at: https://apiclaw.nordsym.com/workspace`);
+  console.log(`\nRefresh dashboard at: https://apiclaw.cloud/workspace`);
 }
 
 main().catch(console.error);

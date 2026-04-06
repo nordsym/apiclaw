@@ -12,12 +12,18 @@ The API layer for AI agents. 18 providers → 1000s of capabilities. Workspace �
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
+[![GitHub Stars](https://img.shields.io/github/stars/nordsym/apiclaw?style=social)](https://github.com/nordsym/apiclaw)
+[![Built with MCP](https://img.shields.io/badge/Built%20with-MCP-purple)](https://modelcontextprotocol.io)
+
+> **If APIClaw saves you time, [⭐ star the repo](https://github.com/nordsym/apiclaw) — it helps more developers find us.**
+
+![APIClaw Demo](landing/public/demo.gif)
 
 ---
 
 ## The Platform
 
-**[apiclaw.com](https://apiclaw.com)** — Your workspace for API-powered agents.
+**[apiclaw.cloud](https://apiclaw.cloud)** — Your workspace for API-powered agents.
 
 | Layer | What You Get |
 |-------|--------------|
@@ -37,7 +43,7 @@ One `mcp-install` connects your agent to all of it.
 
 ```bash
 # Install
-curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
+curl -fsSL https://apiclaw.cloud/install.sh | bash
 
 # Restart your AI assistant
 # Immediately use any API (10 calls/week)
@@ -51,9 +57,49 @@ That's it. All 18 Direct Call providers work instantly through NordSym's infrast
 **Usage Limits:**
 - **Anonymous:** 10 calls/week (no registration)
 - **Registered:** 50 calls/week (5x more)
-- **Upgrade:** Contact us for higher limits
+- **Upgrade:** See [Pricing](#pricing) below
 
 Start calling APIs immediately. No setup, no API keys, no configuration.
+
+---
+
+## End-to-End Example
+
+Here's a complete agent workflow — send an SMS, generate an image, and search the web in one session:
+
+```javascript
+// 1. Register for 50 calls/week
+register_owner({ email: "you@example.com" })
+
+// 2. Send an SMS via 46elks
+call_api({
+  provider: "46elks",
+  action: "send_sms",
+  params: {
+    to: "+46701234567",
+    message: "APIClaw is live! 🦞"
+  }
+})
+
+// 3. Generate an image via Replicate
+call_api({
+  provider: "replicate",
+  action: "run",
+  params: {
+    model: "stability-ai/sdxl",
+    input: { prompt: "a lobster wearing a top hat, digital art" }
+  }
+})
+
+// 4. Search the web via Brave
+call_api({
+  provider: "brave",
+  action: "search",
+  params: { q: "MCP protocol AI agents 2025", count: 5 }
+})
+```
+
+All three calls go through APIClaw's proxy — zero API keys, zero configuration.
 
 ---
 
@@ -148,7 +194,7 @@ Public APIs, instantly callable. No API keys needed.
 - Food & Recipes
 - Science & Education
 
-Browse at [apiclaw.com/open-apis](https://apiclaw.com/open-apis)
+Browse at [apiclaw.cloud/open-apis](https://apiclaw.cloud/open-apis)
 
 ---
 
@@ -163,7 +209,7 @@ Use `discover_apis` to search:
 "What APIs exist for recipe data?"
 ```
 
-Browse at [apiclaw.com/discover](https://apiclaw.com/discover)
+Browse at [apiclaw.cloud/discover](https://apiclaw.cloud/discover)
 
 ---
 
@@ -172,7 +218,7 @@ Browse at [apiclaw.com/discover](https://apiclaw.com/discover)
 ### One-Line Install (Recommended)
 
 ```bash
-curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
+curl -fsSL https://apiclaw.cloud/install.sh | bash
 ```
 
 Auto-detects Claude Desktop or Claude Code. Configures MCP. Done.
@@ -358,7 +404,7 @@ You don't manage API keys. You don't configure auth. You don't worry about rate 
 - Usage analytics in your workspace
 - Production-ready from day one
 
-**Want higher limits?** Upgrade at [apiclaw.com](https://apiclaw.com) or contact us.
+**Want higher limits?** See [Pricing](#pricing) below or upgrade at [apiclaw.cloud](https://apiclaw.cloud).
 
 ---
 
@@ -379,12 +425,66 @@ Returns the exact request that *would* be sent, with mock response data.
 
 ---
 
+## Why APIClaw?
+
+| | **APIClaw** | **RapidAPI** | **Direct API Keys** | **Kong / custom gateway** |
+|---|---|---|---|---|
+| **Setup time** | `curl \| bash` (30 sec) | Account + per-API signup | Per-provider signup | Hours of config |
+| **API keys to manage** | 0 | Per API | 1 per provider | 1 per provider |
+| **Providers covered** | 18 premium + 1,636 open | 40,000+ (DIY) | 1 at a time | Any (DIY) |
+| **MCP-native** | ✅ First-class | ❌ | ❌ | ❌ |
+| **Works in AI agents** | ✅ Out of the box | ⚠️ Manual wiring | ⚠️ Manual wiring | ⚠️ Manual wiring |
+| **Free tier** | ✅ 50 calls/week | ✅ Limited | Varies | ❌ |
+| **Self-hosted option** | ✅ | ❌ | — | ✅ |
+
+APIClaw is purpose-built for AI agents and MCP clients. No glue code, no key juggling — just call the API.
+
+---
+
+## Social Proof
+
+**9,000+ npm installs** · 88 versions shipped · Used in Claude Agents, GPT Builders, and Codex workflows worldwide.
+
+---
+
+## Pricing
+
+| Plan | Price | Calls/month | Best for |
+|------|-------|-------------|----------|
+| **Free** | $0 | 50 | Exploring, prototyping |
+| **Pro** | $79/mo | 5,000 | Solo builders & small teams |
+| **Scale** | $249/mo | 25,000 | Production agents |
+| **Enterprise** | Custom | Unlimited | Large teams & custom SLAs |
+
+→ [Upgrade at apiclaw.cloud](https://apiclaw.cloud) · Enterprise: [book a call](https://apiclaw.cloud/contact)
+
+---
+
+## AI Discoverability
+
+APIClaw is optimized for discovery by AI agents and LLM tooling:
+
+- **llms.txt:** [apiclaw.cloud/llms.txt](https://apiclaw.cloud/llms.txt) — Machine-readable API index
+- **llms-full.txt:** [apiclaw.cloud/llms-full.txt](https://apiclaw.cloud/llms-full.txt) — Full capability descriptions
+- **ai-plugin.json:** [apiclaw.cloud/.well-known/ai-plugin.json](https://apiclaw.cloud/.well-known/ai-plugin.json) — OpenAI plugin manifest
+- **MCP:** Install with one command and any MCP-compatible agent can use APIClaw immediately
+
+---
+
+## Contributing & Changelog
+
+- [CONTRIBUTING.md](apiclaw-CONTRIBUTING.md) — How to contribute
+- [CHANGELOG.md](apiclaw-CHANGELOG.md) — Release history
+
+---
+
 ## Links
 
-- **Platform:** [apiclaw.com](https://apiclaw.com)
-- **Docs:** [apiclaw.nordsym.com/docs](https://apiclaw.nordsym.com/docs)
+- **Platform:** [apiclaw.cloud](https://apiclaw.cloud)
+- **Docs:** [apiclaw.cloud/docs](https://apiclaw.cloud/docs)
 - **GitHub:** [github.com/nordsym/apiclaw](https://github.com/nordsym/apiclaw)
 - **npm:** [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)
+- **Security:** [SECURITY.md](SECURITY.md)
 
 ---
 

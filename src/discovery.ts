@@ -192,7 +192,7 @@ const DIRECT_CALL_SPECS: Record<string, {
           { name: 'subject', required: true, desc: 'Email subject' },
           { name: 'html', required: false, desc: 'HTML body' },
           { name: 'text', required: false, desc: 'Plain text body' },
-          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.nordsym.com)' },
+          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.cloud)' },
         ],
       },
     },

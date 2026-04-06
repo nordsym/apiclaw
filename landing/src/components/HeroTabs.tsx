@@ -31,7 +31,7 @@ export function HeroTabs() {
 
   const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
-  const terminalCommandMac = "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash";
+  const terminalCommandMac = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
   const terminalCommandWin = "npx @nordsym/apiclaw mcp-install";
 
   const copyConfig = () => {
@@ -50,7 +50,7 @@ export function HeroTabs() {
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto lg:mx-0">
+      <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden">
         {/* Tab Buttons */}
         <div className="flex gap-2 mb-6">
           <button
@@ -136,9 +136,9 @@ export function HeroTabs() {
                         {copiedTerminal === "mac" ? "Copied!" : "Click to copy"}
                       </span>
                     </div>
-                    <div className="code-preview-body">
-                      <pre className="text-sm">
-                        <span className="text-green-400">$</span> curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
+                    <div className="code-preview-body overflow-x-auto">
+                      <pre className="text-sm whitespace-pre-wrap break-all">
+                        <span className="text-green-400">$</span> curl -fsSL https://apiclaw.cloud/install.sh | bash
                       </pre>
                     </div>
                   </div>
@@ -157,8 +157,8 @@ export function HeroTabs() {
                         {copiedTerminal === "win" ? "Copied!" : "Click to copy"}
                       </span>
                     </div>
-                    <div className="code-preview-body">
-                      <pre className="text-sm">
+                    <div className="code-preview-body overflow-x-auto">
+                      <pre className="text-sm whitespace-pre-wrap break-all">
                         <span className="text-blue-400">{'>'}</span> npx @nordsym/apiclaw mcp-install
                       </pre>
                     </div>

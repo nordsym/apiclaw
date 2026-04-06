@@ -20,13 +20,12 @@ export const seedPrathamWorkspace = mutation({
       const workspaceId = await ctx.db.insert("workspaces", {
         email,
         status: "active",
-        tier: "backer", // Give him backer tier (unlimited)
+        tier: "pro",
         usageCount: 0,
         usageLimit: -1, // unlimited
         weeklyUsageCount: 0,
         weeklyUsageLimit: -1, // unlimited
         hourlyUsageCount: 0,
-        backerUntil: new Date("2027-12-31").getTime(), // Backer until end of 2027
         mainAgentName: "APILayer Dashboard",
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -154,7 +153,7 @@ export const seedPrathamWorkspace = mutation({
         created: createdCount,
         existing: existingCount,
       },
-      dashboardUrl: `https://apiclaw.nordsym.com/workspace`,
+      dashboardUrl: `https://apiclaw.cloud/workspace`,
       loginInstructions: "Test account using Gustav's personal email. Magic link will be sent to gustav_hemmingsson@hotmail.com",
     };
   },

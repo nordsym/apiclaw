@@ -35,10 +35,10 @@ All notable changes to APIClaw.
 ### Fixed
 - `doctor` connectivity check now uses resilient fallbacks:
   - `${APICLAW_API_URL}/health`
-  - `https://apiclaw.nordsym.com`
+  - `https://apiclaw.cloud`
   - Convex auth endpoint (`/workspace/poll`)
 - Convex auth endpoint `HTTP 400` is now treated as a valid reachability signal in `doctor`.
-- Setup/network guidance now points to live docs and domain paths on `apiclaw.nordsym.com`.
+- Setup/network guidance now points to live docs and domain paths on `apiclaw.cloud`.
 
 ---
 
@@ -77,7 +77,7 @@ All notable changes to APIClaw.
 ### Added
 - **Workspace & Dashboard** — Manage your API usage, view logs, configure settings
 - **Auth with Magic Link** — No passwords. Email link, you're in.
-- **`mcp-install` command** — One command setup: `curl -fsSL https://apiclaw.nordsym.com/install.sh | bash`
+- **`mcp-install` command** — One command setup: `curl -fsSL https://apiclaw.cloud/install.sh | bash`
 
 ### Improved
 - Simplified onboarding flow
@@ -109,7 +109,7 @@ We use [SemVer](https://semver.org/). Given version `MAJOR.MINOR.PATCH`:
 
 ## Links
 
-- [Documentation](https://apiclaw.nordsym.com/docs)
+- [Documentation](https://apiclaw.cloud/docs)
 - [GitHub](https://github.com/nordsym/apiclaw)
 - [npm](https://npmjs.com/package/@nordsym/apiclaw)
 

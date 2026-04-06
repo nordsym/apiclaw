@@ -174,7 +174,7 @@ async function checkConnectivity(): Promise<CheckResult> {
   const convexUrl = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
   const candidates = [
     `${apiUrl}/health`,
-    'https://apiclaw.nordsym.com',
+    'https://apiclaw.cloud',
     `${convexUrl.replace('.cloud', '.site')}/workspace/poll`,
   ];
   const failures: string[] = [];

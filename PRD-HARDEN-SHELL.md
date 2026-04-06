@@ -64,7 +64,7 @@ Every critique from the 4 AI agents becomes a feature, clarification, or landing
 
 **Copy-context addition:**
 ```
-Pricing: Free (50 calls/week), Pay-as-you-go (usage-based), or Founding Backer ($199 unlimited until 2027).
+Pricing: Free (50 calls/month), Pro ($79/mo), Scale ($249/mo), or Pay-as-you-go (usage-based).
 ```
 
 ---
@@ -103,7 +103,7 @@ Pricing: Free (50 calls/week), Pay-as-you-go (usage-based), or Founding Backer (
 - Created dedicated `/security` page with full coverage
 - Added "AES-256 Encrypted" badge to footer (links to /security)
 - Added Security link in footer Product menu
-- Live at: https://apiclaw.nordsym.com/security
+- Live at: https://apiclaw.cloud/security
 
 **FAQ addition:**
 ```
@@ -194,7 +194,7 @@ Settings → Billing → Monthly budget cap: $____
 
 **Action:**
 - [ ] Consider increasing free tier to 100/week
-- [ ] OR: Make "Founding Backer" more prominent as the serious option
+- [ ] OR: Make Pro/Scale tiers more prominent as the serious option
 - [ ] Add "Earn more calls" via GitHub star, newsletter, etc. (optional, low priority)
 
 **Decision needed:** Keep 50 or bump to 100?

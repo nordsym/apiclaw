@@ -272,7 +272,7 @@ const mockResponses: Record<string, Record<string, (params: any) => unknown>> = 
     send_email: (params) => ({
       id: 'mock_email_' + Date.now(),
       to: params.to,
-      from: params.from || 'APIClaw <noreply@apiclaw.nordsym.com>',
+      from: params.from || 'APIClaw <noreply@apiclaw.cloud>',
       subject: params.subject,
       status: 'sent',
     }),
@@ -674,7 +674,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
   // Resend - Email
   resend: {
     send_email: async (params, creds) => {
-      const { to, subject, html, text, from = 'APIClaw <noreply@apiclaw.nordsym.com>' } = params;
+      const { to, subject, html, text, from = 'APIClaw <noreply@apiclaw.cloud>' } = params;
       
       if (!to || !subject || (!html && !text)) {
         return createErrorResult('resend', 'send_email', 'Missing required params: to, subject, html or text', ERROR_CODES.INVALID_PARAMS);
@@ -718,7 +718,7 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
         headers: {
           'Authorization': `Bearer ${creds.api_key}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://apiclaw.nordsym.com',
+          'HTTP-Referer': 'https://apiclaw.cloud',
         },
         body: JSON.stringify({ model, messages, max_tokens }),
       }, { provider: 'openrouter', action: 'chat' });

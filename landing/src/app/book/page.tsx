@@ -153,7 +153,7 @@ function BookForm() {
           <h1 className="text-2xl font-bold mb-3">Meeting booked</h1>
           <p className="text-[var(--text-muted)] mb-2">Check <strong>{email}</strong> for confirmation.</p>
           <p className="text-sm text-[var(--text-muted)]">The team will be in touch to confirm details.</p>
-          <a href="https://apiclaw.nordsym.com" className="inline-flex items-center gap-2 mt-8 text-[#ef4444] text-sm hover:underline">
+          <a href="https://apiclaw.cloud" className="inline-flex items-center gap-2 mt-8 text-[#ef4444] text-sm hover:underline">
             Back to APIClaw <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </div>

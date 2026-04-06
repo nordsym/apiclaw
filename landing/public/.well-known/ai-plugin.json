@@ -9,9 +9,9 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://apiclaw.nordsym.com/.well-known/openapi.json"
+    "url": "https://apiclaw.cloud/.well-known/openapi.json"
   },
-  "logo_url": "https://apiclaw.nordsym.com/favicon.svg",
+  "logo_url": "https://apiclaw.cloud/favicon.svg",
   "contact_email": "gustav@nordsym.com",
   "legal_info_url": "https://nordsym.com/privacy"
 }

@@ -24,7 +24,7 @@ const EARN_CHANNELS = [
     description: 'Stay updated on X/Twitter',
     credits: 15,
     cta: 'Follow Us',
-    href: 'https://x.com/NordSym',
+    href: 'https://x.com/APIClaw',
     color: 'from-red-400/20 to-rose-500/10',
     borderColor: 'hover:border-red-400/50',
     iconColor: 'text-red-400',

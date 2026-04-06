@@ -165,7 +165,7 @@ def demo():
 {BOLD}  APIClaw: From query to working API in 30 seconds.{RESET}
 {CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{RESET}
 
-  {DIM}npx @nordsym/apiclaw{RESET}  •  {DIM}apiclaw.nordsym.com{RESET}
+  {DIM}npx @nordsym/apiclaw{RESET}  •  {DIM}apiclaw.cloud{RESET}
 """)
     pause(2)
 

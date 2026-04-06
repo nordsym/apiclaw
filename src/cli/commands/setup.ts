@@ -5,6 +5,8 @@
 
 import { existsSync } from 'fs';
 import { detectOS, getOSDisplayName } from '../../utils/os.js';
+import { readSession } from '../../session.js';
+import { loginCommand } from './login.js';
 import { 
   getAllClients, 
   getConfigPath, 
@@ -187,7 +189,26 @@ export async function setupCommand(options: SetupOptions): Promise<void> {
   
   console.log('\n🚀 APIClaw MCP Auto-Setup\n');
   console.log(`Platform: ${osName}\n`);
-  
+
+  // Step 0: Ensure user is signed in
+  if (!options.workspace) {
+    const session = readSession();
+    if (!session) {
+      console.log('First, sign in to link your workspace:\n');
+      const loginResult = await loginCommand({});
+      if (!loginResult) {
+        console.error('\n❌ Login failed. Setup cancelled.');
+        process.exit(1);
+      }
+      // Use the session token as workspace identifier
+      options.workspace = loginResult.workspaceId;
+      console.log('');
+    } else {
+      console.log(`✓ Signed in as ${session.email}\n`);
+      options.workspace = options.workspace || session.workspaceId;
+    }
+  }
+
   // Determine which clients to configure
   let clientsToSetup: Array<{ client: MCPClient | 'custom'; path: string }> = [];
   
@@ -263,14 +284,14 @@ export async function setupCommand(options: SetupOptions): Promise<void> {
       console.log('Next steps:');
       console.log('  1. Restart your AI coding assistant');
       console.log('  2. Ask your agent: "List available APIs"\n');
-      console.log('Need help? https://apiclaw.nordsym.com/docs/setup\n');
+      console.log('Need help? https://apiclaw.cloud/docs/setup\n');
     } else if (skipped === results.length) {
       console.log('\n✅ APIClaw already configured in all clients.\n');
       console.log('Use --force to reconfigure.\n');
     }
   } else {
     console.log(`\n⚠️  Setup completed with ${failed} error(s).\n`);
-    console.log('For troubleshooting, visit: https://apiclaw.nordsym.com/docs/setup/troubleshooting\n');
+    console.log('For troubleshooting, visit: https://apiclaw.cloud/docs/setup/troubleshooting\n');
     process.exit(1);
   }
 }

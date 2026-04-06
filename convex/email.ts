@@ -5,8 +5,8 @@ import { action, internalAction } from "./_generated/server";
 // EMAIL TEMPLATES
 // ============================================
 
-const EMAIL_FROM = "APIClaw <noreply@apiclaw.nordsym.com>";
-const APP_URL = "https://apiclaw.nordsym.com";
+const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
+const APP_URL = "https://apiclaw.cloud";
 
 // Base email wrapper - using string concat for Convex compatibility
 function wrapEmail(content: string): string {
@@ -37,7 +37,7 @@ function wrapEmail(content: string): string {
     '<tr>',
     '<td style="padding: 24px 32px; background-color: #fafafa; border-top: 1px solid #f0f0f0;">',
     '<p style="margin: 0; font-size: 12px; color: #737373; text-align: center;">',
-    '<a href="https://apiclaw.nordsym.com" style="color: #ef4444; text-decoration: none;">APIClaw</a> — The API Layer for AI Agents',
+    '<a href="https://apiclaw.cloud" style="color: #ef4444; text-decoration: none;">APIClaw</a> — The API Layer for AI Agents',
     '</p>',
     '<p style="margin: 8px 0 0; font-size: 12px; color: #a3a3a3; text-align: center;">',
     '© ' + year + ' NordSym. Stockholm, Sweden.',
@@ -283,7 +283,7 @@ export const debugEmailTemplate = action({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const testUrl = "https://apiclaw.nordsym.com/auth/verify?token=DEBUG_TEST";
+    const testUrl = "https://apiclaw.cloud/auth/verify?token=DEBUG_TEST";
     
     // Generate HTML using the template
     var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
@@ -309,7 +309,7 @@ export const debugEmailTemplate = action({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "APIClaw <noreply@apiclaw.nordsym.com>",
+        from: "APIClaw <noreply@apiclaw.cloud>",
         to: email,
         subject: "DEBUG EMAIL FROM CONVEX",
         html: html,

@@ -217,15 +217,15 @@ function UpgradeContent() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-xl font-bold text-white mb-1">
-                  🦞 Become a Founding Backer
+                  Upgrade to Pro
                 </div>
                 <div className="text-gray-400">
-                  Unlimited API calls until Dec 31, 2026
+                  5,000 Direct Call requests per month
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-white">$99</div>
-                <div className="text-gray-400 text-sm">one-time</div>
+                <div className="text-3xl font-bold text-white">$79</div>
+                <div className="text-gray-400 text-sm">/month</div>
               </div>
             </div>
 
@@ -253,20 +253,20 @@ function UpgradeContent() {
                   Processing...
                 </span>
               ) : (
-                "Add Payment Method →"
+                "Upgrade to Pro"
               )}
             </button>
 
             <div className="text-center text-gray-500 text-xs mt-4">
-              Secure payment via Stripe. One-time payment, no subscription.
+              Secure payment via Stripe.
             </div>
           </div>
         )}
 
-        {/* Already Backer Message */}
+        {/* Already Pro Message */}
         {isPro && !success && (
           <div className="text-center text-gray-400">
-            🦞 You&apos;re a Founding Backer! Unlimited API calls until Dec 31, 2026.
+            You&apos;re on a paid plan. Manage your subscription from the workspace billing tab.
           </div>
         )}
 

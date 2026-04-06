@@ -6,9 +6,6 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
-// Price ID for usage-based subscription
-const USAGE_BASED_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price_1R9hAUCQSPYXHCfhMmaPnmN9";
-
 export async function POST(req: NextRequest) {
   if (!stripe) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
@@ -67,32 +64,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Determine the app URL for redirects
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.com";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud";
 
-    // Create Checkout Session for setup mode (to collect payment method)
-    // This will create a subscription with usage-based billing
+    // Create Checkout Session in setup mode (collect payment method)
+    // The Stripe webhook (setup_intent.succeeded) upgrades workspace to usage_based
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "subscription",
+      mode: "setup",
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price: USAGE_BASED_PRICE_ID,
-        },
-      ],
-      subscription_data: {
-        metadata: {
-          workspaceId: workspace._id,
-          type: "usage_based",
-        },
-      },
       metadata: {
         workspaceId: workspace._id,
         type: "usage_based",
       },
       success_url: `${appUrl}/workspace?billing=success`,
       cancel_url: `${appUrl}/workspace?billing=cancel`,
-      allow_promotion_codes: true,
     });
 
     return NextResponse.json({

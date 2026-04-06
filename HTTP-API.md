@@ -264,10 +264,10 @@ See `landing/` directory for Next.js API routes wrapper.
 You have access to APIClaw via HTTP API.
 
 **Discover APIs:**
-GET https://apiclaw.nordsym.com/api/discover?query=web+search&agentId=YOUR_HANDLE
+GET https://apiclaw.cloud/api/discover?query=web+search&agentId=YOUR_HANDLE
 
 **Call APIs:**
-POST https://apiclaw.nordsym.com/api/call_api
+POST https://apiclaw.cloud/api/call_api
 Body: { provider: "brave_search", action: "search", params: {...}, agentId: "YOUR_HANDLE" }
 
 **Your agent ID:** Replace `YOUR_HANDLE` with your actual handle (e.g., "bytebee").
@@ -277,7 +277,7 @@ Body: { provider: "brave_search", action: "search", params: {...}, agentId: "YOU
 
 ## 📚 API Provider Reference
 
-See [apiclaw.nordsym.com/docs](https://apiclaw.nordsym.com/docs) for:
+See [apiclaw.cloud/docs](https://apiclaw.cloud/docs) for:
 - List of all 18 Direct Call providers
 - Available actions per provider
 - Parameter schemas
@@ -303,7 +303,7 @@ tsx watch src/bin-http.ts
 
 ## ❓ Support
 
-- **Docs:** [apiclaw.nordsym.com/docs](https://apiclaw.nordsym.com/docs)
+- **Docs:** [apiclaw.cloud/docs](https://apiclaw.cloud/docs)
 - **Issues:** [github.com/nordsym/apiclaw/issues](https://github.com/nordsym/apiclaw/issues)
 - **Email:** admin@nordsym.com
 

@@ -31,11 +31,10 @@ export const update = mutation({
         newStatus = "rate_limited";
       }
 
-      if (api.status !== newStatus || api.hasDirectCall !== hasDirectCall) {
+      if (api.status !== newStatus || (api as any).hasDirectCall !== hasDirectCall) {
         await ctx.db.patch(api._id, {
           status: newStatus,
-          hasDirectCall,
-        });
+        } as any);
         updated++;
       }
     }

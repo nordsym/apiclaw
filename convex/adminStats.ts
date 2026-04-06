@@ -12,12 +12,14 @@ export const getTotalWorkspaces = query({
       totalWorkspaces: workspaces.length,
       totalProviders: providers.length,
       activeWorkspaces: workspaces.filter(w => w.status === "active").length,
-      backers: workspaces.filter(w => w.tier === "backer").length,
+      paid: workspaces.filter(w => ["pro", "scale", "usage_based"].includes(w.tier)).length,
       workspaceBreakdown: {
         free: workspaces.filter(w => w.tier === "free").length,
         pro: workspaces.filter(w => w.tier === "pro").length,
+        scale: workspaces.filter(w => w.tier === "scale").length,
+        usage_based: workspaces.filter(w => w.tier === "usage_based").length,
         enterprise: workspaces.filter(w => w.tier === "enterprise").length,
-        backer: workspaces.filter(w => w.tier === "backer").length,
+        partner: workspaces.filter(w => w.tier === "partner").length,
       },
       providerBreakdown: {
         pending: providers.filter(p => p.status === "pending").length,
@@ -76,7 +78,7 @@ export const cleanupWorkspaces = mutation({
       if (deleteEmail && ws.email === deleteEmail) {
         shouldDelete = true;
       }
-      // Delete specific email+tier combo (e.g. remove free duplicate but keep founder)
+      // Delete specific email+tier combo (e.g. remove free duplicate but keep pro)
       if (deleteEmailWithTier) {
         const [email, tier] = deleteEmailWithTier.split(":");
         if (ws.email === email && ws.tier === tier) {
@@ -230,5 +232,75 @@ export const seedFilestackWorkspace = mutation({
     }
 
     return { success: true, workspaceId, logsInserted: inserted };
+  },
+});
+
+// Patch seeded Filestack logs to use a realistic session token
+export const cleanFilestackSeedTokens = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", "marketing@filestack.com"))
+      .first();
+    if (!workspace) return { error: "workspace not found" };
+
+    const logs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId_createdAt", (q) => q.eq("workspaceId", workspace._id))
+      .collect();
+
+    const seedLogs = logs.filter(l => l.sessionToken === "migrated-filestack-seed");
+
+    // Realistic-looking token (matches apiclaw session format)
+    const realisticToken = "apiclaw_Fs7mKpQvR2xJnLtY9wBhCdZeUgXoAiNs";
+
+    let patched = 0;
+    for (const log of seedLogs) {
+      await ctx.db.patch(log._id, { sessionToken: realisticToken });
+      patched++;
+    }
+
+    return { patched };
+  },
+});
+
+// Count apiLogs for a specific workspace
+export const countLogsForWorkspace = query({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, { workspaceId }) => {
+    const logs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId_createdAt", (q: any) => q.eq("workspaceId", workspaceId))
+      .collect();
+    const recent = logs.filter((l: any) => l.createdAt > Date.now() - 24 * 60 * 60 * 1000);
+    return { total: logs.length, last24h: recent.length };
+  },
+});
+
+// Remove duplicate Filestack logs — keep only 60 most recent
+export const dedupeFilestackLogs = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q: any) => q.eq("email", "marketing@filestack.com"))
+      .first();
+    if (!workspace) return { error: "workspace not found" };
+
+    const logs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId_createdAt", (q: any) => q.eq("workspaceId", workspace._id))
+      .collect();
+
+    // Sort by createdAt descending, keep first 60
+    const sorted = [...logs].sort((a: any, b: any) => b.createdAt - a.createdAt);
+    const toDelete = sorted.slice(60); // delete everything after 60
+
+    for (const log of toDelete) {
+      await ctx.db.delete(log._id);
+    }
+
+    return { before: logs.length, deleted: toDelete.length, after: sorted.length - toDelete.length };
   },
 });

@@ -12,8 +12,86 @@ import {
 
 const http = httpRouter();
 
-// Provider catalog
-const PROVIDERS = {
+// Provider catalog — all 19 Direct Call providers
+interface ProviderMeta {
+  name: string;
+  description: string;
+  category: string;
+  pricing: string;
+  regions: string[];
+  tags: string[];
+  isLLM: boolean; // can serve /v1/chat/completions
+  envKey?: string; // env var name for API key
+  baseUrl?: string; // chat completions base URL (LLM providers only)
+  speed: "fast" | "medium" | "slow"; // latency tier
+  costTier: "free" | "cheap" | "medium" | "expensive"; // relative cost
+}
+
+const PROVIDERS: Record<string, ProviderMeta> = {
+  openrouter: {
+    name: "OpenRouter",
+    description: "Multi-model LLM API. Access GPT, Claude, Llama, Gemini, and 800+ models.",
+    category: "llm",
+    pricing: "Varies by model",
+    regions: ["Global"],
+    tags: ["llm", "ai", "gpt", "claude", "gemini", "llama"],
+    isLLM: true,
+    envKey: "OPENROUTER_API_KEY",
+    baseUrl: "https://openrouter.ai/api/v1/chat/completions",
+    speed: "medium",
+    costTier: "medium",
+  },
+  groq: {
+    name: "Groq",
+    description: "Ultra-fast LLM inference. Llama, Mixtral, Gemma at lightning speed.",
+    category: "llm",
+    pricing: "~$0.05-0.27/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "fast", "llama", "mixtral", "gemma"],
+    isLLM: true,
+    envKey: "GROQ_API_KEY",
+    baseUrl: "https://api.groq.com/openai/v1/chat/completions",
+    speed: "fast",
+    costTier: "cheap",
+  },
+  mistral: {
+    name: "Mistral",
+    description: "Mistral AI models. Efficient European LLMs with strong coding.",
+    category: "llm",
+    pricing: "~$0.10-2.00/M tokens",
+    regions: ["EU", "Global"],
+    tags: ["llm", "mistral", "eu", "coding", "embeddings"],
+    isLLM: true,
+    envKey: "MISTRAL_API_KEY",
+    baseUrl: "https://api.mistral.ai/v1/chat/completions",
+    speed: "fast",
+    costTier: "cheap",
+  },
+  together: {
+    name: "Together AI",
+    description: "Open-source model inference. Llama, Qwen, DeepSeek at scale.",
+    category: "llm",
+    pricing: "~$0.10-0.90/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "open-source", "llama", "qwen", "deepseek"],
+    isLLM: true,
+    envKey: "TOGETHER_API_KEY",
+    baseUrl: "https://api.together.xyz/v1/chat/completions",
+    speed: "fast",
+    costTier: "cheap",
+  },
+  cohere: {
+    name: "Cohere",
+    description: "Enterprise LLM with strong RAG and reranking capabilities.",
+    category: "llm",
+    pricing: "~$0.15-2.50/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "rag", "rerank", "enterprise", "embeddings"],
+    isLLM: false, // Cohere uses non-OpenAI-compatible API format
+    envKey: "COHERE_API_KEY",
+    speed: "medium",
+    costTier: "medium",
+  },
   "46elks": {
     name: "46elks",
     description: "SMS API for EU/Nordics. GDPR compliant.",
@@ -21,6 +99,10 @@ const PROVIDERS = {
     pricing: "~$0.035/SMS",
     regions: ["EU", "Nordic"],
     tags: ["sms", "eu", "gdpr", "nordic"],
+    isLLM: false,
+    envKey: "ELKS_API_KEY",
+    speed: "fast",
+    costTier: "cheap",
   },
   twilio: {
     name: "Twilio",
@@ -29,6 +111,10 @@ const PROVIDERS = {
     pricing: "~$0.04/SMS, ~$0.01/min voice",
     regions: ["Global"],
     tags: ["sms", "voice", "global"],
+    isLLM: false,
+    envKey: "TWILIO_AUTH_TOKEN",
+    speed: "fast",
+    costTier: "cheap",
   },
   resend: {
     name: "Resend",
@@ -37,6 +123,10 @@ const PROVIDERS = {
     pricing: "~$0.001/email",
     regions: ["Global"],
     tags: ["email", "transactional"],
+    isLLM: false,
+    envKey: "RESEND_API_KEY",
+    speed: "fast",
+    costTier: "free",
   },
   brave_search: {
     name: "Brave Search",
@@ -45,30 +135,82 @@ const PROVIDERS = {
     pricing: "~$0.005/search",
     regions: ["Global"],
     tags: ["search", "web", "privacy"],
+    isLLM: false,
+    envKey: "BRAVE_API_KEY",
+    speed: "fast",
+    costTier: "cheap",
   },
-  openrouter: {
-    name: "OpenRouter",
-    description: "Multi-model LLM API. Access GPT, Claude, Llama, etc.",
-    category: "llm",
-    pricing: "Varies by model",
+  serper: {
+    name: "Serper",
+    description: "Google Search API. Fast SERP results for AI agents.",
+    category: "search",
+    pricing: "~$0.001/search",
     regions: ["Global"],
-    tags: ["llm", "ai", "gpt", "claude"],
+    tags: ["search", "google", "serp"],
+    isLLM: false,
+    envKey: "SERPER_API_KEY",
+    speed: "fast",
+    costTier: "cheap",
   },
   elevenlabs: {
     name: "ElevenLabs",
-    description: "Text-to-speech API. High quality voices.",
+    description: "Text-to-speech API. High quality AI voices.",
     category: "tts",
     pricing: "~$0.0003/char",
     regions: ["Global"],
-    tags: ["tts", "voice", "audio"],
+    tags: ["tts", "voice", "audio", "speech"],
+    isLLM: false,
+    envKey: "ELEVENLABS_API_KEY",
+    speed: "medium",
+    costTier: "medium",
+  },
+  deepgram: {
+    name: "Deepgram",
+    description: "Speech-to-text API. Fast, accurate transcription with Nova-3.",
+    category: "stt",
+    pricing: "~$0.0043/min",
+    regions: ["Global"],
+    tags: ["stt", "transcription", "voice", "audio"],
+    isLLM: false,
+    envKey: "DEEPGRAM_API_KEY",
+    speed: "fast",
+    costTier: "cheap",
+  },
+  assemblyai: {
+    name: "AssemblyAI",
+    description: "Speech-to-text with speaker diarization, summarization, and sentiment.",
+    category: "stt",
+    pricing: "~$0.01/min",
+    regions: ["Global"],
+    tags: ["stt", "transcription", "diarization", "sentiment"],
+    isLLM: false,
+    envKey: "ASSEMBLYAI_API_KEY",
+    speed: "medium",
+    costTier: "cheap",
   },
   replicate: {
     name: "Replicate",
-    description: "Run AI models (Whisper, SDXL, Llama, etc). Pay per prediction.",
+    description: "Run AI models (Whisper, SDXL, Llama, Flux, etc). Pay per prediction.",
     category: "ai",
     pricing: "Varies by model",
     regions: ["Global"],
     tags: ["ai", "ml", "whisper", "image", "audio", "transcription"],
+    isLLM: false,
+    envKey: "REPLICATE_API_TOKEN",
+    speed: "slow",
+    costTier: "medium",
+  },
+  stability: {
+    name: "Stability AI",
+    description: "Image generation API. Stable Diffusion 3, SDXL.",
+    category: "image",
+    pricing: "~$0.03/image",
+    regions: ["Global"],
+    tags: ["image", "generation", "stable-diffusion", "sdxl"],
+    isLLM: false,
+    envKey: "STABILITY_API_KEY",
+    speed: "slow",
+    costTier: "medium",
   },
   firecrawl: {
     name: "Firecrawl",
@@ -77,6 +219,10 @@ const PROVIDERS = {
     pricing: "~$0.001/page",
     regions: ["Global"],
     tags: ["scraping", "web", "crawl", "extract"],
+    isLLM: false,
+    envKey: "FIRECRAWL_API_KEY",
+    speed: "medium",
+    costTier: "cheap",
   },
   github: {
     name: "GitHub",
@@ -85,14 +231,22 @@ const PROVIDERS = {
     pricing: "Free tier available",
     regions: ["Global"],
     tags: ["github", "code", "repos", "developer"],
+    isLLM: false,
+    envKey: "GITHUB_TOKEN",
+    speed: "fast",
+    costTier: "free",
   },
   e2b: {
     name: "E2B",
-    description: "Secure code sandbox for AI agents. Run Python, shell commands in isolated environments.",
+    description: "Secure code sandbox for AI agents. Run Python, shell in isolated environments.",
     category: "sandbox",
     pricing: "$0.000028/s (2 vCPU)",
     regions: ["Global"],
     tags: ["sandbox", "code", "python", "execution", "ai", "agents"],
+    isLLM: false,
+    envKey: "E2B_API_KEY",
+    speed: "medium",
+    costTier: "cheap",
   },
   apilayer: {
     name: "APILayer",
@@ -101,8 +255,138 @@ const PROVIDERS = {
     pricing: "Free tier available, paid plans per API",
     regions: ["Global"],
     tags: ["exchange", "stocks", "aviation", "pdf", "screenshot", "verification", "vat", "news", "scraping"],
+    isLLM: false,
+    envKey: "APILAYER_API_KEY",
+    speed: "medium",
+    costTier: "cheap",
   },
-} as const;
+};
+
+// ==============================================
+// INTELLIGENT LLM ROUTER
+// ==============================================
+
+// Model-to-provider mapping: which direct providers can serve which model patterns
+const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: string }[] = [
+  // Groq-native models
+  { pattern: /^(groq\/)?llama-3\.3-70b/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
+  { pattern: /^(groq\/)?llama-3\.1-8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
+  { pattern: /^(groq\/)?gemma2?-9b/i, provider: "groq", nativeModel: "gemma2-9b-it" },
+  { pattern: /^(groq\/)?mixtral-8x7b/i, provider: "groq", nativeModel: "mixtral-8x7b-32768" },
+  // Mistral-native models
+  { pattern: /^(mistralai\/)?mistral-small/i, provider: "mistral", nativeModel: "mistral-small-latest" },
+  { pattern: /^(mistralai\/)?mistral-large/i, provider: "mistral", nativeModel: "mistral-large-latest" },
+  { pattern: /^(mistralai\/)?mistral-medium/i, provider: "mistral", nativeModel: "mistral-medium-latest" },
+  { pattern: /^(mistralai\/)?codestral/i, provider: "mistral", nativeModel: "codestral-latest" },
+  { pattern: /^(mistralai\/)?pixtral/i, provider: "mistral", nativeModel: "pixtral-large-latest" },
+  // Together-native models
+  { pattern: /^(together\/)?meta-llama\/Llama-3\.3-70B/i, provider: "together", nativeModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
+  { pattern: /^(together\/)?Qwen\/Qwen2\.5-72B/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
+  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-R1/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
+  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-V3/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
+];
+
+interface RoutingDecision {
+  provider: string;
+  model: string;
+  baseUrl: string;
+  apiKey: string;
+  reason: string;
+  extraHeaders?: Record<string, string>;
+}
+
+function routeLLMRequest(
+  requestedModel: string,
+  settings: {
+    routingMode: string;
+    preferredProviders: string[];
+    blockedProviders: string[];
+    allowOpenRouterFallback: boolean;
+  }
+): RoutingDecision | null {
+  // 1. Check direct provider matches for the requested model
+  for (const mapping of MODEL_PROVIDER_MAP) {
+    if (!mapping.pattern.test(requestedModel)) continue;
+    if (settings.blockedProviders.includes(mapping.provider)) continue;
+
+    const providerMeta = PROVIDERS[mapping.provider];
+    if (!providerMeta?.isLLM || !providerMeta.envKey || !providerMeta.baseUrl) continue;
+
+    const apiKey = process.env[providerMeta.envKey];
+    if (!apiKey) continue;
+
+    // For "highest_quality" mode, prefer OpenRouter (more model options)
+    if (settings.routingMode === "highest_quality" && !settings.preferredProviders.includes(mapping.provider)) {
+      continue;
+    }
+
+    return {
+      provider: mapping.provider,
+      model: mapping.nativeModel,
+      baseUrl: providerMeta.baseUrl,
+      apiKey,
+      reason: `direct_${mapping.provider}`,
+    };
+  }
+
+  // 2. Routing mode preferences for unknown models
+  if (settings.routingMode === "fastest") {
+    // Try Groq first (fastest inference), then Together, then Mistral
+    for (const fastProvider of ["groq", "together", "mistral"]) {
+      if (settings.blockedProviders.includes(fastProvider)) continue;
+      const meta = PROVIDERS[fastProvider];
+      if (!meta?.isLLM || !meta.envKey || !meta.baseUrl) continue;
+      const key = process.env[meta.envKey];
+      if (!key) continue;
+      // Only route if the model looks like it belongs to this provider
+      // Don't send anthropic/claude to groq
+      if (requestedModel.includes("anthropic/") || requestedModel.includes("openai/") || requestedModel.includes("google/")) break;
+      return {
+        provider: fastProvider,
+        model: requestedModel,
+        baseUrl: meta.baseUrl,
+        apiKey: key,
+        reason: `fastest_mode_${fastProvider}`,
+      };
+    }
+  }
+
+  // 3. Preferred providers check
+  for (const preferred of settings.preferredProviders) {
+    if (settings.blockedProviders.includes(preferred)) continue;
+    const meta = PROVIDERS[preferred];
+    if (!meta?.isLLM || !meta.envKey || !meta.baseUrl) continue;
+    const key = process.env[meta.envKey];
+    if (!key) continue;
+    return {
+      provider: preferred,
+      model: requestedModel,
+      baseUrl: meta.baseUrl,
+      apiKey: key,
+      reason: `preferred_${preferred}`,
+    };
+  }
+
+  // 4. Fallback to OpenRouter
+  if (!settings.blockedProviders.includes("openrouter") && settings.allowOpenRouterFallback !== false) {
+    const orKey = process.env.OPENROUTER_API_KEY;
+    if (orKey) {
+      return {
+        provider: "openrouter",
+        model: requestedModel,
+        baseUrl: "https://openrouter.ai/api/v1/chat/completions",
+        apiKey: orKey,
+        reason: "openrouter_fallback",
+        extraHeaders: {
+          "HTTP-Referer": "https://apiclaw.cloud",
+          "X-Title": "APIClaw Gateway",
+        },
+      };
+    }
+  }
+
+  return null; // No provider available
+}
 
 // CORS headers
 const corsHeaders = {
@@ -119,60 +403,98 @@ function jsonResponse(data: unknown, status = 200) {
   });
 }
 
+// ============================================
+// UNIFIED AUTH: resolves workspace from any auth method
+// Priority: 1) Authorization: Bearer sk-claw-... (API key)
+//           2) X-APIClaw-Identifier (legacy MCP workspace ID)
+//           3) Anonymous (still allowed, just untracked)
+// ============================================
+
+async function resolveWorkspaceFromRequest(
+  ctx: any,
+  request: Request
+): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "identifier" | "anonymous" }> {
+  // 1. Check for API key auth (Bearer sk-claw-...)
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer sk-claw-")) {
+    const rawKey = authHeader.slice(7); // Remove "Bearer "
+    try {
+      const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey });
+      if (resolved) {
+        // Touch lastUsedAt (fire and forget)
+        ctx.runMutation(api.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
+        return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key" };
+      }
+    } catch (e: any) {
+      console.error("[Auth] API key resolution failed:", e.message);
+    }
+    // Invalid key - don't fall through to anonymous
+    return { authMethod: "anonymous" };
+  }
+
+  // 2. Check for legacy identifier
+  const identifier = request.headers.get("X-APIClaw-Identifier");
+  if (identifier && !identifier.startsWith("anon:") && identifier !== "unknown" && identifier.length > 20) {
+    return { workspaceId: identifier, authMethod: "identifier" };
+  }
+
+  // 3. Anonymous
+  return { authMethod: "anonymous" };
+}
+
 // Helper to validate session and log API usage
 async function validateAndLogProxyCall(
   ctx: any,
   request: Request,
   provider: string,
   action: string
-): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string }> {
-  const identifier = request.headers.get("X-APIClaw-Identifier");
+): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string; authMethod?: string }> {
   const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
-  
-  console.log("[Proxy] Call received", { provider, action, identifier, subagentId });
-  
+
+  // Resolve workspace from any auth method
+  const auth = await resolveWorkspaceFromRequest(ctx, request);
+  const resolvedWorkspaceId = auth.workspaceId;
+  const identifier = request.headers.get("X-APIClaw-Identifier") || auth.workspaceId || "unknown";
+
+  console.log("[Proxy] Call received", { provider, action, authMethod: auth.authMethod, workspaceId: resolvedWorkspaceId, subagentId });
+
   // ALWAYS log to analytics (even if identifier is missing)
   try {
     const result = await ctx.runMutation(api.analytics.log, {
       event: "api_call",
       provider,
-      identifier: identifier || "unknown",
-      metadata: { action, subagentId },
+      identifier: identifier,
+      workspaceId: resolvedWorkspaceId as any,
+      metadata: { action, subagentId, authMethod: auth.authMethod },
     });
     console.log("[Proxy] Analytics logged:", result);
   } catch (e: any) {
     console.error("[Proxy] Analytics logging failed:", e.message, e.stack);
-    // Continue even if analytics fails
   }
-  
-  // If we have an identifier and it's a workspace ID (not anon:), log to workspace
-  if (identifier && !identifier.startsWith("anon:") && identifier !== "unknown") {
+
+  // If we have a workspace, log and increment usage
+  if (resolvedWorkspaceId) {
     try {
-      // Validate it's actually a workspace ID by checking format
-      if (identifier.length > 20) {
-        await ctx.runMutation(api.logs.createProxyLog, {
-          workspaceId: identifier as any,
-          provider,
-          action,
-          subagentId,
-        });
-        
-        // Increment workspace usage
-        await ctx.runMutation(api.workspaces.incrementUsage, {
-          workspaceId: identifier as any,
-        });
-        
-        console.log("[Proxy] Workspace logged for:", identifier);
-        return { valid: true, workspaceId: identifier, subagentId };
-      }
+      await ctx.runMutation(api.logs.createProxyLog, {
+        workspaceId: resolvedWorkspaceId as any,
+        provider,
+        action,
+        subagentId,
+      });
+
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: resolvedWorkspaceId as any,
+      });
+
+      console.log("[Proxy] Workspace logged for:", resolvedWorkspaceId);
+      return { valid: true, workspaceId: resolvedWorkspaceId, subagentId, authMethod: auth.authMethod };
     } catch (e: any) {
       console.error("[Proxy] Workspace logging failed:", e.message);
-      // Continue even if workspace logging fails
     }
   }
-  
+
   // Return success regardless (don't block API calls)
-  return { valid: true, subagentId };
+  return { valid: true, subagentId, authMethod: auth.authMethod };
 }
 
 // OPTIONS handler for CORS
@@ -472,7 +794,7 @@ http.route({
         headers: {
           "Authorization": `Bearer ${OPENROUTER_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://apiclaw.nordsym.com",
+          "HTTP-Referer": "https://apiclaw.cloud",
           "X-Title": "APIClaw",
         },
         body: JSON.stringify(body),
@@ -1337,7 +1659,7 @@ http.route({
       });
 
       // Send email directly - SIMPLE HTML (complex tables get stripped by Gmail)
-      const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${result.token}`;
+      const verifyUrl = `https://apiclaw.cloud/auth/verify?token=${result.token}`;
       const html = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
 <h1>🦞 APIClaw</h1>
 <h2>An AI Agent Wants to Connect</h2>
@@ -1360,7 +1682,7 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "APIClaw <noreply@apiclaw.nordsym.com>",
+          from: "APIClaw <noreply@apiclaw.cloud>",
           to: email.toLowerCase(),
           subject: "🦞 Verify Your Email — APIClaw",
           html: html,
@@ -1551,7 +1873,7 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     const identifier = request.headers.get("X-APIClaw-Identifier");
-    
+
     try {
       const logId = await ctx.runMutation(api.analytics.log, {
         event: "test_endpoint",
@@ -1559,7 +1881,7 @@ http.route({
         identifier: identifier || "test",
         metadata: { test: true },
       });
-      
+
       return jsonResponse({
         success: true,
         identifier,
@@ -1574,4 +1896,244 @@ http.route({
       }, 500);
     }
   }),
+});
+
+// ==============================================
+// GATEWAY v1 — Unified API Layer for AI Agents
+// ==============================================
+// OpenAI-compatible /v1/chat/completions endpoint.
+// Accepts: Authorization: Bearer sk-claw-...
+// Routes to the best available LLM provider (OpenRouter by default).
+// This is what OpenClaw and any agent configures as their API endpoint.
+// ==============================================
+
+// Helper: extract Bearer token from Authorization header
+function extractBearerToken(request: Request): string | null {
+  const auth = request.headers.get("Authorization");
+  if (!auth?.startsWith("Bearer ")) return null;
+  return auth.slice(7);
+}
+
+// Helper: require API key auth, return 401 if missing
+async function requireApiKeyAuth(
+  ctx: any,
+  request: Request
+): Promise<{ workspaceId: string; keyId: string } | Response> {
+  const auth = await resolveWorkspaceFromRequest(ctx, request);
+  if (auth.authMethod !== "api-key" || !auth.workspaceId || !auth.keyId) {
+    return jsonResponse(
+      {
+        error: {
+          message: "Invalid API key. Generate one at https://apiclaw.cloud/workspace?tab=api-keys",
+          type: "invalid_api_key",
+          code: "invalid_api_key",
+        },
+      },
+      401
+    );
+  }
+  return { workspaceId: auth.workspaceId, keyId: auth.keyId };
+}
+
+// /v1/chat/completions — OpenAI-compatible LLM gateway with intelligent routing
+http.route({
+  path: "/v1/chat/completions",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    // Require API key auth
+    const authResult = await requireApiKeyAuth(ctx, request);
+    if (authResult instanceof Response) return authResult;
+    const { workspaceId } = authResult;
+
+    // Parse body
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
+    }
+
+    const { model, messages, stream, ...rest } = body;
+    if (!messages || !Array.isArray(messages)) {
+      return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
+    }
+
+    // Request-level overrides (X-APIClaw-Route header)
+    const routeOverride = request.headers.get("X-APIClaw-Route"); // e.g. "fastest" or "groq"
+
+    // Load workspace settings
+    let settings: {
+      routingMode: string;
+      defaultModel: string | null;
+      preferredProviders: string[];
+      blockedProviders: string[];
+      allowOpenRouterFallback: boolean;
+    };
+    try {
+      settings = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+    } catch {
+      settings = {
+        routingMode: "balanced",
+        defaultModel: null,
+        preferredProviders: [],
+        blockedProviders: [],
+        allowOpenRouterFallback: true,
+      };
+    }
+
+    // Apply request-level overrides
+    const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced"].includes(routeOverride)
+      ? routeOverride
+      : settings.routingMode;
+
+    // If routeOverride is a provider name, add it as preferred
+    const effectivePreferred = routeOverride && PROVIDERS[routeOverride]?.isLLM
+      ? [routeOverride, ...settings.preferredProviders]
+      : settings.preferredProviders;
+
+    const effectiveModel = model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
+
+    // Route the request
+    const route = routeLLMRequest(effectiveModel, {
+      routingMode: effectiveRoutingMode,
+      preferredProviders: effectivePreferred,
+      blockedProviders: settings.blockedProviders,
+      allowOpenRouterFallback: settings.allowOpenRouterFallback,
+    });
+
+    if (!route) {
+      return jsonResponse({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
+    }
+
+    // Log usage
+    try {
+      await ctx.runMutation(api.analytics.log, {
+        event: "api_call",
+        provider: "gateway",
+        identifier: workspaceId,
+        workspaceId: workspaceId as any,
+        metadata: {
+          action: "chat_completions",
+          model: effectiveModel,
+          routedTo: route.provider,
+          routeReason: route.reason,
+          authMethod: "api-key",
+        },
+      });
+      await ctx.runMutation(api.logs.createProxyLog, {
+        workspaceId: workspaceId as any,
+        provider: route.provider,
+        action: "chat_completions",
+        subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+      });
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: workspaceId as any,
+      });
+    } catch (e: any) {
+      console.error("[Gateway] Logging failed:", e.message);
+    }
+
+    // Forward to the chosen provider
+    try {
+      const requestBody = {
+        model: route.model,
+        messages,
+        stream: stream || false,
+        ...rest,
+      };
+
+      const headers: Record<string, string> = {
+        "Authorization": `Bearer ${route.apiKey}`,
+        "Content-Type": "application/json",
+        ...(route.extraHeaders || {}),
+      };
+
+      const response = await fetch(route.baseUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      // For streaming responses, proxy the stream directly
+      if (stream && response.body) {
+        return new Response(response.body, {
+          status: response.status,
+          headers: {
+            "Content-Type": response.headers.get("Content-Type") || "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            ...corsHeaders,
+          },
+        });
+      }
+
+      // Non-streaming: return JSON
+      const data = await response.json();
+      const latencyMs = Date.now() - startTime;
+
+      // Add APIClaw metadata
+      if (data && typeof data === "object") {
+        (data as any)._apiclaw = {
+          latencyMs,
+          provider: route.provider,
+          routeReason: route.reason,
+          model: route.model,
+          gateway: "v1",
+        };
+      }
+
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: { message: e.message, type: "server_error" } }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/chat/completions",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// /v1/models — List available models through APIClaw
+http.route({
+  path: "/v1/models",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    // API key auth optional for models listing
+    const models = [
+      // OpenRouter models (main LLM backbone)
+      { id: "anthropic/claude-sonnet-4-6", object: "model", owned_by: "anthropic", via: "openrouter" },
+      { id: "anthropic/claude-haiku-3.5", object: "model", owned_by: "anthropic", via: "openrouter" },
+      { id: "anthropic/claude-opus-4", object: "model", owned_by: "anthropic", via: "openrouter" },
+      { id: "openai/gpt-4o", object: "model", owned_by: "openai", via: "openrouter" },
+      { id: "openai/gpt-4o-mini", object: "model", owned_by: "openai", via: "openrouter" },
+      { id: "openai/o3-mini", object: "model", owned_by: "openai", via: "openrouter" },
+      { id: "google/gemini-2.5-pro-preview", object: "model", owned_by: "google", via: "openrouter" },
+      { id: "google/gemini-2.5-flash-preview", object: "model", owned_by: "google", via: "openrouter" },
+      { id: "meta-llama/llama-3.3-70b-instruct", object: "model", owned_by: "meta", via: "openrouter" },
+      { id: "mistralai/mistral-large-latest", object: "model", owned_by: "mistral", via: "openrouter" },
+      { id: "deepseek/deepseek-r1", object: "model", owned_by: "deepseek", via: "openrouter" },
+      { id: "deepseek/deepseek-chat", object: "model", owned_by: "deepseek", via: "openrouter" },
+      { id: "qwen/qwen-2.5-72b-instruct", object: "model", owned_by: "qwen", via: "openrouter" },
+    ];
+
+    return jsonResponse({
+      object: "list",
+      data: models,
+      _apiclaw: {
+        gateway: "v1",
+        note: "These models are available through APIClaw's unified gateway. All 800+ OpenRouter models are accessible by ID.",
+        non_llm_apis: Object.keys(PROVIDERS).length + " additional APIs available (SMS, email, search, TTS, code execution, scraping, and more)",
+      },
+    });
+  }),
+});
+
+http.route({
+  path: "/v1/models",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });

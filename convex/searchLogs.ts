@@ -177,17 +177,25 @@ export const getStats = query({
     hoursBack: v.optional(v.number()),
   },
   handler: async (ctx, { token, hoursBack }) => {
-    const session = await ctx.db
+    // Try agentSessions first (MCP agent tokens)
+    let workspaceId: any = null;
+    const agentSession = await ctx.db
       .query("agentSessions")
       .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
       .first();
-    if (!session) return { totalSearches: 0, zeroResultSearches: 0, avgResponseTimeMs: 0, successRate: 0, byDay: [] };
+    if (agentSession) {
+      workspaceId = agentSession.workspaceId;
+    } else {
+      // Fall back to workspace magic-link sessions (legacy: table was renamed to workspaceMagicLinks)
+      // No fallback needed — agentSessions is the only session table
+    }
+    if (!workspaceId) return { totalSearches: 0, zeroResultSearches: 0, avgResponseTimeMs: 0, successRate: 0, byDay: [] };
 
     const since = hoursBack ? Date.now() - hoursBack * 60 * 60 * 1000 : 0;
 
     const logs = await ctx.db
       .query("searchLogs")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
       .collect();
 
     const filtered = since > 0 ? logs.filter((l) => l.timestamp >= since) : logs;

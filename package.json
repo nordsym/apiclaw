@@ -1,10 +1,10 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.8.0",
+  "version": "1.8.7",
   "description": "The API layer for AI agents. Dashboard + 22K APIs + 18 Direct Call providers. MCP native.",
   "type": "module",
   "main": "dist/index.js",
-  "homepage": "https://apiclaw.nordsym.com",
+  "homepage": "https://apiclaw.cloud",
   "repository": {
     "type": "git",
     "url": "https://github.com/nordsym/apiclaw"
@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "tsc && cp -r src/registry dist/",
+    "postinstall": "node dist/postinstall.js || true",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "start:http": "tsx src/http-server-minimal.ts",

@@ -33,4 +33,4 @@ rm -rf .next
 echo "🚀 Deploying to Vercel..."
 npx vercel --prod --force --yes
 
-echo "✅ Done! Check https://apiclaw.nordsym.com"
+echo "✅ Done! Check https://apiclaw.cloud"

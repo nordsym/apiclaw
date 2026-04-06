@@ -80,6 +80,9 @@ import {
   BarChart,
   Bar,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import {
   CheckoutButton,
@@ -169,7 +172,7 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "analytics" | "webhooks" | "earn" | "docs" | "feedback" | "settings" | "billing";
+type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "api-keys" | "analytics" | "webhooks" | "earn" | "docs" | "feedback" | "settings" | "billing";
 type AnalyticsSubtab = "overview" | "usage" | "logs" | "chains";
 
 // Generate preview analytics data for demo
@@ -275,7 +278,7 @@ export default function WorkspacePage() {
   }, [searchParams, showToast]);
 
   useEffect(() => {
-    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "analytics", "webhooks", "earn", "docs", "feedback", "settings", "billing"];
+    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "api-keys", "analytics", "webhooks", "earn", "docs", "feedback", "settings", "billing"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
@@ -559,6 +562,7 @@ export default function WorkspacePage() {
     { id: "api-catalog" as TabType, label: "API Catalog", icon: Zap },
     { id: "my-agents" as TabType, label: "My Agents", icon: Users },
     { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
+    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
     { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
     { id: "webhooks" as TabType, label: "Notifications", icon: Bell },
   ];
@@ -932,8 +936,11 @@ export default function WorkspacePage() {
           {activeTab === "my-apis" && (
             <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} providerId={providerId} />
           )}
+          {activeTab === "api-keys" && (
+            <APIKeysTab sessionToken={sessionToken} />
+          )}
           {activeTab === "analytics" && (
-            <AnalyticsTab 
+            <AnalyticsTab
               apis={providerApis} 
               analytics={providerAnalytics} 
               workspace={workspace}
@@ -986,8 +993,8 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isBacker = (workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.usageLimit === -1;
-  const usagePct = isBacker ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
+  const isPaid = ["pro", "scale", "usage_based"].includes(workspace?.tier || "");
+  const usagePct = isPaid ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
 
@@ -1015,27 +1022,51 @@ function OverviewTab({
             {agents.length === 0 && <p className="text-xs text-[var(--text-muted)] mt-2">Run <code className="font-mono bg-[var(--surface)] px-1 rounded">mcp-install</code> to connect</p>}
           </button>
 
-          {/* Usage card */}
+          {/* Usage meter */}
           <button onClick={() => setActiveTab("analytics")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <BarChart3 className="w-5 h-5 text-[#ef4444]" />
-              <span className={`text-xs px-2 py-0.5 rounded-full ${isBacker ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
-                {workspace?.tier === "partner" ? "Partner" : isBacker ? "Backer" : workspace?.tier || "free"}
+              <span className={`text-xs px-2 py-0.5 rounded-full ${isPaid || workspace?.tier === "partner" ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
+                {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier === "scale" ? "Scale" : workspace?.tier === "pro" ? "Pro" : workspace?.tier || "free"}
               </span>
             </div>
-            <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
-            <p className="text-sm text-[var(--text-muted)] mt-0.5">
-              {isBacker ? "calls (unlimited)" : `of ${workspace?.usageLimit || 50} this month`}
-            </p>
-            {!isBacker && workspace && (
-              <div className="mt-3">
-                <div className="h-1.5 bg-[var(--surface)] rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all ${usagePct > 90 ? "bg-red-500" : usagePct > 70 ? "bg-yellow-500" : "bg-[#ef4444]"}`}
-                    style={{ width: `${usagePct}%` }} />
+            <div className="flex items-center gap-4">
+              {/* Donut meter */}
+              <div className="relative w-20 h-20 shrink-0">
+                <PieChart width={80} height={80}>
+                  <Pie
+                    data={isPaid
+                      ? [{ value: workspace?.usageCount || 0 }, { value: Math.max(100 - (workspace?.usageCount || 0), 20) }]
+                      : [{ value: usagePct }, { value: 100 - usagePct }]
+                    }
+                    cx={35}
+                    cy={35}
+                    innerRadius={24}
+                    outerRadius={34}
+                    startAngle={90}
+                    endAngle={-270}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    <Cell fill={isPaid ? "#22c55e" : usagePct > 90 ? "#ef4444" : usagePct > 70 ? "#eab308" : "#ef4444"} />
+                    <Cell fill="var(--surface)" />
+                  </Pie>
+                </PieChart>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-sm font-bold">{isPaid ? <span className="text-green-400 text-xs">&#8734;</span> : `${Math.round(usagePct)}%`}</span>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{workspace.usageRemaining} remaining</p>
               </div>
-            )}
+              {/* Stats */}
+              <div className="min-w-0">
+                <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  {isPaid ? "calls this month" : `of ${workspace?.usageLimit || 50} calls`}
+                </p>
+                {!isPaid && workspace && (
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{workspace.usageRemaining} remaining</p>
+                )}
+              </div>
+            </div>
           </button>
 
           {/* API Catalog access card */}
@@ -1048,9 +1079,9 @@ function OverviewTab({
             <div className="mt-3 space-y-1">
               <p className="text-xs flex items-center gap-1.5 text-green-400"><Check className="w-3 h-3" />Search always available</p>
               <p className="text-xs flex items-center gap-1.5 text-green-400"><Check className="w-3 h-3" />Open APIs always available</p>
-              <p className={`text-xs flex items-center gap-1.5 ${isBacker || (workspace?.usageRemaining ?? 1) > 0 ? "text-green-400" : "text-red-400"}`}>
-                {(isBacker || (workspace?.usageRemaining ?? 1) > 0) ? <Check className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                Direct Call {(!isBacker && (workspace?.usageRemaining ?? 1) <= 0) ? "blocked (limit reached)" : "available"}
+              <p className={`text-xs flex items-center gap-1.5 ${isPaid || (workspace?.usageRemaining ?? 1) > 0 ? "text-green-400" : "text-red-400"}`}>
+                {(isPaid || (workspace?.usageRemaining ?? 1) > 0) ? <Check className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                Direct Call {(!isPaid && (workspace?.usageRemaining ?? 1) <= 0) ? "blocked (limit reached)" : "available"}
               </p>
             </div>
           </button>
@@ -1105,7 +1136,7 @@ function OverviewTab({
       )}
 
       {/* Upgrade nudge for free tier running low */}
-      {!isBacker && workspace && usagePct > 80 && (
+      {!isPaid && workspace && usagePct > 80 && (
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5 flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[#ef4444] shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -2106,7 +2137,7 @@ function AgentsTab({
     return new Date(timestamp).toLocaleDateString();
   };
 
-  const mcpCommand = "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash";
+  const mcpCommand = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
 
   const getMCPClientIcon = (client: string) => {
     switch (client) {
@@ -3546,7 +3577,7 @@ function AnalyticsOverviewTab({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             path: "logs:getProviderAnalytics",
-            args: { token: sessionToken, hoursBack: 240 }, // Last 10 days
+            args: { token: sessionToken, hoursBack: 240, direction: "outbound" }, // Last 10 days, my usage only
           }),
         });
         const data = await res.json();
@@ -3685,7 +3716,7 @@ function AnalyticsOverviewTab({
                 <Bot className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
                 <p className="text-sm font-medium mb-1">No agents connected</p>
                 <p className="text-xs text-[var(--text-muted)] mb-3">Connect an MCP agent to see your call activity here.</p>
-                <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-1.5 font-mono text-[#ef4444]">curl -fsSL https://apiclaw.nordsym.com/install.sh | bash</code>
+                <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-1.5 font-mono text-[#ef4444]">curl -fsSL https://apiclaw.cloud/install.sh | bash</code>
               </div>
             )}
           </div>
@@ -3757,7 +3788,7 @@ function UsageTab({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             path: "logs:getProviderAnalytics",
-            args: { token: sessionToken, hoursBack: hoursMap[timeRange] || 168 },
+            args: { token: sessionToken, hoursBack: hoursMap[timeRange] || 168, direction: "inbound" },
           }),
         });
         const data = await res.json();
@@ -3850,11 +3881,21 @@ function UsageTab({
     <div className="space-y-8">
       {/* Preview Banner */}
       {isPreview && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
+        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-5 flex items-start gap-4">
+          <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-[#ef4444]">Preview Mode</p>
-            <p className="text-sm text-[var(--text-muted)]">This is sample data. Real analytics will appear once agents start using your listed APIs.</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              {apis.length === 0
+                ? "This is what your API analytics will look like. List an API on APIClaw and see real traffic data from agents using it."
+                : "This is sample data. Real analytics will appear once agents start using your listed APIs."}
+            </p>
+            {apis.length === 0 && (
+              <a href="/providers" className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+                <Plus className="w-4 h-4" />
+                List your API
+              </a>
+            )}
           </div>
         </div>
       )}
@@ -4569,7 +4610,7 @@ interface PaymentMethod {
 
 function BillingTab({ workspace }: { workspace: Workspace | null }) {
   const currentTier = workspace?.tier || "free";
-  const isBacker = (currentTier === "backer" || currentTier === "founder");
+  const isPaid = ["pro", "scale", "usage_based"].includes(currentTier);
   const isPartner = currentTier === "partner";
 
   const plans = PLANS.map((p) => ({
@@ -4586,19 +4627,8 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
         <p className="text-[var(--text-muted)] mt-1">Help us stay 100% user funded — no VC, no ads, no compromises.</p>
       </div>
 
-      {/* Backer banner */}
-      {isBacker && (
-        <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-5 flex items-center gap-4">
-          <Check className="w-5 h-5 text-green-400 shrink-0" />
-          <div>
-            <p className="font-semibold text-green-400">Founder</p>
-            <p className="text-sm text-[var(--text-muted)] mt-0.5">Unlimited access until end of 2026. Thank you for backing APIClaw early.</p>
-          </div>
-        </div>
-      )}
-
       {/* Current plan summary */}
-      {!isBacker && !isPartner && (
+      {!isPaid && !isPartner && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 flex items-center justify-between">
           <div>
             <p className="text-sm text-[var(--text-muted)]">Current plan</p>
@@ -4616,7 +4646,7 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
       {/* Plans grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {plans.map(plan => {
-          const isCurrentPlan = currentTier === plan.id || (isBacker && plan.id === "free") || (isPartner && plan.id === "free");
+          const isCurrentPlan = currentTier === plan.id || (isPartner && plan.id === "free");
           return (
             <div key={plan.id} className={`rounded-2xl border p-5 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
               {plan.highlight && (
@@ -4679,6 +4709,311 @@ const WEBHOOK_EVENTS = [
   { id: "agent.connected", label: "Agent Connected", description: "Triggered when a new agent connects" },
   { id: "agent.revoked", label: "Agent Revoked", description: "Triggered when an agent is revoked" },
 ];
+
+// ============================================
+// API KEYS TAB
+// ============================================
+
+function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
+  const [keys, setKeys] = useState<Array<{ id: string; name: string; keyPrefix: string; lastUsedAt?: number; createdAt: number }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [showNewKey, setShowNewKey] = useState<{ key: string; name: string } | null>(null);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchKeys = useCallback(async () => {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "apiKeys:listKeys", args: { token: sessionToken } }),
+      });
+      const data = await res.json();
+      setKeys(data.value?.keys || []);
+    } catch {
+      console.error("Failed to fetch keys");
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionToken]);
+
+  useEffect(() => { fetchKeys(); }, [fetchKeys]);
+
+  const handleGenerate = async () => {
+    if (!sessionToken || !newKeyName.trim()) return;
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "apiKeys:generateKey", args: { token: sessionToken, name: newKeyName.trim() } }),
+      });
+      const data = await res.json();
+      if (data.value?.key) {
+        setShowNewKey({ key: data.value.key, name: data.value.name });
+        setNewKeyName("");
+        setShowCreateForm(false);
+        fetchKeys();
+      } else {
+        setError(data.value?.error || data.error?.message || "Failed to generate key");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to generate key");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleRevoke = async (keyId: string) => {
+    if (!sessionToken) return;
+    setRevoking(keyId);
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "apiKeys:revokeKey", args: { token: sessionToken, keyId } }),
+      });
+      fetchKeys();
+    } catch {
+      console.error("Failed to revoke key");
+    } finally {
+      setRevoking(null);
+    }
+  };
+
+  const copyKey = () => {
+    if (showNewKey) {
+      navigator.clipboard.writeText(showNewKey.key);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const timeAgo = (ts: number) => {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return "just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    if (diff < 2592000000) return `${Math.floor(diff / 86400000)}d ago`;
+    return new Date(ts).toLocaleDateString();
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-xl font-bold">API Keys</h2>
+        <p className="text-[var(--text-muted)] mt-1">
+          Connect APIClaw to anything. Generate a key and use it in any AI agent, automation tool, or script. One key, all APIs.
+        </p>
+      </div>
+
+      {/* Info banner */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+            <Shield className="w-4 h-4 text-blue-400" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">Already using APIClaw via MCP?</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              You don't need a key. Your agents are already connected and working.
+            </p>
+            <p className="text-sm text-[var(--text-muted)] mt-2">
+              Generate a key when you want to use APIClaw from <strong className="text-[var(--text-primary)]">other tools</strong> — like OpenClaw, Cursor, n8n, or any app that accepts an API key.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* New key reveal modal */}
+      {showNewKey && (
+        <div className="rounded-xl border-2 border-[#ef4444] bg-[#ef4444]/5 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Key className="w-5 h-5 text-[#ef4444]" />
+            <p className="font-bold text-[#ef4444]">Key created: {showNewKey.name}</p>
+          </div>
+          <p className="text-sm text-[var(--text-muted)] mb-3">
+            Copy this key now. You won't be able to see it again.
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-4 py-3 font-mono text-sm break-all select-all">
+              {showNewKey.key}
+            </code>
+            <button
+              onClick={copyKey}
+              className="shrink-0 px-4 py-3 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition flex items-center gap-2"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <button
+            onClick={() => setShowNewKey(null)}
+            className="mt-3 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+          >
+            I've saved the key, close this
+          </button>
+        </div>
+      )}
+
+      {/* Generate new key */}
+      {!showCreateForm ? (
+        <button
+          onClick={() => setShowCreateForm(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition"
+        >
+          <Plus className="w-4 h-4" />
+          Generate new key
+        </button>
+      ) : (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5">
+          <p className="font-medium text-sm mb-3">New API Key</p>
+          {error && (
+            <div className="mb-3 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Key name (e.g. Production, My Agent)"
+              value={newKeyName}
+              onChange={(e) => setNewKeyName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+              className="flex-1 px-3 py-2.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:border-[#ef4444]/50"
+              autoFocus
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={generating || !newKeyName.trim()}
+              className="shrink-0 px-4 py-2.5 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate"}
+            </button>
+            <button
+              onClick={() => { setShowCreateForm(false); setError(null); }}
+              className="shrink-0 px-3 py-2.5 rounded-lg border border-[var(--border)] text-sm hover:bg-[var(--surface)] transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Keys list */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--border)]">
+          <p className="font-semibold text-sm">Your keys</p>
+        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+          </div>
+        ) : keys.length === 0 ? (
+          <div className="py-12 text-center">
+            <Key className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-3 opacity-40" />
+            <p className="text-sm text-[var(--text-muted)]">No API keys yet</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Generate a key to get started</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border)]">
+            {keys.map((k) => (
+              <div key={k.id} className="flex items-center justify-between px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--surface)] flex items-center justify-center">
+                    <Key className="w-4 h-4 text-[var(--text-muted)]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{k.name}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <code className="text-xs text-[var(--text-muted)] font-mono">{k.keyPrefix}</code>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {k.lastUsedAt ? `Last used ${timeAgo(k.lastUsedAt)}` : "Never used"}
+                      </span>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        Created {timeAgo(k.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRevoke(k.id)}
+                  disabled={revoking === k.id}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+                >
+                  {revoking === k.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Revoke"}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Quick start */}
+      {keys.length > 0 && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5">
+          <p className="font-medium text-sm mb-3 flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-[var(--text-muted)]" />
+            Quick start
+          </p>
+
+          {/* Universal endpoint */}
+          <div className="mb-4">
+            <p className="text-xs text-[var(--text-muted)] mb-2">Your endpoint (OpenAI-compatible):</p>
+            <code className="block bg-[var(--surface)] border border-[var(--border)] rounded-lg px-4 py-3 text-xs font-mono select-all">
+              https://api.apiclaw.cloud/v1/chat/completions
+            </code>
+          </div>
+
+          {/* curl example */}
+          <p className="text-xs text-[var(--text-muted)] mb-2">Works with any tool that speaks OpenAI:</p>
+          <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 text-xs font-mono overflow-x-auto">
+{`curl https://api.apiclaw.cloud/v1/chat/completions \\
+  -H "Authorization: Bearer ${keys[0]?.keyPrefix || "sk-claw-..."}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "anthropic/claude-sonnet-4-6",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'`}
+          </pre>
+
+          {/* Integrations */}
+          <div className="mt-4 pt-4 border-t border-[var(--border)]">
+            <p className="text-xs font-medium mb-3">Works with</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { name: "OpenClaw", desc: "AI gateway" },
+                { name: "Cursor", desc: "AI code editor" },
+                { name: "n8n", desc: "Workflow automation" },
+                { name: "LangChain", desc: "Agent framework" },
+                { name: "Hermes", desc: "AI agent runtime" },
+                { name: "Continue", desc: "IDE assistant" },
+                { name: "Custom agents", desc: "Any HTTP client" },
+                { name: "800+ models", desc: "One key, all providers" },
+              ].map((tool) => (
+                <div key={tool.name} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-3 py-2">
+                  <p className="text-xs font-medium">{tool.name}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">{tool.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-xs text-[var(--text-muted)] mt-4">
+            APIClaw gives you access to hundreds of LLMs and APIs through a single key. Use it anywhere you would use an OpenAI API key.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function WebhooksTab({ sessionToken }: { sessionToken: string | null }) {
   const [enabled, setEnabled] = useState<Record<string, boolean>>({
@@ -4795,7 +5130,7 @@ function DocsTab() {
           </div>
           <div>
             <p className="text-sm text-[var(--text-muted)] mb-2">2. Or auto-install for your client:</p>
-            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">curl -fsSL https://apiclaw.nordsym.com/install.sh | bash</pre>
+            <pre className="bg-[var(--background)] rounded-lg p-4 text-sm">curl -fsSL https://apiclaw.cloud/install.sh | bash</pre>
             <p className="text-xs text-[var(--text-muted)] mt-2">Supports: Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Continue, Codex (OpenAI)</p>
           </div>
           <div>
@@ -5092,6 +5427,264 @@ function FeedbackTab() {
 // SETTINGS TAB
 // ============================================
 
+// ==============================================
+// GATEWAY SETTINGS SECTION
+// ==============================================
+
+const ROUTING_MODES = [
+  { id: "balanced", label: "Balanced", desc: "Best mix of cost, speed, and quality" },
+  { id: "best_price", label: "Best Price", desc: "Cheapest provider for each model" },
+  { id: "fastest", label: "Fastest", desc: "Lowest latency (Groq, Together)" },
+  { id: "highest_quality", label: "Highest Quality", desc: "Premium models via OpenRouter" },
+];
+
+const LLM_PROVIDERS = [
+  { id: "groq", name: "Groq", desc: "Ultra-fast inference" },
+  { id: "mistral", name: "Mistral", desc: "Efficient EU models" },
+  { id: "together", name: "Together AI", desc: "Open-source models" },
+  { id: "openrouter", name: "OpenRouter", desc: "800+ models (fallback)" },
+];
+
+function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null }) {
+  const [routingMode, setRoutingMode] = useState("balanced");
+  const [defaultModel, setDefaultModel] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [monthlyBudget, setMonthlyBudget] = useState("");
+  const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
+  const [preferredProviders, setPreferredProviders] = useState<string[]>([]);
+  const [allowFallback, setAllowFallback] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Load settings on mount
+  useEffect(() => {
+    if (!sessionToken || loaded) return;
+    // We don't have a direct query endpoint, so start with defaults
+    // Settings are loaded fresh each time the gateway handles a request
+    setLoaded(true);
+  }, [sessionToken, loaded]);
+
+  const saveSettings = async () => {
+    if (!sessionToken) return;
+    setSaving(true);
+    setSaveStatus("idle");
+    try {
+      await fetch(`${CONVEX_URL}/api/mutation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "workspaceSettings:upsert",
+          args: {
+            token: sessionToken,
+            routingMode,
+            defaultModel: defaultModel || undefined,
+            maxPricePerMTokens: maxPrice ? parseFloat(maxPrice) : undefined,
+            monthlyBudgetLimit: monthlyBudget ? parseFloat(monthlyBudget) : undefined,
+            preferredProviders: preferredProviders.length > 0 ? preferredProviders : undefined,
+            blockedProviders: blockedProviders.length > 0 ? blockedProviders : undefined,
+            allowOpenRouterFallback: allowFallback,
+          },
+        }),
+      });
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    } catch {
+      setSaveStatus("error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleProvider = (id: string, list: "preferred" | "blocked") => {
+    if (list === "preferred") {
+      setPreferredProviders((prev) =>
+        prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      );
+      // Remove from blocked if adding to preferred
+      setBlockedProviders((prev) => prev.filter((p) => p !== id));
+    } else {
+      setBlockedProviders((prev) =>
+        prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      );
+      setPreferredProviders((prev) => prev.filter((p) => p !== id));
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-5 hover:bg-[var(--surface)] transition"
+      >
+        <div className="flex items-center gap-3">
+          <Zap className="w-5 h-5 text-[#ef4444]" />
+          <span className="font-semibold">Gateway Routing</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] font-medium">NEW</span>
+        </div>
+        {isOpen ? <ChevronUp className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />}
+      </button>
+
+      {isOpen && (
+        <div className="px-5 pb-5 space-y-6">
+          {/* Routing Mode */}
+          <div>
+            <label className="block text-sm font-medium mb-3">Routing Mode</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ROUTING_MODES.map((mode) => (
+                <button
+                  key={mode.id}
+                  onClick={() => setRoutingMode(mode.id)}
+                  className={`p-3 rounded-xl border text-left transition ${
+                    routingMode === mode.id
+                      ? "border-[#ef4444] bg-[#ef4444]/10"
+                      : "border-[var(--border)] hover:border-[var(--text-muted)]"
+                  }`}
+                >
+                  <p className="font-medium text-sm">{mode.label}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{mode.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Default Model */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Default Model</label>
+            <input
+              type="text"
+              value={defaultModel}
+              onChange={(e) => setDefaultModel(e.target.value)}
+              placeholder="anthropic/claude-sonnet-4-6"
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">Used when no model is specified in the request</p>
+          </div>
+
+          {/* Provider Preferences */}
+          <div>
+            <label className="block text-sm font-medium mb-3">LLM Provider Preferences</label>
+            <div className="space-y-2">
+              {LLM_PROVIDERS.map((provider) => {
+                const isPref = preferredProviders.includes(provider.id);
+                const isBlocked = blockedProviders.includes(provider.id);
+                return (
+                  <div key={provider.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
+                    <div>
+                      <p className="font-medium text-sm">{provider.name}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{provider.desc}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => toggleProvider(provider.id, "preferred")}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                          isPref
+                            ? "bg-green-500/20 text-green-500"
+                            : "bg-[var(--background)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        {isPref ? "Preferred" : "Prefer"}
+                      </button>
+                      <button
+                        onClick={() => toggleProvider(provider.id, "blocked")}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                          isBlocked
+                            ? "bg-red-500/20 text-red-500"
+                            : "bg-[var(--background)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        {isBlocked ? "Blocked" : "Block"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Budget Controls */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Max $/M Tokens</label>
+              <input
+                type="number"
+                step="0.01"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="No limit"
+                className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Monthly Budget (USD)</label>
+              <input
+                type="number"
+                step="1"
+                value={monthlyBudget}
+                onChange={(e) => setMonthlyBudget(e.target.value)}
+                placeholder="No limit"
+                className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+              />
+            </div>
+          </div>
+
+          {/* OpenRouter Fallback Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
+            <div>
+              <p className="font-medium text-sm">OpenRouter Fallback</p>
+              <p className="text-xs text-[var(--text-muted)]">Use OpenRouter when no direct provider matches</p>
+            </div>
+            <button
+              onClick={() => setAllowFallback(!allowFallback)}
+              className={`w-12 h-6 rounded-full relative transition ${
+                allowFallback ? "bg-[#ef4444]" : "bg-[var(--border)]"
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 shadow transition-all ${
+                allowFallback ? "left-[26px]" : "left-0.5"
+              }`} />
+            </button>
+          </div>
+
+          {/* Request-level override hint */}
+          <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+            <p className="text-xs text-[var(--text-muted)]">
+              <span className="font-medium text-[var(--text-primary)]">Tip:</span> Override per-request with{" "}
+              <code className="px-1.5 py-0.5 rounded bg-[var(--background)] text-[#ef4444] text-[11px]">X-APIClaw-Route: fastest</code>{" "}
+              or{" "}
+              <code className="px-1.5 py-0.5 rounded bg-[var(--background)] text-[#ef4444] text-[11px]">X-APIClaw-Route: groq</code>
+            </p>
+          </div>
+
+          {/* Save Button */}
+          <button
+            onClick={saveSettings}
+            disabled={saving}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition ${
+              saveStatus === "saved"
+                ? "bg-green-500/20 text-green-500 border border-green-500/30"
+                : saveStatus === "error"
+                ? "bg-red-500/20 text-red-500 border border-red-500/30"
+                : "bg-[#ef4444] text-white hover:bg-[#dc2626]"
+            } disabled:opacity-50`}
+          >
+            {saving ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+            ) : saveStatus === "saved" ? (
+              <><Check className="w-4 h-4" /> Settings Saved</>
+            ) : saveStatus === "error" ? (
+              <><AlertCircle className="w-4 h-4" /> Save Failed</>
+            ) : (
+              <><Save className="w-4 h-4" /> Save Gateway Settings</>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface SettingsSectionProps {
   title: string;
   icon: React.ElementType;
@@ -5285,6 +5878,8 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
         </div>
       </SettingsSection>
 
+      <GatewaySettingsSection sessionToken={sessionToken} />
+
       <SettingsSection title="Security" icon={Lock}>
         <div className="space-y-4 pt-4">
           <div className="p-4 rounded-xl bg-[var(--surface)]">
@@ -5397,7 +5992,7 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
             </div>
             <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
-              {workspace?.tier === "partner" ? "Partner" : (workspace?.tier === "backer" || workspace?.tier === "founder") ? "Founder" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
+              {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "scale" ? "Scale" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
             </span>
           </div>
         </div>
@@ -5418,17 +6013,17 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
             <div>
               <p className="font-medium">Current Plan</p>
               <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "partner" ? "Partner" : (workspace?.tier === "backer" || workspace?.tier === "founder") ? "Founder — Unlimited" : workspace?.tier === "pro" || workspace?.tier === "usage_based" ? "Usage-Based" : "Free Tier"}
+                {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "scale" ? "Scale" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : "Free Tier"}
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              ((workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.tier === "partner")
+              workspace?.tier === "partner"
                 ? "bg-[#ef4444]/20 text-[#ef4444]"
-                : workspace?.tier === "pro" || workspace?.tier === "usage_based"
+                : ["pro", "scale", "usage_based"].includes(workspace?.tier || "")
                 ? "bg-green-500/20 text-green-500"
                 : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
             }`}>
-              {((workspace?.tier === "backer" || workspace?.tier === "founder") || workspace?.tier === "partner" || workspace?.tier === "pro" || workspace?.tier === "usage_based") ? "Active" : "Free"}
+              {(workspace?.tier === "partner" || ["pro", "scale", "usage_based"].includes(workspace?.tier || "")) ? "Active" : "Free"}
             </span>
           </div>
 

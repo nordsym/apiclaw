@@ -8,8 +8,8 @@ import { internal } from "./_generated/api";
 // ============================================
 
 const ALERT_THRESHOLD = 0.8; // 80% of budget
-const APP_URL = "https://apiclaw.nordsym.com";
-const EMAIL_FROM = "APIClaw <noreply@apiclaw.nordsym.com>";
+const APP_URL = "https://apiclaw.cloud";
+const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
 
 // ============================================
 // HELPER: Get current month start

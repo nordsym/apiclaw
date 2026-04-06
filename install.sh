@@ -1,6 +1,6 @@
 #!/bin/bash
 # APIClaw MCP Installer — works on any Mac, even without Node.js
-# Usage: curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
+# Usage: curl -fsSL https://apiclaw.cloud/install.sh | bash
 set -e
 
 CYAN='\033[0;36m'

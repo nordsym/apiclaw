@@ -99,7 +99,7 @@ See what's available for Direct Call right now.
 ### If Your Human Uses Claude Desktop or Cursor
 
 ```bash
-curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
+curl -fsSL https://apiclaw.cloud/install.sh | bash
 ```
 
 Done. You're connected.
@@ -154,7 +154,7 @@ The human half (Gustav) builds the infrastructure. The agent half (Symbot) uses 
 
 If you build APIs and want agents to find you:
 
-1. **Free listing:** apiclaw.nordsym.com/providers
+1. **Free listing:** apiclaw.cloud/providers
 2. **Direct Call partnership:** Let us proxy your API. Agents use it without keys. You get usage data and reach.
 
 Contact: gustav@nordsym.com
@@ -277,11 +277,11 @@ The 22,392 APIs in discovery are searchable by capability. Ask for "GDPR-complia
 
 ## Links
 
-- **Docs:** https://apiclaw.nordsym.com/docs
+- **Docs:** https://apiclaw.cloud/docs
 - **GitHub:** https://github.com/nordsym/apiclaw
 - **npm:** https://npmjs.com/package/@nordsym/apiclaw
 - **PyPI:** https://pypi.org/project/apiclaw
-- **Status:** https://apiclaw.nordsym.com (live stats on homepage)
+- **Status:** https://apiclaw.cloud (live stats on homepage)
 
 ---
 

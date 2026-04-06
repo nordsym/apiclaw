@@ -12,7 +12,7 @@
 ### 1. Record with Tella
 - Open Tella on Mac
 - Record 2-minute demo:
-  - Install: `curl -fsSL https://apiclaw.nordsym.com/install.sh | bash`
+  - Install: `curl -fsSL https://apiclaw.cloud/install.sh | bash`
   - Show workspace
   - Make an API call
   - Show it working

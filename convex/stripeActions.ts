@@ -69,7 +69,7 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
       });
     }
 
-    const baseUrl = returnUrl || "https://apiclaw.nordsym.com";
+    const baseUrl = returnUrl || "https://apiclaw.cloud";
 
     // Create checkout session
     if (mode === "setup") {
@@ -291,6 +291,12 @@ async function handleCheckoutComplete(
   }
 }
 
+// Map Stripe product IDs to APIClaw billing plans
+const PRODUCT_PLAN_MAP: Record<string, string> = {
+  "prod_UEPEBJUtrXDTLS": "pro",       // APIClaw Pro ($79/mo)
+  "prod_UEPFCcnUqfIaIn": "scale",     // APIClaw Scale ($249/mo)
+};
+
 async function handleSubscriptionUpdate(
   ctx: any,
   subscription: Stripe.Subscription
@@ -310,8 +316,24 @@ async function handleSubscriptionUpdate(
     return;
   }
 
-  // Determine plan from subscription
-  const plan = subscription.status === "active" ? "usage_based" : "free";
+  // Determine plan from subscription product
+  let plan = "free";
+  if (subscription.status === "active") {
+    // Check each subscription item's product to determine the plan
+    for (const item of subscription.items.data) {
+      const productId = typeof item.price.product === "string"
+        ? item.price.product
+        : item.price.product.id;
+      if (PRODUCT_PLAN_MAP[productId]) {
+        plan = PRODUCT_PLAN_MAP[productId];
+        break;
+      }
+    }
+    // Fallback: if no known product matched but subscription is active
+    if (plan === "free") {
+      plan = "usage_based";
+    }
+  }
 
   await ctx.runMutation(api.billing.updateSubscription, {
     workspaceId: workspace._id,
@@ -319,7 +341,7 @@ async function handleSubscriptionUpdate(
     billingPlan: plan,
   });
 
-  console.log(`Subscription ${subscription.id} updated for workspace ${workspace._id}`);
+  console.log(`Subscription ${subscription.id} updated for workspace ${workspace._id} -> plan: ${plan}`);
 }
 
 async function handleSubscriptionCanceled(

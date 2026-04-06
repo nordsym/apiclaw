@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APIClaw Session Report — 2026-04-05</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    line-height: 1.6;
+    padding: 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    padding-bottom: 48px;
+    border-bottom: 1px solid #262626;
+    margin-bottom: 48px;
+  }
+
+  .header .logo { font-size: 48px; margin-bottom: 12px; }
+  .header h1 { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 14px; color: #737373; margin-top: 8px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+  .header .date { font-size: 13px; color: #525252; margin-top: 16px; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #ef4444/10, #ef4444/5);
+    border: 1px solid #ef4444/30;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .highlight-box p { font-size: 16px; color: #fca5a5; font-weight: 600; }
+  .highlight-box .sub { font-size: 13px; color: #a3a3a3; margin-top: 8px; font-weight: 400; }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 40px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ef4444;
+    margin: 28px 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  p { font-size: 14px; color: #a3a3a3; margin-bottom: 12px; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .feature-card {
+    background: #141414;
+    border: 1px solid #262626;
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .feature-card .num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ef4444;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .feature-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .feature-card p { font-size: 12px; color: #737373; margin: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: #141414;
+    color: #a3a3a3;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #262626;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #1a1a1a;
+    color: #d4d4d4;
+  }
+
+  .status-pass {
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .status-live {
+    background: #4ade80/15;
+    color: #4ade80;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #fca5a5;
+  }
+
+  pre {
+    background: #141414;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #d4d4d4;
+  }
+
+  .e2e-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    background: #141414;
+    border: 1px solid #262626;
+    border-radius: 10px;
+    flex-wrap: wrap;
+  }
+
+  .e2e-chain .node {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .e2e-chain .arrow { color: #ef4444; font-size: 16px; font-weight: 700; }
+
+  .files-list {
+    list-style: none;
+    margin: 12px 0;
+  }
+
+  .files-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+  }
+
+  .files-list li code { flex-shrink: 0; }
+  .files-list li span { color: #737373; }
+
+  .footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid #262626;
+    text-align: center;
+    font-size: 12px;
+    color: #525252;
+  }
+
+  .footer .brand { color: #737373; font-weight: 600; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+  .badge-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+  .badge-new { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+  @media print {
+    body { background: #fff; color: #1a1a1a; padding: 40px; }
+    .feature-card, pre, .e2e-chain { background: #f5f5f5; border-color: #e5e5e5; }
+    .feature-card p, p { color: #525252; }
+    td { color: #1a1a1a; }
+    th { background: #f5f5f5; color: #525252; }
+    h2 { border-bottom-color: #e5e5e5; }
+    code { background: #f0f0f0; color: #dc2626; }
+    .e2e-chain .node { background: #f0f0f0; border-color: #d4d4d4; color: #1a1a1a; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">&#x1F99E;</div>
+  <h1>APIClaw Session Report</h1>
+  <div class="subtitle">The API Layer for AI Agents</div>
+  <div class="date">Session: April 5, 2026 &mdash; NordSym AB</div>
+</div>
+
+<div class="highlight-box">
+  <p>APIClaw is now a live production API gateway.</p>
+  <div class="sub">Telegram bot responding via APIClaw. Anthropic OAuth dependency eliminated. E2E proven.</div>
+</div>
+
+<!-- ========== FEATURES ========== -->
+<h2>What We Built</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="num">Feature 1</div>
+    <h4>Workspace API Keys</h4>
+    <p>Generate persistent <code>sk-claw-</code> keys in your workspace. One key, every API. Keys are hashed after creation -- shown once, never stored in plain text.</p>
+  </div>
+  <div class="feature-card">
+    <div class="num">Feature 2</div>
+    <h4>Unified Auth Layer</h4>
+    <p>All 15+ proxy endpoints upgraded in one change. Accepts <code>Authorization: Bearer sk-claw-...</code> alongside legacy identifier auth. Zero breaking changes.</p>
+  </div>
+  <div class="feature-card">
+    <div class="num">Feature 3</div>
+    <h4>Gateway /v1/chat/completions</h4>
+    <p>OpenAI-compatible LLM endpoint. Routes to OpenRouter (800+ models). Streaming support. Usage tracking. Standard protocol -- works with any AI tool.</p>
+  </div>
+  <div class="feature-card">
+    <div class="num">Feature 4</div>
+    <h4>OpenClaw Integration</h4>
+    <p>APIClaw configured as a first-class provider in OpenClaw. Telegram bots now powered entirely by APIClaw gateway. No direct Anthropic key needed.</p>
+  </div>
+</div>
+
+<!-- ========== E2E CHAIN ========== -->
+<h2>E2E Architecture</h2>
+
+<div class="e2e-chain">
+  <div class="node">Telegram</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node">OpenClaw Gateway</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node">APIClaw Gateway<br><small style="color:#ef4444">sk-claw-...q6Yd</small></div>
+  <div class="arrow">&rarr;</div>
+  <div class="node">OpenRouter</div>
+  <div class="arrow">&rarr;</div>
+  <div class="node">Claude Sonnet 4.6</div>
+</div>
+
+<!-- ========== TEST RESULTS ========== -->
+<h2>E2E Test Results</h2>
+
+<table>
+  <thead>
+    <tr><th>Test</th><th>Result</th><th>Latency</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>GET /v1/models</code> on prod</td>
+      <td class="status-pass">13 models listed</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td>Fake key rejection</td>
+      <td class="status-pass">401 with error message</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <td><code>sk-claw-</code> &rarr; Gateway &rarr; OpenRouter &rarr; Claude</td>
+      <td class="status-pass">Response received</td>
+      <td>2.2s</td>
+    </tr>
+    <tr>
+      <td>OpenClaw CLI &rarr; APIClaw &rarr; Telegram delivery</td>
+      <td class="status-pass">"APIClaw e2e works through OpenClaw"</td>
+      <td>17.8s</td>
+    </tr>
+    <tr>
+      <td>Telegram DM &rarr; bot responds</td>
+      <td class="status-pass">Confirmed live by operator</td>
+      <td>--</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ========== BACKEND DETAIL ========== -->
+<h2>Backend: API Keys</h2>
+
+<h3>Schema (convex/schema.ts)</h3>
+<pre>workspaceApiKeys: defineTable({
+  workspaceId: v.id("workspaces"),
+  key: v.string(),
+  keyHash: v.string(),       // SHA lookup (raw key not stored)
+  keyPrefix: v.string(),     // "sk-claw-...last4" for display
+  name: v.string(),          // user label
+  lastUsedAt: v.optional(v.number()),
+  createdAt: v.number(),
+  revokedAt: v.optional(v.number()),
+})
+  .index("by_keyHash", ["keyHash"])
+  .index("by_workspaceId", ["workspaceId"])</pre>
+
+<h3>Functions (convex/apiKeys.ts)</h3>
+<table>
+  <thead><tr><th>Function</th><th>Type</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>generateKey</code></td><td>mutation</td><td>Create key, return raw ONCE, store hash only</td></tr>
+    <tr><td><code>listKeys</code></td><td>query</td><td>Return prefix + metadata (never raw key)</td></tr>
+    <tr><td><code>revokeKey</code></td><td>mutation</td><td>Soft delete with revokedAt timestamp</td></tr>
+    <tr><td><code>resolveKey</code></td><td>internalQuery</td><td>Hash lookup for gateway auth</td></tr>
+    <tr><td><code>touchKey</code></td><td>mutation</td><td>Update lastUsedAt on each use</td></tr>
+  </tbody>
+</table>
+
+<!-- ========== GATEWAY DETAIL ========== -->
+<h2>Backend: Gateway</h2>
+
+<h3>Auth Resolution (convex/http.ts)</h3>
+<pre>resolveWorkspaceFromRequest(ctx, request)
+  1. Authorization: Bearer sk-claw-...  &rarr; resolveKey &rarr; workspaceId
+  2. X-APIClaw-Identifier (legacy)      &rarr; workspaceId
+  3. Anonymous                          &rarr; allowed, untracked</pre>
+
+<h3>Endpoints</h3>
+<table>
+  <thead><tr><th>Endpoint</th><th>Method</th><th>Auth</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>/v1/chat/completions</code></td><td>POST</td><td>sk-claw- required</td><td>OpenAI-compatible LLM gateway</td></tr>
+    <tr><td><code>/v1/models</code></td><td>GET</td><td>optional</td><td>List available models</td></tr>
+    <tr><td><code>/proxy/*</code> (15+ routes)</td><td>POST</td><td>sk-claw- or legacy</td><td>All existing API proxies</td></tr>
+  </tbody>
+</table>
+
+<!-- ========== OPENCLAW CONFIG ========== -->
+<h2>OpenClaw Configuration</h2>
+
+<pre>{
+  "models": {
+    "providers": {
+      "apiclaw": {
+        "baseUrl": "https://adventurous-avocet-799.convex.site/v1",
+        "apiKey": "sk-claw-...q6Yd",
+        "api": "openai-completions",
+        "auth": "api-key",
+        "models": [
+          { "id": "anthropic/claude-sonnet-4-6", "name": "Claude Sonnet 4.6" },
+          { "id": "anthropic/claude-haiku-3.5", "name": "Claude Haiku 3.5" },
+          { "id": "openai/gpt-4o", "name": "GPT-4o" },
+          { "id": "google/gemini-2.5-pro-preview", "name": "Gemini 2.5 Pro" },
+          { "id": "meta-llama/llama-3.3-70b-instruct", "name": "Llama 3.3 70B" },
+          { "id": "deepseek/deepseek-chat", "name": "DeepSeek Chat" }
+        ]
+      }
+    }
+  }
+}</pre>
+
+<p><strong>Key discovery:</strong> OpenClaw appends <code>/chat/completions</code> to baseUrl. The baseUrl must include <code>/v1</code>.</p>
+
+<!-- ========== FILES ========== -->
+<h2>Files Changed</h2>
+
+<ul class="files-list">
+  <li><code>convex/schema.ts</code> <span>Added workspaceApiKeys table + indexes</span></li>
+  <li><code>convex/apiKeys.ts</code> <span class="badge badge-new">NEW</span> <span>Generate, list, revoke, resolve, touch</span></li>
+  <li><code>convex/http.ts</code> <span>Unified auth + /v1/chat/completions + /v1/models</span></li>
+  <li><code>landing/.../workspace/page.tsx</code> <span>API Keys tab + nav + config snippet</span></li>
+  <li><code>~/.openclaw/openclaw.json</code> <span>APIClaw as primary provider, Telegram restored</span></li>
+</ul>
+
+<!-- ========== PRODUCTION STATE ========== -->
+<h2>Production State</h2>
+
+<table>
+  <thead><tr><th>Component</th><th>Status</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td>Convex prod</td><td><span class="badge badge-green">DEPLOYED</span></td><td>adventurous-avocet-799</td></tr>
+    <tr><td>Gateway endpoint</td><td><span class="badge badge-green">LIVE</span></td><td>/v1/chat/completions responding</td></tr>
+    <tr><td>Prod API key</td><td><span class="badge badge-green">ACTIVE</span></td><td>sk-claw-...q6Yd ("OpenClaw Production")</td></tr>
+    <tr><td>OpenClaw default model</td><td><span class="badge badge-green">ACTIVE</span></td><td>apiclaw/anthropic/claude-sonnet-4-6</td></tr>
+    <tr><td>Telegram bots</td><td><span class="badge badge-green">LIVE</span></td><td>4 accounts responding</td></tr>
+    <tr><td>Anthropic OAuth</td><td><span class="badge badge-red">ELIMINATED</span></td><td>No longer needed</td></tr>
+    <tr><td>Frontend build</td><td><span class="badge badge-green">CLEAN</span></td><td>Next.js + Convex both pass</td></tr>
+  </tbody>
+</table>
+
+<!-- ========== FOOTER ========== -->
+<div class="footer">
+  <p class="brand">NordSym AB (559535-5768)</p>
+  <p>APIClaw -- The API Layer for AI Agents</p>
+  <p>Session report generated April 5, 2026</p>
+</div>
+
+</body>
+</html>

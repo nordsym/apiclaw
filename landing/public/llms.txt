@@ -1,85 +1,110 @@
 # APIClaw
 
-> The API layer for AI agents
+> The API layer for AI agents. One key for everything.
 
 ## What is APIClaw?
 
-APIClaw provides unified API access for AI agents. One SDK, one API key, thousands of APIs.
+APIClaw provides unified API access for AI agents. One SDK, one API key, thousands of APIs. Intelligent LLM routing across multiple providers.
 
-**For AI agents:** Discover and call APIs instantly
-**For API providers:** Get your API in front of AI agents
+**For AI agents:** Discover and call APIs instantly. Use the OpenAI-compatible gateway for LLM requests.
+**For API providers:** Get your API in front of AI agents.
+
+## Intelligent Gateway
+
+APIClaw routes LLM requests to the best provider automatically:
+- Groq for ultra-fast inference (Llama, Mixtral)
+- Mistral for European models
+- Together AI for open-source (DeepSeek, Qwen)
+- OpenRouter as fallback for 800+ models (GPT, Claude, Gemini, etc.)
+
+OpenAI-compatible endpoint: `api.apiclaw.cloud/v1/chat/completions`
+
+One `sk-claw-` key replaces all provider keys. Configure routing mode (fastest, best_price, highest_quality, balanced) in workspace settings. Override per-request with `X-APIClaw-Route` header.
 
 ## Three Access Layers
 
-### 1. Direct Call (18 Providers → 1000s of Capabilities)
-Zero config. APIClaw handles authentication. These 18 providers include 1000+ ML models via Replicate, 100+ LLMs via OpenRouter, and more.
+### 1. Direct Call (19 Providers)
+Zero config. APIClaw handles authentication, rate limiting, and billing.
 
-**AI & LLM:**
-- Replicate (1000+ ML models)
-- OpenRouter (100+ LLMs)
-- Groq
-- Mistral
-- Cohere
-- Together AI
-- Stability AI
+**LLM:**
+- OpenRouter (800+ LLMs: GPT, Claude, Gemini, Llama)
+- Groq (ultra-fast inference: Llama, Mixtral, Gemma)
+- Mistral (Mistral Small, Large, Codestral)
+- Together AI (DeepSeek, Qwen, Llama)
+- Cohere (RAG, reranking, embeddings)
 
-**Voice & TTS:**
-- ElevenLabs (29 languages)
-- Deepgram
-- AssemblyAI
+**AI/ML:**
+- Replicate (1000+ ML models: Flux, SDXL, Whisper)
+- Stability AI (SD3, SDXL image generation)
 
-**SMS:**
-- 46elks
-- Twilio
-
-**Email:**
-- Resend
+**Voice:**
+- ElevenLabs (text-to-speech, 29 languages)
+- Deepgram (speech-to-text, Nova-3)
+- AssemblyAI (audio intelligence, diarization)
 
 **Search:**
-- Brave Search
-- Firecrawl
-- Serper
+- Brave Search (privacy-first web search)
+- Serper (Google SERP results)
 
-**Code:**
-- E2B
+**Scraping:**
+- Firecrawl (web scraping and crawling)
 
-**Dev:**
-- GitHub
+**Communication:**
+- Twilio (SMS and voice calls, global)
+- 46elks (SMS, Nordic/EU, GDPR)
 
-### 2. Open APIs (1,636 APIs)
-No auth needed. Call directly through APIClaw.
+**Email:**
+- Resend (transactional email)
+
+**Dev Tools:**
+- E2B (code execution sandbox)
+- GitHub (repository and code access)
+
+**Multi-API:**
+- APILayer (27 APIs: finance, geo, scraping, news)
+
+### 2. Open APIs (1,600+ APIs)
+No auth needed. Call directly through APIClaw. Free.
 
 ### 3. Discovery (22,392 APIs)
-Full API index. Search, explore, integrate.
+Full API index. Search, explore, integrate. Free and unlimited.
+
+## MCP Tools
+
+- `discover_apis` - Search 22,392 APIs by capability
+- `get_api_details` - Full specs, pricing, auth
+- `call_api` - Execute through APIClaw proxy
+- `list_connected` - See available Direct Call providers
+- `check_balance` - Usage and remaining calls
+- `register_owner` - Register email, unlock 50 calls/month
 
 ## Quick Start
 
 ```bash
-npm install apiclaw
+curl -fsSL https://apiclaw.cloud/install.sh | bash
 ```
 
-```javascript
-import { APIClaw } from 'apiclaw';
+Or use as OpenAI-compatible gateway:
 
-const claw = new APIClaw('your-api-key');
-
-// Direct Call - zero config
-const result = await claw.call('replicate', 'predictions.create', {
-  model: 'stability-ai/sdxl',
-  input: { prompt: 'A futuristic city' }
-});
-
-// Search APIs
-const apis = await claw.search('weather forecast');
-
-// Discover capabilities
-const providers = await claw.providers();
+```bash
+curl api.apiclaw.cloud/v1/chat/completions \
+  -H "Authorization: Bearer sk-claw-..." \
+  -H "Content-Type: application/json" \
+  -d '{"model": "anthropic/claude-sonnet-4-6", "messages": [{"role": "user", "content": "Hello"}]}'
 ```
+
+## Pricing
+
+- Free: 50 calls/month, full dashboard
+- Pay-as-you-go: Usage-based, unlimited calls
+- Pro: $79/month, 5,000 calls
+- Scale: $249/month, 25,000 calls
+- Enterprise: Custom
 
 ## Links
 
-- Website: https://apiclaw.com
-- Dashboard: https://apiclaw.com/dashboard
-- Docs: https://apiclaw.com/docs
-- npm: https://npmjs.com/package/apiclaw
+- Website: https://apiclaw.cloud
+- Dashboard: https://apiclaw.cloud/workspace
+- Docs: https://apiclaw.cloud/docs
+- npm: https://npmjs.com/package/@nordsym/apiclaw
 - GitHub: https://github.com/nordsym/apiclaw

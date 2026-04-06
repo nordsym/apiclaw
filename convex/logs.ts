@@ -91,19 +91,16 @@ export const logProviderCall = mutation({
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Map provider to workspace email (for providers with workspaces)
-    const providerEmailMap: Record<string, string> = {
-      apilayer: "pratham@apilayer.com",
-    };
+    // Resolve provider → workspace dynamically (no hardcoded email maps)
+    const providerNameLower = args.provider.toLowerCase();
+    const allProviders = await ctx.db.query("providers").collect();
+    const providerRecord = allProviders.find(
+      (p) => p.name.toLowerCase() === providerNameLower
+    );
 
-    const providerEmail = providerEmailMap[args.provider];
-    let workspace = null;
-
-    if (providerEmail) {
-      workspace = await ctx.db
-        .query("workspaces")
-        .withIndex("by_email", (q) => q.eq("email", providerEmail))
-        .first();
+    let workspace: any = null;
+    if (providerRecord && (providerRecord as any).workspaceId) {
+      workspace = await ctx.db.get((providerRecord as any).workspaceId);
     }
 
     // Always log to global provider analytics (even without workspace)
@@ -148,8 +145,9 @@ export const getProviderAnalytics = query({
   args: {
     token: v.string(),
     hoursBack: v.optional(v.number()),
+    direction: v.optional(v.string()), // "outbound" = my usage, "inbound" = traffic to my APIs, omit = all
   },
-  handler: async (ctx, { token, hoursBack = 168 }) => {
+  handler: async (ctx, { token, hoursBack = 168, direction }) => {
     const session = await ctx.db
       .query("agentSessions")
       .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
@@ -164,11 +162,18 @@ export const getProviderAnalytics = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
-    const periodLogs = allLogs.filter((l) => l.createdAt >= since);
-    const inboundLogs = periodLogs.filter((l) => l.direction === "inbound");
-    const outboundLogs = periodLogs.filter((l) => l.direction !== "inbound");
+    let periodLogs = allLogs.filter((l) => l.createdAt >= since);
 
-    // Daily buckets — separate calls and searches
+    // Filter by direction if specified
+    if (direction === "outbound") {
+      periodLogs = periodLogs.filter((l) => l.direction !== "inbound");
+    } else if (direction === "inbound") {
+      periodLogs = periodLogs.filter((l) => l.direction === "inbound");
+    }
+
+    const inboundLogs = periodLogs.filter((l) => l.direction === "inbound");
+
+    // Daily buckets
     const byDay: Record<string, { calls: number; searches: number }> = {};
     periodLogs.forEach((l) => {
       const day = new Date(l.createdAt).toISOString().split("T")[0];
@@ -180,11 +185,10 @@ export const getProviderAnalytics = query({
       }
     });
 
-    // By action (individual API endpoints, not just provider name)
+    // By action
     const byAction: Record<string, { calls: number; success: number; type: string }> = {};
     periodLogs.forEach((l) => {
       const isDiscovery = l.action.startsWith("discovery:");
-      const key = isDiscovery ? l.action : `${l.provider}:${l.action}`;
       const displayName = isDiscovery ? l.action.replace("discovery:", "Search: ") : l.action;
       if (!byAction[displayName]) byAction[displayName] = { calls: 0, success: 0, type: isDiscovery ? "discovery" : "call" };
       byAction[displayName].calls++;
@@ -194,7 +198,6 @@ export const getProviderAnalytics = query({
     // Unique callers (for inbound)
     const uniqueCallers = new Set(inboundLogs.map((l) => l.callerWorkspaceId).filter(Boolean)).size;
 
-    // Counts
     const callLogs = periodLogs.filter((l) => !l.action.startsWith("discovery:"));
     const discoveryLogs = periodLogs.filter((l) => l.action.startsWith("discovery:"));
 
@@ -202,7 +205,7 @@ export const getProviderAnalytics = query({
       totalCalls: callLogs.length,
       totalDiscoveries: discoveryLogs.length,
       inboundCalls: inboundLogs.filter((l) => !l.action.startsWith("discovery:")).length,
-      outboundCalls: outboundLogs.length,
+      uniqueCallers,
       byDay: Object.entries(byDay)
         .map(([date, data]) => ({ date, calls: data.calls, searches: data.searches }))
         .sort((a, b) => a.date.localeCompare(b.date)),
@@ -668,7 +671,8 @@ export const createProxyLog = mutation({
       subagentId: subagentId || "unknown",
       sessionToken: sessionToken || "proxy",
       status: "success",
-      latencyMs: 0, // Proxy calls don't track latency
+      latencyMs: 0,
+      direction: "outbound",
       createdAt: now,
     });
     

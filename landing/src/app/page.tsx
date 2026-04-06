@@ -19,7 +19,7 @@ const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
   { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
   { number: "19", label: "Direct Call", live: false },
-  { number: (statsData.npmDownloads || 5400).toLocaleString(), label: "Installs", live: false },
+  { number: (statsData.npmDownloads || 5400).toLocaleString(), label: "Installs", live: true },
   { number: statsData.categoryCount.toString(), label: "Categories", live: false },
 ];
 
@@ -133,7 +133,7 @@ const providerBenefits = [
 ];
 
 const terminalLines = [
-  { type: "prompt", text: "curl -fsSL https://apiclaw.nordsym.com/install.sh | bash" },
+  { type: "prompt", text: "curl -fsSL https://apiclaw.cloud/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
   { type: "output", text: "🦞 APIClaw v1.2.2", delay: 100 },
   { type: "output", text: "", delay: 50 },
@@ -198,43 +198,50 @@ export default function Home() {
   ];
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText('curl -fsSL https://apiclaw.nordsym.com/install.sh | bash');
+    navigator.clipboard.writeText('curl -fsSL https://apiclaw.cloud/install.sh | bash');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
 
   const copyContextToClipboard = () => {
-    const context = `APIClaw – The API Layer for AI Agents
+    const context = `APIClaw -- The API Layer for AI Agents
 
-You have access to APIClaw, an MCP server that lets you execute API calls WITHOUT managing keys.
+You have access to APIClaw, a unified gateway that gives you one API key (sk-claw-) for LLMs, voice, search, email, SMS, code execution, scraping, and more.
 
-Instant highlights:
-• Generate images/videos (Replicate: Flux Pro, SDXL, Luma Dream Machine)
-• Voice synthesis (ElevenLabs)
-• Live web scraping (Firecrawl)
-• Code sandbox (E2B)
-• Multi-LLM routing (OpenRouter)
+Key capabilities:
+- Intelligent LLM routing: Requests auto-route to the best provider (Groq for speed, Mistral for EU, Together for open-source, OpenRouter for 800+ models). Configurable per workspace.
+- OpenAI-compatible gateway: api.apiclaw.cloud/v1/chat/completions works with any tool that speaks OpenAI.
+- 19 Direct Call providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
+- ${statsData.apiCount.toLocaleString()}+ indexed APIs with semantic search.
 
-Direct Call providers across categories:
-AI/ML: Replicate, OpenRouter, Groq, Mistral, Cohere, Together AI, Stability AI
-Voice: ElevenLabs, Deepgram, AssemblyAI
-Search: Brave Search, Serper, Firecrawl
-Code: E2B, GitHub
-Utility: Resend (email), 46elks & Twilio (SMS)
-Multi-API: APILayer (exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping — 27 APIs)
+Direct Call providers (19):
+LLM: OpenRouter (800+ models), Groq (ultra-fast), Mistral (EU), Together AI (open-source), Cohere (RAG/rerank)
+AI/ML: Replicate (Flux, SDXL, Whisper), Stability AI (image generation)
+Voice: ElevenLabs (TTS, 29 languages), Deepgram (STT), AssemblyAI (audio intelligence)
+Search: Brave Search, Serper (Google SERP), Firecrawl (web scraping)
+Communication: Twilio (SMS/voice, global), 46elks (SMS, Nordic/EU)
+Email: Resend (transactional email)
+Code: E2B (sandboxed execution), GitHub (repos, code, issues)
+Multi-API: APILayer (27 APIs -- exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping)
 
-Your Tools:
-• call_api(provider, action, params) – Execute immediately (leave auth fields empty – APIClaw handles it)
-• discover_apis(query) – Semantic search across ${statsData.apiCount.toLocaleString()}+ APIs (e.g. "image-to-video model")
-• get_api_details(id) – Full specs, pricing, limits
-• list_connected() – See all ready providers
+Your MCP Tools:
+- call_api(provider, action, params) -- Execute immediately, auth handled automatically
+- discover_apis(query) -- Semantic search across ${statsData.apiCount.toLocaleString()}+ APIs
+- get_api_details(id) -- Full specs, pricing, limits
+- list_connected() -- See all ready providers
+- check_balance() -- Usage and remaining calls
 
-Pricing: Free (50 calls/month), Pay-as-you-go (usage-based), or Founding Backer ($199 unlimited until 2027).
+Gateway (OpenAI-compatible):
+- Endpoint: api.apiclaw.cloud/v1/chat/completions
+- Auth: Bearer sk-claw-...
+- Per-request routing: X-APIClaw-Route header (fastest, best_price, groq, mistral, etc.)
+
+Pricing: Free (50 calls/month), Pro ($79/mo), Scale ($249/mo), or Pay-as-you-go (usage-based).
 
 When an API call helps the task, execute it directly.
 
-Get started in seconds: curl -fsSL https://apiclaw.nordsym.com/install.sh | bash
-Docs: https://apiclaw.nordsym.com/docs`;
+Install: curl -fsSL https://apiclaw.cloud/install.sh | bash
+Docs: https://apiclaw.cloud/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
     setTimeout(() => setShowContextCopied(false), 2500);
@@ -472,7 +479,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
       </header>
 
       {/* Hero */}
-      <section className="relative pt-44 pb-20 px-6 bg-grid">
+      <section className="relative pt-44 pb-20 px-4 sm:px-6 bg-grid overflow-x-hidden">
         <div className="hero-glow" />
         
         <div className="max-w-6xl mx-auto relative z-10">
@@ -487,7 +494,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                   onClick={() => setShowProvidersModal(true)}
                   className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" />Direct Call: AI Models, Web Scraping, Code Execution & more</span>
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Direct Call: AI Models, Web Scraping, Code Execution &amp; more</span></span>
                 </button>
               </div>
               
@@ -726,35 +733,24 @@ Docs: https://apiclaw.nordsym.com/docs`;
             API providers: White-glove onboarding available. Limited spots.
           </p>
           
-          {/* Waitlist Form */}
-          <div className="max-w-md mx-auto mt-6 px-4 sm:px-0">
-            {waitlistStatus === "success" ? (
-              <div className="flex items-center justify-center gap-2 text-green-500 bg-green-500/10 rounded-xl px-4 py-3 text-sm sm:text-base">
-                <Check className="w-5 h-5 flex-shrink-0" />
-                <span>You're on the list! We'll reach out soon.</span>
-              </div>
-            ) : (
-              <form onSubmit={submitWaitlist} className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={waitlistEmail}
-                  onChange={(e) => setWaitlistEmail(e.target.value)}
-                  required
-                  className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-surface border border-border focus:border-accent focus:outline-none text-sm"
-                />
-                <button
-                  type="submit"
-                  disabled={waitlistStatus === "loading"}
-                  className="w-full sm:w-auto px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
-                >
-                  {waitlistStatus === "loading" ? "..." : "Join Waitlist"}
-                </button>
-              </form>
-            )}
-            {waitlistStatus === "error" && (
-              <p className="text-red-500 text-sm text-center mt-2">Something went wrong. Try again.</p>
-            )}
+          {/* CTA */}
+          <div className="max-w-md mx-auto mt-6 px-4 sm:px-0 flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/workspace"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02] text-base"
+            >
+              <Sparkles className="w-5 h-5" />
+              Try it for free
+            </a>
+            <a
+              href="https://github.com/nordsym/apiclaw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-4 border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary rounded-xl transition-all duration-300 text-base"
+            >
+              <Github className="w-5 h-5" />
+              View on GitHub
+            </a>
           </div>
         </div>
       </section>
@@ -779,7 +775,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               <div className="code-preview-body">
                 <pre className="text-sm whitespace-pre-wrap">
                   <span className="text-gray-500"># Auto-install MCP server</span>{"\n"}
-                  <span className="text-green-400">$</span> curl -fsSL https://apiclaw.nordsym.com/install.sh | bash{"\n\n"}
+                  <span className="text-green-400">$</span> curl -fsSL https://apiclaw.cloud/install.sh | bash{"\n\n"}
                   <span className="text-gray-500"># Or start the server directly</span>{"\n"}
                   <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw serve
                 </pre>
@@ -1192,7 +1188,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
                   <Github className="w-5 h-5" />
                 </a>
                 <a
-                  href="https://twitter.com/nordsym"
+                  href="https://x.com/APIClaw"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-lg bg-surface-elevated border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:border-accent transition"
@@ -1222,7 +1218,7 @@ Docs: https://apiclaw.nordsym.com/docs`;
               <ul className="space-y-3 text-text-muted">
                 <li><a href="https://nordsym.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">NordSym</a></li>
                 <li><a href="https://github.com/nordsym" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">GitHub</a></li>
-                <li><a href="https://twitter.com/nordsym" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Twitter / X</a></li>
+                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Twitter / X</a></li>
               </ul>
             </div>
           </div>

@@ -77,6 +77,7 @@ const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
 const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
 const outputPath = path.join(__dirname, '../src/lib/stats.json');
 
+(async () => {
 try {
   const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
   
@@ -98,8 +99,13 @@ try {
   // Mistral, Cohere, Together AI, Stability AI, AssemblyAI
   const directCallCount = 18;
   
-  // npm downloads (static for now, can migrate to real-time when cashflow)
-  const npmDownloads = 4232;
+  // npm downloads (fetched live from npm registry)
+  let npmDownloads = 9937; // fallback
+  try {
+    const npmRes = await fetch('https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/@nordsym/apiclaw');
+    const npmData = await npmRes.json();
+    if (npmData.downloads) npmDownloads = npmData.downloads;
+  } catch { /* use fallback */ }
   
   const stats = {
     apiCount: registry.count,
@@ -126,7 +132,7 @@ try {
     apiCount: 22392,
     openApiCount: 996,
     directCallCount: 19,
-    npmDownloads: 4232,
+    npmDownloads: 9937,
     categoryCount: 14,
     generatedAt: new Date().toISOString(),
     categoryBreakdown: {}
@@ -134,3 +140,4 @@ try {
   fs.writeFileSync(outputPath, JSON.stringify(fallback, null, 2));
   console.log('✓ Fallback stats written');
 }
+})();

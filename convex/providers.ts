@@ -62,14 +62,41 @@ export const registerProvider = mutation({
       discoveryCount: 0,
     });
 
-    // Create session for auto-login after registration
-    const sessionToken = generateToken();
-    const sessionExpiresAt = now + 30 * 24 * 60 * 60 * 1000; // 30 days
+    // Find or create workspace for this provider email
+    const emailLower = args.provider.email.toLowerCase();
+    let workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", emailLower))
+      .first();
 
-    await ctx.db.insert("sessions", {
-      providerId,
-      token: sessionToken,
-      expiresAt: sessionExpiresAt,
+    if (!workspace) {
+      const wsId = await ctx.db.insert("workspaces", {
+        email: emailLower,
+        status: "active",
+        tier: "free",
+        usageCount: 0,
+        usageLimit: 50,
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50,
+        hourlyUsageCount: 0,
+        createdAt: now,
+        updatedAt: now,
+      });
+      workspace = await ctx.db.get(wsId);
+    }
+
+    // Link provider → workspace (if not already)
+    const provider = await ctx.db.get(providerId);
+    if (provider && !(provider as any).workspaceId) {
+      await ctx.db.patch(providerId, { workspaceId: workspace!._id } as any);
+    }
+
+    // Create unified session (agentSessions only - legacy sessions table deprecated)
+    const sessionToken = generateToken();
+    await ctx.db.insert("agentSessions", {
+      workspaceId: workspace!._id,
+      sessionToken,
+      lastUsedAt: now,
       createdAt: now,
     });
 
@@ -169,22 +196,21 @@ export const logDiscovery = mutation({
     callerWorkspaceId: v.string(),
   },
   handler: async (ctx, args) => {
-    const providerEmailMap: Record<string, string> = {
-      apilayer: "pratham@apilayer.com",
-      filestack: "marketing@filestack.com",
-    };
-    const email = providerEmailMap[args.provider];
-    if (!email) return { logged: false };
+    // Resolve provider → workspace dynamically (no hardcoded email maps)
+    const providerNameLower = args.provider.toLowerCase();
+    const allProviders = await ctx.db.query("providers").collect();
+    const providerRecord = allProviders.find(
+      (p) => p.name.toLowerCase() === providerNameLower
+    );
+    if (!providerRecord || !(providerRecord as any).workspaceId) return { logged: false };
 
-    const workspace = await ctx.db
-      .query("workspaces")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .first();
+    const workspace = await ctx.db.get((providerRecord as any).workspaceId);
     if (!workspace) return { logged: false };
+    const wsId = workspace._id as any;
 
     // 1. Log to apiLogs (source of truth for Analytics)
     await ctx.db.insert("apiLogs", {
-      workspaceId: workspace._id,
+      workspaceId: wsId,
       sessionToken: "",
       provider: args.provider,
       action: `discovery:${args.query}`,
@@ -196,31 +222,25 @@ export const logDiscovery = mutation({
     });
 
     // 2. Increment discoveryCount on MATCHING APIs only
-    const providerRecord = await ctx.db
-      .query("providers")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .first();
-    if (providerRecord) {
-      const apis = await ctx.db.query("providerAPIs").collect();
-      const providerApis = apis.filter((a) => a.providerId === providerRecord._id);
-      const queryLower = args.query.toLowerCase();
-      const queryWords = queryLower.split(/\s+/).filter((w: string) => w.length > 2);
+    const apis = await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_providerId", (q) => q.eq("providerId", providerRecord._id))
+      .collect();
+    const queryLower = args.query.toLowerCase();
+    const queryWords = queryLower.split(/\s+/).filter((w: string) => w.length > 2);
 
-      let matched = 0;
-      for (const api of providerApis) {
-        const apiText = `${api.name} ${api.description || ""}`.toLowerCase();
-        if (queryWords.some((w: string) => apiText.includes(w))) {
-          await ctx.db.patch(api._id, {
-            discoveryCount: ((api as any).discoveryCount || 0) + 1,
-            lastDiscoveredAt: Date.now(),
-          });
-          matched++;
-        }
+    let matched = 0;
+    for (const api of apis) {
+      const apiText = `${api.name} ${api.description || ""}`.toLowerCase();
+      if (queryWords.some((w: string) => apiText.includes(w))) {
+        await ctx.db.patch(api._id, {
+          discoveryCount: ((api as any).discoveryCount || 0) + 1,
+          lastDiscoveredAt: Date.now(),
+        });
+        matched++;
       }
-      return { logged: true, matched };
     }
-
-    return { logged: true, matched: 0 };
+    return { logged: true, matched };
   },
 });
 
@@ -228,24 +248,19 @@ export const logDiscovery = mutation({
 export const trackDiscoveryByProvider = mutation({
   args: { provider: v.string(), query: v.string() },
   handler: async (ctx, args) => {
-    // Find provider by email mapping
-    const providerEmailMap: Record<string, string> = {
-      apilayer: "pratham@apilayer.com",
-      filestack: "marketing@filestack.com",
-    };
-    const email = providerEmailMap[args.provider];
-    if (!email) return { updated: 0, error: "no email mapping" };
-
-    // Find provider record by email
-    const provider = await ctx.db
-      .query("providers")
-      .withIndex("by_email", (q) => q.eq("email", email))
-      .first();
+    // Resolve provider dynamically by name (no hardcoded email maps)
+    const providerNameLower = args.provider.toLowerCase();
+    const allProviders = await ctx.db.query("providers").collect();
+    const provider = allProviders.find(
+      (p) => p.name.toLowerCase() === providerNameLower
+    );
     if (!provider) return { updated: 0, error: "provider not found" };
 
     // Get all APIs for this provider
-    const apis = await ctx.db.query("providerAPIs").collect();
-    const providerApis = apis.filter((a) => a.providerId === provider._id);
+    const providerApis = await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_providerId", (q) => q.eq("providerId", provider._id))
+      .collect();
 
     // Increment discoveryCount on ALL provider APIs
     for (const api of providerApis) {
@@ -314,14 +329,14 @@ export const getProviderStats = query({
 // DASHBOARD AUTH & SESSION FUNCTIONS
 // ============================================
 
-// Create magic link for email auth
+// Create magic link for email auth (unified: writes to workspaceMagicLinks)
 export const createMagicLink = mutation({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const token = generateToken();
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
 
-    await ctx.db.insert("magicLinks", {
+    await ctx.db.insert("workspaceMagicLinks", {
       email: email.toLowerCase(),
       token,
       expiresAt,
@@ -332,12 +347,12 @@ export const createMagicLink = mutation({
   },
 });
 
-// Verify magic link and create session
+// Verify magic link and create unified session (workspace + provider)
 export const verifyMagicLink = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const magicLink = await ctx.db
-      .query("magicLinks")
+      .query("workspaceMagicLinks")
       .withIndex("by_token", (q) => q.eq("token", token))
       .first();
 
@@ -356,6 +371,30 @@ export const verifyMagicLink = mutation({
     // Mark as used
     await ctx.db.patch(magicLink._id, { usedAt: Date.now() });
 
+    const now = Date.now();
+
+    // Find or create workspace
+    let workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", magicLink.email))
+      .first();
+
+    if (!workspace) {
+      const wsId = await ctx.db.insert("workspaces", {
+        email: magicLink.email,
+        status: "active",
+        tier: "free",
+        usageCount: 0,
+        usageLimit: 50,
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50,
+        hourlyUsageCount: 0,
+        createdAt: now,
+        updatedAt: now,
+      });
+      workspace = await ctx.db.get(wsId);
+    }
+
     // Find or create provider
     let provider = await ctx.db
       .query("providers")
@@ -367,21 +406,23 @@ export const verifyMagicLink = mutation({
         email: magicLink.email,
         name: magicLink.email.split("@")[0],
         status: "approved",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
+        workspaceId: workspace!._id,
+        createdAt: now,
+        updatedAt: now,
+      } as any);
       provider = await ctx.db.get(providerId);
+    } else if (!(provider as any).workspaceId) {
+      // Link existing provider to workspace
+      await ctx.db.patch(provider._id, { workspaceId: workspace!._id } as any);
     }
 
-    // Create session
+    // Create unified session (agentSessions)
     const sessionToken = generateToken();
-    const sessionExpiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
-
-    await ctx.db.insert("sessions", {
-      providerId: provider!._id,
-      token: sessionToken,
-      expiresAt: sessionExpiresAt,
-      createdAt: Date.now(),
+    await ctx.db.insert("agentSessions", {
+      workspaceId: workspace!._id,
+      sessionToken,
+      lastUsedAt: now,
+      createdAt: now,
     });
 
     return {
@@ -396,10 +437,34 @@ export const verifyMagicLink = mutation({
   },
 });
 
-// Get current session
+// Get current session (unified: tries agentSessions first, falls back to legacy sessions)
 export const getSession = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
+    // 1. Try unified agentSessions (by sessionToken)
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+
+    if (agentSession) {
+      // Resolve provider via workspace
+      const provider = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+
+      if (!provider) return null;
+
+      return {
+        providerId: provider._id,
+        email: provider.email,
+        name: provider.name,
+        stripeOnboardingComplete: (provider as any).stripeOnboardingComplete,
+      };
+    }
+
+    // 2. Fallback: legacy sessions table (for tokens created before migration)
     const session = await ctx.db
       .query("sessions")
       .withIndex("by_token", (q) => q.eq("token", token))
@@ -499,19 +564,35 @@ export const addAPI = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    // Verify session
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
+    // Unified session lookup
+    let providerId: any = null;
+
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
       .first();
 
-    if (!session || session.expiresAt < Date.now()) {
-      throw new Error("Invalid or expired session");
+    if (agentSession) {
+      const prov = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+      if (prov) providerId = prov._id;
+    } else {
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", args.token))
+        .first();
+      if (session && session.expiresAt >= Date.now()) {
+        providerId = session.providerId;
+      }
     }
+
+    if (!providerId) throw new Error("Invalid or expired session");
 
     const now = Date.now();
     const apiId = await ctx.db.insert("providerAPIs", {
-      providerId: session.providerId,
+      providerId,
       name: args.api.name,
       description: args.api.description,
       category: args.api.category,
@@ -536,19 +617,35 @@ export const deleteAPI = mutation({
     apiId: v.string(),
   },
   handler: async (ctx, args) => {
-    // Verify session
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
+    // Unified session lookup
+    let providerId: any = null;
+
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
       .first();
 
-    if (!session || session.expiresAt < Date.now()) {
-      throw new Error("Invalid or expired session");
+    if (agentSession) {
+      const prov = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+      if (prov) providerId = prov._id;
+    } else {
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", args.token))
+        .first();
+      if (session && session.expiresAt >= Date.now()) {
+        providerId = session.providerId;
+      }
     }
+
+    if (!providerId) throw new Error("Invalid or expired session");
 
     // Get the API and verify ownership
     const api = await ctx.db.get(args.apiId as any);
-    if (!api || (api as any).providerId !== session.providerId) {
+    if (!api || (api as any).providerId !== providerId) {
       throw new Error("API not found or unauthorized");
     }
 
@@ -659,18 +756,50 @@ export const debugListProviders = query({
 
 export const getAnalytics = query({
   args: {
-    token: v.string(),
+    token: v.optional(v.string()),
+    workspaceId: v.optional(v.string()), // Direct workspace ID (used by /workspace page)
     period: v.optional(v.string()), // "week", "month", "all"
   },
-  handler: async (ctx, { token, period = "month" }) => {
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", token))
-      .first();
+  handler: async (ctx, { token, workspaceId: wsIdArg, period = "month" }) => {
+    let providerId: any = null;
 
-    if (!session || session.expiresAt < Date.now()) {
-      return null;
+    // Path 1: Direct workspaceId (from workspace page)
+    if (wsIdArg) {
+      const prov = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", wsIdArg as any))
+        .first();
+      if (prov) providerId = prov._id;
     }
+
+    // Path 2: Session token lookup (from provider dashboard / API)
+    if (!providerId && token) {
+      const agentSession = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+        .first();
+
+      if (agentSession) {
+        const prov = await ctx.db
+          .query("providers")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+          .first();
+        if (prov) providerId = prov._id;
+      } else {
+        const session = await ctx.db
+          .query("sessions")
+          .withIndex("by_token", (q) => q.eq("token", token))
+          .first();
+        if (session && session.expiresAt >= Date.now()) {
+          providerId = session.providerId;
+        }
+      }
+    }
+
+    if (!providerId) return null;
+
+    const provider = await ctx.db.get(providerId) as any;
+    if (!provider) return null;
 
     const now = Date.now();
     const periodMs = {
@@ -681,139 +810,101 @@ export const getAnalytics = query({
 
     const startTime = now - periodMs;
 
-    // Get usage logs for this provider (from Direct Call usageLog)
-    const usageLogs = await ctx.db
-      .query("usageLog")
-      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
+    // Provider name key used in apiLogs.provider (lowercase)
+    const providerKey = (provider.name as string).toLowerCase();
+
+    // Get real data from apiLogs (source of truth for all API activity)
+    const allLogs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_provider", (q) => q.eq("provider", providerKey))
       .collect();
 
-    const periodCalls = usageLogs.filter((c) => c.timestamp >= startTime);
+    const periodLogs = allLogs.filter((l) => l.createdAt >= startTime);
+
+    // Split into direct calls vs discovery
+    const directCalls = periodLogs.filter((l) => !(l as any).action?.startsWith("discovery:"));
+    const discoveries = periodLogs.filter((l) => (l as any).action?.startsWith("discovery:"));
 
     // Calculate metrics
-    const totalCalls = periodCalls.length;
-    const uniqueAgents = new Set(periodCalls.map((c) => c.userId)).size;
-    const totalRevenue = periodCalls.reduce((sum, c) => sum + (c.creditsUsed / 100), 0); // cents to dollars
-    const successCount = periodCalls.filter((c) => c.success).length;
+    const totalCalls = directCalls.length;
+    const totalDiscoveries = discoveries.length;
+    const uniqueCallers = new Set(periodLogs.map((l) => (l as any).callerWorkspaceId || l.workspaceId)).size;
+    const successCount = directCalls.filter((l) => l.status === "success").length;
     const successRate = totalCalls > 0 ? (successCount / totalCalls) * 100 : 100;
-    const avgLatency = totalCalls > 0 
-      ? periodCalls.reduce((sum, c) => sum + c.latencyMs, 0) / totalCalls 
+    const avgLatency = totalCalls > 0
+      ? Math.round(directCalls.reduce((sum, l) => sum + l.latencyMs, 0) / totalCalls)
       : 0;
 
     // Calls over time (daily buckets)
-    const callsByDay: Record<string, { calls: number; revenue: number; success: number }> = {};
+    const callsByDay: Record<string, { calls: number; discoveries: number; success: number }> = {};
 
-    periodCalls.forEach((call) => {
-      const day = new Date(call.timestamp).toISOString().split("T")[0];
+    periodLogs.forEach((log) => {
+      const day = new Date(log.createdAt).toISOString().split("T")[0];
       if (!callsByDay[day]) {
-        callsByDay[day] = { calls: 0, revenue: 0, success: 0 };
+        callsByDay[day] = { calls: 0, discoveries: 0, success: 0 };
       }
-      callsByDay[day].calls += 1;
-      callsByDay[day].revenue += call.creditsUsed / 100;
-      if (call.success) callsByDay[day].success += 1;
+      if ((log as any).action?.startsWith("discovery:")) {
+        callsByDay[day].discoveries += 1;
+      } else {
+        callsByDay[day].calls += 1;
+        if (log.status === "success") callsByDay[day].success += 1;
+      }
     });
-
-    // Top agents (users)
-    const agentCallCounts: Record<string, number> = {};
-    periodCalls.forEach((call) => {
-      agentCallCounts[call.userId] = (agentCallCounts[call.userId] || 0) + 1;
-    });
-    const topAgents = Object.entries(agentCallCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([agentId, calls]) => ({ agentId, calls }));
 
     // Top actions
     const actionCallCounts: Record<string, number> = {};
-    periodCalls.forEach((call) => {
-      actionCallCounts[call.actionName] = (actionCallCounts[call.actionName] || 0) + 1;
+    directCalls.forEach((log) => {
+      const action = (log as any).action || "unknown";
+      actionCallCounts[action] = (actionCallCounts[action] || 0) + 1;
     });
     const topActions = Object.entries(actionCallCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([actionName, calls]) => ({ actionName, calls }));
 
+    // Top callers (workspace IDs that called this provider)
+    const callerCounts: Record<string, number> = {};
+    directCalls.forEach((log) => {
+      const caller = (log as any).callerWorkspaceId || "anonymous";
+      callerCounts[caller] = (callerCounts[caller] || 0) + 1;
+    });
+    const topAgents = Object.entries(callerCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([agentId, calls]) => ({ agentId, calls }));
+
     // Get provider's APIs
     const apis = await ctx.db
       .query("providerAPIs")
-      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
+      .withIndex("by_providerId", (q) => q.eq("providerId", providerId))
       .collect();
 
-    // Get Direct Call configs to map directCallId to apiId
-    const directCallConfigs = await ctx.db
-      .query("providerDirectCall")
-      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
-      .collect();
-
-    // Calls per API (via directCallId → apiId mapping)
-    const callsByDirectCallId: Record<string, number> = {};
-    periodCalls.forEach((call) => {
-      const dcId = call.directCallId as string;
-      callsByDirectCallId[dcId] = (callsByDirectCallId[dcId] || 0) + 1;
-    });
-
-    // Map to apiId
-    const callsByApiId: Record<string, number> = {};
-    directCallConfigs.forEach((dc) => {
-      if (dc.apiId) {
-        callsByApiId[dc.apiId as string] = callsByDirectCallId[dc._id as string] || 0;
-      }
-    });
-
-    // Preview data for providers with no usage yet
-    const isPreview = totalCalls === 0;
-    
-    if (isPreview) {
-      // Generate preview data so providers can see what the dashboard looks like
-      const previewDays = [];
-      for (let i = 13; i >= 0; i--) {
-        const date = new Date(now - i * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-        previewDays.push({
-          date,
-          calls: Math.floor(Math.random() * 50) + 10,
-          revenue: Math.random() * 5,
-        });
-      }
-      
-      return {
-        totalCalls: 847,
-        uniqueAgents: 23,
-        totalRevenue: 42.35,
-        successRate: 98.2,
-        avgLatency: 145,
-        callsByDay: previewDays,
-        topAgents: [
-          { agentId: "agent_demo_1", calls: 234 },
-          { agentId: "agent_demo_2", calls: 189 },
-          { agentId: "agent_demo_3", calls: 156 },
-          { agentId: "agent_demo_4", calls: 98 },
-          { agentId: "agent_demo_5", calls: 67 },
-        ],
-        topActions: [
-          { actionName: "send_message", calls: 412 },
-          { actionName: "get_status", calls: 289 },
-          { actionName: "create_invoice", calls: 146 },
-        ],
-        apis: apis.map((api) => ({
-          id: api._id,
-          name: api.name,
-          calls: Math.floor(Math.random() * 200) + 50,
-          status: api.status,
-        })),
-        isPreview: true,
-      };
+    // Per-API call counts (match action name to API name)
+    const apiCallCounts: Record<string, number> = {};
+    const apiDiscoveryCounts: Record<string, number> = {};
+    for (const api of apis) {
+      const apiNameLower = api.name.toLowerCase();
+      apiCallCounts[api._id as string] = directCalls.filter(
+        (l) => (l as any).action?.toLowerCase().includes(apiNameLower)
+      ).length;
+      apiDiscoveryCounts[api._id as string] = discoveries.filter(
+        (l) => (l as any).action?.toLowerCase().includes(apiNameLower)
+      ).length;
     }
 
     return {
       totalCalls,
-      uniqueAgents,
-      totalRevenue,
-      successRate,
+      totalDiscoveries,
+      uniqueAgents: uniqueCallers,
+      totalRevenue: 0, // Revenue tracking not yet implemented
+      successRate: Math.round(successRate * 10) / 10,
       avgLatency,
       callsByDay: Object.entries(callsByDay)
         .map(([date, data]) => ({
           date,
           calls: data.calls,
-          revenue: data.revenue,
+          discoveries: data.discoveries,
+          revenue: 0,
         }))
         .sort((a, b) => a.date.localeCompare(b.date)),
       topAgents,
@@ -821,7 +912,8 @@ export const getAnalytics = query({
       apis: apis.map((api) => ({
         id: api._id,
         name: api.name,
-        calls: callsByApiId[api._id as string] || 0,
+        calls: apiCallCounts[api._id as string] || 0,
+        discoveries: apiDiscoveryCounts[api._id as string] || 0,
         status: api.status,
       })),
       isPreview: false,
@@ -833,28 +925,46 @@ export const getAnalytics = query({
 // DASHBOARD EARNINGS
 // ============================================
 
+// Earnings placeholder - partners (APILayer, Filestack) don't earn per-call revenue yet
 export const getEarnings = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", token))
+    // Unified session lookup
+    let providerId: any = null;
+
+    const agentSession = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
       .first();
 
-    if (!session || session.expiresAt < Date.now()) {
-      return null;
+    if (agentSession) {
+      const prov = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", agentSession.workspaceId))
+        .first();
+      if (prov) providerId = prov._id;
+    } else {
+      const session = await ctx.db
+        .query("sessions")
+        .withIndex("by_token", (q) => q.eq("token", token))
+        .first();
+      if (session && session.expiresAt >= Date.now()) {
+        providerId = session.providerId;
+      }
     }
 
-    // Get all payouts
+    if (!providerId) return null;
+
+    // Get all payouts (currently empty for all providers)
     const payouts = await ctx.db
       .query("payouts")
-      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
+      .withIndex("by_providerId", (q) => q.eq("providerId", providerId))
       .collect();
 
-    // Get all API calls to calculate pending
+    // Get all API calls (legacy table, currently empty)
     const allCalls = await ctx.db
       .query("apiCalls")
-      .withIndex("by_providerId", (q) => q.eq("providerId", session.providerId))
+      .withIndex("by_providerId", (q) => q.eq("providerId", providerId))
       .collect();
 
     // Find last completed payout
@@ -872,7 +982,7 @@ export const getEarnings = query({
     const totalEarned = allCalls.reduce((sum, c) => sum + c.costUsd, 0);
 
     // Get provider for Stripe status
-    const provider = await ctx.db.get(session.providerId);
+    const provider = await ctx.db.get(providerId);
 
     return {
       pendingAmount,

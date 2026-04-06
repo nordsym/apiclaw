@@ -11,10 +11,9 @@ export const activateWorkspace = mutation({
     
     await ctx.db.patch(workspaceId, {
       status: "active",
-      tier: "backer", // Give Hivr bees backer status
+      tier: "pro",
       weeklyUsageLimit: 999999,
       usageLimit: 999999,
-      backerUntil: new Date("2026-12-31T23:59:59Z").getTime(), // Founding Backer until end of 2026
       updatedAt: Date.now(),
     });
     

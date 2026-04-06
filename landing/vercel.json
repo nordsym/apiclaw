@@ -4,5 +4,10 @@
       "memory": 1024,
       "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/v1/:path*", "destination": "https://adventurous-avocet-799.convex.site/v1/:path*", "has": [{ "type": "host", "value": "api.apiclaw.cloud" }] },
+    { "source": "/api/:path*", "destination": "https://adventurous-avocet-799.convex.site/api/:path*", "has": [{ "type": "host", "value": "api.apiclaw.cloud" }] },
+    { "source": "/proxy/:path*", "destination": "https://adventurous-avocet-799.convex.site/proxy/:path*", "has": [{ "type": "host", "value": "api.apiclaw.cloud" }] }
+  ]
 }

@@ -8,6 +8,7 @@ export const log = mutation({
     provider: v.optional(v.string()),
     query: v.optional(v.string()),
     identifier: v.string(),
+    workspaceId: v.optional(v.id("workspaces")),
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {

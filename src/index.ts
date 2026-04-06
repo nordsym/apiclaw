@@ -170,9 +170,10 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       allowed: false,
       error: JSON.stringify({
         success: false,
-        error: `Monthly limit reached (${ANONYMOUS_WEEKLY_LIMIT} calls)`,
-        hint: "Register to get 50 calls/month",
+        error: `⚡ You've hit your free tier limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
+        hint: "Register for 50 calls/week, or upgrade for unlimited",
         action: "Run: register_owner({ email: 'you@example.com' })",
+        upgrade_url: "https://apiclaw.cloud/upgrade",
         retry_after: getNextMonthUTC()
       }, null, 2)
     };
@@ -335,9 +336,9 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
         allowed: false, 
         error: JSON.stringify({
           success: false,
-          error: `Monthly limit reached (${FREE_MONTHLY_LIMIT} calls)`,
-          hint: "Upgrade to Backer for unlimited calls",
-          upgrade_url: "https://apiclaw.nordsym.com/upgrade",
+          error: `⚡ You've hit your free tier limit (${FREE_MONTHLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
+          hint: "Upgrade to Pro for unlimited calls",
+          upgrade_url: "https://apiclaw.cloud/upgrade",
           retry_after: getNextMonthUTC()
         }, null, 2)
       };
@@ -346,7 +347,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     // Other tiers (shouldn't happen, but handle gracefully)
     return { 
       allowed: false, 
-      error: `Usage limit reached. Contact support or check your plan at https://apiclaw.nordsym.com/account` 
+      error: `⚡ You've hit your free tier limit (${FREE_MONTHLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade` 
     };
   }
   
@@ -723,12 +724,12 @@ Example chain:
         success_url: {
           type: 'string',
           description: 'URL to redirect after successful setup',
-          default: 'https://apiclaw.nordsym.com/billing/success'
+          default: 'https://apiclaw.cloud/billing/success'
         },
         cancel_url: {
           type: 'string',
           description: 'URL to redirect if setup is cancelled',
-          default: 'https://apiclaw.nordsym.com/billing/cancel'
+          default: 'https://apiclaw.cloud/billing/cancel'
         }
       },
       required: ['email']
@@ -861,7 +862,7 @@ BROWSE:
   list_categories()
   list_all_apis({ category: "communication", limit: 20 })
 
-Docs: https://apiclaw.nordsym.com
+Docs: https://apiclaw.cloud
 `;
         return {
           content: [{ type: 'text', text: helpText }]
@@ -931,6 +932,7 @@ Docs: https://apiclaw.nordsym.com
           // Single mutation handles both apiLogs + discoveryCount
           const PROVIDER_KEYWORDS: Record<string, string[]> = {
             apilayer: ['exchange', 'currency', 'fixer', 'weather', 'ip', 'geo', 'flight', 'aviation', 'vat', 'news', 'scrape', 'screenshot', 'pdf', 'email verif', 'phone verif', 'language', 'user agent', 'coinlayer', 'marketstack', 'positionstack', 'ipstack', 'mediastack', 'serpstack', 'userstack', 'scrapestack', 'weatherstack'],
+            filestack: ['file upload', 'upload file', 'file storage', 'file picker', 'image upload', 'upload image', 'file transform', 'image transform', 'resize image', 'document upload', 'upload document', 'file delivery', 'cdn upload', 'file processing', 'ocr', 'virus scan', 'file convert', 'convert pdf', 'filestack'],
           };
           const queryLower = query.toLowerCase();
           for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
@@ -1802,7 +1804,7 @@ Docs: https://apiclaw.nordsym.com
           }) as { token: string; expiresAt: number };
           
           // Send magic link via email
-          const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${magicLinkResult.token}`;
+          const verifyUrl = `https://apiclaw.cloud/auth/verify?token=${magicLinkResult.token}`;
           
           const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -1811,7 +1813,7 @@ Docs: https://apiclaw.nordsym.com
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: 'APIClaw <noreply@apiclaw.nordsym.com>',
+              from: 'APIClaw <noreply@apiclaw.cloud>',
               to: email,
               subject: 'Verify your APIClaw workspace',
               html: `<p>Click to verify: <a href="${verifyUrl}">${verifyUrl}</a></p><p>Expires in 15 minutes.</p>`
@@ -1973,7 +1975,7 @@ Docs: https://apiclaw.nordsym.com
           }) as { token: string; expiresAt: number };
           
           // TODO: Agent 2 will implement actual email sending
-          const verifyUrl = `https://apiclaw.nordsym.com/auth/verify?token=${magicLinkResult.token}`;
+          const verifyUrl = `https://apiclaw.cloud/auth/verify?token=${magicLinkResult.token}`;
           
           return {
             content: [{
@@ -2035,8 +2037,8 @@ Docs: https://apiclaw.nordsym.com
         // Create checkout session for metered subscription
         const checkoutResult = await createMeteredCheckoutSession(
           email,
-          success_url || 'https://apiclaw.nordsym.com/billing/success',
-          cancel_url || 'https://apiclaw.nordsym.com/billing/cancel'
+          success_url || 'https://apiclaw.cloud/billing/success',
+          cancel_url || 'https://apiclaw.cloud/billing/cancel'
         );
 
         if ('error' in checkoutResult) {
@@ -2412,7 +2414,7 @@ Direct Call (no API key needed):
 Interactive CLI mode:
   npx @nordsym/apiclaw --cli
 
-Docs: https://apiclaw.nordsym.com
+Docs: https://apiclaw.cloud
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
 }

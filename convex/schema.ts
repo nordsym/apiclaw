@@ -47,18 +47,18 @@ export default defineSchema({
     workspaceName: v.optional(v.string()), // Display name (e.g., "APILayer", "My Team")
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
-    tier: v.string(), // "free" | "pro" | "enterprise" | "backer" | "founder"
+    tier: v.string(), // "free" | "pro" | "scale" | "usage_based" | "enterprise" | "partner"
     usageCount: v.number(), // total API calls made (lifetime)
     usageLimit: v.number(), // max API calls for tier
     // Weekly usage (resets every Monday 00:00 UTC)
     weeklyUsageCount: v.optional(v.number()), // calls this week
-    weeklyUsageLimit: v.optional(v.number()), // 50 for free, unlimited for backer
+    weeklyUsageLimit: v.optional(v.number()), // 50 for free, unlimited for paid tiers
     lastWeeklyResetAt: v.optional(v.number()), // timestamp of last reset
     // Hourly rate limit
     hourlyUsageCount: v.optional(v.number()), // calls this hour
     lastHourlyResetAt: v.optional(v.number()), // timestamp of last hourly reset
-    // Backer status (Founding Backer = unlimited until end of 2026)
-    backerUntil: v.optional(v.number()), // timestamp when backer status expires
+    // Legacy field (no longer used)
+    backerUntil: v.optional(v.number()),
     // Main agent identification
     mainAgentId: v.optional(v.string()), // UUID, auto-generated on first call
     mainAgentName: v.optional(v.string()), // Auto-generated name (e.g., "Crimson Phoenix")
@@ -127,6 +127,20 @@ export default defineSchema({
     .index("by_date", ["date"])
     .index("by_workspaceId_date", ["workspaceId", "date"])
     .index("by_reportedToStripe", ["reportedToStripe"]),
+
+  // Workspace API Keys (persistent keys for programmatic access)
+  workspaceApiKeys: defineTable({
+    workspaceId: v.id("workspaces"),
+    key: v.string(), // "sk-claw-" + 48 random chars (hashed after creation)
+    keyHash: v.string(), // SHA-256 hash for lookup (key itself not stored after first show)
+    keyPrefix: v.string(), // "sk-claw-...last4" for display
+    name: v.string(), // user label ("Production", "My Agent")
+    lastUsedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_keyHash", ["keyHash"])
+    .index("by_workspaceId", ["workspaceId"]),
 
   // Agent sessions (for MCP server authentication)
   agentSessions: defineTable({
@@ -248,13 +262,15 @@ export default defineSchema({
     stripeConnectId: v.optional(v.string()), // for payouts
     stripeOnboardingComplete: v.optional(v.boolean()),
     status: v.string(), // pending, approved, rejected, suspended
+    workspaceId: v.optional(v.id("workspaces")), // Link to unified workspace identity
     createdAt: v.number(),
     updatedAt: v.number(),
     approvedAt: v.optional(v.number()),
   })
     .index("by_email", ["email"])
     .index("by_stripeConnectId", ["stripeConnectId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_workspaceId", ["workspaceId"]),
 
   // APIs listed by providers (self-service onboarding)
   providerAPIs: defineTable({
@@ -283,6 +299,7 @@ export default defineSchema({
   // APIs listed by providers (for full dashboard)
   apis: defineTable({
     providerId: v.id("providers"),
+    workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
     name: v.string(),
     description: v.string(),
     category: v.string(),
@@ -304,6 +321,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_category", ["category"])
     .index("by_status", ["status"]),
 
@@ -311,6 +329,7 @@ export default defineSchema({
   apiCalls: defineTable({
     apiId: v.id("apis"),
     providerId: v.id("providers"),
+    workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
     agentId: v.string(),
     endpoint: v.optional(v.string()),
     method: v.optional(v.string()),
@@ -322,6 +341,7 @@ export default defineSchema({
   })
     .index("by_apiId", ["apiId"])
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_agentId", ["agentId"])
     .index("by_timestamp", ["timestamp"])
     .index("by_providerId_timestamp", ["providerId", "timestamp"]),
@@ -329,6 +349,7 @@ export default defineSchema({
   // Provider Payouts
   payouts: defineTable({
     providerId: v.id("providers"),
+    workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
     amountUsd: v.number(),
     status: v.string(), // pending, processing, completed, failed
     stripePayoutId: v.optional(v.string()),
@@ -338,6 +359,7 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
   })
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_status", ["status"]),
 
   // Magic link tokens for email auth
@@ -411,6 +433,7 @@ export default defineSchema({
   // Provider Direct Call configuration (master key, limits, pricing)
   providerDirectCall: defineTable({
     providerId: v.id("providers"),
+    workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
     apiId: v.optional(v.id("providerAPIs")),
     baseUrl: v.string(),
     authType: v.string(), // "bearer" | "basic" | "api_key" | "none"
@@ -429,6 +452,7 @@ export default defineSchema({
     publishedAt: v.optional(v.number()),
   })
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_apiId", ["apiId"])
     .index("by_status", ["status"]),
 
@@ -466,6 +490,7 @@ export default defineSchema({
   usageLog: defineTable({
     userId: v.string(),
     providerId: v.id("providers"),
+    workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
     directCallId: v.id("providerDirectCall"),
     actionName: v.string(),
     timestamp: v.number(),
@@ -476,6 +501,7 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_providerId", ["providerId"])
+    .index("by_workspaceId", ["workspaceId"])
     .index("by_directCallId", ["directCallId"])
     .index("by_timestamp", ["timestamp"])
     .index("by_userId_providerId", ["userId", "providerId"])
@@ -780,6 +806,29 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_votes", ["votes"])
     .index("by_createdAt", ["createdAt"]),
+
+  // ============================================
+  // WORKSPACE SETTINGS (Gateway routing config)
+  // ============================================
+
+  workspaceSettings: defineTable({
+    workspaceId: v.id("workspaces"),
+    // Routing preferences
+    routingMode: v.string(), // "best_price" | "highest_quality" | "fastest" | "balanced"
+    defaultModel: v.optional(v.string()), // e.g. "anthropic/claude-sonnet-4-6"
+    // Budget controls
+    maxPricePerMTokens: v.optional(v.float64()), // max $/million tokens, null = no limit
+    monthlyBudgetLimit: v.optional(v.float64()), // monthly budget in USD, null = no limit
+    // Provider preferences
+    preferredProviders: v.optional(v.array(v.string())), // e.g. ["groq", "mistral", "together"]
+    blockedProviders: v.optional(v.array(v.string())), // providers to never use
+    // Fallback
+    allowOpenRouterFallback: v.optional(v.boolean()), // default true
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"]),
 
   // ============================================
   // MOU SIGNATURES
