@@ -131,7 +131,7 @@ try {
   const fallback = {
     apiCount: 22392,
     openApiCount: 996,
-    directCallCount: 19,
+    directCallCount: 20,
     npmDownloads: 9937,
     categoryCount: 14,
     generatedAt: new Date().toISOString(),

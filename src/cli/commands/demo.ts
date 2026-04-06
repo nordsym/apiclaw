@@ -93,7 +93,7 @@ export async function demoCommand(): Promise<void> {
     spinner.stop();
 
     console.log(chalk.green('  ✓ That was a live Direct Call through APIClaw.'));
-    console.log(chalk.dim('  19 providers, hundreds of APIs. Zero API keys needed.\n'));
+    console.log(chalk.dim('  20 providers, hundreds of APIs. Zero API keys needed.\n'));
     console.log(
       chalk.bold('  Next step:') +
       chalk.dim(' add APIClaw to your AI agent:\n')

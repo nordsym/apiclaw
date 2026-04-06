@@ -211,11 +211,12 @@ You have access to APIClaw, a unified gateway that gives you one API key (sk-cla
 Key capabilities:
 - Intelligent LLM routing: Requests auto-route to the best provider (Groq for speed, Mistral for EU, Together for open-source, OpenRouter for 800+ models). Configurable per workspace.
 - OpenAI-compatible gateway: api.apiclaw.cloud/v1/chat/completions works with any tool that speaks OpenAI.
-- 19 Direct Call providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
+- 20 Direct Call providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
 - ${statsData.apiCount.toLocaleString()}+ indexed APIs with semantic search.
 
-Direct Call providers (19):
+Direct Call providers (20):
 LLM: OpenRouter (800+ models), Groq (ultra-fast), Mistral (EU), Together AI (open-source), Cohere (RAG/rerank)
+Embeddings: Voyage AI (voyage-3-large, best-in-class RAG retrieval)
 AI/ML: Replicate (Flux, SDXL, Whisper), Stability AI (image generation)
 Voice: ElevenLabs (TTS, 29 languages), Deepgram (STT), AssemblyAI (audio intelligence)
 Search: Brave Search, Serper (Google SERP), Firecrawl (web scraping)
@@ -1119,7 +1120,7 @@ Docs: https://apiclaw.cloud/docs`;
               },
               {
                 q: "How does Direct Call work?",
-                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication — your agent just calls the API through us. Currently available for 19 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Firecrawl (web scraping), E2B (code sandbox), and more."
+                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication -- your agent just calls the API through us. Currently available for 20 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more."
               },
               {
                 q: "How are API credentials secured?",

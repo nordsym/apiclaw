@@ -29,7 +29,7 @@
 
 ## CREDENTIALS UPDATED
 - PDFLayer key updated in `~/.secrets/apilayer.env`
-- All 19 Direct Call providers have credentials in src/credentials.ts
+- All 20 Direct Call providers have credentials in src/credentials.ts
 - Product messaging reordered (AI-first) in src/discovery.ts
 
 ## NEXT STEPS

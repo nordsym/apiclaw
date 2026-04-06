@@ -291,6 +291,18 @@ const providers: Record<string, ProviderCredential> = {
       return null;
     },
   },
+
+  voyage: {
+    type: 'bearer',
+    get(): APICredentials | null {
+      const env = loadEnvFile('voyage.env');
+      const key = env.VOYAGE_API_KEY || process.env.VOYAGE_API_KEY;
+      if (key) {
+        return { type: 'bearer', api_key: key };
+      }
+      return null;
+    },
+  },
 };
 
 /**
@@ -383,6 +395,10 @@ export function hasRealCredentials(providerId: string): boolean {
   if (providerId === 'assemblyai') {
     const env = loadEnvFile('assemblyai.env');
     return !!(env.ASSEMBLYAI_API_KEY || process.env.ASSEMBLYAI_API_KEY);
+  }
+  if (providerId === 'voyage') {
+    const env = loadEnvFile('voyage.env');
+    return !!(env.VOYAGE_API_KEY || process.env.VOYAGE_API_KEY);
   }
   if (providerId === 'serper') {
     const env = loadEnvFile('serper.env');

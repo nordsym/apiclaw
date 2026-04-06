@@ -51,7 +51,7 @@ const schemaOrg = {
       "@type": "WebSite",
       "name": "APIClaw",
       "url": "https://apiclaw.cloud",
-      "description": "Your agent's API encyclopedia. Search by capability, call instantly. 22,392 APIs indexed • 1,636 Open APIs • 19 Direct Call • MCP native"
+      "description": "Your agent's API encyclopedia. Search by capability, call instantly. 22,392 APIs indexed • 1,636 Open APIs • 20 Direct Call • MCP native"
     },
     {
       "@type": "Organization",
@@ -63,7 +63,7 @@ const schemaOrg = {
       "name": "APIClaw",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
-      "description": "The API layer for AI agents. 22,392 APIs indexed, 1,636 Open APIs, 19 Direct Call providers. MCP native.",
+      "description": "The API layer for AI agents. 22,392 APIs indexed, 1,636 Open APIs, 20 Direct Call providers. MCP native.",
       "offers": {
         "@type": "Offer",
         "price": "0",

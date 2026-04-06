@@ -6,7 +6,7 @@ The API layer for AI agents. One key for everything.
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 
-10,000+ installs. 19 Direct Call providers. 22,392 indexed APIs. Intelligent LLM routing.
+10,000+ installs. 20 Direct Call providers. 22,392 indexed APIs. Intelligent LLM routing.
 
 ## Install
 

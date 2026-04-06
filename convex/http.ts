@@ -12,7 +12,7 @@ import {
 
 const http = httpRouter();
 
-// Provider catalog — all 19 Direct Call providers
+// Provider catalog — all 20 Direct Call providers
 interface ProviderMeta {
   name: string;
   description: string;
@@ -258,6 +258,18 @@ const PROVIDERS: Record<string, ProviderMeta> = {
     isLLM: false,
     envKey: "APILAYER_API_KEY",
     speed: "medium",
+    costTier: "cheap",
+  },
+  voyage: {
+    name: "Voyage AI",
+    description: "State-of-the-art embeddings for RAG and agent memory. Best-in-class retrieval quality.",
+    category: "embeddings",
+    pricing: "~$0.02-0.18/M tokens",
+    regions: ["Global"],
+    tags: ["embeddings", "rag", "agent-memory", "retrieval", "voyage-3", "code-embeddings"],
+    isLLM: false,
+    envKey: "VOYAGE_API_KEY",
+    speed: "fast",
     costTier: "cheap",
   },
 };
@@ -2097,6 +2109,253 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
+// ==============================================
+// /v1/embeddings — OpenAI-compatible embedding gateway
+// ==============================================
+// Accepts: Authorization: Bearer sk-claw-...
+// Routes by model prefix to Direct Call embedding providers:
+//   voyage/*   → Voyage AI  (default: voyage-3-large)
+//   mistral/*  → Mistral     (mistral-embed)
+//   openai/*   → OpenAI      (text-embedding-3-small, -large, ada-002)
+//   cohere/*   → Cohere      (embed-v4.0, embed-multilingual-v3) — translated
+// Unprefixed model strings auto-route by known model names.
+// ==============================================
+
+type EmbeddingBackend = {
+  provider: "voyage" | "mistral" | "openai" | "cohere";
+  baseUrl: string;
+  apiKey: string | undefined;
+  model: string;
+  format: "openai" | "cohere";
+};
+
+// Map a model string to a backend. Supports prefixed (voyage/voyage-3-large)
+// and bare model names (text-embedding-3-small, mistral-embed, voyage-3-large).
+function resolveEmbeddingBackend(requestedModel: string | undefined): EmbeddingBackend | null {
+  const raw = (requestedModel || "voyage/voyage-3-large").trim();
+  let provider: EmbeddingBackend["provider"] | null = null;
+  let model = raw;
+
+  // Explicit prefix
+  if (raw.startsWith("voyage/")) {
+    provider = "voyage";
+    model = raw.slice(7);
+  } else if (raw.startsWith("mistral/")) {
+    provider = "mistral";
+    model = raw.slice(8);
+  } else if (raw.startsWith("openai/")) {
+    provider = "openai";
+    model = raw.slice(7);
+  } else if (raw.startsWith("cohere/")) {
+    provider = "cohere";
+    model = raw.slice(7);
+  } else {
+    // Auto-detect from bare model name
+    if (raw.startsWith("voyage-")) provider = "voyage";
+    else if (raw.startsWith("mistral-embed") || raw === "mistral-embed") provider = "mistral";
+    else if (raw.startsWith("text-embedding-") || raw.startsWith("ada-")) provider = "openai";
+    else if (raw.startsWith("embed-")) provider = "cohere";
+    else return null;
+  }
+
+  switch (provider) {
+    case "voyage":
+      return {
+        provider,
+        baseUrl: "https://api.voyageai.com/v1/embeddings",
+        apiKey: process.env.VOYAGE_API_KEY,
+        model: model || "voyage-3-large",
+        format: "openai",
+      };
+    case "mistral":
+      return {
+        provider,
+        baseUrl: "https://api.mistral.ai/v1/embeddings",
+        apiKey: process.env.MISTRAL_API_KEY,
+        model: model || "mistral-embed",
+        format: "openai",
+      };
+    case "openai":
+      return {
+        provider,
+        baseUrl: "https://api.openai.com/v1/embeddings",
+        apiKey: process.env.OPENAI_API_KEY,
+        model: model || "text-embedding-3-small",
+        format: "openai",
+      };
+    case "cohere":
+      return {
+        provider,
+        baseUrl: "https://api.cohere.com/v2/embed",
+        apiKey: process.env.COHERE_API_KEY,
+        model: model || "embed-v4.0",
+        format: "cohere",
+      };
+  }
+}
+
+// /v1/embeddings — POST
+http.route({
+  path: "/v1/embeddings",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    const authResult = await requireApiKeyAuth(ctx, request);
+    if (authResult instanceof Response) return authResult;
+    const { workspaceId } = authResult;
+
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
+    }
+
+    const { model, input, encoding_format, dimensions, user, input_type } = body;
+    if (input === undefined || input === null) {
+      return jsonResponse({ error: { message: "input is required", type: "invalid_request_error" } }, 400);
+    }
+
+    const backend = resolveEmbeddingBackend(model);
+    if (!backend) {
+      return jsonResponse(
+        { error: { message: `Unknown embedding model: ${model}. Use voyage/*, mistral/*, openai/*, or cohere/* prefix.`, type: "invalid_request_error" } },
+        400
+      );
+    }
+    if (!backend.apiKey) {
+      return jsonResponse(
+        { error: { message: `Provider ${backend.provider} is not configured (missing ${backend.provider.toUpperCase()}_API_KEY).`, type: "server_error" } },
+        503
+      );
+    }
+
+    // Log usage
+    try {
+      await ctx.runMutation(api.analytics.log, {
+        event: "api_call",
+        provider: "gateway",
+        identifier: workspaceId,
+        workspaceId: workspaceId as any,
+        metadata: {
+          action: "embeddings",
+          model: `${backend.provider}/${backend.model}`,
+          routedTo: backend.provider,
+          authMethod: "api-key",
+        },
+      });
+      await ctx.runMutation(api.logs.createProxyLog, {
+        workspaceId: workspaceId as any,
+        provider: backend.provider,
+        action: "embeddings",
+        subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+      });
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: workspaceId as any,
+      });
+    } catch (e: any) {
+      console.error("[Gateway] Embeddings logging failed:", e.message);
+    }
+
+    try {
+      let providerRequestBody: any;
+      let providerHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${backend.apiKey}`,
+      };
+
+      if (backend.format === "openai") {
+        // OpenAI-compatible passthrough (Voyage, Mistral, OpenAI)
+        providerRequestBody = {
+          model: backend.model,
+          input,
+          ...(encoding_format !== undefined ? { encoding_format } : {}),
+          ...(dimensions !== undefined ? { dimensions } : {}),
+          ...(user !== undefined ? { user } : {}),
+          ...(input_type !== undefined ? { input_type } : {}),
+        };
+      } else {
+        // Cohere v2 format
+        const texts = Array.isArray(input) ? input : [String(input)];
+        providerRequestBody = {
+          model: backend.model,
+          texts,
+          input_type: input_type || "search_document",
+          embedding_types: ["float"],
+        };
+      }
+
+      const response = await fetch(backend.baseUrl, {
+        method: "POST",
+        headers: providerHeaders,
+        body: JSON.stringify(providerRequestBody),
+      });
+
+      const providerData = await response.json();
+      const latencyMs = Date.now() - startTime;
+
+      if (!response.ok) {
+        return jsonResponse(
+          {
+            error: {
+              message: (providerData as any)?.error?.message || (providerData as any)?.message || `${backend.provider} error`,
+              type: "provider_error",
+              provider: backend.provider,
+            },
+            _apiclaw: { latencyMs, provider: backend.provider, gateway: "v1" },
+          },
+          response.status
+        );
+      }
+
+      // Normalize Cohere response to OpenAI format
+      let openAIData: any;
+      if (backend.format === "cohere") {
+        const cohereEmbeddings: number[][] = (providerData as any)?.embeddings?.float || (providerData as any)?.embeddings || [];
+        openAIData = {
+          object: "list",
+          data: cohereEmbeddings.map((embedding, index) => ({
+            object: "embedding",
+            embedding,
+            index,
+          })),
+          model: `cohere/${backend.model}`,
+          usage: {
+            prompt_tokens: (providerData as any)?.meta?.billed_units?.input_tokens || 0,
+            total_tokens: (providerData as any)?.meta?.billed_units?.input_tokens || 0,
+          },
+        };
+      } else {
+        // Already OpenAI-format
+        openAIData = providerData;
+        if (openAIData && typeof openAIData === "object" && !openAIData.model) {
+          openAIData.model = `${backend.provider}/${backend.model}`;
+        }
+      }
+
+      if (openAIData && typeof openAIData === "object") {
+        openAIData._apiclaw = {
+          latencyMs,
+          provider: backend.provider,
+          model: backend.model,
+          gateway: "v1",
+        };
+      }
+
+      return jsonResponse(openAIData, 200);
+    } catch (e: any) {
+      return jsonResponse({ error: { message: e.message, type: "server_error" } }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/embeddings",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
 // /v1/models — List available models through APIClaw
 http.route({
   path: "/v1/models",
@@ -2118,6 +2377,19 @@ http.route({
       { id: "deepseek/deepseek-r1", object: "model", owned_by: "deepseek", via: "openrouter" },
       { id: "deepseek/deepseek-chat", object: "model", owned_by: "deepseek", via: "openrouter" },
       { id: "qwen/qwen-2.5-72b-instruct", object: "model", owned_by: "qwen", via: "openrouter" },
+
+      // Embedding models via /v1/embeddings
+      { id: "voyage/voyage-3-large", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
+      { id: "voyage/voyage-3", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
+      { id: "voyage/voyage-3-lite", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
+      { id: "voyage/voyage-code-3", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
+      { id: "voyage/voyage-multilingual-2", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
+      { id: "mistral/mistral-embed", object: "model", owned_by: "mistral", via: "mistral", endpoint: "/v1/embeddings" },
+      { id: "openai/text-embedding-3-small", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
+      { id: "openai/text-embedding-3-large", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
+      { id: "openai/text-embedding-ada-002", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
+      { id: "cohere/embed-v4.0", object: "model", owned_by: "cohere", via: "cohere", endpoint: "/v1/embeddings" },
+      { id: "cohere/embed-multilingual-v3", object: "model", owned_by: "cohere", via: "cohere", endpoint: "/v1/embeddings" },
     ];
 
     return jsonResponse({
@@ -2125,8 +2397,8 @@ http.route({
       data: models,
       _apiclaw: {
         gateway: "v1",
-        note: "These models are available through APIClaw's unified gateway. All 800+ OpenRouter models are accessible by ID.",
-        non_llm_apis: Object.keys(PROVIDERS).length + " additional APIs available (SMS, email, search, TTS, code execution, scraping, and more)",
+        note: "These models are available through APIClaw's unified gateway. All 800+ OpenRouter chat models + embedding models across Voyage, Mistral, OpenAI, and Cohere.",
+        non_llm_apis: Object.keys(PROVIDERS).length + " Direct Call providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
       },
     });
   }),
