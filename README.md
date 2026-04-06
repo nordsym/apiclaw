@@ -113,18 +113,12 @@ The router picks the best provider based on your workspace settings. Override pe
 
 ## Pricing
 
-| Tier | Price | Access |
-|------|-------|--------|
-| Free | Free | 50 calls/month, full dashboard |
-| Pay-as-you-go | Usage-based | Unlimited calls, billed monthly |
-| Founding Backer | $199 one-time | Unlimited until 2027 |
-| Enterprise | Custom | [Book a call](https://apiclaw.cloud/book) |
-
-## For API Providers
-
-List your APIs on APIClaw. Get discovered by AI agents. Track usage, discoveries, and calls in your dashboard.
-
-[Register as provider](https://apiclaw.cloud/providers/register)
+| Plan | Price | What you get |
+|------|-------|--------------|
+| Free | $0 forever | Search index, Open APIs, 1 connected agent |
+| Pro | $79/month | All Direct Call providers, priority support |
+| Scale | $249/month | Volume pricing, dedicated onboarding, SLA |
+| Enterprise | Custom | Private deployment, custom limits, [book a call](https://apiclaw.cloud/book) |
 
 ---
 
