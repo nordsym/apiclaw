@@ -1,8 +1,8 @@
 // Mission Control Convex HTTP client
-// All NordSym signed documents centralized in agile-crane-840
+// All NordSym signed documents centralized in prod: laudable-ladybug-188
 
 const MC_CONVEX_URL =
-  process.env.MC_CONVEX_URL || "https://agile-crane-840.convex.cloud";
+  process.env.MC_CONVEX_URL || "https://laudable-ladybug-188.convex.cloud";
 
 export async function mcQuery<T>(
   path: string,
