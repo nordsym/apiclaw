@@ -32,7 +32,8 @@ import { hasRealCredentials } from './credentials.js';
 import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './mcp-analytics.js';
-import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions } from './open-apis.js';
+import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl } from './open-apis.js';
+import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
   requiresConfirmation,
@@ -1394,35 +1395,54 @@ Docs: https://apiclaw.cloud
             };
           }
 
-          // Execute the confirmed action with metered billing
+          // Execute the confirmed action
           apiType = 'direct';
-          const customerKey = (args?.customer_key as string) || getCustomerKey(pending.provider);
-          const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
-          result = await executeMetered(pending.provider, pending.action, pending.params, {
-            customerId: stripeCustomerId,
-            customerKey,
-            userId: DEFAULT_AGENT_ID,
-          });
 
-          // Log the confirmed API call (with fingerprint for anonymous users)
-          const analyticsUserId = workspaceContext 
-            ? workspaceContext.workspaceId 
-            : `anon:${getMachineFingerprint()}`;
-          
-          logAPICall({
-            timestamp: new Date().toISOString(),
-            provider: pending.provider,
-            action: pending.action,
-            type: apiType,
-            userId: analyticsUserId,
-            success: result.success,
-            latencyMs: Date.now() - startTime,
-            error: result.error,
-          });
+          if (isGatewayEnabled()) {
+            // Route through Intelligent Gateway
+            const gatewayResult = await getGateway().execute(
+              pending.provider,
+              pending.action,
+              pending.params,
+              { workspaceId: workspaceContext?.workspaceId },
+            );
+            result = {
+              success: gatewayResult.success,
+              provider: gatewayResult.provider,
+              action: gatewayResult.action,
+              data: gatewayResult.data,
+              error: gatewayResult.error,
+              cost: gatewayResult.cost,
+            };
+          } else {
+            // Legacy: direct execution with metered billing
+            const customerKey = (args?.customer_key as string) || getCustomerKey(pending.provider);
+            const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
+            result = await executeMetered(pending.provider, pending.action, pending.params, {
+              customerId: stripeCustomerId,
+              customerKey,
+              userId: DEFAULT_AGENT_ID,
+            });
 
-          // Track earn progress for confirmed actions
-          if (result.success && workspaceContext) {
-            await trackEarnProgress(workspaceContext.workspaceId, pending.provider, pending.action);
+            // Legacy logging (gateway handles this when enabled)
+            const analyticsUserId = workspaceContext
+              ? workspaceContext.workspaceId
+              : `anon:${getMachineFingerprint()}`;
+            logAPICall({
+              timestamp: new Date().toISOString(),
+              provider: pending.provider,
+              action: pending.action,
+              type: apiType,
+              userId: analyticsUserId,
+              success: result.success,
+              latencyMs: Date.now() - startTime,
+              error: result.error,
+            });
+
+            // Track earn progress (legacy path)
+            if (result.success && workspaceContext) {
+              await trackEarnProgress(workspaceContext.workspaceId, pending.provider, pending.action);
+            }
           }
 
           return {
@@ -1487,80 +1507,104 @@ Docs: https://apiclaw.cloud
         }
 
         // Regular execution (no confirmation needed)
-        if (isOpenAPI(provider)) {
-          apiType = 'open';
-          result = await executeOpenAPI(provider, action, params);
+        apiType = isOpenAPI(provider) ? 'open' : 'direct';
+
+        if (isGatewayEnabled()) {
+          // Route through Intelligent Gateway (handles billing, logging, analytics)
+          const gatewayParams = {
+            ...params,
+            ...(apiType === 'open' ? { baseUrl: getOpenAPIBaseUrl(provider, action, params) } : {}),
+          };
+          const gatewayResult = await getGateway().execute(
+            provider,
+            action,
+            gatewayParams,
+            { workspaceId: workspaceContext?.workspaceId },
+          );
+          result = {
+            success: gatewayResult.success,
+            provider: gatewayResult.provider,
+            action: gatewayResult.action,
+            data: gatewayResult.data,
+            error: gatewayResult.error,
+            cost: gatewayResult.cost,
+          };
         } else {
-          apiType = 'direct';
-          const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
-          const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
-          result = await executeMetered(provider, action, params, {
-            customerId: stripeCustomerId,
-            customerKey,
-            userId: DEFAULT_AGENT_ID,
-          });
-        }
-
-        // Log the API call for analytics (with fingerprint for anonymous users)
-        const analyticsUserId = workspaceContext 
-          ? workspaceContext.workspaceId 
-          : `anon:${getMachineFingerprint()}`;
-        
-        logAPICall({
-          timestamp: new Date().toISOString(),
-          provider,
-          action,
-          type: apiType,
-          userId: analyticsUserId,
-          success: result.success,
-          latencyMs: Date.now() - startTime,
-          error: result.error,
-        });
-
-        // Log to apiLogs (single source of truth for logs + analytics)
-        if (workspaceContext) {
-          convex.mutation("logs:createLogInternal" as any, {
-            workspaceId: workspaceContext.workspaceId as any,
-            sessionToken: workspaceContext.sessionToken || "",
-            provider,
-            action,
-            status: result.success ? "success" : "error",
-            latencyMs: Date.now() - startTime,
-            errorMessage: result.success ? undefined : (result.error || "Unknown error"),
-          }).catch(() => {}); // fire-and-forget
-
-          // Dual-log: also log to provider workspace (inbound)
-          convex.mutation("logs:logProviderCall" as any, {
-            provider,
-            action,
-            status: result.success ? "success" : "error",
-            latencyMs: Date.now() - startTime,
-            callerWorkspaceId: workspaceContext.workspaceId,
-            errorMessage: result.success ? undefined : (result.error || "Unknown error"),
-          }).catch(() => {}); // fire-and-forget
-        }
-
-        // Increment usage for workspace (non-free APIs only)
-        if (result.success && workspaceContext && !isFreeAPI) {
-          try {
-            const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
-              workspaceId: workspaceContext.workspaceId as any,
-            }) as { success: boolean; remaining?: number };
-            if (usageResult.success) {
-              workspaceContext.usageRemaining = usageResult.remaining ?? -1;
-              workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
-            }
-
-            // Increment per-agent call counter
-            if (currentAgentId) {
-              convex.mutation("agents:incrementAgentCalls" as any, { agentId: currentAgentId as any }).catch(() => {});
-            }
-
-            // Track earn progress (first direct call + unique APIs)
-            await trackEarnProgress(workspaceContext.workspaceId, provider, action);
-          } catch (e) {
-            console.error('[APIClaw] Failed to track usage:', e);
+          // Legacy: direct local execution
+          if (apiType === 'open') {
+            result = await executeOpenAPI(provider, action, params);
+          } else {
+            const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
+            const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
+            result = await executeMetered(provider, action, params, {
+              customerId: stripeCustomerId,
+              customerKey,
+              userId: DEFAULT_AGENT_ID,
+            });
           }
+
+          // Legacy logging (gateway handles all of this when enabled)
+          const analyticsUserId = workspaceContext
+            ? workspaceContext.workspaceId
+            : `anon:${getMachineFingerprint()}`;
+
+          logAPICall({
+            timestamp: new Date().toISOString(),
+            provider,
+            action,
+            type: apiType,
+            userId: analyticsUserId,
+            success: result.success,
+            latencyMs: Date.now() - startTime,
+            error: result.error,
+          });
+
+          if (workspaceContext) {
+            convex.mutation("logs:createLogInternal" as any, {
+              workspaceId: workspaceContext.workspaceId as any,
+              sessionToken: workspaceContext.sessionToken || "",
+              provider,
+              action,
+              status: result.success ? "success" : "error",
+              latencyMs: Date.now() - startTime,
+              errorMessage: result.success ? undefined : (result.error || "Unknown error"),
+            }).catch(() => {}); // fire-and-forget
+
+            convex.mutation("logs:logProviderCall" as any, {
+              provider,
+              action,
+              status: result.success ? "success" : "error",
+              latencyMs: Date.now() - startTime,
+              callerWorkspaceId: workspaceContext.workspaceId,
+              errorMessage: result.success ? undefined : (result.error || "Unknown error"),
+            }).catch(() => {}); // fire-and-forget
+          }
+
+          // Increment usage for workspace (non-free APIs only, legacy path)
+          if (result.success && workspaceContext && !isFreeAPI) {
+            try {
+              const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
+                workspaceId: workspaceContext.workspaceId as any,
+              }) as { success: boolean; remaining?: number };
+              if (usageResult.success) {
+                workspaceContext.usageRemaining = usageResult.remaining ?? -1;
+                workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
+              }
+
+              if (currentAgentId) {
+                convex.mutation("agents:incrementAgentCalls" as any, { agentId: currentAgentId as any }).catch(() => {});
+              }
+
+              await trackEarnProgress(workspaceContext.workspaceId, provider, action);
+            } catch (e) {
+              console.error('[APIClaw] Failed to track usage:', e);
+            }
+          }
+        }
+
+        // When gateway is enabled, still update local workspace context for nudge logic
+        if (isGatewayEnabled() && result.success && workspaceContext && !isFreeAPI) {
+          workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
         }
 
         // Build response with signup nudge for unregistered users
