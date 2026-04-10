@@ -1,7 +1,7 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "1.8.7",
-  "description": "The API layer for AI agents. Dashboard + 22K APIs + 18 Direct Call providers. MCP native.",
+  "version": "1.9.0",
+  "description": "The API layer for AI agents. 26,700+ discoverable APIs, 1,650+ callable. MCP native.",
   "type": "module",
   "main": "dist/index.js",
   "homepage": "https://apiclaw.cloud",
