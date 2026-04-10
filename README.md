@@ -6,7 +6,9 @@ The API layer for AI agents. One key for everything.
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 
-10,000+ installs. 20 Direct Call providers. 22,392 indexed APIs. Intelligent LLM routing.
+10,000+ installs. 26,700+ discoverable APIs. 1,654 callable. Intelligent LLM Gateway.
+
+> APIClaw is in early release. Core features are live and actively expanding. Provider coverage, routing intelligence, and catalog depth grow with every update.
 
 ## Install
 
@@ -14,59 +16,91 @@ The API layer for AI agents. One key for everything.
 curl -fsSL https://apiclaw.cloud/install.sh | bash
 ```
 
-Restart your AI assistant. Register your email to unlock 50 calls/month.
+Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agent. Register your email to unlock 50 calls/month.
 
 ---
 
-## What's New
+## Two Ways to Use APIClaw
 
-**Intelligent Gateway** -- APIClaw now routes LLM requests to the best provider automatically:
-- Groq for ultra-fast inference (Llama, Mixtral)
-- Mistral for European models
-- Together AI for open-source (DeepSeek, Qwen)
-- OpenRouter as fallback for 800+ models (GPT, Claude, Gemini, etc.)
+### 1. MCP Server (Agent Discovery + Calling)
 
-**OpenAI-compatible endpoint** -- Use `api.apiclaw.cloud/v1/chat/completions` with any tool that speaks OpenAI. One `sk-claw-` key replaces all your provider keys.
-
-**Workspace Settings** -- Configure routing mode (fastest, best_price, highest_quality, balanced), set default models, budget limits, and provider preferences from the dashboard.
-
-**Per-request overrides** -- Set `X-APIClaw-Route: fastest` or `X-APIClaw-Route: groq` to override workspace defaults on any request.
-
----
-
-## Three Tiers of Access
-
-### Tier 1: Discovery (22,392 APIs)
-
-Search the full API index. Every API ever cataloged. Free, unlimited, no account needed.
+Install APIClaw and your agent gets tools to discover and call APIs directly:
 
 ```
 discover_apis("weather data for Stockholm")
 -> Weatherstack, Visual Crossing, AccuWeather, OpenWeather...
-```
 
-### Tier 2: Open API (1,600+ APIs)
-
-Public APIs with no auth required. Call them directly through APIClaw. Free.
-
-```
 call_api("frankfurter", "latest", {"from": "USD", "to": "SEK"})
 -> { "rates": { "SEK": 10.85 } }
 ```
 
-### Tier 3: Direct Call (19 Providers)
+The agent handles everything through MCP tools. Works in Claude Desktop, Cursor, Windsurf, and any MCP-compatible client.
 
-Premium APIs proxied through APIClaw. No keys needed. APIClaw handles auth, rate limiting, and billing.
+### 2. Intelligent Gateway (OpenAI-compatible endpoint)
+
+Generate an `sk-claw-` API key at [apiclaw.cloud/workspace](https://apiclaw.cloud/workspace) and use APIClaw as an LLM gateway from any application:
+
+```bash
+curl api.apiclaw.cloud/v1/chat/completions \
+  -H "Authorization: Bearer sk-claw-..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "anthropic/claude-sonnet-4-6",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+One endpoint. Automatic provider routing. The gateway selects the optimal provider based on your workspace settings:
+
+| Routing Mode | Behavior |
+|-------------|----------|
+| `fastest` | Lowest latency (Groq, Mistral) |
+| `best_price` | Cheapest available provider |
+| `highest_quality` | Best model quality |
+| `balanced` | Weighs speed, cost, and quality |
+
+**Providers routed through the gateway:**
+- **Groq** -- Ultra-fast inference (Llama, Mixtral, Gemma)
+- **Mistral** -- European models (Small, Large, Codestral)
+- **Together AI** -- Open-source models (DeepSeek, Qwen, Llama)
+- **OpenRouter** -- 800+ models as fallback (GPT, Claude, Gemini, etc.)
+
+Override per-request with `X-APIClaw-Route: fastest` or target a provider directly: `X-APIClaw-Route: groq`.
+
+The Intelligent Gateway is in its first release. Routing logic, provider coverage, and model support are actively expanding.
+
+---
+
+## API Catalog
+
+Browse all 26,700+ indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/catalog).
+
+- Search across 31 categories
+- Toggle callable-only to filter 1,654 APIs you can call through APIClaw
+- Infinite scroll, category filters, instant search
+
+---
+
+## Discoverable vs Callable
+
+**Discoverable (26,704 APIs)** -- Every API in the index. Your agent can search, read specs, and evaluate them. Free and unlimited.
+
+**Callable (1,654 APIs)** -- APIs your agent can actually execute through APIClaw. Two types:
+
+- **Open APIs (1,635)** -- No authentication required. APIClaw calls them directly.
+- **Managed Providers (19)** -- APIClaw owns the keys. You call, APIClaw authenticates.
+
+### Managed Providers
 
 | Provider | What | Category |
 |----------|------|----------|
-| OpenRouter | 800+ LLMs (GPT, Claude, Gemini, Llama) | LLM |
-| Groq | Ultra-fast inference (Llama, Mixtral, Gemma) | LLM |
-| Mistral | Mistral models (Small, Large, Codestral) | LLM |
-| Together AI | Open-source models (DeepSeek, Qwen, Llama) | LLM |
-| Cohere | RAG, reranking, embeddings | LLM |
-| Replicate | ML models (Flux, SDXL, Whisper) | AI/ML |
-| Stability AI | Image generation (SD3, SDXL) | AI/ML |
+| OpenRouter | 800+ LLMs (GPT, Claude, Gemini, Llama) | AI & ML |
+| Groq | Ultra-fast inference (Llama, Mixtral, Gemma) | AI & ML |
+| Mistral | Mistral models (Small, Large, Codestral) | AI & ML |
+| Together AI | Open-source models (DeepSeek, Qwen, Llama) | AI & ML |
+| Cohere | RAG, reranking, embeddings | AI & ML |
+| Replicate | ML models (Flux, SDXL, Whisper) | AI & ML |
+| Stability AI | Image generation (SD3, SDXL) | AI & ML |
 | ElevenLabs | Text-to-speech (29 languages) | Voice |
 | Deepgram | Speech-to-text (Nova-3) | Voice |
 | AssemblyAI | Audio intelligence, diarization | Voice |
@@ -82,32 +116,14 @@ Premium APIs proxied through APIClaw. No keys needed. APIClaw handles auth, rate
 
 ---
 
-## Gateway
-
-Use APIClaw as an OpenAI-compatible LLM gateway:
-
-```bash
-curl api.apiclaw.cloud/v1/chat/completions \
-  -H "Authorization: Bearer sk-claw-..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "anthropic/claude-sonnet-4-6",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'
-```
-
-The router picks the best provider based on your workspace settings. Override per-request with `X-APIClaw-Route: fastest` or target a specific provider like `X-APIClaw-Route: groq`.
-
----
-
 ## MCP Tools
 
 | Tool | What |
 |------|------|
-| `discover_apis` | Search 22,392 APIs by capability |
+| `discover_apis` | Search 26,704 APIs by capability |
 | `get_api_details` | Full specs, pricing, auth |
 | `call_api` | Execute through APIClaw proxy |
-| `list_connected` | See available Direct Call providers |
+| `list_connected` | See available managed providers |
 | `check_balance` | Usage and remaining calls |
 | `register_owner` | Register email, unlock 50 calls/month |
 
@@ -115,13 +131,15 @@ The router picks the best provider based on your workspace settings. Override pe
 
 | Plan | Price | What you get |
 |------|-------|--------------|
-| Free | $0 forever | Search index, Open APIs, 1 connected agent |
-| Pro | $79/month | All Direct Call providers, priority support |
+| Free | $0 forever | Discovery, open APIs, 50 calls/month |
+| Pro | $79/month | All managed providers, priority support |
 | Scale | $249/month | Volume pricing, dedicated onboarding, SLA |
 | Enterprise | Custom | Private deployment, custom limits, [book a call](https://apiclaw.cloud/book) |
 
+Pass-through pricing on managed provider calls + 30% margin. No hidden fees.
+
 ---
 
-[Dashboard](https://apiclaw.cloud/workspace) - [Docs](https://apiclaw.cloud/docs) - [Book a Call](https://apiclaw.cloud/book)
+[Catalog](https://apiclaw.cloud/catalog) - [Dashboard](https://apiclaw.cloud/workspace) - [Docs](https://apiclaw.cloud/docs) - [Book a Call](https://apiclaw.cloud/book)
 
 MIT License
