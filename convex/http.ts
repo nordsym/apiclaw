@@ -307,16 +307,103 @@ interface RoutingDecision {
   extraHeaders?: Record<string, string>;
 }
 
-function routeLLMRequest(
+// ==============================================
+// ADVISOR: Analyzes prompts to pick optimal model+provider
+// Runs only when model is "auto" or unspecified and routing mode is "balanced"
+// Uses Mistral Small (~$0.00001/decision) for near-zero cost intelligence
+// ==============================================
+
+const ADVISOR_SYSTEM_PROMPT = `You are an LLM routing advisor. Given a user prompt, pick the optimal provider and model.
+
+PROVIDERS (use exact provider key and model name):
+
+provider: "mistral", model: "mistral-small-latest" -- Fast, cheap. Simple Q&A, translation, summarization.
+provider: "mistral", model: "mistral-large-latest" -- Strong reasoning, coding, complex analysis.
+provider: "mistral", model: "codestral-latest" -- Code generation, debugging, technical.
+provider: "together", model: "meta-llama/Llama-3.3-70B-Instruct-Turbo" -- Strong open-source all-rounder.
+provider: "together", model: "deepseek-ai/DeepSeek-R1" -- Deep reasoning, math, chain-of-thought.
+provider: "together", model: "Qwen/Qwen2.5-72B-Instruct-Turbo" -- Multilingual, strong CJK.
+provider: "openrouter", model: "anthropic/claude-sonnet-4-6" -- Best quality. Complex multi-step, nuanced writing.
+provider: "openrouter", model: "openai/gpt-4o" -- Vision, function calling, broad knowledge.
+provider: "openrouter", model: "google/gemini-2.0-flash-001" -- Fast multimodal, long context.
+
+Respond with ONLY JSON:
+{"provider":"mistral","model":"mistral-small-latest","reason":"simple factual query"}`;
+
+interface AdvisorDecision {
+  provider: string;
+  model: string;
+  reason: string;
+}
+
+async function advisorPickModel(
+  messages: Array<{ role: string; content: string }>,
+  settings: { blockedProviders: string[] }
+): Promise<AdvisorDecision | null> {
+  // Extract first user message for analysis (keep it short)
+  const userMsg = messages.find(m => m.role === "user");
+  if (!userMsg) return null;
+
+  const promptPreview = typeof userMsg.content === "string"
+    ? userMsg.content.slice(0, 500)
+    : JSON.stringify(userMsg.content).slice(0, 500);
+
+  // Use Mistral Small as the advisor (fast + cheap)
+  const mistralKey = process.env.MISTRAL_API_KEY;
+  if (!mistralKey) return null;
+
+  try {
+    const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${mistralKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "mistral-small-latest",
+        messages: [
+          { role: "system", content: ADVISOR_SYSTEM_PROMPT },
+          { role: "user", content: `Route this prompt:\n\n${promptPreview}` },
+        ],
+        max_tokens: 100,
+        temperature: 0,
+      }),
+    });
+
+    if (!response.ok) return null;
+
+    const data: any = await response.json();
+    const content = data?.choices?.[0]?.message?.content?.trim();
+    if (!content) return null;
+
+    // Parse JSON response (handle markdown code blocks)
+    const jsonStr = content.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+    const decision = JSON.parse(jsonStr) as AdvisorDecision;
+
+    // Validate the decision
+    if (!decision.provider || !decision.model) return null;
+
+    // Check if the suggested provider is blocked
+    if (settings.blockedProviders.includes(decision.provider)) return null;
+
+    return decision;
+  } catch {
+    // Advisor failed silently -- fall through to rule-based routing
+    return null;
+  }
+}
+
+async function routeLLMRequest(
   requestedModel: string,
   settings: {
     routingMode: string;
     preferredProviders: string[];
     blockedProviders: string[];
     allowOpenRouterFallback: boolean;
-  }
-): RoutingDecision | null {
-  // 1. Check direct provider matches for the requested model
+  },
+  messages?: Array<{ role: string; content: string }>
+): Promise<RoutingDecision | null> {
+  // 1. Direct provider match -- always wins, no advisor needed
   for (const mapping of MODEL_PROVIDER_MAP) {
     if (!mapping.pattern.test(requestedModel)) continue;
     if (settings.blockedProviders.includes(mapping.provider)) continue;
@@ -341,17 +428,62 @@ function routeLLMRequest(
     };
   }
 
-  // 2. Routing mode preferences for unknown models
+  // 2. ADVISOR -- intelligent model selection for ambiguous routing
+  // Triggers when: model is generic ("auto", empty, or provider-prefixed like "openai/gpt-4o")
+  //   AND routing mode is "balanced" (default)
+  //   AND we have messages to analyze
+  const isGenericModel = !requestedModel || requestedModel === "auto" || requestedModel.includes("/");
+  const useAdvisor = isGenericModel && settings.routingMode === "balanced" && messages && messages.length > 0;
+
+  if (useAdvisor) {
+    const advisorDecision = await advisorPickModel(messages, settings);
+    if (advisorDecision) {
+      // Map advisor decision to a routing decision
+      const providerKey = advisorDecision.provider;
+      const providerMeta = PROVIDERS[providerKey];
+
+      if (providerMeta?.isLLM && providerMeta.envKey && providerMeta.baseUrl) {
+        const apiKey = process.env[providerMeta.envKey];
+        if (apiKey) {
+          return {
+            provider: providerKey,
+            model: advisorDecision.model,
+            baseUrl: providerMeta.baseUrl,
+            apiKey,
+            reason: `advisor_${providerKey}: ${advisorDecision.reason}`,
+            ...(providerKey === "openrouter" ? {
+              extraHeaders: { "HTTP-Referer": "https://apiclaw.cloud", "X-Title": "APIClaw Gateway" },
+            } : {}),
+          };
+        }
+      }
+
+      // Advisor picked a provider we don't have direct keys for -- route via OpenRouter
+      if (!settings.blockedProviders.includes("openrouter") && settings.allowOpenRouterFallback !== false) {
+        const orKey = process.env.OPENROUTER_API_KEY;
+        if (orKey) {
+          return {
+            provider: "openrouter",
+            model: advisorDecision.model,
+            baseUrl: "https://openrouter.ai/api/v1/chat/completions",
+            apiKey: orKey,
+            reason: `advisor_via_openrouter: ${advisorDecision.reason}`,
+            extraHeaders: { "HTTP-Referer": "https://apiclaw.cloud", "X-Title": "APIClaw Gateway" },
+          };
+        }
+      }
+    }
+    // Advisor failed -- fall through to rule-based routing
+  }
+
+  // 3. Static routing mode preferences (fallback)
   if (settings.routingMode === "fastest") {
-    // Try Groq first (fastest inference), then Together, then Mistral
     for (const fastProvider of ["groq", "together", "mistral"]) {
       if (settings.blockedProviders.includes(fastProvider)) continue;
       const meta = PROVIDERS[fastProvider];
       if (!meta?.isLLM || !meta.envKey || !meta.baseUrl) continue;
       const key = process.env[meta.envKey];
       if (!key) continue;
-      // Only route if the model looks like it belongs to this provider
-      // Don't send anthropic/claude to groq
       if (requestedModel.includes("anthropic/") || requestedModel.includes("openai/") || requestedModel.includes("google/")) break;
       return {
         provider: fastProvider,
@@ -363,7 +495,7 @@ function routeLLMRequest(
     }
   }
 
-  // 3. Preferred providers check
+  // 4. Preferred providers check
   for (const preferred of settings.preferredProviders) {
     if (settings.blockedProviders.includes(preferred)) continue;
     const meta = PROVIDERS[preferred];
@@ -379,7 +511,7 @@ function routeLLMRequest(
     };
   }
 
-  // 4. Fallback to OpenRouter
+  // 5. Fallback to OpenRouter
   if (!settings.blockedProviders.includes("openrouter") && settings.allowOpenRouterFallback !== false) {
     const orKey = process.env.OPENROUTER_API_KEY;
     if (orKey) {
@@ -404,7 +536,7 @@ function routeLLMRequest(
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-APIClaw-Internal, X-APIClaw-Subagent",
 };
 
 // Helper for JSON responses
@@ -2007,13 +2139,13 @@ http.route({
 
     const effectiveModel = model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
 
-    // Route the request
-    const route = routeLLMRequest(effectiveModel, {
+    // Route the request (async -- may invoke advisor for intelligent model selection)
+    const route = await routeLLMRequest(effectiveModel, {
       routingMode: effectiveRoutingMode,
       preferredProviders: effectivePreferred,
       blockedProviders: settings.blockedProviders,
       allowOpenRouterFallback: settings.allowOpenRouterFallback,
-    });
+    }, messages);
 
     if (!route) {
       return jsonResponse({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
@@ -2352,6 +2484,502 @@ http.route({
 
 http.route({
   path: "/v1/embeddings",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// /v1/execute — Unified execution gateway
+// ==============================================
+// Single endpoint for ALL API call types:
+//   1. Managed providers (19 providers, APIClaw owns keys)
+//   2. LLM routing (Groq, Mistral, Together, OpenRouter)
+//   3. Open APIs (generic HTTP proxy with caller-supplied baseUrl)
+//
+// Auth: Bearer sk-claw-... OR X-APIClaw-Internal (server-to-server)
+// ==============================================
+
+// Managed provider dispatch: maps provider+action to an upstream HTTP call
+// Returns { url, method, headers, body } or null if unknown
+function buildManagedRequest(
+  provider: string,
+  action: string,
+  params: Record<string, any>
+): { url: string; method: string; headers: Record<string, string>; body?: string } | null {
+  const meta = PROVIDERS[provider];
+  if (!meta?.envKey) return null;
+
+  const apiKey = process.env[meta.envKey];
+  if (!apiKey) return null;
+
+  // Provider-specific request builders
+  switch (provider) {
+    case "brave_search": {
+      if (action !== "search") return null;
+      const url = new URL("https://api.search.brave.com/res/v1/web/search");
+      url.searchParams.set("q", params.query || "");
+      url.searchParams.set("count", String(params.count || 10));
+      return { url: url.toString(), method: "GET", headers: { "X-Subscription-Token": apiKey } };
+    }
+    case "serper": {
+      if (action !== "search") return null;
+      return {
+        url: "https://google.serper.dev/search",
+        method: "POST",
+        headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ q: params.query || params.q, num: params.num || 10 }),
+      };
+    }
+    case "resend": {
+      if (action !== "send_email") return null;
+      return {
+        url: "https://api.resend.com/emails",
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      };
+    }
+    case "elevenlabs": {
+      if (action !== "text_to_speech") return null;
+      const voiceId = params.voice_id || "21m00Tcm4TlvDq8ikWAM";
+      return {
+        url: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        method: "POST",
+        headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: params.text,
+          model_id: params.model_id || "eleven_multilingual_v2",
+          voice_settings: params.voice_settings || { stability: 0.5, similarity_boost: 0.75 },
+        }),
+      };
+    }
+    case "deepgram": {
+      if (action !== "transcribe") return null;
+      const dgUrl = new URL("https://api.deepgram.com/v1/listen");
+      if (params.language) dgUrl.searchParams.set("language", params.language);
+      if (params.model) dgUrl.searchParams.set("model", params.model);
+      dgUrl.searchParams.set("smart_format", "true");
+      return {
+        url: dgUrl.toString(),
+        method: "POST",
+        headers: { "Authorization": `Token ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ url: params.url || params.audio_url }),
+      };
+    }
+    case "firecrawl": {
+      const firecrawlActions: Record<string, string> = {
+        scrape: "https://api.firecrawl.dev/v1/scrape",
+        crawl: "https://api.firecrawl.dev/v1/crawl",
+        map: "https://api.firecrawl.dev/v1/map",
+      };
+      const fUrl = firecrawlActions[action];
+      if (!fUrl) return null;
+      return {
+        url: fUrl,
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      };
+    }
+    case "replicate": {
+      if (action !== "run") return null;
+      return {
+        url: "https://api.replicate.com/v1/predictions",
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ version: params.version, input: params.input || params }),
+      };
+    }
+    case "stability": {
+      if (action !== "generate") return null;
+      return {
+        url: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(params),
+      };
+    }
+    case "github": {
+      const ghHeaders = { "Authorization": `Bearer ${apiKey}`, "Accept": "application/vnd.github.v3+json", "User-Agent": "APIClaw-Gateway" };
+      if (action === "search_repos") {
+        const ghUrl = new URL("https://api.github.com/search/repositories");
+        ghUrl.searchParams.set("q", params.query || params.q || "");
+        return { url: ghUrl.toString(), method: "GET", headers: ghHeaders };
+      }
+      if (action === "get_repo") {
+        return { url: `https://api.github.com/repos/${params.owner}/${params.repo}`, method: "GET", headers: ghHeaders };
+      }
+      if (action === "get_file") {
+        return { url: `https://api.github.com/repos/${params.owner}/${params.repo}/contents/${params.path}`, method: "GET", headers: ghHeaders };
+      }
+      return null;
+    }
+    case "e2b": {
+      // E2B sandbox execution is complex (create sandbox, then run code). Simplified for gateway.
+      if (action !== "run_code") return null;
+      return {
+        url: "https://api.e2b.dev/v1/sandboxes",
+        method: "POST",
+        headers: { "X-API-Key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ template: params.template || "base", ...params }),
+      };
+    }
+    case "46elks": {
+      if (action !== "send_sms") return null;
+      // 46elks uses Basic auth with username:password (envKey has format user:pass)
+      const [user, pass] = apiKey.includes(":") ? apiKey.split(":") : [apiKey, ""];
+      const basicAuth = typeof btoa !== "undefined" ? btoa(`${user}:${pass}`) : Buffer.from(`${user}:${pass}`).toString("base64");
+      return {
+        url: "https://api.46elks.com/a1/sms",
+        method: "POST",
+        headers: { "Authorization": `Basic ${basicAuth}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ from: params.from || "APIClaw", to: params.to, message: params.message }).toString(),
+      };
+    }
+    case "twilio": {
+      // Twilio uses Basic auth. envKey format: accountSid:authToken
+      const [sid, token] = apiKey.includes(":") ? apiKey.split(":") : [apiKey, ""];
+      const twilioAuth = typeof btoa !== "undefined" ? btoa(`${sid}:${token}`) : Buffer.from(`${sid}:${token}`).toString("base64");
+      return {
+        url: `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+        method: "POST",
+        headers: { "Authorization": `Basic ${twilioAuth}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ From: params.from, To: params.to, Body: params.message }).toString(),
+      };
+    }
+    case "assemblyai": {
+      if (action !== "transcribe") return null;
+      return {
+        url: "https://api.assemblyai.com/v2/transcript",
+        method: "POST",
+        headers: { "Authorization": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ audio_url: params.url || params.audio_url, ...params }),
+      };
+    }
+    case "cohere": {
+      if (action === "chat") {
+        return {
+          url: "https://api.cohere.com/v2/chat",
+          method: "POST",
+          headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify(params),
+        };
+      }
+      if (action === "rerank") {
+        return {
+          url: "https://api.cohere.com/v2/rerank",
+          method: "POST",
+          headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify(params),
+        };
+      }
+      return null;
+    }
+    default:
+      return null;
+  }
+}
+
+// Resolve auth for /v1/execute: supports both sk-claw- keys and X-APIClaw-Internal
+async function resolveExecuteAuth(
+  ctx: any,
+  request: Request
+): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "internal" | "anonymous" } | Response> {
+  // 1. Check internal server-to-server auth
+  const internalSecret = request.headers.get("X-APIClaw-Internal");
+  if (internalSecret) {
+    const expectedSecret = process.env.APICLAW_INTERNAL_SECRET;
+    if (!expectedSecret || internalSecret !== expectedSecret) {
+      return jsonResponse({ error: { message: "Invalid internal secret", type: "auth_error" } }, 401);
+    }
+    // Internal auth: extract workspace from body or header
+    const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
+    return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
+  }
+
+  // 2. Check for API key auth (Bearer sk-claw-...)
+  const auth = await resolveWorkspaceFromRequest(ctx, request);
+  if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
+    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
+  }
+
+  // 3. No valid auth
+  return jsonResponse(
+    { error: { message: "Authentication required. Use Bearer sk-claw-... or X-APIClaw-Internal header.", type: "auth_error" } },
+    401
+  );
+}
+
+http.route({
+  path: "/v1/execute",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    // Auth
+    const authResult = await resolveExecuteAuth(ctx, request);
+    if (authResult instanceof Response) return authResult;
+    const { workspaceId, authMethod } = authResult;
+
+    // Parse body
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request" } }, 400);
+    }
+
+    const { provider, action, params = {} } = body;
+    if (!provider) {
+      return jsonResponse({ error: { message: "provider is required", type: "invalid_request" } }, 400);
+    }
+    if (!action) {
+      return jsonResponse({ error: { message: "action is required", type: "invalid_request" } }, 400);
+    }
+
+    const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
+
+    // Determine execution path
+    let routeDetail = "";
+
+    // Path 1: LLM routing (provider "auto" or known LLM provider with action "chat")
+    const isLLMRequest = action === "chat" && (
+      provider === "auto" ||
+      (PROVIDERS[provider]?.isLLM === true)
+    );
+
+    if (isLLMRequest) {
+      // LLM routing path
+
+      // Load workspace settings for routing
+      let settings = {
+        routingMode: "balanced",
+        defaultModel: null as string | null,
+        preferredProviders: [] as string[],
+        blockedProviders: [] as string[],
+        allowOpenRouterFallback: true,
+      };
+      if (workspaceId) {
+        try {
+          settings = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+        } catch { /* use defaults */ }
+      }
+
+      const routeOverride = request.headers.get("X-APIClaw-Route");
+      const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced"].includes(routeOverride)
+        ? routeOverride : settings.routingMode;
+      const effectivePreferred = routeOverride && PROVIDERS[routeOverride]?.isLLM
+        ? [routeOverride, ...settings.preferredProviders] : settings.preferredProviders;
+      // If a specific LLM provider is requested (not "auto"), prefer it
+      const finalPreferred = provider !== "auto" && PROVIDERS[provider]?.isLLM
+        ? [provider, ...effectivePreferred] : effectivePreferred;
+
+      const effectiveModel = params.model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
+
+      const route = await routeLLMRequest(effectiveModel, {
+        routingMode: effectiveRoutingMode,
+        preferredProviders: finalPreferred,
+        blockedProviders: settings.blockedProviders,
+        allowOpenRouterFallback: settings.allowOpenRouterFallback,
+      }, params.messages);
+
+      if (!route) {
+        return jsonResponse({ success: false, error: "No LLM provider available", _apiclaw: { latencyMs: Date.now() - startTime, route: "none", gateway: true } }, 503);
+      }
+
+      routeDetail = route.reason;
+
+      // Log usage
+      if (workspaceId) {
+        try {
+          await ctx.runMutation(api.analytics.log, {
+            event: "api_call", provider: "gateway", identifier: workspaceId,
+            workspaceId: workspaceId as any,
+            metadata: { action: "execute_chat", model: effectiveModel, routedTo: route.provider, routeReason: route.reason, authMethod },
+          });
+          await ctx.runMutation(api.logs.createProxyLog, {
+            workspaceId: workspaceId as any, provider: route.provider, action: "chat", subagentId,
+          });
+          await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+        } catch (e: any) { console.error("[Execute] LLM logging failed:", e.message); }
+      }
+
+      // Forward to provider
+      try {
+        const { model: _m, ...restParams } = params;
+        const requestBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
+        delete requestBody.messages; // Already included
+        // Re-add messages explicitly
+        const finalBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
+
+        const headers: Record<string, string> = {
+          "Authorization": `Bearer ${route.apiKey}`,
+          "Content-Type": "application/json",
+          ...(route.extraHeaders || {}),
+        };
+
+        const response = await fetch(route.baseUrl, {
+          method: "POST", headers, body: JSON.stringify(finalBody),
+        });
+
+        // Streaming
+        if (params.stream && response.body) {
+          return new Response(response.body, {
+            status: response.status,
+            headers: { "Content-Type": response.headers.get("Content-Type") || "text/event-stream", "Cache-Control": "no-cache", ...corsHeaders },
+          });
+        }
+
+        const data = await response.json();
+        const latencyMs = Date.now() - startTime;
+
+        return jsonResponse({
+          success: response.ok,
+          provider: route.provider,
+          action: "chat",
+          data,
+          _apiclaw: { latencyMs, route: routeDetail, gateway: true, model: route.model },
+        }, response.ok ? 200 : response.status);
+      } catch (e: any) {
+        return jsonResponse({ success: false, provider: provider, action, error: e.message, _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true } }, 500);
+      }
+    }
+
+    // Path 2: Managed provider (known in PROVIDERS catalog)
+    if (PROVIDERS[provider]) {
+      // Managed provider path
+      routeDetail = `direct_${provider}`;
+
+      const req = buildManagedRequest(provider, action, params);
+      if (!req) {
+        return jsonResponse({
+          success: false,
+          error: `Unknown action "${action}" for provider "${provider}"`,
+          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+        }, 400);
+      }
+
+      // Log usage
+      if (workspaceId) {
+        try {
+          await ctx.runMutation(api.analytics.log, {
+            event: "api_call", provider, identifier: workspaceId,
+            workspaceId: workspaceId as any,
+            metadata: { action, subagentId, authMethod, via: "execute" },
+          });
+          await ctx.runMutation(api.logs.createProxyLog, {
+            workspaceId: workspaceId as any, provider, action, subagentId,
+          });
+          await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+        } catch (e: any) { console.error("[Execute] Managed logging failed:", e.message); }
+      }
+
+      // Execute upstream call
+      try {
+        const fetchOpts: RequestInit = { method: req.method, headers: req.headers };
+        if (req.body) fetchOpts.body = req.body;
+
+        const response = await fetch(req.url, fetchOpts);
+        const latencyMs = Date.now() - startTime;
+
+        // Handle binary responses (e.g., ElevenLabs audio)
+        const contentType = response.headers.get("Content-Type") || "";
+        if (contentType.includes("audio/") || contentType.includes("application/octet-stream")) {
+          return new Response(response.body, {
+            status: response.status,
+            headers: { "Content-Type": contentType, ...corsHeaders },
+          });
+        }
+
+        let data: any;
+        try {
+          data = await response.json();
+        } catch {
+          data = { raw: await response.text() };
+        }
+
+        return jsonResponse({
+          success: response.ok,
+          provider,
+          action,
+          data,
+          _apiclaw: { latencyMs, route: routeDetail, gateway: true },
+        }, response.ok ? 200 : response.status);
+      } catch (e: any) {
+        return jsonResponse({
+          success: false, provider, action, error: e.message,
+          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+        }, 500);
+      }
+    }
+
+    // Path 3: Open API (generic HTTP proxy)
+    // Open API path
+    routeDetail = `open_${provider}`;
+
+    const { baseUrl, method = "GET", headers: customHeaders = {}, body: customBody } = params;
+    if (!baseUrl) {
+      return jsonResponse({
+        success: false,
+        error: `Unknown provider "${provider}". For open APIs, include params.baseUrl.`,
+        _apiclaw: { latencyMs: Date.now() - startTime, route: "unknown", gateway: true },
+      }, 400);
+    }
+
+    // Log usage
+    if (workspaceId) {
+      try {
+        await ctx.runMutation(api.analytics.log, {
+          event: "api_call", provider: `open:${provider}`, identifier: workspaceId,
+          workspaceId: workspaceId as any,
+          metadata: { action, subagentId, authMethod, baseUrl, via: "execute_open" },
+        });
+        await ctx.runMutation(api.logs.createProxyLog, {
+          workspaceId: workspaceId as any, provider: `open:${provider}`, action, subagentId,
+        });
+        await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+      } catch (e: any) { console.error("[Execute] Open API logging failed:", e.message); }
+    }
+
+    // Execute open API call
+    try {
+      const fetchOpts: RequestInit = {
+        method: method.toUpperCase(),
+        headers: { "Content-Type": "application/json", ...customHeaders },
+      };
+      if (customBody && method.toUpperCase() !== "GET") {
+        fetchOpts.body = typeof customBody === "string" ? customBody : JSON.stringify(customBody);
+      }
+
+      const response = await fetch(baseUrl, fetchOpts);
+      const latencyMs = Date.now() - startTime;
+
+      let data: any;
+      const ct = response.headers.get("Content-Type") || "";
+      if (ct.includes("json")) {
+        try { data = await response.json(); } catch { data = { raw: await response.text() }; }
+      } else {
+        data = { raw: await response.text() };
+      }
+
+      return jsonResponse({
+        success: response.ok,
+        provider,
+        action,
+        data,
+        _apiclaw: { latencyMs, route: routeDetail, gateway: true },
+      }, response.ok ? 200 : response.status);
+    } catch (e: any) {
+      return jsonResponse({
+        success: false, provider, action, error: e.message,
+        _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+      }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/execute",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
