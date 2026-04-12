@@ -1317,8 +1317,8 @@ Docs: https://apiclaw.cloud/docs`;
         </div>
       )}
 
-      {/* Video Demo Bubble - Always visible */}
-      <VideoDemo />
+      {/* Video Demo hidden - outdated after v2.1 updates, re-record needed */}
+      {/* <VideoDemo /> */}
     </main>
   );
 }
