@@ -457,13 +457,86 @@ async function handleSetupSuccess(
     return;
   }
 
-  // Upgrade to usage-based if still on free
+  // Only upgrade if on free tier (don't downgrade existing paid users)
   if (!workspace.billingPlan || workspace.billingPlan === "free") {
+    const stripe = getStripe();
+
+    // Set the payment method as default for invoices
+    const paymentMethodId =
+      typeof setupIntent.payment_method === "string"
+        ? setupIntent.payment_method
+        : setupIntent.payment_method?.id;
+
+    if (paymentMethodId) {
+      await stripe.customers.update(customerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId,
+        },
+      });
+    }
+
+    // Check if customer already has an active metered subscription
+    const METERED_PRICE_ID = process.env.STRIPE_PRICE_ID_USAGE || "price_1TL038RtJYK3aJTqODoFAiVT";
+    const existingSubs = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+      limit: 10,
+    });
+
+    let subscriptionId: string | undefined;
+    const hasMetered = existingSubs.data.some((sub) =>
+      sub.items.data.some((item) => item.price.id === METERED_PRICE_ID)
+    );
+
+    if (!hasMetered) {
+      // Create metered subscription so Stripe can invoice usage
+      try {
+        const subscription = await stripe.subscriptions.create({
+          customer: customerId,
+          items: [{ price: METERED_PRICE_ID }],
+          payment_behavior: "default_incomplete",
+          payment_settings: {
+            save_default_payment_method: "on_subscription",
+          },
+        });
+        subscriptionId = subscription.id;
+        console.log(`Created metered subscription ${subscription.id} for customer ${customerId}`);
+      } catch (subError: any) {
+        console.error(`Failed to create metered subscription for ${customerId}:`, subError.message);
+        // Still upgrade the tier even if subscription creation fails
+        // User can retry later
+      }
+    } else {
+      subscriptionId = existingSubs.data.find((sub) =>
+        sub.items.data.some((item) => item.price.id === METERED_PRICE_ID)
+      )?.id;
+      console.log(`Customer ${customerId} already has metered subscription ${subscriptionId}`);
+    }
+
+    // Upgrade workspace to usage_based
     await ctx.runMutation(api.billing.updateSubscription, {
       workspaceId: workspace._id,
+      stripeSubscriptionId: subscriptionId,
       billingPlan: "usage_based",
     });
-    console.log(`Workspace ${workspace._id} upgraded after setup intent`);
+
+    // Store payment method info
+    if (paymentMethodId) {
+      try {
+        const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+        if (pm.card) {
+          await ctx.runMutation(api.billing.updatePaymentMethodInfo, {
+            workspaceId: workspace._id,
+            hasPaymentMethod: true,
+            paymentMethodType: pm.type,
+            cardBrand: pm.card.brand,
+            cardLast4: pm.card.last4,
+          });
+        }
+      } catch { /* non-critical */ }
+    }
+
+    console.log(`Workspace ${workspace._id} upgraded to usage_based with subscription ${subscriptionId}`);
   }
 }
 

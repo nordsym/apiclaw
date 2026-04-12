@@ -8,43 +8,26 @@ import { mutation } from "./_generated/server";
 export const seedPrathamWorkspace = mutation({
   args: {},
   handler: async (ctx) => {
-    const email = "gustav_hemmingsson@hotmail.com"; // Gustav's personal email for testing
-    
-    // 1. Create or get workspace
+    const email = "pratham@apilayer.com";
+
+    // 1. Get existing workspace (already created + activated on prod)
     let workspace = await ctx.db
       .query("workspaces")
       .withIndex("by_email", (q) => q.eq("email", email))
       .first();
-    
+
     if (!workspace) {
-      const workspaceId = await ctx.db.insert("workspaces", {
-        email,
-        status: "active",
-        tier: "pro",
-        usageCount: 0,
-        usageLimit: -1, // unlimited
-        weeklyUsageCount: 0,
-        weeklyUsageLimit: -1, // unlimited
-        hourlyUsageCount: 0,
-        mainAgentName: "APILayer Dashboard",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-      
-      workspace = await ctx.db.get(workspaceId);
-      console.log(`✓ Created workspace for ${email}`);
-    } else {
-      console.log(`✓ Workspace exists for ${email}`);
+      throw new Error(`Workspace for ${email} not found on prod. Create it first.`);
     }
+
+    console.log(`✓ Workspace exists: ${workspace._id} (${workspace.tier}, ${workspace.status})`);
     
-    if (!workspace) throw new Error("Failed to create workspace");
-    
-    // 2. Create provider profile
+    // 2. Create provider profile linked to workspace
     let provider = await ctx.db
       .query("providers")
       .withIndex("by_email", (q) => q.eq("email", email))
       .first();
-    
+
     if (!provider) {
       const providerId = await ctx.db.insert("providers", {
         email,
@@ -52,18 +35,24 @@ export const seedPrathamWorkspace = mutation({
         company: "APILayer",
         website: "https://apilayer.com",
         status: "approved",
+        workspaceId: workspace._id,
         stripeOnboardingComplete: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
         approvedAt: Date.now(),
       });
-      
+
       provider = await ctx.db.get(providerId);
-      console.log(`✓ Created provider profile`);
+      console.log(`✓ Created provider profile linked to workspace ${workspace._id}`);
     } else {
-      console.log(`✓ Provider profile exists`);
+      // Ensure workspaceId is linked
+      if (!provider.workspaceId) {
+        await ctx.db.patch(provider._id, { workspaceId: workspace._id });
+        console.log(`✓ Linked existing provider to workspace ${workspace._id}`);
+      }
+      console.log(`✓ Provider profile exists: ${provider._id}`);
     }
-    
+
     if (!provider) throw new Error("Failed to create provider");
     
     // 3. Create all 27 APILayer APIs
@@ -154,7 +143,7 @@ export const seedPrathamWorkspace = mutation({
         existing: existingCount,
       },
       dashboardUrl: `https://apiclaw.cloud/workspace`,
-      loginInstructions: "Test account using Gustav's personal email. Magic link will be sent to gustav_hemmingsson@hotmail.com",
+      loginInstructions: "Magic link sent to pratham@apilayer.com",
     };
   },
 });

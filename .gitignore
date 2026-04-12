@@ -9,6 +9,8 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.vercel-check
+landing/.env.vercel-check
 
 # Convex
 .convex/
@@ -17,3 +19,6 @@ dist/
 convex/*.d.ts
 convex/*.js
 convex/*.bak
+
+# Large generated files
+src/registry/generated-providers.json

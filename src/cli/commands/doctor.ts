@@ -105,6 +105,57 @@ function checkNpx(): CheckResult {
 }
 
 /**
+ * Check Codex CLI installation and surface its binary path
+ */
+function checkCodex(): CheckResult {
+  try {
+    const binPath = execSync('which codex', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    let version = '';
+    try {
+      version = execSync('codex --version', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    } catch {
+      // version flag may vary — path is enough
+    }
+    return {
+      category: 'Tooling',
+      name: 'Codex CLI',
+      status: 'pass',
+      message: version ? `${version} — ${binPath}` : binPath,
+    };
+  } catch {
+    return {
+      category: 'Tooling',
+      name: 'Codex CLI',
+      status: 'skip',
+      message: 'Not installed',
+      details: 'Install: npm install -g @openai/codex  |  Then: npx @nordsym/apiclaw setup --client codex',
+    };
+  }
+}
+
+/**
+ * Check APIClaw MCP server binary path
+ */
+function checkApiclawBin(): CheckResult {
+  try {
+    const binPath = execSync('which apiclaw', { encoding: 'utf-8', stdio: 'pipe' }).trim();
+    return {
+      category: 'Tooling',
+      name: 'APIClaw binary',
+      status: 'pass',
+      message: binPath,
+    };
+  } catch {
+    return {
+      category: 'Tooling',
+      name: 'APIClaw binary',
+      status: 'skip',
+      message: 'Not in PATH (using npx)',
+    };
+  }
+}
+
+/**
  * Check MCP client configuration
  */
 function checkClient(client: MCPClient, serverName = 'apiclaw'): CheckResult {
@@ -272,15 +323,19 @@ export async function runDoctor(options: { serverName?: string } = {}): Promise<
   checks.push(checkNode());
   checks.push(checkNpm());
   checks.push(checkNpx());
-  
+
+  // Tooling checks
+  checks.push(checkCodex());
+  checks.push(checkApiclawBin());
+
   // Client checks
   for (const client of getAllClients()) {
     checks.push(checkClient(client, serverName));
   }
-  
+
   // Connectivity check
   checks.push(await checkConnectivity());
-  
+
   // Environment checks
   checks.push(...checkEnvVars());
   

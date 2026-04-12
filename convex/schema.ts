@@ -118,6 +118,8 @@ export default defineSchema({
     workspaceId: v.id("workspaces"),
     date: v.string(), // "2026-02-28" format
     callCount: v.number(),
+    providerCostUsd: v.optional(v.float64()), // actual provider cost accumulated
+    apiclawCostUsd: v.optional(v.float64()),  // provider cost + 15% margin accumulated
     reportedToStripe: v.boolean(),
     stripeUsageRecordId: v.optional(v.string()),
     createdAt: v.number(),

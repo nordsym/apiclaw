@@ -95,7 +95,11 @@ export const logProviderCall = mutation({
     const providerNameLower = args.provider.toLowerCase();
     const allProviders = await ctx.db.query("providers").collect();
     const providerRecord = allProviders.find(
-      (p) => p.name.toLowerCase() === providerNameLower
+      (p) =>
+        p.name.toLowerCase() === providerNameLower ||
+        (p.company && p.company.toLowerCase() === providerNameLower) ||
+        p.name.toLowerCase().includes(providerNameLower) ||
+        (p.company && p.company.toLowerCase().includes(providerNameLower))
     );
 
     let workspace: any = null;

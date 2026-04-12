@@ -7,7 +7,7 @@ import { appendFileSync, existsSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import { ConvexHttpClient } from 'convex/browser';
-import { api } from '../convex/_generated/api.js';
+import { api } from './types/convex-api.js';
 
 export interface APICallLog {
   timestamp: string;

@@ -23,10 +23,10 @@ interface WithoutMessage {
 
 type Message = WithMessage | WithoutMessage;
 
-// Example 1: Direct Call - Replicate
+// Example 1: Managed API - Replicate
 const DirectCallExample: WithMessage[] = [
   { role: "user", text: "Generate a product photo of a coffee mug" },
-  { role: "assistant", text: "Direct Call → Replicate", search: true },
+  { role: "assistant", text: "Managed API → Replicate", search: true },
   { 
     role: "assistant", 
     text: "Selecting model...",
@@ -36,7 +36,7 @@ const DirectCallExample: WithMessage[] = [
       { name: "Stable Diffusion 3", match: "Versatile" },
     ]
   },
-  { role: "assistant", text: "Using Flux Pro", meta: "via Replicate Direct Call" },
+  { role: "assistant", text: "Using Flux Pro", meta: "via Replicate (managed)" },
   { role: "assistant", text: "Generating...", typing: true },
   { role: "assistant", text: "Done", image: true, success: true },
 ];
@@ -53,7 +53,7 @@ const OpenAPIExample: WithMessage[] = [
 // Example 3: Discovery - Search 22k APIs
 const DiscoveryExample: WithMessage[] = [
   { role: "user", text: "I need to transcribe meeting recordings" },
-  { role: "assistant", text: "Searching 22,000+ APIs...", search: true },
+  { role: "assistant", text: "Searching 47,000+ APIs...", search: true },
   { 
     role: "assistant", 
     text: "Found 4 matches",
@@ -80,7 +80,7 @@ const WithoutAPIClaw: WithoutMessage[] = [
 ];
 
 const examples = [
-  { id: "direct", label: "Direct Call", messages: DirectCallExample },
+  { id: "direct", label: "Managed", messages: DirectCallExample },
   { id: "open", label: "Open API", messages: OpenAPIExample },
   { id: "discovery", label: "Discovery", messages: DiscoveryExample },
 ];

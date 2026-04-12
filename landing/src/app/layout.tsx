@@ -5,7 +5,7 @@ import statsData from "@/lib/stats.json";
 
 export const metadata: Metadata = {
   title: "APIClaw | The API Layer for AI Agents",
-  description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
+  description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
   metadataBase: new URL("https://apiclaw.cloud"),
   icons: {
     icon: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "APIClaw | The API Layer for AI Agents",
-    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
+    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "APIClaw | The API Layer for AI Agents",
-    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.apiCount.toLocaleString()} APIs indexed • ${statsData.openApiCount.toLocaleString()} Open APIs • ${statsData.directCallCount} Direct Call • MCP native`,
+    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
     images: ["/api/og"],
     creator: "@nordsym",
   },
@@ -51,7 +51,7 @@ const schemaOrg = {
       "@type": "WebSite",
       "name": "APIClaw",
       "url": "https://apiclaw.cloud",
-      "description": "Your agent's API encyclopedia. Search by capability, call instantly. 22,392 APIs indexed • 1,636 Open APIs • 20 Direct Call • MCP native"
+      "description": `Your agent's API encyclopedia. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`
     },
     {
       "@type": "Organization",
@@ -63,7 +63,7 @@ const schemaOrg = {
       "name": "APIClaw",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
-      "description": "The API layer for AI agents. 22,392 APIs indexed, 1,636 Open APIs, 20 Direct Call providers. MCP native.",
+      "description": `The API layer for AI agents. ${statsData.callableCount.toLocaleString()} callable APIs, ${statsData.endpointCount.toLocaleString()} endpoints, ${statsData.capabilityCount} capability categories. MCP native.`,
       "offers": {
         "@type": "Offer",
         "price": "0",

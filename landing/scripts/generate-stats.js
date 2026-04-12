@@ -1,4 +1,4 @@
-// Generate stats at build time from apis.json
+// Generate stats at build time from apis.json + scaled pipeline data
 const fs = require('fs');
 const path = require('path');
 
@@ -71,69 +71,95 @@ const categoryMap = {
   'Design': 'Design',
 };
 
-// Try local copy first (for Vercel), then parent directory (for local dev)
-const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
-const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
-const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
 const outputPath = path.join(__dirname, '../src/lib/stats.json');
 
 (async () => {
 try {
+  // Check if stats.json already has scaled pipeline data (apiCount > 30000)
+  // If so, only update npmDownloads (live fetch) and preserve everything else
+  let existingStats = null;
+  try {
+    existingStats = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+  } catch { /* no existing stats */ }
+
+  // If we have scaled pipeline stats (apiCount > 30k), preserve them and only refresh npm
+  if (existingStats && existingStats.apiCount > 30000) {
+    let npmDownloads = existingStats.npmDownloads || 10184;
+    try {
+      const npmRes = await fetch('https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/@nordsym/apiclaw');
+      const npmData = await npmRes.json();
+      if (npmData.downloads) npmDownloads = npmData.downloads;
+    } catch { /* use existing */ }
+
+    existingStats.npmDownloads = npmDownloads;
+    existingStats.generatedAt = new Date().toISOString();
+
+    fs.writeFileSync(outputPath, JSON.stringify(existingStats, null, 2));
+    console.log('✓ Stats preserved (scaled pipeline data), npm downloads refreshed:', npmDownloads);
+    return;
+  }
+
+  // Otherwise, generate from apis.json (pre-scaling path)
+  const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
+  const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
+  const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
+
   const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-  
+
   // Consolidate categories using the mapping and count them
   const categoryBreakdown = {};
   registry.apis.forEach(api => {
     const cat = categoryMap[api.category] || api.category || 'Other';
     categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1;
   });
-  const uniqueCategories = Object.keys(categoryBreakdown);
-  
+
   // Count open APIs (no auth required) - case insensitive
-  const openApiCount = registry.apis.filter(api => 
+  const openApiCount = registry.apis.filter(api =>
     !api.auth || api.auth === '' || api.auth.toLowerCase() === 'none'
   ).length;
-  
-  // Direct Call providers: Replicate, OpenRouter, ElevenLabs, 46elks, Twilio,
-  // Resend, Brave Search, Firecrawl, E2B, GitHub, Groq, Deepgram, Serper,
-  // Mistral, Cohere, Together AI, Stability AI, AssemblyAI
-  const directCallCount = 18;
-  
+
+  // Managed providers count
+  const managedCount = 19;
+
   // npm downloads (fetched live from npm registry)
-  let npmDownloads = 9937; // fallback
+  let npmDownloads = 10184; // fallback
   try {
     const npmRes = await fetch('https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/@nordsym/apiclaw');
     const npmData = await npmRes.json();
     if (npmData.downloads) npmDownloads = npmData.downloads;
   } catch { /* use fallback */ }
-  
+
   const stats = {
     apiCount: registry.count,
+    callableCount: openApiCount + managedCount,
     openApiCount: openApiCount,
-    directCallCount: directCallCount,
+    managedCount: managedCount,
     npmDownloads: npmDownloads,
-    categoryCount: uniqueCategories.length,
+    endpointCount: 0,
+    capabilityCount: 15,
     generatedAt: new Date().toISOString(),
     categoryBreakdown: categoryBreakdown
   };
-  
+
   // Ensure directory exists
   const dir = path.dirname(outputPath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   fs.writeFileSync(outputPath, JSON.stringify(stats, null, 2));
   console.log('✓ Stats generated:', stats);
 } catch (err) {
   console.error('Failed to generate stats:', err);
   // Write fallback stats
   const fallback = {
-    apiCount: 22392,
-    openApiCount: 996,
-    directCallCount: 20,
-    npmDownloads: 9937,
-    categoryCount: 14,
+    apiCount: 47977,
+    callableCount: 9528,
+    openApiCount: 9482,
+    managedCount: 19,
+    npmDownloads: 10184,
+    endpointCount: 294032,
+    capabilityCount: 15,
     generatedAt: new Date().toISOString(),
     categoryBreakdown: {}
   };

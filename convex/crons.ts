@@ -25,4 +25,26 @@ crons.monthly(
   internal.spendAlerts.resetMonthlySpend
 );
 
+/**
+ * Weekly Usage Report
+ * Runs every Monday at 08:00 UTC (10:00 CEST)
+ * Sends usage summary email to all workspaces with activity
+ */
+crons.weekly(
+  "weekly-usage-report",
+  { dayOfWeek: "monday", hourUTC: 8, minuteUTC: 0 },
+  internal.usageReports.sendWeeklyReports
+);
+
+/**
+ * Monthly Usage Report
+ * Runs on the 1st of each month at 09:00 UTC
+ * Sends full monthly summary to all workspaces
+ */
+crons.monthly(
+  "monthly-usage-report",
+  { day: 1, hourUTC: 9, minuteUTC: 0 },
+  internal.usageReports.sendMonthlyReports
+);
+
 export default crons;

@@ -40,6 +40,11 @@ export const getForRouting = internalQuery({
     const all = await ctx.db.query("workspaceSettings").collect();
     const settings = all.find((s) => String(s.workspaceId) === workspaceId);
 
+    // Get workspace tier for premium features (OAuth passthrough etc.)
+    const allWorkspaces = await ctx.db.query("workspaces").collect();
+    const workspace = allWorkspaces.find((w) => String(w._id) === workspaceId);
+    const tier = workspace?.tier ?? "free";
+
     if (!settings) {
       return {
         routingMode: "balanced" as const,
@@ -49,6 +54,7 @@ export const getForRouting = internalQuery({
         preferredProviders: [] as string[],
         blockedProviders: [] as string[],
         allowOpenRouterFallback: true,
+        tier,
       };
     }
 
@@ -60,6 +66,7 @@ export const getForRouting = internalQuery({
       preferredProviders: settings.preferredProviders ?? [],
       blockedProviders: settings.blockedProviders ?? [],
       allowOpenRouterFallback: settings.allowOpenRouterFallback ?? true,
+      tier,
     };
   },
 });

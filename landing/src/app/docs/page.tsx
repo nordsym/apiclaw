@@ -112,6 +112,85 @@ export default function DocsPage() {
           </div>
         </section>
 
+        {/* Codex Setup */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <span className="text-[var(--accent)]">⌨️</span> Codex (OpenAI CLI)
+          </h2>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+            <p className="text-[var(--text-secondary)]">
+              APIClaw integrates with Codex via its MCP install command. Codex must be installed and available in your PATH.
+            </p>
+            <div>
+              <p className="text-sm font-medium mb-2">Verify Codex install path:</p>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm text-[var(--text-primary)]">which codex</code>
+              </pre>
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">Install APIClaw into Codex:</p>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw setup --client codex</code>
+              </pre>
+              <p className="text-xs text-[var(--text-muted)] mt-2">
+                This runs <code>codex mcp add apiclaw -- npx -y @nordsym/apiclaw</code> and verifies the install.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">Check status:</p>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw doctor</code>
+              </pre>
+              <p className="text-xs text-[var(--text-muted)] mt-2">Shows Codex binary path, connection status, and all MCP client configurations.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Gateway / OpenClaw */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+            <span className="text-[var(--accent)]">⚡</span> Intelligent Gateway
+          </h2>
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+            <p className="text-[var(--text-secondary)]">
+              APIClaw exposes an OpenAI-compatible LLM gateway. Use it from OpenClaw, Cursor, n8n, Codex, or any tool that accepts an OpenAI-style base URL and API key.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Endpoint</p>
+                <code className="text-sm font-mono text-[var(--accent)] break-all">https://api.apiclaw.cloud/v1</code>
+              </div>
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Default model</p>
+                <code className="text-sm font-mono text-[var(--accent)]">apiclaw/openai/gpt-5.4-20260305</code>
+              </div>
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                <p className="text-xs text-[var(--text-muted)] mb-1">API key</p>
+                <code className="text-sm font-mono text-[var(--accent)]">sk-claw-...</code>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">Generate in workspace → API Keys</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Environment config (OpenClaw, Cursor, any OpenAI-compatible client):</p>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm text-[var(--text-primary)]">{`OPENAI_BASE_URL=https://api.apiclaw.cloud/v1
+OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
+              </pre>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Override route or model per request:</p>
+              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                <code className="text-sm text-[var(--text-primary)]">{`X-APIClaw-Route: fastest   # or: best_price, highest_quality, balanced`}</code>
+              </pre>
+              <p className="text-xs text-[var(--text-muted)] mt-2">
+                Response includes <code>_apiclaw</code> metadata: provider used, route reason, model resolved.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Examples */}
         <section className="mb-16">

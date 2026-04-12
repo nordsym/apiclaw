@@ -122,6 +122,52 @@ export const recordUsage = mutation({
 });
 
 /**
+ * Log actual cost for a single API call (called by gateway after response)
+ * Accumulates into daily usageRecords for Stripe reporting
+ */
+export const logCallCost = internalMutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    provider: v.string(),
+    model: v.string(),
+    providerCostUsd: v.float64(),
+    apiclawCostUsd: v.float64(),
+    inputTokens: v.number(),
+    outputTokens: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const date = new Date().toISOString().split("T")[0]; // "2026-04-11"
+
+    const existing = await ctx.db
+      .query("usageRecords")
+      .withIndex("by_workspaceId_date", (q) =>
+        q.eq("workspaceId", args.workspaceId).eq("date", date)
+      )
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        callCount: existing.callCount + 1,
+        providerCostUsd: (existing.providerCostUsd || 0) + args.providerCostUsd,
+        apiclawCostUsd: (existing.apiclawCostUsd || 0) + args.apiclawCostUsd,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("usageRecords", {
+        workspaceId: args.workspaceId,
+        date,
+        callCount: 1,
+        providerCostUsd: args.providerCostUsd,
+        apiclawCostUsd: args.apiclawCostUsd,
+        reportedToStripe: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
+/**
  * Process a successful payment (from webhook)
  */
 export const processPayment = mutation({
@@ -430,11 +476,14 @@ export const getCurrentUsage = query({
     const periodRecords = usageRecords.filter((r) => r.date >= periodStartStr);
     const callCount = periodRecords.reduce((sum, r) => sum + r.callCount, 0);
 
-    // Calculate estimated cost (for usage-based billing)
+    // Calculate cost from actual tracked costs (or estimate from call count)
     const FREE_CALLS = 100;
-    const COST_PER_CALL = 1; // 1 cent = $0.01
+    const totalApiclawCost = periodRecords.reduce((sum: number, r: any) => sum + (r.apiclawCostUsd || 0), 0);
     const billableCalls = Math.max(0, callCount - FREE_CALLS);
-    const estimatedCost = billableCalls * COST_PER_CALL;
+    // Use actual tracked cost if available, otherwise estimate at $0.01/call
+    const estimatedCost = totalApiclawCost > 0
+      ? Math.round(totalApiclawCost * 100) // convert USD to cents
+      : billableCalls * 1;
 
     return {
       callCount,
@@ -612,9 +661,13 @@ export const reportUsageToStripe = internalAction({
         return { success: true, callCount: 0 };
       }
 
-      // Sum up all unreported calls
+      // Sum up all unreported calls and costs
       const totalCalls = usageRecords.reduce(
         (sum: number, r: { callCount: number }) => sum + r.callCount,
+        0
+      );
+      const totalCostUsd = usageRecords.reduce(
+        (sum: number, r: any) => sum + (r.apiclawCostUsd || r.callCount * 0.002),
         0
       );
 
@@ -649,7 +702,9 @@ export const reportUsageToStripe = internalAction({
       }
 
       // Report usage to Stripe using usage records API
-      // Using raw fetch since SDK method varies by version
+      // Quantity = cost in cents (rounded up to nearest cent)
+      // Stripe price should be set to $0.01 per unit (1 cent per unit)
+      const costInCents = Math.ceil(totalCostUsd * 100);
       const stripeKey = process.env.STRIPE_SECRET_KEY;
       const usageRecordResponse = await fetch(
         `https://api.stripe.com/v1/subscription_items/${meteredItem.id}/usage_records`,
@@ -660,7 +715,7 @@ export const reportUsageToStripe = internalAction({
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            quantity: String(totalCalls),
+            quantity: String(costInCents),
             timestamp: String(Math.floor(Date.now() / 1000)),
             action: "increment",
           }),

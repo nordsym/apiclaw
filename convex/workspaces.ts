@@ -297,7 +297,7 @@ export const getWorkspaceDashboard = query({
 
     // Calculate usage remaining -- paid tiers have high limits
     const now = Date.now();
-    const isPaidTier = ["pro", "scale", "usage_based", "partner"].includes(workspace.tier);
+    const isPaidTier = ["pro", "scale", "usage_based", "partner", "founder"].includes(workspace.tier);
     const effectiveLimit = isPaidTier ? -1 : workspace.usageLimit; // -1 = unlimited
     const usageRemaining = isPaidTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
     const usagePercentage = isPaidTier ? 0 : (workspace.usageCount / workspace.usageLimit) * 100;
@@ -649,7 +649,7 @@ export const incrementUsage = mutation({
     const hourStart = getHourStart();
     
     // Check if paid tier (unlimited usage)
-    const isPaid = ["pro", "scale", "usage_based", "partner"].includes(workspace.tier);
+    const isPaid = ["pro", "scale", "usage_based", "partner", "founder"].includes(workspace.tier);
     
     // Initialize weekly/hourly counters if needed
     let weeklyCount = workspace.weeklyUsageCount || 0;

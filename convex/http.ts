@@ -80,6 +80,45 @@ const PROVIDERS: Record<string, ProviderMeta> = {
     speed: "fast",
     costTier: "cheap",
   },
+  openai: {
+    name: "OpenAI",
+    description: "GPT-5.4, GPT-4o, o3, o4-mini. Direct access, no middleman markup.",
+    category: "llm",
+    pricing: "~$2.50-15.00/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "gpt", "openai", "gpt-5", "o3", "o4", "coding"],
+    isLLM: true,
+    envKey: "OPENAI_API_KEY",
+    baseUrl: "https://api.openai.com/v1/chat/completions",
+    speed: "medium",
+    costTier: "expensive",
+  },
+  xai: {
+    name: "xAI",
+    description: "Grok models by xAI. Reasoning, coding, and real-time knowledge via X/Twitter data.",
+    category: "llm",
+    pricing: "~$0.30-3.00/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "grok", "reasoning", "xai", "x", "twitter"],
+    isLLM: true,
+    envKey: "XAI_API_KEY",
+    baseUrl: "https://api.x.ai/v1/chat/completions",
+    speed: "medium",
+    costTier: "medium",
+  },
+  anthropic: {
+    name: "Anthropic",
+    description: "Claude models by Anthropic. Best-in-class reasoning, coding, and analysis.",
+    category: "llm",
+    pricing: "~$0.80-15.00/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "claude", "anthropic", "reasoning", "coding", "analysis"],
+    isLLM: true,
+    envKey: "ANTHROPIC_API_KEY",
+    baseUrl: "https://api.anthropic.com/v1/messages",
+    speed: "medium",
+    costTier: "expensive",
+  },
   cohere: {
     name: "Cohere",
     description: "Enterprise LLM with strong RAG and reranking capabilities.",
@@ -275,14 +314,91 @@ const PROVIDERS: Record<string, ProviderMeta> = {
 };
 
 // ==============================================
+// PROVIDER COST TABLE (per million tokens, USD)
+// ==============================================
+const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  // OpenAI
+  "gpt-5.4":             { input: 12.50, output: 50.00 },
+  "gpt-5":               { input: 10.00, output: 40.00 },
+  "gpt-4o":              { input: 2.50,  output: 10.00 },
+  "gpt-4o-mini":         { input: 0.15,  output: 0.60 },
+  "gpt-4.1":             { input: 2.00,  output: 8.00 },
+  "o3":                  { input: 10.00, output: 40.00 },
+  "o4-mini":             { input: 1.10,  output: 4.40 },
+  // Groq (heavily discounted)
+  "llama-3.3-70b-versatile": { input: 0.059, output: 0.079 },
+  "llama-3.1-8b-instant":   { input: 0.05,  output: 0.08 },
+  "llama-3.1-70b-versatile": { input: 0.059, output: 0.079 },
+  "gemma2-9b-it":            { input: 0.02,  output: 0.02 },
+  "mixtral-8x7b-32768":     { input: 0.024, output: 0.024 },
+  // Mistral
+  "mistral-small-latest":   { input: 0.10,  output: 0.30 },
+  "mistral-large-latest":   { input: 2.00,  output: 6.00 },
+  "mistral-medium-latest":  { input: 0.40,  output: 1.20 },
+  "codestral-latest":       { input: 0.30,  output: 0.90 },
+  "pixtral-large-latest":   { input: 2.00,  output: 6.00 },
+  "open-mistral-nemo":      { input: 0.15,  output: 0.15 },
+  // Together
+  "deepseek-ai/DeepSeek-R1": { input: 0.55, output: 2.19 },
+  "deepseek-ai/DeepSeek-V3": { input: 0.30, output: 0.88 },
+  "meta-llama/Llama-3.3-70B-Instruct-Turbo": { input: 0.18, output: 0.18 },
+  "Qwen/Qwen2.5-72B-Instruct-Turbo":         { input: 0.18, output: 0.18 },
+  // xAI
+  "grok-4.20-reasoning":  { input: 3.00,  output: 15.00 },
+  "grok-3":               { input: 3.00,  output: 15.00 },
+  "grok-3-mini":          { input: 0.30,  output: 0.50 },
+  "grok-2-latest":        { input: 2.00,  output: 10.00 },
+  // Anthropic (direct or via OpenRouter)
+  "claude-sonnet-4-6":           { input: 3.00,  output: 15.00 },
+  "claude-opus-4-6":             { input: 15.00, output: 75.00 },
+  "claude-opus-4":               { input: 15.00, output: 75.00 },
+  "claude-4-sonnet":             { input: 3.00,  output: 15.00 },
+  "claude-4-opus":               { input: 15.00, output: 75.00 },
+  "claude-3.5-sonnet":           { input: 3.00,  output: 15.00 },
+  "claude-3-5-sonnet-20241022":  { input: 3.00,  output: 15.00 },
+  "claude-haiku-4-5":            { input: 0.80,  output: 4.00 },
+  "claude-3-5-haiku-20241022":   { input: 0.80,  output: 4.00 },
+  "anthropic/claude-sonnet-4-6": { input: 3.00,  output: 15.00 },
+  "anthropic/claude-haiku-3.5":  { input: 0.80,  output: 4.00 },
+};
+
+// APIClaw margin: 15% on top of provider cost (market standard)
+const APICLAW_MARGIN = 0.15;
+
+function calculateCallCost(model: string, usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): { providerCost: number; apiclawCost: number } {
+  if (!usage) return { providerCost: 0, apiclawCost: 0 };
+
+  // Find cost entry (try exact match, then partial)
+  let costs = MODEL_COSTS[model];
+  if (!costs) {
+    const modelLower = model.toLowerCase();
+    const key = Object.keys(MODEL_COSTS).find(k => modelLower.includes(k.toLowerCase()));
+    if (key) costs = MODEL_COSTS[key];
+  }
+  if (!costs) {
+    // Unknown model -- estimate at medium tier
+    costs = { input: 1.00, output: 3.00 };
+  }
+
+  const inputTokens = usage.prompt_tokens || 0;
+  const outputTokens = usage.completion_tokens || 0;
+
+  const providerCost = (inputTokens * costs.input + outputTokens * costs.output) / 1_000_000;
+  const apiclawCost = providerCost * (1 + APICLAW_MARGIN);
+
+  return { providerCost, apiclawCost };
+}
+
+// ==============================================
 // INTELLIGENT LLM ROUTER
 // ==============================================
 
 // Model-to-provider mapping: which direct providers can serve which model patterns
 const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: string }[] = [
-  // Groq-native models
+  // Groq-native models (ultra-fast inference)
   { pattern: /^(groq\/)?llama-3\.3-70b/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
   { pattern: /^(groq\/)?llama-3\.1-8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
+  { pattern: /^(groq\/)?llama-3\.1-70b/i, provider: "groq", nativeModel: "llama-3.1-70b-versatile" },
   { pattern: /^(groq\/)?gemma2?-9b/i, provider: "groq", nativeModel: "gemma2-9b-it" },
   { pattern: /^(groq\/)?mixtral-8x7b/i, provider: "groq", nativeModel: "mixtral-8x7b-32768" },
   // Mistral-native models
@@ -291,11 +407,38 @@ const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: stri
   { pattern: /^(mistralai\/)?mistral-medium/i, provider: "mistral", nativeModel: "mistral-medium-latest" },
   { pattern: /^(mistralai\/)?codestral/i, provider: "mistral", nativeModel: "codestral-latest" },
   { pattern: /^(mistralai\/)?pixtral/i, provider: "mistral", nativeModel: "pixtral-large-latest" },
-  // Together-native models
+  { pattern: /^(mistralai\/)?mistral-nemo/i, provider: "mistral", nativeModel: "open-mistral-nemo" },
+  // Together-native models (open-source at scale)
   { pattern: /^(together\/)?meta-llama\/Llama-3\.3-70B/i, provider: "together", nativeModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
   { pattern: /^(together\/)?Qwen\/Qwen2\.5-72B/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
   { pattern: /^(together\/)?deepseek-ai\/DeepSeek-R1/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
   { pattern: /^(together\/)?deepseek-ai\/DeepSeek-V3/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
+  // OpenAI direct models
+  { pattern: /^(openai\/)?gpt-5\.4/i, provider: "openai", nativeModel: "gpt-5.4" },
+  { pattern: /^(openai\/)?gpt-5/i, provider: "openai", nativeModel: "gpt-5" },
+  { pattern: /^(openai\/)?gpt-4o/i, provider: "openai", nativeModel: "gpt-4o" },
+  { pattern: /^(openai\/)?gpt-4\.1/i, provider: "openai", nativeModel: "gpt-4.1" },
+  { pattern: /^(openai\/)?o3/i, provider: "openai", nativeModel: "o3" },
+  { pattern: /^(openai\/)?o4-mini/i, provider: "openai", nativeModel: "o4-mini" },
+  // xAI/Grok models
+  { pattern: /^(xai\/)?grok-4/i, provider: "xai", nativeModel: "grok-4.20-reasoning" },
+  { pattern: /^(xai\/)?grok-3-mini/i, provider: "xai", nativeModel: "grok-3-mini" },
+  { pattern: /^(xai\/)?grok-3/i, provider: "xai", nativeModel: "grok-3" },
+  { pattern: /^(xai\/)?grok-2/i, provider: "xai", nativeModel: "grok-2-latest" },
+  // Anthropic direct models
+  { pattern: /^(anthropic\/)?claude-sonnet-4-6/i, provider: "anthropic", nativeModel: "claude-sonnet-4-6-20250514" },
+  { pattern: /^(anthropic\/)?claude-4-sonnet/i, provider: "anthropic", nativeModel: "claude-sonnet-4-6-20250514" },
+  { pattern: /^(anthropic\/)?claude-opus-4/i, provider: "anthropic", nativeModel: "claude-opus-4-6-20250514" },
+  { pattern: /^(anthropic\/)?claude-4-opus/i, provider: "anthropic", nativeModel: "claude-opus-4-6-20250514" },
+  { pattern: /^(anthropic\/)?claude-3[\.\-]5-sonnet/i, provider: "anthropic", nativeModel: "claude-3-5-sonnet-20241022" },
+  { pattern: /^(anthropic\/)?claude-haiku-4/i, provider: "anthropic", nativeModel: "claude-haiku-4-5-20251001" },
+  { pattern: /^(anthropic\/)?claude-3[\.\-]5-haiku/i, provider: "anthropic", nativeModel: "claude-3-5-haiku-20241022" },
+  // Shorthand aliases -- route common names to cheapest/fastest direct provider
+  { pattern: /^deepseek-r1$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
+  { pattern: /^deepseek-v3$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
+  { pattern: /^llama-?3\.?3/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
+  { pattern: /^llama-?3\.?1-?8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
+  { pattern: /^qwen-?2\.?5/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
 ];
 
 interface RoutingDecision {
@@ -432,8 +575,8 @@ async function routeLLMRequest(
   // Triggers when: model is generic ("auto", empty, or provider-prefixed like "openai/gpt-4o")
   //   AND routing mode is "balanced" (default)
   //   AND we have messages to analyze
-  const isGenericModel = !requestedModel || requestedModel === "auto" || requestedModel.includes("/");
-  const useAdvisor = isGenericModel && settings.routingMode === "balanced" && messages && messages.length > 0;
+  const isAutoModel = !requestedModel || requestedModel === "auto";
+  const useAdvisor = isAutoModel && settings.routingMode === "balanced" && messages && messages.length > 0;
 
   if (useAdvisor) {
     const advisorDecision = await advisorPickModel(messages, settings);
@@ -530,6 +673,60 @@ async function routeLLMRequest(
   }
 
   return null; // No provider available
+}
+
+// ==============================================
+// ANTHROPIC MESSAGES API TRANSLATION
+// Translates OpenAI chat format to/from Anthropic Messages API
+// ==============================================
+
+function openaiToAnthropicRequest(
+  model: string,
+  messages: Array<{ role: string; content: any }>,
+  rest: Record<string, any>
+): { body: any; headers: Record<string, string> } {
+  // Extract system message
+  const systemMessages = messages.filter(m => m.role === "system");
+  const nonSystemMessages = messages.filter(m => m.role !== "system");
+  const systemText = systemMessages.map(m => typeof m.content === "string" ? m.content : JSON.stringify(m.content)).join("\n\n");
+
+  const body: any = {
+    model,
+    messages: nonSystemMessages.map(m => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
+    })),
+    max_tokens: rest.max_tokens || rest.max_completion_tokens || 4096,
+  };
+  if (systemText) body.system = systemText;
+  if (rest.temperature !== undefined) body.temperature = rest.temperature;
+  if (rest.top_p !== undefined) body.top_p = rest.top_p;
+  if (rest.stop) body.stop_sequences = Array.isArray(rest.stop) ? rest.stop : [rest.stop];
+
+  return { body, headers: {} };
+}
+
+function anthropicToOpenaiResponse(anthropicData: any, model: string): any {
+  const content = anthropicData.content?.[0]?.text || "";
+  const inputTokens = anthropicData.usage?.input_tokens || 0;
+  const outputTokens = anthropicData.usage?.output_tokens || 0;
+
+  return {
+    id: anthropicData.id || `chatcmpl-${Date.now()}`,
+    object: "chat.completion",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [{
+      index: 0,
+      message: { role: "assistant", content },
+      finish_reason: anthropicData.stop_reason === "end_turn" ? "stop" : (anthropicData.stop_reason || "stop"),
+    }],
+    usage: {
+      prompt_tokens: inputTokens,
+      completion_tokens: outputTokens,
+      total_tokens: inputTokens + outputTokens,
+    },
+  };
 }
 
 // CORS headers
@@ -672,7 +869,81 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
-// Discover APIs
+// Full registry discovery — proxies to Vercel catalog (26,704 APIs)
+http.route({
+  path: "/v1/discover",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/v1/discover",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    try {
+      const body = await request.json();
+      const query = body.query || "";
+      const category = body.category || "";
+      const callableOnly = body.callable_only ?? false;
+      const page = body.page || 1;
+      const limit = Math.min(body.limit || 20, 100);
+
+      // Build query params for the Vercel catalog endpoint
+      const params = new URLSearchParams();
+      if (query) params.set("q", query);
+      if (category) params.set("category", category);
+      if (callableOnly) params.set("callable", "true");
+      params.set("page", String(page));
+      params.set("limit", String(limit));
+
+      const catalogUrl = `https://apiclaw.cloud/api/catalog?${params.toString()}`;
+      const catalogRes = await fetch(catalogUrl);
+
+      if (!catalogRes.ok) {
+        return jsonResponse({ error: "Registry unavailable" }, 502);
+      }
+
+      const catalogData = await catalogRes.json() as {
+        items: Array<{ name: string; description: string; category: string; baseUrl: string; docsUrl: string; auth: string; pricing: string; callable?: boolean }>;
+        total: number;
+        page: number;
+        limit: number;
+        hasMore: boolean;
+        categories: Record<string, { total: number; callable: number }>;
+        totalCallable: number;
+      };
+
+      // Also include managed providers from PROVIDERS catalog
+      const managedProviders = Object.entries(PROVIDERS).map(([id, p]) => ({
+        providerId: id,
+        name: p.name,
+        description: p.description,
+        category: p.category,
+        managed: true,
+      }));
+
+      return jsonResponse({
+        apis: catalogData.items,
+        total: catalogData.total,
+        page: catalogData.page,
+        limit: catalogData.limit,
+        hasMore: catalogData.hasMore,
+        categories: catalogData.categories,
+        totalCallable: catalogData.totalCallable,
+        managedProviders: managedProviders,
+        _meta: {
+          registry: "26,704 discoverable APIs",
+          managed: `${managedProviders.length} managed providers`,
+          docs: "https://apiclaw.cloud/docs",
+        },
+      });
+    } catch (e: any) {
+      return jsonResponse({ error: "Discovery failed", details: e.message }, 500);
+    }
+  }),
+});
+
+// Discover managed providers only (legacy endpoint)
 http.route({
   path: "/api/discover",
   method: "POST",
@@ -2114,6 +2385,7 @@ http.route({
       preferredProviders: string[];
       blockedProviders: string[];
       allowOpenRouterFallback: boolean;
+      tier: string;
     };
     try {
       settings = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
@@ -2124,6 +2396,7 @@ http.route({
         preferredProviders: [],
         blockedProviders: [],
         allowOpenRouterFallback: true,
+        tier: "free",
       };
     }
 
@@ -2179,26 +2452,63 @@ http.route({
       console.error("[Gateway] Logging failed:", e.message);
     }
 
+    // OAuth passthrough — founder tier can supply their own provider token
+    // Header: X-APIClaw-OAuth: Bearer <token>
+    // Only accepted for founder/partner tiers. Uses caller's token instead of managed key.
+    const oauthPassthrough = request.headers.get("X-APIClaw-OAuth");
+    const isPremiumTier = settings.tier === "founder" || settings.tier === "partner";
+    const effectiveApiKey = (oauthPassthrough && isPremiumTier && route.provider === "openai")
+      ? oauthPassthrough.replace(/^Bearer\s+/i, "")
+      : route.apiKey;
+
     // Forward to the chosen provider
     try {
-      const requestBody = {
-        model: route.model,
-        messages,
-        stream: stream || false,
-        ...rest,
-      };
+      const isAnthropic = route.provider === "anthropic";
+      let requestBody: any;
+      let headers: Record<string, string>;
 
-      const headers: Record<string, string> = {
-        "Authorization": `Bearer ${route.apiKey}`,
-        "Content-Type": "application/json",
-        ...(route.extraHeaders || {}),
-      };
+      if (isAnthropic) {
+        // Anthropic Messages API format
+        const { body: anthropicBody } = openaiToAnthropicRequest(route.model, messages, rest);
+        if (stream) anthropicBody.stream = true;
+        requestBody = anthropicBody;
+        headers = {
+          "x-api-key": effectiveApiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+          ...(route.extraHeaders || {}),
+        };
+      } else {
+        requestBody = {
+          model: route.model,
+          messages,
+          stream: stream || false,
+          ...rest,
+        };
+        headers = {
+          "Authorization": `Bearer ${effectiveApiKey}`,
+          "Content-Type": "application/json",
+          ...(route.extraHeaders || {}),
+        };
+      }
 
-      const response = await fetch(route.baseUrl, {
+      let response = await fetch(route.baseUrl, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),
       });
+
+      // OAuth fallback: if OAuth token fails with 401/403, retry with managed key
+      const usedOAuth = oauthPassthrough && isPremiumTier && route.provider === "openai" && effectiveApiKey !== route.apiKey;
+      if (usedOAuth && (response.status === 401 || response.status === 403)) {
+        console.log(`OAuth token failed (${response.status}), falling back to managed key for ${route.provider}`);
+        headers["Authorization"] = `Bearer ${route.apiKey}`;
+        response = await fetch(route.baseUrl, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(requestBody),
+        });
+      }
 
       // For streaming responses, proxy the stream directly
       if (stream && response.body) {
@@ -2214,8 +2524,30 @@ http.route({
       }
 
       // Non-streaming: return JSON
-      const data = await response.json();
+      let data = await response.json();
+
+      // Translate Anthropic response to OpenAI format
+      if (isAnthropic && response.ok) {
+        data = anthropicToOpenaiResponse(data, route.model);
+      }
       const latencyMs = Date.now() - startTime;
+
+      // Calculate cost from token usage
+      const usage = (data as any)?.usage;
+      const { providerCost, apiclawCost } = calculateCallCost(route.model, usage);
+
+      // Log cost to usage records (fire and forget)
+      if (apiclawCost > 0) {
+        ctx.runMutation(internal.billing.logCallCost, {
+          workspaceId: workspaceId as any,
+          provider: route.provider,
+          model: route.model,
+          providerCostUsd: providerCost,
+          apiclawCostUsd: apiclawCost,
+          inputTokens: usage?.prompt_tokens || 0,
+          outputTokens: usage?.completion_tokens || 0,
+        }).catch(() => {});
+      }
 
       // Add APIClaw metadata
       if (data && typeof data === "object") {
@@ -2225,6 +2557,11 @@ http.route({
           routeReason: route.reason,
           model: route.model,
           gateway: "v1",
+          cost: {
+            providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
+            totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+            margin: "15%",
+          },
         };
       }
 
@@ -2656,6 +2993,17 @@ function buildManagedRequest(
         body: JSON.stringify({ audio_url: params.url || params.audio_url, ...params }),
       };
     }
+    case "anthropic": {
+      if (action === "chat" || action === "messages") {
+        return {
+          url: "https://api.anthropic.com/v1/messages",
+          method: "POST",
+          headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" },
+          body: JSON.stringify(params),
+        };
+      }
+      return null;
+    }
     case "cohere": {
       if (action === "chat") {
         return {
@@ -2807,16 +3155,28 @@ http.route({
       // Forward to provider
       try {
         const { model: _m, ...restParams } = params;
-        const requestBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
-        delete requestBody.messages; // Already included
-        // Re-add messages explicitly
-        const finalBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
+        const isAnthropic = route.provider === "anthropic";
+        let finalBody: any;
+        let headers: Record<string, string>;
 
-        const headers: Record<string, string> = {
-          "Authorization": `Bearer ${route.apiKey}`,
-          "Content-Type": "application/json",
-          ...(route.extraHeaders || {}),
-        };
+        if (isAnthropic) {
+          const { body: anthropicBody } = openaiToAnthropicRequest(route.model, params.messages || [], restParams);
+          if (params.stream) anthropicBody.stream = true;
+          finalBody = anthropicBody;
+          headers = {
+            "x-api-key": route.apiKey,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+            ...(route.extraHeaders || {}),
+          };
+        } else {
+          finalBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
+          headers = {
+            "Authorization": `Bearer ${route.apiKey}`,
+            "Content-Type": "application/json",
+            ...(route.extraHeaders || {}),
+          };
+        }
 
         const response = await fetch(route.baseUrl, {
           method: "POST", headers, body: JSON.stringify(finalBody),
@@ -2830,15 +3190,44 @@ http.route({
           });
         }
 
-        const data = await response.json();
+        let data = await response.json();
+
+        // Translate Anthropic response to OpenAI format
+        if (isAnthropic && response.ok) {
+          data = anthropicToOpenaiResponse(data, route.model);
+        }
         const latencyMs = Date.now() - startTime;
+
+        // Calculate cost from token usage (parity with /v1/chat/completions)
+        const usage = (data as any)?.usage;
+        const { providerCost, apiclawCost } = calculateCallCost(route.model, usage);
+
+        // Log cost to usage records
+        if (apiclawCost > 0 && workspaceId) {
+          ctx.runMutation(internal.billing.logCallCost, {
+            workspaceId: workspaceId as any,
+            provider: route.provider,
+            model: route.model,
+            providerCostUsd: providerCost,
+            apiclawCostUsd: apiclawCost,
+            inputTokens: usage?.prompt_tokens || 0,
+            outputTokens: usage?.completion_tokens || 0,
+          }).catch(() => {});
+        }
 
         return jsonResponse({
           success: response.ok,
           provider: route.provider,
           action: "chat",
           data,
-          _apiclaw: { latencyMs, route: routeDetail, gateway: true, model: route.model },
+          _apiclaw: {
+            latencyMs, route: routeDetail, gateway: true, model: route.model,
+            cost: {
+              providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
+              totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+              margin: "15%",
+            },
+          },
         }, response.ok ? 200 : response.status);
       } catch (e: any) {
         return jsonResponse({ success: false, provider: provider, action, error: e.message, _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true } }, 500);
@@ -2992,9 +3381,11 @@ http.route({
     // API key auth optional for models listing
     const models = [
       // OpenRouter models (main LLM backbone)
-      { id: "anthropic/claude-sonnet-4-6", object: "model", owned_by: "anthropic", via: "openrouter" },
-      { id: "anthropic/claude-haiku-3.5", object: "model", owned_by: "anthropic", via: "openrouter" },
-      { id: "anthropic/claude-opus-4", object: "model", owned_by: "anthropic", via: "openrouter" },
+      // Anthropic direct models
+      { id: "anthropic/claude-sonnet-4-6", object: "model", owned_by: "anthropic", via: "direct" },
+      { id: "anthropic/claude-opus-4-6", object: "model", owned_by: "anthropic", via: "direct" },
+      { id: "anthropic/claude-3.5-sonnet", object: "model", owned_by: "anthropic", via: "direct" },
+      { id: "anthropic/claude-haiku-4-5", object: "model", owned_by: "anthropic", via: "direct" },
       { id: "openai/gpt-4o", object: "model", owned_by: "openai", via: "openrouter" },
       { id: "openai/gpt-4o-mini", object: "model", owned_by: "openai", via: "openrouter" },
       { id: "openai/o3-mini", object: "model", owned_by: "openai", via: "openrouter" },

@@ -16,11 +16,9 @@ import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
 
 const stats = [
-  { number: statsData.apiCount.toLocaleString(), label: "APIs Indexed", live: true },
-  { number: statsData.openApiCount.toLocaleString(), label: "Open APIs", live: true },
-  { number: "19", label: "Direct Call", live: false },
-  { number: (statsData.npmDownloads || 5400).toLocaleString(), label: "Installs", live: true },
-  { number: statsData.categoryCount.toString(), label: "Categories", live: false },
+  { number: "26,700+", label: "Discoverable APIs", live: true },
+  { number: "1,650+", label: "Callable APIs", live: true },
+  { number: (statsData.npmDownloads || 10184).toLocaleString(), label: "Installs", live: true },
 ];
 
 const trustedBy = [
@@ -70,7 +68,7 @@ const howItWorks = [
   {
     step: "3",
     title: "Agent Integrates",
-    description: "Full specs, auth details, endpoints. Or use Direct Call — no keys needed.",
+    description: "Full specs, auth details, endpoints. Or use Managed APIs -- no keys needed.",
     icon: Rocket,
     codeJsx: (
       <>
@@ -209,12 +207,13 @@ export default function Home() {
 You have access to APIClaw, a unified gateway that gives you one API key (sk-claw-) for LLMs, voice, search, email, SMS, code execution, scraping, and more.
 
 Key capabilities:
-- Intelligent LLM routing: Requests auto-route to the best provider (Groq for speed, Mistral for EU, Together for open-source, OpenRouter for 800+ models). Configurable per workspace.
+- ${statsData.callableCount.toLocaleString()}+ callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories, ${statsData.endpointCount.toLocaleString()} endpoints.
+- Intelligent capability routing: describe what you need, get the best provider ranked by match score.
+- ${statsData.capabilityCount} capability types: lookup, search, list, convert, validate, generate, monitor, price, enrich, analyze, send, compute, stream, create, update.
 - OpenAI-compatible gateway: api.apiclaw.cloud/v1/chat/completions works with any tool that speaks OpenAI.
-- 20 Direct Call providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
-- ${statsData.apiCount.toLocaleString()}+ indexed APIs with semantic search.
+- ${statsData.managedCount} managed providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
 
-Direct Call providers (20):
+Managed providers (${statsData.managedCount}):
 LLM: OpenRouter (800+ models), Groq (ultra-fast), Mistral (EU), Together AI (open-source), Cohere (RAG/rerank)
 Embeddings: Voyage AI (voyage-3-large, best-in-class RAG retrieval)
 AI/ML: Replicate (Flux, SDXL, Whisper), Stability AI (image generation)
@@ -227,8 +226,9 @@ Multi-API: APILayer (27 APIs -- exchange rates, stocks, aviation, PDF, screensho
 
 Your MCP Tools:
 - call_api(provider, action, params) -- Execute immediately, auth handled automatically
-- discover_apis(query) -- Semantic search across ${statsData.apiCount.toLocaleString()}+ APIs
+- discover_apis(query) -- Search across ${statsData.callableCount.toLocaleString()}+ callable APIs
 - get_api_details(id) -- Full specs, pricing, limits
+- capability(type, keywords) -- Route by capability (validate email, convert currency, etc.)
 - list_connected() -- See all ready providers
 - check_balance() -- Usage and remaining calls
 
@@ -237,7 +237,7 @@ Gateway (OpenAI-compatible):
 - Auth: Bearer sk-claw-...
 - Per-request routing: X-APIClaw-Route header (fastest, best_price, groq, mistral, etc.)
 
-Pricing: Free (50 calls/month), Pro ($79/mo), Scale ($249/mo), or Pay-as-you-go (usage-based).
+Pricing: Free (50 managed calls/month). Pay-as-you-go: API cost + 15%, no commitment.
 
 When an API call helps the task, execute it directly.
 
@@ -341,26 +341,32 @@ Docs: https://apiclaw.cloud/docs`;
           
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm text-text-muted">
-            <a 
-              href="#how-it-works" 
+            <a
+              href="/catalog"
+              className="transition hover:text-text-primary font-medium"
+            >
+              Catalog
+            </a>
+            <a
+              href="#how-it-works"
               className={`transition ${activeSection === "how-it-works" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
               How It Works
             </a>
-            <a 
-              href="#for-agents" 
+            <a
+              href="#for-agents"
               className={`transition ${activeSection === "for-agents" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
               For Agents
             </a>
-            <a 
-              href="#for-providers" 
+            <a
+              href="#for-providers"
               className={`transition ${activeSection === "for-providers" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
-              For API Providers
+              For API Owners
             </a>
-            <a 
-              href="#faq" 
+            <a
+              href="#faq"
               className={`transition ${activeSection === "faq" ? "text-accent font-medium" : "hover:text-text-primary"}`}
             >
               FAQ
@@ -427,8 +433,15 @@ Docs: https://apiclaw.cloud/docs`;
         {mobileMenuOpen && (
           <div className="md:hidden bg-background border-t border-border">
             <nav className="flex flex-col px-4 py-4 space-y-3 text-sm">
-              <a 
-                href="#how-it-works" 
+              <a
+                href="/catalog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 text-text-primary font-medium hover:text-accent transition"
+              >
+                Catalog
+              </a>
+              <a
+                href="#how-it-works"
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
@@ -446,7 +459,7 @@ Docs: https://apiclaw.cloud/docs`;
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 text-text-muted hover:text-text-primary transition"
               >
-                For API Providers
+                For API Owners
               </a>
               <a 
                 href="#faq" 
@@ -489,13 +502,13 @@ Docs: https://apiclaw.cloud/docs`;
             <div className="text-center lg:text-left">
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="badge badge-live inline-flex">
-                  <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live • {statsData.apiCount.toLocaleString()} APIs</span>
+                  <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live - {statsData.apiCount.toLocaleString()} APIs indexed</span>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowProvidersModal(true)}
                   className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Direct Call: AI Models, Web Scraping, Code Execution &amp; more</span></span>
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Managed: AI Models, Web Scraping, Code Execution &amp; more</span></span>
                 </button>
               </div>
               
@@ -510,7 +523,7 @@ Docs: https://apiclaw.cloud/docs`;
               </p>
               
               <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
-                <span className="text-accent font-medium">Direct Call:</span> No API keys. No setup. Just call.
+                <span className="text-accent font-medium">Managed APIs:</span> No API keys. No setup. Just call.
               </p>
 
               {/* Copy Context Button */}
@@ -545,12 +558,11 @@ Docs: https://apiclaw.cloud/docs`;
       {/* Stats */}
       <section className="py-16 px-6 bg-surface/50">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
             {stats.map((stat, i) => (
-              <div 
-                key={i} 
-                className={`stat-card relative ${(stat.label === "Direct Call" || stat.label === "Categories" || stat.label === "Open APIs") ? "cursor-pointer hover:border-accent/50 transition-colors" : ""}`}
-                onClick={stat.label === "Direct Call" ? () => setShowDirectCallModal(true) : stat.label === "Categories" ? () => setShowCategoriesModal(true) : stat.label === "Open APIs" ? () => setShowOpenApisModal(true) : undefined}
+              <div
+                key={i}
+                className="stat-card relative"
               >
                 {stat.live && (
                   <div className="absolute top-2 right-2 flex items-center gap-1">
@@ -560,9 +572,6 @@ Docs: https://apiclaw.cloud/docs`;
                 )}
                 <div className="stat-number">{stat.number}</div>
                 <div className="stat-label">{stat.label}</div>
-                {(stat.label === "Direct Call" || stat.label === "Categories" || stat.label === "Open APIs") && (
-                  <div className="text-xs text-text-muted mt-1">Click to see all →</div>
-                )}
               </div>
             ))}
           </div>
@@ -587,12 +596,12 @@ Docs: https://apiclaw.cloud/docs`;
         </div>
       </section>
 
-      {/* Direct Call Modal */}
+      {/* Managed APIs Modal */}
       {showDirectCallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDirectCallModal(false)}>
           <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">⚡ Direct Call Providers</h3>
+              <h3 className="text-xl font-bold">Managed API Providers</h3>
               <button onClick={() => setShowDirectCallModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
                 <X className="w-5 h-5" />
               </button>
@@ -637,7 +646,7 @@ Docs: https://apiclaw.cloud/docs`;
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-text-muted mb-4">{statsData.apiCount.toLocaleString()} APIs organized into {statsData.categoryCount} categories.</p>
+            <p className="text-text-muted mb-4">{statsData.apiCount.toLocaleString()} APIs organized into {Object.keys(statsData.categoryBreakdown).length} categories.</p>
             <div className="space-y-2">
               {Object.entries(statsData.categoryBreakdown || {})
                 .sort(([,a], [,b]) => (b as number) - (a as number))
@@ -716,11 +725,11 @@ Docs: https://apiclaw.cloud/docs`;
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span>No accounts, no API keys needed</span>
+                  <span>No API keys needed for managed APIs</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
-                  <span>Direct Call: AI, Scraping, Code & more</span>
+                  <span>Managed: AI, Scraping, Code & more</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-1">✓</span>
@@ -815,12 +824,12 @@ Docs: https://apiclaw.cloud/docs`;
       <section id="how-it-works" className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="section-label">DIRECT CALL</span>
+            <span className="section-label">HOW IT WORKS</span>
             <h2 className="text-3xl md:text-5xl font-bold mt-4 tracking-tight">
               Three steps. No API keys.
             </h2>
             <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
-              Your agent asks, APIClaw matches, and calls the API directly — 
+              Your agent asks, APIClaw matches, and calls the API --
               no keys needed.
             </p>
           </div>
@@ -916,7 +925,7 @@ Docs: https://apiclaw.cloud/docs`;
                   <span className="text-gray-500">{"// That's it. Your agent now has access to:"}</span>{"\n"}
                   <span className="text-gray-500">{"// • discover_apis  - Find APIs by capability"}</span>{"\n"}
                   <span className="text-gray-500">{"// • get_api_details - Full specs & pricing"}</span>{"\n"}
-                  <span className="text-gray-500">{"// • call_api - Direct Call (no keys needed)"}</span>{"\n"}
+                  <span className="text-gray-500">{"// • call_api - Managed APIs (no keys needed)"}</span>{"\n"}
                   <span className="text-gray-500">{"// • list_connected - See available providers"}</span>{"\n"}
                   {"\n"}
                   <span className="text-gray-500">{"// Works with Claude, Cursor, and any MCP compatible Agent 🦞"}</span>
@@ -964,15 +973,12 @@ Docs: https://apiclaw.cloud/docs`;
 
                 <div className="flex items-center justify-between pt-6 border-t border-border">
                   <div>
-                    <p className="font-semibold">Free Listing</p>
-                    <p className="text-text-muted text-sm">For all API providers</p>
+                    <p className="font-semibold">Always Free</p>
+                    <p className="text-text-muted text-sm">For all API owners</p>
                   </div>
                   <div className="flex gap-2">
-                    <a href="/workspace?tab=my-apis" className="btn-ghost !py-2.5 !px-4 text-sm">
-                      Dashboard
-                    </a>
-                    <a href="/providers" className="btn-primary !py-2.5 !px-5 text-sm">
-                      List Your API
+                    <a href="/workspace?tab=my-apis" className="btn-primary !py-2.5 !px-5 text-sm">
+                      Go to Workspace
                     </a>
                   </div>
                 </div>
@@ -982,7 +988,7 @@ Docs: https://apiclaw.cloud/docs`;
             <div className="order-1 lg:order-2">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
                 <Building2 className="w-4 h-4" />
-                For API Providers
+                For API Owners
               </div>
               
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
@@ -1023,33 +1029,27 @@ Docs: https://apiclaw.cloud/docs`;
               Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              Discovery is free forever — search, compare, evaluate at no cost.<br />
-              {statsData.openApiCount.toLocaleString()}+ Open APIs work without any account.
+              Search, discover, and call {statsData.callableCount.toLocaleString()}+ APIs for free.<br />
+              Managed APIs: pay what the API costs + 15%. Always transparent.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {PLANS.map((plan) => {
-              const href = plan.isContact
-                ? "/book"
-                : plan.link === null
+              const href = plan.link === null
                 ? isLoggedIn ? "/workspace?tab=billing" : "/login"
                 : isLoggedIn
                 ? plan.link
                 : "/login";
 
-              const ctaLabel = plan.isContact
-                ? "Book a call"
-                : plan.id === "free"
-                ? isLoggedIn ? "Go to Dashboard" : "Get Started"
-                : plan.cta;
-
-              const isExternal = href.startsWith("http");
+              const ctaLabel = plan.id === "free"
+                ? isLoggedIn ? "Go to Workspace" : "Get Started"
+                : isLoggedIn ? "Add Payment Method" : "Get Started";
 
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl p-6 flex flex-col relative ${
+                  className={`rounded-2xl p-8 flex flex-col relative ${
                     plan.highlight
                       ? "border-2 border-accent bg-surface-elevated glow"
                       : "border border-border bg-surface-elevated"
@@ -1057,14 +1057,13 @@ Docs: https://apiclaw.cloud/docs`;
                 >
                   {plan.highlight && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-white text-xs font-bold tracking-wide rounded-full uppercase">
-                      Most popular
+                      Recommended
                     </div>
                   )}
                   <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                  <div className="text-3xl font-bold mb-1">{plan.price}</div>
-                  <p className="text-text-muted text-sm mb-6">
-                    {plan.period || (plan.id === "free" ? "Forever" : plan.id === "enterprise" ? "Contact us" : "")}
-                  </p>
+                  <div className="text-4xl font-bold mb-1">{plan.price}</div>
+                  <p className="text-text-muted text-sm mb-2">{plan.period}</p>
+                  <p className="text-text-secondary text-sm mb-6">{plan.calls} {plan.callsSub}</p>
                   <ul className="space-y-3 mb-8 flex-1">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-start gap-3 text-text-secondary text-sm">
@@ -1075,9 +1074,7 @@ Docs: https://apiclaw.cloud/docs`;
                   </ul>
                   <a
                     href={href}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
-                    className={`w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold transition ${
+                    className={`w-full text-center py-3 px-4 rounded-xl text-sm font-semibold transition ${
                       plan.highlight
                         ? "btn-primary"
                         : "btn-ghost border border-border"
@@ -1090,9 +1087,13 @@ Docs: https://apiclaw.cloud/docs`;
             })}
           </div>
 
-          {/* For API Providers - smaller section below */}
-          <div className="mt-16 text-center">
-            <p className="text-text-muted mb-4">Are you an API provider?</p>
+          <p className="text-center text-sm text-text-muted mt-8">
+            Need custom limits or SLA? <a href="/book" className="text-accent hover:underline">Talk to us</a>
+          </p>
+
+          {/* For API Owners - smaller section below */}
+          <div className="mt-12 text-center">
+            <p className="text-text-muted mb-4">Are you an API owner?</p>
             <a href="/workspace?tab=my-apis" className="text-accent hover:underline font-medium">
               List your API for free →
             </a>
@@ -1119,20 +1120,20 @@ Docs: https://apiclaw.cloud/docs`;
                 a: `APIClaw is the API layer for AI agents. Your agent queries by capability ("I need image generation"), gets ranked matches with metadata and pricing, and can call APIs directly through us — no keys needed.`
               },
               {
-                q: "How does Direct Call work?",
-                a: "Direct Call lets your agent use APIs without managing API keys. APIClaw handles authentication -- your agent just calls the API through us. Currently available for 20 providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more."
+                q: "How do Managed APIs work?",
+                a: `Managed APIs let your agent use APIs without managing API keys. APIClaw handles authentication -- your agent just calls the API through us. Currently available for ${statsData.managedCount} providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more.`
               },
               {
                 q: "How are API credentials secured?",
-                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Direct Call requests are proxied server-side — your credentials never touch the agent. We take security seriously."
+                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Managed API requests are proxied server-side -- your credentials never touch the agent. We take security seriously."
               },
               {
                 q: "What does it cost?",
-                a: `Search ${statsData.apiCount.toLocaleString()}+ APIs free forever. Direct Call is free during beta; pay-per-use pricing coming later. For providers, listing your API is always free.`
+                a: `Search and discover ${statsData.callableCount.toLocaleString()}+ APIs free forever. Managed API calls are billed at the underlying API cost plus 15% -- fully transparent, no hidden fees. For API owners, listing is always free.`
               },
               {
                 q: "How do I add my API?",
-                a: "Go to your Workspace, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a Direct Call partner? Set that up in your Workspace too."
+                a: "Go to your Workspace, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a managed partner? Set that up in your Workspace too."
               },
               {
                 q: "What's MCP?",
@@ -1205,7 +1206,7 @@ Docs: https://apiclaw.cloud/docs`;
               <ul className="space-y-3 text-text-muted">
                 <li><a href="#how-it-works" className="hover:text-text-primary transition">How It Works</a></li>
                 <li><a href="#for-agents" className="hover:text-text-primary transition">For Agents</a></li>
-                <li><a href="#for-providers" className="hover:text-text-primary transition">For API Providers</a></li>
+                <li><a href="#for-providers" className="hover:text-text-primary transition">For API Owners</a></li>
                 <li><a href="/workspace" className="hover:text-text-primary transition">Workspace</a></li>
                 <li><a href="#get-started" className="hover:text-text-primary transition">Get Started</a></li>
                 <li><a href="#faq" className="hover:text-text-primary transition">FAQ</a></li>
@@ -1261,13 +1262,13 @@ Docs: https://apiclaw.cloud/docs`;
         </div>
       </a> */}
 
-      {/* Direct Call Providers Modal */}
+      {/* Managed Providers Modal */}
       {showProvidersModal && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setShowProvidersModal(false)}
         >
-          <div 
+          <div
             className="bg-background border border-border rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1275,7 +1276,7 @@ Docs: https://apiclaw.cloud/docs`;
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <Zap className="w-5 h-5 text-accent" />
-                  Direct Call Providers
+                  Managed Providers
                 </h3>
                 <button 
                   onClick={() => setShowProvidersModal(false)}
@@ -1284,7 +1285,7 @@ Docs: https://apiclaw.cloud/docs`;
                   <span className="text-xl">×</span>
                 </button>
               </div>
-              <p className="text-sm text-text-muted mt-1">No API keys needed. Call directly through APIClaw.</p>
+              <p className="text-sm text-text-muted mt-1">No API keys needed. APIClaw handles auth and billing.</p>
             </div>
             
             <div className="p-4 max-h-[40vh] overflow-y-auto">

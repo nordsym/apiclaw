@@ -48,6 +48,7 @@ import type * as teams from "../teams.js";
 import type * as telemetry from "../telemetry.js";
 import type * as updateAPIStatus from "../updateAPIStatus.js";
 import type * as usage from "../usage.js";
+import type * as usageReports from "../usageReports.js";
 import type * as waitlist from "../waitlist.js";
 import type * as webhooks from "../webhooks.js";
 import type * as workspaceSettings from "../workspaceSettings.js";
@@ -100,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   telemetry: typeof telemetry;
   updateAPIStatus: typeof updateAPIStatus;
   usage: typeof usage;
+  usageReports: typeof usageReports;
   waitlist: typeof waitlist;
   webhooks: typeof webhooks;
   workspaceSettings: typeof workspaceSettings;

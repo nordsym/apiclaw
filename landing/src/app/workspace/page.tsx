@@ -4612,6 +4612,31 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
   const currentTier = workspace?.tier || "free";
   const isPaid = ["pro", "scale", "usage_based"].includes(currentTier);
   const isPartner = currentTier === "partner";
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setCheckoutLoading(true);
+    try {
+      const token = document.cookie.split(";").find(c => c.trim().startsWith("session_token="))?.split("=")[1];
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      // fallback
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   const plans = PLANS.map((p) => ({
     ...p,
@@ -4624,33 +4649,33 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold">Billing</h2>
-        <p className="text-[var(--text-muted)] mt-1">Help us stay 100% user funded — no VC, no ads, no compromises.</p>
+        <p className="text-[var(--text-muted)] mt-1">Simple, transparent pricing. API cost + 15%.</p>
       </div>
 
       {/* Current plan summary */}
-      {!isPaid && !isPartner && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-[var(--text-muted)]">Current plan</p>
-            <p className="text-xl font-bold capitalize mt-0.5">{currentTier}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-[var(--text-muted)]">Direct Call usage this month</p>
-            <p className="text-xl font-bold mt-0.5">
-              {workspace?.usageLimit === -1 ? "Unlimited" : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || 50}`}
-            </p>
-          </div>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 flex items-center justify-between">
+        <div>
+          <p className="text-sm text-[var(--text-muted)]">Current plan</p>
+          <p className="text-xl font-bold capitalize mt-0.5">
+            {isPartner ? "Partner" : currentTier === "usage_based" ? "Pay as you go" : currentTier}
+          </p>
         </div>
-      )}
+        <div className="text-right">
+          <p className="text-sm text-[var(--text-muted)]">Managed API usage this month</p>
+          <p className="text-xl font-bold mt-0.5">
+            {isPaid || isPartner ? `${workspace?.usageCount || 0} calls` : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || 50}`}
+          </p>
+        </div>
+      </div>
 
       {/* Plans grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
         {plans.map(plan => {
           const isCurrentPlan = currentTier === plan.id || (isPartner && plan.id === "free");
           return (
-            <div key={plan.id} className={`rounded-2xl border p-5 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
+            <div key={plan.id} className={`rounded-2xl border p-6 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
               {plan.highlight && (
-                <span className="self-start text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ef4444] text-white mb-3">Most popular</span>
+                <span className="self-start text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ef4444] text-white mb-3">Recommended</span>
               )}
               <p className="font-bold text-lg">{plan.name}</p>
               <div className="flex items-baseline gap-1 mt-1 mb-1">
@@ -4669,25 +4694,21 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
               </ul>
               <button
                 onClick={() => {
-                  if (!plan.link || plan.ctaDisabled) return;
-                  if (plan.link.startsWith("/")) {
-                    const params = new URLSearchParams();
-                    if (workspace?.email) params.set("email", workspace.email);
-                    window.location.href = `${plan.link}?${params.toString()}`;
-                  } else {
-                    window.open(plan.link, "_blank");
+                  if (isCurrentPlan) return;
+                  if (plan.id === "usage_based") {
+                    handleUpgrade();
                   }
                 }}
-                disabled={plan.ctaDisabled || isCurrentPlan}
+                disabled={isCurrentPlan || (plan.id === "usage_based" && checkoutLoading)}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${
-                  isCurrentPlan || plan.ctaDisabled
+                  isCurrentPlan
                     ? "bg-[var(--surface)] text-[var(--text-muted)] cursor-default"
                     : plan.highlight
                     ? "bg-[#ef4444] text-white hover:bg-[#dc2626]"
                     : "border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface)]"
                 }`}
               >
-                {isCurrentPlan ? "Current plan" : plan.cta}
+                {isCurrentPlan ? "Current plan" : checkoutLoading && plan.id === "usage_based" ? "Opening Stripe..." : plan.cta}
               </button>
             </div>
           );
@@ -4696,7 +4717,11 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
 
       {/* Fine print */}
       <p className="text-xs text-center text-[var(--text-muted)]">
-        All plans include unlimited Search Index and Open API access. Direct Call APIs require usage credits. Prices in USD, tax inclusive.
+        All plans include unlimited search and Open API access. Managed API calls billed at API cost + 15%.
+      </p>
+
+      <p className="text-xs text-center text-[var(--text-muted)]">
+        Need custom limits or SLA? <a href="/book" className="text-[#ef4444] hover:underline">Talk to us</a>
       </p>
     </div>
   );
@@ -4979,7 +5004,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
   -H "Authorization: Bearer ${keys[0]?.keyPrefix || "sk-claw-..."}" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "anthropic/claude-sonnet-4-6",
+    "model": "apiclaw/openai/gpt-5.4-20260305",
     "messages": [{"role": "user", "content": "Hello"}]
   }'`}
           </pre>
@@ -4989,7 +5014,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
             <p className="text-xs font-medium mb-3">Works with</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
-                { name: "OpenClaw", desc: "AI gateway" },
+                { name: "OpenClaw", desc: "AI gateway — connect via workspace key" },
                 { name: "Cursor", desc: "AI code editor" },
                 { name: "n8n", desc: "Workflow automation" },
                 { name: "LangChain", desc: "Agent framework" },
@@ -5556,7 +5581,7 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
               type="text"
               value={defaultModel}
               onChange={(e) => setDefaultModel(e.target.value)}
-              placeholder="anthropic/claude-sonnet-4-6"
+              placeholder="apiclaw/openai/gpt-5.4-20260305"
               className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
             />
             <p className="text-xs text-[var(--text-muted)] mt-1">Used when no model is specified in the request</p>
