@@ -84,6 +84,7 @@ interface WorkspaceContext {
 
 let workspaceContext: WorkspaceContext | null = null;
 let currentAgentId: string | null = null; // Agent ID from agents table (set on startup)
+let pendingRegistrationEmail: string | null = null; // Email waiting for OTP verification
 
 // Anonymous rate limit tracking (in-memory, per machine fingerprint)
 interface AnonymousRateLimitState {
@@ -278,35 +279,21 @@ const rateLimitStore = new Map<string, RateLimitState>();
 const UNREGISTERED_CALL_LIMIT = 5;
 
 /**
- * For proxy providers, allow anonymous usage with rate limiting
+ * Check workspace access -- registration required for all API calls
  */
 function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: string; isAnonymous?: boolean } {
-  // Allow anonymous access for proxy providers
-  if (providerId && PROXY_PROVIDERS.includes(providerId)) {
-    if (!workspaceContext) {
-      // Anonymous user - check rate limits
-      const fingerprint = getMachineFingerprint();
-      const rateLimitCheck = checkAnonymousRateLimit(fingerprint);
-      
-      if (!rateLimitCheck.allowed) {
-        return {
-          allowed: false,
-          error: rateLimitCheck.error,
-          isAnonymous: true
-        };
-      }
-      
-      return { allowed: true, isAnonymous: true };
-    }
-    // Authenticated user using proxy provider - allow with higher limits
-    return { allowed: true, isAnonymous: false };
-  }
-  
-  // Non-proxy providers require authentication
+  // All API calls require registration now
   if (!workspaceContext) {
-    return { 
-      allowed: false, 
-      error: 'Not authenticated. Use register_owner to authenticate your workspace.' 
+    return {
+      allowed: false,
+      error: JSON.stringify({
+        status: 'registration_required',
+        error: 'Registration required to call APIs.',
+        message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
+        action: 'register_owner',
+        free_tier: '50 API calls/month -- completely free.',
+      }, null, 2),
+      isAnonymous: true,
     };
   }
   
@@ -511,7 +498,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Execute an API call through APIClaw. Supports single calls AND multi-step chains.
+    description: `Execute an API call through APIClaw. Requires registration (free). If not registered, call register_owner first.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -683,7 +670,7 @@ Example chain:
   // ============================================
   {
     name: 'register_owner',
-    description: 'Register your email to create a workspace. This authenticates your agent with APIClaw. You will receive a magic link to verify ownership.',
+    description: 'REQUIRED before using any API. Register your email to create a workspace. A 6-digit verification code will be sent to your email. After calling this, ask the user for the code and call verify_code.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -693,6 +680,24 @@ Example chain:
         }
       },
       required: ['email']
+    }
+  },
+  {
+    name: 'verify_code',
+    description: 'Verify the 6-digit code sent to your email after register_owner. This completes registration and activates your workspace. Ask the user to check their email and paste the code.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: 'The email address used in register_owner'
+        },
+        code: {
+          type: 'string',
+          description: 'The 6-digit verification code from the email'
+        }
+      },
+      required: ['email', 'code']
     }
   },
   {
@@ -831,40 +836,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'apiclaw_help': {
+        const isAuthenticated = !!workspaceContext;
         const helpText = `
-🦞 APIClaw — The API Layer for AI Agents
+🦞 APIClaw -- The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-DISCOVER APIs:
+${!isAuthenticated ? `
+GET STARTED (free):
+  1. register_owner({ email: "you@example.com" })  — sends 6-digit code
+  2. verify_code({ email: "you@example.com", code: "123456" })  — activates workspace
+` : `
+STATUS: Authenticated as ${workspaceContext!.email} (${workspaceContext!.tier} tier)
+`}
+DISCOVER APIs (free, no registration needed):
   discover_apis({ query: "send SMS to Sweden" })
-  discover_apis({ query: "search the web", max_results: 10 })
   discover_apis({ query: "text to speech", category: "ai" })
 
-GET DETAILS:
-  get_api_details({ api_id: "46elks" })
+CALL APIs (requires free registration):
+  call_api({ provider: "brave_search", action: "search", params: { q: "AI agents" } })
+  call_api({ provider: "elevenlabs", action: "tts", params: { text: "Hello" } })
 
-DIRECT CALL (8 APIs, no key needed):
-  get_connected_providers()
-  call_api({ provider: "brave_search", endpoint: "search", params: { query: "AI agents" } })
+23 MANAGED PROVIDERS:
+  OpenAI, Anthropic, xAI/Grok, Groq, Mistral, OpenRouter, Together AI,
+  Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Firecrawl,
+  Serper, Resend, 46elks, Twilio, E2B, Stability AI, Cohere, Voyage AI,
+  GitHub, APILayer (27 sub-APIs)
 
-Available direct-call providers:
-  • brave_search — Web search
-  • 46elks — SMS (Sweden)
-  • twilio — SMS (Global)
-  • resend — Email
-  • openrouter — LLM routing (100+ models)
-  • elevenlabs — Text-to-speech
-  • replicate — AI models (images, video, audio)
-  • firecrawl — Web scraping & crawling
-  • github — Code repos & developer data
-  • e2b — Code sandbox for AI agents
-
-BROWSE:
-  list_categories()
-  list_all_apis({ category: "communication", limit: 20 })
+26,700+ DISCOVERABLE | 1,654 CALLABLE | Free tier: 50 calls/month
 
 Docs: https://apiclaw.cloud
 `;
+
         return {
           content: [{ type: 'text', text: helpText }]
         };
@@ -1180,6 +1181,25 @@ Docs: https://apiclaw.cloud
       }
 
       case 'call_api': {
+        // ============================================
+        // REGISTRATION GATE: require email before any API call
+        // ============================================
+        if (!workspaceContext) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'registration_required',
+                error: 'You need to register before making API calls.',
+                message: 'APIClaw requires a free account to use APIs. Ask the user for their email address, then call register_owner({ email: "user@example.com" }). A 6-digit verification code will be sent to their email. Then call verify_code with the code.',
+                action: 'register_owner',
+                free_tier: '50 API calls/month, unlimited discovery -- completely free.',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
         const provider = args?.provider as string;
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
@@ -1188,7 +1208,7 @@ Docs: https://apiclaw.cloud
         const chain = args?.chain as ChainStepUnion[] | undefined;
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
-        
+
         // Track AI backend if provided
         if (aiBackend && workspaceContext?.sessionToken) {
           fetch('https://adventurous-avocet-799.convex.cloud/api/mutation', {
@@ -1663,13 +1683,29 @@ Docs: https://apiclaw.cloud
       }
 
       case 'capability': {
+        // Registration gate
+        if (!workspaceContext) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'registration_required',
+                error: 'You need to register before making API calls.',
+                message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
+                action: 'register_owner',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
         const capabilityId = args?.capability as string;
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
         const preferences = (args?.preferences as Record<string, any>) || {};
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
-        
+
         // Track AI backend if provided
         if (aiBackend && workspaceContext?.sessionToken) {
           fetch('https://adventurous-avocet-799.convex.cloud/api/mutation', {
@@ -1755,7 +1791,7 @@ Docs: https://apiclaw.cloud
       
       case 'register_owner': {
         const email = args?.email as string;
-        
+
         if (!email || !email.includes('@')) {
           return {
             content: [{
@@ -1768,13 +1804,12 @@ Docs: https://apiclaw.cloud
             isError: true
           };
         }
-        
+
         try {
-          // Check if workspace already exists
+          // Check if workspace already exists and is active -- auto-login
           const existing = await convex.query("workspaces:getByEmail" as any, { email }) as { id: string; status: string; tier: string; usageCount: number; usageLimit: number } | null;
 
           if (existing && existing.status === 'active') {
-            // Workspace exists and is active - create session directly
             const fingerprint = getMachineFingerprint();
             const sessionResult = await convex.mutation("workspaces:createAgentSession" as any, {
               workspaceId: existing.id,
@@ -1783,23 +1818,17 @@ Docs: https://apiclaw.cloud
 
             if (sessionResult.success) {
               writeSession(sessionResult.sessionToken!, existing.id, email);
-              
-              // Claim anonymous usage history
+
               try {
                 const claimResult = await convex.mutation("workspaces:claimAnonymousUsage" as any, {
                   workspaceId: existing.id,
                   machineFingerprint: fingerprint,
-                }) as { success: boolean; claimedCount?: number; message?: string };
-                
+                }) as { success: boolean; claimedCount?: number };
                 if (claimResult.success && claimResult.claimedCount) {
-                  console.error(`[APIClaw] ✓ Claimed ${claimResult.claimedCount} anonymous usage records`);
+                  console.error(`[APIClaw] Claimed ${claimResult.claimedCount} anonymous usage records`);
                 }
-              } catch (err) {
-                // Non-critical error, just log it
-                console.error('[APIClaw] Warning: Failed to claim anonymous usage:', err);
-              }
-              
-              // Update global context
+              } catch (_) {}
+
               workspaceContext = {
                 sessionToken: sessionResult.sessionToken!,
                 workspaceId: existing.id,
@@ -1809,7 +1838,7 @@ Docs: https://apiclaw.cloud
                 usageCount: existing.usageCount,
                 status: existing.status,
               };
-              
+
               return {
                 content: [{
                   type: 'text',
@@ -1827,29 +1856,15 @@ Docs: https://apiclaw.cloud
               };
             }
           }
-          
-          // Create workspace and magic link
-          const createResult = await convex.mutation("workspaces:createWorkspace" as any, { email }) as { success: boolean; workspaceId?: string; error?: string };
-          
-          let workspaceId: string;
-          if (createResult.success) {
-            workspaceId = createResult.workspaceId!;
-          } else if (createResult.error === 'workspace_exists') {
-            workspaceId = createResult.workspaceId!;
-          } else {
-            throw new Error(createResult.error);
-          }
-          
-          // Create magic link
+
+          // New user or pending workspace -- send OTP
           const fingerprint = getMachineFingerprint();
-          const magicLinkResult = await convex.mutation("workspaces:createMagicLink" as any, {
+          const otpResult = await convex.mutation("workspaces:createOTP" as any, {
             email,
             fingerprint,
-          }) as { token: string; expiresAt: number };
-          
-          // Send magic link via email
-          const verifyUrl = `https://apiclaw.cloud/auth/verify?token=${magicLinkResult.token}`;
-          
+          }) as { code: string; expiresAt: number };
+
+          // Send OTP email
           const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -1859,25 +1874,42 @@ Docs: https://apiclaw.cloud
             body: JSON.stringify({
               from: 'APIClaw <noreply@apiclaw.cloud>',
               to: email,
-              subject: 'Verify your APIClaw workspace',
-              html: `<p>Click to verify: <a href="${verifyUrl}">${verifyUrl}</a></p><p>Expires in 15 minutes.</p>`
+              subject: `Your APIClaw verification code: ${otpResult.code}`,
+              html: `
+                <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 24px;">
+                  <div style="text-align: center; margin-bottom: 32px;">
+                    <span style="font-size: 48px;">🦞</span>
+                  </div>
+                  <h1 style="font-size: 24px; font-weight: 700; color: #0A0A0A; text-align: center; margin-bottom: 8px;">Your verification code</h1>
+                  <p style="font-size: 16px; color: #525252; text-align: center; margin-bottom: 32px;">Paste this code in your terminal to activate APIClaw.</p>
+                  <div style="background: #F5F5F5; border: 1px solid #E5E5E5; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                    <code style="font-size: 36px; font-weight: 700; letter-spacing: 0.3em; color: #EF4444; font-family: 'JetBrains Mono', monospace;">${otpResult.code}</code>
+                  </div>
+                  <p style="font-size: 13px; color: #737373; text-align: center;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
+                  <hr style="border: none; border-top: 1px solid #E5E5E5; margin: 32px 0 16px;" />
+                  <p style="font-size: 12px; color: #A3A3A3; text-align: center;">APIClaw -- The API Layer For AI Agents</p>
+                </div>
+              `
             })
           });
-          
+
           if (!emailResponse.ok) {
             const errorData = await emailResponse.text();
             throw new Error(`Failed to send verification email: ${errorData}`);
           }
-          
+
+          // Store pending email for verify_code
+          pendingRegistrationEmail = email;
+
           return {
             content: [{
               type: 'text',
               text: JSON.stringify({
-                status: 'pending_verification',
-                message: 'Workspace created! Check your email for verification link.',
+                status: 'code_sent',
+                message: `Verification code sent to ${email}`,
+                next_step: 'Ask the user to check their email for a 6-digit code, then call verify_code with the email and code.',
                 email,
-                expires_in_minutes: 15,
-                next_step: 'Check your email, click the verification link, then run check_workspace_status',
+                expires_in_minutes: 10,
               }, null, 2)
             }]
           };
@@ -1888,6 +1920,119 @@ Docs: https://apiclaw.cloud
               text: JSON.stringify({
                 status: 'error',
                 error: error instanceof Error ? error.message : 'Registration failed',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+      }
+
+      case 'verify_code': {
+        const email = (args?.email as string) || pendingRegistrationEmail;
+        const code = args?.code as string;
+
+        if (!email || !code) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'Both email and code are required.',
+                hint: 'Call register_owner first to receive a verification code.',
+              }, null, 2)
+            }],
+            isError: true
+          };
+        }
+
+        try {
+          const fingerprint = getMachineFingerprint();
+          const result = await convex.mutation("workspaces:verifyOTP" as any, {
+            email,
+            code: code.trim(),
+            fingerprint,
+          }) as {
+            success: boolean;
+            error?: string;
+            message?: string;
+            isNewUser?: boolean;
+            sessionToken?: string;
+            workspace?: { id: string; email: string; tier: string; status: string; usageCount: number; usageLimit: number }
+          };
+
+          if (!result.success) {
+            // Increment attempt counter
+            try {
+              await convex.mutation("workspaces:incrementOTPAttempt" as any, { email, code: code.trim() });
+            } catch (_) {}
+
+            return {
+              content: [{
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'error',
+                  error: result.message || 'Verification failed',
+                  hint: result.error === 'code_expired'
+                    ? 'Run register_owner again to get a new code.'
+                    : 'Check the code and try again.',
+                }, null, 2)
+              }],
+              isError: true
+            };
+          }
+
+          // Success! Save session
+          writeSession(result.sessionToken!, result.workspace!.id, result.workspace!.email);
+
+          // Claim anonymous usage
+          try {
+            const claimResult = await convex.mutation("workspaces:claimAnonymousUsage" as any, {
+              workspaceId: result.workspace!.id,
+              machineFingerprint: fingerprint,
+            }) as { success: boolean; claimedCount?: number };
+            if (claimResult.success && claimResult.claimedCount) {
+              console.error(`[APIClaw] Claimed ${claimResult.claimedCount} anonymous usage records`);
+            }
+          } catch (_) {}
+
+          // Update global context
+          workspaceContext = {
+            sessionToken: result.sessionToken!,
+            workspaceId: result.workspace!.id,
+            email: result.workspace!.email,
+            tier: result.workspace!.tier,
+            usageRemaining: result.workspace!.usageLimit - result.workspace!.usageCount,
+            usageCount: result.workspace!.usageCount,
+            status: result.workspace!.status,
+          };
+
+          pendingRegistrationEmail = null;
+
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'success',
+                message: result.isNewUser
+                  ? `Welcome to APIClaw! Workspace activated for ${result.workspace!.email}`
+                  : `Welcome back! Authenticated as ${result.workspace!.email}`,
+                workspace: {
+                  email: result.workspace!.email,
+                  tier: result.workspace!.tier,
+                  usageCount: result.workspace!.usageCount,
+                  usageLimit: result.workspace!.usageLimit,
+                },
+                ready: 'You can now use discover_apis and call_api.',
+              }, null, 2)
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Verification failed',
               }, null, 2)
             }],
             isError: true

@@ -364,6 +364,19 @@ export default defineSchema({
     .index("by_workspaceId", ["workspaceId"])
     .index("by_status", ["status"]),
 
+  // OTP codes for terminal-native email verification
+  otpCodes: defineTable({
+    email: v.string(),
+    code: v.string(), // 6-digit code
+    fingerprint: v.optional(v.string()),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+    attempts: v.number(), // failed attempts counter
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_email_code", ["email", "code"]),
+
   // Magic link tokens for email auth
   magicLinks: defineTable({
     email: v.string(),

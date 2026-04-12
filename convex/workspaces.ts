@@ -3,6 +3,191 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 // ============================================
+// OTP AUTH FOR WORKSPACES (terminal-native)
+// ============================================
+
+function generateOTP(): string {
+  const digits = "0123456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += digits.charAt(Math.floor(Math.random() * digits.length));
+  }
+  return code;
+}
+
+// Create OTP code and return it (MCP server sends the email)
+export const createOTP = mutation({
+  args: {
+    email: v.string(),
+    fingerprint: v.optional(v.string()),
+  },
+  handler: async (ctx, { email, fingerprint }) => {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Invalidate any existing unused OTPs for this email
+    const existing = await ctx.db
+      .query("otpCodes")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .collect();
+    for (const otp of existing) {
+      if (!otp.usedAt && otp.expiresAt > Date.now()) {
+        await ctx.db.patch(otp._id, { expiresAt: 0 }); // expire it
+      }
+    }
+
+    const code = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    await ctx.db.insert("otpCodes", {
+      email: normalizedEmail,
+      code,
+      fingerprint,
+      expiresAt,
+      usedAt: undefined,
+      attempts: 0,
+      createdAt: Date.now(),
+    });
+
+    return { code, expiresAt };
+  },
+});
+
+// Verify OTP code, create/activate workspace, return session
+export const verifyOTP = mutation({
+  args: {
+    email: v.string(),
+    code: v.string(),
+    fingerprint: v.optional(v.string()),
+  },
+  handler: async (ctx, { email, code, fingerprint }) => {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const otpRecord = await ctx.db
+      .query("otpCodes")
+      .withIndex("by_email_code", (q) =>
+        q.eq("email", normalizedEmail).eq("code", code)
+      )
+      .first();
+
+    if (!otpRecord) {
+      return { success: false, error: "invalid_code", message: "Invalid verification code." };
+    }
+
+    if (otpRecord.usedAt) {
+      return { success: false, error: "code_used", message: "Code already used." };
+    }
+
+    if (otpRecord.expiresAt < Date.now()) {
+      return { success: false, error: "code_expired", message: "Code expired. Run register_owner again to get a new code." };
+    }
+
+    if (otpRecord.attempts >= 5) {
+      return { success: false, error: "too_many_attempts", message: "Too many failed attempts. Run register_owner again." };
+    }
+
+    // Mark OTP as used
+    await ctx.db.patch(otpRecord._id, { usedAt: Date.now() });
+
+    // Find or create workspace
+    let workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
+
+    let isNewUser = false;
+    if (!workspace) {
+      isNewUser = true;
+      // Generate referral code
+      let referralCode: string;
+      let attempts = 0;
+      do {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let rc = "";
+        for (let i = 0; i < 6; i++) {
+          rc += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        referralCode = `CLAW-${rc}`;
+        const existingRef = await ctx.db
+          .query("workspaces")
+          .withIndex("by_referralCode", (q) => q.eq("referralCode", referralCode))
+          .first();
+        if (!existingRef) break;
+        attempts++;
+      } while (attempts < 10);
+
+      const workspaceId = await ctx.db.insert("workspaces", {
+        email: normalizedEmail,
+        status: "active",
+        tier: "free",
+        usageCount: 0,
+        usageLimit: 50,
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50,
+        lastWeeklyResetAt: Date.now(),
+        hourlyUsageCount: 0,
+        lastHourlyResetAt: Date.now(),
+        referralCode: referralCode!,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      workspace = await ctx.db.get(workspaceId);
+    } else if (workspace.status === "pending") {
+      // Activate pending workspace
+      await ctx.db.patch(workspace._id, { status: "active" });
+      workspace = await ctx.db.get(workspace._id);
+    }
+
+    if (!workspace) {
+      return { success: false, error: "workspace_error", message: "Failed to create workspace." };
+    }
+
+    // Create agent session
+    const sessionToken = generateToken();
+    await ctx.db.insert("agentSessions", {
+      workspaceId: workspace._id,
+      sessionToken,
+      fingerprint: fingerprint || "unknown",
+      lastUsedAt: Date.now(),
+      createdAt: Date.now(),
+    });
+
+    return {
+      success: true,
+      isNewUser,
+      sessionToken,
+      workspace: {
+        id: workspace._id,
+        email: workspace.email,
+        tier: workspace.tier,
+        status: "active",
+        usageCount: workspace.usageCount,
+        usageLimit: workspace.usageLimit,
+      },
+    };
+  },
+});
+
+// Increment failed OTP attempt counter
+export const incrementOTPAttempt = mutation({
+  args: {
+    email: v.string(),
+    code: v.string(),
+  },
+  handler: async (ctx, { email, code }) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    const otpRecord = await ctx.db
+      .query("otpCodes")
+      .withIndex("by_email_code", (q) =>
+        q.eq("email", normalizedEmail).eq("code", code)
+      )
+      .first();
+    if (otpRecord && !otpRecord.usedAt) {
+      await ctx.db.patch(otpRecord._id, { attempts: otpRecord.attempts + 1 });
+    }
+  },
+});
+
+// ============================================
 // MAGIC LINK AUTH FOR WORKSPACES
 // ============================================
 
