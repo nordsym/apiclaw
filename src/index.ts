@@ -520,7 +520,7 @@ const tools: Tool[] = [
   },
   {
     name: 'add_credits',
-    description: 'Add credits to your account. (For testing/demo purposes)',
+    description: 'Add credits to your workspace. (For testing/demo purposes)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1197,7 +1197,7 @@ Docs: https://apiclaw.cloud
               type: 'text',
               text: JSON.stringify({
                 status: 'success',
-                message: `Added $${amountUsd.toFixed(2)} to your account`,
+                message: `Added $${amountUsd.toFixed(2)} to your workspace`,
                 new_balance_usd: credits.balance_usd
               }, null, 2)
             }
