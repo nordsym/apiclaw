@@ -45,6 +45,8 @@ import {
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
+import { requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
   getOrCreateCustomer, 
@@ -341,6 +343,52 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
   
   return { allowed: true, isAnonymous: false };
 }
+
+/**
+ * Single enforcement entry point for every paying call path.
+ * Returns either a verified workspace context or an MCP-formatted block response.
+ */
+function enforceOwner(channel: string):
+  | { ok: true; ctx: WorkspaceContextLike }
+  | { ok: false; response: { content: { type: 'text'; text: string }[]; isError: true } } {
+  const result = requireVerifiedOwner(workspaceContext as WorkspaceContextLike | null);
+  if (result.ok) {
+    return { ok: true, ctx: result.ctx };
+  }
+  // Diagnostic: record why the call was blocked.
+  try {
+    emitFunnelEvent({
+      event: 'call_api_blocked',
+      workspaceId: workspaceContext?.workspaceId,
+      email: workspaceContext?.email,
+      fingerprint: getMachineFingerprint(),
+      mcpClient: detectMCPClient(),
+      platform: process.platform,
+      version: process.env.npm_package_version || 'unknown',
+      props: { reason: result.reason, channel },
+    });
+    if (result.reason === 'quota_exceeded') {
+      emitFunnelEvent({
+        event: 'quota_hit',
+        workspaceId: workspaceContext?.workspaceId,
+        email: workspaceContext?.email,
+        fingerprint: getMachineFingerprint(),
+        version: process.env.npm_package_version || 'unknown',
+        props: { tier: workspaceContext?.tier, limit: workspaceContext?.usageCount },
+      });
+    }
+  } catch { /* non-blocking */ }
+  return {
+    ok: false,
+    response: {
+      content: [{ type: 'text', text: JSON.stringify(result.payload, null, 2) }],
+      isError: true,
+    },
+  };
+}
+
+// Per-process marker: ensure first_call_api_success fires once per server boot.
+let firstCallEmitted = false;
 
 /**
  * Get customer API key from environment variable
@@ -1182,23 +1230,10 @@ Docs: https://apiclaw.cloud
 
       case 'call_api': {
         // ============================================
-        // REGISTRATION GATE: require email before any API call
+        // REGISTRATION GATE: requireVerifiedOwner (single source of truth)
         // ============================================
-        if (!workspaceContext) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                status: 'registration_required',
-                error: 'You need to register before making API calls.',
-                message: 'APIClaw requires a free account to use APIs. Ask the user for their email address, then call register_owner({ email: "user@example.com" }). A 6-digit verification code will be sent to their email. Then call verify_code with the code.',
-                action: 'register_owner',
-                free_tier: '50 API calls/month, unlimited discovery -- completely free.',
-              }, null, 2)
-            }],
-            isError: true
-          };
-        }
+        const gate = enforceOwner("mcp:call_api");
+        if (!gate.ok) return gate.response;
 
         const provider = args?.provider as string;
         const action = args?.action as string;
@@ -1229,34 +1264,7 @@ Docs: https://apiclaw.cloud
         // CHAIN EXECUTION MODE
         // ============================================
         if (chain && Array.isArray(chain) && chain.length > 0) {
-          // Check workspace access for chains
-          const access = checkWorkspaceAccess();
-          if (!access.allowed) {
-            // If error is already formatted JSON (from rate limit checks), return as-is
-            if (access.error?.startsWith('{')) {
-              return {
-                content: [{
-                  type: 'text',
-                  text: access.error
-                }],
-                isError: true
-              };
-            }
-            
-            // Otherwise, wrap in standard error format
-            return {
-              content: [{
-                type: 'text',
-                text: JSON.stringify({
-                  status: 'error',
-                  error: access.error,
-                  hint: 'Use register_owner to authenticate your workspace.',
-                }, null, 2)
-              }],
-              isError: true
-            };
-          }
-          
+          // Gate already enforced at top of call_api via enforceOwner().
           try {
             // Construct ChainDefinition from the input
             const chainDefinition: ChainDefinition = {
@@ -1627,6 +1635,39 @@ Docs: https://apiclaw.cloud
           workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
         }
 
+        // Funnel: call_api_error (provider-level failure)
+        if (!result.success && workspaceContext) {
+          emitFunnelEvent({
+            event: 'call_api_error',
+            workspaceId: workspaceContext.workspaceId,
+            email: workspaceContext.email,
+            fingerprint: getMachineFingerprint(),
+            version: process.env.npm_package_version || 'unknown',
+            props: {
+              provider: result.provider || provider,
+              action: result.action || action,
+              errorCode: (result.error || '').slice(0, 80) || 'unknown',
+            },
+          });
+        }
+
+        // Funnel: first_call_api_success (once per workspace, deduped server-side)
+        if (result.success && workspaceContext && !isFreeAPI && !firstCallEmitted) {
+          firstCallEmitted = true;
+          emitFunnelEvent({
+            event: 'first_call_api_success',
+            email: workspaceContext.email,
+            workspaceId: workspaceContext.workspaceId,
+            sessionToken: workspaceContext.sessionToken,
+            fingerprint: getMachineFingerprint(),
+            mcpClient: detectMCPClient(),
+            platform: process.platform,
+            version: process.env.npm_package_version || 'unknown',
+            dedupeKey: `first_call:${workspaceContext.workspaceId}`,
+            props: { provider, action, channel: 'mcp:call_api' },
+          });
+        }
+
         // Build response with signup nudge for unregistered users
         const responseData: Record<string, unknown> = {
           status: result.success ? 'success' : 'error',
@@ -1683,21 +1724,9 @@ Docs: https://apiclaw.cloud
       }
 
       case 'capability': {
-        // Registration gate
-        if (!workspaceContext) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                status: 'registration_required',
-                error: 'You need to register before making API calls.',
-                message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
-                action: 'register_owner',
-              }, null, 2)
-            }],
-            isError: true
-          };
-        }
+        // Registration gate: requireVerifiedOwner (single source of truth)
+        const capGate = enforceOwner("mcp:capability");
+        if (!capGate.ok) return capGate.response;
 
         const capabilityId = args?.capability as string;
         const action = args?.action as string;
@@ -1793,6 +1822,14 @@ Docs: https://apiclaw.cloud
         const email = args?.email as string;
 
         if (!email || !email.includes('@')) {
+          emitFunnelEvent({
+            event: 'register_owner_failed',
+            email,
+            fingerprint: getMachineFingerprint(),
+            mcpClient: detectMCPClient(),
+            version: process.env.npm_package_version || 'unknown',
+            props: { reason: 'invalid_email' },
+          });
           return {
             content: [{
               type: 'text',
@@ -1895,11 +1932,29 @@ Docs: https://apiclaw.cloud
 
           if (!emailResponse.ok) {
             const errorData = await emailResponse.text();
+            emitFunnelEvent({
+              event: 'register_owner_failed',
+              email,
+              fingerprint: getMachineFingerprint(),
+              mcpClient: detectMCPClient(),
+              version: process.env.npm_package_version || 'unknown',
+              props: { reason: 'email_send_failed' },
+            });
             throw new Error(`Failed to send verification email: ${errorData}`);
           }
 
           // Store pending email for verify_code
           pendingRegistrationEmail = email;
+
+          // Funnel: register_owner
+          emitFunnelEvent({
+            event: 'register_owner',
+            email,
+            fingerprint: getMachineFingerprint(),
+            mcpClient: detectMCPClient(),
+            platform: process.platform,
+            version: process.env.npm_package_version || 'unknown',
+          });
 
           return {
             content: [{
@@ -1966,6 +2021,19 @@ Docs: https://apiclaw.cloud
               await convex.mutation("workspaces:incrementOTPAttempt" as any, { email, code: code.trim() });
             } catch (_) {}
 
+            const reason =
+              result.error === 'code_expired' ? 'expired'
+              : result.error === 'attempts_exceeded' ? 'attempts_exceeded'
+              : 'invalid';
+            emitFunnelEvent({
+              event: 'verify_code_failed',
+              email,
+              fingerprint: getMachineFingerprint(),
+              mcpClient: detectMCPClient(),
+              version: process.env.npm_package_version || 'unknown',
+              props: { reason },
+            });
+
             return {
               content: [{
                 type: 'text',
@@ -2007,6 +2075,20 @@ Docs: https://apiclaw.cloud
           };
 
           pendingRegistrationEmail = null;
+
+          // Funnel: verify_code (dedupe per workspace so re-verifies don't double-count)
+          emitFunnelEvent({
+            event: 'verify_code',
+            email: result.workspace!.email,
+            workspaceId: result.workspace!.id,
+            fingerprint: getMachineFingerprint(),
+            sessionToken: result.sessionToken,
+            mcpClient: detectMCPClient(),
+            platform: process.platform,
+            version: process.env.npm_package_version || 'unknown',
+            dedupeKey: `verify_code:${result.workspace!.id}`,
+            props: { isNewUser: !!result.isNewUser },
+          });
 
           return {
             content: [{
@@ -2418,22 +2500,10 @@ Docs: https://apiclaw.cloud
           };
         }
         
-        // Check workspace access
-        const access = checkWorkspaceAccess();
-        if (!access.allowed) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                status: 'error',
-                error: access.error,
-                hint: 'Use register_owner to authenticate your workspace.',
-              }, null, 2)
-            }],
-            isError: true
-          };
-        }
-        
+        // Registration gate: requireVerifiedOwner (single source of truth)
+        const resumeGate = enforceOwner("mcp:resume_chain");
+        if (!resumeGate.ok) return resumeGate.response;
+
         try {
           // Note: The resume_chain function requires the original chain definition
           // In practice, you'd store this or require the caller to provide it
@@ -2556,7 +2626,28 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   trackStartup();
-  
+
+  // Funnel: first_run (once per fingerprint, persisted across restarts)
+  try {
+    const fp = getMachineFingerprint();
+    const mcpClient = detectMCPClient();
+    const version = process.env.npm_package_version || 'unknown';
+    const dedupeKey = `first_run:${fp}`;
+    if (!hasLocalMarker(dedupeKey)) {
+      emitFunnelEvent({
+        event: 'first_run',
+        fingerprint: fp,
+        mcpClient,
+        platform: process.platform,
+        version,
+        dedupeKey,
+      });
+      setLocalMarker(dedupeKey);
+    }
+  } catch {
+    /* non-blocking */
+  }
+
   // Validate session on startup
   const hasValidSession = await validateSession();
 

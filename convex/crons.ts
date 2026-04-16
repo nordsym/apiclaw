@@ -47,4 +47,19 @@ crons.monthly(
   internal.usageReports.sendMonthlyReports
 );
 
+// Nurture classifier — daily at 06:00 UTC, upserts each workspace's lifecycle stage
+crons.daily(
+  "nurture-classify",
+  { hourUTC: 6, minuteUTC: 0 },
+  internal.nurture.classifyAllWorkspaces
+);
+
+// Nurture sender — daily at 09:30 UTC (11:30 CEST), caps at 12 emails/day
+crons.daily(
+  "nurture-send",
+  { hourUTC: 9, minuteUTC: 30 },
+  internal.nurture.sendDailyNurture,
+  { maxSends: 12 }
+);
+
 export default crons;

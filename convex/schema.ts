@@ -426,6 +426,33 @@ export default defineSchema({
     .index("by_workspaceId", ["workspaceId"])
     .index("by_identifier", ["identifier"]),
 
+  // ============================================
+  // FUNNEL EVENTS — canonical conversion truth
+  // install -> first_run -> register_owner -> verify_code -> first_call_api_success
+  // ============================================
+  funnelEvents: defineTable({
+    event: v.string(), // one of FUNNEL_EVENTS (see convex/funnel.ts)
+    classification: v.string(), // "human" | "ci" | "bot" | "internal"
+    workspaceId: v.optional(v.id("workspaces")),
+    fingerprint: v.optional(v.string()),
+    sessionToken: v.optional(v.string()),
+    email: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    mcpClient: v.optional(v.string()),
+    platform: v.optional(v.string()),
+    version: v.optional(v.string()),
+    dedupeKey: v.optional(v.string()), // for first-time events (install/first_run/first_call)
+    props: v.optional(v.any()),
+    timestamp: v.number(),
+  })
+    .index("by_event", ["event"])
+    .index("by_classification", ["classification"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_fingerprint", ["fingerprint"])
+    .index("by_dedupeKey", ["dedupeKey"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_event_timestamp", ["event", "timestamp"]),
+
   // MCP Server telemetry (anonymous usage tracking)
   telemetry: defineTable({
     type: v.string(),  // "startup", "search", "execute", "discovery"
@@ -866,4 +893,34 @@ export default defineSchema({
   })
     .index("by_partnerId", ["partnerId"])
     .index("by_status", ["status"]),
+
+  // ═══════════════════════════════════════════════════════════════
+  // NURTURE - Workspace lifecycle + email nurture state
+  // ═══════════════════════════════════════════════════════════════
+  nurture: defineTable({
+    workspaceId: v.id("workspaces"),
+    email: v.optional(v.string()),            // mirrored for easy dedupe
+    stage: v.union(
+      v.literal("new"),                       // <48h since signup, no activity yet
+      v.literal("activating"),                // seen some discovery, no calls
+      v.literal("active"),                    // has made API calls recently
+      v.literal("power"),                     // >50 calls in last 14d
+      v.literal("dormant"),                   // no activity 7d+
+      v.literal("lost"),                      // no activity 30d+
+      v.literal("partner-locked"),            // partner workspace — never nurture
+      v.literal("excluded")                   // explicit opt-out / internal / test
+    ),
+    lastActivityAt: v.optional(v.number()),
+    emailsSent: v.number(),                   // total nurture emails sent
+    lastEmailSentAt: v.optional(v.number()),
+    lastEmailKind: v.optional(v.string()),    // "welcome", "try-discover", "first-call", "upgrade", "reactivate-7d", "reactivate-30d", "power-upgrade"
+    unsubscribed: v.boolean(),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_email", ["email"])
+    .index("by_stage", ["stage"])
+    .index("by_lastActivityAt", ["lastActivityAt"]),
 });

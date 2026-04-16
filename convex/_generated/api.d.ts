@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as _listWorkspaces from "../_listWorkspaces.js";
 import type * as adminActivate from "../adminActivate.js";
 import type * as adminStats from "../adminStats.js";
 import type * as agents from "../agents.js";
@@ -26,6 +27,8 @@ import type * as directCall from "../directCall.js";
 import type * as earnProgress from "../earnProgress.js";
 import type * as email from "../email.js";
 import type * as feedback from "../feedback.js";
+import type * as funnel from "../funnel.js";
+import type * as guards from "../guards.js";
 import type * as http from "../http.js";
 import type * as inbound from "../inbound.js";
 import type * as logs from "../logs.js";
@@ -34,6 +37,7 @@ import type * as migratePartnersProd from "../migratePartnersProd.js";
 import type * as migratePratham from "../migratePratham.js";
 import type * as migrateProviderWorkspaces from "../migrateProviderWorkspaces.js";
 import type * as mou from "../mou.js";
+import type * as nurture from "../nurture.js";
 import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
@@ -61,6 +65,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  _listWorkspaces: typeof _listWorkspaces;
   adminActivate: typeof adminActivate;
   adminStats: typeof adminStats;
   agents: typeof agents;
@@ -79,6 +84,8 @@ declare const fullApi: ApiFromModules<{
   earnProgress: typeof earnProgress;
   email: typeof email;
   feedback: typeof feedback;
+  funnel: typeof funnel;
+  guards: typeof guards;
   http: typeof http;
   inbound: typeof inbound;
   logs: typeof logs;
@@ -87,6 +94,7 @@ declare const fullApi: ApiFromModules<{
   migratePratham: typeof migratePratham;
   migrateProviderWorkspaces: typeof migrateProviderWorkspaces;
   mou: typeof mou;
+  nurture: typeof nurture;
   providerKeys: typeof providerKeys;
   providers: typeof providers;
   purchases: typeof purchases;
