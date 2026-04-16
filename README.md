@@ -20,7 +20,7 @@ Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agen
 
 ---
 
-## Two Ways to Use APIClaw
+## Three Ways to Use APIClaw
 
 ### 1. MCP Server (Agent Discovery + Calling)
 
@@ -34,7 +34,7 @@ call_api("frankfurter", "latest", {"from": "USD", "to": "SEK"})
 -> { "rates": { "SEK": 10.85 } }
 ```
 
-The agent handles everything through MCP tools. Works in Claude Desktop, Cursor, Windsurf, and any MCP-compatible client.
+The agent handles everything through MCP tools. Works in Claude Desktop, Cursor, Windsurf, OpenClaw, and any MCP-compatible client.
 
 ### 2. Intelligent Gateway (OpenAI-compatible endpoint)
 
@@ -49,6 +49,19 @@ curl api.apiclaw.cloud/v1/chat/completions \
     "messages": [{"role": "user", "content": "Hello"}]
   }'
 ```
+
+### 3. CLI
+
+Humans in the terminal, scripts, CI. Ships with `@nordsym/apiclaw`:
+
+```bash
+npx @nordsym/apiclaw login                    # OTP auth, terminal-native
+npx @nordsym/apiclaw setup                    # auto-detect Claude, Cursor, Windsurf
+apiclaw discover "send SMS to Sweden"         # search registry
+apiclaw-http                                  # stand up local HTTP gateway
+```
+
+All three interfaces route through the same `api.apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry.
 
 One endpoint. Automatic provider routing. The gateway selects the optimal provider based on your workspace settings:
 

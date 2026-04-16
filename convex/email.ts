@@ -106,30 +106,30 @@ function limitReachedEmailTemplate(upgradeUrl: string): string {
     <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #0a0a0a; text-align: center;">
       Free Tier Limit Reached
     </h2>
-    
+
     <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #525252; text-align: center;">
-      Your AI agent has used all 100 free API calls. Add a payment method to continue using APIClaw.
+      Your AI agent has used all 50 free API calls this month. Add a payment method to keep going — pay-as-you-go, no subscription.
     </p>
-    
+
     <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-      <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #0a0a0a;">Pro Plan — $10/month</p>
+      <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #0a0a0a;">Pay as you go</p>
       <ul style="margin: 0; padding: 0 0 0 20px; font-size: 14px; color: #525252; line-height: 1.8;">
-        <li>10,000 API calls/month</li>
-        <li>Priority support</li>
-        <li>Usage analytics</li>
+        <li>Underlying API cost + 15% margin (market standard)</li>
+        <li>No monthly fee, no commitment</li>
+        <li>Usage-based billing via Stripe, transparent per-call cost</li>
       </ul>
     </div>
-    
+
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center" style="padding: 8px 0 24px;">
           <a href="${upgradeUrl}" style="display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-            Upgrade Now
+            Add Payment Method
           </a>
         </td>
       </tr>
     </table>
-    
+
     <p style="margin: 0; font-size: 13px; color: #737373; text-align: center;">
       Questions? Reply to this email.
     </p>
@@ -278,52 +278,3 @@ export const sendLimitReachedEmail = action({
   },
 });
 
-// Debug: Test email template generation
-export const debugEmailTemplate = action({
-  args: { email: v.string() },
-  handler: async (ctx, { email }) => {
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const testUrl = "https://apiclaw.cloud/auth/verify?token=DEBUG_TEST";
-    
-    // Generate HTML using the template
-    var html = "<!DOCTYPE html><html><head><meta charset='utf-8'></head>";
-    html += "<body style='margin:0;padding:40px;background:#f5f5f5;font-family:Arial,sans-serif;'>";
-    html += "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>";
-    html += "<table width='500' cellpadding='0' cellspacing='0' style='background:#fff;border-radius:12px;'>";
-    html += "<tr><td style='padding:32px;text-align:center;'>";
-    html += "<div style='font-size:48px;'>🦞</div>";
-    html += "<h1 style='margin:16px 0;color:#0a0a0a;'>APIClaw DEBUG</h1>";
-    html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>Debug Email Test</h2>";
-    html += "<p style='margin:0 0 24px;color:#525252;'>This is a debug test email.</p>";
-    html += "<a href='" + testUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Test Link</a>";
-    html += "</td></tr></table>";
-    html += "</td></tr></table></body></html>";
-    
-    console.log("[Debug] HTML length:", html.length);
-    console.log("[Debug] HTML:", html);
-    
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + RESEND_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "APIClaw <noreply@apiclaw.cloud>",
-        to: email,
-        subject: "DEBUG EMAIL FROM CONVEX",
-        html: html,
-      }),
-    });
-    
-    const result = await response.text();
-    console.log("[Debug] Response:", response.status, result);
-    
-    return { 
-      htmlLength: html.length, 
-      htmlPreview: html.substring(0, 200),
-      resendStatus: response.status,
-      resendResult: result 
-    };
-  },
-});
