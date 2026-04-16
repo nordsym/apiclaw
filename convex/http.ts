@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { resolveVerifiedOwnerByWorkspaceId } from "./guards";
 import {
   createCheckoutSession,
   createPortalSession,
@@ -2347,6 +2348,8 @@ async function requireApiKeyAuth(
       401
     );
   }
+  // NOTE: verified-owner HTTP gate reverted 2026-04-16 after OpenClaw outage.
+  // To be re-enabled after investigation (see Apiclaw-STATE.md incident log).
   return { workspaceId: auth.workspaceId, keyId: auth.keyId };
 }
 
@@ -3023,6 +3026,273 @@ function buildManagedRequest(
       }
       return null;
     }
+    case "apilayer": {
+      // 14 unified APILayer actions + popular legacy APIs — ported from src/execute.ts
+      // Reads product-specific env keys where APILayer requires them; falls back to unified.
+      const p = (params as Record<string, any>) || {};
+      const buildUrl = (base: string, qs?: Record<string, any>) => {
+        const u = new URL(base);
+        if (qs) for (const [k, v] of Object.entries(qs)) if (v !== undefined && v !== null && v !== "") u.searchParams.set(k, String(v));
+        return u.toString();
+      };
+      const envKey = (name: string) => process.env[name] || apiKey;
+
+      switch (action) {
+        // Unified (apikey header)
+        case "exchange_rates": {
+          const endpoint = p.date ? "historical" : "latest";
+          return {
+            url: buildUrl(`https://api.apilayer.com/exchangerates_data/${endpoint}`, { base: p.base || "USD", symbols: p.symbols, date: p.date }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        }
+        case "verify_email":
+          if (!p.email) return null;
+          return {
+            url: buildUrl("https://api.apilayer.com/email_verification/check", { email: p.email }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "verify_number":
+          if (!p.number) return null;
+          return {
+            url: buildUrl("https://api.apilayer.com/number_verification/validate", { number: p.number }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "world_news":
+          if (!p.url) return null;
+          return {
+            url: buildUrl("https://api.apilayer.com/world_news/extract-news", { url: p.url, analyze: p.analyze !== false ? "true" : "false" }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "finance_news":
+          return {
+            url: buildUrl("https://api.apilayer.com/financelayer/news", { tickers: p.tickers, keywords: p.text, limit: p.number || 5 }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "scrape":
+          if (!p.url) return null;
+          return {
+            url: buildUrl("https://api.apilayer.com/adv_scraper/scraper", { url: p.url }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "skills":
+          if (!p.q) return null;
+          return {
+            url: buildUrl("https://api.promptapi.com/skills", { q: p.q, count: p.count }),
+            method: "GET",
+            headers: { apikey: apiKey },
+          };
+        case "image_crop": {
+          if (!p.url) return null;
+          const formData = new URLSearchParams();
+          formData.set("url", p.url);
+          if (p.width) formData.set("width", String(p.width));
+          if (p.height) formData.set("height", String(p.height));
+          return {
+            url: "https://api.apilayer.com/smart_crop/url",
+            method: "POST",
+            headers: { apikey: apiKey, "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString(),
+          };
+        }
+        case "form_submit": {
+          if (!p.endpoint) return null;
+          return {
+            url: `https://api.apilayer.com/form_api/${p.endpoint}`,
+            method: "POST",
+            headers: { apikey: apiKey, "Content-Type": "application/json" },
+            body: JSON.stringify(p.data || {}),
+          };
+        }
+
+        // Product-specific access_key query (legacy domain) — binary response
+        case "pdf_generate": {
+          if (!p.document_url && !p.document_html) return null;
+          const pdfKey = envKey("PDFLAYER_API_KEY");
+          const url = buildUrl("https://api.pdflayer.com/api/convert", {
+            access_key: pdfKey,
+            page_size: p.page_size || "A4",
+            document_url: p.document_url,
+          });
+          if (p.document_html && !p.document_url) {
+            return {
+              url: buildUrl("https://api.pdflayer.com/api/convert", { access_key: pdfKey, page_size: p.page_size || "A4" }),
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: `document_html=${encodeURIComponent(p.document_html)}`,
+            };
+          }
+          return { url, method: "GET", headers: {} };
+        }
+        case "screenshot": {
+          if (!p.url) return null;
+          return {
+            url: buildUrl("https://api.screenshotlayer.com/api/capture", {
+              access_key: envKey("SCREENSHOTLAYER_API_KEY"),
+              url: p.url,
+              viewport: p.viewport || "1440x900",
+              fullpage: p.fullpage ? "1" : "0",
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "vat_check": {
+          if (!p.vat_number) return null;
+          return {
+            url: buildUrl("http://apilayer.net/api/validate", { access_key: envKey("VATLAYER_API_KEY"), vat_number: p.vat_number }),
+            method: "GET",
+            headers: {},
+          };
+        }
+
+        // Legacy domains (each uses product-specific access_key query param)
+        case "market_data": {
+          if (!p.symbols) return null;
+          return {
+            url: buildUrl("http://api.marketstack.com/v1/eod", {
+              access_key: envKey("MARKETSTACK_API_KEY"), symbols: p.symbols, limit: p.limit || 10, date_from: p.date_from, date_to: p.date_to,
+            }),
+            method: "GET", headers: {},
+          };
+        }
+        case "aviation": {
+          return {
+            url: buildUrl("http://api.aviationstack.com/v1/flights", {
+              access_key: envKey("AVIATIONSTACK_API_KEY"), flight_iata: p.flight_iata, dep_iata: p.dep_iata, arr_iata: p.arr_iata, airline_iata: p.airline_iata,
+            }),
+            method: "GET", headers: {},
+          };
+        }
+        case "weatherstack_current":
+        case "weather": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.weatherstack.com/current", { access_key: envKey("WEATHERSTACK_API_KEY"), query: p.query, units: p.units || "m" }),
+            method: "GET", headers: {},
+          };
+        }
+        case "weatherstack_forecast": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.weatherstack.com/forecast", { access_key: envKey("WEATHERSTACK_API_KEY"), query: p.query, forecast_days: p.forecast_days || 3 }),
+            method: "GET", headers: {},
+          };
+        }
+        case "ipstack_lookup": {
+          if (!p.ip) return null;
+          return {
+            url: buildUrl(`http://api.ipstack.com/${encodeURIComponent(p.ip)}`, { access_key: envKey("IPSTACK_API_KEY") }),
+            method: "GET", headers: {},
+          };
+        }
+        case "ipapi_lookup": {
+          if (!p.ip) return null;
+          return {
+            url: buildUrl(`https://api.ipapi.com/api/${encodeURIComponent(p.ip)}`, { access_key: envKey("IPAPI_API_KEY") }),
+            method: "GET", headers: {},
+          };
+        }
+        case "currencylayer_live": {
+          return {
+            url: buildUrl("http://api.currencylayer.com/live", { access_key: envKey("CURRENCYLAYER_API_KEY"), source: p.source || "USD", currencies: p.currencies }),
+            method: "GET", headers: {},
+          };
+        }
+        case "currencylayer_convert": {
+          if (!p.from || !p.to || !p.amount) return null;
+          return {
+            url: buildUrl("http://api.currencylayer.com/convert", {
+              access_key: envKey("CURRENCYLAYER_API_KEY"), from: p.from, to: p.to, amount: p.amount, date: p.date,
+            }),
+            method: "GET", headers: {},
+          };
+        }
+        case "coinlayer_live": {
+          return {
+            url: buildUrl("http://api.coinlayer.com/live", { access_key: envKey("COINLAYER_API_KEY"), target: p.target || "USD", symbols: p.symbols }),
+            method: "GET", headers: {},
+          };
+        }
+        case "positionstack_forward": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.positionstack.com/v1/forward", { access_key: envKey("POSITIONSTACK_API_KEY"), query: p.query, limit: p.limit || 1 }),
+            method: "GET", headers: {},
+          };
+        }
+        case "positionstack_reverse": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.positionstack.com/v1/reverse", { access_key: envKey("POSITIONSTACK_API_KEY"), query: p.query, limit: p.limit || 1 }),
+            method: "GET", headers: {},
+          };
+        }
+        case "fixer_latest": {
+          return {
+            url: buildUrl("http://data.fixer.io/api/latest", { access_key: envKey("FIXER_API_KEY"), base: p.base || "EUR", symbols: p.symbols }),
+            method: "GET", headers: {},
+          };
+        }
+        case "fixer_convert": {
+          if (!p.from || !p.to || !p.amount) return null;
+          return {
+            url: buildUrl("http://data.fixer.io/api/convert", {
+              access_key: envKey("FIXER_API_KEY"), from: p.from, to: p.to, amount: p.amount, date: p.date,
+            }),
+            method: "GET", headers: {},
+          };
+        }
+        case "languagelayer_detect": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.languagelayer.com/detect", { access_key: envKey("LANGUAGELAYER_API_KEY"), query: p.query }),
+            method: "GET", headers: {},
+          };
+        }
+        case "scrapestack_scrape": {
+          if (!p.url) return null;
+          return {
+            url: buildUrl("http://api.scrapestack.com/scrape", { access_key: envKey("SCRAPESTACK_API_KEY"), url: p.url, render_js: p.render_js ? "1" : "0" }),
+            method: "GET", headers: {},
+          };
+        }
+        case "serpstack_search": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("http://api.serpstack.com/search", { access_key: envKey("SERPSTACK_API_KEY"), query: p.query, num: p.num || 10 }),
+            method: "GET", headers: {},
+          };
+        }
+        case "mediastack_news": {
+          return {
+            url: buildUrl("http://api.mediastack.com/v1/news", { access_key: envKey("MEDIASTACK_API_KEY"), keywords: p.keywords, categories: p.categories, limit: p.limit || 10 }),
+            method: "GET", headers: {},
+          };
+        }
+        case "userstack_detect": {
+          if (!p.ua) return null;
+          return {
+            url: buildUrl("http://api.userstack.com/detect", { access_key: envKey("USERSTACK_API_KEY"), ua: p.ua }),
+            method: "GET", headers: {},
+          };
+        }
+        case "exchangeratehost_latest": {
+          return {
+            url: buildUrl("https://api.exchangerate.host/live", { access_key: envKey("EXCHANGERATEHOST_API_KEY"), source: p.source || "USD", currencies: p.currencies }),
+            method: "GET", headers: {},
+          };
+        }
+        default:
+          return null;
+      }
+    }
     default:
       return null;
   }
@@ -3048,6 +3318,7 @@ async function resolveExecuteAuth(
   // 2. Check for API key auth (Bearer sk-claw-...)
   const auth = await resolveWorkspaceFromRequest(ctx, request);
   if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
+    // NOTE: verified-owner HTTP gate reverted 2026-04-16 after OpenClaw outage.
     return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
   }
 
@@ -3271,20 +3542,43 @@ http.route({
         const response = await fetch(req.url, fetchOpts);
         const latencyMs = Date.now() - startTime;
 
-        // Handle binary responses (e.g., ElevenLabs audio)
+        // Handle binary responses (audio, PDF, image, octet-stream)
         const contentType = response.headers.get("Content-Type") || "";
-        if (contentType.includes("audio/") || contentType.includes("application/octet-stream")) {
-          return new Response(response.body, {
-            status: response.status,
-            headers: { "Content-Type": contentType, ...corsHeaders },
-          });
+        const isBinary =
+          contentType.includes("audio/") ||
+          contentType.includes("image/") ||
+          contentType.includes("application/pdf") ||
+          contentType.includes("application/octet-stream");
+        if (isBinary) {
+          const buf = await response.arrayBuffer();
+          const bytes = new Uint8Array(buf);
+          let binary = "";
+          const chunk = 0x8000;
+          for (let i = 0; i < bytes.length; i += chunk) {
+            binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+          }
+          const base64 = btoa(binary);
+          return jsonResponse({
+            success: response.ok,
+            provider,
+            action,
+            data: {
+              message: response.ok ? "Binary asset returned" : "Binary error",
+              content_type: contentType,
+              size: buf.byteLength,
+              base64,
+            },
+            _apiclaw: { latencyMs, route: routeDetail, gateway: true },
+          }, response.ok ? 200 : response.status);
         }
 
+        // For text/json responses read once as text then try json parse
+        const raw = await response.text();
         let data: any;
         try {
-          data = await response.json();
+          data = JSON.parse(raw);
         } catch {
-          data = { raw: await response.text() };
+          data = { raw };
         }
 
         return jsonResponse({
