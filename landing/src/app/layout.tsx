@@ -92,6 +92,11 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
+        <script
+          defer
+          src="https://analytics.nordsym.com/script.js"
+          data-website-id="593e90e2-9573-4b01-928b-b5a24050489e"
+        />
       </head>
       <body className="antialiased bg-background text-text-primary">
         {children}
