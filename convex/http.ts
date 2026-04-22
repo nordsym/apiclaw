@@ -81,6 +81,19 @@ const PROVIDERS: Record<string, ProviderMeta> = {
     speed: "fast",
     costTier: "cheap",
   },
+  deepinfra: {
+    name: "DeepInfra",
+    description: "Lowest-cost open-weights inference. Kimi K2.6, DeepSeek, Llama, Qwen.",
+    category: "llm",
+    pricing: "~$0.05-4.00/M tokens",
+    regions: ["Global"],
+    tags: ["llm", "open-source", "kimi", "deepseek", "llama", "qwen", "cheap"],
+    isLLM: true,
+    envKey: "DEEPINFRA_API_KEY",
+    baseUrl: "https://api.deepinfra.com/v1/openai/chat/completions",
+    speed: "fast",
+    costTier: "cheap",
+  },
   openai: {
     name: "OpenAI",
     description: "GPT-5.4, GPT-4o, o3, o4-mini. Direct access, no middleman markup.",
@@ -344,6 +357,12 @@ const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   "deepseek-ai/DeepSeek-V3": { input: 0.30, output: 0.88 },
   "meta-llama/Llama-3.3-70B-Instruct-Turbo": { input: 0.18, output: 0.18 },
   "Qwen/Qwen2.5-72B-Instruct-Turbo":         { input: 0.18, output: 0.18 },
+  // DeepInfra (open-weights, cheapest tier)
+  "moonshotai/Kimi-K2.6":       { input: 0.50, output: 2.80 },
+  "moonshotai/Kimi-K2.5":       { input: 0.50, output: 2.80 },
+  "deepseek-ai/DeepSeek-V3.2":  { input: 0.27, output: 0.40 },
+  "meta-llama/Llama-3.3-70B-Instruct": { input: 0.23, output: 0.40 },
+  "Qwen/Qwen2.5-72B-Instruct": { input: 0.23, output: 0.40 },
   // xAI
   "grok-4.20-reasoning":  { input: 3.00,  output: 15.00 },
   "grok-3":               { input: 3.00,  output: 15.00 },
@@ -413,7 +432,15 @@ const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: stri
   { pattern: /^(together\/)?meta-llama\/Llama-3\.3-70B/i, provider: "together", nativeModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
   { pattern: /^(together\/)?Qwen\/Qwen2\.5-72B/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
   { pattern: /^(together\/)?deepseek-ai\/DeepSeek-R1/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
-  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-V3/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
+  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-V3$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
+  // DeepInfra-native models (cheapest open-weights)
+  { pattern: /^(deepinfra\/)?moonshotai\/Kimi-K2\.6/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
+  { pattern: /^(deepinfra\/)?moonshotai\/Kimi-K2\.5/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.5" },
+  { pattern: /^kimi-?k?2\.6$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
+  { pattern: /^kimi-?k?2\.5$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.5" },
+  { pattern: /^kimi$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
+  { pattern: /^(deepinfra\/)?deepseek-ai\/DeepSeek-V3\.2/i, provider: "deepinfra", nativeModel: "deepseek-ai/DeepSeek-V3.2" },
+  { pattern: /^deepseek-v3\.2$/i, provider: "deepinfra", nativeModel: "deepseek-ai/DeepSeek-V3.2" },
   // OpenAI direct models
   { pattern: /^(openai\/)?gpt-5\.4/i, provider: "openai", nativeModel: "gpt-5.4" },
   { pattern: /^(openai\/)?gpt-5/i, provider: "openai", nativeModel: "gpt-5" },
@@ -1920,6 +1947,46 @@ http.route({
 
 http.route({
   path: "/proxy/together",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ==============================================
+// DEEPINFRA (Open-weights LLM Inference) PROXY
+// ==============================================
+http.route({
+  path: "/proxy/deepinfra",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    await validateAndLogProxyCall(ctx, request, "deepinfra", "chat");
+    const DEEPINFRA_KEY = process.env.DEEPINFRA_API_KEY;
+    if (!DEEPINFRA_KEY) {
+      return jsonResponse({ error: "DeepInfra not configured" }, 500);
+    }
+    try {
+      const body = await request.json();
+      const { model = "moonshotai/Kimi-K2.6", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      if (!messages || !Array.isArray(messages)) {
+        return jsonResponse({ error: "messages array required" }, 400);
+      }
+      const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${DEEPINFRA_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model, messages, temperature, max_tokens }),
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/deepinfra",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
