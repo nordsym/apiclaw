@@ -2247,6 +2247,60 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
+// NASA Open API proxy — api.nasa.gov. Accepts {path, method, params}.
+// Key is injected server-side via ?api_key=<NASA_API_KEY>. SSRF pinned to api.nasa.gov.
+http.route({
+  path: "/proxy/nasa",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const __gate = await validateAndLogProxyCall(ctx, request, "nasa", "call");
+    if (__gate instanceof Response) return __gate;
+
+    const NASA_KEY = process.env.NASA_API_KEY;
+    if (!NASA_KEY) {
+      return jsonResponse({ error: "NASA not configured" }, 500);
+    }
+
+    let body: any = {};
+    try { body = await request.json(); } catch {}
+    const path: string = typeof body?.path === "string" && body.path.startsWith("/") ? body.path : "/planetary/apod";
+    const method: string = (body?.method ?? "GET").toString().toUpperCase();
+    const params: Record<string, any> = (body?.params && typeof body.params === "object") ? body.params : {};
+
+    const url = new URL(path, "https://api.nasa.gov");
+    if (url.origin !== "https://api.nasa.gov") {
+      return jsonResponse({ error: "invalid_target", detail: "path must resolve under api.nasa.gov" }, 400);
+    }
+    for (const [k, v] of Object.entries(params)) {
+      if (v === undefined || v === null) continue;
+      url.searchParams.set(k, String(v));
+    }
+    url.searchParams.set("api_key", NASA_KEY);
+
+    try {
+      const resp = await fetch(url.toString(), {
+        method,
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(25000),
+      });
+      const ct = resp.headers.get("Content-Type") ?? "application/json";
+      const text = await resp.text();
+      return new Response(text, {
+        status: resp.status,
+        headers: { ...corsHeaders, "Content-Type": ct, "X-APIClaw-Mode": "managed", "X-APIClaw-Provider": "NASA" },
+      });
+    } catch (e: any) {
+      return jsonResponse({ error: "upstream_failed", message: e?.message ?? "fetch failed" }, 502);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/nasa",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
 // ==============================================
 // WORKSPACE / MAGIC LINK ENDPOINTS
 // ==============================================
@@ -4021,6 +4075,7 @@ const MANAGED_PROXY_ROUTES: Record<string, string> = {
   deepinfra: "/proxy/deepinfra",
   stability: "/proxy/stability",
   assemblyai: "/proxy/assemblyai",
+  nasa: "/proxy/nasa",
 };
 
 http.route({

@@ -272,3 +272,41 @@ export const searchDiscovery = query({
     return { total, limit, offset, results: page };
   },
 });
+
+// ---------------------------------------------------------------------------
+// promoteToManaged — Flip a specific providerAPIs row to the managed lane.
+// Used when APIClaw acquires a key for a public API (e.g. NASA) and the
+// adapter is registered in MANAGED_PROXY_ROUTES. Patch-only, idempotent.
+// ---------------------------------------------------------------------------
+export const promoteToManaged = mutation({
+  args: {
+    apiId: v.id("providerAPIs"),
+    baseUrl: v.optional(v.string()),
+    category: v.optional(v.string()),
+  },
+  handler: async (ctx, { apiId, baseUrl, category }) => {
+    const row = await ctx.db.get(apiId);
+    if (!row) return { status: "not_found", apiId };
+    const patch: any = {
+      authType: "managed",
+      listingStatus: "live",
+      proxyMode: "direct_call",
+      healthStatus: row.healthStatus ?? "healthy",
+      consecutiveFailures: 0,
+    };
+    if (baseUrl) patch.baseUrl = baseUrl;
+    if (category) patch.category = category;
+    await ctx.db.patch(apiId, patch);
+    return {
+      status: "ok",
+      apiId,
+      name: row.name,
+      before: {
+        authType: row.authType,
+        listingStatus: row.listingStatus,
+        proxyMode: row.proxyMode,
+      },
+      after: patch,
+    };
+  },
+});

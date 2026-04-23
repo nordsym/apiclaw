@@ -321,8 +321,8 @@ export default function SecurityPage() {
                 a: "SOC 2 Type II certification is on our roadmap for 2026. We currently follow SOC 2-aligned practices and are preparing for formal audit."
               },
               {
-                q: "Can I use my own API keys instead of Direct Call?",
-                a: "Yes! You can bring your own keys (BYOK) for any of the 22,000+ indexed APIs. Direct Call is optional — it's there when you want zero-config convenience."
+                q: "Do I need to manage API keys for providers?",
+                a: "No. APIClaw is zero-config by design: for managed providers APIClaw holds the keys, and for open public APIs no key is required. If an API cannot be served either way it stays in Discovery until a managed adapter is added."
               }
             ].map((faq, i) => (
               <div key={i} className="p-6 rounded-xl bg-surface-elevated border border-border">
