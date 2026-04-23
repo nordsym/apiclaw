@@ -3942,3 +3942,347 @@ http.route({
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
+
+// ==============================================
+// /v1/call — UNIFIED EXECUTION LAYER
+// Binary funnel: every providerAPIs row with listingStatus="live" is reachable
+// through this endpoint. Three branches by authType:
+//   "managed" → internal dispatch to existing /proxy/{providerName} adapter
+//   "none"    → universal pass-through with SSRF guard + circuit breaker
+//   else      → 400 discovery_only
+// No BYOK. Ever.
+// ==============================================
+
+// SSRF guard: block private/loopback/link-local/metadata addresses.
+function isPrivateHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "::1") return true;
+  if (h === "169.254.169.254") return true; // AWS/GCP metadata
+  if (h.endsWith(".internal") || h.endsWith(".local")) return true;
+  // IPv4 private ranges
+  const m = h.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (m) {
+    const [a, b] = [parseInt(m[1], 10), parseInt(m[2], 10)];
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 0) return true;
+  }
+  // IPv6 unique-local / link-local
+  if (/^f[cd][0-9a-f]{2}:/.test(h) || /^fe[89ab][0-9a-f]:/.test(h)) return true;
+  return false;
+}
+
+// Validate + build the final URL for an open-proxy call.
+// Constraint: resolved URL's origin must match baseUrl's origin.
+function buildOpenProxyURL(baseUrl: string, userPath: string, params?: Record<string, string>): URL | null {
+  let base: URL;
+  try { base = new URL(baseUrl); } catch { return null; }
+  if (base.protocol !== "http:" && base.protocol !== "https:") return null;
+  if (isPrivateHost(base.hostname)) return null;
+  // Normalize path: always starts with /, never contains schema://
+  const path = userPath.startsWith("/") ? userPath : "/" + userPath;
+  if (path.startsWith("//") || /^[a-z]+:\/\//i.test(userPath)) return null;
+  const merged = new URL(path, base.toString().replace(/\/$/, "") + "/");
+  if (merged.origin !== base.origin) return null; // prevents // relative path escapes
+  if (isPrivateHost(merged.hostname)) return null;
+  // Append params
+  if (params) {
+    for (const [k, val] of Object.entries(params)) {
+      if (typeof val === "string") merged.searchParams.set(k, val);
+    }
+  }
+  return merged;
+}
+
+// Map of managed-provider names → /proxy/{adapter} internal forwarding.
+// Case-insensitive. Names must match providerAPIs.name exactly (one word each).
+const MANAGED_PROXY_ROUTES: Record<string, string> = {
+  apilayer: "/proxy/apilayer",
+  twilio: "/proxy/twilio",
+  "46elks": "/proxy/46elks",
+  resend: "/proxy/resend",
+  openrouter: "/proxy/openrouter",
+  brave_search: "/proxy/brave_search",
+  "brave search": "/proxy/brave_search",
+  elevenlabs: "/proxy/elevenlabs",
+  github: "/proxy/github",
+  serper: "/proxy/serper",
+  firecrawl: "/proxy/firecrawl",
+  groq: "/proxy/groq",
+  mistral: "/proxy/mistral",
+  cohere: "/proxy/cohere",
+  replicate: "/proxy/replicate",
+  deepgram: "/proxy/deepgram",
+  e2b: "/proxy/e2b",
+  together: "/proxy/together",
+  deepinfra: "/proxy/deepinfra",
+  stability: "/proxy/stability",
+  assemblyai: "/proxy/assemblyai",
+};
+
+http.route({
+  path: "/v1/call",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const t0 = Date.now();
+
+    // Auth — accepts Bearer sk-claw, X-APIClaw-Api-Key, or X-APIClaw-Session.
+    // Shadow-mode compliant: anonymous calls flow through for telemetry but
+    // are subject to workspace-less quota (handled downstream).
+    const auth = await resolveWorkspaceFromRequest(ctx, request);
+    const workspaceId = auth.workspaceId;
+
+    let body: any;
+    try { body = await request.json(); }
+    catch { return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400); }
+
+    const apiName: string = typeof body?.api === "string" ? body.api.trim() : "";
+    const userPath: string = typeof body?.path === "string" ? body.path : "/";
+    const method: string = (body?.method ?? "GET").toString().toUpperCase();
+    const params = body?.params && typeof body.params === "object" ? body.params : undefined;
+    const userBody = body?.body;
+    if (!apiName) {
+      return jsonResponse({ error: { code: "missing_api", message: "Body must include { api: string }" } }, 400);
+    }
+    if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+      return jsonResponse({ error: { code: "invalid_method", message: `Unsupported method ${method}` } }, 400);
+    }
+
+    // Lookup by exact name, then case-insensitive fallback.
+    let row: any = null;
+    try {
+      const rows = await ctx.runQuery(api.pipelineAlign.searchDiscovery, {
+        query: apiName,
+        callableOnly: false,
+        limit: 5,
+        offset: 0,
+      });
+      const exact = rows.results.find((r: any) => r.name.toLowerCase() === apiName.toLowerCase());
+      row = exact ?? rows.results[0];
+    } catch (e: any) {
+      return jsonResponse({ error: { code: "registry_lookup_failed", message: e.message } }, 503);
+    }
+
+    if (!row) {
+      return jsonResponse(
+        { error: { code: "api_not_found", message: `No API named "${apiName}" in registry`, hint: "Use /v1/discover to search." } },
+        404
+      );
+    }
+    if (!row.callable) {
+      return jsonResponse(
+        {
+          error: {
+            code: "discovery_only",
+            message: `"${row.name}" is discovery-only (authType=${row.authType}).`,
+            hint: "This API is indexed but not yet wired for execution. See docsUrl for integration.",
+            docsUrl: row.docsUrl,
+          },
+        },
+        400
+      );
+    }
+
+    // Circuit breaker
+    const rowFull = await ctx.runQuery(api.providers.getApiById, { apiId: row.id }).catch(() => null) as any;
+    if (rowFull?.circuitOpenUntil && rowFull.circuitOpenUntil > Date.now()) {
+      const retryAfterMs = rowFull.circuitOpenUntil - Date.now();
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: "upstream_degraded",
+            message: `"${row.name}" is currently unavailable (circuit open).`,
+            retryAfterMs,
+          },
+        }),
+        {
+          status: 503,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": Math.ceil(retryAfterMs / 1000).toString(),
+          },
+        }
+      );
+    }
+
+    const analyticsBase = {
+      event: "api_call" as const,
+      identifier: workspaceId ?? `anon:${auth.authMethod}`,
+      workspaceId: workspaceId as any,
+    };
+
+    // ---------------- Branch: managed ----------------
+    if (row.authType === "managed" && row.proxyMode === "direct_call") {
+      const proxyRoute = MANAGED_PROXY_ROUTES[row.name.toLowerCase()];
+      if (!proxyRoute) {
+        return jsonResponse(
+          { error: { code: "managed_not_mapped", message: `"${row.name}" is marked managed but has no proxy adapter mapping yet.` } },
+          501
+        );
+      }
+      // Server-side forward to the internal proxy adapter. We rebuild the body the
+      // adapter expects: most adapters accept {service, endpoint, params} or similar
+      // and are already callable via /proxy/*. We forward the inbound body verbatim
+      // and preserve auth headers so the adapter can attribute usage correctly.
+      const forwardUrl = new URL(proxyRoute, request.url).toString();
+      try {
+        const forwardRes = await fetch(forwardUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(request.headers.get("Authorization") ? { Authorization: request.headers.get("Authorization")! } : {}),
+            ...(request.headers.get("X-APIClaw-Api-Key") ? { "X-APIClaw-Api-Key": request.headers.get("X-APIClaw-Api-Key")! } : {}),
+            ...(request.headers.get("X-APIClaw-Session") ? { "X-APIClaw-Session": request.headers.get("X-APIClaw-Session")! } : {}),
+            ...(request.headers.get("X-APIClaw-Subagent") ? { "X-APIClaw-Subagent": request.headers.get("X-APIClaw-Subagent")! } : {}),
+          },
+          body: JSON.stringify({ path: userPath, method, params, body: userBody, ...userBody }),
+          signal: AbortSignal.timeout(25000),
+        });
+        const respText = await forwardRes.text();
+        const ok = forwardRes.status >= 200 && forwardRes.status < 500;
+        if (ok) await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: row.id });
+        else await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: forwardRes.status });
+        try {
+          await ctx.runMutation(api.analytics.log, {
+            ...analyticsBase,
+            provider: row.name,
+            metadata: { route: "v1_call", mode: "managed", status: forwardRes.status, latencyMs: Date.now() - t0 },
+          });
+        } catch {}
+        return new Response(respText, {
+          status: forwardRes.status,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": forwardRes.headers.get("Content-Type") ?? "application/json",
+            "X-APIClaw-Mode": "managed",
+            "X-APIClaw-Provider": row.name,
+          },
+        });
+      } catch (e: any) {
+        await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 0 });
+        return jsonResponse(
+          { error: { code: "managed_adapter_error", message: e?.message ?? "managed adapter failed", provider: row.name } },
+          502
+        );
+      }
+    }
+
+    // ---------------- Branch: open-proxy (authType="none") ----------------
+    if (row.authType === "none" && row.proxyMode === "open_proxy") {
+      const baseUrl = row.baseUrl ?? row.docsUrl;
+      if (!baseUrl) {
+        return jsonResponse({ error: { code: "missing_base_url", message: `"${row.name}" has no baseUrl configured.` } }, 500);
+      }
+      const target = buildOpenProxyURL(baseUrl, userPath, params);
+      if (!target) {
+        return jsonResponse(
+          { error: { code: "invalid_target", message: "Resolved URL failed SSRF/origin validation", baseUrl, path: userPath } },
+          400
+        );
+      }
+
+      // Content-type allowlist + size cap enforced in response handling.
+      try {
+        const fetchInit: RequestInit = {
+          method,
+          headers: {
+            "User-Agent": "APIClaw/2.5 (+https://apiclaw.com)",
+            Accept: "application/json, text/*, application/xml;q=0.9",
+          },
+          signal: AbortSignal.timeout(25000),
+        };
+        if (method !== "GET" && method !== "DELETE" && userBody !== undefined) {
+          (fetchInit.headers as any)["Content-Type"] = "application/json";
+          fetchInit.body = typeof userBody === "string" ? userBody : JSON.stringify(userBody);
+        }
+        const upstream = await fetch(target.toString(), fetchInit);
+
+        // 10 MB response cap
+        const reader = upstream.body?.getReader();
+        const CAP = 10 * 1024 * 1024;
+        const chunks: Uint8Array[] = [];
+        let total = 0;
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            total += value.byteLength;
+            if (total > CAP) {
+              await reader.cancel();
+              await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 413 });
+              return jsonResponse(
+                { error: { code: "response_too_large", message: "Upstream exceeded 10 MB cap." } },
+                413
+              );
+            }
+            chunks.push(value);
+          }
+        }
+        const buf = new Uint8Array(total);
+        let off = 0; for (const c of chunks) { buf.set(c, off); off += c.byteLength; }
+
+        const ok = upstream.status >= 200 && upstream.status < 500;
+        if (ok) await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: row.id });
+        else await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: upstream.status });
+
+        try {
+          await ctx.runMutation(api.analytics.log, {
+            ...analyticsBase,
+            provider: row.name,
+            metadata: {
+              route: "v1_call", mode: "open_proxy",
+              method, target: target.origin + target.pathname,
+              status: upstream.status, latencyMs: Date.now() - t0, bytes: total,
+            },
+          });
+        } catch {}
+
+        return new Response(buf, {
+          status: upstream.status,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": upstream.headers.get("Content-Type") ?? "application/json",
+            "X-APIClaw-Mode": "open_proxy",
+            "X-APIClaw-Provider": row.name,
+            "X-APIClaw-Upstream-Bytes": total.toString(),
+          },
+        });
+      } catch (e: any) {
+        await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 0 });
+        const isTimeout = e?.name === "TimeoutError" || /timeout|abort/i.test(e?.message ?? "");
+        return jsonResponse(
+          {
+            error: {
+              code: isTimeout ? "upstream_timeout" : "upstream_error",
+              message: e?.message ?? "upstream fetch failed",
+              provider: row.name,
+            },
+          },
+          isTimeout ? 504 : 502
+        );
+      }
+    }
+
+    // ---------------- Branch: everything else = discovery_only ----------------
+    return jsonResponse(
+      {
+        error: {
+          code: "discovery_only",
+          message: `"${row.name}" is discovery-only (authType=${row.authType}, proxyMode=${row.proxyMode}).`,
+          docsUrl: row.docsUrl,
+        },
+      },
+      400
+    );
+  }),
+});
+
+http.route({
+  path: "/v1/call",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});

@@ -230,7 +230,7 @@ export default function WorkspacePage() {
   const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "overview");
   const [analyticsExpanded, setAnalyticsExpanded] = useState(tabFromUrl === "analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   
   // Workspace data (consumer)
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -473,10 +473,11 @@ export default function WorkspacePage() {
       }
     };
 
-    // Check theme
+    // Theme: light-first canon; opt into dark explicitly.
     const saved = localStorage.getItem("theme");
-    setIsDark(saved !== "light");
-    document.documentElement.classList.toggle("dark", saved !== "light");
+    const dark = saved === "dark";
+    setIsDark(dark);
+    document.documentElement.classList.toggle("dark", dark);
 
     init();
   }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs]);
@@ -1363,10 +1364,24 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
 // MY APIs TAB (Provider)
 // ============================================
 
-const APICLAW_MANAGED_PROVIDER = "k97cvcvadnyz8x8m4we7xqmh1s83p0ph";
+// Providers whose underlying service keys are managed server-side by APIClaw
+// (not configured by the partner themselves). Add partner provider IDs here.
+const APICLAW_MANAGED_PROVIDERS = new Set<string>([
+  "k97cvcvadnyz8x8m4we7xqmh1s83p0ph",  // APIClaw own managed provider
+  "k97fj3bpy1nvp6fd1vr51kbkxs84k5dn",  // APILayer (Pratham) — keys held server-side by NordSym
+]);
+
+// APILayer APIs that are subscription-blocked at the upstream (APILayer) side.
+// Documented in APIClaw × APILayer Partnership SoW, Section 3 (Integration Status).
+const APILAYER_SUBSCRIPTION_BLOCKED_NAMES = new Set<string>([
+  "Number Verification API",
+  "World News API",
+  "Image Crop API",
+  "Form API",
+]);
 
 function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, providerId }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void; sessionToken: string | null; providerId: string | null }) {
-  const isManagedByAPIClaw = providerId === APICLAW_MANAGED_PROVIDER;
+  const isManagedByAPIClaw = providerId !== null && APICLAW_MANAGED_PROVIDERS.has(providerId);
   const [form, setForm] = useState({ name: "", description: "", category: "DevTools", openApiUrl: "", docsUrl: "", pricingModel: "freemium" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -1653,7 +1668,9 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
       )}
 
       <div className="grid gap-4">
-        {apis.map((api) => (
+        {apis.map((api) => {
+          const isSubscriptionBlocked = isManagedByAPIClaw && APILAYER_SUBSCRIPTION_BLOCKED_NAMES.has(api.name);
+          return (
           <div key={api._id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden hover:border-[#ef4444]/30 transition">
             {/* Row */}
             <div
@@ -1664,7 +1681,12 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-semibold text-lg">{api.name}</h3>
                   {api.hasDirectCall && <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Direct Call</span>}
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${api.status === "approved" ? "bg-green-500/20 text-green-500" : api.status === "blocked" ? "bg-red-500/20 text-red-500" : api.status === "rate_limited" ? "bg-yellow-500/20 text-yellow-500" : "bg-yellow-500/20 text-yellow-500"}`}>{api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}</span>
+                  {isManagedByAPIClaw && <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium" title="Keys held server-side by APIClaw. No configuration needed.">Managed</span>}
+                  {isSubscriptionBlocked ? (
+                    <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium" title="Subscription-blocked at upstream provider. Not callable until upstream plan is upgraded.">Blocked upstream</span>
+                  ) : (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${api.status === "approved" ? "bg-green-500/20 text-green-500" : api.status === "blocked" ? "bg-red-500/20 text-red-500" : api.status === "rate_limited" ? "bg-yellow-500/20 text-yellow-500" : "bg-yellow-500/20 text-yellow-500"}`}>{api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}</span>
+                  )}
                 </div>
                 <p className="text-sm text-[var(--text-muted)]">{api.description}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-[var(--text-muted)]">
@@ -1854,7 +1876,8 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -4748,6 +4771,8 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [copied, setCopied] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchKeys = useCallback(async () => {
@@ -4797,7 +4822,17 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
 
   const handleRevoke = async (keyId: string) => {
     if (!sessionToken) return;
+    // Two-click confirmation pattern — first click arms, second click executes.
+    if (confirmRevokeId !== keyId) {
+      setConfirmRevokeId(keyId);
+      // Auto-disarm after 4s so a user can't accidentally revoke later.
+      setTimeout(() => {
+        setConfirmRevokeId((id) => (id === keyId ? null : id));
+      }, 4000);
+      return;
+    }
     setRevoking(keyId);
+    setConfirmRevokeId(null);
     try {
       await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST",
@@ -4810,6 +4845,12 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
     } finally {
       setRevoking(null);
     }
+  };
+
+  const copyKeyPrefix = (keyId: string, prefix: string) => {
+    navigator.clipboard.writeText(prefix).catch(() => {});
+    setCopiedKeyId(keyId);
+    setTimeout(() => setCopiedKeyId((id) => (id === keyId ? null : id)), 1800);
   };
 
   const copyKey = () => {
@@ -4958,7 +4999,18 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
                   <div>
                     <p className="text-sm font-medium">{k.name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <code className="text-xs text-[var(--text-muted)] font-mono">{k.keyPrefix}</code>
+                      <button
+                        onClick={() => copyKeyPrefix(k.id, k.keyPrefix)}
+                        className="group inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono hover:text-[var(--text-primary)] transition"
+                        title="Copy key prefix"
+                      >
+                        <code>{k.keyPrefix}</code>
+                        {copiedKeyId === k.id ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3 opacity-50 group-hover:opacity-100 transition" />
+                        )}
+                      </button>
                       <span className="text-xs text-[var(--text-muted)]">
                         {k.lastUsedAt ? `Last used ${timeAgo(k.lastUsedAt)}` : "Never used"}
                       </span>
@@ -4971,9 +5023,20 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
                 <button
                   onClick={() => handleRevoke(k.id)}
                   disabled={revoking === k.id}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition disabled:opacity-50"
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition disabled:opacity-50 ${
+                    confirmRevokeId === k.id
+                      ? "border-red-500 bg-red-500 text-white hover:bg-red-600"
+                      : "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  }`}
+                  title={confirmRevokeId === k.id ? "Click again to confirm revocation" : "Revoke this API key"}
                 >
-                  {revoking === k.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Revoke"}
+                  {revoking === k.id ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : confirmRevokeId === k.id ? (
+                    "Confirm revoke"
+                  ) : (
+                    "Revoke"
+                  )}
                 </button>
               </div>
             ))}

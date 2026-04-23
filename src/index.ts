@@ -1044,18 +1044,28 @@ Docs: https://apiclaw.cloud
                 status: 'success',
                 query,
                 results_count: results.length,
-                results: results.map(r => ({
-                  id: r.provider.id,
-                  name: r.provider.name,
-                  description: r.provider.description,
-                  category: r.provider.category,
-                  capabilities: r.provider.capabilities,
-                  pricing_model: r.provider.pricing.model,
-                  has_free_tier: r.provider.pricing.free_tier,
-                  agent_success_rate: r.provider.agent_success_rate,
-                  relevance_score: r.relevance_score,
-                  match_reasons: r.match_reasons
-                }))
+                results: results.map(r => {
+                  // Binary funnel: callable iff APIClaw can execute it server-side
+                  // (managed adapter OR keyless open proxy). Everything else = discovery-only.
+                  const anyProvider = r.provider as unknown as { callable?: boolean; auth?: string };
+                  const isCallable = anyProvider.callable === true;
+                  return {
+                    id: r.provider.id,
+                    name: r.provider.name,
+                    description: r.provider.description,
+                    category: r.provider.category,
+                    capabilities: r.provider.capabilities,
+                    pricing_model: r.provider.pricing.model,
+                    has_free_tier: r.provider.pricing.free_tier,
+                    agent_success_rate: r.provider.agent_success_rate,
+                    relevance_score: r.relevance_score,
+                    match_reasons: r.match_reasons,
+                    callable: isCallable,
+                    execution: isCallable
+                      ? { tool: 'call_api', endpoint: '/v1/call', hint: 'APIClaw handles auth + routing.' }
+                      : { tool: null, endpoint: null, hint: 'Discovery-only. See docsUrl for integration.' },
+                  };
+                })
               }, null, 2)
             }
           ]

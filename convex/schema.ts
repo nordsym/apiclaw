@@ -290,14 +290,29 @@ export default defineSchema({
     category: v.string(),
     openApiUrl: v.optional(v.string()),
     docsUrl: v.optional(v.string()),
+    baseUrl: v.optional(v.string()), // canonical origin used by universal proxy
     pricingModel: v.string(), // free, freemium, paid
     pricingNotes: v.optional(v.string()),
     status: v.string(), // active, paused
-    // Promotion lane: where this entry sits on the "raw registry → live production" pipeline
-    //   "indexed"  = present in registry, callable-in-theory, no runtime wiring
-    //   "callable" = runtime adapter/params mapped, not smoke-tested
-    //   "live"     = routed via /proxy/* or /v1/execute with verified traffic
+    // Binary callable funnel (GTM canon):
+    //   "live"      — callable via /v1/call (managed adapter or open proxy)
+    //   "discovery" — searchable in registry, not callable
     listingStatus: v.optional(v.string()),
+    // How /v1/call authenticates upstream:
+    //   "managed" — APIClaw holds the provider key (46 Direct Call adapters)
+    //   "none"    — keyless public API, universal pass-through
+    //   "unknown" — auth model not mapped, cannot be called (= discovery lane)
+    authType: v.optional(v.string()),
+    // Execution mode used by /v1/call:
+    //   "direct_call"     — dispatch to existing /proxy/{providerName} adapter
+    //   "open_proxy"      — generic fetch via baseUrl + agent-supplied path
+    //   "discovery_only"  — reject with helpful error
+    proxyMode: v.optional(v.string()),
+    // Circuit-breaker state — NEVER deleted, only patched.
+    healthStatus: v.optional(v.string()), // "healthy" | "degraded" | "down"
+    lastHealthCheckAt: v.optional(v.number()),
+    consecutiveFailures: v.optional(v.number()),
+    circuitOpenUntil: v.optional(v.number()), // epoch ms — if set & in future, calls return 503
     createdAt: v.number(),
     approvedAt: v.optional(v.number()),
     // Analytics
@@ -309,7 +324,9 @@ export default defineSchema({
     .index("by_category", ["category"])
     .index("by_status", ["status"])
     .index("by_status_category", ["status", "category"])
-    .index("by_listingStatus", ["listingStatus"]),
+    .index("by_listingStatus", ["listingStatus"])
+    .index("by_authType", ["authType"])
+    .index("by_name", ["name"]),
 
   // APIs listed by providers (for full dashboard)
   apis: defineTable({

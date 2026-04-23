@@ -8,9 +8,9 @@ interface VideoDemoProps {
   thumbnailUrl?: string;
 }
 
-export function VideoDemo({ 
-  videoUrl = "https://firebasestorage.googleapis.com/v0/b/nordsym-funnel.firebasestorage.app/o/Getting%20Started%20with%20API%20Claw.mp4?alt=media&token=5982c20f-d97c-4b36-9ef1-4795f9347068",
-  thumbnailUrl 
+export function VideoDemo({
+  videoUrl = "/demo.mp4",
+  thumbnailUrl
 }: VideoDemoProps) {
   const [isOpen, setIsOpen] = useState(false);
 
