@@ -4,7 +4,7 @@
 
 import { readSession, getMachineFingerprint } from './session.js';
 
-const PROXY_BASE = "https://brilliant-puffin-712.eu-west-1.convex.site/proxy";
+const PROXY_BASE = "https://adventurous-avocet-799.convex.site/proxy";
 
 export async function callProxy(provider: string, params: any): Promise<any> {
   const url = `${PROXY_BASE}/${provider}`;
@@ -51,4 +51,4 @@ export async function callProxy(provider: string, params: any): Promise<any> {
   return response.json();
 }
 
-export const PROXY_PROVIDERS = ["openrouter", "brave_search", "resend", "elevenlabs", "46elks", "twilio", "replicate", "firecrawl", "e2b", "groq", "deepgram", "serper", "mistral", "cohere", "together", "stability", "assemblyai", "github", "apilayer"];
+export const PROXY_PROVIDERS = ["openrouter", "brave_search", "resend", "elevenlabs", "46elks", "twilio", "replicate", "firecrawl", "e2b", "groq", "deepgram", "serper", "mistral", "cohere", "together", "stability", "assemblyai", "github", "apilayer", "nasa"];

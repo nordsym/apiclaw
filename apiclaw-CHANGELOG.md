@@ -10,7 +10,26 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
-### Server-side (no client bump — 2.5.0 MCP is wire-compatible)
+---
+
+## [2.5.1] — 2026-04-23
+
+### Fixed — production hotfix
+
+- **`src/proxy.ts` was pointing to dev deployment.** `PROXY_BASE` updated from `brilliant-puffin-712.eu-west-1.convex.site/proxy` → `adventurous-avocet-799.convex.site/proxy`. This was the root cause of managed-provider calls through the legacy `callProxy()` path returning 403 / "not configured" errors. All users on 2.5.0 who hit this code path were silently routed to dev.
+- **`nasa` added to `PROXY_PROVIDERS`** so the `callProxy()` fallback is allowed to dispatch NASA calls.
+
+### Added
+
+- NASA is live in the managed lane for all users. Managed adapter count: 47. Callable APIs: 1,679.
+
+Upgrade: `npx -y @nordsym/apiclaw@2.5.1` or Claude Desktop restart (pulls `@latest`).
+
+---
+
+## [Historical unreleased — server-side only notes]
+
+### Server-side (unchanged by 2.5.1 client bump; listed for completeness)
 
 - **NASA promoted to managed lane.** `/proxy/nasa` adapter live on Convex prod; managed key injected server-side; SSRF pinned to `api.nasa.gov`.
   - Verified: `/planetary/apod` (APOD), `/neo/rest/v1/feed` (NEO)
