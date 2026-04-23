@@ -16,9 +16,9 @@ import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
 
 const stats = [
-  { number: "26,700+", label: "Discoverable APIs", live: true },
+  { number: "20,386+", label: "Discoverable APIs", live: true },
   { number: "1,650+", label: "Callable APIs", live: true },
-  { number: (statsData.npmDownloads || 10184).toLocaleString(), label: "Installs", live: true },
+  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "12,200+"), label: "Installs", live: true },
 ];
 
 const trustedBy = [

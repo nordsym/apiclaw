@@ -1,9 +1,9 @@
 {
-  "apiCount": 26704,
-  "callableCount": 1654,
+  "apiCount": 20386,
+  "callableCount": 1660,
   "openApiCount": 1635,
-  "managedCount": 19,
-  "npmDownloads": 10782,
+  "managedCount": 22,
+  "npmDownloads": 12206,
   "endpointCount": 0,
   "capabilityCount": 15,
   "generatedAt": "2026-04-10T12:00:34.940Z",
