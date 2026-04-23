@@ -301,6 +301,19 @@ const PROVIDERS: Record<string, ProviderMeta> = {
     speed: "medium",
     costTier: "cheap",
   },
+  nasa: {
+    name: "NASA",
+    description: "NASA open-data APIs. Managed key injection for api.nasa.gov — APOD, NEO Feed, EPIC, Mars Weather.",
+    category: "science",
+    pricing: "Free (rate-limited upstream)",
+    regions: ["Global"],
+    tags: ["nasa", "space", "science", "apod", "neo", "epic", "mars", "earth", "astronomy"],
+    isLLM: false,
+    envKey: "NASA_API_KEY",
+    baseUrl: "https://api.nasa.gov",
+    speed: "medium",
+    costTier: "cheap",
+  },
   apilayer: {
     name: "APILayer",
     description: "14 APIs: exchange rates, market data, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping, and more.",
@@ -3116,6 +3129,36 @@ function buildManagedRequest(
       url.searchParams.set("q", params.query || "");
       url.searchParams.set("count", String(params.count || 10));
       return { url: url.toString(), method: "GET", headers: { "X-Subscription-Token": apiKey } };
+    }
+    case "nasa": {
+      // Named common actions + a generic "call" passthrough for power users.
+      // All resolve under https://api.nasa.gov; api_key query-param injected server-side.
+      const nasaActionPaths: Record<string, string> = {
+        apod: "/planetary/apod",
+        neo_feed: "/neo/rest/v1/feed",
+        neo_lookup: "/neo/rest/v1/neo",
+        epic: "/EPIC/api/natural",
+        epic_date: "/EPIC/api/natural/date",
+        mars_weather: "/insight_weather/",
+        earth_imagery: "/planetary/earth/imagery",
+        earth_assets: "/planetary/earth/assets",
+        donki_notifications: "/DONKI/notifications",
+        call: "", // generic — caller passes params.path
+      };
+      if (!(action in nasaActionPaths)) return null;
+      let pathStr = nasaActionPaths[action];
+      if (action === "call") {
+        pathStr = typeof params.path === "string" && params.path.startsWith("/") ? params.path : "/planetary/apod";
+      }
+      const url = new URL(pathStr, "https://api.nasa.gov");
+      if (url.origin !== "https://api.nasa.gov") return null; // SSRF guard
+      const skip = new Set(["path", "method", "api_key"]);
+      for (const [k, v] of Object.entries(params)) {
+        if (skip.has(k) || v === undefined || v === null) continue;
+        url.searchParams.set(k, String(v));
+      }
+      url.searchParams.set("api_key", apiKey);
+      return { url: url.toString(), method: "GET", headers: { "Accept": "application/json" } };
     }
     case "serper": {
       if (action !== "search") return null;
