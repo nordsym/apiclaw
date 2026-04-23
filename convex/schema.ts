@@ -68,14 +68,21 @@ export default defineSchema({
     // Stripe billing fields
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
+    stripeSubscriptionStatus: v.optional(v.string()), // "active" | "trialing" | "past_due" | "canceled" | "incomplete"
     billingPlan: v.optional(v.string()), // "free" | "usage_based" | "starter" | "pro" | "scale"
     creditBalance: v.optional(v.number()), // prepaid credits in cents
     lastBillingDate: v.optional(v.number()),
     // Payment method fields
     hasPaymentMethod: v.optional(v.boolean()),
+    hasCardAttached: v.optional(v.boolean()), // mirror of hasPaymentMethod, set at subscription/payment-method attach time
     paymentMethodType: v.optional(v.string()),
     cardBrand: v.optional(v.string()),
     cardLast4: v.optional(v.string()),
+    // Per-workspace gating override (shadow-mode bypass flag)
+    // true  => enforce auth/billing gate even if env is in shadow mode
+    // false => never gate this workspace (legacy grandfather)
+    // unset => follow AUTH_ENFORCEMENT env
+    gatingEnabled: v.optional(v.boolean()),
     // Referral fields
     referralCode: v.optional(v.string()), // CLAW-XXXXXX format
     referredBy: v.optional(v.id("workspaces")), // who referred this user
@@ -286,6 +293,11 @@ export default defineSchema({
     pricingModel: v.string(), // free, freemium, paid
     pricingNotes: v.optional(v.string()),
     status: v.string(), // active, paused
+    // Promotion lane: where this entry sits on the "raw registry → live production" pipeline
+    //   "indexed"  = present in registry, callable-in-theory, no runtime wiring
+    //   "callable" = runtime adapter/params mapped, not smoke-tested
+    //   "live"     = routed via /proxy/* or /v1/execute with verified traffic
+    listingStatus: v.optional(v.string()),
     createdAt: v.number(),
     approvedAt: v.optional(v.number()),
     // Analytics
@@ -296,7 +308,8 @@ export default defineSchema({
     .index("by_workspaceId", ["workspaceId"])
     .index("by_category", ["category"])
     .index("by_status", ["status"])
-    .index("by_status_category", ["status", "category"]),
+    .index("by_status_category", ["status", "category"])
+    .index("by_listingStatus", ["listingStatus"]),
 
   // APIs listed by providers (for full dashboard)
   apis: defineTable({

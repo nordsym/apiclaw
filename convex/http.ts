@@ -761,8 +761,35 @@ function anthropicToOpenaiResponse(anthropicData: any, model: string): any {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-APIClaw-Internal, X-APIClaw-Subagent",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-APIClaw-Internal, X-APIClaw-Subagent, X-APIClaw-Api-Key, X-APIClaw-Session, X-APIClaw-Identifier, X-APIClaw-Route, X-APIClaw-Workspace",
 };
+
+// ============================================
+// SHADOW-MODE GATE (staged rollout to enforce)
+// ============================================
+// AUTH_ENFORCEMENT env var controls the gate behavior:
+//   "shadow"  (default) → log unauth calls to funnel.call_api_unauth, pass through
+//   "enforce"           → reject anonymous calls with 401 + signup link
+// Per-workspace override: workspaces.gatingEnabled === true forces enforce for that workspace.
+// /v1/discover stays open unconditionally.
+function isEnforceMode(): boolean {
+  return (process.env.APICLAW_AUTH_ENFORCEMENT ?? "shadow") === "enforce";
+}
+
+function unauthResponse(reason: string) {
+  return jsonResponse(
+    {
+      error: {
+        message: "Authentication required. Get a free key at https://apiclaw.com/signup",
+        type: "auth_error",
+        code: "unauth",
+        reason,
+        signupUrl: "https://apiclaw.com/signup",
+      },
+    },
+    401
+  );
+}
 
 // Helper for JSON responses
 function jsonResponse(data: unknown, status = 200) {
@@ -782,42 +809,67 @@ function jsonResponse(data: unknown, status = 200) {
 async function resolveWorkspaceFromRequest(
   ctx: any,
   request: Request
-): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "identifier" | "anonymous" }> {
-  // 1. Check for API key auth (Bearer sk-claw-...)
+): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "identifier" | "anonymous" }> {
+  // 1a. API key via Authorization: Bearer sk-claw-...
   const authHeader = request.headers.get("Authorization");
+  let rawKey: string | null = null;
   if (authHeader?.startsWith("Bearer sk-claw-")) {
-    const rawKey = authHeader.slice(7); // Remove "Bearer "
+    rawKey = authHeader.slice(7);
+  }
+  // 1b. API key via X-APIClaw-Api-Key header (OpenClaw / server-to-server preferred form)
+  if (!rawKey) {
+    const headerKey = request.headers.get("X-APIClaw-Api-Key");
+    if (headerKey?.startsWith("sk-claw-")) rawKey = headerKey;
+  }
+  if (rawKey) {
     try {
       const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey });
       if (resolved) {
-        // Touch lastUsedAt (fire and forget)
         ctx.runMutation(api.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
         return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key" };
       }
     } catch (e: any) {
       console.error("[Auth] API key resolution failed:", e.message);
     }
-    // Invalid key - don't fall through to anonymous
+    // Invalid key → anonymous (do not fall through to other methods for this request)
     return { authMethod: "anonymous" };
   }
 
-  // 2. Check for legacy identifier
+  // 2. CLI session token (apiclaw login → ~/.apiclaw/session)
+  const sessionToken = request.headers.get("X-APIClaw-Session");
+  if (sessionToken && sessionToken.length >= 20) {
+    try {
+      const session = await ctx.runQuery(api.workspaces.verifySession, { sessionToken });
+      if (session?.workspaceId) {
+        return { workspaceId: session.workspaceId, authMethod: "session" };
+      }
+    } catch (e: any) {
+      console.error("[Auth] Session resolution failed:", e.message);
+    }
+    // Unknown/expired session → anonymous, do not fall through
+    return { authMethod: "anonymous" };
+  }
+
+  // 3. Legacy identifier header
   const identifier = request.headers.get("X-APIClaw-Identifier");
   if (identifier && !identifier.startsWith("anon:") && identifier !== "unknown" && identifier.length > 20) {
     return { workspaceId: identifier, authMethod: "identifier" };
   }
 
-  // 3. Anonymous
+  // 4. Anonymous
   return { authMethod: "anonymous" };
 }
 
-// Helper to validate session and log API usage
+// Helper to validate session and log API usage.
+// Returns a Response (401) when AUTH_ENFORCEMENT=enforce and the caller is anonymous.
+// In shadow mode (default) it logs to funnel.call_api_unauth and passes through so
+// existing headless traffic stays unbroken while portal conversion is measured.
 async function validateAndLogProxyCall(
   ctx: any,
   request: Request,
   provider: string,
   action: string
-): Promise<{ valid: boolean; workspaceId?: string; subagentId?: string; error?: string; authMethod?: string }> {
+): Promise<Response | { valid: true; workspaceId?: string; subagentId?: string; authMethod: string }> {
   const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
 
   // Resolve workspace from any auth method
@@ -827,16 +879,40 @@ async function validateAndLogProxyCall(
 
   console.log("[Proxy] Call received", { provider, action, authMethod: auth.authMethod, workspaceId: resolvedWorkspaceId, subagentId });
 
-  // ALWAYS log to analytics (even if identifier is missing)
+  // ---- Gate: enforce vs shadow ----
+  if (auth.authMethod === "anonymous") {
+    // Log the unauth attempt to the funnel so conversion is measurable regardless of mode.
+    try {
+      await ctx.runMutation(api.funnel.recordEvent, {
+        event: "call_api_blocked",
+        classification: "human",
+        userAgent: request.headers.get("User-Agent") ?? undefined,
+        props: {
+          reason: "unauth",
+          provider,
+          action,
+          mode: isEnforceMode() ? "enforce" : "shadow",
+          path: "/proxy/" + provider,
+        },
+      });
+    } catch (e: any) {
+      console.error("[Proxy] Funnel log failed:", e.message);
+    }
+    if (isEnforceMode()) {
+      return unauthResponse("proxy_requires_auth");
+    }
+    // shadow mode: fall through, record analytics, pass the call
+  }
+
+  // ALWAYS log to analytics (mirrors existing behavior for dashboard continuity)
   try {
-    const result = await ctx.runMutation(api.analytics.log, {
+    await ctx.runMutation(api.analytics.log, {
       event: "api_call",
       provider,
       identifier: identifier,
       workspaceId: resolvedWorkspaceId as any,
       metadata: { action, subagentId, authMethod: auth.authMethod },
     });
-    console.log("[Proxy] Analytics logged:", result);
   } catch (e: any) {
     console.error("[Proxy] Analytics logging failed:", e.message, e.stack);
   }
@@ -850,19 +926,15 @@ async function validateAndLogProxyCall(
         action,
         subagentId,
       });
-
       await ctx.runMutation(api.workspaces.incrementUsage, {
         workspaceId: resolvedWorkspaceId as any,
       });
-
-      console.log("[Proxy] Workspace logged for:", resolvedWorkspaceId);
-      return { valid: true, workspaceId: resolvedWorkspaceId, subagentId, authMethod: auth.authMethod };
     } catch (e: any) {
       console.error("[Proxy] Workspace logging failed:", e.message);
     }
+    return { valid: true, workspaceId: resolvedWorkspaceId, subagentId, authMethod: auth.authMethod };
   }
 
-  // Return success regardless (don't block API calls)
   return { valid: true, subagentId, authMethod: auth.authMethod };
 }
 
@@ -1222,7 +1294,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "openrouter", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "openrouter", "chat");
+    if (__gate instanceof Response) return __gate;
     
     const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
     if (!OPENROUTER_KEY) {
@@ -1257,7 +1330,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "brave_search", "search");
+    const __gate = await validateAndLogProxyCall(ctx, request, "brave_search", "search");
+    if (__gate instanceof Response) return __gate;
     
     const BRAVE_KEY = process.env.BRAVE_API_KEY;
     if (!BRAVE_KEY) {
@@ -1290,7 +1364,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "resend", "send_email");
+    const __gate = await validateAndLogProxyCall(ctx, request, "resend", "send_email");
+    if (__gate instanceof Response) return __gate;
     
     const RESEND_KEY = process.env.RESEND_API_KEY;
     if (!RESEND_KEY) {
@@ -1323,7 +1398,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "elevenlabs", "text_to_speech");
+    const __gate = await validateAndLogProxyCall(ctx, request, "elevenlabs", "text_to_speech");
+    if (__gate instanceof Response) return __gate;
     
     const ELEVENLABS_KEY = process.env.ELEVENLABS_API_KEY;
     if (!ELEVENLABS_KEY) {
@@ -1395,7 +1471,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "46elks", "send_sms");
+    const __gate = await validateAndLogProxyCall(ctx, request, "46elks", "send_sms");
+    if (__gate instanceof Response) return __gate;
     
     const ELKS_USER = process.env.ELKS_API_USER;
     const ELKS_PASS = process.env.ELKS_API_PASSWORD;
@@ -1432,7 +1509,8 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     // Validate session and log usage
-    await validateAndLogProxyCall(ctx, request, "twilio", "send_sms");
+    const __gate = await validateAndLogProxyCall(ctx, request, "twilio", "send_sms");
+    if (__gate instanceof Response) return __gate;
     
     const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
     const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
@@ -1491,7 +1569,8 @@ http.route({
     // Validate session and log usage
     const body = await request.json();
     const action = body.action || "search_repos";
-    await validateAndLogProxyCall(ctx, request, "github", action);
+    const __gate = await validateAndLogProxyCall(ctx, request, "github", action);
+    if (__gate instanceof Response) return __gate;
     
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
     if (!GITHUB_TOKEN) {
@@ -1569,7 +1648,8 @@ http.route({
   path: "/proxy/serper",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "serper", "search");
+    const __gate = await validateAndLogProxyCall(ctx, request, "serper", "search");
+    if (__gate instanceof Response) return __gate;
     const SERPER_KEY = process.env.SERPER_API_KEY;
     if (!SERPER_KEY) {
       return jsonResponse({ error: "Serper not configured" }, 500);
@@ -1610,7 +1690,8 @@ http.route({
   path: "/proxy/firecrawl",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "firecrawl", "scrape");
+    const __gate = await validateAndLogProxyCall(ctx, request, "firecrawl", "scrape");
+    if (__gate instanceof Response) return __gate;
     const FIRECRAWL_KEY = process.env.FIRECRAWL_API_KEY;
     if (!FIRECRAWL_KEY) {
       return jsonResponse({ error: "Firecrawl not configured" }, 500);
@@ -1650,7 +1731,8 @@ http.route({
   path: "/proxy/groq",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "groq", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "groq", "chat");
+    if (__gate instanceof Response) return __gate;
     const GROQ_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_KEY) {
       return jsonResponse({ error: "Groq not configured" }, 500);
@@ -1690,7 +1772,8 @@ http.route({
   path: "/proxy/mistral",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "mistral", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "mistral", "chat");
+    if (__gate instanceof Response) return __gate;
     const MISTRAL_KEY = process.env.MISTRAL_API_KEY;
     if (!MISTRAL_KEY) {
       return jsonResponse({ error: "Mistral not configured" }, 500);
@@ -1730,7 +1813,8 @@ http.route({
   path: "/proxy/cohere",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "cohere", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "cohere", "chat");
+    if (__gate instanceof Response) return __gate;
     const COHERE_KEY = process.env.COHERE_API_KEY;
     if (!COHERE_KEY) {
       return jsonResponse({ error: "Cohere not configured" }, 500);
@@ -1770,7 +1854,8 @@ http.route({
   path: "/proxy/replicate",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "replicate", "prediction");
+    const __gate = await validateAndLogProxyCall(ctx, request, "replicate", "prediction");
+    if (__gate instanceof Response) return __gate;
     const REPLICATE_KEY = process.env.REPLICATE_API_TOKEN;
     if (!REPLICATE_KEY) {
       return jsonResponse({ error: "Replicate not configured" }, 500);
@@ -1808,6 +1893,43 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
+// GET /proxy/replicate/poll?id=<prediction_id>
+// Proxies Replicate GET /v1/predictions/{id} using APIClaw's managed token.
+// Lets downstream callers (NordSym UGC Studio, etc.) poll long-running predictions
+// without holding their own REPLICATE_API_TOKEN.
+http.route({
+  path: "/proxy/replicate/poll",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const __gate = await validateAndLogProxyCall(ctx, request, "replicate", "poll");
+    if (__gate instanceof Response) return __gate;
+    const REPLICATE_KEY = process.env.REPLICATE_API_TOKEN;
+    if (!REPLICATE_KEY) {
+      return jsonResponse({ error: "Replicate not configured" }, 500);
+    }
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    if (!id) {
+      return jsonResponse({ error: "id query param required" }, 400);
+    }
+    try {
+      const response = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
+        headers: { Authorization: `Bearer ${REPLICATE_KEY}` },
+      });
+      const data = await response.json();
+      return jsonResponse(data, response.status);
+    } catch (e: any) {
+      return jsonResponse({ error: e.message }, 500);
+    }
+  }),
+});
+
+http.route({
+  path: "/proxy/replicate/poll",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
 // ==============================================
 // DEEPGRAM (Speech-to-Text) PROXY
 // ==============================================
@@ -1815,7 +1937,8 @@ http.route({
   path: "/proxy/deepgram",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "deepgram", "transcribe");
+    const __gate = await validateAndLogProxyCall(ctx, request, "deepgram", "transcribe");
+    if (__gate instanceof Response) return __gate;
     const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;
     if (!DEEPGRAM_KEY) {
       return jsonResponse({ error: "Deepgram not configured" }, 500);
@@ -1863,7 +1986,8 @@ http.route({
   path: "/proxy/e2b",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "e2b", "execute");
+    const __gate = await validateAndLogProxyCall(ctx, request, "e2b", "execute");
+    if (__gate instanceof Response) return __gate;
     const E2B_KEY = process.env.E2B_API_KEY;
     if (!E2B_KEY) {
       return jsonResponse({ error: "E2B not configured" }, 500);
@@ -1918,7 +2042,8 @@ http.route({
   path: "/proxy/together",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "together", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "together", "chat");
+    if (__gate instanceof Response) return __gate;
     const TOGETHER_KEY = process.env.TOGETHER_API_KEY;
     if (!TOGETHER_KEY) {
       return jsonResponse({ error: "Together AI not configured" }, 500);
@@ -1958,7 +2083,8 @@ http.route({
   path: "/proxy/deepinfra",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "deepinfra", "chat");
+    const __gate = await validateAndLogProxyCall(ctx, request, "deepinfra", "chat");
+    if (__gate instanceof Response) return __gate;
     const DEEPINFRA_KEY = process.env.DEEPINFRA_API_KEY;
     if (!DEEPINFRA_KEY) {
       return jsonResponse({ error: "DeepInfra not configured" }, 500);
@@ -1998,7 +2124,8 @@ http.route({
   path: "/proxy/stability",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "stability", "generate");
+    const __gate = await validateAndLogProxyCall(ctx, request, "stability", "generate");
+    if (__gate instanceof Response) return __gate;
     const STABILITY_KEY = process.env.STABILITY_API_KEY;
     if (!STABILITY_KEY) {
       return jsonResponse({ error: "Stability AI not configured" }, 500);
@@ -2045,7 +2172,8 @@ http.route({
   path: "/proxy/assemblyai",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "assemblyai", "transcribe");
+    const __gate = await validateAndLogProxyCall(ctx, request, "assemblyai", "transcribe");
+    if (__gate instanceof Response) return __gate;
     const ASSEMBLYAI_KEY = process.env.ASSEMBLYAI_API_KEY;
     if (!ASSEMBLYAI_KEY) {
       return jsonResponse({ error: "AssemblyAI not configured" }, 500);
@@ -2085,7 +2213,8 @@ http.route({
   path: "/proxy/apilayer",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    await validateAndLogProxyCall(ctx, request, "apilayer", "call");
+    const __gate = await validateAndLogProxyCall(ctx, request, "apilayer", "call");
+    if (__gate instanceof Response) return __gate;
     const APILAYER_KEY = process.env.APILAYER_API_KEY;
     if (!APILAYER_KEY) {
       return jsonResponse({ error: "APILayer not configured" }, 500);
@@ -2397,27 +2526,33 @@ function extractBearerToken(request: Request): string | null {
   return auth.slice(7);
 }
 
-// Helper: require API key auth, return 401 if missing
+// Helper: require auth (permanent API key OR CLI session). 401 if missing.
+// Accepted forms:
+//   Authorization: Bearer sk-claw-…     (legacy, still supported)
+//   X-APIClaw-Api-Key: sk-claw-…        (preferred permanent header)
+//   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw login)
 async function requireApiKeyAuth(
   ctx: any,
   request: Request
-): Promise<{ workspaceId: string; keyId: string } | Response> {
+): Promise<{ workspaceId: string; keyId?: string; authMethod: "api-key" | "session" } | Response> {
   const auth = await resolveWorkspaceFromRequest(ctx, request);
-  if (auth.authMethod !== "api-key" || !auth.workspaceId || !auth.keyId) {
-    return jsonResponse(
-      {
-        error: {
-          message: "Invalid API key. Generate one at https://apiclaw.cloud/workspace?tab=api-keys",
-          type: "invalid_api_key",
-          code: "invalid_api_key",
-        },
-      },
-      401
-    );
+  if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
+    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
   }
-  // NOTE: verified-owner HTTP gate reverted 2026-04-16 after OpenClaw outage.
-  // To be re-enabled after investigation (see Apiclaw-STATE.md incident log).
-  return { workspaceId: auth.workspaceId, keyId: auth.keyId };
+  if (auth.authMethod === "session" && auth.workspaceId) {
+    return { workspaceId: auth.workspaceId, authMethod: "session" };
+  }
+  return jsonResponse(
+    {
+      error: {
+        message: "Authentication required. Get a free key at https://apiclaw.com/signup or run `apiclaw login`.",
+        type: "invalid_api_key",
+        code: "invalid_api_key",
+        signupUrl: "https://apiclaw.com/signup",
+      },
+    },
+    401
+  );
 }
 
 // /v1/chat/completions — OpenAI-compatible LLM gateway with intelligent routing
@@ -3365,35 +3500,53 @@ function buildManagedRequest(
   }
 }
 
-// Resolve auth for /v1/execute: supports both sk-claw- keys and X-APIClaw-Internal
+// Resolve auth for /v1/execute.
+// Accepts: X-APIClaw-Internal (server-to-server), Bearer sk-claw-… or X-APIClaw-Api-Key (permanent keys), X-APIClaw-Session (CLI login).
+// Shadow-mode: anonymous is logged to funnel.call_api_blocked and returned as authMethod=anonymous
+// so existing headless traffic is unbroken until AUTH_ENFORCEMENT=enforce flips.
 async function resolveExecuteAuth(
   ctx: any,
   request: Request
-): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "internal" | "anonymous" } | Response> {
-  // 1. Check internal server-to-server auth
+): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "internal" | "anonymous" } | Response> {
+  // 1. Internal server-to-server auth
   const internalSecret = request.headers.get("X-APIClaw-Internal");
   if (internalSecret) {
     const expectedSecret = process.env.APICLAW_INTERNAL_SECRET;
     if (!expectedSecret || internalSecret !== expectedSecret) {
       return jsonResponse({ error: { message: "Invalid internal secret", type: "auth_error" } }, 401);
     }
-    // Internal auth: extract workspace from body or header
     const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
     return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
   }
 
-  // 2. Check for API key auth (Bearer sk-claw-...)
+  // 2. API key or CLI session (unified resolver handles both new header forms)
   const auth = await resolveWorkspaceFromRequest(ctx, request);
   if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
-    // NOTE: verified-owner HTTP gate reverted 2026-04-16 after OpenClaw outage.
     return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
   }
+  if (auth.authMethod === "session" && auth.workspaceId) {
+    return { workspaceId: auth.workspaceId, authMethod: "session" };
+  }
 
-  // 3. No valid auth
-  return jsonResponse(
-    { error: { message: "Authentication required. Use Bearer sk-claw-... or X-APIClaw-Internal header.", type: "auth_error" } },
-    401
-  );
+  // 3. Anonymous → shadow vs enforce
+  try {
+    await ctx.runMutation(api.funnel.recordEvent, {
+      event: "call_api_blocked",
+      classification: "human",
+      userAgent: request.headers.get("User-Agent") ?? undefined,
+      props: {
+        reason: "unauth",
+        path: "/v1/execute",
+        mode: isEnforceMode() ? "enforce" : "shadow",
+      },
+    });
+  } catch (e: any) {
+    console.error("[Execute] Funnel log failed:", e.message);
+  }
+  if (isEnforceMode()) {
+    return unauthResponse("execute_requires_auth");
+  }
+  return { authMethod: "anonymous" };
 }
 
 http.route({
