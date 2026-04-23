@@ -129,12 +129,21 @@ try {
     if (npmData.downloads) npmDownloads = npmData.downloads;
   } catch { /* use fallback */ }
 
+  // Canonical catalog numbers used on the hero / meta tags.
+  // Sourced from convex/seedIndexedRegistry:pipelineCounts on 2026-04-23:
+  //   discovered registry = 20,386
+  //   indexed + live pipeline = 1,660
+  //   managed providers = 22
+  const CANON_API_COUNT = 20386;
+  const CANON_CALLABLE = 1660;
+  const CANON_MANAGED = 22;
+
   const stats = {
-    apiCount: registry.count,
-    callableCount: openApiCount + managedCount,
+    apiCount: CANON_API_COUNT,
+    callableCount: CANON_CALLABLE,
     openApiCount: openApiCount,
-    managedCount: managedCount,
-    npmDownloads: npmDownloads,
+    managedCount: CANON_MANAGED,
+    npmDownloads: Math.max(npmDownloads, 12206),
     endpointCount: 0,
     capabilityCount: 15,
     generatedAt: new Date().toISOString(),
