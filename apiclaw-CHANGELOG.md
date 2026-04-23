@@ -10,6 +10,18 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+### Server-side (no client bump — 2.5.0 MCP is wire-compatible)
+
+- **NASA promoted to managed lane.** `/proxy/nasa` adapter live on Convex prod; managed key injected server-side; SSRF pinned to `api.nasa.gov`.
+  - Verified: `/planetary/apod` (APOD), `/neo/rest/v1/feed` (NEO)
+  - Mars Rover Photos (`/mars-photos/api/v1/...`) returns upstream 404 from NASA — endpoint retired on their side.
+- **NASA Image and Video Library** added as keyless open-proxy (`images-api.nasa.gov`) for image/video search. Verified: 100 Apollo 11 results on smoke.
+- **NASA row description** rewritten to steer agents toward working endpoints (APOD, NEO, EPIC, insight_weather, Image Library) and away from retired ones.
+- **Legacy BYOK module removed** (`convex/providerKeys.ts`). APIClaw canon is zero-config: managed-key or discovery-only.
+- Managed adapter count: 46 → 47. Callable rows: 1,678 → 1,679.
+
+Client package `@nordsym/apiclaw@2.5.0` is unchanged — a restart of the MCP host (e.g. Claude Desktop) is sufficient to surface the new NASA entries.
+
 ---
 
 ## [1.6.0] - 2026-03-27

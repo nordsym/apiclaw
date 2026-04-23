@@ -310,3 +310,30 @@ export const promoteToManaged = mutation({
     };
   },
 });
+
+// ---------------------------------------------------------------------------
+// patchApiMetadata — Patch description / docsUrl / category on a registry row
+// without touching classification fields. Used for demo-hygiene adjustments
+// (e.g. steering agents away from retired upstream endpoints).
+// ---------------------------------------------------------------------------
+export const patchApiMetadata = mutation({
+  args: {
+    apiId: v.id("providerAPIs"),
+    description: v.optional(v.string()),
+    docsUrl: v.optional(v.string()),
+    category: v.optional(v.string()),
+    baseUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, { apiId, description, docsUrl, category, baseUrl }) => {
+    const row = await ctx.db.get(apiId);
+    if (!row) return { status: "not_found" };
+    const patch: any = {};
+    if (description !== undefined) patch.description = description;
+    if (docsUrl !== undefined) patch.docsUrl = docsUrl;
+    if (category !== undefined) patch.category = category;
+    if (baseUrl !== undefined) patch.baseUrl = baseUrl;
+    if (Object.keys(patch).length === 0) return { status: "noop" };
+    await ctx.db.patch(apiId, patch);
+    return { status: "ok", apiId, name: row.name, patch };
+  },
+});
