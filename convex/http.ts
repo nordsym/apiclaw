@@ -493,7 +493,9 @@ interface RoutingDecision {
 
 // ==============================================
 // ADVISOR: Analyzes prompts to pick optimal model+provider
-// Runs only when model is "auto" or unspecified and routing mode is "balanced"
+// Opt-in only -- runs when routingMode === "advisor" AND model is "auto" or unspecified.
+// Default routingMode "balanced" no longer triggers the advisor; explicit model names
+// are honored verbatim and unspecified/auto falls through to rule-based routing.
 // Uses Mistral Small (~$0.00001/decision) for near-zero cost intelligence
 // ==============================================
 
@@ -612,12 +614,13 @@ async function routeLLMRequest(
     };
   }
 
-  // 2. ADVISOR -- intelligent model selection for ambiguous routing
-  // Triggers when: model is generic ("auto", empty, or provider-prefixed like "openai/gpt-4o")
-  //   AND routing mode is "balanced" (default)
-  //   AND we have messages to analyze
+  // 2. ADVISOR -- intelligent model selection (OPT-IN ONLY)
+  // Triggers when: routingMode === "advisor" AND model is "auto" or unspecified.
+  // Callers who specify a model name skip the advisor entirely (handled in step 1).
+  // Default mode "balanced" intentionally does NOT invoke the advisor anymore --
+  // most callers want the model they asked for, not a re-pick by another LLM.
   const isAutoModel = !requestedModel || requestedModel === "auto";
-  const useAdvisor = isAutoModel && settings.routingMode === "balanced" && messages && messages.length > 0;
+  const useAdvisor = isAutoModel && settings.routingMode === "advisor" && messages && messages.length > 0;
 
   if (useAdvisor) {
     const advisorDecision = await advisorPickModel(messages, settings);
@@ -1290,7 +1293,7 @@ function generateCredentials(providerId: string): object {
   // For now, return placeholder indicating how to use
   return {
     type: "apiclaw_proxy",
-    endpoint: `https://brilliant-puffin-712.convex.site/proxy/${providerId}`,
+    endpoint: `https://adventurous-avocet-799.convex.site/proxy/${providerId}`,
     note: "Use APIClaw proxy endpoint. Credentials managed automatically.",
   };
 }
@@ -2673,7 +2676,7 @@ http.route({
     }
 
     // Apply request-level overrides
-    const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced"].includes(routeOverride)
+    const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced", "advisor"].includes(routeOverride)
       ? routeOverride
       : settings.routingMode;
 
@@ -3702,7 +3705,7 @@ http.route({
       }
 
       const routeOverride = request.headers.get("X-APIClaw-Route");
-      const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced"].includes(routeOverride)
+      const effectiveRoutingMode = routeOverride && ["best_price", "highest_quality", "fastest", "balanced", "advisor"].includes(routeOverride)
         ? routeOverride : settings.routingMode;
       const effectivePreferred = routeOverride && PROVIDERS[routeOverride]?.isLLM
         ? [routeOverride, ...settings.preferredProviders] : settings.preferredProviders;

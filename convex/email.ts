@@ -136,6 +136,63 @@ function limitReachedEmailTemplate(upgradeUrl: string): string {
   `);
 }
 
+// Invoice paid email template
+function invoicePaidEmailTemplate(args: {
+  amountFormatted: string;
+  invoiceNumber: string | null;
+  periodStart: string;
+  periodEnd: string;
+  hostedInvoiceUrl: string | null;
+  invoicePdfUrl: string | null;
+  lineItems: Array<{ description: string; amount: string }>;
+}): string {
+  const itemsRows = args.lineItems.length
+    ? args.lineItems
+        .map(
+          (item) =>
+            `<tr><td style="padding: 8px 0; font-size: 14px; color: #525252;">${item.description}</td>` +
+            `<td style="padding: 8px 0; font-size: 14px; color: #0a0a0a; text-align: right; font-variant-numeric: tabular-nums;">${item.amount}</td></tr>`
+        )
+        .join("")
+    : `<tr><td colspan="2" style="padding: 8px 0; font-size: 14px; color: #737373;">Metered API usage for the period.</td></tr>`;
+
+  const buttons: string[] = [];
+  if (args.hostedInvoiceUrl) {
+    buttons.push(
+      `<a href="${args.hostedInvoiceUrl}" style="display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 0 4px;">View Invoice</a>`
+    );
+  }
+  if (args.invoicePdfUrl) {
+    buttons.push(
+      `<a href="${args.invoicePdfUrl}" style="display: inline-block; background: #f5f5f5; color: #0a0a0a; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 0 4px; border: 1px solid #e5e5e5;">Download PDF</a>`
+    );
+  }
+
+  return wrapEmail(`
+    <h2 style="margin: 0 0 8px; font-size: 22px; font-weight: 700; color: #0a0a0a; text-align: center; letter-spacing: -0.02em;">
+      Payment received
+    </h2>
+    <p style="margin: 0 0 24px; font-size: 14px; color: #737373; text-align: center;">
+      ${args.invoiceNumber ? "Invoice " + args.invoiceNumber + " · " : ""}${args.periodStart} → ${args.periodEnd}
+    </p>
+
+    <div style="background: #f5f5f5; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <p style="margin: 0 0 4px; font-size: 13px; color: #737373; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">Amount paid</p>
+      <p style="margin: 0; font-size: 32px; font-weight: 800; color: #0a0a0a; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;">${args.amountFormatted}</p>
+    </div>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; border-top: 1px solid #f0f0f0;">
+      ${itemsRows}
+    </table>
+
+    ${buttons.length ? `<div style="text-align: center; padding: 8px 0 24px;">${buttons.join("")}</div>` : ""}
+
+    <p style="margin: 0; font-size: 13px; color: #737373; text-align: center;">
+      Pay-as-you-go billing: provider cost + 15% margin. Questions? Reply to this email.
+    </p>
+  `);
+}
+
 // ============================================
 // EMAIL SENDING ACTIONS
 // ============================================
@@ -233,6 +290,77 @@ export const sendReminderEmail = action({
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Failed to send email: ${error}`);
+    }
+
+    return { success: true };
+  },
+});
+
+/**
+ * Send invoice paid email — branded receipt with hosted invoice + PDF link
+ */
+export const sendInvoicePaidEmail = action({
+  args: {
+    email: v.string(),
+    amountPaidCents: v.number(),
+    currency: v.string(),
+    invoiceNumber: v.optional(v.string()),
+    periodStartMs: v.number(),
+    periodEndMs: v.number(),
+    hostedInvoiceUrl: v.optional(v.string()),
+    invoicePdfUrl: v.optional(v.string()),
+    lineItems: v.array(v.object({
+      description: v.string(),
+      amountCents: v.number(),
+    })),
+  },
+  handler: async (_ctx, args) => {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY not configured");
+    }
+
+    const fmt = (cents: number) =>
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: args.currency.toUpperCase(),
+      }).format(cents / 100);
+
+    const fmtDate = (ms: number) =>
+      new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+    const html = invoicePaidEmailTemplate({
+      amountFormatted: fmt(args.amountPaidCents),
+      invoiceNumber: args.invoiceNumber || null,
+      periodStart: fmtDate(args.periodStartMs),
+      periodEnd: fmtDate(args.periodEndMs),
+      hostedInvoiceUrl: args.hostedInvoiceUrl || null,
+      invoicePdfUrl: args.invoicePdfUrl || null,
+      lineItems: args.lineItems.map((li) => ({
+        description: li.description,
+        amount: fmt(li.amountCents),
+      })),
+    });
+
+    const subject = `🦞 APIClaw invoice ${args.invoiceNumber ? args.invoiceNumber + " " : ""}— ${fmt(args.amountPaidCents)} paid`;
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: args.email,
+        subject,
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to send invoice email: ${error}`);
     }
 
     return { success: true };

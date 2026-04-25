@@ -701,13 +701,27 @@ export const reportUsageToStripe = internalAction({
         };
       }
 
-      // Report usage to Stripe using usage records API
-      // Quantity = cost in cents (rounded up to nearest cent)
-      // Stripe price should be set to $0.01 per unit (1 cent per unit)
+      // Report usage via Stripe Meter Events API.
+      // The metered price `price_1TL038RtJYK3aJTqODoFAiVT` is bound to meter
+      // `mtr_61UFEGojJ0b2awh1441RtJYK3aJTqS9g` (event_name="api_call", sum of payload.value).
+      // Stripe deprecated the legacy /v1/subscription_items/.../usage_records endpoint
+      // for meter-bound prices -- it returns an error there. Use /v1/billing/meter_events.
+      // 1 unit = $0.01, so we send the dollar cost in cents.
       const costInCents = Math.ceil(totalCostUsd * 100);
+      const customerId = typeof subscription.customer === "string"
+        ? subscription.customer
+        : subscription.customer?.id;
+
+      if (!customerId) {
+        throw new Error(`Subscription ${args.stripeSubscriptionId} has no customer`);
+      }
+
       const stripeKey = process.env.STRIPE_SECRET_KEY;
-      const usageRecordResponse = await fetch(
-        `https://api.stripe.com/v1/subscription_items/${meteredItem.id}/usage_records`,
+      // Idempotency key prevents Stripe from double-counting on retry.
+      const idempotencyKey = `apiclaw_${args.workspaceId}_${Date.now()}`;
+
+      const meterEventResponse = await fetch(
+        `https://api.stripe.com/v1/billing/meter_events`,
         {
           method: "POST",
           headers: {
@@ -715,28 +729,28 @@ export const reportUsageToStripe = internalAction({
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            quantity: String(costInCents),
+            event_name: "api_call",
+            "payload[stripe_customer_id]": customerId,
+            "payload[value]": String(costInCents),
+            identifier: idempotencyKey,
             timestamp: String(Math.floor(Date.now() / 1000)),
-            action: "increment",
           }),
         }
       );
 
-      if (!usageRecordResponse.ok) {
-        const errorData = await usageRecordResponse.text();
-        throw new Error(`Stripe API error: ${usageRecordResponse.status} - ${errorData}`);
+      if (!meterEventResponse.ok) {
+        const errorData = await meterEventResponse.text();
+        throw new Error(`Stripe meter event error: ${meterEventResponse.status} - ${errorData}`);
       }
 
-      const usageRecord = await usageRecordResponse.json() as { id: string };
-
-      // Mark records as reported
+      // Meter events don't return an `id`; the idempotency identifier is the reference.
       await ctx.runMutation(internal.billing.markUsageRecordsReported, {
         usageRecordIds: usageRecords.map((r: { _id: Id<"usageRecords"> }) => r._id),
-        stripeUsageRecordId: usageRecord.id,
+        stripeUsageRecordId: idempotencyKey,
       });
 
       console.log(
-        `Reported ${totalCalls} calls for workspace ${args.workspaceId} to Stripe`
+        `Reported ${totalCalls} calls (${costInCents}¢) for workspace ${args.workspaceId} via meter event ${idempotencyKey}`
       );
 
       return { success: true, callCount: totalCalls };

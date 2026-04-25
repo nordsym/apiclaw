@@ -191,7 +191,9 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
 
   try {
     const body = await request.text();
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    // Convex edge runtime requires the async variant — SubtleCrypto cannot
+    // be used synchronously here.
+    event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
   } catch (err: any) {
     console.error("Webhook signature verification failed:", err.message);
     return jsonResponse({ error: `Webhook Error: ${err.message}` }, 400);
@@ -413,6 +415,32 @@ async function handleInvoicePaid(ctx: any, invoice: Stripe.Invoice) {
     callCount,
     pdfUrl: invoice.invoice_pdf || undefined,
   });
+
+  // Send branded invoice email via Resend. Falls back gracefully if recipient
+  // missing -- invoice still processed in DB.
+  const recipientEmail = invoice.customer_email || workspace.email;
+  if (recipientEmail) {
+    try {
+      const lineItems = (invoice.lines?.data || []).map((line) => ({
+        description: line.description || "API usage",
+        amountCents: line.amount,
+      }));
+
+      await ctx.scheduler.runAfter(0, api.email.sendInvoicePaidEmail, {
+        email: recipientEmail,
+        amountPaidCents: invoice.amount_paid,
+        currency: invoice.currency || "usd",
+        invoiceNumber: invoice.number || undefined,
+        periodStartMs: invoice.period_start * 1000,
+        periodEndMs: invoice.period_end * 1000,
+        hostedInvoiceUrl: invoice.hosted_invoice_url || undefined,
+        invoicePdfUrl: invoice.invoice_pdf || undefined,
+        lineItems,
+      });
+    } catch (e: any) {
+      console.error(`Failed to schedule invoice email for ${invoice.id}:`, e.message);
+    }
+  }
 
   console.log(`Invoice ${invoice.id} processed for workspace ${workspace._id}`);
 }
