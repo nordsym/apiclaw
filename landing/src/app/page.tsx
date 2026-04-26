@@ -1,19 +1,20 @@
 "use client";
 
-import { 
+import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
   Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
   Play, ChevronRight, ChevronDown, Star, Users, Cpu, Activity, Copy, FileText,
-  Menu, X
+  Menu, X, Download
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
 import { useState, useEffect, useRef } from "react";
 import { HeroTabs } from "@/components/HeroTabs";
-import { PhoneDemo } from "@/components/demo";
 import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
+import { SeeTheDifference } from "@/components/SeeTheDifference";
+import { InstallSection } from "@/components/InstallSection";
 
 const stats = [
   { number: "20,386+", label: "Discoverable APIs", live: true },
@@ -526,27 +527,42 @@ Docs: https://apiclaw.cloud/docs`;
                 <span className="text-accent font-medium">Managed APIs:</span> No API keys. No setup. Just call.
               </p>
 
-              {/* Copy Context Button */}
-              <button
-                onClick={copyContextToClipboard}
-                className="group relative inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02] w-full sm:w-auto justify-center"
-              >
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="flex flex-col items-start">
-                  <span className="text-sm sm:text-base">{showContextCopied ? "Copied!" : "Explain to your AI"}</span>
-                  <span className="text-xs opacity-80 font-normal">Copy context for your agent</span>
-                </span>
-                {showContextCopied ? (
-                  <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  <Copy className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                )}
-                {showContextCopied && (
-                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg whitespace-nowrap shadow-lg">
-                    ✓ Paste this to your AI agent!
+              {/* Primary CTAs */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <a
+                  href="/apiclaw.mcpb"
+                  download
+                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-accent hover:bg-accent-hover text-white font-bold text-sm sm:text-base shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300"
+                >
+                  <Download className="w-5 h-5" />
+                  Install for Claude Desktop
+                  <span className="text-[10px] font-mono uppercase tracking-widest bg-white/20 px-1.5 py-0.5 rounded ml-0.5">
+                    .mcpb
                   </span>
-                )}
-              </button>
+                </a>
+                <a
+                  href="/workspace"
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-bold text-sm sm:text-base transition-all"
+                >
+                  Get a workspace key
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
+                <a href="#install" className="hover:text-accent transition inline-flex items-center gap-1">
+                  <Terminal className="w-3.5 h-3.5" />
+                  All install paths
+                </a>
+                <span className="text-border">·</span>
+                <button
+                  onClick={copyContextToClipboard}
+                  className="hover:text-accent transition inline-flex items-center gap-1"
+                >
+                  {showContextCopied ? <Check className="w-3.5 h-3.5 text-accent" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {showContextCopied ? "Copied! Paste to your AI" : "Copy context for your AI"}
+                </button>
+              </div>
             </div>
 
             {/* Right: HeroTabs */}
@@ -581,18 +597,19 @@ Docs: https://apiclaw.cloud/docs`;
       {/* AI Testimonials Carousel */}
       <AITestimonials />
 
-      {/* Phone Demo - With vs Without APIClaw */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              See the Difference
+      {/* See the Difference v2 — racing clock, side-by-side */}
+      <section className="py-20 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 sm:mb-12">
+            <span className="section-label">SEE THE DIFFERENCE</span>
+            <h2 className="text-3xl md:text-5xl font-bold mt-3 sm:mt-4 tracking-tighter">
+              Same prompt. Two paths.
             </h2>
-            <p className="text-text-muted text-lg max-w-2xl mx-auto">
-              Toggle to compare what happens when your AI agent has APIClaw — versus doing it the old way.
+            <p className="text-text-muted text-base sm:text-lg mt-3 max-w-2xl mx-auto">
+              One finishes in 1.4 seconds. The other is still going.
             </p>
           </div>
-          <PhoneDemo />
+          <SeeTheDifference />
         </div>
       </section>
 
@@ -687,136 +704,8 @@ Docs: https://apiclaw.cloud/docs`;
         </div>
       )}
 
-      {/* Before/After */}
-      <section className="py-12 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-xl border border-red-500/20 bg-red-500/5">
-              <div className="flex items-center gap-2 text-red-400 font-medium mb-4">
-                <span className="text-xl">😤</span> Without APIClaw
-              </div>
-              <ul className="space-y-3 text-text-secondary">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 mt-1">✗</span>
-                  <span>3+ hours searching for the right API</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 mt-1">✗</span>
-                  <span>Create accounts, manage API keys</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 mt-1">✗</span>
-                  <span>Read docs, figure out auth, test endpoints</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 mt-1">✗</span>
-                  <span>Your agent waits... and waits...</span>
-                </li>
-              </ul>
-            </div>
-            <div className="p-6 rounded-xl border border-green-500/20 bg-green-500/5">
-              <div className="flex items-center gap-2 text-green-400 font-medium mb-4">
-                <span className="text-xl">🦞</span> With APIClaw
-              </div>
-              <ul className="space-y-3 text-text-secondary">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-1">✓</span>
-                  <span><strong>∞ hours saved</strong> per integration</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-1">✓</span>
-                  <span>No API keys needed for managed APIs</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-1">✓</span>
-                  <span>Managed: AI, Scraping, Code & more</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-1">✓</span>
-                  <span>Your agent ships. Today.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <p className="text-center text-sm text-text-muted mt-8">
-            <Sparkles className="w-4 h-4 inline mr-1" />
-            API providers: White-glove onboarding available. Limited spots.
-          </p>
-          
-          {/* CTA */}
-          <div className="max-w-md mx-auto mt-6 px-4 sm:px-0 flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="/workspace"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300 hover:scale-[1.02] text-base"
-            >
-              <Sparkles className="w-5 h-5" />
-              Try it for free
-            </a>
-            <a
-              href="https://github.com/nordsym/apiclaw"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-4 border border-border hover:border-accent/40 text-text-secondary hover:text-text-primary rounded-xl transition-all duration-300 text-base"
-            >
-              <Github className="w-5 h-5" />
-              View on GitHub
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Start */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-surface/50">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center justify-center gap-2 sm:gap-3">
-              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
-              Quick Start
-            </h2>
-            <p className="text-text-secondary mt-2 text-sm sm:text-base">Get running in 30 seconds</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-            {/* Install */}
-            <div className="code-preview">
-              <div className="code-preview-header">
-                terminal
-              </div>
-              <div className="code-preview-body">
-                <pre className="text-sm whitespace-pre-wrap">
-                  <span className="text-gray-500"># Auto-install MCP server</span>{"\n"}
-                  <span className="text-green-400">$</span> curl -fsSL https://apiclaw.cloud/install.sh | bash{"\n\n"}
-                  <span className="text-gray-500"># Or start the server directly</span>{"\n"}
-                  <span className="text-green-400">$</span> <span className="text-blue-400">npx</span> @nordsym/apiclaw serve
-                </pre>
-              </div>
-            </div>
-
-            {/* MCP Config */}
-            <div className="code-preview">
-              <div className="code-preview-header">
-                claude_desktop_config.json
-              </div>
-              <div className="code-preview-body">
-                <pre className="text-sm whitespace-pre-wrap">
-                  <span className="text-gray-500">{"{"}</span>{"\n"}
-                  {"  "}<span className="text-red-400">"mcpServers"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
-                  {"    "}<span className="text-red-400">"apiclaw"</span>: <span className="text-gray-500">{"{"}</span>{"\n"}
-                  {"      "}<span className="text-red-400">"command"</span>: <span className="text-green-400">"npx"</span>,{"\n"}
-                  {"      "}<span className="text-red-400">"args"</span>: [<span className="text-green-400">"@nordsym/apiclaw"</span>]{"\n"}
-                  {"    "}<span className="text-gray-500">{"}"}</span>{"\n"}
-                  {"  "}<span className="text-gray-500">{"}"}</span>{"\n"}
-                  <span className="text-gray-500">{"}"}</span>
-                </pre>
-              </div>
-            </div>
-          </div>
-          
-          <p className="text-center text-sm text-text-muted mt-6">
-            Works with Claude Desktop, Cursor, and any MCP-compatible client
-          </p>
-        </div>
-      </section>
+      {/* Install — Three Doors + OS-aware quick install + .mcpb */}
+      <InstallSection />
 
       <div className="divider" />
 

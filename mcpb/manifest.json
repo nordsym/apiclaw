@@ -1,0 +1,71 @@
+{
+  "manifest_version": "0.3",
+  "name": "apiclaw",
+  "display_name": "APIClaw",
+  "version": "2.5.3",
+  "description": "The API layer for AI agents. 20,000+ discoverable APIs, 1,650+ callable with zero config.",
+  "long_description": "APIClaw is a unified gateway that gives your AI agent access to 20,000+ APIs through one MCP server. 1,650+ are callable instantly with zero configuration — APIClaw holds the keys for managed providers like OpenRouter, Replicate, ElevenLabs, Brave Search, APILayer, GitHub, and Resend. Universal pass-through for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 50 calls/month.",
+  "author": {
+    "name": "NordSym AB",
+    "email": "gustav@nordsym.com",
+    "url": "https://nordsym.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nordsym/apiclaw"
+  },
+  "homepage": "https://apiclaw.cloud",
+  "documentation": "https://apiclaw.cloud/docs",
+  "support": "https://github.com/nordsym/apiclaw/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "APICLAW_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "discover_apis", "description": "Search 20,000+ APIs by capability. Returns ranked matches with pricing and metadata." },
+    { "name": "call_api", "description": "Execute any callable API through APIClaw. Auth handled automatically for managed providers." },
+    { "name": "get_api_details", "description": "Full specs, pricing, limits, and auth details for a specific API." },
+    { "name": "list_connected", "description": "List all managed providers ready for instant calls." },
+    { "name": "list_categories", "description": "Browse APIs by category (AI, search, voice, communication, etc.)." },
+    { "name": "capability", "description": "Route by capability (validate email, convert currency, transcribe audio) — APIClaw picks the best provider." },
+    { "name": "check_balance", "description": "Check workspace balance and usage." },
+    { "name": "estimate_cost", "description": "Estimate cost of a call before executing." }
+  ],
+  "keywords": [
+    "api",
+    "api-gateway",
+    "ai-agents",
+    "mcp",
+    "openrouter",
+    "replicate",
+    "elevenlabs",
+    "brave-search",
+    "apilayer",
+    "claude-desktop"
+  ],
+  "license": "MIT",
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Workspace API Key (optional)",
+      "description": "Paste your APIClaw workspace key (sk-claw-...) for paid usage and analytics. Leave blank to start in free anonymous mode (50 managed calls/month).",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

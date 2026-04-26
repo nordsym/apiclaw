@@ -1,2 +1,5 @@
 .vercel
 .env*.local
+
+# MCPB bundle is built fresh on each deploy by mcpb/build.sh (chained from prebuild)
+public/apiclaw.mcpb

@@ -1,0 +1,11 @@
+{
+  "name": "apiclaw-mcpb-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bundled APIClaw MCP server for Claude Desktop Extension",
+  "main": "index.js",
+  "dependencies": {
+    "@nordsym/apiclaw": "^2.5.3"
+  }
+}
