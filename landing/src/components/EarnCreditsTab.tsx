@@ -80,7 +80,7 @@ const TASKS: TaskConfig[] = [
   // USAGE TASKS
   {
     id: "first-direct-call",
-    title: "First Direct Call",
+    title: "First Managed Call",
     credits: 15,
     icon: Zap,
     category: "usage",

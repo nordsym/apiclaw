@@ -1082,7 +1082,7 @@ function OverviewTab({
               <p className="text-xs flex items-center gap-1.5 text-green-400"><Check className="w-3 h-3" />Open APIs always available</p>
               <p className={`text-xs flex items-center gap-1.5 ${isPaid || (workspace?.usageRemaining ?? 1) > 0 ? "text-green-400" : "text-red-400"}`}>
                 {(isPaid || (workspace?.usageRemaining ?? 1) > 0) ? <Check className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                Direct Call {(!isPaid && (workspace?.usageRemaining ?? 1) <= 0) ? "blocked (limit reached)" : "available"}
+                Managed call {(!isPaid && (workspace?.usageRemaining ?? 1) <= 0) ? "blocked (limit reached)" : "available"}
               </p>
             </div>
           </button>
@@ -1121,7 +1121,7 @@ function OverviewTab({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {api.hasDirectCall && <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded">Direct Call</span>}
+                    {api.hasDirectCall && <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded">Managed</span>}
                     <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-400" : api.status === "blocked" ? "bg-red-500/10 text-red-400" : api.status === "rate_limited" ? "bg-yellow-500/10 text-yellow-400" : "bg-yellow-500/10 text-yellow-400"}`}>{api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}</span>
                   </div>
                 </div>
@@ -1141,8 +1141,8 @@ function OverviewTab({
         <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5 flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[#ef4444] shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium text-[#ef4444]">Running low on Direct Call usage</p>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Search and Open APIs always work. Direct Call APIs need usage credits.</p>
+            <p className="font-medium text-[#ef4444]">Running low on managed call usage</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Search and discovery always work. Managed API calls need usage credits.</p>
           </div>
           <button onClick={() => setActiveTab("billing")} className="px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition shrink-0">Upgrade</button>
         </div>
@@ -1208,9 +1208,9 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
           <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-3">
             <Zap className="w-5 h-5 text-[#ef4444]" />
           </div>
-          <p className="font-semibold text-base">Direct Call</p>
+          <p className="font-semibold text-base">Managed APIs</p>
           <p className="text-2xl font-bold mt-1">{DIRECT_CALL_PROVIDERS.length} <span className="text-sm font-normal text-[var(--text-muted)]">providers</span></p>
-          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">APIClaw handles all API keys. Your agent just calls — zero config.</p>
+          <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">APIClaw handles all API keys. Your agent just calls. Zero config.</p>
           <div className="mt-3 flex items-center gap-1.5 text-xs font-mono text-green-400 bg-green-500/5 border border-green-500/20 rounded-lg px-2.5 py-1.5">
             <Layers className="w-3 h-3 shrink-0" />
             call_api(provider, action, params)
@@ -1256,7 +1256,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
       {activeSection === "direct-call" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-[var(--text-muted)]">{filteredDc.length} Direct Call providers</p>
+            <p className="text-sm text-[var(--text-muted)]">{filteredDc.length} managed providers</p>
             <select value={dcFilter} onChange={e => setDcFilter(e.target.value)} className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
               {dcCategories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
             </select>
@@ -1626,7 +1626,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
           <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
             <Zap className="w-6 h-6 text-[#ef4444]" />
           </div>
-          <h3 className="font-semibold text-lg mb-1">Direct Call</h3>
+          <h3 className="font-semibold text-lg mb-1">Managed API</h3>
           <p className="text-[#ef4444] text-sm font-medium mb-3">We handle keys</p>
           <p className="text-sm text-[var(--text-muted)] mb-4">
             APIClaw manages authentication and billing. Agents call your API without handling keys.
@@ -1680,7 +1680,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-semibold text-lg">{api.name}</h3>
-                  {api.hasDirectCall && <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Direct Call</span>}
+                  {api.hasDirectCall && <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-500 text-xs font-medium">Managed</span>}
                   {isManagedByAPIClaw && <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium" title="Keys held server-side by APIClaw. No configuration needed.">Managed</span>}
                   {isSubscriptionBlocked ? (
                     <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs font-medium" title="Subscription-blocked at upstream provider. Not callable until upstream plan is upgraded.">Blocked upstream</span>
@@ -1704,7 +1704,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                   {(["direct-call", "actions", "test"] as const).map(tab => (
                     <button key={tab} onClick={() => setApiDetailTab(tab)}
                       className={`px-4 py-3 text-sm font-medium border-b-2 transition -mb-px ${apiDetailTab === tab ? "border-[#ef4444] text-[#ef4444]" : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
-                      {tab === "direct-call" ? "Direct Call" : tab === "actions" ? "Actions" : "Test"}
+                      {tab === "direct-call" ? "Managed API" : tab === "actions" ? "Actions" : "Test"}
                     </button>
                   ))}
                 </div>
@@ -1782,7 +1782,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                   {apiDetailTab === "actions" && (
                     actionsLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
                       <div className="space-y-4">
-                        {!dcConfigId && <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm text-yellow-400">Configure Direct Call first before adding actions.</div>}
+                        {!dcConfigId && <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm text-yellow-400">Configure the Managed API tab first before adding actions.</div>}
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-[var(--text-muted)]">{actions.length} action{actions.length !== 1 ? "s" : ""} defined</p>
                           {dcConfigId && <button onClick={() => setShowAddAction(v => !v)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef4444]/10 text-[#ef4444] text-sm font-medium hover:bg-[#ef4444]/20 transition"><Plus className="w-4 h-4" />Add Action</button>}
@@ -1851,7 +1851,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                               setTestLoading(true); setTestResult(null);
                               try {
                                 const action = actions.find(a => a._id === testAction);
-                                if (!action || !dcConfig.baseUrl) { setTestResult("Configure Direct Call first."); return; }
+                                if (!action || !dcConfig.baseUrl) { setTestResult("Configure the Managed API tab first."); return; }
                                 const url = dcConfig.baseUrl.replace(/\/$/, "") + action.path;
                                 const headers: Record<string, string> = { "Content-Type": "application/json" };
                                 if (dcConfig.authType !== "none" && dcConfig.masterApiKey) headers[dcConfig.authHeader] = (dcConfig.authPrefix + dcConfig.masterApiKey).trim();
@@ -4418,7 +4418,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
           <ScrollText className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
           <h3 className="font-semibold text-xl mb-2">No API calls logged yet</h3>
           <p className="text-[var(--text-muted)] max-w-md mx-auto">
-            When your agents start making Direct Call API requests, they&apos;ll appear here with timestamps, latency, and status information.
+            When your agents start making managed API calls, they&apos;ll appear here with timestamps, latency, and status information.
           </p>
         </div>
       ) : (
@@ -5116,14 +5116,14 @@ function WebhooksTab({ sessionToken }: { sessionToken: string | null }) {
     {
       id: "usage.threshold.80",
       label: "Usage at 80%",
-      description: "Email when 80% of your monthly Direct Call quota is used.",
+      description: "Email when 80% of your monthly managed call quota is used.",
       icon: AlertCircle,
       color: "text-yellow-400",
     },
     {
       id: "usage.threshold.100",
       label: "Usage limit reached",
-      description: "Email when Direct Call is blocked. Search and Open APIs still work.",
+      description: "Email when managed calls are blocked. Search and discovery still work.",
       icon: AlertCircle,
       color: "text-red-400",
     },
@@ -5236,8 +5236,8 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
           {[
             { name: "discover_apis", desc: "Search 22,000+ APIs by capability" },
             { name: "get_api_details", desc: "Get full details for a specific API" },
-            { name: "call_api", desc: "Execute a Direct Call API" },
-            { name: "list_connected", desc: "Show available Direct Call providers" },
+            { name: "call_api", desc: "Execute a managed API call" },
+            { name: "list_connected", desc: "Show available managed providers" },
             { name: "get_categories", desc: "List all API categories" },
             { name: "register_owner", desc: "Authenticate workspace via magic link" },
           ].map((tool) => (
@@ -5250,7 +5250,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
       </div>
 
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Direct Call Providers (No API Key Needed)</h3>
+        <h3 className="font-semibold mb-4">Managed Providers (No API Key Needed)</h3>
         <div className="grid gap-2 md:grid-cols-2">
           {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
             <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>

@@ -202,7 +202,7 @@ function UpgradeContent() {
             </div>
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>All Direct Call providers</span>
+              <span>All managed providers</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
               <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
@@ -220,7 +220,7 @@ function UpgradeContent() {
                   Upgrade to Pro
                 </div>
                 <div className="text-gray-400">
-                  5,000 Direct Call requests per month
+                  Unlimited managed API calls, pay as you go
                 </div>
               </div>
               <div className="text-right">

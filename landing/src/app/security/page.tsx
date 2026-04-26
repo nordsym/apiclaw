@@ -44,7 +44,7 @@ const securityFeatures = [
   {
     icon: Server,
     title: "Server-Side Proxy",
-    description: "Direct Call requests are proxied server-side. Your agent never sees the actual API credentials — they stay on our secure infrastructure.",
+    description: "Managed API calls are proxied server-side. Your agent never sees the actual API credentials. They stay on our secure infrastructure.",
     details: [
       "Credentials never sent to agents",
       "TLS 1.3 for all connections",
@@ -205,12 +205,12 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      {/* How Direct Call Works - Security View */}
+      {/* How Managed APIs Work - Security View */}
       <section className="py-20 px-6 bg-surface/30">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Direct Call: Secure by Design
+              Managed APIs: Secure by Design
             </h2>
             <p className="text-text-secondary text-lg">
               Your agent calls APIs without ever seeing credentials.

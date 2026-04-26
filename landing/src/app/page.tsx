@@ -10,7 +10,7 @@ import {
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
 import { useState, useEffect, useRef } from "react";
-import { HeroTabs } from "@/components/HeroTabs";
+import { HeroDoorsPreview } from "@/components/HeroDoorsPreview";
 import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
 import { SeeTheDifference } from "@/components/SeeTheDifference";
@@ -145,19 +145,6 @@ const terminalLines = [
   { type: "accent", text: "→ Add to Claude Desktop: Settings → MCP → Add Server", delay: 0 },
 ];
 
-const directCallProviders = [
-  { name: "Replicate", desc: "1000+ ML models" },
-  { name: "OpenRouter", desc: "100+ LLMs" },
-  { name: "APILayer", desc: "27 APIs" },
-  { name: "Firecrawl", desc: "Web scraping" },
-  { name: "E2B", desc: "Code sandbox" },
-  { name: "GitHub", desc: "Repos & Issues" },
-  { name: "ElevenLabs", desc: "Text-to-speech" },
-  { name: "Brave Search", desc: "Web search" },
-  { name: "Resend", desc: "Email" },
-  { name: "46elks", desc: "SMS (Nordic)" },
-];
-
 export default function Home() {
   const [isDark, setIsDark] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -165,7 +152,7 @@ export default function Home() {
   const [showContextCopied, setShowContextCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
-  const [showDirectCallModal, setShowDirectCallModal] = useState(false);
+  const [showManagedModal, setShowManagedModal] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [showOpenApisModal, setShowOpenApisModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -173,7 +160,7 @@ export default function Home() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const directCallProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
+  const managedProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
     // Multi-API providers (top)
     { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 27 },
     { name: "Replicate", desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API", apis: 1000 },
@@ -218,7 +205,7 @@ OpenAI-compatible gateway also available at https://api.apiclaw.cloud/v1/chat/co
 
 Managed providers include OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI (embeddings), Replicate (Flux, SDXL, Whisper), Stability AI, ElevenLabs (TTS), Deepgram (STT), AssemblyAI, Brave Search, Serper, Firecrawl, Twilio, 46elks, Resend, E2B, GitHub, and the full APILayer suite (exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping). Pass-through is universal for any keyless public API.
 
-Pricing: free tier of 50 managed calls per month. Beyond that: pay-as-you-go at provider cost + 15%, no commitment, billed via Stripe.
+Pricing: free tier of 25 API calls per month with email signup, any provider counts equally. Discovery (search, list, get_api_details) is always free and unmetered. Beyond the free tier: pay-as-you-go at provider cost + 15%, no commitment, billed via Stripe.
 
 When an API call would help the task, execute it through whichever access method this agent is using. Never ask the user for an API key for any of the providers above. APIClaw holds them.
 
@@ -547,8 +534,8 @@ Full docs: https://apiclaw.cloud/docs.`;
               </div>
             </div>
 
-            {/* Right: HeroTabs */}
-            <HeroTabs />
+            {/* Right: Three Doors preview */}
+            <HeroDoorsPreview />
           </div>
         </div>
       </section>
@@ -596,18 +583,18 @@ Full docs: https://apiclaw.cloud/docs.`;
       </section>
 
       {/* Managed APIs Modal */}
-      {showDirectCallModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowDirectCallModal(false)}>
+      {showManagedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowManagedModal(false)}>
           <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold">Managed API Providers</h3>
-              <button onClick={() => setShowDirectCallModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
+              <button onClick={() => setShowManagedModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <p className="text-text-muted mb-4">These APIs work through APIClaw's proxy. Your agent calls them without needing API keys.</p>
             <div className="space-y-3">
-              {directCallProviders.map((provider, i) => (
+              {managedProviders.map((provider, i) => (
                 <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                   provider.featured
                     ? 'bg-gradient-to-r from-accent/5 to-purple-500/5 border-accent/30 hover:border-accent/50 hover:shadow-[0_0_20px_rgba(0,212,255,0.08)]'
@@ -898,8 +885,8 @@ Full docs: https://apiclaw.cloud/docs.`;
               Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              Search, discover, and call {statsData.callableCount.toLocaleString()}+ APIs for free.<br />
-              Managed APIs: pay what the API costs + 15%. Always transparent.
+              25 free API calls per month, any provider. Discovery is always free, unmetered.<br />
+              Past the free tier: API cost plus 15%, no commitment.
             </p>
           </div>
 
@@ -1002,7 +989,11 @@ Full docs: https://apiclaw.cloud/docs.`;
               },
               {
                 q: "What does it cost?",
-                a: `Search and discover ${statsData.callableCount.toLocaleString()}+ APIs free forever. Managed API calls are billed at the underlying API cost plus 15%. Fully transparent, no hidden fees. For API owners, listing is always free.`
+                a: `Free tier: 25 API calls per month, any provider, email signup required (no card). Discovery (search, list, capability lookups) is always free and unmetered, even past 25 calls. Past the free tier: pay-as-you-go at the underlying API cost plus 15%, fully transparent, no commitment. For API owners, listing is always free.`
+              },
+              {
+                q: "Do I have to sign up to use APIClaw?",
+                a: `Discovery and search work without signup. Calling an API requires a workspace, which is a free email signup at apiclaw.cloud/workspace. The signup gives you a workspace key (sk-claw-…) and 25 free calls per month. We require this so we can show you usage, give you logs, and protect the gateway.`
               },
               {
                 q: "Do I have to use MCP?",
@@ -1166,7 +1157,7 @@ Full docs: https://apiclaw.cloud/docs.`;
             
             <div className="p-4 max-h-[40vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
-                {directCallProviders.map((provider, i) => (
+                {managedProviders.map((provider, i) => (
                   <div key={i} className="p-3 rounded-xl bg-surface border border-border">
                     <div className="font-medium text-sm">{provider.name}</div>
                     <div className="text-xs text-text-muted">{provider.desc}</div>
