@@ -796,11 +796,14 @@ function unauthResponse(reason: string) {
   return jsonResponse(
     {
       error: {
-        message: "Authentication required. Get a free key at https://apiclaw.com/signup",
+        message:
+          "Workspace required. APIClaw is free for the first 25 calls per month. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
         type: "auth_error",
         code: "unauth",
         reason,
-        signupUrl: "https://apiclaw.com/signup",
+        signupUrl: "https://apiclaw.cloud/workspace",
+        docsUrl: "https://apiclaw.cloud/install",
+        freeTierCalls: 25,
       },
     },
     401
@@ -4131,10 +4134,29 @@ http.route({
     const t0 = Date.now();
 
     // Auth — accepts Bearer sk-claw, X-APIClaw-Api-Key, or X-APIClaw-Session.
-    // Shadow-mode compliant: anonymous calls flow through for telemetry but
-    // are subject to workspace-less quota (handled downstream).
     const auth = await resolveWorkspaceFromRequest(ctx, request);
     const workspaceId = auth.workspaceId;
+
+    // Enforce gate: anonymous /v1/call is rejected when AUTH_ENFORCEMENT=enforce.
+    if (auth.authMethod === "anonymous") {
+      try {
+        await ctx.runMutation(api.funnel.recordEvent, {
+          event: "call_api_blocked",
+          classification: "human",
+          userAgent: request.headers.get("User-Agent") ?? undefined,
+          props: {
+            reason: "unauth",
+            path: "/v1/call",
+            mode: isEnforceMode() ? "enforce" : "shadow",
+          },
+        });
+      } catch (e: any) {
+        console.error("[v1/call] Funnel log failed:", e.message);
+      }
+      if (isEnforceMode()) {
+        return unauthResponse("call_requires_auth");
+      }
+    }
 
     let body: any;
     try { body = await request.json(); }
