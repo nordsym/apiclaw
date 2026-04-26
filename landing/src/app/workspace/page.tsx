@@ -91,6 +91,7 @@ import {
 } from "@/components/CheckoutButton";
 import { Toast, useToast } from "@/components/Toast";
 import { EarnCreditsTab } from "@/components/EarnCreditsTab";
+import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
 
@@ -929,7 +930,7 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "api-catalog" && (
-            <APICatalogTab apis={approvedApis} />
+            <WorkspaceCatalog />
           )}
           {activeTab === "my-agents" && (
             <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} isProvider={isProvider} />
