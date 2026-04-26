@@ -394,6 +394,136 @@ let firstCallEmitted = false;
  * Get customer API key from environment variable
  * Convention: {PROVIDER}_API_KEY (e.g., COACCEPT_API_KEY, ELKS_API_KEY)
  */
+// ─────────────────────────────────────────────────────────────────────────
+// Suggested-call hints for discover_apis.
+//
+// APILayer wraps 27 sub-APIs behind one provider with action slugs like
+// fixer_latest, weatherstack_current, aviation. Generic discovery returns
+// names like "Weatherstack" or "Frankfurter" without the provider+action
+// shape an agent needs to call them. This helper inspects the natural-
+// language query and surfaces an exact call recipe so the agent can skip
+// the list_connected fishing trip.
+// ─────────────────────────────────────────────────────────────────────────
+type SuggestedCall = {
+  provider: string;
+  action: string;
+  description: string;
+  example_params: Record<string, unknown>;
+  intent: string;
+};
+
+const SUGGESTED_CALL_RULES: Array<{
+  match: RegExp;
+  suggestion: SuggestedCall;
+}> = [
+  {
+    match: /(exchange[\s-]?rate|currency|forex|\bfx\b|fixer|convert.*(usd|eur|sek|gbp|jpy|cny)|usd.*(eur|sek)|sek.*(usd|eur)|eur.*(usd|sek))/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'fixer_latest',
+      description: 'Live FX rates across 170+ currencies via APILayer Fixer.',
+      example_params: { base: 'USD', symbols: 'EUR' },
+      intent: 'currency exchange / FX rates',
+    },
+  },
+  {
+    match: /(weather|forecast|temperature|climate|\brain\b|\bsnow\b|\bsunny\b)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'weatherstack_current',
+      description: 'Real-time weather conditions for any location via APILayer Weatherstack.',
+      example_params: { query: 'New York' },
+      intent: 'weather / forecast',
+    },
+  },
+  {
+    match: /(flight|aviation|airline|aircraft|\biata\b|\bicao\b|airport|departure|arrival)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'aviation',
+      description: 'Live flight tracking, status, and aviation data via APILayer Aviation Stack.',
+      example_params: { flight_iata: 'SK903' },
+      intent: 'flight tracking / aviation',
+    },
+  },
+  {
+    match: /(\bip\b|geolocation|geoip|ip[\s-]?address|locate.*ip)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'ipstack',
+      description: 'IP geolocation, ISP, and security data via APILayer IP Stack.',
+      example_params: { ip: '8.8.8.8' },
+      intent: 'IP geolocation',
+    },
+  },
+  {
+    match: /(verify[\s-]?email|email.*valid|email.*deliverab)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'email_verification',
+      description: 'Validate email deliverability and detect disposable addresses via APILayer.',
+      example_params: { email: 'name@example.com' },
+      intent: 'email verification',
+    },
+  },
+  {
+    match: /(verify[\s-]?(phone|number)|phone.*valid)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'number_verification',
+      description: 'Validate phone numbers and identify carriers via APILayer.',
+      example_params: { number: '+14158586273' },
+      intent: 'phone verification',
+    },
+  },
+  {
+    match: /(\bvat\b|tax id|vies)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'vat_layer',
+      description: 'Validate EU VAT numbers via APILayer.',
+      example_params: { vat_number: 'LU26375245' },
+      intent: 'VAT validation',
+    },
+  },
+  {
+    match: /(\bnews\b|headlines|articles)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'world_news',
+      description: 'Latest world news from thousands of sources via APILayer.',
+      example_params: { language: 'en', categories: 'business,technology' },
+      intent: 'news / headlines',
+    },
+  },
+  {
+    match: /(screenshot|capture.*website|render.*page)/i,
+    suggestion: {
+      provider: 'apilayer',
+      action: 'screenshot',
+      description: 'Render a screenshot of any URL via APILayer.',
+      example_params: { url: 'https://apiclaw.cloud' },
+      intent: 'website screenshot',
+    },
+  },
+];
+
+function buildSuggestedCalls(query: string): SuggestedCall[] {
+  if (!query) return [];
+  const seen = new Set<string>();
+  const out: SuggestedCall[] = [];
+  for (const rule of SUGGESTED_CALL_RULES) {
+    if (rule.match.test(query)) {
+      const key = `${rule.suggestion.provider}/${rule.suggestion.action}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(rule.suggestion);
+      }
+    }
+  }
+  return out;
+}
+
 function getCustomerKey(providerId: string): string | undefined {
   // Try exact match first (e.g., 46elks -> 46ELKS_API_KEY)
   const exactKey = `${providerId.toUpperCase().replace(/-/g, '_')}_API_KEY`;
@@ -932,6 +1062,12 @@ Docs: https://apiclaw.cloud
         const responseTimeMs = Date.now() - startTime;
         trackSearch(query, results.length, responseTimeMs);
 
+        // Suggested-call enrichment.
+        // When a query matches a known managed sub-action (APILayer's 27-API
+        // wrapper has the most non-obvious slugs), surface the exact call
+        // shape so the agent doesn't have to fish for it via list_connected.
+        const suggestedCalls = buildSuggestedCalls(query);
+
         // Log search to Convex analytics (authenticated + anonymous)
         const analyticsUserId = workspaceContext?.workspaceId || `anon:${getMachineFingerprint()}`;
         const convexUrl = CONVEX_URL;
@@ -1044,6 +1180,13 @@ Docs: https://apiclaw.cloud
                 status: 'success',
                 query,
                 results_count: results.length,
+                ...(suggestedCalls.length > 0
+                  ? {
+                      suggested_calls: suggestedCalls,
+                      suggested_calls_hint:
+                        'These provider+action pairs are exact matches for the query. Skip further lookups and call them directly via call_api.',
+                    }
+                  : {}),
                 results: results.map(r => {
                   // Binary funnel: callable iff APIClaw can execute it server-side
                   // (managed adapter OR keyless open proxy). Everything else = discovery-only.
