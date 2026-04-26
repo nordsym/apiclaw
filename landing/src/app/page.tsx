@@ -15,6 +15,7 @@ import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
 import { SeeTheDifference } from "@/components/SeeTheDifference";
 import { InstallSection } from "@/components/InstallSection";
+import { ContributeCards } from "@/components/ContributeCards";
 
 const stats = [
   { number: "20,386+", label: "Discoverable APIs", live: true },
@@ -98,13 +99,13 @@ const agentBenefits = [
   },
   {
     icon: Database,
-    title: "Structured Data",
-    description: "JSON responses with pricing, limits, regions, auth. Everything an agent needs.",
+    title: "Managed Keys",
+    description: "APIClaw holds the credentials for 22+ providers. Your agent calls them with zero config.",
   },
   {
     icon: Shield,
-    title: "MCP Native",
-    description: "Built for Model Context Protocol. Works with Claude, GPT, and any compatible agent.",
+    title: "Three Access Paths",
+    description: "MCP for AI clients, CLI for terminals, sk-claw- for your own agent over HTTP. Same gateway.",
   },
 ];
 
@@ -203,47 +204,28 @@ export default function Home() {
   };
 
   const copyContextToClipboard = () => {
-    const context = `APIClaw -- The API Layer for AI Agents
+    const callable = statsData.callableCount.toLocaleString();
+    const total = statsData.apiCount.toLocaleString();
+    const managed = statsData.managedCount;
+    const context = `APIClaw is the API layer for AI agents. One unified gateway that gives an agent access to ${total}+ APIs across LLMs, voice, search, email, SMS, code execution, web scraping, payments, and more. ${callable}+ are callable instantly through APIClaw, ${managed} of those with managed keys (zero config on your side).
 
-You have access to APIClaw, a unified gateway that gives you one API key (sk-claw-) for LLMs, voice, search, email, SMS, code execution, scraping, and more.
+Three ways to use APIClaw:
+1. MCP server. Drop it into Claude Desktop, Cursor, or any MCP-compatible client. Tools: discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost.
+2. CLI. Install npm i -g @nordsym/apiclaw, then call any provider from a shell or CI job: apiclaw call <provider>/<action> -d '{...}'.
+3. Workspace key (HTTP). For agent builders shipping their own product. POST https://api.apiclaw.cloud/v1/call with header Authorization: Bearer sk-claw-..., body { provider, action, params }. Same gateway, same auth, same logs as the MCP path.
 
-Key capabilities:
-- ${statsData.callableCount.toLocaleString()}+ callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories, ${statsData.endpointCount.toLocaleString()} endpoints.
-- Intelligent capability routing: describe what you need, get the best provider ranked by match score.
-- ${statsData.capabilityCount} capability types: lookup, search, list, convert, validate, generate, monitor, price, enrich, analyze, send, compute, stream, create, update.
-- OpenAI-compatible gateway: api.apiclaw.cloud/v1/chat/completions works with any tool that speaks OpenAI.
-- ${statsData.managedCount} managed providers: Zero-config API access. APIClaw handles auth, rate limiting, and billing.
+OpenAI-compatible gateway also available at https://api.apiclaw.cloud/v1/chat/completions for any tool that speaks the OpenAI Chat API. Per-request model routing via the X-APIClaw-Route header (auto, fastest, best_price, or a specific provider like groq, mistral, openrouter).
 
-Managed providers (${statsData.managedCount}):
-LLM: OpenRouter (800+ models), Groq (ultra-fast), Mistral (EU), Together AI (open-source), Cohere (RAG/rerank)
-Embeddings: Voyage AI (voyage-3-large, best-in-class RAG retrieval)
-AI/ML: Replicate (Flux, SDXL, Whisper), Stability AI (image generation)
-Voice: ElevenLabs (TTS, 29 languages), Deepgram (STT), AssemblyAI (audio intelligence)
-Search: Brave Search, Serper (Google SERP), Firecrawl (web scraping)
-Communication: Twilio (SMS/voice, global), 46elks (SMS, Nordic/EU)
-Email: Resend (transactional email)
-Code: E2B (sandboxed execution), GitHub (repos, code, issues)
-Multi-API: APILayer (27 APIs -- exchange rates, stocks, aviation, PDF, screenshots, verification, VAT, news, scraping)
+Managed providers include OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI (embeddings), Replicate (Flux, SDXL, Whisper), Stability AI, ElevenLabs (TTS), Deepgram (STT), AssemblyAI, Brave Search, Serper, Firecrawl, Twilio, 46elks, Resend, E2B, GitHub, and the full APILayer suite (exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping). Pass-through is universal for any keyless public API.
 
-Your MCP Tools:
-- call_api(provider, action, params) -- Execute immediately, auth handled automatically
-- discover_apis(query) -- Search across ${statsData.callableCount.toLocaleString()}+ callable APIs
-- get_api_details(id) -- Full specs, pricing, limits
-- capability(type, keywords) -- Route by capability (validate email, convert currency, etc.)
-- list_connected() -- See all ready providers
-- check_balance() -- Usage and remaining calls
+Pricing: free tier of 50 managed calls per month. Beyond that: pay-as-you-go at provider cost + 15%, no commitment, billed via Stripe.
 
-Gateway (OpenAI-compatible):
-- Endpoint: api.apiclaw.cloud/v1/chat/completions
-- Auth: Bearer sk-claw-...
-- Per-request routing: X-APIClaw-Route header (fastest, best_price, groq, mistral, etc.)
+When an API call would help the task, execute it through whichever access method this agent is using. Never ask the user for an API key for any of the providers above. APIClaw holds them.
 
-Pricing: Free (50 managed calls/month). Pay-as-you-go: API cost + 15%, no commitment.
-
-When an API call helps the task, execute it directly.
-
-Install: curl -fsSL https://apiclaw.cloud/install.sh | bash
-Docs: https://apiclaw.cloud/docs`;
+Install for Claude Desktop: download https://apiclaw.cloud/apiclaw.mcpb and double-click.
+Install via terminal: curl -fsSL https://apiclaw.cloud/install.sh | bash (macOS/Linux) or iwr -useb https://apiclaw.cloud/install.ps1 | iex (Windows).
+Workspace key signup: https://apiclaw.cloud/workspace.
+Full docs: https://apiclaw.cloud/docs.`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
     setTimeout(() => setShowContextCopied(false), 2500);
@@ -797,27 +779,25 @@ Docs: https://apiclaw.cloud/docs`;
 
             <div className="code-preview">
               <div className="code-preview-header">
-                mcp-config.json
+                same flow · three doors
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm">
-                  <span className="text-gray-500">{"// Add to your MCP settings"}</span>{"\n"}
-                  {"{"}{"\n"}
-                  {"  "}<span className="text-red-400">"mcpServers"</span>: {"{"}{"\n"}
-                  {"    "}<span className="text-red-400">"apiclaw"</span>: {"{"}{"\n"}
-                  {"      "}<span className="text-red-400">"command"</span>: <span className="text-green-400">"npx"</span>,{"\n"}
-                  {"      "}<span className="text-red-400">"args"</span>: [<span className="text-green-400">"@nordsym/apiclaw"</span>]{"\n"}
-                  {"    "}{"}"}{"\n"}
-                  {"  "}{"}"}{"\n"}
-                  {"}"}{"\n"}
+                  <span className="text-gray-500">{"// 1. MCP — Claude Desktop, Cursor, any MCP client"}</span>{"\n"}
+                  <span className="text-blue-400">discover_apis</span>({"{ "}<span className="text-red-400">query</span>: <span className="text-green-400">"tts in spanish"</span>{" }"}){"\n"}
+                  <span className="text-blue-400">call_api</span>({"{ "}<span className="text-red-400">provider</span>: <span className="text-green-400">"elevenlabs"</span>, <span className="text-red-400">action</span>: <span className="text-green-400">"tts"</span>, <span className="text-red-400">params</span>: {"{...}"} {"}"}){"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// That's it. Your agent now has access to:"}</span>{"\n"}
-                  <span className="text-gray-500">{"// • discover_apis  - Find APIs by capability"}</span>{"\n"}
-                  <span className="text-gray-500">{"// • get_api_details - Full specs & pricing"}</span>{"\n"}
-                  <span className="text-gray-500">{"// • call_api - Managed APIs (no keys needed)"}</span>{"\n"}
-                  <span className="text-gray-500">{"// • list_connected - See available providers"}</span>{"\n"}
+                  <span className="text-gray-500">{"// 2. CLI — terminal, scripts, CI"}</span>{"\n"}
+                  <span className="text-green-400">$</span> apiclaw discover <span className="text-green-400">"tts in spanish"</span>{"\n"}
+                  <span className="text-green-400">$</span> apiclaw call elevenlabs/tts -d <span className="text-green-400">'{"{...}"}'</span>{"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// Works with Claude, Cursor, and any MCP compatible Agent 🦞"}</span>
+                  <span className="text-gray-500">{"// 3. Workspace key — your own agent over HTTP"}</span>{"\n"}
+                  fetch(<span className="text-green-400">"https://api.apiclaw.cloud/v1/call"</span>, {"{"}{"\n"}
+                  {"  "}<span className="text-red-400">headers</span>: {"{ "}<span className="text-red-400">Authorization</span>: <span className="text-green-400">"Bearer sk-claw-..."</span> {"}"},{"\n"}
+                  {"  "}<span className="text-red-400">body</span>: JSON.stringify({"{ provider, action, params }"}){"\n"}
+                  {"}"}){"\n"}
+                  {"\n"}
+                  <span className="text-gray-500">{"// Same gateway. Same auth. Same logs. 🦞"}</span>
                 </pre>
               </div>
             </div>
@@ -1006,27 +986,31 @@ Docs: https://apiclaw.cloud/docs`;
             {[
               {
                 q: "What is APIClaw?",
-                a: `APIClaw is the API layer for AI agents. Your agent queries by capability ("I need image generation"), gets ranked matches with metadata and pricing, and can call APIs directly through us — no keys needed.`
+                a: `APIClaw is the API layer for AI agents. Your agent queries by capability (for example "I need image generation"), gets ranked matches with metadata and pricing, and can call APIs directly through us with no keys needed.`
+              },
+              {
+                q: "How does my agent actually call APIClaw?",
+                a: `Three doors, same gateway. (1) MCP server: drop APIClaw into Claude Desktop, Cursor, or any MCP client and your agent gets eight tools (discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost). (2) CLI: install with npm and call providers from a terminal or CI job. (3) Workspace key: build your own agent and POST to api.apiclaw.cloud/v1/call with a Bearer sk-claw- key. Same APIs, same auth, same logs across all three.`
               },
               {
                 q: "How do Managed APIs work?",
-                a: `Managed APIs let your agent use APIs without managing API keys. APIClaw handles authentication -- your agent just calls the API through us. Currently available for ${statsData.managedCount} providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more.`
+                a: `Managed APIs let your agent use APIs without managing API keys. APIClaw handles authentication. Your agent just calls the API through us. Currently available for ${statsData.managedCount} providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more.`
               },
               {
                 q: "How are API credentials secured?",
-                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Managed API requests are proxied server-side -- your credentials never touch the agent. We take security seriously."
+                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Managed API requests are proxied server-side, your credentials never touch the agent. We take security seriously."
               },
               {
                 q: "What does it cost?",
-                a: `Search and discover ${statsData.callableCount.toLocaleString()}+ APIs free forever. Managed API calls are billed at the underlying API cost plus 15% -- fully transparent, no hidden fees. For API owners, listing is always free.`
+                a: `Search and discover ${statsData.callableCount.toLocaleString()}+ APIs free forever. Managed API calls are billed at the underlying API cost plus 15%. Fully transparent, no hidden fees. For API owners, listing is always free.`
+              },
+              {
+                q: "Do I have to use MCP?",
+                a: `No. MCP is one of three doors. If you are running Claude Desktop or Cursor, MCP is the easiest path. If you are scripting from a terminal, use the CLI. If you are building your own agent or backend, use a workspace key and POST to /v1/call. The MCP path is most popular but the choice is yours.`
               },
               {
                 q: "How do I add my API?",
                 a: "Go to your Workspace, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a managed partner? Set that up in your Workspace too."
-              },
-              {
-                q: "What's MCP?",
-                a: "MCP (Model Context Protocol) is the open standard for connecting AI agents to external tools. APIClaw is an MCP server — add one line to your config and your agent can discover and call any API in our registry. Works with Claude Desktop, Cursor, and any MCP-compatible agent."
               }
             ].map((faq, i) => (
               <div 
@@ -1052,6 +1036,9 @@ Docs: https://apiclaw.cloud/docs`;
           </div>
         </div>
       </section>
+
+      {/* Contribute */}
+      <ContributeCards />
 
       {/* Footer */}
       <footer className="border-t border-border py-16 px-6 bg-surface/30">

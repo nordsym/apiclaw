@@ -1,72 +1,138 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { RotateCcw, Sparkles, ArrowRight, Check, Loader2, AlertTriangle } from "lucide-react";
+import {
+  Sparkles,
+  Check,
+  Loader2,
+  AlertTriangle,
+  ArrowRight,
+  Newspaper,
+  Globe,
+  Pause,
+} from "lucide-react";
 
-const PROMPT = "Generate a product photo of a coffee mug.";
+type BeatKind = "tool" | "result" | "done";
+type Beat = { atMs: number; text: string; kind: BeatKind };
 
-const APICLAW_BEATS = [
-  { atMs: 120,  text: "discover_apis(\"image generation\")", kind: "tool" as const },
-  { atMs: 220,  text: "→ matched: Replicate (Flux Pro)",   kind: "result" as const },
-  { atMs: 380,  text: "call_api(\"replicate/flux-pro\")",   kind: "tool" as const },
-  { atMs: 1100, text: "→ image generated · zero keys",     kind: "result" as const },
-  { atMs: 1400, text: "Done.",                              kind: "done" as const },
+const PROMPT = "What's happening in tech right now?";
+
+const APICLAW_BEATS: Beat[] = [
+  { atMs: 100,  text: 'discover_apis("news") + discover_apis("article extraction")', kind: "tool" },
+  { atMs: 220,  text: "matched: Brave Search · Firecrawl · auto LLM", kind: "result" },
+  { atMs: 380,  text: 'call_api("brave/search", { q: "AI tech news today" })', kind: "tool" },
+  { atMs: 700,  text: "3 source URLs returned", kind: "result" },
+  { atMs: 820,  text: 'call_api("firecrawl/extract") · 3 URLs in parallel', kind: "tool" },
+  { atMs: 1100, text: "articles converted to markdown", kind: "result" },
+  { atMs: 1250, text: 'synthesize → /v1/chat (route: "auto")', kind: "tool" },
+  { atMs: 1400, text: "Done · 3 headlines with sources", kind: "done" },
 ];
 
 const FINISH_AT_MS = 1400;
+const HOLD_AT_END_MS = 4000;
 
-const MANUAL_STEPS = [
-  { atMin: 0,    text: "Search the web for image-gen APIs"            },
-  { atMin: 4,    text: "Open 12 tabs, compare providers"              },
-  { atMin: 11,   text: "Read Replicate docs — auth, models, limits"   },
-  { atMin: 16,   text: "Sign up · verify email · click confirmation"  },
-  { atMin: 22,   text: "Add credit card · accept billing terms"       },
-  { atMin: 27,   text: "Generate API key · save to .env"              },
-  { atMin: 34,   text: "Install replicate-node · read SDK examples"   },
-  { atMin: 41,   text: "Write request code · debug 401, 422, 500"     },
-  { atMin: 47,   text: "First call works · agent finally has an image" },
+const HEADLINES = [
+  {
+    title: "OpenAI announces o3-pro for enterprise tier",
+    source: "techcrunch.com",
+    via: "Brave Search",
+    time: "14:32 UTC",
+  },
+  {
+    title: "Anthropic ships Claude 4.7 Opus with 1M context window",
+    source: "anthropic.com",
+    via: "Brave Search",
+    time: "13:50 UTC",
+  },
+  {
+    title: "Vercel acquires V0 marketplace, expands AI tooling stack",
+    source: "vercel.com",
+    via: "Brave Search",
+    time: "12:15 UTC",
+  },
 ];
 
-type State = "idle" | "running" | "done";
+const MANUAL_STEPS = [
+  { atMin: 0,    text: "Search for news + content extraction APIs"          },
+  { atMin: 5,    text: "Compare NewsAPI, Bing, Brave, Firecrawl, Diffbot"   },
+  { atMin: 11,   text: "Read pricing, rate-limit, content-rights pages"     },
+  { atMin: 17,   text: "Sign up for news API · verify email · add card"    },
+  { atMin: 24,   text: "Sign up for extraction API · second key, second .env" },
+  { atMin: 31,   text: "Read both SDK docs · auth headers, pagination"     },
+  { atMin: 39,   text: "Write fetch · debug 401, 403, 422 across both"    },
+  { atMin: 46,   text: "Dedupe sources · handle rate limits · retries"    },
+  { atMin: 53,   text: "Send to your LLM yourself · pay per token"        },
+  { atMin: 60,   text: "First synthesized answer · ~3 hours in"            },
+];
 
 export function SeeTheDifference() {
-  const [state, setState] = useState<State>("idle");
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [done, setDone] = useState(false);
+  const [paused, setPaused] = useState(false);
   const startRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const hasStartedRef = useRef(false);
+  const [active, setActive] = useState(false);
 
-  const tick = useCallback(() => {
-    if (startRef.current == null) return;
-    const ms = performance.now() - startRef.current;
-    setElapsedMs(ms);
-    if (ms >= FINISH_AT_MS) {
-      setState("done");
-      setElapsedMs(FINISH_AT_MS);
-      return;
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }, []);
-
-  const start = useCallback(() => {
-    setState("running");
+  const startCycle = useCallback(() => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    if (holdTimerRef.current != null) clearTimeout(holdTimerRef.current);
+    setDone(false);
     setElapsedMs(0);
     startRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(tick);
-  }, [tick]);
 
-  const reset = useCallback(() => {
-    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    startRef.current = null;
-    setElapsedMs(0);
-    setState("idle");
-    hasStartedRef.current = false;
-    setTimeout(() => {
-      hasStartedRef.current = true;
-      start();
-    }, 60);
-  }, [start]);
+    const tick = () => {
+      if (paused) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      if (startRef.current == null) return;
+      const ms = performance.now() - startRef.current;
+      if (ms >= FINISH_AT_MS) {
+        setElapsedMs(FINISH_AT_MS);
+        setDone(true);
+        holdTimerRef.current = setTimeout(() => {
+          if (!paused) startCycle();
+        }, HOLD_AT_END_MS);
+        return;
+      }
+      setElapsedMs(ms);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }, [paused]);
+
+  // Pause adjustments — when paused, freeze time; when unpaused, shift the start
+  useEffect(() => {
+    if (paused) {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      if (holdTimerRef.current != null) clearTimeout(holdTimerRef.current);
+    } else if (active) {
+      // Resume from current elapsedMs
+      if (done) {
+        holdTimerRef.current = setTimeout(() => startCycle(), HOLD_AT_END_MS);
+      } else {
+        startRef.current = performance.now() - elapsedMs;
+        const tick = () => {
+          if (paused || startRef.current == null) return;
+          const ms = performance.now() - startRef.current;
+          if (ms >= FINISH_AT_MS) {
+            setElapsedMs(FINISH_AT_MS);
+            setDone(true);
+            holdTimerRef.current = setTimeout(() => {
+              if (!paused) startCycle();
+            }, HOLD_AT_END_MS);
+            return;
+          }
+          setElapsedMs(ms);
+          rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    }
+  }, [paused, active, done, elapsedMs, startCycle]);
 
   useEffect(() => {
     const node = sectionRef.current;
@@ -74,35 +140,38 @@ export function SeeTheDifference() {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && !hasStartedRef.current) {
-            hasStartedRef.current = true;
-            start();
-            observer.disconnect();
+          if (entry.isIntersecting && !active) {
+            setActive(true);
+            startCycle();
           }
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.25 }
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [start]);
+  }, [active, startCycle]);
 
   useEffect(() => () => {
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    if (holdTimerRef.current != null) clearTimeout(holdTimerRef.current);
   }, []);
 
-  // Manual side: simulated minutes are paced 1 real second = 1 simulated minute,
-  // capped at the last step. Stays "still going" past 47 min.
+  // Manual side: 1 real second = 1 simulated minute, capped at 60
   const simulatedMin = Math.min(60, elapsedMs / 1000);
-  const visibleManualSteps = MANUAL_STEPS.filter((s) => s.atMin <= simulatedMin);
-  const lastVisibleManual = visibleManualSteps[visibleManualSteps.length - 1];
-  const manualDone = state === "done" && simulatedMin >= 47;
+  const lastVisibleManualIdx = MANUAL_STEPS.findIndex((s, i) =>
+    s.atMin <= simulatedMin && (MANUAL_STEPS[i + 1]?.atMin ?? Infinity) > simulatedMin
+  );
 
-  // APIClaw side: reveal beats based on elapsed time
   const visibleBeats = APICLAW_BEATS.filter((b) => b.atMs <= elapsedMs);
 
   return (
-    <div ref={sectionRef} className="w-full max-w-6xl mx-auto">
+    <div
+      ref={sectionRef}
+      className="w-full max-w-6xl mx-auto"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Without APIClaw */}
         <div className="relative rounded-2xl border border-border bg-surface-elevated overflow-hidden">
@@ -111,7 +180,7 @@ export function SeeTheDifference() {
               <AlertTriangle className="w-4 h-4 text-text-muted" />
               Without APIClaw
             </div>
-            <ManualClock minutes={simulatedMin} done={manualDone} />
+            <ManualClock minutes={simulatedMin} done={done && simulatedMin >= 60} />
           </div>
 
           <div className="px-4 sm:px-5 py-4 border-b border-border-subtle">
@@ -119,10 +188,10 @@ export function SeeTheDifference() {
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <ol className="p-4 sm:p-5 space-y-2.5 min-h-[280px]">
+          <ol className="p-4 sm:p-5 space-y-2.5 min-h-[320px]">
             {MANUAL_STEPS.map((step, i) => {
               const visible = step.atMin <= simulatedMin;
-              const active = visible && step === lastVisibleManual && !manualDone;
+              const isActive = visible && i === lastVisibleManualIdx && !(done && simulatedMin >= 60);
               return (
                 <li
                   key={i}
@@ -132,7 +201,7 @@ export function SeeTheDifference() {
                 >
                   <span
                     className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold flex-shrink-0 ${
-                      active
+                      isActive
                         ? "bg-text-muted/20 text-text-secondary"
                         : visible
                           ? "bg-text-muted/10 text-text-muted"
@@ -143,11 +212,11 @@ export function SeeTheDifference() {
                   </span>
                   <span
                     className={`text-sm leading-relaxed ${
-                      active ? "text-text-primary" : "text-text-secondary"
+                      isActive ? "text-text-primary" : "text-text-secondary"
                     }`}
                   >
                     {step.text}
-                    {active && (
+                    {isActive && (
                       <span className="inline-flex gap-0.5 ml-1.5 align-middle">
                         <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" />
                         <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.15s" }} />
@@ -159,12 +228,6 @@ export function SeeTheDifference() {
               );
             })}
           </ol>
-
-          {manualDone && (
-            <div className="px-4 sm:px-5 pb-4 sm:pb-5 -mt-1 text-xs text-text-muted">
-              And that's just the first integration.
-            </div>
-          )}
         </div>
 
         {/* With APIClaw */}
@@ -174,7 +237,7 @@ export function SeeTheDifference() {
               <Sparkles className="w-4 h-4" />
               With APIClaw
             </div>
-            <ApiClawClock ms={elapsedMs} done={state === "done"} />
+            <ApiClawClock ms={elapsedMs} done={done} />
           </div>
 
           <div className="px-4 sm:px-5 py-4 border-b border-border-subtle">
@@ -182,11 +245,11 @@ export function SeeTheDifference() {
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-2.5 min-h-[280px] font-mono">
+          <div className="p-4 sm:p-5 space-y-2.5 min-h-[320px] font-mono">
             {visibleBeats.map((beat, i) => (
               <div
-                key={i}
-                className="flex items-start gap-2.5 text-sm leading-relaxed animate-[fadeIn_0.3s_ease-out_forwards]"
+                key={`${beat.atMs}-${i}`}
+                className="flex items-start gap-2.5 text-[13px] sm:text-sm leading-relaxed animate-[fadeIn_0.3s_ease-out_forwards]"
               >
                 {beat.kind === "tool" && (
                   <ArrowRight className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
@@ -200,17 +263,17 @@ export function SeeTheDifference() {
                 <span
                   className={
                     beat.kind === "tool"
-                      ? "text-text-secondary"
+                      ? "text-text-secondary break-all"
                       : beat.kind === "done"
                         ? "text-accent font-semibold"
-                        : "text-text-primary"
+                        : "text-text-primary break-words"
                   }
                 >
                   {beat.text}
                 </span>
               </div>
             ))}
-            {state === "running" && visibleBeats.length < APICLAW_BEATS.length && (
+            {!done && visibleBeats.length < APICLAW_BEATS.length && (
               <div className="flex items-center gap-2.5 text-sm text-text-muted">
                 <Loader2 className="w-4 h-4 animate-spin text-accent" />
                 <span>working…</span>
@@ -218,31 +281,48 @@ export function SeeTheDifference() {
             )}
           </div>
 
-          {state === "done" && (
-            <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-xl border border-accent/30 bg-gradient-to-br from-accent/10 to-transparent p-3 sm:p-4 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center flex-shrink-0">
-                <span className="text-lg">☕</span>
+          {done && (
+            <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-xl border border-accent/20 bg-gradient-to-br from-accent/5 to-transparent p-3 sm:p-4 space-y-2 animate-[fadeIn_0.4s_ease-out_forwards]">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-accent font-semibold mb-1">
+                <Newspaper className="w-3.5 h-3.5" />
+                Synthesized answer
               </div>
-              <div className="text-sm">
-                <div className="font-semibold text-text-primary">Image returned</div>
-                <div className="text-text-muted text-xs">via Replicate · zero keys configured · 1.4s end to end</div>
-              </div>
+              {HEADLINES.map((h, i) => (
+                <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
+                  <Globe className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-text-primary font-medium leading-snug">{h.title}</div>
+                    <div className="text-text-muted text-[11px] flex items-center gap-1.5 mt-0.5">
+                      <span>{h.source}</span>
+                      <span>·</span>
+                      <span>{h.via}</span>
+                      <span>·</span>
+                      <span>{h.time}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex items-center justify-center mt-6 gap-3">
-        <button
-          onClick={reset}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-sm font-medium text-text-secondary hover:text-text-primary transition-all"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Replay
-        </button>
-        <span className="text-xs text-text-muted hidden sm:inline">
-          Same prompt · two paths · one finishes
-        </span>
+      <div className="flex items-center justify-center mt-5 gap-2 text-xs text-text-muted">
+        {paused ? (
+          <>
+            <Pause className="w-3 h-3" />
+            <span>Paused on hover · move away to resume</span>
+          </>
+        ) : (
+          <>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span>
+              {done
+                ? "Holding for 4s · then loops"
+                : "Same prompt · two paths · one finishes"}
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

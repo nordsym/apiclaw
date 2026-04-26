@@ -6,7 +6,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 LANDING_PUBLIC="$(cd ../public && pwd)"
-ICON_SRC="$LANDING_PUBLIC/android-chrome-512x512.png"
+ICON_SRC="./icon.png"
 OUTPUT="$LANDING_PUBLIC/apiclaw.mcpb"
 STAGE="$(mktemp -d -t apiclaw-mcpb.XXXXXX)"
 
@@ -17,7 +17,7 @@ cp manifest.json "$STAGE/manifest.json"
 if [ -f "$ICON_SRC" ]; then
   cp "$ICON_SRC" "$STAGE/icon.png"
 else
-  echo "  (warning: $ICON_SRC missing — packaging without icon)"
+  echo "  (warning: $ICON_SRC missing, packaging without icon)"
 fi
 
 mkdir -p "$STAGE/server"

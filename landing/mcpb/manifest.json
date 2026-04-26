@@ -3,8 +3,8 @@
   "name": "apiclaw",
   "display_name": "APIClaw",
   "version": "2.5.3",
-  "description": "The API layer for AI agents. 20,000+ discoverable APIs, 1,650+ callable with zero config.",
-  "long_description": "APIClaw is a unified gateway that gives your AI agent access to 20,000+ APIs through one MCP server. 1,650+ are callable instantly with zero configuration — APIClaw holds the keys for managed providers like OpenRouter, Replicate, ElevenLabs, Brave Search, APILayer, GitHub, and Resend. Universal pass-through for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 50 calls/month.",
+  "description": "The API layer for AI agents. 26,000+ discoverable APIs, 1,650+ callable with zero config.",
+  "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 1,650+ are callable instantly with zero configuration. APIClaw holds the keys for managed providers like OpenRouter, Replicate, ElevenLabs, Brave Search, APILayer, GitHub, and Resend. Universal pass-through for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 50 calls per month.",
   "author": {
     "name": "NordSym AB",
     "email": "gustav@nordsym.com",
@@ -30,12 +30,12 @@
     }
   },
   "tools": [
-    { "name": "discover_apis", "description": "Search 20,000+ APIs by capability. Returns ranked matches with pricing and metadata." },
+    { "name": "discover_apis", "description": "Search 26,000+ APIs by capability. Returns ranked matches with pricing and metadata." },
     { "name": "call_api", "description": "Execute any callable API through APIClaw. Auth handled automatically for managed providers." },
     { "name": "get_api_details", "description": "Full specs, pricing, limits, and auth details for a specific API." },
     { "name": "list_connected", "description": "List all managed providers ready for instant calls." },
     { "name": "list_categories", "description": "Browse APIs by category (AI, search, voice, communication, etc.)." },
-    { "name": "capability", "description": "Route by capability (validate email, convert currency, transcribe audio) — APIClaw picks the best provider." },
+    { "name": "capability", "description": "Route by capability (validate email, convert currency, transcribe audio). APIClaw picks the best provider." },
     { "name": "check_balance", "description": "Check workspace balance and usage." },
     { "name": "estimate_cost", "description": "Estimate cost of a call before executing." }
   ],
@@ -56,7 +56,7 @@
     "api_key": {
       "type": "string",
       "title": "Workspace API Key (optional)",
-      "description": "Paste your APIClaw workspace key (sk-claw-...) for paid usage and analytics. Leave blank to start in free anonymous mode (50 managed calls/month).",
+      "description": "Paste your APIClaw workspace key (sk-claw-...) for paid usage and analytics. Leave blank to start in free anonymous mode with 50 managed calls per month.",
       "sensitive": true,
       "required": false
     }
