@@ -1678,6 +1678,39 @@ Docs: https://apiclaw.cloud
           });
         }
 
+        // Workspace-required path: gateway returned 401 because the caller is
+        // anonymous. Return a structured tool response so the agent surfaces
+        // the signup nudge to the user instead of opaque JSON.
+        if (!result.success && (result as any).authRequired) {
+          const ar = (result as any).authRequired as {
+            message: string;
+            signupUrl: string;
+            docsUrl?: string;
+            freeTierCalls?: number;
+          };
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  status: 'auth_required',
+                  message: ar.message,
+                  action_required:
+                    'Tell the user to sign up at the signupUrl to get a free workspace key. ' +
+                    'After signup, set APICLAW_API_KEY in their MCP client config and retry. ' +
+                    'Until then, discover_apis and get_api_details still work without a key.',
+                  signupUrl: ar.signupUrl,
+                  docsUrl: ar.docsUrl,
+                  freeTierCalls: ar.freeTierCalls,
+                  provider,
+                  action,
+                }, null, 2),
+              },
+            ],
+            isError: true,
+          };
+        }
+
         // Build response with signup nudge for unregistered users
         const responseData: Record<string, unknown> = {
           status: result.success ? 'success' : 'error',
@@ -1692,7 +1725,7 @@ Docs: https://apiclaw.cloud
         if (result.success && workspaceContext && !workspaceContext.email) {
           const remaining = UNREGISTERED_CALL_LIMIT - (workspaceContext.usageCount || 0);
           if (remaining > 0 && remaining <= 3) {
-            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock 50/month.`;
+            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock more.`;
           }
         }
 

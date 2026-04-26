@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { emitFunnelEvent } from './funnel-client.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,6 +21,17 @@ export interface GatewayResponse {
   data?: any;
   error?: string;
   cost?: number;
+  /**
+   * Set when the gateway rejected the call because the workspace was missing
+   * (authMethod=anonymous in enforce mode). Carries the signup nudge fields
+   * so the MCP server can surface a clean message instead of raw JSON.
+   */
+  authRequired?: {
+    message: string;
+    signupUrl: string;
+    docsUrl?: string;
+    freeTierCalls?: number;
+  };
   _apiclaw?: {
     latencyMs: number;
     route: string;
@@ -109,13 +121,31 @@ export class GatewayClient {
 
     // First attempt
     let response = await this.doFetch(url, headers, body);
+    let firstStatus: number | null = response?.status ?? null;
 
-    // Retry once on network error
-    if (!response) {
+    // Retry once on network error OR 5xx
+    if (!response || response.status >= 500) {
+      const reason = !response ? 'fetch_fail' : `5xx:${response.status}`;
+      emitFunnelEvent({
+        event: 'gateway_retry',
+        workspaceId: options?.workspaceId,
+        version: process.env.npm_package_version || 'unknown',
+        props: { attempt: 2, reason, provider, action },
+      });
+      // If first response was a 5xx, drain it before retry
+      if (response && response.status >= 500) {
+        try { await response.text(); } catch { /* ignore */ }
+      }
       response = await this.doFetch(url, headers, body);
     }
 
     if (!response) {
+      emitFunnelEvent({
+        event: 'gateway_retry',
+        workspaceId: options?.workspaceId,
+        version: process.env.npm_package_version || 'unknown',
+        props: { attempt: 2, reason: 'retry_exhausted', provider, action, firstStatus },
+      });
       return {
         success: false,
         provider,
@@ -128,11 +158,39 @@ export class GatewayClient {
       const json = await response.json() as any;
 
       if (!response.ok) {
+        // Surface workspace-required errors structurally so the MCP server can
+        // print a friendly signup banner instead of dumping raw JSON.
+        const errObj = json?.error;
+        const isAuthError =
+          response.status === 401 &&
+          errObj &&
+          typeof errObj === "object" &&
+          (errObj.code === "unauth" || errObj.type === "auth_error");
         return {
           success: false,
           provider: json.provider || provider,
           action: json.action || action,
-          error: json.error || `Gateway HTTP ${response.status}`,
+          error:
+            typeof errObj === "string"
+              ? errObj
+              : errObj?.message || `Gateway HTTP ${response.status}`,
+          ...(isAuthError
+            ? {
+                authRequired: {
+                  message: String(errObj.message ?? "Workspace required."),
+                  signupUrl: String(
+                    errObj.signupUrl ?? "https://apiclaw.cloud/workspace",
+                  ),
+                  docsUrl: errObj.docsUrl
+                    ? String(errObj.docsUrl)
+                    : "https://apiclaw.cloud/install",
+                  freeTierCalls:
+                    typeof errObj.freeTierCalls === "number"
+                      ? errObj.freeTierCalls
+                      : 25,
+                },
+              }
+            : {}),
           _apiclaw: json._apiclaw,
         };
       }
