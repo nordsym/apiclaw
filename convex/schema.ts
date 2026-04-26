@@ -418,6 +418,24 @@ export default defineSchema({
     .index("by_token", ["token"])
     .index("by_email", ["email"]),
 
+  // Device-auth codes for the MCP install path. The npm package generates
+  // a code on first call_api when no session exists, opens
+  // /workspace?link=<code> in the user's browser, and polls until the page
+  // attaches a workspace session token. No keys are pasted anywhere.
+  deviceAuthCodes: defineTable({
+    code: v.string(),                     // short opaque token in the URL
+    fingerprint: v.optional(v.string()),  // device fingerprint that started the request
+    status: v.string(),                   // "pending" | "linked" | "expired"
+    sessionToken: v.optional(v.string()), // populated when status = "linked"
+    workspaceId: v.optional(v.id("workspaces")),
+    email: v.optional(v.string()),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+    linkedAt: v.optional(v.number()),
+  })
+    .index("by_code", ["code"])
+    .index("by_status", ["status"]),
+
   // Sessions for authenticated providers
   sessions: defineTable({
     providerId: v.id("providers"),

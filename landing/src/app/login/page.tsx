@@ -7,6 +7,14 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+  // Preserve a device-link code across the magic-link round trip so the
+  // MCP install flow can finish on the workspace page after sign-in.
+  // Using window.location to avoid the Suspense boundary requirement.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const code = new URLSearchParams(window.location.search).get("link");
+    if (code) localStorage.setItem("apiclaw_pending_link", code);
+  }, []);
   const [isDark, setIsDark] = useState(true);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +28,8 @@ export default function LoginPage() {
         const res = await fetch("/api/workspace-auth/session");
         const data = await res.json();
         if (data.session) {
-          router.push("/workspace");
+          const pending = localStorage.getItem("apiclaw_pending_link");
+          router.push(pending ? `/workspace?link=${pending}` : "/workspace");
           return;
         }
       } catch {

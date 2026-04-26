@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "apiclaw",
   "display_name": "APIClaw",
-  "version": "2.5.7",
+  "version": "2.5.8",
   "description": "The API layer for AI agents. 26,000+ discoverable APIs, 1,650+ callable with zero config.",
   "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 1,650+ are callable instantly with zero configuration. APIClaw holds the keys for managed providers like OpenRouter, Replicate, ElevenLabs, Brave Search, APILayer, GitHub, and the full APILayer suite. Universal pass-through for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 25 API calls per month, email signup required.",
   "author": {
@@ -23,10 +23,7 @@
     "entry_point": "server/index.js",
     "mcp_config": {
       "command": "node",
-      "args": ["${__dirname}/server/index.js"],
-      "env": {
-        "APICLAW_API_KEY": "${user_config.api_key}"
-      }
+      "args": ["${__dirname}/server/index.js"]
     }
   },
   "tools": [
@@ -52,15 +49,6 @@
     "claude-desktop"
   ],
   "license": "MIT",
-  "user_config": {
-    "api_key": {
-      "type": "string",
-      "title": "Workspace API Key (advanced, leave blank for default flow)",
-      "description": "Most users should leave this blank and click Install. After install, sign up free at apiclaw.cloud/workspace. The first call_api will guide you through linking your workspace. This field is only useful if you already have a sk-claw-... key from a previous APIClaw signup and want to skip the magic-link flow.",
-      "sensitive": true,
-      "required": false
-    }
-  },
   "compatibility": {
     "claude_desktop": ">=0.10.0",
     "platforms": ["darwin", "win32", "linux"],

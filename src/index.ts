@@ -10,6 +10,7 @@
  * - add_credits: Add credits to account (for testing)
  */
 
+import { spawn } from 'node:child_process';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -394,6 +395,107 @@ let firstCallEmitted = false;
  * Get customer API key from environment variable
  * Convention: {PROVIDER}_API_KEY (e.g., COACCEPT_API_KEY, ELKS_API_KEY)
  */
+// ─────────────────────────────────────────────────────────────────────────
+// Device-auth flow.
+//
+// On the first call_api 401 from the gateway, the MCP server kicks off a
+// browser-based magic-link signup. No keys are pasted into the install
+// dialog. No terminal commands are needed. Flow:
+//
+//   1. We POST deviceAuth:start → get a one-time code
+//   2. We open https://apiclaw.cloud/workspace?link=<code> in the user's
+//      default browser
+//   3. The user signs up / signs in via the existing magic-link flow
+//   4. The /workspace page calls deviceAuth:complete with the new session
+//   5. We poll deviceAuth:poll until the code flips to "linked", then
+//      write the session to ~/.apiclaw/session
+//
+// Time budget: 90 seconds. If the user doesn't finish in that window the
+// MCP returns an auth_pending tool result and the agent tells them to
+// finish the browser tab and ask again.
+// ─────────────────────────────────────────────────────────────────────────
+
+let deviceLinkInFlight = false;
+
+function openBrowser(url: string): void {
+  try {
+    const platform = process.platform;
+    const cmd =
+      platform === 'darwin' ? 'open' :
+      platform === 'win32'  ? 'cmd'  :
+      'xdg-open';
+    const args =
+      platform === 'win32' ? ['/c', 'start', '""', url] : [url];
+    spawn(cmd, args, {
+      detached: true,
+      stdio: 'ignore',
+      shell: platform === 'win32',
+    }).unref();
+  } catch (e) {
+    console.error('[APIClaw] Could not open browser:', e);
+  }
+}
+
+async function attemptDeviceLink(): Promise<{
+  ok: boolean;
+  linkUrl?: string;
+  reason?: 'pending' | 'expired' | 'error';
+}> {
+  if (deviceLinkInFlight) {
+    return { ok: false, reason: 'pending' };
+  }
+  deviceLinkInFlight = true;
+  try {
+    const startRes = await fetch(`${CONVEX_URL}/api/mutation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: 'deviceAuth:start',
+        args: { fingerprint: getMachineFingerprint() },
+      }),
+    });
+    const startBody = (await startRes.json()) as any;
+    const start = startBody.value ?? startBody;
+    if (!start?.code || !start?.linkUrl) {
+      return { ok: false, reason: 'error' };
+    }
+
+    openBrowser(start.linkUrl);
+
+    const deadline = Date.now() + 90_000;
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 2000));
+      const pollRes = await fetch(`${CONVEX_URL}/api/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: 'deviceAuth:poll',
+          args: { code: start.code },
+        }),
+      });
+      const pollBody = (await pollRes.json()) as any;
+      const poll = pollBody.value ?? pollBody;
+      if (poll?.status === 'linked' && poll.sessionToken) {
+        try {
+          writeSession(poll.sessionToken, poll.workspaceId ?? '', poll.email ?? '');
+        } catch (e) {
+          console.error('[APIClaw] Could not persist session:', e);
+        }
+        return { ok: true };
+      }
+      if (poll?.status === 'expired' || poll?.status === 'not_found') {
+        return { ok: false, reason: 'expired', linkUrl: start.linkUrl };
+      }
+    }
+    return { ok: false, reason: 'pending', linkUrl: start.linkUrl };
+  } catch (e) {
+    console.error('[APIClaw] Device link failed:', e);
+    return { ok: false, reason: 'error' };
+  } finally {
+    deviceLinkInFlight = false;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Suggested-call hints for discover_apis.
 //
@@ -1821,9 +1923,9 @@ Docs: https://apiclaw.cloud
           });
         }
 
-        // Workspace-required path: gateway returned 401 because the caller is
-        // anonymous. Return a structured tool response so the agent surfaces
-        // the signup nudge to the user instead of opaque JSON.
+        // Workspace-required path: gateway returned 401 because no session.
+        // Open a browser to /workspace?link=CODE, poll for the user to
+        // sign up / sign in, then retry the call. No keys, no terminal.
         if (!result.success && (result as any).authRequired) {
           const ar = (result as any).authRequired as {
             message: string;
@@ -1831,33 +1933,46 @@ Docs: https://apiclaw.cloud
             docsUrl?: string;
             freeTierCalls?: number;
           };
+
+          const link = await attemptDeviceLink();
+
+          if (link.ok) {
+            // We have a fresh session. Retry the gateway call once.
+            const retry = await getGateway().execute(provider, action, params, {});
+            if (retry.success) {
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify({
+                      status: 'success',
+                      message: 'Linked APIClaw to your workspace and ran the call.',
+                      provider: retry.provider,
+                      action: retry.action,
+                      type: apiType,
+                      data: retry.data,
+                      ...(retry.cost !== undefined ? { cost_sek: retry.cost } : {}),
+                    }, null, 2),
+                  },
+                ],
+              };
+            }
+            // Linked but call still failed — fall through to error path
+          }
+
+          // Browser opened, user didn't finish in time. Tell agent + user.
           return {
             content: [
               {
                 type: 'text',
                 text: JSON.stringify({
-                  status: 'auth_required',
-                  message: ar.message,
+                  status: 'auth_pending',
+                  message:
+                    'Opened apiclaw.cloud/workspace in your browser. Sign in with your email to link this MCP server, then ask me to retry the call.',
                   action_required:
-                    'Tell the user APIClaw needs a workspace (anonymous mode is closed). ' +
-                    'They sign up free at the signupUrl. After signup they can authenticate ' +
-                    'EITHER by setting APICLAW_API_KEY in their MCP client config (paste their ' +
-                    'sk-claw-... key) OR by running "apiclaw login" in a terminal to use ' +
-                    'session auth. Both work. Until they pick one, discover_apis and ' +
-                    'get_api_details still work without auth.',
-                  signupUrl: ar.signupUrl,
-                  authOptions: [
-                    {
-                      method: 'api_key',
-                      how: 'Set APICLAW_API_KEY env var or paste sk-claw-... into MCP client config',
-                    },
-                    {
-                      method: 'cli_session',
-                      how: 'Run "apiclaw login" in a terminal, follow the magic link',
-                    },
-                  ],
-                  docsUrl: ar.docsUrl,
-                  freeTierCalls: ar.freeTierCalls,
+                    'Tell the user a browser tab opened with the APIClaw signup. After they sign in, the link is automatic — no key paste needed. Ask them to retry the original prompt once the page shows "linked".',
+                  link_url: link.linkUrl,
+                  free_tier_calls: ar.freeTierCalls ?? 25,
                   provider,
                   action,
                 }, null, 2),

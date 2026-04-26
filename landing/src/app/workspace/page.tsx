@@ -436,9 +436,24 @@ export default function WorkspacePage() {
     }
   }, []);
 
+  // Device-auth link state (MCP install bridge). When the user lands on
+  // /workspace?link=<code>, the npm package opened this URL after a 401 on
+  // call_api. We capture the code, persist it across the login redirect,
+  // then call deviceAuth:complete once we have a session.
+  const [deviceLinkStatus, setDeviceLinkStatus] = useState<
+    "idle" | "linking" | "linked" | "error"
+  >("idle");
+  const [deviceLinkError, setDeviceLinkError] = useState<string | null>(null);
+
   useEffect(() => {
     const init = async () => {
       try {
+        // Capture device-link code from URL before any redirects.
+        const linkCode = searchParams.get("link");
+        if (linkCode) {
+          localStorage.setItem("apiclaw_pending_link", linkCode);
+        }
+
         // Check workspace session
         const token = localStorage.getItem("apiclaw_workspace_session");
         if (token) {
@@ -460,12 +475,63 @@ export default function WorkspacePage() {
         // Fetch all approved APIs for the catalog
         await fetchApprovedAPIs();
 
-        // If no session, redirect to login
+        // If no session, redirect to login. Preserve any pending device-link
+        // code via localStorage; /login → /workspace will pick it up.
         if (!token) {
-          router.push("/login");
+          const pending = localStorage.getItem("apiclaw_pending_link");
+          router.push(pending ? `/login?link=${pending}` : "/login");
           return;
         }
-        
+
+        // Have a session. If a device-link code is pending, attach this
+        // workspace to it so the MCP server's poll completes.
+        const pendingLink = localStorage.getItem("apiclaw_pending_link");
+        if (pendingLink) {
+          setDeviceLinkStatus("linking");
+          try {
+            const dashRes = await fetch(`${CONVEX_URL}/api/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                path: "workspaces:getWorkspaceDashboard",
+                args: { token },
+              }),
+            });
+            const dashJson = await dashRes.json();
+            const dash = dashJson.value || dashJson;
+            const workspaceId = dash?.workspace?._id;
+            const email = dash?.workspace?.email;
+            if (!workspaceId) throw new Error("No workspace on this session.");
+            const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                path: "deviceAuth:complete",
+                args: {
+                  code: pendingLink,
+                  sessionToken: token,
+                  workspaceId,
+                  email,
+                },
+              }),
+            });
+            const body = await res.json();
+            if (body.status === "error") {
+              throw new Error(body.errorMessage || "Linking failed.");
+            }
+            localStorage.removeItem("apiclaw_pending_link");
+            setDeviceLinkStatus("linked");
+            // Strip ?link from the URL bar so refresh doesn't re-link.
+            const url = new URL(window.location.href);
+            url.searchParams.delete("link");
+            window.history.replaceState({}, "", url.toString());
+          } catch (e: any) {
+            setDeviceLinkStatus("error");
+            setDeviceLinkError(e?.message || "Failed to link device.");
+            localStorage.removeItem("apiclaw_pending_link");
+          }
+        }
+
         setIsLoading(false);
       } catch (err) {
         console.error("Init error:", err);
@@ -638,6 +704,23 @@ export default function WorkspacePage() {
       {/* Toast notification */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
+      {/* Device-auth link banner. Visible only when the MCP install path
+          drove the user here via /workspace?link=CODE. */}
+      {deviceLinkStatus === "linked" && (
+        <div className="fixed top-0 inset-x-0 z-[60] bg-green-500 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
+          ✓ APIClaw is linked. You can close this tab and return to your AI client.
+        </div>
+      )}
+      {deviceLinkStatus === "linking" && (
+        <div className="fixed top-0 inset-x-0 z-[60] bg-[#ef4444] text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
+          Linking your APIClaw extension…
+        </div>
+      )}
+      {deviceLinkStatus === "error" && deviceLinkError && (
+        <div className="fixed top-0 inset-x-0 z-[60] bg-red-600 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
+          Could not link your extension: {deviceLinkError}. Restart from your AI client.
+        </div>
       )}
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--border)]">
