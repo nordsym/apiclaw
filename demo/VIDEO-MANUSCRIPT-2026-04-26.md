@@ -32,13 +32,13 @@
 
 **"One double-click."**
 
-*[Cut to Finder. Double-click `apiclaw.mcpb`. Claude Desktop opens its extension dialog with the lobster icon, the description, and the tools list.]*
+*[Cut to Finder. Double-click `apiclaw.mcpb`. Claude Desktop opens its extension dialog with the lobster icon, the description, and the tools list. No input fields. No keys to paste.]*
 
 **"That's the install."**
 
-*[Click Install. Don't touch the optional API Key field — leave it empty. Hold on the "APIClaw installed" toast for 1 second.]*
+*[Click Install. Hold on the "APIClaw installed" toast for 1 second.]*
 
-*[Note: your session is already set up locally from a previous `apiclaw login`, so calls in Beat 3 will succeed. New viewers who follow along will sign up at apiclaw.cloud/workspace after their first 401 nudge — that's the honest path.]*
+*[Note: your session is already set up from a previous `apiclaw login`, so calls in Beat 3 succeed without further setup. A truly fresh viewer (no session) will see a browser tab open after their first call_api — they sign in there, the link is automatic, the call resumes. No keys, no terminal.]*
 
 ---
 
