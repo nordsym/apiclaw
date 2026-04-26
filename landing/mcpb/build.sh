@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Build apiclaw.mcpb (Claude Desktop Extension)
-# Installs deps into mcpb/server and zips manifest + server + icon into landing/public/apiclaw.mcpb
+# Lives at landing/mcpb. Output goes to landing/public/apiclaw.mcpb.
+# Chained from landing/package.json prebuild so Vercel rebuilds it on every deploy.
 set -euo pipefail
 
 cd "$(dirname "$0")"
-ROOT_DIR="$(cd .. && pwd)"
-LANDING_PUBLIC="$ROOT_DIR/landing/public"
+LANDING_PUBLIC="$(cd ../public && pwd)"
 ICON_SRC="$LANDING_PUBLIC/android-chrome-512x512.png"
 OUTPUT="$LANDING_PUBLIC/apiclaw.mcpb"
 STAGE="$(mktemp -d -t apiclaw-mcpb.XXXXXX)"
