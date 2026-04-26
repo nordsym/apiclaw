@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "apiclaw",
   "display_name": "APIClaw",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "The API layer for AI agents. 26,000+ discoverable APIs, 1,650+ callable with zero config.",
   "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 1,650+ are callable instantly with zero configuration. APIClaw holds the keys for managed providers like OpenRouter, Replicate, ElevenLabs, Brave Search, APILayer, GitHub, and Resend. Universal pass-through for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 25 API calls per month, email signup required.",
   "author": {
@@ -55,10 +55,10 @@
   "user_config": {
     "api_key": {
       "type": "string",
-      "title": "Workspace API Key",
-      "description": "Required. Paste your APIClaw workspace key (sk-claw-...). Get one for free at apiclaw.cloud/workspace, 25 API calls per month free, no card. Calls without a key return 401.",
+      "title": "Workspace API Key (optional, see description)",
+      "description": "APIClaw needs a workspace, not specifically this key. You have two ways to authenticate after signing up free at apiclaw.cloud/workspace: (1) paste your sk-claw-... key here, or (2) leave this blank and run 'apiclaw login' in a terminal to use session auth. Either works. Anonymous mode is closed, so calls without one of the two return 401.",
       "sensitive": true,
-      "required": true
+      "required": false
     }
   },
   "compatibility": {

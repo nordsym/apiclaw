@@ -1696,10 +1696,23 @@ Docs: https://apiclaw.cloud
                   status: 'auth_required',
                   message: ar.message,
                   action_required:
-                    'Tell the user to sign up at the signupUrl to get a free workspace key. ' +
-                    'After signup, set APICLAW_API_KEY in their MCP client config and retry. ' +
-                    'Until then, discover_apis and get_api_details still work without a key.',
+                    'Tell the user APIClaw needs a workspace (anonymous mode is closed). ' +
+                    'They sign up free at the signupUrl. After signup they can authenticate ' +
+                    'EITHER by setting APICLAW_API_KEY in their MCP client config (paste their ' +
+                    'sk-claw-... key) OR by running "apiclaw login" in a terminal to use ' +
+                    'session auth. Both work. Until they pick one, discover_apis and ' +
+                    'get_api_details still work without auth.',
                   signupUrl: ar.signupUrl,
+                  authOptions: [
+                    {
+                      method: 'api_key',
+                      how: 'Set APICLAW_API_KEY env var or paste sk-claw-... into MCP client config',
+                    },
+                    {
+                      method: 'cli_session',
+                      how: 'Run "apiclaw login" in a terminal, follow the magic link',
+                    },
+                  ],
                   docsUrl: ar.docsUrl,
                   freeTierCalls: ar.freeTierCalls,
                   provider,

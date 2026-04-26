@@ -993,7 +993,7 @@ Full docs: https://apiclaw.cloud/docs.`;
               },
               {
                 q: "Do I have to sign up to use APIClaw?",
-                a: `Discovery and search work without signup. Calling an API requires a workspace, which is a free email signup at apiclaw.cloud/workspace. The signup gives you a workspace key (sk-claw-…) and 25 free calls per month. We require this so we can show you usage, give you logs, and protect the gateway.`
+                a: `Discovery and search work without signup. Calling an API requires a workspace, which is a free email signup at apiclaw.cloud/workspace. After signup you can authenticate any of three ways: (1) paste your sk-claw-… key into your MCP client config, (2) run "apiclaw login" in a terminal for browser-based session auth, or (3) pass the key as Authorization: Bearer when you call /v1/call from your own backend. Same workspace, same 25 free calls per month, you pick the door.`
               },
               {
                 q: "Do I have to use MCP?",
