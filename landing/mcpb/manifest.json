@@ -55,8 +55,8 @@
   "user_config": {
     "api_key": {
       "type": "string",
-      "title": "Workspace API Key (optional, see description)",
-      "description": "APIClaw needs a workspace, not specifically this key. You have two ways to authenticate after signing up free at apiclaw.cloud/workspace: (1) paste your sk-claw-... key here, or (2) leave this blank and run 'apiclaw login' in a terminal to use session auth. Either works. Anonymous mode is closed, so calls without one of the two return 401.",
+      "title": "Workspace API Key (advanced, leave blank for default flow)",
+      "description": "Most users should leave this blank and click Install. After install, sign up free at apiclaw.cloud/workspace. The first call_api will guide you through linking your workspace. This field is only useful if you already have a sk-claw-... key from a previous APIClaw signup and want to skip the magic-link flow.",
       "sensitive": true,
       "required": false
     }
