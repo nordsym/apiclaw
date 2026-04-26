@@ -200,18 +200,17 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
           
           <div className="space-y-6">
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Send an SMS</h3>
+              <h3 className="text-lg font-semibold mb-4">Generate an image</h3>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
-                  <span className="text-[var(--text-muted)]">// Find SMS providers for Sweden</span>{'\n'}
-                  <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send SMS Sweden&quot;</span>{' }'}){'\n\n'}
+                  <span className="text-[var(--text-muted)]">// Find image-generation providers</span>{'\n'}
+                  <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;text to image generation&quot;</span>{' }'}){'\n\n'}
                   <span className="text-[var(--text-muted)]">// Send via APIClaw managed call</span>{'\n'}
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;46elks&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;sms&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;replicate&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">action</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;flux-schnell&quot;</span>,{'\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">to</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;+46701234567&quot;</span>,{'\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">message</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello from APIClaw!&quot;</span>{'\n'}
+                  {"    "}<span className="text-sky-600 dark:text-sky-400">prompt</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;a coastal lobster trap at dawn&quot;</span>{'\n'}
                   {"  }"}{'\n'}
                   {'}'})
                 </code>
@@ -298,7 +297,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">get_api_details</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">api_id</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;46elks&quot;</span>{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">api_id</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;replicate&quot;</span>{'\n'}
                   {'}'})
                 </code>
               </pre>
@@ -314,12 +313,12 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
               <div className="mt-4 text-sm text-[var(--text-muted)]">
                 <strong className="text-[var(--text-primary)]">Currently available:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
-                  <li><code className="text-[var(--accent)]">46elks</code> - SMS (Sweden)</li>
-                  <li><code className="text-[var(--accent)]">twilio</code> - SMS (Global)</li>
-                  <li><code className="text-[var(--accent)]">resend</code> - Email</li>
-                  <li><code className="text-[var(--accent)]">openrouter</code> - LLM routing</li>
+                  <li><code className="text-[var(--accent)]">openrouter</code> - 800+ LLMs</li>
+                  <li><code className="text-[var(--accent)]">replicate</code> - Image, audio, ML models</li>
                   <li><code className="text-[var(--accent)]">elevenlabs</code> - Text-to-speech</li>
+                  <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
+                  <li><code className="text-[var(--accent)]">firecrawl</code> - Web scraping</li>
+                  <li><code className="text-[var(--accent)]">apilayer</code> - 27 APIs (rates, stocks, PDF, etc.)</li>
                 </ul>
               </div>
             </div>

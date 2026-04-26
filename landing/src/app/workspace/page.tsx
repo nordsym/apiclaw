@@ -1167,9 +1167,6 @@ const DIRECT_CALL_PROVIDERS = [
   { name: "Serper", apis: 1, desc: "Google search API for AI", category: "Search" },
   { name: "E2B", apis: 1, desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
   { name: "GitHub", apis: 1, desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
-  { name: "Resend", apis: 1, desc: "Modern email API for developers", category: "Email" },
-  { name: "46elks", apis: 1, desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
-  { name: "Twilio", apis: 1, desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
   { name: "Mistral", apis: 1, desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
   { name: "Cohere", apis: 1, desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
   { name: "Together AI", apis: 1, desc: "Open-source model inference", category: "AI & LLM" },
@@ -5252,7 +5249,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Managed Providers (No API Key Needed)</h3>
         <div className="grid gap-2 md:grid-cols-2">
-          {["Brave Search", "46elks SMS", "Resend Email", "OpenRouter LLM", "ElevenLabs TTS", "Twilio", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
+          {["Brave Search", "OpenRouter LLM", "ElevenLabs TTS", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
             <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
           ))}
         </div>

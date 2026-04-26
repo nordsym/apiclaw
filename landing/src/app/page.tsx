@@ -174,9 +174,6 @@ export default function Home() {
     { name: "Serper", desc: "Google search API for AI", category: "Search" },
     { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
     { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
-    { name: "Resend", desc: "Modern email API for developers", category: "Email" },
-    { name: "46elks", desc: "SMS in Sweden and globally", category: "SMS & Messaging" },
-    { name: "Twilio", desc: "Enterprise SMS and voice", category: "SMS & Messaging" },
     { name: "Mistral", desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
     { name: "Cohere", desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
     { name: "Together AI", desc: "Open-source model inference", category: "AI & LLM" },
@@ -203,7 +200,7 @@ Three ways to use APIClaw:
 
 OpenAI-compatible gateway also available at https://api.apiclaw.cloud/v1/chat/completions for any tool that speaks the OpenAI Chat API. Per-request model routing via the X-APIClaw-Route header (auto, fastest, best_price, or a specific provider like groq, mistral, openrouter).
 
-Managed providers include OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI (embeddings), Replicate (Flux, SDXL, Whisper), Stability AI, ElevenLabs (TTS), Deepgram (STT), AssemblyAI, Brave Search, Serper, Firecrawl, Twilio, 46elks, Resend, E2B, GitHub, and the full APILayer suite (exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping). Pass-through is universal for any keyless public API.
+Managed providers include OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI (embeddings), Replicate (Flux, SDXL, Whisper), Stability AI, ElevenLabs (TTS), Deepgram (STT), AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping). Pass-through is universal for any keyless public API.
 
 Pricing: free tier of 25 API calls per month with email signup, any provider counts equally. Discovery (search, list, get_api_details) is always free and unmetered. Beyond the free tier: pay-as-you-go at provider cost + 15%, no commitment, billed via Stripe.
 
@@ -981,7 +978,7 @@ Full docs: https://apiclaw.cloud/docs.`;
               },
               {
                 q: "How do Managed APIs work?",
-                a: `Managed APIs let your agent use APIs without you handling any keys. APIClaw owns the credentials, runs the auth server-side, and proxies the call. Your agent just asks for the capability and gets the answer. Currently live for OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI, Replicate (1000+ ML models), Stability AI, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, Twilio, 46elks, Resend, E2B, GitHub, and the full APILayer suite (27 APIs). New providers added regularly.`
+                a: `Managed APIs let your agent use APIs without you handling any keys. APIClaw owns the credentials, runs the auth server-side, and proxies the call. Your agent just asks for the capability and gets the answer. Currently live for OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI, Replicate (1000+ ML models), Stability AI, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (27 APIs). New providers added regularly.`
               },
               {
                 q: "How are API credentials secured?",

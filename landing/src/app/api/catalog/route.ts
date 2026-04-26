@@ -15,6 +15,11 @@ interface ApiEntry {
 
 let cachedApis: ApiEntry[] | null = null;
 
+// Providers that are reserved for APIClaw / NordSym internal infrastructure
+// (booking confirmations, magic links, OTP). They must not appear in the
+// public catalog and are blocked at the gateway for non-internal callers.
+const INTERNAL_ONLY_PROVIDERS = new Set(["twilio", "46elks", "resend"]);
+
 function loadApis(): ApiEntry[] {
   if (cachedApis) return cachedApis;
 
@@ -27,7 +32,10 @@ function loadApis(): ApiEntry[] {
     try {
       const raw = fs.readFileSync(p, "utf-8");
       const data = JSON.parse(raw);
-      cachedApis = data.apis || [];
+      const all: ApiEntry[] = data.apis || [];
+      cachedApis = all.filter(
+        (a) => !INTERNAL_ONLY_PROVIDERS.has((a.name || "").toLowerCase()),
+      );
       return cachedApis!;
     } catch {
       continue;

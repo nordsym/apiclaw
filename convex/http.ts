@@ -879,10 +879,28 @@ async function resolveWorkspaceFromRequest(
   return { authMethod: "anonymous" };
 }
 
+// Providers that are NEVER callable through the public gateway. Used by NordSym
+// internal infrastructure (booking confirmations, magic-link emails, OTP) and
+// only reachable via X-APIClaw-Internal server-to-server auth, never through
+// a workspace key, session, or anonymous call.
+const INTERNAL_ONLY_PROVIDERS = new Set(["twilio", "46elks", "resend"]);
+
+function internalOnlyResponse(provider: string) {
+  return jsonResponse(
+    {
+      error: {
+        code: "internal_only",
+        message: `Provider "${provider}" is reserved for APIClaw internal infrastructure and not callable through the public gateway.`,
+        type: "forbidden",
+      },
+    },
+    403
+  );
+}
+
 // Helper to validate session and log API usage.
 // Returns a Response (401) when AUTH_ENFORCEMENT=enforce and the caller is anonymous.
-// In shadow mode (default) it logs to funnel.call_api_unauth and passes through so
-// existing headless traffic stays unbroken while portal conversion is measured.
+// Returns a Response (403) when the provider is reserved for internal infrastructure.
 async function validateAndLogProxyCall(
   ctx: any,
   request: Request,
@@ -897,6 +915,16 @@ async function validateAndLogProxyCall(
   const identifier = request.headers.get("X-APIClaw-Identifier") || auth.workspaceId || "unknown";
 
   console.log("[Proxy] Call received", { provider, action, authMethod: auth.authMethod, workspaceId: resolvedWorkspaceId, subagentId });
+
+  // ---- Internal-only provider gate ----
+  // Reserved providers (Twilio/46elks/Resend) only accept X-APIClaw-Internal auth.
+  // Anything else returns 403 even with a valid workspace key.
+  if (
+    INTERNAL_ONLY_PROVIDERS.has(provider.toLowerCase()) &&
+    (auth as any).authMethod !== "internal"
+  ) {
+    return internalOnlyResponse(provider);
+  }
 
   // ---- Gate: enforce vs shadow ----
   if (auth.authMethod === "anonymous") {
@@ -1032,17 +1060,26 @@ http.route({
         totalCallable: number;
       };
 
-      // Also include managed providers from PROVIDERS catalog
-      const managedProviders = Object.entries(PROVIDERS).map(([id, p]) => ({
-        providerId: id,
-        name: p.name,
-        description: p.description,
-        category: p.category,
-        managed: true,
-      }));
+      // Also include managed providers from PROVIDERS catalog.
+      // Filter out internal-only providers so they never appear in public discovery.
+      const managedProviders = Object.entries(PROVIDERS)
+        .filter(([id]) => !INTERNAL_ONLY_PROVIDERS.has(id.toLowerCase()))
+        .map(([id, p]) => ({
+          providerId: id,
+          name: p.name,
+          description: p.description,
+          category: p.category,
+          managed: true,
+        }));
+
+      // Also strip them from the catalog items in case the upstream registry
+      // happens to include them.
+      const filteredApis = (catalogData.items || []).filter(
+        (item) => !INTERNAL_ONLY_PROVIDERS.has((item.name || "").toLowerCase()),
+      );
 
       return jsonResponse({
-        apis: catalogData.items,
+        apis: filteredApis,
         total: catalogData.total,
         page: catalogData.page,
         limit: catalogData.limit,
@@ -4172,6 +4209,14 @@ http.route({
     }
     if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(method)) {
       return jsonResponse({ error: { code: "invalid_method", message: `Unsupported method ${method}` } }, 400);
+    }
+
+    // Internal-only provider gate. Same set as /proxy/* routes.
+    if (
+      INTERNAL_ONLY_PROVIDERS.has(apiName.toLowerCase()) &&
+      (auth as any).authMethod !== "internal"
+    ) {
+      return internalOnlyResponse(apiName);
     }
 
     // Lookup by exact name, then case-insensitive fallback.

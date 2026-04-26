@@ -472,7 +472,7 @@ const tools: Tool[] = [
       properties: {
         api_id: {
           type: 'string',
-          description: 'The API provider ID (e.g., "46elks", "resend", "openrouter")'
+          description: 'The API provider ID (e.g., "openrouter", "brave_search", "elevenlabs")'
         },
         compact: {
           type: 'boolean',
@@ -570,7 +570,7 @@ Example chain:
         // Single call params
         provider: {
           type: 'string',
-          description: 'Provider ID (e.g., "46elks", "brave_search", "resend", "openrouter", "elevenlabs", "twilio", "coaccept", "frankfurter")'
+          description: 'Provider ID (e.g., "openrouter", "brave_search", "elevenlabs", "replicate", "firecrawl", "groq", "frankfurter")'
         },
         action: {
           type: 'string',
@@ -903,13 +903,13 @@ CALL APIs (requires free registration):
   call_api({ provider: "brave_search", action: "search", params: { q: "AI agents" } })
   call_api({ provider: "elevenlabs", action: "tts", params: { text: "Hello" } })
 
-23 MANAGED PROVIDERS:
+MANAGED PROVIDERS:
   OpenAI, Anthropic, xAI/Grok, Groq, Mistral, OpenRouter, Together AI,
   Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Firecrawl,
-  Serper, Resend, 46elks, Twilio, E2B, Stability AI, Cohere, Voyage AI,
-  GitHub, APILayer (27 sub-APIs)
+  Serper, E2B, Stability AI, Cohere, Voyage AI, GitHub,
+  APILayer (27 sub-APIs)
 
-26,700+ DISCOVERABLE | 1,654 CALLABLE | Free tier: 50 calls/month
+26,000+ DISCOVERABLE | 1,650+ CALLABLE | Free tier: 25 calls per month, email signup required
 
 Docs: https://apiclaw.cloud
 `;
