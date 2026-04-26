@@ -135,7 +135,7 @@ const providerBenefits = [
 const terminalLines = [
   { type: "prompt", text: "curl -fsSL https://apiclaw.cloud/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
-  { type: "output", text: "🦞 APIClaw v1.2.2", delay: 100 },
+  { type: "output", text: "🦞 APIClaw v2.5.3", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
   { type: "success", text: `✓ ${statsData.apiCount.toLocaleString()} APIs loaded`, delay: 200 },
@@ -994,7 +994,7 @@ Full docs: https://apiclaw.cloud/docs.`;
               },
               {
                 q: "How do Managed APIs work?",
-                a: `Managed APIs let your agent use APIs without managing API keys. APIClaw handles authentication. Your agent just calls the API through us. Currently available for ${statsData.managedCount} providers including Replicate (1000+ ML models), OpenRouter (100+ LLMs), Voyage AI (embeddings), Firecrawl (web scraping), E2B (code sandbox), and more.`
+                a: `Managed APIs let your agent use APIs without you handling any keys. APIClaw owns the credentials, runs the auth server-side, and proxies the call. Your agent just asks for the capability and gets the answer. Currently live for OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI, Replicate (1000+ ML models), Stability AI, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, Twilio, 46elks, Resend, E2B, GitHub, and the full APILayer suite (27 APIs). New providers added regularly.`
               },
               {
                 q: "How are API credentials secured?",

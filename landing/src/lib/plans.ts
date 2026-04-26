@@ -27,9 +27,9 @@ export const PLANS: Plan[] = [
     calls: "50 managed",
     callsSub: "API calls per month",
     features: [
-      "9,500+ callable APIs",
+      "1,650+ callable APIs",
       "Search and discover always free",
-      "Open API access, no limits",
+      "Keyless open APIs, no limits",
       "1 workspace",
     ],
     cta: "Get Started",
@@ -48,7 +48,7 @@ export const PLANS: Plan[] = [
     features: [
       "Everything in Free",
       "Unlimited managed API calls",
-      "API cost + 15% -- transparent margin",
+      "API cost + 15%, transparent margin",
       "No commitment, cancel anytime",
     ],
     cta: "Add Payment Method",
