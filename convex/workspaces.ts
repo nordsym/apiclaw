@@ -1329,3 +1329,107 @@ export const adminSetTier = mutation({
     return { success: true, tier };
   },
 });
+
+// ============================================
+// CLERK BRIDGE — get-or-create workspace from Clerk identity
+// Mirrors verifyMagicLink session behavior so middleware/CLI/MCP keep working.
+// ============================================
+
+export const getOrCreateForClerk = mutation({
+  args: {
+    email: v.string(),
+    clerkUserId: v.string(),
+    fingerprint: v.optional(v.string()),
+  },
+  handler: async (ctx, { email, clerkUserId, fingerprint }) => {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    let workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
+
+    let isNewUser = false;
+    if (!workspace) {
+      isNewUser = true;
+
+      let newReferralCode: string;
+      let attempts = 0;
+      do {
+        newReferralCode = generateReferralCode();
+        const existing = await ctx.db
+          .query("workspaces")
+          .withIndex("by_referralCode", (q) => q.eq("referralCode", newReferralCode))
+          .first();
+        if (!existing) break;
+        attempts++;
+      } while (attempts < 10);
+
+      const workspaceId = await ctx.db.insert("workspaces", {
+        email: normalizedEmail,
+        status: "active",
+        tier: "free",
+        usageCount: 0,
+        usageLimit: 50,
+        weeklyUsageCount: 0,
+        weeklyUsageLimit: 50,
+        hourlyUsageCount: 0,
+        referralCode: newReferralCode!,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      workspace = await ctx.db.get(workspaceId);
+    }
+
+    if (!workspace) {
+      return { success: false, error: "workspace_error" };
+    }
+
+    const sessionToken = generateToken();
+
+    const existingSession = fingerprint
+      ? await ctx.db
+          .query("agentSessions")
+          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace!._id))
+          .filter((q) => q.eq(q.field("fingerprint"), fingerprint))
+          .first()
+      : null;
+
+    if (existingSession) {
+      await ctx.db.patch(existingSession._id, {
+        sessionToken,
+        lastUsedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("agentSessions", {
+        workspaceId: workspace._id,
+        sessionToken,
+        fingerprint: fingerprint || `clerk:${clerkUserId}`,
+        lastUsedAt: Date.now(),
+        createdAt: Date.now(),
+      });
+    }
+
+    if (isNewUser) {
+      await ctx.scheduler.runAfter(0, internal.inbound.notifySignup, {
+        email: workspace.email,
+        workspaceId: workspace._id,
+        tier: workspace.tier,
+        isNewUser: true,
+        timestamp: Date.now(),
+      });
+    }
+
+    return {
+      success: true,
+      isNewUser,
+      sessionToken,
+      workspace: {
+        id: workspace._id,
+        email: workspace.email,
+        tier: workspace.tier,
+        referralCode: workspace.referralCode,
+      },
+    };
+  },
+});

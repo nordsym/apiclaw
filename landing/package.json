@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.37.1",
     "@sparticuz/chromium": "^143.0.4",
     "@vercel/analytics": "^1.6.1",
     "@vercel/og": "^0.8.6",

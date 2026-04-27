@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import { ClerkProvider } from "@clerk/nextjs";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import "./globals.css";
 import statsData from "@/lib/stats.json";
+
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export const metadata: Metadata = {
   title: "APIClaw | The API Layer for AI Agents",
@@ -99,7 +103,17 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-background text-text-primary">
-        {children}
+        {CLERK_ENABLED ? (
+          <ClerkProvider
+            afterSignOutUrl="/api/workspace-auth/clerk-signout"
+            signInForceRedirectUrl="/api/workspace-auth/clerk-bridge"
+            signUpForceRedirectUrl="/api/workspace-auth/clerk-bridge"
+          >
+            <PostHogProvider>{children}</PostHogProvider>
+          </ClerkProvider>
+        ) : (
+          <PostHogProvider>{children}</PostHogProvider>
+        )}
         <Analytics />
       </body>
     </html>

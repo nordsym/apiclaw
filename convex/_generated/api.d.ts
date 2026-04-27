@@ -26,6 +26,7 @@ import type * as crons from "../crons.js";
 import type * as debugFilestackLogs from "../debugFilestackLogs.js";
 import type * as debugGetToken from "../debugGetToken.js";
 import type * as debugPrathamLogs from "../debugPrathamLogs.js";
+import type * as deviceAuth from "../deviceAuth.js";
 import type * as directCall from "../directCall.js";
 import type * as earnProgress from "../earnProgress.js";
 import type * as email from "../email.js";
@@ -89,6 +90,7 @@ declare const fullApi: ApiFromModules<{
   debugFilestackLogs: typeof debugFilestackLogs;
   debugGetToken: typeof debugGetToken;
   debugPrathamLogs: typeof debugPrathamLogs;
+  deviceAuth: typeof deviceAuth;
   directCall: typeof directCall;
   earnProgress: typeof earnProgress;
   email: typeof email;

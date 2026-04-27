@@ -566,6 +566,20 @@ export default function WorkspacePage() {
 
   const handleLogout = async () => {
     try {
+      // If Clerk is enabled, route through its sign-out flow so afterSignOutUrl
+      // (configured on <ClerkProvider>) can also invalidate the apiclaw session.
+      // Otherwise fall back to the legacy magic-link sign-out.
+      if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+        try {
+          localStorage.removeItem("apiclaw_workspace_session");
+        } catch {}
+        const clerk = (window as unknown as { Clerk?: { signOut: (opts: { redirectUrl: string }) => Promise<void> } }).Clerk;
+        if (clerk?.signOut) {
+          await clerk.signOut({ redirectUrl: "/sign-in" });
+          return;
+        }
+        // Clerk not loaded — fall through to legacy path
+      }
       await fetch("/api/workspace-auth/session", { method: "DELETE" });
       localStorage.removeItem("apiclaw_workspace_session");
       router.push("/login");
