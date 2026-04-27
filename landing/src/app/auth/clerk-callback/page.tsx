@@ -4,6 +4,10 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+// Convex session tokens are 48 alphanumeric chars (see generateToken in convex/workspaces.ts).
+// Reject anything else so a hostile /auth/clerk-callback?t=<junk> URL can't pollute localStorage.
+const TOKEN_FORMAT = /^[A-Za-z0-9]{48}$/;
+
 function CallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
@@ -11,8 +15,8 @@ function CallbackInner() {
   const next = params?.get("next") || "/workspace";
 
   useEffect(() => {
-    if (!token) {
-      router.replace("/sign-in?error=no_token");
+    if (!token || !TOKEN_FORMAT.test(token)) {
+      router.replace("/sign-in?error=invalid_token");
       return;
     }
     try {
