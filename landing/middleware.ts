@@ -54,7 +54,14 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.redirect(bridge);
   }
 
-  return NextResponse.redirect(new URL("/sign-in", request.url));
+  // Unauthed → /sign-in. Preserve link / ref query params so /sign-in can
+  // stash them in localStorage and the callback can replay on the way back.
+  const signIn = new URL("/sign-in", request.url);
+  const link = request.nextUrl.searchParams.get("link");
+  const ref = request.nextUrl.searchParams.get("ref");
+  if (link) signIn.searchParams.set("link", link);
+  if (ref) signIn.searchParams.set("ref", ref);
+  return NextResponse.redirect(signIn);
 });
 
 export const config = {

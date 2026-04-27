@@ -20,7 +20,25 @@ function CallbackInner() {
     } catch {
       // localStorage blocked — cookie still works for middleware-protected routes
     }
-    router.replace(next);
+
+    // Replay device-link code if /sign-in stashed one before the Clerk round-trip.
+    // /workspace reads ?link=<code> to complete deviceAuth:complete.
+    let target = next;
+    try {
+      const pendingLink = localStorage.getItem("apiclaw_pending_link");
+      if (pendingLink) {
+        const url = new URL(target, window.location.origin);
+        if (!url.searchParams.has("link")) {
+          url.searchParams.set("link", pendingLink);
+        }
+        target = url.pathname + url.search;
+        localStorage.removeItem("apiclaw_pending_link");
+      }
+    } catch {
+      // localStorage blocked — fall back to the bare next path
+    }
+
+    router.replace(target);
   }, [token, next, router]);
 
   return (
