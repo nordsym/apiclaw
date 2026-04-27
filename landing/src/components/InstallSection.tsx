@@ -13,6 +13,7 @@ import {
   Code2,
   ArrowRight,
 } from "lucide-react";
+import statsData from "@/lib/stats.json";
 
 type OS = "mac" | "win" | "linux" | "unknown";
 type Door = "mcp" | "cli" | "workspace";
@@ -268,7 +269,7 @@ function DoorMCP() {
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
           Drop APIClaw into Claude Desktop, Cursor, or any MCP-compatible client. Zero
-          code, zero key handling — your AI suddenly speaks 20,000+ APIs.
+          code, zero key handling — your AI suddenly speaks {statsData.apiCount.toLocaleString()}+ APIs.
         </p>
       </div>
 

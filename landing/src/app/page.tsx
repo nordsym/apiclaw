@@ -18,8 +18,8 @@ import { InstallSection } from "@/components/InstallSection";
 import { ContributeCards } from "@/components/ContributeCards";
 
 const stats = [
-  { number: "20,386+", label: "Discoverable APIs", live: true },
-  { number: "1,650+", label: "Callable APIs", live: true },
+  { number: `${statsData.apiCount.toLocaleString()}+`, label: "Discoverable APIs", live: true },
+  { number: `${statsData.callableCount.toLocaleString()}+`, label: "Callable APIs", live: true },
   { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "12,200+"), label: "Installs", live: true },
 ];
 

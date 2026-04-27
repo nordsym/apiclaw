@@ -1,12 +1,12 @@
 {
-  "apiCount": 20386,
-  "callableCount": 1660,
+  "apiCount": 26740,
+  "callableCount": 1679,
   "openApiCount": 1635,
-  "managedCount": 22,
-  "npmDownloads": 12206,
+  "managedCount": 47,
+  "npmDownloads": 13552,
   "endpointCount": 0,
   "capabilityCount": 15,
-  "generatedAt": "2026-04-10T12:00:34.940Z",
+  "generatedAt": "2026-04-27T12:31:50.249Z",
   "categoryBreakdown": {
     "Customer_Relation": 1,
     "Cloud & Infrastructure": 1688,

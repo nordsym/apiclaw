@@ -130,13 +130,13 @@ try {
   } catch { /* use fallback */ }
 
   // Canonical catalog numbers used on the hero / meta tags.
-  // Sourced from convex/seedIndexedRegistry:pipelineCounts on 2026-04-23:
-  //   discovered registry = 20,386
-  //   indexed + live pipeline = 1,660
-  //   managed providers = 22
-  const CANON_API_COUNT = 20386;
-  const CANON_CALLABLE = 1660;
-  const CANON_MANAGED = 22;
+  // Sourced from convex/pipelineAlign:funnelCounts on 2026-04-27:
+  //   discovery (discovery + indexed + unclassified) = 26,740
+  //   callable (listingStatus=live) = 1,679
+  //   managed providers (authType=managed, subset of callable) = 47
+  const CANON_API_COUNT = 26740;
+  const CANON_CALLABLE = 1679;
+  const CANON_MANAGED = 47;
 
   const stats = {
     apiCount: CANON_API_COUNT,

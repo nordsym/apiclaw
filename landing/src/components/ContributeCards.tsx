@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import posthog from "posthog-js";
+import statsData from "@/lib/stats.json";
 import {
   Star,
   Compass,
@@ -328,7 +329,7 @@ function BuildingCard({ done, onDone }: { done: boolean; onDone: () => void }) {
 
 function ShareCard({ done, onDone }: { done: boolean; onDone: () => void }) {
   const tweetText =
-    "APIClaw gives my AI agent access to 26,000+ APIs through one gateway. Zero key handling, three access doors (MCP / CLI / HTTP). https://apiclaw.cloud";
+    `APIClaw gives my AI agent access to ${statsData.apiCount.toLocaleString()}+ APIs through one gateway. Zero key handling, three access doors (MCP / CLI / HTTP). https://apiclaw.cloud`;
   const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweetText)}`;
   const liUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
     "https://apiclaw.cloud"
