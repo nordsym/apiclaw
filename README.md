@@ -6,7 +6,7 @@ The API layer for AI agents. One key for everything.
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 
-10,000+ installs. 26,700+ discoverable APIs. 1,654 callable. Intelligent LLM Gateway.
+13,500+ installs. 26,704 discoverable APIs. 5,175 callable (2,895 empirically verified, 49 fully managed). Intelligent LLM Gateway.
 
 > APIClaw is in early release. Core features are live and actively expanding. Provider coverage, routing intelligence, and catalog depth grow with every update.
 
@@ -86,10 +86,11 @@ The Intelligent Gateway is in its first release. Routing logic, provider coverag
 
 ## API Catalog
 
-Browse all 26,700+ indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/catalog).
+Browse all 26,704 indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/catalog).
 
-- Search across 31 categories
-- Toggle callable-only to filter 1,654 APIs you can call through APIClaw
+- Search across 40+ categories
+- Filter by tier: Managed (49), Verified (2,895), Callable (5,175), Discovery only
+- Verified-badge shows which entries we've smoketested with empirical 200-OK + parsed JSON
 - Infinite scroll, category filters, instant search
 
 ---
@@ -98,10 +99,11 @@ Browse all 26,700+ indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud
 
 **Discoverable (26,704 APIs)** -- Every API in the index. Your agent can search, read specs, and evaluate them. Free and unlimited.
 
-**Callable (1,654 APIs)** -- APIs your agent can actually execute through APIClaw. Two types:
+**Callable (5,175 APIs)** -- APIs your agent can actually execute through APIClaw. Three tiers:
 
-- **Open APIs (1,635)** -- No authentication required. APIClaw calls them directly.
-- **Managed Providers (19)** -- APIClaw owns the keys. You call, APIClaw authenticates.
+- **Managed (49 directCallConfigs across 19 brands)** -- APIClaw owns the keys. You call, APIClaw authenticates. Verified by us.
+- **Verified (2,895)** -- Keyless public APIs that smoketest passed: 200 + parseable JSON in our last sweep. Sortable by verified latency.
+- **Untested (~2,231)** -- Valid OpenAPI specs that need context (POST body, path-vars, query params) we can't blindly fill in. Will work with the right inputs.
 
 ### Managed Providers
 

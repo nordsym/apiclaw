@@ -22,3 +22,6 @@ convex/*.bak
 
 # Large generated files
 src/registry/generated-providers.json
+
+# Smoketest raw output (large per-record JSON; verification-status.json is the derived artifact that lives in landing/src/lib/)
+reports/smoketest/*.json

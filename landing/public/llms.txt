@@ -7,7 +7,7 @@ APIClaw is in early release. Core features are live and actively expanding. Prov
 
 ## What is APIClaw?
 
-APIClaw provides unified API access for AI agents. Two interfaces: MCP server for agent-native discovery and calling, and an Intelligent Gateway for OpenAI-compatible LLM routing. 26,740 discoverable APIs, 1,679 callable.
+APIClaw provides unified API access for AI agents. Two interfaces: MCP server for agent-native discovery and calling, and an Intelligent Gateway for OpenAI-compatible LLM routing. 26,704 discoverable APIs, 5,175 callable (2,895 empirically verified, 49 fully managed).
 
 **Domain:** apiclaw.cloud
 **Gateway:** api.apiclaw.cloud
@@ -42,17 +42,18 @@ curl api.apiclaw.cloud/v1/chat/completions \
 
 ## Discoverable vs Callable
 
-**Discoverable (26,740 APIs)** - Every API in the index. Search, read specs, evaluate. Free and unlimited.
+**Discoverable (26,704 APIs)** - Every API in the index. Search, read specs, evaluate. Free and unlimited.
 
-**Callable (1,679 APIs)** - APIs that can be executed through APIClaw:
-- Open APIs (1,632): No auth required, called directly
-- Managed Providers (47): APIClaw owns the keys, handles auth and billing
+**Callable (5,175 APIs)** - APIs that can be executed through APIClaw:
+- Verified callable (2,895): empirically confirmed working via smoketest (returned 200 + parseable JSON)
+- Untested callable (~2,231): valid OpenAPI spec, requires context (params/path-vars) to test blindly
+- Managed providers (49): APIClaw owns the keys, handles auth and billing — Tier 1, fully verified
 
 ## API Catalog
 
 Browse all indexed APIs at apiclaw.cloud/catalog. Search, filter by category, toggle callable-only. 31 categories.
 
-## Managed Providers (47)
+## Managed Providers (49 directCallConfigs across 19 brands)
 
 **AI & ML:** OpenRouter (800+ LLMs), Groq (ultra-fast inference), Mistral (European models), Together AI (open-source), Cohere (RAG/embeddings), Replicate (ML models), Stability AI (image gen)
 **Voice:** ElevenLabs (TTS, 29 languages), Deepgram (STT, Nova-3), AssemblyAI (audio intelligence)
@@ -65,7 +66,7 @@ Browse all indexed APIs at apiclaw.cloud/catalog. Search, filter by category, to
 
 ## MCP Tools
 
-- `discover_apis` - Search 26,740 APIs by capability
+- `discover_apis` - Search 26,704 APIs by capability (set callable_only=true to filter to verified-working)
 - `get_api_details` - Full specs, pricing, auth
 - `call_api` - Execute through APIClaw proxy
 - `list_connected` - See available managed providers

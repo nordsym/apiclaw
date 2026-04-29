@@ -1,12 +1,12 @@
 {
-  "apiCount": 26740,
-  "callableCount": 1679,
-  "openApiCount": 1635,
-  "managedCount": 47,
-  "npmDownloads": 13552,
+  "apiCount": 26704,
+  "callableCount": 5175,
+  "openApiCount": 5126,
+  "managedCount": 49,
+  "npmDownloads": 13639,
   "endpointCount": 0,
   "capabilityCount": 15,
-  "generatedAt": "2026-04-27T12:31:50.249Z",
+  "generatedAt": "2026-04-29T22:31:16.785Z",
   "categoryBreakdown": {
     "Customer_Relation": 1,
     "Cloud & Infrastructure": 1688,
@@ -39,5 +39,16 @@
     "Sports": 1,
     "Marketing": 1,
     "Storage": 1
+  },
+  "callableVerified": 2895,
+  "callableTotal": 5175,
+  "managedBrands": 19,
+  "canonGeneratedAt": "2026-04-29",
+  "verificationBuckets": {
+    "verified": 2895,
+    "working": 395,
+    "auth": 375,
+    "needs_ctx": 506,
+    "dead": 1131
   }
 }

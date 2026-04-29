@@ -20,11 +20,16 @@ interface ApiEntry {
   auth: string;
   pricing: string;
   callable?: boolean;
+  verified?: boolean;
+  tier?: "managed" | "verified" | "working" | "needs_ctx" | "auth" | "dead" | "untested";
+  latency_ms?: number | null;
+  last_verified_at?: string | null;
 }
 
 interface CategoryInfo {
   total: number;
   callable: number;
+  verified?: number;
 }
 
 interface CatalogResponse {
@@ -34,7 +39,11 @@ interface CatalogResponse {
   hasMore: boolean;
   categories: Record<string, CategoryInfo>;
   totalCallable: number;
+  totalVerified?: number;
+  totalManaged?: number;
 }
+
+type TierFilter = "" | "managed" | "verified" | "callable" | "discovery";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   "AI & ML": <Cpu className="w-3.5 h-3.5" />,
@@ -69,22 +78,25 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const MANAGED_PROVIDERS: ApiEntry[] = [
-  { name: "OpenRouter", description: "800+ LLM models through a single API. GPT-4, Claude, Llama, Mistral, Gemini and more. Routed via Intelligent Gateway.", category: "AI & ML", baseUrl: "https://openrouter.ai", docsUrl: "https://openrouter.ai/docs", auth: "managed", pricing: "paid", callable: true },
-  { name: "Brave Search", description: "Privacy-focused web search API. Web, news, and image search with AI-ready structured results.", category: "Utilities", baseUrl: "https://api.search.brave.com", docsUrl: "https://brave.com/search/api/", auth: "managed", pricing: "freemium", callable: true },
-  { name: "ElevenLabs", description: "AI voice generation and text-to-speech. Natural-sounding voices in 29 languages.", category: "AI & ML", baseUrl: "https://api.elevenlabs.io", docsUrl: "https://elevenlabs.io/docs", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Replicate", description: "Thousands of ML models. Stable Diffusion, Flux, Whisper, LLaMA and more. Run any open-source model on demand.", category: "AI & ML", baseUrl: "https://api.replicate.com", docsUrl: "https://replicate.com/docs", auth: "managed", pricing: "paid", callable: true },
-  { name: "Firecrawl", description: "Web scraping API for AI. Extract clean, structured data from any website.", category: "Utilities", baseUrl: "https://api.firecrawl.dev", docsUrl: "https://docs.firecrawl.dev", auth: "managed", pricing: "freemium", callable: true },
-  { name: "E2B", description: "Code execution sandbox for AI agents. Run untrusted code safely in isolated environments.", category: "Development", baseUrl: "https://api.e2b.dev", docsUrl: "https://e2b.dev/docs", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Groq", description: "Ultra-fast LLM inference. Llama, Mixtral, and Gemma models at industry-leading speed.", category: "AI & ML", baseUrl: "https://api.groq.com", docsUrl: "https://console.groq.com/docs", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Deepgram", description: "Speech-to-text and text-to-speech API. Real-time transcription with high accuracy.", category: "AI & ML", baseUrl: "https://api.deepgram.com", docsUrl: "https://developers.deepgram.com", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Serper", description: "Google Search API. Fast, affordable access to Google search results for AI applications.", category: "Utilities", baseUrl: "https://google.serper.dev", docsUrl: "https://serper.dev/docs", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Mistral AI", description: "European AI models. Mistral, Mixtral, and custom fine-tuned models via API.", category: "AI & ML", baseUrl: "https://api.mistral.ai", docsUrl: "https://docs.mistral.ai", auth: "managed", pricing: "paid", callable: true },
-  { name: "Cohere", description: "Enterprise AI platform. Embed, generate, classify, and rerank with production-grade models.", category: "AI & ML", baseUrl: "https://api.cohere.ai", docsUrl: "https://docs.cohere.com", auth: "managed", pricing: "freemium", callable: true },
-  { name: "Together AI", description: "Open-source model inference. Run Llama, DeepSeek, and 100+ models with serverless or dedicated.", category: "AI & ML", baseUrl: "https://api.together.xyz", docsUrl: "https://docs.together.ai", auth: "managed", pricing: "paid", callable: true },
-  { name: "Stability AI", description: "Image generation API. Stable Diffusion, SDXL, and next-gen image models.", category: "AI & ML", baseUrl: "https://api.stability.ai", docsUrl: "https://platform.stability.ai/docs", auth: "managed", pricing: "paid", callable: true },
-  { name: "AssemblyAI", description: "AI models for speech recognition, summarization, and audio intelligence.", category: "AI & ML", baseUrl: "https://api.assemblyai.com", docsUrl: "https://www.assemblyai.com/docs", auth: "managed", pricing: "freemium", callable: true },
-  { name: "GitHub API", description: "Access GitHub repositories, issues, pull requests, actions, and more programmatically.", category: "Development", baseUrl: "https://api.github.com", docsUrl: "https://docs.github.com/rest", auth: "managed", pricing: "freemium", callable: true },
-  { name: "APILayer", description: "27 data APIs. Currency exchange, IP geolocation, stock data, aviation, screenshots, email verification and more.", category: "Finance", baseUrl: "https://apilayer.com", docsUrl: "https://apilayer.com/docs", auth: "managed", pricing: "freemium", callable: true },
+  { name: "OpenAI", description: "GPT-5.4, GPT-5, GPT-4o, o3, o4-mini. Direct routing via Intelligent Gateway, OAuth passthrough supported.", category: "AI & ML", baseUrl: "https://api.openai.com", docsUrl: "https://platform.openai.com/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "Anthropic", description: "Claude Opus, Sonnet, and Haiku — direct routing without OpenRouter markup.", category: "AI & ML", baseUrl: "https://api.anthropic.com", docsUrl: "https://docs.anthropic.com", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "OpenRouter", description: "800+ LLM models through a single API. GPT-4, Claude, Llama, Mistral, Gemini and more. Routed via Intelligent Gateway.", category: "AI & ML", baseUrl: "https://openrouter.ai", docsUrl: "https://openrouter.ai/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "xAI / Grok", description: "Grok-4, Grok-3, Grok-3-mini, Grok-2. Direct routing.", category: "AI & ML", baseUrl: "https://api.x.ai", docsUrl: "https://docs.x.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "Brave Search", description: "Privacy-focused web search API. Web, news, and image search with AI-ready structured results.", category: "Utilities", baseUrl: "https://api.search.brave.com", docsUrl: "https://brave.com/search/api/", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "ElevenLabs", description: "AI voice generation and text-to-speech. Natural-sounding voices in 29 languages.", category: "AI & ML", baseUrl: "https://api.elevenlabs.io", docsUrl: "https://elevenlabs.io/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Replicate", description: "Thousands of ML models. Stable Diffusion, Flux, Whisper, LLaMA and more. Run any open-source model on demand.", category: "AI & ML", baseUrl: "https://api.replicate.com", docsUrl: "https://replicate.com/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "Firecrawl", description: "Web scraping API for AI. Extract clean, structured data from any website.", category: "Utilities", baseUrl: "https://api.firecrawl.dev", docsUrl: "https://docs.firecrawl.dev", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "E2B", description: "Code execution sandbox for AI agents. Run untrusted code safely in isolated environments.", category: "Development", baseUrl: "https://api.e2b.dev", docsUrl: "https://e2b.dev/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Groq", description: "Ultra-fast LLM inference. Llama, Mixtral, and Gemma models at industry-leading speed.", category: "AI & ML", baseUrl: "https://api.groq.com", docsUrl: "https://console.groq.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Deepgram", description: "Speech-to-text and text-to-speech API. Real-time transcription with high accuracy.", category: "AI & ML", baseUrl: "https://api.deepgram.com", docsUrl: "https://developers.deepgram.com", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Serper", description: "Google Search API. Fast, affordable access to Google search results for AI applications.", category: "Utilities", baseUrl: "https://google.serper.dev", docsUrl: "https://serper.dev/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Mistral AI", description: "European AI models. Mistral, Mixtral, and custom fine-tuned models via API.", category: "AI & ML", baseUrl: "https://api.mistral.ai", docsUrl: "https://docs.mistral.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "Cohere", description: "Enterprise AI platform. Embed, generate, classify, and rerank with production-grade models.", category: "AI & ML", baseUrl: "https://api.cohere.ai", docsUrl: "https://docs.cohere.com", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "Together AI", description: "Open-source model inference. Run Llama, DeepSeek, and 100+ models with serverless or dedicated.", category: "AI & ML", baseUrl: "https://api.together.xyz", docsUrl: "https://docs.together.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "Stability AI", description: "Image generation API. Stable Diffusion, SDXL, and next-gen image models.", category: "AI & ML", baseUrl: "https://api.stability.ai", docsUrl: "https://platform.stability.ai/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
+  { name: "AssemblyAI", description: "AI models for speech recognition, summarization, and audio intelligence.", category: "AI & ML", baseUrl: "https://api.assemblyai.com", docsUrl: "https://www.assemblyai.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "GitHub API", description: "Access GitHub repositories, issues, pull requests, actions, and more programmatically.", category: "Development", baseUrl: "https://api.github.com", docsUrl: "https://docs.github.com/rest", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "APILayer", description: "27 data APIs. Currency exchange, IP geolocation, stock data, aviation, screenshots, email verification and more.", category: "Finance", baseUrl: "https://apilayer.com", docsUrl: "https://apilayer.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
 ];
 
 const AUTH_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -100,6 +112,8 @@ export default function CatalogPage() {
   const [categories, setCategories] = useState<Record<string, CategoryInfo>>({});
   const [total, setTotal] = useState(0);
   const [totalCallable, setTotalCallable] = useState(0);
+  const [totalVerified, setTotalVerified] = useState(0);
+  const [totalManaged, setTotalManaged] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -107,6 +121,7 @@ export default function CatalogPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [tierFilter, setTierFilter] = useState<TierFilter>("");
   const [callableOnly, setCallableOnly] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -136,23 +151,34 @@ export default function CatalogPage() {
     setPage(1);
     setHasMore(true);
     setLoading(true);
-  }, [debouncedQuery, selectedCategory, callableOnly]);
+  }, [debouncedQuery, selectedCategory, callableOnly, tierFilter]);
 
   const fetchPage = useCallback(
     async (p: number, append: boolean) => {
       const params = new URLSearchParams({ page: String(p), limit: "60" });
       if (debouncedQuery) params.set("q", debouncedQuery);
       if (selectedCategory) params.set("category", selectedCategory);
-      if (callableOnly) params.set("callable", "true");
+      if (tierFilter) params.set("tier", tierFilter);
+      else if (callableOnly) params.set("callable", "true");
 
       try {
         const res = await fetch(`/api/catalog?${params}`);
         const data: CatalogResponse = await res.json();
 
-        // When callable is on and first page, prepend managed providers
+        // Prepend the canonical managed-provider list on first page when the
+        // active view includes managed APIs. /api/catalog also tags managed
+        // entries via verification-status, but the registry doesn't carry the
+        // marketing copy we want here, so we keep this curated list as the
+        // visual source of truth for the Tier 1 row.
         let items = data.items;
         let extraCount = 0;
-        if (callableOnly && p === 1) {
+        const showManagedAtTop =
+          p === 1 &&
+          (tierFilter === "managed" ||
+            tierFilter === "verified" ||
+            tierFilter === "callable" ||
+            (callableOnly && !tierFilter));
+        if (showManagedAtTop) {
           let managed = MANAGED_PROVIDERS;
           if (debouncedQuery) {
             const q = debouncedQuery.toLowerCase();
@@ -161,13 +187,18 @@ export default function CatalogPage() {
           if (selectedCategory) {
             managed = managed.filter(a => a.category === selectedCategory);
           }
-          items = [...managed, ...items];
+          // Avoid double-listing: drop any /api/catalog row whose lowercase
+          // name matches a managed entry we're prepending.
+          const managedNames = new Set(managed.map((m) => m.name.toLowerCase()));
+          items = [...managed, ...items.filter((it) => !managedNames.has((it.name || "").toLowerCase()))];
           extraCount = managed.length;
         }
 
         setApis((prev) => (append ? [...prev, ...items] : items));
         setTotal(data.total + (p === 1 ? extraCount : 0));
-        setTotalCallable(data.totalCallable + 19);
+        setTotalCallable(data.totalCallable);
+        setTotalVerified(data.totalVerified ?? 0);
+        setTotalManaged(data.totalManaged ?? MANAGED_PROVIDERS.length);
         setHasMore(data.hasMore);
         setCategories(data.categories);
       } catch (err) {
@@ -177,7 +208,7 @@ export default function CatalogPage() {
         setLoadingMore(false);
       }
     },
-    [debouncedQuery, selectedCategory, callableOnly]
+    [debouncedQuery, selectedCategory, callableOnly, tierFilter]
   );
 
   useEffect(() => {
@@ -219,7 +250,10 @@ export default function CatalogPage() {
     ([, a], [, b]) => b.total - a.total
   );
 
-  const indexedCount = statsData.apiCount || 27254;
+  const indexedCount = statsData.apiCount || 26704;
+  const callableHeadline = statsData.callableTotal ?? statsData.callableCount ?? 5175;
+  const verifiedHeadline = statsData.callableVerified ?? totalVerified ?? 2895;
+  const managedHeadline = statsData.managedCount ?? totalManaged ?? 49;
 
   return (
     <main className="min-h-screen bg-background text-text-primary">
@@ -271,8 +305,7 @@ export default function CatalogPage() {
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">API Catalog</h1>
           <p className="text-text-secondary text-base max-w-2xl mb-6">
-            {indexedCount.toLocaleString()} APIs discoverable by AI agents.
-            {" "}{(totalCallable).toLocaleString()} callable through APIClaw with zero config.
+            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} callable through APIClaw with zero config — {verifiedHeadline.toLocaleString()} empirically verified, {managedHeadline} fully managed (we own the keys).
           </p>
 
           <div className="flex flex-wrap gap-6 text-sm text-text-muted">
@@ -282,9 +315,46 @@ export default function CatalogPage() {
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-accent" />
-              <span><span className="text-text-primary font-semibold">{(totalCallable).toLocaleString()}</span> callable</span>
+              <span><span className="text-text-primary font-semibold">{callableHeadline.toLocaleString()}</span> callable</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              <span><span className="text-text-primary font-semibold">{verifiedHeadline.toLocaleString()}</span> verified</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-500" />
+              <span><span className="text-text-primary font-semibold">{managedHeadline}</span> managed</span>
             </div>
           </div>
+        </div>
+
+        {/* Tier filter row */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="text-xs uppercase tracking-wider text-text-muted mr-1">View</span>
+          {([
+            { id: "", label: "All", count: indexedCount, icon: <Database className="w-3.5 h-3.5" /> },
+            { id: "managed", label: "Managed", count: managedHeadline, icon: <Shield className="w-3.5 h-3.5" /> },
+            { id: "verified", label: "Verified", count: verifiedHeadline, icon: <Check className="w-3.5 h-3.5" /> },
+            { id: "callable", label: "Callable", count: callableHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
+            { id: "discovery", label: "Discovery only", count: Math.max(0, indexedCount - callableHeadline), icon: <Search className="w-3.5 h-3.5" /> },
+          ] as const).map(({ id, label, count, icon }) => {
+            const active = tierFilter === id;
+            return (
+              <button
+                key={id || "all"}
+                onClick={() => { setTierFilter(id as TierFilter); if (id) setCallableOnly(false); }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
+                  active
+                    ? "bg-accent/10 border-accent/20 text-accent"
+                    : "bg-surface border-border text-text-muted hover:text-text-primary"
+                }`}
+              >
+                {icon}
+                {label}
+                <span className="opacity-60">{count.toLocaleString()}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search + callable toggle */}
@@ -472,14 +542,29 @@ function ApiCard({ api }: { api: ApiEntry }) {
       <div className="flex items-center gap-1.5 flex-wrap">
         {(api.callable || api.auth === "managed") ? (
           <>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent">
-              <Zap className="w-2.5 h-2.5" />
-              Callable
-            </span>
-            {api.auth === "managed" && (
+            {api.auth === "managed" || api.tier === "managed" ? (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400">
                 <Shield className="w-2.5 h-2.5" />
                 Managed
+              </span>
+            ) : api.verified ? (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-600 dark:text-green-400"
+                title={api.latency_ms ? `Verified · ${api.latency_ms} ms` : "Verified by smoketest"}
+              >
+                <Check className="w-2.5 h-2.5" />
+                Verified
+                {api.latency_ms ? <span className="opacity-60">{api.latency_ms}ms</span> : null}
+              </span>
+            ) : api.tier === "untested" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+                <Zap className="w-2.5 h-2.5" />
+                Untested
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent">
+                <Zap className="w-2.5 h-2.5" />
+                Callable
               </span>
             )}
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">

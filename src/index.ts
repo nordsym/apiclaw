@@ -34,6 +34,7 @@ import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './mcp-analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
+import { CANON_STATS } from './canon-stats.js';
 import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
@@ -1407,7 +1408,7 @@ MANAGED PROVIDERS:
   Serper, E2B, Stability AI, Cohere, Voyage AI, GitHub,
   APILayer (27 sub-APIs)
 
-26,000+ DISCOVERABLE | 1,650+ CALLABLE | Free tier: 25 calls per month, email signup required
+${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.callable_total.toLocaleString()} CALLABLE (${CANON_STATS.callable_verified.toLocaleString()} empirically verified, ${CANON_STATS.managed_directcallconfigs} managed) | Free tier: 25 calls / month, email signup required
 
 Docs: https://apiclaw.cloud
 `;
@@ -2356,7 +2357,6 @@ Docs: https://apiclaw.cloud
 
         const directProviders = getConnectedProviders();
         const openProviders = listOpenAPIs();
-        const stats = getAPIClawTotalStats();
 
         // Cheap top-N "what kind of open APIs are there" rollup so the agent
         // gets a useful narrative without 9k entries.
@@ -2377,10 +2377,11 @@ Docs: https://apiclaw.cloud
           status: 'success',
           message: 'APIClaw can execute these RIGHT NOW — no key paste, no integration code.',
           counts: {
-            managed_providers: directProviders.length,
-            open_callable_providers: openProviders.length,
-            total_callable_apis: stats.total_callable,
-            indexed_for_discovery: stats.tier1_discovery_indexed,
+            discoverable: CANON_STATS.discoverable,
+            callable_total: CANON_STATS.callable_total,
+            callable_verified: CANON_STATS.callable_verified,
+            managed_brands: CANON_STATS.managed_brands,
+            managed_directcallconfigs: CANON_STATS.managed_directcallconfigs,
           },
           managed_providers: {
             description: 'APIClaw owns the keys. Free tier: 25 calls/month across the whole platform, then pay-as-you-go (provider cost + 15%).',
