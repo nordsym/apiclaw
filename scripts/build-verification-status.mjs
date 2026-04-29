@@ -73,6 +73,7 @@ const out = {
   source_summary: report.summary,
   by_id: {},
   by_name_lower: {},
+  by_host: {},
   buckets: {
     verified: 0,
     working: 0,
@@ -81,6 +82,14 @@ const out = {
     dead: 0,
   },
 };
+
+function hostFromUrl(u) {
+  try {
+    return new URL(u).host.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
 
 for (const r of records) {
   const tier = TIER[r.classification] || 'dead';
@@ -96,11 +105,19 @@ for (const r of records) {
   };
   if (r.id) out.by_id[r.id] = entry;
   if (r.name) {
-    const k = String(r.name).toLowerCase();
-    // Prefer better tier on name collision
-    const prev = out.by_name_lower[k];
+    const k = String(r.name).toLowerCase().trim();
+    if (k.length > 0) {
+      const prev = out.by_name_lower[k];
+      if (!prev || rankTier(tier) > rankTier(prev.tier)) {
+        out.by_name_lower[k] = entry;
+      }
+    }
+  }
+  const host = r.host ? String(r.host).toLowerCase().replace(/^www\./, '') : hostFromUrl(r.url);
+  if (host) {
+    const prev = out.by_host[host];
     if (!prev || rankTier(tier) > rankTier(prev.tier)) {
-      out.by_name_lower[k] = entry;
+      out.by_host[host] = entry;
     }
   }
 }

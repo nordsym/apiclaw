@@ -32,6 +32,49 @@ interface VerificationStatus {
   buckets: Record<string, number>;
   by_id: Record<string, VerificationEntry>;
   by_name_lower: Record<string, VerificationEntry>;
+  by_host?: Record<string, VerificationEntry>;
+}
+
+// Canon managed-provider brand names (lowercase). Mirrors src/canon-stats.ts +
+// the curated list in landing/src/app/catalog/page.tsx. APIClaw owns the keys
+// for these and the registry's auth field is unreliable (often "apiKey" even
+// when we proxy with our own credentials), so we identify them by name match.
+const MANAGED_BRAND_NAMES = new Set([
+  "openai",
+  "anthropic",
+  "openrouter",
+  "xai",
+  "grok",
+  "xai / grok",
+  "x.ai",
+  "brave search",
+  "brave",
+  "elevenlabs",
+  "replicate",
+  "firecrawl",
+  "e2b",
+  "groq",
+  "deepgram",
+  "serper",
+  "mistral ai",
+  "mistral",
+  "cohere",
+  "together ai",
+  "together",
+  "stability ai",
+  "stability",
+  "assemblyai",
+  "github api",
+  "github",
+  "apilayer",
+]);
+
+function hostFromUrl(u: string): string | null {
+  try {
+    return new URL(u).host.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
 }
 
 let cachedApis: ApiEntry[] | null = null;
@@ -93,8 +136,21 @@ function loadApis(): ApiEntry[] {
       const enriched = all
         .filter((a) => !INTERNAL_ONLY_PROVIDERS.has((a.name || "").toLowerCase()))
         .map((a): ApiEntry => {
-          const isManaged = (a.auth || "").toLowerCase() === "managed";
-          const v = verification?.by_name_lower?.[(a.name || "").toLowerCase()];
+          const nameLower = (a.name || "").toLowerCase().trim();
+          const isManagedByAuth = (a.auth || "").toLowerCase() === "managed";
+          const isManagedByName = MANAGED_BRAND_NAMES.has(nameLower);
+          const isManaged = isManagedByAuth || isManagedByName;
+
+          // Verification join: try name first, then host fallback.
+          let v: VerificationEntry | undefined =
+            (nameLower && verification?.by_name_lower?.[nameLower]) || undefined;
+          if (!v) {
+            const host = hostFromUrl(a.baseUrl || "");
+            if (host && verification?.by_host?.[host]) {
+              v = verification.by_host[host];
+            }
+          }
+
           let tier: ApiEntry["tier"];
           let verified = false;
           let callable = a.callable === true;
