@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * APIvault - Agent-Native API Discovery MCP Server
+ * APIClaw - Agent-Native API Discovery MCP Server
  * 
  * Tools:
  * - discover_apis: Search for APIs by capability
@@ -33,7 +33,7 @@ import { hasRealCredentials } from './credentials.js';
 import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './mcp-analytics.js';
-import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl } from './open-apis.js';
+import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
 import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
@@ -103,6 +103,180 @@ const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
 const ANONYMOUS_HOURLY_LIMIT = 5;
 const ANONYMOUS_WEEKLY_LIMIT = 10;
 const FREE_MONTHLY_LIMIT = 50;
+const MAX_MCP_TOOL_RESULT_BYTES = 900_000;
+
+type TransportCompactLimits = {
+  maxDepth: number;
+  maxArrayItems: number;
+  maxObjectKeys: number;
+  maxStringChars: number;
+};
+
+const SOFT_TRANSPORT_LIMITS: TransportCompactLimits = {
+  maxDepth: 6,
+  maxArrayItems: 40,
+  maxObjectKeys: 50,
+  maxStringChars: 12_000,
+};
+
+const HARD_TRANSPORT_LIMITS: TransportCompactLimits = {
+  maxDepth: 4,
+  maxArrayItems: 12,
+  maxObjectKeys: 20,
+  maxStringChars: 3_000,
+};
+
+function measureUtf8Bytes(text: string): number {
+  return Buffer.byteLength(text, 'utf8');
+}
+
+function truncateToolString(value: string, maxChars: number): string {
+  if (value.length <= maxChars) return value;
+  const omitted = value.length - maxChars;
+  return `${value.slice(0, maxChars)}\n...[truncated ${omitted} chars]`;
+}
+
+function summarizeOverflowValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[Array(${value.length})]`;
+  }
+
+  if (value && typeof value === 'object') {
+    return `[Object keys=${Object.keys(value as Record<string, unknown>).length}]`;
+  }
+
+  return String(value);
+}
+
+function compactToolPayload(
+  value: unknown,
+  limits: TransportCompactLimits,
+  depth = 0,
+  seen = new WeakSet<object>(),
+): unknown {
+  if (typeof value === 'string') {
+    return truncateToolString(value, limits.maxStringChars);
+  }
+
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+
+  if (depth >= limits.maxDepth) {
+    return summarizeOverflowValue(value);
+  }
+
+  if (seen.has(value)) {
+    return '[Circular]';
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    const items = value
+      .slice(0, limits.maxArrayItems)
+      .map((item) => compactToolPayload(item, limits, depth + 1, seen));
+
+    if (value.length > limits.maxArrayItems) {
+      items.push(`[${value.length - limits.maxArrayItems} more items truncated]`);
+    }
+
+    return items;
+  }
+
+  const entries = Object.entries(value);
+  const output: Record<string, unknown> = {};
+
+  for (const [key, nested] of entries.slice(0, limits.maxObjectKeys)) {
+    output[key] = compactToolPayload(nested, limits, depth + 1, seen);
+  }
+
+  if (entries.length > limits.maxObjectKeys) {
+    output._truncated_keys = entries.length - limits.maxObjectKeys;
+  }
+
+  return output;
+}
+
+function wrapToolTransportMeta(payload: unknown, meta: Record<string, unknown>): unknown {
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    return {
+      ...(payload as Record<string, unknown>),
+      _transport: meta,
+    };
+  }
+
+  return {
+    data: payload,
+    _transport: meta,
+  };
+}
+
+function safeJsonStringify(
+  payload: unknown,
+  options: { pretty?: boolean; hint?: string } = {},
+): string {
+  const pretty = options.pretty ?? true;
+  const stringify = (value: unknown, prettyPrint = pretty) =>
+    JSON.stringify(value, null, prettyPrint ? 2 : 0);
+
+  const initial = stringify(payload);
+  const initialBytes = measureUtf8Bytes(initial);
+  if (initialBytes <= MAX_MCP_TOOL_RESULT_BYTES) {
+    return initial;
+  }
+
+  const suggestion =
+    options.hint ||
+    'Narrow the request, ask for a summary, paginate, or use compact=true when available.';
+
+  const softPayload = wrapToolTransportMeta(
+    compactToolPayload(payload, SOFT_TRANSPORT_LIMITS),
+    {
+      truncated: true,
+      reason: 'Tool result exceeded the MCP transport limit and was compacted automatically.',
+      original_bytes: initialBytes,
+      suggestion,
+    },
+  );
+  const softText = stringify(softPayload);
+  if (measureUtf8Bytes(softText) <= MAX_MCP_TOOL_RESULT_BYTES) {
+    return softText;
+  }
+
+  const hardPayload = wrapToolTransportMeta(
+    compactToolPayload(payload, HARD_TRANSPORT_LIMITS),
+    {
+      truncated: true,
+      reason: 'Tool result exceeded the MCP transport limit and was heavily compacted automatically.',
+      original_bytes: initialBytes,
+      suggestion,
+    },
+  );
+  const hardText = stringify(hardPayload);
+  if (measureUtf8Bytes(hardText) <= MAX_MCP_TOOL_RESULT_BYTES) {
+    return hardText;
+  }
+
+  return JSON.stringify(
+    {
+      status: 'partial',
+      preview: compactToolPayload(payload, {
+        maxDepth: 2,
+        maxArrayItems: 5,
+        maxObjectKeys: 10,
+        maxStringChars: 400,
+      }),
+      _transport: {
+        truncated: true,
+        reason: 'Tool result exceeded the MCP transport limit even after compaction.',
+        original_bytes: initialBytes,
+        suggestion,
+      },
+    },
+    null,
+    2,
+  );
+}
 
 /**
  * Calculate minutes until next hour
@@ -608,6 +782,76 @@ const SUGGESTED_CALL_RULES: Array<{
       intent: 'website screenshot',
     },
   },
+  {
+    match: /(scrape|scraper|scraping|crawl|crawler|browser.*automat|extract.*page|extract.*site|browserless|firecrawl|scrapingbee)/i,
+    suggestion: {
+      provider: 'firecrawl',
+      action: 'scrape',
+      description: 'Scrape a single URL to clean markdown via Firecrawl (APIClaw owns the key).',
+      example_params: { url: 'https://example.com', formats: ['markdown'] },
+      intent: 'web scraping / page extraction',
+    },
+  },
+  {
+    match: /(web[\s-]?search|search.*web|search.*google|search.*engine|serp|google.*results|brave.*search|search.*the.*internet)/i,
+    suggestion: {
+      provider: 'brave_search',
+      action: 'search',
+      description: 'Live web search via Brave (APIClaw owns the key).',
+      example_params: { q: 'apiclaw nordsym', count: 10 },
+      intent: 'web search',
+    },
+  },
+  {
+    match: /(\bllm\b|chat[\s-]?completion|chat.*model|gpt[\s-]?\d|claude[\s-]?\d|opus|sonnet|haiku|generate.*text|language.*model|reasoning.*model)/i,
+    suggestion: {
+      provider: 'openrouter',
+      action: 'chat',
+      description: 'Route to any of 800+ LLMs via OpenRouter; or use APIClaw advisor by passing model="auto" to /v1/chat/completions.',
+      example_params: { model: 'auto', messages: [{ role: 'user', content: 'Hello' }] },
+      intent: 'LLM chat / completion',
+    },
+  },
+  {
+    match: /(text[\s-]?to[\s-]?speech|\btts\b|generate.*speech|voice[\s-]?clone|elevenlabs|speech.*synthesis)/i,
+    suggestion: {
+      provider: 'elevenlabs',
+      action: 'text_to_speech',
+      description: 'Generate speech audio from text via ElevenLabs (APIClaw owns the key).',
+      example_params: { text: 'Hello from APIClaw.', voice_id: 'Rachel' },
+      intent: 'text-to-speech',
+    },
+  },
+  {
+    match: /(transcribe|speech[\s-]?to[\s-]?text|\bstt\b|deepgram|whisper|audio.*to.*text)/i,
+    suggestion: {
+      provider: 'deepgram',
+      action: 'transcribe',
+      description: 'Transcribe audio to text via Deepgram (APIClaw owns the key).',
+      example_params: { url: 'https://example.com/audio.mp3' },
+      intent: 'audio transcription',
+    },
+  },
+  {
+    match: /(generate.*image|image[\s-]?generation|text[\s-]?to[\s-]?image|stable[\s-]?diffusion|sdxl|flux|midjourney|dall[\s-]?e|create.*picture)/i,
+    suggestion: {
+      provider: 'replicate',
+      action: 'run',
+      description: 'Run any open-source image/video model via Replicate (APIClaw owns the key).',
+      example_params: { model: 'black-forest-labs/flux-schnell', input: { prompt: 'a lobster wearing a tiny hat' } },
+      intent: 'image / video generation',
+    },
+  },
+  {
+    match: /(run.*code|sandbox|execute.*python|execute.*javascript|code.*interpreter|e2b)/i,
+    suggestion: {
+      provider: 'e2b',
+      action: 'run_code',
+      description: 'Run code in an isolated cloud sandbox via E2B (APIClaw owns the key).',
+      example_params: { language: 'python', code: 'print(2+2)' },
+      intent: 'code execution sandbox',
+    },
+  },
 ];
 
 function buildSuggestedCalls(query: string): SuggestedCall[] {
@@ -662,7 +906,7 @@ const tools: Tool[] = [
   },
   {
     name: 'discover_apis',
-    description: 'Search for APIs based on what you need to do. Describe your use case naturally.',
+    description: 'Find APIs by job-to-be-done. Use this when the user asks "what API can do X?", wants provider recommendations, or needs web search, scraping, email, SMS, speech, PDFs, browser automation, weather, finance, or other external capabilities.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -672,8 +916,12 @@ const tools: Tool[] = [
         },
         category: {
           type: 'string',
-          description: 'Filter by category: communication, search, ai',
-          enum: ['communication', 'search', 'ai']
+          description: 'Optional category filter. Categories are case-sensitive — call list_categories first to see exact names (e.g., "Utilities", "Analytics", "Development", "AI & ML", "Cloud", "Finance", "Communication", "Location", "Entertainment", "Security", "Health").',
+        },
+        callable_only: {
+          type: 'boolean',
+          description: 'If true, only return APIs APIClaw can execute right now (managed providers + keyless open APIs). If false (default) you also see discovery-only entries — useful when scoping integrations, but agents that just want to act should set this to true.',
+          default: false,
         },
         max_results: {
           type: 'number',
@@ -698,7 +946,7 @@ const tools: Tool[] = [
   },
   {
     name: 'get_api_details',
-    description: 'Get detailed information about a specific API provider, including endpoints, pricing, and features. Use compact=true to save ~60% tokens.',
+    description: 'Inspect one provider after discovery. Good when the agent needs endpoint names, params, pricing, auth, or docs. Use compact=true to avoid oversized responses in Claude/Desktop.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -770,15 +1018,22 @@ const tools: Tool[] = [
   },
   {
     name: 'list_categories',
-    description: 'List all available API categories.',
+    description: 'List API categories with total + callable counts. Lightweight by design — does NOT dump every API ID. Use discover_apis(query, category) to drill into a category.',
     inputSchema: {
       type: 'object',
-      properties: {}
-    }
+      properties: {
+        with_api_ids: {
+          type: 'boolean',
+          description: 'If true, include the full API id list per category (large response, will auto-compact). Default: false.',
+          default: false,
+        },
+      },
+      required: [],
+    },
   },
   {
     name: 'call_api',
-    description: `Execute an API call through APIClaw. Requires registration (free). If not registered, call register_owner first.
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, email, SMS, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires free registration; if not registered, call register_owner first.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -891,15 +1146,26 @@ Example chain:
   },
   {
     name: 'list_connected',
-    description: 'List all APIs available for Direct Call (no API key needed).',
+    description: 'Summary of providers callable right now through APIClaw with no key paste. Defaults to a compact summary (managed providers + open-API counts). Pass verbose=true only if the agent explicitly needs the full open-API list. Use discover_apis(query) for narrow lookups instead of dumping the whole catalog.',
     inputSchema: {
       type: 'object',
-      properties: {}
-    }
+      properties: {
+        verbose: {
+          type: 'boolean',
+          description: 'If true, also include the full keyless open-API list (large response, will auto-compact). Default: false.',
+          default: false,
+        },
+        category: {
+          type: 'string',
+          description: 'Optional category filter for the open-API list when verbose=true.',
+        },
+      },
+      required: [],
+    },
   },
   {
     name: 'capability',
-    description: 'Execute an action by capability, not provider. APIClaw automatically selects the best provider, handles fallback, and optimizes for cost/speed. Example: capability("sms", "send", {to: "+46...", message: "Hello"})',
+    description: 'Best default when you know the job but not the provider. Execute by intent such as sms, email, search, tts, invoice, or llm, and APIClaw picks the provider plus fallback automatically.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -939,7 +1205,7 @@ Example chain:
   },
   {
     name: 'list_capabilities',
-    description: 'List all available capabilities and their providers.',
+    description: 'List high-level jobs APIClaw can do, such as sms, email, search, tts, invoice, or llm, and which providers back them.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -1094,8 +1360,8 @@ Example chain:
 // Create server
 const server = new Server(
   {
-    name: 'apivault',
-    version: '0.1.0',
+    name: 'apiclaw',
+    version: process.env.npm_package_version || '0.1.0',
   },
   {
     capabilities: {
@@ -1154,13 +1420,26 @@ Docs: https://apiclaw.cloud
       case 'discover_apis': {
         const query = args?.query as string;
         const category = args?.category as string | undefined;
-        const maxResults = (args?.max_results as number) || 5;
+        const requestedMax = (args?.max_results as number) || 5;
+        const callableOnly = args?.callable_only === true;
         const region = args?.region as string | undefined;
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
 
         const startTime = Date.now();
-        const results = discoverAPIs(query, { category, maxResults, region });
+        // When callable_only is set, over-fetch then filter so the agent still
+        // gets the requested count of useful entries.
+        const fetchMax = callableOnly ? Math.max(requestedMax * 6, 30) : requestedMax;
+        const rawResults = discoverAPIs(query, { category, maxResults: fetchMax, region });
+        const filteredResults = callableOnly
+          ? rawResults.filter((r) => (r.provider as unknown as { callable?: boolean }).callable === true)
+          : rawResults;
+        // Stable callable-first ordering (preserve relevance order within each bucket).
+        const results = [...filteredResults].sort((a, b) => {
+          const aCall = (a.provider as unknown as { callable?: boolean }).callable === true ? 0 : 1;
+          const bCall = (b.provider as unknown as { callable?: boolean }).callable === true ? 0 : 1;
+          return aCall - bCall;
+        }).slice(0, requestedMax);
         const responseTimeMs = Date.now() - startTime;
         trackSearch(query, results.length, responseTimeMs);
 
@@ -1264,24 +1543,36 @@ Docs: https://apiclaw.cloud
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
+                text: safeJsonStringify({
                   status: 'no_results',
                   message: `No APIs found matching "${query}". Try broader terms or check available categories with list_categories.`,
                   available_categories: getCategories()
-                }, null, 2)
+                })
               }
             ]
           };
         }
 
+        const callableCount = results.filter((r) => (r.provider as unknown as { callable?: boolean }).callable === true).length;
+        const discoveryOnlyCount = results.length - callableCount;
+
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: 'success',
                 query,
                 results_count: results.length,
+                callable_count: callableCount,
+                discovery_only_count: discoveryOnlyCount,
+                ...(callableCount === 0 && !callableOnly
+                  ? {
+                      no_callable_match: true,
+                      no_callable_match_hint:
+                        'No directly-callable provider matched. Try call_api({provider:"generic", action:"request", params:{url, method, ...}}) for any keyless public endpoint, or refine the query, or call list_connected to see what APIClaw can execute right now.',
+                    }
+                  : {}),
                 ...(suggestedCalls.length > 0
                   ? {
                       suggested_calls: suggestedCalls,
@@ -1311,7 +1602,9 @@ Docs: https://apiclaw.cloud
                       : { tool: null, endpoint: null, hint: 'Discovery-only. See docsUrl for integration.' },
                   };
                 })
-              }, null, 2)
+              }, {
+                hint: 'Lower max_results or inspect one provider at a time if you need the full discovery payload.',
+              })
             }
           ]
         };
@@ -1325,13 +1618,13 @@ Docs: https://apiclaw.cloud
         if (!api) {
           return {
             content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  status: 'error',
-                  message: `API not found: ${apiId}`,
-                  hint: 'Try discover_apis to search, or list_connected for direct-call APIs',
-                }, null, 2)
+            {
+              type: 'text',
+              text: safeJsonStringify({
+                status: 'error',
+                message: `API not found: ${apiId}`,
+                hint: 'Try discover_apis to search, or list_connected for direct-call APIs',
+              })
               }
             ]
           };
@@ -1341,9 +1634,15 @@ Docs: https://apiclaw.cloud
         if (compact) {
           return {
             content: [
-              {
-                type: 'text',
-                text: JSON.stringify({ status: 'ok', ...api })
+            {
+              type: 'text',
+              text: safeJsonStringify(
+                { status: 'ok', ...api },
+                {
+                  pretty: false,
+                  hint: 'Retry with compact=true or inspect a single endpoint if you need less metadata.',
+                },
+              )
               }
             ]
           };
@@ -1353,10 +1652,12 @@ Docs: https://apiclaw.cloud
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: 'success',
                 api
-              }, null, 2)
+              }, {
+                hint: 'Retry get_api_details({ api_id, compact: true }) for a smaller provider spec.',
+              })
             }
           ]
         };
@@ -1461,25 +1762,53 @@ Docs: https://apiclaw.cloud
       }
 
       case 'list_categories': {
+        const withApiIds = args?.with_api_ids === true;
         const categories = getCategories();
-        const apisByCategory: Record<string, string[]> = {};
-        
-        for (const cat of categories) {
-          apisByCategory[cat] = getAllAPIs()
-            .filter(a => a.category === cat)
-            .map(a => a.id);
-        }
+        const allAPIs = getAllAPIs();
+
+        const summary = categories
+          .map((cat) => {
+            const inCat = allAPIs.filter((a) => a.category === cat);
+            const callable = inCat.filter((a) => {
+              const anyA = a as unknown as { callable?: boolean };
+              return anyA.callable === true;
+            }).length;
+            const entry: Record<string, unknown> = {
+              category: cat,
+              total: inCat.length,
+              callable,
+            };
+            if (withApiIds) {
+              entry.api_ids = inCat.map((a) => a.id);
+            }
+            return entry;
+          })
+          .sort((a, b) => (b.total as number) - (a.total as number));
+
+        const totalAPIs = allAPIs.length;
+        const totalCallable = allAPIs.filter((a) => {
+          const anyA = a as unknown as { callable?: boolean };
+          return anyA.callable === true;
+        }).length;
 
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: 'success',
-                categories: apisByCategory
-              }, null, 2)
-            }
-          ]
+                totals: {
+                  categories: categories.length,
+                  apis_indexed: totalAPIs,
+                  apis_callable: totalCallable,
+                },
+                hint: 'Use discover_apis({ query, category }) to find APIs in a specific category. Pass with_api_ids=true here only if you really need every id.',
+                categories: summary,
+              }, {
+                hint: 'Use discover_apis({query, category}) for a narrow slice instead of every API id.',
+              }),
+            },
+          ],
         };
       }
 
@@ -1573,7 +1902,7 @@ Docs: https://apiclaw.cloud
             return {
               content: [{
                 type: 'text',
-                text: JSON.stringify({
+                text: safeJsonStringify({
                   status: chainResult.success ? 'success' : 'error',
                   mode: 'chain',
                   chainId: chainResult.chainId,
@@ -1600,7 +1929,9 @@ Docs: https://apiclaw.cloud
                     canResume: chainResult.canResume,
                     resumeToken: chainResult.resumeToken,
                   } : {}),
-                }, null, 2)
+                }, {
+                  hint: 'Inspect one step at a time or reduce step outputs if the chain result is too large.',
+                })
               }],
               isError: !chainResult.success
             };
@@ -1608,11 +1939,11 @@ Docs: https://apiclaw.cloud
             return {
               content: [{
                 type: 'text',
-                text: JSON.stringify({
+                text: safeJsonStringify({
                   status: 'error',
                   mode: 'chain',
                   error: error instanceof Error ? error.message : String(error),
-                }, null, 2)
+                })
               }],
               isError: true
             };
@@ -1631,7 +1962,9 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify(dryRunResult, null, 2)
+              text: safeJsonStringify(dryRunResult, {
+                hint: 'Use smaller params or one step at a time for a shorter preview.',
+              })
             }]
           };
         }
@@ -1731,13 +2064,15 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: result.success ? 'success' : 'error',
                 provider: result.provider,
                 action: result.action,
                 confirmed: true,
                 ...(result.success ? { data: result.data } : { error: result.error }),
-              }, null, 2)
+              }, {
+                hint: 'Ask for a summary or narrower params if the confirmed result is very large.',
+              })
             }],
             isError: !result.success
           };
@@ -1943,16 +2278,18 @@ Docs: https://apiclaw.cloud
               return {
                 content: [
                   {
-                    type: 'text',
-                    text: JSON.stringify({
-                      status: 'success',
-                      message: 'Linked APIClaw to your workspace and ran the call.',
-                      provider: retry.provider,
+                type: 'text',
+                text: safeJsonStringify({
+                  status: 'success',
+                  message: 'Linked APIClaw to your workspace and ran the call.',
+                  provider: retry.provider,
                       action: retry.action,
                       type: apiType,
-                      data: retry.data,
-                      ...(retry.cost !== undefined ? { cost_sek: retry.cost } : {}),
-                    }, null, 2),
+                    data: retry.data,
+                    ...(retry.cost !== undefined ? { cost_sek: retry.cost } : {}),
+                    }, {
+                      hint: 'Retry with narrower params or ask for a summary if the linked-call result is too large.',
+                    }),
                   },
                 ],
               };
@@ -2004,7 +2341,9 @@ Docs: https://apiclaw.cloud
           content: [
             {
               type: 'text',
-              text: JSON.stringify(responseData, null, 2)
+              text: safeJsonStringify(responseData, {
+                hint: 'Narrow params, paginate, or ask for a summarized result if the full dataset is too large.',
+              })
             }
           ],
           isError: !result.success
@@ -2012,28 +2351,81 @@ Docs: https://apiclaw.cloud
       }
 
       case 'list_connected': {
+        const verbose = args?.verbose === true;
+        const filterCategory = typeof args?.category === 'string' ? (args.category as string) : undefined;
+
         const directProviders = getConnectedProviders();
         const openProviders = listOpenAPIs();
+        const stats = getAPIClawTotalStats();
+
+        // Cheap top-N "what kind of open APIs are there" rollup so the agent
+        // gets a useful narrative without 9k entries.
+        const allAPIs = getAllAPIs();
+        const openCategoryCounts: Record<string, number> = {};
+        for (const a of allAPIs) {
+          const anyA = a as unknown as { callable?: boolean; category?: string };
+          if (anyA.callable === true && anyA.category) {
+            openCategoryCounts[anyA.category] = (openCategoryCounts[anyA.category] || 0) + 1;
+          }
+        }
+        const topOpenCategories = Object.entries(openCategoryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 12)
+          .map(([category, count]) => ({ category, callable: count }));
+
+        const summary = {
+          status: 'success',
+          message: 'APIClaw can execute these RIGHT NOW — no key paste, no integration code.',
+          counts: {
+            managed_providers: directProviders.length,
+            open_callable_providers: openProviders.length,
+            total_callable_apis: stats.total_callable,
+            indexed_for_discovery: stats.tier1_discovery_indexed,
+          },
+          managed_providers: {
+            description: 'APIClaw owns the keys. Free tier: 25 calls/month across the whole platform, then pay-as-you-go (provider cost + 15%).',
+            providers: directProviders,
+          },
+          open_apis_summary: {
+            description: 'Keyless public APIs proxied via call_api({provider, action, params}). Free.',
+            total_providers: openProviders.length,
+            top_categories: topOpenCategories,
+            generic_passthrough: {
+              hint: 'Use call_api({provider:"generic", action:"request", params:{url, method, headers, query, body}}) to hit any keyless public endpoint not curated below.',
+            },
+          },
+          usage: 'discover_apis(query) for narrow search. call_api(provider, action, params) to execute. Set verbose=true to also see the full open-API list.',
+        } as Record<string, unknown>;
+
+        if (verbose) {
+          const filtered = filterCategory
+            ? allAPIs.filter((a) => {
+                const anyA = a as unknown as { callable?: boolean; category?: string };
+                return anyA.callable === true && anyA.category === filterCategory;
+              }).map((a) => ({
+                provider: (a as unknown as { id: string }).id,
+                name: (a as unknown as { name: string }).name,
+                category: (a as unknown as { category?: string }).category,
+              }))
+            : openProviders;
+          summary.open_apis_full = {
+            description: filterCategory
+              ? `Open APIs in category "${filterCategory}".`
+              : 'Full keyless open-API list (auto-compacted if oversized; prefer discover_apis for narrow lookups).',
+            count: filtered.length,
+            providers: filtered,
+          };
+        }
 
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                status: 'success',
-                message: 'These APIs are available via call_api - no API key needed!',
-                direct_call: {
-                  description: 'APIs where we handle authentication',
-                  providers: directProviders,
-                },
-                open_apis: {
-                  description: 'Free, open APIs (no auth required)',
-                  providers: openProviders,
-                },
-                usage: 'Use call_api with provider, action, and params to execute calls.'
-              }, null, 2)
-            }
-          ]
+              text: safeJsonStringify(summary, {
+                hint: 'Use discover_apis(query) or capability() for a narrower slice instead of listing everything.',
+              }),
+            },
+          ],
         };
       }
 
@@ -2073,12 +2465,12 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: 'error',
                 error: `Unknown capability: ${capabilityId}`,
                 available_capabilities: available.map(c => c.id),
                 hint: 'Use list_capabilities to see all available capabilities.'
-              }, null, 2)
+              })
             }],
             isError: true
           };
@@ -2096,7 +2488,7 @@ Docs: https://apiclaw.cloud
         return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
+            text: safeJsonStringify({
               status: result.success ? 'success' : 'error',
               capability: result.capability,
               action: result.action,
@@ -2106,7 +2498,9 @@ Docs: https://apiclaw.cloud
               ...(result.success ? { data: result.data } : { error: result.error }),
               ...(result.cost !== undefined ? { cost: result.cost, currency: result.currency } : {}),
               latency_ms: result.latencyMs,
-            }, null, 2)
+            }, {
+              hint: 'Use more specific params or one capability call at a time for a smaller payload.',
+            })
           }],
           isError: !result.success
         };
@@ -2118,12 +2512,14 @@ Docs: https://apiclaw.cloud
         return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
+            text: safeJsonStringify({
               status: 'success',
               message: 'Available capabilities - use capability() to execute',
               capabilities,
               usage: 'capability("sms", "send", {to: "+46...", message: "Hello"})'
-            }, null, 2)
+            }, {
+              hint: 'If this list is too broad, ask for a specific capability like search, sms, email, tts, invoice, or llm.',
+            })
           }]
         };
       }
@@ -2773,7 +3169,7 @@ Docs: https://apiclaw.cloud
         return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
+            text: safeJsonStringify({
               status: 'success',
               chain: {
                 chainId: chainStatus.chainId,
@@ -2791,7 +3187,9 @@ Docs: https://apiclaw.cloud
                   }
                 } : {})
               }
-            }, null, 2)
+            }, {
+              hint: 'Inspect one chain step or ask for a shorter status summary if needed.',
+            })
           }]
         };
       }
@@ -2861,7 +3259,7 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
+              text: safeJsonStringify({
                 status: result.success ? 'success' : 'error',
                 mode: 'chain_resumed',
                 chainId: result.chainId,
@@ -2880,7 +3278,9 @@ Docs: https://apiclaw.cloud
                   canResume: result.canResume,
                   resumeToken: result.resumeToken,
                 } : {}),
-              }, null, 2)
+              }, {
+                hint: 'Inspect one resumed step at a time or reduce step outputs if the trace is too large.',
+              })
             }],
             isError: !result.success
           };
