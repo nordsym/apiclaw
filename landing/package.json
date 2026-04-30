@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/generate-stats.js && node scripts/sync-canon-to-stats.mjs && (bash mcpb/build.sh || echo '⚠ mcpb build skipped (npm install failed in this env, rebuild manually)')",
+    "prebuild": "node scripts/generate-stats.js && node scripts/sync-canon-to-stats.mjs && bash mcpb/build.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

@@ -24,8 +24,19 @@ mkdir -p "$STAGE/server"
 cp server/package.json "$STAGE/server/package.json"
 cp server/index.js     "$STAGE/server/index.js"
 
-echo "→ Installing @nordsym/apiclaw into bundle"
-( cd "$STAGE/server" && npm install --omit=dev --no-audit --no-fund --silent )
+echo "→ Installing @nordsym/apiclaw into bundle (cwd: $STAGE/server)"
+echo "→ npm: $(npm --version), node: $(node --version)"
+(
+  cd "$STAGE/server" \
+  && npm install \
+       --omit=dev \
+       --no-audit \
+       --no-fund \
+       --fetch-timeout=60000 \
+       --fetch-retries=5 \
+       --prefer-online \
+       --loglevel=warn
+)
 
 echo "→ Trimming bundle"
 find "$STAGE/server/node_modules" -type d \( -name test -o -name tests -o -name __tests__ -o -name docs -o -name examples \) -prune -exec rm -rf {} + 2>/dev/null || true
