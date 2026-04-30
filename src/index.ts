@@ -1408,7 +1408,7 @@ MANAGED PROVIDERS:
   Serper, E2B, Stability AI, Cohere, Voyage AI, GitHub,
   APILayer (27 sub-APIs)
 
-${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.callable_total.toLocaleString()} CALLABLE (${CANON_STATS.callable_verified.toLocaleString()} empirically verified, ${CANON_STATS.managed_directcallconfigs} managed) | Free tier: 25 calls / month, email signup required
+${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()} CALLABLE (empirically verified, ${CANON_STATS.managed_directcallconfigs} managed) | Free tier: 25 calls / month, email signup required
 
 Docs: https://apiclaw.cloud
 `;
@@ -2378,8 +2378,7 @@ Docs: https://apiclaw.cloud
           message: 'APIClaw can execute these RIGHT NOW — no key paste, no integration code.',
           counts: {
             discoverable: CANON_STATS.discoverable,
-            callable_total: CANON_STATS.callable_total,
-            callable_verified: CANON_STATS.callable_verified,
+            callable: CANON_STATS.callable,
             managed_brands: CANON_STATS.managed_brands,
             managed_directcallconfigs: CANON_STATS.managed_directcallconfigs,
           },

@@ -6,7 +6,7 @@ The API layer for AI agents. One key for everything.
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
 
-13,500+ installs. 26,704 discoverable APIs. 5,175 callable (2,895 empirically verified, 49 fully managed). Intelligent LLM Gateway.
+13,500+ installs. 26,704 discoverable APIs. 2,895 empirically callable (49 fully managed). Intelligent LLM Gateway.
 
 > APIClaw is in early release. Core features are live and actively expanding. Provider coverage, routing intelligence, and catalog depth grow with every update.
 
@@ -89,8 +89,8 @@ The Intelligent Gateway is in its first release. Routing logic, provider coverag
 Browse all 26,704 indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/catalog).
 
 - Search across 40+ categories
-- Filter by tier: Managed (49), Verified (2,895), Callable (5,175), Discovery only
-- Verified-badge shows which entries we've smoketested with empirical 200-OK + parsed JSON
+- Filter by tier: Managed (49), Callable (2,895), Discovery only (~23,800)
+- Every "Callable" entry is empirically smoketested (HTTP 200 + parseable JSON in our last sweep)
 - Infinite scroll, category filters, instant search
 
 ---
@@ -99,11 +99,12 @@ Browse all 26,704 indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/
 
 **Discoverable (26,704 APIs)** -- Every API in the index. Your agent can search, read specs, and evaluate them. Free and unlimited.
 
-**Callable (5,175 APIs)** -- APIs your agent can actually execute through APIClaw. Three tiers:
+**Callable (2,895 APIs)** -- Every entry empirically smoketested: returned HTTP 200 + parseable JSON in our last sweep. Two layers:
 
-- **Managed (49 directCallConfigs across 19 brands)** -- APIClaw owns the keys. You call, APIClaw authenticates. Verified by us.
-- **Verified (2,895)** -- Keyless public APIs that smoketest passed: 200 + parseable JSON in our last sweep. Sortable by verified latency.
-- **Untested (~2,231)** -- Valid OpenAPI specs that need context (POST body, path-vars, query params) we can't blindly fill in. Will work with the right inputs.
+- **Managed (49 directCallConfigs across 19 brands)** -- APIClaw owns the keys. You call, APIClaw authenticates.
+- **Keyless verified (~2,846)** -- Public APIs proxied through APIClaw, smoketest-passed. Sortable by verified latency.
+
+The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integration paths but need context (POST body, path-vars, required query params) we couldn't smoketest blindly. They live in Discovery — your agent can still call them through APIClaw if it supplies the right inputs, but we don't claim them as callable until proven.
 
 ### Managed Providers
 

@@ -251,8 +251,7 @@ export default function CatalogPage() {
   );
 
   const indexedCount = statsData.apiCount || 26704;
-  const callableHeadline = statsData.callableTotal ?? statsData.callableCount ?? 5175;
-  const verifiedHeadline = statsData.callableVerified ?? totalVerified ?? 2895;
+  const callableHeadline = statsData.callableCount ?? 2895;
   const managedHeadline = statsData.managedCount ?? totalManaged ?? 49;
 
   return (
@@ -305,7 +304,7 @@ export default function CatalogPage() {
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">API Catalog</h1>
           <p className="text-text-secondary text-base max-w-2xl mb-6">
-            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} callable through APIClaw with zero config — {verifiedHeadline.toLocaleString()} empirically verified, {managedHeadline} fully managed (we own the keys).
+            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} empirically callable through APIClaw with zero config — {managedHeadline} fully managed (we own the keys).
           </p>
 
           <div className="flex flex-wrap gap-6 text-sm text-text-muted">
@@ -316,10 +315,6 @@ export default function CatalogPage() {
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-accent" />
               <span><span className="text-text-primary font-semibold">{callableHeadline.toLocaleString()}</span> callable</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-500" />
-              <span><span className="text-text-primary font-semibold">{verifiedHeadline.toLocaleString()}</span> verified</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-purple-500" />
@@ -334,7 +329,6 @@ export default function CatalogPage() {
           {([
             { id: "", label: "All", count: indexedCount, icon: <Database className="w-3.5 h-3.5" /> },
             { id: "managed", label: "Managed", count: managedHeadline, icon: <Shield className="w-3.5 h-3.5" /> },
-            { id: "verified", label: "Verified", count: verifiedHeadline, icon: <Check className="w-3.5 h-3.5" /> },
             { id: "callable", label: "Callable", count: callableHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
             { id: "discovery", label: "Discovery only", count: Math.max(0, indexedCount - callableHeadline), icon: <Search className="w-3.5 h-3.5" /> },
           ] as const).map(({ id, label, count, icon }) => {
@@ -540,31 +534,21 @@ function ApiCard({ api }: { api: ApiEntry }) {
       </p>
 
       <div className="flex items-center gap-1.5 flex-wrap">
-        {(api.callable || api.auth === "managed") ? (
+        {(api.callable || api.auth === "managed" || api.tier === "managed") ? (
           <>
             {api.auth === "managed" || api.tier === "managed" ? (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400">
                 <Shield className="w-2.5 h-2.5" />
                 Managed
               </span>
-            ) : api.verified ? (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-600 dark:text-green-400"
-                title={api.latency_ms ? `Verified · ${api.latency_ms} ms` : "Verified by smoketest"}
-              >
-                <Check className="w-2.5 h-2.5" />
-                Verified
-                {api.latency_ms ? <span className="opacity-60">{api.latency_ms}ms</span> : null}
-              </span>
-            ) : api.tier === "untested" ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
-                <Zap className="w-2.5 h-2.5" />
-                Untested
-              </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent">
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent"
+                title={api.latency_ms ? `Smoketest verified · ${api.latency_ms} ms` : "Callable through APIClaw"}
+              >
                 <Zap className="w-2.5 h-2.5" />
                 Callable
+                {api.latency_ms ? <span className="opacity-60">{api.latency_ms}ms</span> : null}
               </span>
             )}
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">

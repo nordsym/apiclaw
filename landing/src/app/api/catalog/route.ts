@@ -162,12 +162,14 @@ function loadApis(): ApiEntry[] {
           } else if (v) {
             tier = v.tier;
             verified = v.tier === "verified";
-            // Re-derive runtime callable from verification rather than the
-            // stale registry flag. verified + working count as callable; the
-            // rest don't (auth-required hides credentials, dead is dead).
-            callable = v.tier === "verified" || v.tier === "working";
-          } else if (callable) {
-            tier = "untested";
+            // Honest measurement: only verified providers count as callable.
+            // Working_other, auth, needs_ctx, dead all drop to discovery.
+            callable = v.tier === "verified";
+          } else {
+            // No verification result and not managed → demoted to discovery,
+            // regardless of any stale registry callable flag. Honest count.
+            callable = false;
+            if (a.callable === true) tier = "untested";
           }
 
           return {

@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "apiclaw",
   "display_name": "APIClaw",
-  "version": "2.6.0",
-  "description": "The API layer for AI agents. 26,704 discoverable APIs, 5,175 callable (2,895 empirically verified, 49 fully managed). Zero config.",
-  "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 5,175 are callable through APIClaw — 2,895 of those are empirically verified by smoketest (200 + parseable JSON), and 49 are fully managed where APIClaw owns the keys (OpenAI, Anthropic, OpenRouter, xAI, Replicate, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer's 27 sub-APIs, plus more). Universal pass-through proxy for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 25 API calls per month, email signup required.",
+  "version": "2.6.1",
+  "description": "The API layer for AI agents. 26,704 discoverable APIs, 2,895 empirically callable (49 fully managed). Zero config.",
+  "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 2,895 are empirically callable — every one verified by smoketest (HTTP 200 + parseable JSON). 49 of those are fully managed where APIClaw owns the keys (OpenAI, Anthropic, OpenRouter, xAI, Replicate, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer's 27 sub-APIs, plus more). Universal pass-through proxy for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 25 API calls per month, email signup required.",
   "author": {
     "name": "NordSym AB",
     "email": "gustav@nordsym.com",

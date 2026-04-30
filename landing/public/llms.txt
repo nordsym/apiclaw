@@ -7,7 +7,7 @@ APIClaw is in early release. Core features are live and actively expanding. Prov
 
 ## What is APIClaw?
 
-APIClaw provides unified API access for AI agents. Two interfaces: MCP server for agent-native discovery and calling, and an Intelligent Gateway for OpenAI-compatible LLM routing. 26,704 discoverable APIs, 5,175 callable (2,895 empirically verified, 49 fully managed).
+APIClaw provides unified API access for AI agents. Two interfaces: MCP server for agent-native discovery and calling, and an Intelligent Gateway for OpenAI-compatible LLM routing. 26,704 discoverable APIs, 2,895 empirically callable (49 fully managed).
 
 **Domain:** apiclaw.cloud
 **Gateway:** api.apiclaw.cloud
@@ -44,10 +44,9 @@ curl api.apiclaw.cloud/v1/chat/completions \
 
 **Discoverable (26,704 APIs)** - Every API in the index. Search, read specs, evaluate. Free and unlimited.
 
-**Callable (5,175 APIs)** - APIs that can be executed through APIClaw:
-- Verified callable (2,895): empirically confirmed working via smoketest (returned 200 + parseable JSON)
-- Untested callable (~2,231): valid OpenAPI spec, requires context (params/path-vars) to test blindly
-- Managed providers (49): APIClaw owns the keys, handles auth and billing — Tier 1, fully verified
+**Callable (2,895 APIs)** - APIs your agent can execute through APIClaw, every one empirically verified by smoketest (returned HTTP 200 + parseable JSON):
+- Managed providers (49): APIClaw owns the keys, handles auth and billing — verified by us in production
+- Keyless verified (~2,846): public APIs proxied through APIClaw, smoketest-passed
 
 ## API Catalog
 

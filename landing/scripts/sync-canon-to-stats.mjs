@@ -20,8 +20,7 @@ const VERIFICATION_PATH = resolve(__dirname, '../src/lib/verification-status.jso
 const CANON = {
   generated_at: '2026-04-29',
   discoverable: 26_704,
-  callable_verified: 2_895,
-  callable_total: 5_175,
+  callable: 2_895,
   managed_brands: 19,
   managed_directcallconfigs: 49,
 };
@@ -49,14 +48,15 @@ const before = {
 };
 
 stats.apiCount = CANON.discoverable;
-stats.callableCount = CANON.callable_total;
-stats.callableVerified = CANON.callable_verified;
-stats.callableTotal = CANON.callable_total;
+stats.callableCount = CANON.callable;
 stats.managedCount = CANON.managed_directcallconfigs;
 stats.managedBrands = CANON.managed_brands;
-stats.openApiCount = Math.max(0, CANON.callable_total - CANON.managed_directcallconfigs);
+stats.openApiCount = Math.max(0, CANON.callable - CANON.managed_directcallconfigs);
 stats.canonGeneratedAt = CANON.generated_at;
 stats.generatedAt = new Date().toISOString();
+// Drop any legacy fields from previous canon variants
+delete stats.callableVerified;
+delete stats.callableTotal;
 
 if (verification?.buckets) {
   stats.verificationBuckets = verification.buckets;
