@@ -35,37 +35,30 @@ interface VerificationStatus {
   by_host?: Record<string, VerificationEntry>;
 }
 
-// Canon managed-provider brand names (lowercase). Mirrors src/canon-stats.ts +
-// the curated list in landing/src/app/catalog/page.tsx. APIClaw owns the keys
-// for these and the registry's auth field is unreliable (often "apiKey" even
-// when we proxy with our own credentials), so we identify them by name match.
+// Canon managed-provider brand names (lowercase). Must stay in sync with
+// scripts/clean-registry-flags.mjs. APIClaw owns the keys for these and the
+// registry's auth field is unreliable (often "apiKey" even when we proxy
+// with our own credentials), so we identify them by name match — including
+// "{brand} api" variants since the registry sometimes has those.
 const MANAGED_BRAND_NAMES = new Set([
-  "openai",
-  "anthropic",
-  "openrouter",
-  "xai",
-  "grok",
-  "xai / grok",
-  "x.ai",
-  "brave search",
-  "brave",
-  "elevenlabs",
-  "replicate",
-  "firecrawl",
-  "e2b",
-  "groq",
-  "deepgram",
-  "serper",
-  "mistral ai",
-  "mistral",
-  "cohere",
-  "together ai",
-  "together",
-  "stability ai",
-  "stability",
-  "assemblyai",
-  "github api",
-  "github",
+  "openai", "openai api",
+  "anthropic", "anthropic api", "anthropic claude", "anthropic messages api",
+  "openrouter", "openrouter api",
+  "x.ai", "x.ai api", "xai api", "grok", "grok api",
+  "brave search", "brave search ai",
+  "elevenlabs", "elevenlabs api", "elevenlabs tts",
+  "replicate", "replicate api",
+  "firecrawl", "firecrawl api",
+  "e2b", "e2b api",
+  "groq", "groq api",
+  "deepgram", "deepgram api",
+  "serper", "serper api",
+  "mistral", "mistral ai", "mistral api", "mistral ai api",
+  "cohere", "cohere api",
+  "together", "together ai", "together ai api", "together apis",
+  "stability", "stability ai", "stability ai api",
+  "assemblyai", "assemblyai api",
+  "github", "github api",
   "apilayer",
 ]);
 

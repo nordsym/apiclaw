@@ -6,6 +6,6 @@
   "description": "Bundled APIClaw MCP server for Claude Desktop Extension",
   "main": "index.js",
   "dependencies": {
-    "@nordsym/apiclaw": "2.6.1"
+    "@nordsym/apiclaw": "2.6.2"
   }
 }
