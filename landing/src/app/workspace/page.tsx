@@ -5871,8 +5871,9 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
             })()}
             <p className="text-xs text-[var(--text-muted)] mt-1">
               Used when no model is specified in the request. Pick from the catalog or type any model id — unknown ids
-              fall through to the OpenRouter fallback. <span className="text-green-500 font-medium">DIRECT</span> = no markup;
-              other models add the standard 15% margin on top of OpenRouter pricing.
+              fall through to the OpenRouter fallback. All paid calls add the standard 15% margin on top of provider
+              pricing. <span className="text-green-500 font-medium">DIRECT</span> = no OpenRouter hop (lower latency,
+              direct provider pricing); non-direct routes via OpenRouter.
             </p>
           </div>
 
