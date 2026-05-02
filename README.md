@@ -57,7 +57,7 @@ Humans in the terminal, scripts, CI. Ships with `@nordsym/apiclaw`:
 ```bash
 npx @nordsym/apiclaw login                    # OTP auth, terminal-native
 npx @nordsym/apiclaw setup                    # auto-detect Claude, Cursor, Windsurf
-apiclaw discover "send SMS to Sweden"         # search registry
+apiclaw discover "transcribe audio file"      # search registry
 apiclaw-http                                  # stand up local HTTP gateway
 ```
 
@@ -67,10 +67,11 @@ One endpoint. Automatic provider routing. The gateway selects the optimal provid
 
 | Routing Mode | Behavior |
 |-------------|----------|
+| `balanced` | Default. Weighs speed, cost, and quality |
 | `fastest` | Lowest latency (Groq, Mistral) |
 | `best_price` | Cheapest available provider |
 | `highest_quality` | Best model quality |
-| `balanced` | Weighs speed, cost, and quality |
+| `advisor` | Opt-in. Mistral Small picks the optimal model per prompt (only fires when no model is set in the request) |
 
 **Providers routed through the gateway:**
 - **Groq** -- Ultra-fast inference (Llama, Mixtral, Gemma)

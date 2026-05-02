@@ -96,6 +96,7 @@ import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 interface Workspace {
   id: string;
@@ -216,6 +217,7 @@ function generatePreviewAnalytics(): ProviderAnalytics {
 export default function WorkspacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const signInPath = CLERK_ENABLED ? "/sign-in" : "/login";
   
   // Handle null searchParams
   if (!searchParams) {
@@ -309,7 +311,7 @@ export default function WorkspacePage() {
         // Guard: anonymous workspace (no email) means the browser session is stale — force re-login
         if (!dashboard.workspace.email) {
           localStorage.removeItem("apiclaw_workspace_session");
-          router.push("/login");
+          router.push(signInPath);
           return;
         }
         setWorkspace(dashboard.workspace);
@@ -479,7 +481,7 @@ export default function WorkspacePage() {
         // code via localStorage; /login → /workspace will pick it up.
         if (!token) {
           const pending = localStorage.getItem("apiclaw_pending_link");
-          router.push(pending ? `/login?link=${pending}` : "/login");
+          router.push(pending ? `${signInPath}?link=${pending}` : signInPath);
           return;
         }
 
@@ -547,7 +549,7 @@ export default function WorkspacePage() {
     document.documentElement.classList.toggle("dark", dark);
 
     init();
-  }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs]);
+  }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs, signInPath]);
 
   // Reactively load provider APIs when workspace email becomes available
   useEffect(() => {
@@ -582,7 +584,7 @@ export default function WorkspacePage() {
       }
       await fetch("/api/workspace-auth/session", { method: "DELETE" });
       localStorage.removeItem("apiclaw_workspace_session");
-      router.push("/login");
+      router.push(signInPath);
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -1055,7 +1057,7 @@ export default function WorkspacePage() {
             <WebhooksTab sessionToken={sessionToken} />
           )}
           {activeTab === "billing" && (
-            <BillingTab workspace={workspace} />
+            <BillingTab workspace={workspace} sessionToken={sessionToken} />
           )}
           {activeTab === "earn" && (
             <EarnCreditsTab showToast={showToast} />
@@ -4726,7 +4728,13 @@ interface PaymentMethod {
   expYear: number;
 }
 
-function BillingTab({ workspace }: { workspace: Workspace | null }) {
+function BillingTab({
+  workspace,
+  sessionToken,
+}: {
+  workspace: Workspace | null;
+  sessionToken: string | null;
+}) {
   const currentTier = workspace?.tier || "free";
   const isPaid = ["pro", "scale", "usage_based"].includes(currentTier);
   const isPartner = currentTier === "partner";
@@ -4735,9 +4743,9 @@ function BillingTab({ workspace }: { workspace: Workspace | null }) {
   const handleUpgrade = async () => {
     setCheckoutLoading(true);
     try {
-      const token = document.cookie.split(";").find(c => c.trim().startsWith("session_token="))?.split("=")[1];
+      const token = sessionToken;
       if (!token) {
-        window.location.href = "/login";
+        window.location.href = CLERK_ENABLED ? "/sign-in" : "/login";
         return;
       }
       const res = await fetch("/api/billing/checkout", {
@@ -5334,7 +5342,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
             { name: "call_api", desc: "Execute a managed API call" },
             { name: "list_connected", desc: "Show available managed providers" },
             { name: "get_categories", desc: "List all API categories" },
-            { name: "register_owner", desc: "Authenticate workspace via magic link" },
+            { name: "register_owner", desc: "Verify workspace ownership and unlock managed API calls" },
           ].map((tool) => (
             <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
               <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
@@ -5619,6 +5627,56 @@ const ROUTING_MODES = [
   { id: "best_price", label: "Best Price", desc: "Cheapest provider for each model" },
   { id: "fastest", label: "Fastest", desc: "Lowest latency (Groq, Together)" },
   { id: "highest_quality", label: "Highest Quality", desc: "Premium models via OpenRouter" },
+  { id: "advisor", label: "Smart Advisor", desc: "AI picks model per prompt (only when no model is set)" },
+];
+
+// Frontier models — direct provider routes (no OpenRouter markup) + Gemini fallback.
+// Grouped by provider; "" entry means use whatever the request specifies.
+const DEFAULT_MODEL_OPTIONS: { group: string; models: { id: string; label: string }[] }[] = [
+  {
+    group: "Anthropic",
+    models: [
+      { id: "claude-opus-4-6", label: "Claude Opus 4.6" },
+      { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
+      { id: "claude-haiku-4-5", label: "Claude Haiku 4.5" },
+    ],
+  },
+  {
+    group: "OpenAI",
+    models: [
+      { id: "gpt-5.4", label: "GPT-5.4" },
+      { id: "gpt-5", label: "GPT-5" },
+      { id: "gpt-4o", label: "GPT-4o" },
+      { id: "o3", label: "o3 (reasoning)" },
+      { id: "o4-mini", label: "o4-mini" },
+    ],
+  },
+  {
+    group: "xAI",
+    models: [
+      { id: "grok-4", label: "Grok 4" },
+      { id: "grok-3", label: "Grok 3" },
+      { id: "grok-3-mini", label: "Grok 3 Mini" },
+    ],
+  },
+  {
+    group: "Google (via OpenRouter)",
+    models: [
+      { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+      { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+    ],
+  },
+  {
+    group: "Open weights",
+    models: [
+      { id: "llama-3.3-70b", label: "Llama 3.3 70B (Groq)" },
+      { id: "deepseek-r1", label: "DeepSeek R1 (Together)" },
+      { id: "deepseek-v3.2", label: "DeepSeek V3.2 (DeepInfra)" },
+      { id: "kimi-k2.6", label: "Kimi K2.6 (DeepInfra)" },
+      { id: "qwen-2.5", label: "Qwen 2.5 72B (Together)" },
+      { id: "mistral-large-latest", label: "Mistral Large" },
+    ],
+  },
 ];
 
 const LLM_PROVIDERS = [
@@ -5631,6 +5689,7 @@ const LLM_PROVIDERS = [
 function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null }) {
   const [routingMode, setRoutingMode] = useState("balanced");
   const [defaultModel, setDefaultModel] = useState("");
+  const [defaultModelCustom, setDefaultModelCustom] = useState(false);
   const [maxPrice, setMaxPrice] = useState("");
   const [monthlyBudget, setMonthlyBudget] = useState("");
   const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
@@ -5735,14 +5794,46 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
           {/* Default Model */}
           <div>
             <label className="block text-sm font-medium mb-2">Default Model</label>
-            <input
-              type="text"
-              value={defaultModel}
-              onChange={(e) => setDefaultModel(e.target.value)}
-              placeholder="apiclaw/openai/gpt-5.4-20260305"
+            <select
+              value={
+                defaultModelCustom
+                  ? "__custom__"
+                  : (DEFAULT_MODEL_OPTIONS.some((g) => g.models.some((m) => m.id === defaultModel))
+                      ? defaultModel
+                      : (defaultModel ? "__custom__" : ""))
+              }
+              onChange={(e) => {
+                if (e.target.value === "__custom__") {
+                  setDefaultModelCustom(true);
+                  return;
+                }
+                setDefaultModelCustom(false);
+                setDefaultModel(e.target.value);
+              }}
               className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-            />
-            <p className="text-xs text-[var(--text-muted)] mt-1">Used when no model is specified in the request</p>
+            >
+              <option value="">No default (model must be specified per request)</option>
+              {DEFAULT_MODEL_OPTIONS.map((group) => (
+                <optgroup key={group.group} label={group.group}>
+                  {group.models.map((m) => (
+                    <option key={m.id} value={m.id}>{m.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+              <option value="__custom__">Custom (enter below)</option>
+            </select>
+            {(defaultModelCustom || (defaultModel && !DEFAULT_MODEL_OPTIONS.some((g) => g.models.some((m) => m.id === defaultModel)))) && (
+              <input
+                type="text"
+                value={defaultModel}
+                onChange={(e) => setDefaultModel(e.target.value)}
+                placeholder="e.g. anthropic/claude-sonnet-4-6 or any OpenRouter model id"
+                className="w-full mt-2 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
+              />
+            )}
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Used when no model is specified in the request. Leave blank to require explicit model on every call.
+            </p>
           </div>
 
           {/* Provider Preferences */}
@@ -6065,9 +6156,13 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
 
       <SettingsSection title="Security" icon={Lock}>
         <div className="space-y-4 pt-4">
-          <div className="p-4 rounded-xl bg-[var(--surface)]">
+        <div className="p-4 rounded-xl bg-[var(--surface)]">
             <p className="font-medium mb-1">Change Password</p>
-            <p className="text-sm text-[var(--text-muted)] mb-3">Set or update your password. You can always use magic link to sign in.</p>
+            <p className="text-sm text-[var(--text-muted)] mb-3">
+              {CLERK_ENABLED
+                ? "Set or update your password for your APIClaw account."
+                : "Set or update your password for workspace sign-in."}
+            </p>
             <form
               onSubmit={async (e) => {
                 e.preventDefault();

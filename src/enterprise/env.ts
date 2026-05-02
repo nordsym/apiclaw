@@ -15,7 +15,7 @@ export const ENV_VARS = {
   DISABLE_TELEMETRY: 'APICLAW_DISABLE_TELEMETRY',
 } as const;
 
-export const DEFAULT_API_URL = 'https://api.apiclaw.com';
+export const DEFAULT_API_URL = 'https://apiclaw.cloud';
 
 /**
  * Read APIClaw config from environment variables
