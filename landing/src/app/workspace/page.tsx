@@ -5630,54 +5630,38 @@ const ROUTING_MODES = [
   { id: "advisor", label: "Smart Advisor", desc: "AI picks model per prompt (only when no model is set)" },
 ];
 
-// Frontier models — direct provider routes (no OpenRouter markup) + Gemini fallback.
-// Grouped by provider; "" entry means use whatever the request specifies.
-const DEFAULT_MODEL_OPTIONS: { group: string; models: { id: string; label: string }[] }[] = [
-  {
-    group: "Anthropic",
-    models: [
-      { id: "claude-opus-4-6", label: "Claude Opus 4.6" },
-      { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
-      { id: "claude-haiku-4-5", label: "Claude Haiku 4.5" },
-    ],
-  },
-  {
-    group: "OpenAI",
-    models: [
-      { id: "gpt-5.4", label: "GPT-5.4" },
-      { id: "gpt-5", label: "GPT-5" },
-      { id: "gpt-4o", label: "GPT-4o" },
-      { id: "o3", label: "o3 (reasoning)" },
-      { id: "o4-mini", label: "o4-mini" },
-    ],
-  },
-  {
-    group: "xAI",
-    models: [
-      { id: "grok-4", label: "Grok 4" },
-      { id: "grok-3", label: "Grok 3" },
-      { id: "grok-3-mini", label: "Grok 3 Mini" },
-    ],
-  },
-  {
-    group: "Google (via OpenRouter)",
-    models: [
-      { id: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-      { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-    ],
-  },
-  {
-    group: "Open weights",
-    models: [
-      { id: "llama-3.3-70b", label: "Llama 3.3 70B (Groq)" },
-      { id: "deepseek-r1", label: "DeepSeek R1 (Together)" },
-      { id: "deepseek-v3.2", label: "DeepSeek V3.2 (DeepInfra)" },
-      { id: "kimi-k2.6", label: "Kimi K2.6 (DeepInfra)" },
-      { id: "qwen-2.5", label: "Qwen 2.5 72B (Together)" },
-      { id: "mistral-large-latest", label: "Mistral Large" },
-    ],
-  },
+// Curated frontier picks — surfaced first in the model picker. Anything not
+// in this list is still available via the searchable catalog (full
+// OpenRouter list, ~370+ models, fetched from /api/models).
+const FRONTIER_PICKS: string[] = [
+  "anthropic/claude-opus-4-6",
+  "anthropic/claude-sonnet-4-6",
+  "anthropic/claude-haiku-4-5",
+  "openai/gpt-5.4",
+  "openai/gpt-5",
+  "openai/gpt-4o",
+  "openai/o3",
+  "x-ai/grok-4",
+  "x-ai/grok-3",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash",
+  "deepseek/deepseek-r1",
+  "deepseek/deepseek-v3",
+  "moonshotai/kimi-k2.6",
+  "qwen/qwen-2.5-72b-instruct",
+  "mistralai/mistral-large-latest",
+  "meta-llama/llama-3.3-70b-instruct",
 ];
+
+interface CatalogModel {
+  id: string;
+  name: string;
+  provider: string;
+  context_length: number | null;
+  prompt_price: number | null;
+  completion_price: number | null;
+  direct: boolean;
+}
 
 const LLM_PROVIDERS = [
   { id: "groq", name: "Groq", desc: "Ultra-fast inference" },
@@ -5689,7 +5673,10 @@ const LLM_PROVIDERS = [
 function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null }) {
   const [routingMode, setRoutingMode] = useState("balanced");
   const [defaultModel, setDefaultModel] = useState("");
-  const [defaultModelCustom, setDefaultModelCustom] = useState(false);
+  const [modelCatalog, setModelCatalog] = useState<CatalogModel[]>([]);
+  const [modelCatalogLoaded, setModelCatalogLoaded] = useState(false);
+  const [modelSearch, setModelSearch] = useState("");
+  const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const [maxPrice, setMaxPrice] = useState("");
   const [monthlyBudget, setMonthlyBudget] = useState("");
   const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
@@ -5707,6 +5694,16 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
     // Settings are loaded fresh each time the gateway handles a request
     setLoaded(true);
   }, [sessionToken, loaded]);
+
+  // Load model catalog from OpenRouter (proxied + cached by /api/models).
+  useEffect(() => {
+    if (modelCatalogLoaded) return;
+    fetch("/api/models")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: { models: CatalogModel[] }) => setModelCatalog(d.models || []))
+      .catch(() => setModelCatalog([]))
+      .finally(() => setModelCatalogLoaded(true));
+  }, [modelCatalogLoaded]);
 
   const saveSettings = async () => {
     if (!sessionToken) return;
@@ -5791,48 +5788,91 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
             </div>
           </div>
 
-          {/* Default Model */}
+          {/* Default Model — searchable picker over the full catalog. */}
           <div>
-            <label className="block text-sm font-medium mb-2">Default Model</label>
-            <select
-              value={
-                defaultModelCustom
-                  ? "__custom__"
-                  : (DEFAULT_MODEL_OPTIONS.some((g) => g.models.some((m) => m.id === defaultModel))
-                      ? defaultModel
-                      : (defaultModel ? "__custom__" : ""))
-              }
+            <div className="flex items-baseline justify-between mb-2">
+              <label className="block text-sm font-medium">Default Model</label>
+              <span className="text-xs text-[var(--text-muted)]">
+                {modelCatalogLoaded ? `${modelCatalog.length} models available` : "loading catalog…"}
+              </span>
+            </div>
+            <input
+              type="text"
+              value={modelPickerOpen ? modelSearch : defaultModel}
+              onFocus={() => {
+                setModelPickerOpen(true);
+                setModelSearch(defaultModel);
+              }}
               onChange={(e) => {
-                if (e.target.value === "__custom__") {
-                  setDefaultModelCustom(true);
-                  return;
-                }
-                setDefaultModelCustom(false);
+                setModelPickerOpen(true);
+                setModelSearch(e.target.value);
                 setDefaultModel(e.target.value);
               }}
+              onBlur={() => setTimeout(() => setModelPickerOpen(false), 150)}
+              placeholder="Search 370+ models or type any model id (anthropic/claude-sonnet-4-6, x-ai/grok-4, qwen/qwen-2.5-72b-instruct, …)"
               className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-            >
-              <option value="">No default (model must be specified per request)</option>
-              {DEFAULT_MODEL_OPTIONS.map((group) => (
-                <optgroup key={group.group} label={group.group}>
-                  {group.models.map((m) => (
-                    <option key={m.id} value={m.id}>{m.label}</option>
-                  ))}
-                </optgroup>
-              ))}
-              <option value="__custom__">Custom (enter below)</option>
-            </select>
-            {(defaultModelCustom || (defaultModel && !DEFAULT_MODEL_OPTIONS.some((g) => g.models.some((m) => m.id === defaultModel)))) && (
-              <input
-                type="text"
-                value={defaultModel}
-                onChange={(e) => setDefaultModel(e.target.value)}
-                placeholder="e.g. anthropic/claude-sonnet-4-6 or any OpenRouter model id"
-                className="w-full mt-2 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50"
-              />
-            )}
+            />
+            {modelPickerOpen && modelCatalog.length > 0 && (() => {
+              const q = modelSearch.trim().toLowerCase();
+              const matches = q
+                ? modelCatalog.filter(
+                    (m) => m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
+                  )
+                : modelCatalog;
+              const frontierMatches = matches.filter((m) => FRONTIER_PICKS.includes(m.id));
+              const otherMatches = matches.filter((m) => !FRONTIER_PICKS.includes(m.id));
+              const ordered = [...frontierMatches, ...otherMatches].slice(0, 50);
+              return (
+                <div className="mt-1 max-h-64 overflow-y-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-lg">
+                  {ordered.length === 0 ? (
+                    <div className="px-3 py-2 text-xs text-[var(--text-muted)]">
+                      No catalog match. The id you typed will still be sent through to the gateway (OpenRouter fallback).
+                    </div>
+                  ) : (
+                    ordered.map((m) => {
+                      const isFrontier = FRONTIER_PICKS.includes(m.id);
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setDefaultModel(m.id);
+                            setModelSearch(m.id);
+                            setModelPickerOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-[var(--background)] border-b border-[var(--border)] last:border-b-0"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-mono text-xs truncate">{m.id}</p>
+                              <p className="text-xs text-[var(--text-muted)] truncate">{m.name}</p>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {isFrontier && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#ef4444]/20 text-[#ef4444] font-medium">FRONTIER</span>
+                              )}
+                              {m.direct && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-500 font-medium">DIRECT</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                  {matches.length > 50 && (
+                    <div className="px-3 py-2 text-xs text-[var(--text-muted)] border-t border-[var(--border)]">
+                      Showing 50 of {matches.length} matches — keep typing to narrow.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <p className="text-xs text-[var(--text-muted)] mt-1">
-              Used when no model is specified in the request. Leave blank to require explicit model on every call.
+              Used when no model is specified in the request. Pick from the catalog or type any model id — unknown ids
+              fall through to the OpenRouter fallback. <span className="text-green-500 font-medium">DIRECT</span> = no markup;
+              other models add the standard 15% margin on top of OpenRouter pricing.
             </p>
           </div>
 
