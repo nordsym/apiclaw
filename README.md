@@ -41,7 +41,7 @@ The agent handles everything through MCP tools. Works in Claude Desktop, Cursor,
 Generate an `sk-claw-` API key at [apiclaw.cloud/workspace](https://apiclaw.cloud/workspace) and use APIClaw as an LLM gateway from any application:
 
 ```bash
-curl api.apiclaw.cloud/v1/chat/completions \
+curl https://apiclaw.cloud/v1/chat/completions \
   -H "Authorization: Bearer sk-claw-..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -61,7 +61,7 @@ apiclaw discover "send SMS to Sweden"         # search registry
 apiclaw-http                                  # stand up local HTTP gateway
 ```
 
-All three interfaces route through the same `api.apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry.
+All three interfaces route through the same `apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry.
 
 One endpoint. Automatic provider routing. The gateway selects the optimal provider based on your workspace settings:
 
