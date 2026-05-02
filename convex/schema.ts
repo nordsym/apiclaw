@@ -94,6 +94,11 @@ export default defineSchema({
     lastSpendResetAt: v.optional(v.number()), // When monthly spend was last reset
     // Activity tracking
     lastActiveAt: v.optional(v.number()), // Last API call timestamp (main agent)
+    // Onboarding wizard state
+    onboardingCompletedAt: v.optional(v.number()), // null = wizard pending
+    onboardingDismissedAt: v.optional(v.number()), // Tracks "skip for now" -- toast instead of full wizard on next visit
+    onboardingSource: v.optional(v.string()), // "X / Twitter", "Reddit / Hacker News", etc.
+    onboardingBuilding: v.optional(v.string()), // freeform: what user is building
     createdAt: v.number(),
     updatedAt: v.number(),
   })

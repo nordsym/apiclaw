@@ -15,7 +15,8 @@ import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
 import { SeeTheDifference } from "@/components/SeeTheDifference";
 import { InstallSection } from "@/components/InstallSection";
-import { ContributeCards } from "@/components/ContributeCards";
+
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 const stats = [
   { number: `${statsData.apiCount.toLocaleString()}+`, label: "Discoverable APIs", live: true },
@@ -889,11 +890,12 @@ Full docs: https://apiclaw.cloud/docs.`;
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {PLANS.map((plan) => {
+              const authPath = CLERK_ENABLED ? "/sign-up" : "/login";
               const href = plan.link === null
-                ? isLoggedIn ? "/workspace?tab=billing" : "/login"
+                ? isLoggedIn ? "/workspace?tab=billing" : authPath
                 : isLoggedIn
                 ? plan.link
-                : "/login";
+                : authPath;
 
               const ctaLabel = plan.id === "free"
                 ? isLoggedIn ? "Go to Workspace" : "Get Started"
@@ -1024,9 +1026,6 @@ Full docs: https://apiclaw.cloud/docs.`;
           </div>
         </div>
       </section>
-
-      {/* Contribute */}
-      <ContributeCards />
 
       {/* Footer */}
       <footer className="border-t border-border py-16 px-6 bg-surface/30">

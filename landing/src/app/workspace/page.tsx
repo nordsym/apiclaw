@@ -92,6 +92,7 @@ import {
 import { Toast, useToast } from "@/components/Toast";
 import { EarnCreditsTab } from "@/components/EarnCreditsTab";
 import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
 
@@ -208,8 +209,8 @@ function generatePreviewAnalytics(): ProviderAnalytics {
     topActions: [
       { actionName: "generate_image", calls: 1247 },
       { actionName: "search_web", calls: 892 },
-      { actionName: "send_sms", calls: 456 },
-      { actionName: "transcribe_audio", calls: 252 },
+      { actionName: "transcribe_audio", calls: 456 },
+      { actionName: "scrape_url", calls: 252 },
     ],
   };
 }
@@ -717,6 +718,8 @@ export default function WorkspacePage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      {/* First-login onboarding wizard. Self-gates on workspace state. */}
+      <OnboardingWizard sessionToken={sessionToken} />
       {/* Toast notification */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
@@ -6048,8 +6051,10 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
+                  if (typeof window !== "undefined") {
+                    import("posthog-js").then((m) => m.default.capture("team_feature_interest"));
+                  }
                   setNotifyClicked(true);
-                  setTimeout(() => setNotifyClicked(false), 3000);
                 }}
                 disabled={notifyClicked}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${

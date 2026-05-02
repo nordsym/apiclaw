@@ -37,7 +37,6 @@ export default function DocsPage() {
             <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Home</Link>
             <span className="hidden md:block text-[var(--accent)] font-medium text-sm md:text-base">Docs</span>
             <Link href="/providers/dashboard" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Providers</Link>
-            <Link href="/earn" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Earn</Link>
             <a 
               href="https://github.com/nordsym/apiclaw" 
               target="_blank"
