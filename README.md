@@ -1,6 +1,6 @@
 # APIClaw
 
-The API layer for AI agents. One key for everything.
+The API layer for AI agents.
 
 [![npm version](https://img.shields.io/npm/v/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
 [![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
@@ -16,7 +16,7 @@ The API layer for AI agents. One key for everything.
 curl -fsSL https://apiclaw.cloud/install.sh | bash
 ```
 
-Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agent. Register your email to unlock 50 calls/month.
+Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agent. Register your email to unlock 25 calls/month.
 
 ---
 
@@ -123,9 +123,6 @@ The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integra
 | Brave Search | Privacy-first web search | Search |
 | Serper | Google SERP results | Search |
 | Firecrawl | Web scraping and crawling | Scraping |
-| Twilio | SMS and voice calls (global) | Communication |
-| 46elks | SMS (Nordic/EU, GDPR) | Communication |
-| Resend | Transactional email | Email |
 | E2B | Code execution sandbox | Dev Tools |
 | GitHub | Repository and code access | Dev Tools |
 | APILayer | 27 APIs (finance, geo, scraping, news) | Multi-API |
@@ -141,18 +138,17 @@ The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integra
 | `call_api` | Execute through APIClaw proxy |
 | `list_connected` | See available managed providers |
 | `check_balance` | Usage and remaining calls |
-| `register_owner` | Register email, unlock 50 calls/month |
+| `register_owner` | Register email, unlock 25 calls/month |
 
 ## Pricing
 
 | Plan | Price | What you get |
 |------|-------|--------------|
-| Free | $0 forever | Discovery, open APIs, 50 calls/month |
-| Pro | $79/month | All managed providers, priority support |
-| Scale | $249/month | Volume pricing, dedicated onboarding, SLA |
-| Enterprise | Custom | Private deployment, custom limits, [book a call](https://apiclaw.cloud/book) |
+| Free | $0 forever | Discovery (always free), 25 managed calls/month |
+| Pay-as-you-go | Provider cost + 15% margin | All managed providers, no monthly fee, metered billing |
+| Enterprise | Custom | Private deployment, custom limits, SLA, [book a call](https://apiclaw.cloud/book) |
 
-Pass-through pricing on managed provider calls + 30% margin. No hidden fees.
+Pass-through pricing on managed provider calls + 15% margin. No hidden fees.
 
 ---
 
