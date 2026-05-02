@@ -5630,29 +5630,6 @@ const ROUTING_MODES = [
   { id: "advisor", label: "Smart Advisor", desc: "AI picks model per prompt (only when no model is set)" },
 ];
 
-// Curated frontier picks — surfaced first in the model picker. Anything not
-// in this list is still available via the searchable catalog (full
-// OpenRouter list, ~370+ models, fetched from /api/models).
-const FRONTIER_PICKS: string[] = [
-  "anthropic/claude-opus-4-6",
-  "anthropic/claude-sonnet-4-6",
-  "anthropic/claude-haiku-4-5",
-  "openai/gpt-5.4",
-  "openai/gpt-5",
-  "openai/gpt-4o",
-  "openai/o3",
-  "x-ai/grok-4",
-  "x-ai/grok-3",
-  "google/gemini-2.5-pro",
-  "google/gemini-2.5-flash",
-  "deepseek/deepseek-r1",
-  "deepseek/deepseek-v3",
-  "moonshotai/kimi-k2.6",
-  "qwen/qwen-2.5-72b-instruct",
-  "mistralai/mistral-large-latest",
-  "meta-llama/llama-3.3-70b-instruct",
-];
-
 interface CatalogModel {
   id: string;
   name: string;
@@ -5819,47 +5796,34 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
                     (m) => m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q)
                   )
                 : modelCatalog;
-              const frontierMatches = matches.filter((m) => FRONTIER_PICKS.includes(m.id));
-              const otherMatches = matches.filter((m) => !FRONTIER_PICKS.includes(m.id));
-              const ordered = [...frontierMatches, ...otherMatches].slice(0, 50);
+              const ordered = [...matches]
+                .sort((a, b) => a.id.localeCompare(b.id))
+                .slice(0, 50);
               return (
                 <div className="mt-1 max-h-64 overflow-y-auto rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-lg">
                   {ordered.length === 0 ? (
                     <div className="px-3 py-2 text-xs text-[var(--text-muted)]">
-                      No catalog match. The id you typed will still be sent through to the gateway (OpenRouter fallback).
+                      No catalog match. The id you typed will still be sent through to the gateway.
                     </div>
                   ) : (
-                    ordered.map((m) => {
-                      const isFrontier = FRONTIER_PICKS.includes(m.id);
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            setDefaultModel(m.id);
-                            setModelSearch(m.id);
-                            setModelPickerOpen(false);
-                          }}
-                          className="w-full text-left px-3 py-2 hover:bg-[var(--background)] border-b border-[var(--border)] last:border-b-0"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <p className="font-mono text-xs truncate">{m.id}</p>
-                              <p className="text-xs text-[var(--text-muted)] truncate">{m.name}</p>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0">
-                              {isFrontier && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#ef4444]/20 text-[#ef4444] font-medium">FRONTIER</span>
-                              )}
-                              {m.direct && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-500 font-medium">DIRECT</span>
-                              )}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })
+                    ordered.map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setDefaultModel(m.id);
+                          setModelSearch(m.id);
+                          setModelPickerOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-[var(--background)] border-b border-[var(--border)] last:border-b-0"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-mono text-xs truncate">{m.id}</p>
+                          <p className="text-xs text-[var(--text-muted)] truncate">{m.name}</p>
+                        </div>
+                      </button>
+                    ))
                   )}
                   {matches.length > 50 && (
                     <div className="px-3 py-2 text-xs text-[var(--text-muted)] border-t border-[var(--border)]">
@@ -5870,10 +5834,8 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
               );
             })()}
             <p className="text-xs text-[var(--text-muted)] mt-1">
-              Used when no model is specified in the request. Pick from the catalog or type any model id — unknown ids
-              fall through to the OpenRouter fallback. All paid calls add the standard 15% margin on top of provider
-              pricing. <span className="text-green-500 font-medium">DIRECT</span> = no OpenRouter hop (lower latency,
-              direct provider pricing); non-direct routes via OpenRouter.
+              Used when no model is specified in the request. Pick from the catalog or type any model id —
+              all paid calls add the standard 15% margin on top of provider pricing.
             </p>
           </div>
 

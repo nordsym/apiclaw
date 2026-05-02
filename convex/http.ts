@@ -480,7 +480,22 @@ const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: stri
   { pattern: /^llama-?3\.?3/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
   { pattern: /^llama-?3\.?1-?8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
   { pattern: /^qwen-?2\.?5/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
+  // Catch-all passthrough — runs LAST. Routes any provider-prefixed or
+  // canonically-named model to its direct provider with the user's exact id.
+  // Sentinel "__passthrough__" tells the router to strip the provider prefix
+  // and forward the rest verbatim to the provider's API. Lets latest models
+  // (claude-opus-4.7, gpt-5.5, grok-4.3, etc.) work the day they ship without
+  // updating MODEL_PROVIDER_MAP.
+  { pattern: /^(anthropic\/)?claude-/i, provider: "anthropic", nativeModel: "__passthrough__" },
+  { pattern: /^(openai\/)?(gpt-|o\d|chatgpt-)/i, provider: "openai", nativeModel: "__passthrough__" },
+  { pattern: /^(xai\/|x-ai\/)?grok-/i, provider: "xai", nativeModel: "__passthrough__" },
+  { pattern: /^(mistralai\/)?(mistral-|codestral|pixtral|magistral|ministral|open-)/i, provider: "mistral", nativeModel: "__passthrough__" },
 ];
+
+// Strip provider prefix from a model id for passthrough routing.
+function stripProviderPrefix(modelId: string): string {
+  return modelId.replace(/^(anthropic|openai|xai|x-ai|mistralai|google|meta-llama|qwen|deepseek|moonshotai|groq|together)\//i, "");
+}
 
 interface RoutingDecision {
   provider: string;
@@ -605,12 +620,18 @@ async function routeLLMRequest(
       continue;
     }
 
+    const resolvedModel = mapping.nativeModel === "__passthrough__"
+      ? stripProviderPrefix(requestedModel)
+      : mapping.nativeModel;
+
     return {
       provider: mapping.provider,
-      model: mapping.nativeModel,
+      model: resolvedModel,
       baseUrl: providerMeta.baseUrl,
       apiKey,
-      reason: `direct_${mapping.provider}`,
+      reason: mapping.nativeModel === "__passthrough__"
+        ? `direct_${mapping.provider}_passthrough`
+        : `direct_${mapping.provider}`,
     };
   }
 
@@ -1171,7 +1192,7 @@ http.route({
         providerId,
         ...provider,
         creditsPerDollar: getCreditsPerDollar(providerId),
-        documentation: `https://apiclaw.com/docs/${providerId}`,
+        documentation: `https://apiclaw.cloud/docs/${providerId}`,
       });
     } catch (e) {
       return jsonResponse({ error: "Invalid request" }, 400);
@@ -2655,10 +2676,10 @@ async function requireApiKeyAuth(
   return jsonResponse(
     {
       error: {
-        message: "Authentication required. Get a free key at https://apiclaw.com/signup or run `apiclaw login`.",
+        message: "Authentication required. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw login`.",
         type: "invalid_api_key",
         code: "invalid_api_key",
-        signupUrl: "https://apiclaw.com/signup",
+        signupUrl: "https://apiclaw.cloud/sign-up",
       },
     },
     401
@@ -4358,7 +4379,7 @@ http.route({
         const fetchInit: RequestInit = {
           method,
           headers: {
-            "User-Agent": "APIClaw/2.5 (+https://apiclaw.com)",
+            "User-Agent": "APIClaw/2.5 (+https://apiclaw.cloud)",
             Accept: "application/json, text/*, application/xml;q=0.9",
           },
           signal: AbortSignal.timeout(25000),
