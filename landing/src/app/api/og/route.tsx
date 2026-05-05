@@ -58,7 +58,7 @@ export async function GET() {
             fontSize: 26,
           }}
         >
-          <span>{statsData.apiCount.toLocaleString()}+ APIs</span>
+          <span>{statsData.apiCount.toLocaleString()}+ Indexed APIs</span>
           <span>•</span>
           <span>MCP, CLI, HTTP</span>
         </div>
