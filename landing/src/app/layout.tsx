@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/api/og?v=5",
+        url: "/api/og?v=6",
         width: 1200,
         height: 630,
         alt: "APIClaw - The API layer for AI agents",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "APIClaw | The API Layer for AI Agents",
     description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
-    images: ["/api/og?v=5"],
+    images: ["/api/og?v=6"],
     creator: "@nordsym",
   },
   keywords: ["API", "AI agents", "MCP", "Claude", "GPT", "autonomous agents", "API discovery", "developer tools"],

@@ -52,15 +52,18 @@ export async function GET() {
         <div
           style={{
             display: 'flex',
-            gap: 32,
-            marginTop: 40,
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 10,
+            marginTop: 36,
             color: '#ef4444',
             fontSize: 26,
+            lineHeight: 1.1,
           }}
         >
           <span>{statsData.apiCount.toLocaleString()}+ Indexed APIs</span>
-          <span>•</span>
-          <span>MCP, CLI, HTTP</span>
+          <span>{statsData.callableCount.toLocaleString()}+ Callable APIs</span>
+          <span style={{ marginTop: 6, color: '#c7c7c7', fontSize: 22 }}>MCP, CLI, HTTP</span>
         </div>
         <div
           style={{
