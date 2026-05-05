@@ -60,7 +60,7 @@ export async function GET() {
         >
           <span>{statsData.apiCount.toLocaleString()}+ APIs</span>
           <span>•</span>
-          <span>MCP Native</span>
+          <span>MCP, CLI, HTTP</span>
         </div>
         <div
           style={{
