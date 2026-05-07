@@ -6,6 +6,15 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  ShieldCheck,
+  ArrowRight,
+  AlertCircle,
+  Loader2,
+  Sparkles,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +41,17 @@ const SCOPE_DESCRIPTIONS: Record<string, string> = {
 
 export default function OAuthAuthorizePage() {
   return (
-    <Suspense fallback={<div style={shell}><div style={card}><p style={muted}>Loading authorization request...</p></div></div>}>
+    <Suspense fallback={<LoadingShell />}>
       <AuthorizeInner />
     </Suspense>
+  );
+}
+
+function LoadingShell() {
+  return (
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] flex items-center justify-center px-4">
+      <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+    </div>
   );
 }
 
@@ -53,14 +70,23 @@ function AuthorizeInner() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [client, setClient] = useState<ClientMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showFull, setShowFull] = useState(false);
 
   const errorRedirect = useMemo(() => {
     if (!redirectUri) return null;
     try {
-      const u = new URL(redirectUri);
-      return u;
+      return new URL(redirectUri);
     } catch {
       return null;
+    }
+  }, [redirectUri]);
+
+  const redirectHost = useMemo(() => {
+    if (!redirectUri) return "";
+    try {
+      return new URL(redirectUri).host;
+    } catch {
+      return redirectUri;
     }
   }, [redirectUri]);
 
@@ -156,251 +182,175 @@ function AuthorizeInner() {
   };
 
   return (
-    <div style={shell}>
-      <div style={card}>
-        <div style={brand}>
-          <span style={brandDot} />
-          <span style={brandText}>APIClaw</span>
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        {/* Brand row */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ef4444] to-[#b91c1c] flex items-center justify-center text-white font-bold text-sm">
+              A
+            </div>
+            <span className="font-semibold tracking-tight text-base">APIClaw</span>
+          </div>
         </div>
-        {phase === "loading" && <p style={muted}>Loading authorization request...</p>}
 
-        {phase === "error" && (
-          <>
-            <h1 style={h1}>Authorization error</h1>
-            <p style={errorBox}>{error || "Something went wrong."}</p>
-            <button style={btnSecondary} onClick={() => router.push("/workspace/integrations")}>
-              Back to dashboard
-            </button>
-          </>
-        )}
-
-        {(phase === "review" || phase === "authorizing" || phase === "redirecting") && client && (
-          <>
-            <h1 style={h1}>Authorize {client.name}</h1>
-            <p style={muted}>
-              {client.name} is requesting access to your APIClaw workspace.
-            </p>
-
-            <div style={panel}>
-              <div style={panelRow}>
-                <span style={panelLabel}>Client</span>
-                <span style={panelValue}>
-                  {client.name}
-                  {client.registrationKind === "dynamic" && (
-                    <span style={badgeDynamic}>Dynamic</span>
-                  )}
-                </span>
-              </div>
-              <div style={panelRow}>
-                <span style={panelLabel}>Client ID</span>
-                <code style={code}>{client.clientId}</code>
-              </div>
-              <div style={panelRow}>
-                <span style={panelLabel}>Redirect</span>
-                <code style={code}>{redirectUri}</code>
-              </div>
+        {/* Card */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-7 shadow-sm">
+          {phase === "loading" && (
+            <div className="py-10 flex flex-col items-center text-[var(--text-muted)]">
+              <Loader2 className="w-6 h-6 animate-spin mb-3 text-[#ef4444]" />
+              <p className="text-sm">Loading authorization request…</p>
             </div>
+          )}
 
-            <h2 style={h2}>This will let it</h2>
-            <ul style={scopeList}>
-              {requestedScope.split(/\s+/).filter(Boolean).map((s) => (
-                <li key={s} style={scopeItem}>
-                  <span style={scopeBullet}>{">"}</span>
-                  <span>
-                    <code style={inlineCode}>{s}</code> {SCOPE_DESCRIPTIONS[s] ?? "Access scope"}
+          {phase === "error" && (
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-3">
+                <AlertCircle className="w-6 h-6 text-rose-500" />
+              </div>
+              <h1 className="text-lg font-semibold mb-1">Authorization failed</h1>
+              <p className="text-sm text-[var(--text-muted)] mb-5">
+                {error || "Something went wrong."}
+              </p>
+              <button
+                onClick={() => router.push("/workspace/integrations")}
+                className="w-full rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] px-4 py-2.5 text-sm font-medium transition"
+              >
+                Back to dashboard
+              </button>
+            </div>
+          )}
+
+          {(phase === "review" || phase === "authorizing" || phase === "redirecting") && client && (
+            <>
+              <div className="text-center mb-5">
+                <div className="w-12 h-12 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-3">
+                  <ShieldCheck className="w-6 h-6 text-[#ef4444]" />
+                </div>
+                <h1 className="text-lg font-semibold">Authorize {client.name}?</h1>
+                <p className="text-sm text-[var(--text-muted)] mt-1">
+                  This will let it use APIClaw on your behalf.
+                </p>
+              </div>
+
+              {/* Client metadata strip */}
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] divide-y divide-[var(--border)] mb-4">
+                <div className="flex items-center justify-between px-3 py-2 text-xs">
+                  <span className="text-[var(--text-muted)]">Client</span>
+                  <span className="font-medium flex items-center gap-1.5">
+                    {client.name}
+                    {client.registrationKind === "dynamic" && (
+                      <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500 font-semibold">
+                        Dynamic
+                      </span>
+                    )}
                   </span>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <div className="flex items-center justify-between px-3 py-2 text-xs">
+                  <span className="text-[var(--text-muted)]">Redirect</span>
+                  <span className="font-mono text-[var(--text-secondary)] truncate ml-2 max-w-[60%]" title={redirectUri}>
+                    {redirectHost}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowFull((v) => !v)}
+                  className="w-full flex items-center justify-between px-3 py-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+                >
+                  <span>Technical details</span>
+                  {showFull ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+                {showFull && (
+                  <div className="px-3 py-2 text-[11px] font-mono space-y-1 bg-[var(--background)]">
+                    <div className="flex justify-between gap-2">
+                      <span className="text-[var(--text-muted)]">client_id</span>
+                      <span className="truncate text-[var(--text-secondary)]">{client.clientId}</span>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-[var(--text-muted)]">redirect_uri</span>
+                      <span className="truncate text-[var(--text-secondary)]">{redirectUri}</span>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-[var(--text-muted)]">scope</span>
+                      <span className="truncate text-[var(--text-secondary)]">{requestedScope}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            <p style={fineprint}>
-              You stay in control. Revoke at any time at{" "}
-              <a href="/workspace/integrations" style={link}>
-                Workspace → Integrations
-              </a>
-              .
-            </p>
+              {/* Scope list */}
+              <div className="mb-5">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                  This will let it
+                </p>
+                <ul className="space-y-2">
+                  {requestedScope.split(/\s+/).filter(Boolean).map((s) => (
+                    <li key={s} className="flex items-start gap-2.5 text-sm">
+                      <Sparkles className="w-3.5 h-3.5 text-[#ef4444] mt-1 flex-shrink-0" />
+                      <span className="text-[var(--text-secondary)]">
+                        <code className="text-[11px] font-mono bg-[var(--surface)] border border-[var(--border)] px-1 py-0.5 rounded mr-1.5">
+                          {s}
+                        </code>
+                        {SCOPE_DESCRIPTIONS[s] ?? "Access scope"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div style={btnRow}>
-              <button
-                style={btnSecondary}
-                onClick={onDeny}
-                disabled={phase !== "review"}
-              >
-                Deny
-              </button>
-              <button
-                style={btnPrimary}
-                onClick={onApprove}
-                disabled={phase !== "review"}
-              >
-                {phase === "authorizing" ? "Authorizing..." : phase === "redirecting" ? "Redirecting..." : "Authorize"}
-              </button>
-            </div>
-          </>
-        )}
+              <p className="text-[11px] text-[var(--text-muted)] mb-5">
+                You stay in control. Revoke any time at{" "}
+                <a href="/workspace/integrations" className="underline hover:text-[var(--text-primary)]">
+                  Workspace → Integrations
+                </a>
+                .
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={onDeny}
+                  disabled={phase !== "review"}
+                  className="flex-1 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] px-4 py-2.5 text-sm font-medium transition disabled:opacity-50"
+                >
+                  Deny
+                </button>
+                <button
+                  onClick={onApprove}
+                  disabled={phase !== "review"}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#ef4444] hover:bg-[#dc2626] active:bg-[#b91c1c] disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2.5 text-sm font-semibold shadow-sm transition"
+                >
+                  {phase === "authorizing" ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Authorizing…
+                    </>
+                  ) : phase === "redirecting" ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Redirecting…
+                    </>
+                  ) : (
+                    <>
+                      Authorize <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {error && (
+                <p className="mt-3 text-xs text-rose-500 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5" /> {error}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        <p className="mt-4 text-center text-[11px] text-[var(--text-muted)]">
+          Powered by{" "}
+          <a href="https://apiclaw.cloud" className="underline hover:text-[var(--text-primary)]">
+            APIClaw
+          </a>{" "}
+          — OAuth 2.1 + PKCE
+        </p>
       </div>
     </div>
   );
 }
-
-const shell: React.CSSProperties = {
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "#F0F4F8",
-  padding: "24px",
-  fontFamily: "Inter, system-ui, sans-serif",
-};
-
-const card: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 480,
-  background: "#fff",
-  border: "1px solid #E2E8F0",
-  borderRadius: 16,
-  padding: "32px",
-  boxShadow: "0 4px 24px rgba(15, 23, 42, 0.04)",
-};
-
-const brand: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  marginBottom: 24,
-};
-
-const brandDot: React.CSSProperties = {
-  width: 12,
-  height: 12,
-  borderRadius: 999,
-  background: "linear-gradient(135deg, #00D4FF, #9370DB)",
-};
-
-const brandText: React.CSSProperties = {
-  fontFamily: "Comfortaa, Inter, system-ui, sans-serif",
-  fontWeight: 700,
-  fontSize: 16,
-  letterSpacing: "0.02em",
-};
-
-const h1: React.CSSProperties = {
-  margin: "0 0 8px",
-  fontSize: 22,
-  fontWeight: 600,
-  color: "#0F172A",
-};
-
-const h2: React.CSSProperties = {
-  margin: "20px 0 8px",
-  fontSize: 13,
-  fontWeight: 600,
-  textTransform: "uppercase",
-  color: "#64748B",
-  letterSpacing: "0.08em",
-};
-
-const muted: React.CSSProperties = { color: "#475569", fontSize: 14, lineHeight: 1.5 };
-
-const panel: React.CSSProperties = {
-  marginTop: 20,
-  background: "#F8FAFC",
-  border: "1px solid #E2E8F0",
-  borderRadius: 12,
-  padding: 16,
-  display: "flex",
-  flexDirection: "column",
-  gap: 10,
-};
-
-const panelRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 12,
-  fontSize: 13,
-};
-
-const panelLabel: React.CSSProperties = { color: "#64748B", flex: "0 0 auto" };
-const panelValue: React.CSSProperties = {
-  color: "#0F172A",
-  textAlign: "right",
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-};
-const code: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #E2E8F0",
-  padding: "2px 8px",
-  borderRadius: 6,
-  fontSize: 12,
-  fontFamily: "ui-monospace, SFMono-Regular, monospace",
-  color: "#334155",
-  maxWidth: 240,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
-const inlineCode: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, monospace",
-  background: "#F1F5F9",
-  padding: "1px 6px",
-  borderRadius: 4,
-  fontSize: 12,
-  marginRight: 4,
-};
-
-const badgeDynamic: React.CSSProperties = {
-  marginLeft: 8,
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: "0.06em",
-  textTransform: "uppercase",
-  color: "#0E7490",
-  background: "#CFFAFE",
-  padding: "2px 6px",
-  borderRadius: 4,
-};
-
-const scopeList: React.CSSProperties = { margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 };
-const scopeItem: React.CSSProperties = { display: "flex", gap: 8, fontSize: 13, color: "#1E293B", lineHeight: 1.5 };
-const scopeBullet: React.CSSProperties = { color: "#9370DB", fontWeight: 700 };
-
-const fineprint: React.CSSProperties = { fontSize: 12, color: "#64748B", marginTop: 16 };
-const link: React.CSSProperties = { color: "#0E7490", textDecoration: "underline" };
-
-const btnRow: React.CSSProperties = { display: "flex", gap: 12, marginTop: 24 };
-const btnPrimary: React.CSSProperties = {
-  flex: 1,
-  background: "#0F172A",
-  color: "#fff",
-  border: 0,
-  padding: "12px 16px",
-  borderRadius: 10,
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-const btnSecondary: React.CSSProperties = {
-  flex: 1,
-  background: "#fff",
-  color: "#0F172A",
-  border: "1px solid #CBD5E1",
-  padding: "12px 16px",
-  borderRadius: 10,
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-const errorBox: React.CSSProperties = {
-  margin: "12px 0",
-  padding: 12,
-  borderRadius: 8,
-  background: "#FEF2F2",
-  border: "1px solid #FECACA",
-  color: "#991B1B",
-  fontSize: 13,
-};

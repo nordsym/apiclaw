@@ -72,6 +72,19 @@ Done. Grok now has `discover_apis`, `call_api`, `get_api_details`, `list_categor
 
 Need pre-shared credentials instead of OAuth? Open [Workspace → Integrations](https://apiclaw.cloud/workspace/integrations), click **Generate connector**, copy the Client ID and Secret.
 
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+
+| Symptom | Fix |
+|---------|-----|
+| Grok doesn't auto-find APIClaw in connector search | Add it manually as a custom MCP server with URL `https://apiclaw.cloud/mcp`. We're rolling into the public catalogs in the next sweep. |
+| Grok shows "Connected" but says it has no access when you ask it to use APIClaw | Start a fresh Grok chat — old chats keep their tool-call cache and don't pick up newly added connectors. |
+| 401 loop after authorize | Your access token expired or was revoked. Open [Workspace → Integrations](https://apiclaw.cloud/workspace/integrations), revoke the connector, and re-add it in the client. |
+| `client_bound_to_other_workspace` | A dynamic client is bound to the first workspace that approved consent. Sign in with the same email or use [Generate connector](https://apiclaw.cloud/workspace/integrations) to create a fresh one for the new workspace. |
+| Consent screen redirects but client says "denied" | The browser blocked the redirect or you closed the tab early. Click "Authorize" again — auth codes are single-use but expire after 10 minutes so you can retry. |
+
+</details>
+
 ### 4. CLI
 
 Humans in the terminal, scripts, CI. Ships with `@nordsym/apiclaw`:

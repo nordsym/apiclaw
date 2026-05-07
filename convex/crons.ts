@@ -62,4 +62,12 @@ crons.daily(
   { maxSends: 12 }
 );
 
+// MCP OAuth garbage collection — daily at 04:15 UTC. Drops expired auth
+// codes and revoked/expired access+refresh tokens older than 30 days.
+crons.daily(
+  "mcp-oauth-sweep",
+  { hourUTC: 4, minuteUTC: 15 },
+  internal.mcpOAuth.sweepExpired
+);
+
 export default crons;

@@ -6,7 +6,7 @@
 // can auto-discover the auth server and run the OAuth flow without manual
 // configuration.
 import { NextRequest, NextResponse } from "next/server";
-import { CONVEX_BASE_URL, convexQuery } from "@/lib/convex";
+import { CONVEX_BASE_URL, convexQuery, convexMutation } from "@/lib/convex";
 
 export const runtime = "nodejs";
 
@@ -180,6 +180,24 @@ async function callConvexHttp(
   return parsed;
 }
 
+function logToolCallFireAndForget(
+  ctx: WorkspaceContext,
+  tool: string,
+  durationMs: number,
+  success: boolean,
+  errorCode?: string
+) {
+  // Don't await — keeps the tool-call latency unaffected.
+  convexMutation("mcpOAuth:logToolCall", {
+    workspaceId: ctx.workspaceId,
+    clientId: ctx.clientId,
+    tool,
+    durationMs,
+    success,
+    errorCode,
+  }).catch(() => {});
+}
+
 async function dispatchTool(name: string, args: Record<string, unknown>, ctx: WorkspaceContext): Promise<unknown> {
   switch (name) {
     case "discover_apis": {
@@ -248,12 +266,15 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
     const p = (params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
     const toolName = typeof p.name === "string" ? p.name : "";
     if (!toolName) return jsonRpcError(id, -32602, "tool name required");
+    const t0 = Date.now();
     try {
       const result = await dispatchTool(toolName, p.arguments ?? {}, ctx);
+      logToolCallFireAndForget(ctx, toolName, Date.now() - t0, true);
       return jsonRpcResult(id, {
         content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
       });
     } catch (e) {
+      logToolCallFireAndForget(ctx, toolName, Date.now() - t0, false, e instanceof Error ? e.message : "unknown");
       return jsonRpcResult(id, {
         isError: true,
         content: [{ type: "text", text: e instanceof Error ? e.message : "Tool execution failed." }],

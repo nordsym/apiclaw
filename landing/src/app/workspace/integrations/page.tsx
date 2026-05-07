@@ -1,11 +1,22 @@
 // /workspace/integrations — Generate & manage remote MCP connectors.
-// Provides one-click "Connect to Grok / Cursor / ChatGPT" buttons that mint
-// a workspace-bound OAuth client. Reaches Convex directly the same way the
-// other workspace pages do (session token from localStorage).
+// Styled with the APIClaw design tokens (light + dark mode aware) so it
+// blends with /workspace.
 "use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowLeft,
+  Layers,
+  Plus,
+  Copy,
+  Check,
+  Trash2,
+  ExternalLink,
+  AlertCircle,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -21,33 +32,52 @@ type Connector = {
   lastUsedAt: number | null;
 };
 
-type Preset = { key: string; label: string; description: string; redirectUris: string[] };
+type Preset = {
+  key: string;
+  label: string;
+  blurb: string;
+  icon: string;
+  redirectUris: string[];
+  guide?: { steps: string[]; note?: string };
+};
 
-// xAI publishes the canonical Grok callback in its docs; Cursor/Claude/ChatGPT
-// use deep-link or localhost callbacks. These are seeds — users can edit.
+// xAI publishes the canonical Grok callback in its docs; Cursor / Claude /
+// ChatGPT use deep-link or localhost. These are seeds — users can edit.
 const PRESETS: Preset[] = [
   {
     key: "grok",
     label: "Grok (xAI)",
-    description: "xAI's Grok with remote MCP connector support.",
-    redirectUris: ["https://grok.com/oauth/callback"],
+    blurb: "xAI's Grok with remote MCP connector support.",
+    icon: "G",
+    redirectUris: ["https://grok.com/connectors-oauth/callback"],
+    guide: {
+      steps: [
+        "Open Grok → Settings → Connectors → New connection.",
+        "Paste the MCP URL and click Add custom connector.",
+        "Approve on the APIClaw consent screen — you're done.",
+      ],
+      note: "Tip: paste-then-OAuth is the lowest-friction path. Most users finish under 30s.",
+    },
   },
   {
     key: "cursor",
     label: "Cursor",
-    description: "Cursor's MCP integration via custom URI.",
+    blurb: "Cursor's MCP integration via custom URI scheme.",
+    icon: "C",
     redirectUris: ["cursor://oauth/callback"],
   },
   {
     key: "chatgpt",
     label: "ChatGPT",
-    description: "OpenAI's ChatGPT custom GPT with MCP.",
+    blurb: "OpenAI's ChatGPT custom GPT with MCP.",
+    icon: "O",
     redirectUris: ["https://chat.openai.com/connector_callback"],
   },
   {
     key: "custom",
     label: "Custom",
-    description: "Any OAuth-capable MCP client.",
+    blurb: "Any OAuth-capable MCP client.",
+    icon: "+",
     redirectUris: [""],
   },
 ];
@@ -89,16 +119,22 @@ export default function IntegrationsPage() {
   const [preset, setPreset] = useState<string>("grok");
   const [customName, setCustomName] = useState("");
   const [redirectInput, setRedirectInput] = useState<string>("");
-  const [issued, setIssued] = useState<{ name: string; clientId: string; clientSecret: string; redirectUris: string[] } | null>(null);
+  const [issued, setIssued] = useState<{
+    name: string;
+    clientId: string;
+    clientSecret: string;
+    redirectUris: string[];
+  } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const sessionToken = useMemo(() => getSessionToken(), []);
-
   const selected = PRESETS.find((p) => p.key === preset) ?? PRESETS[0];
 
   useEffect(() => {
     setRedirectInput(selected.redirectUris.join("\n"));
     if (selected.key !== "custom") setCustomName(selected.label);
+    else setCustomName("");
   }, [preset, selected]);
 
   const refresh = async () => {
@@ -176,310 +212,315 @@ export default function IntegrationsPage() {
     }
   };
 
-  const copy = (text: string) => {
+  const copy = (text: string, field: string) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(text).catch(() => {});
+      setCopiedField(field);
+      setTimeout(() => setCopiedField((cur) => (cur === field ? null : cur)), 1500);
     }
   };
 
   return (
-    <div style={shell}>
-      <header style={header}>
-        <Link href="/workspace" style={backLink}>← Back to workspace</Link>
-        <h1 style={pageTitle}>Integrations</h1>
-        <p style={pageSub}>
-          Connect APIClaw to remote MCP-aware clients. One workspace, one Bearer
-          token, every door.
-        </p>
-      </header>
-
-      <section style={panel}>
-        <h2 style={h2}>Generate a connector</h2>
-        <p style={muted}>
-          Pick a preset, click <strong>Generate</strong>, paste the credentials
-          into your client. Auto-routed via OAuth on first use.
-        </p>
-
-        <div style={presetRow}>
-          {PRESETS.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => setPreset(p.key)}
-              style={p.key === preset ? presetBtnActive : presetBtn}
-            >
-              {p.label}
-            </button>
-          ))}
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            href="/workspace"
+            className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to workspace
+          </Link>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Integrations</h1>
+              <p className="text-sm text-[var(--text-muted)]">
+                Connect APIClaw to remote MCP-aware clients. One workspace, every door.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div style={field}>
-          <label style={label}>Display name</label>
-          <input
-            style={input}
-            value={customName}
-            onChange={(e) => setCustomName(e.target.value)}
-            placeholder={selected.label}
-          />
+        {/* Quick install banner */}
+        <div className="mb-6 rounded-xl border border-[var(--border)] bg-gradient-to-br from-[#ef4444]/5 via-transparent to-transparent p-5">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-[#ef4444] mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold">
+                The fastest path: paste the MCP URL into your client.
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Most modern MCP clients (Grok, Cursor, ChatGPT, Claude Desktop) auto-discover
+                APIClaw via OAuth — no Client ID/Secret needed. Use Generate connector below
+                only if your client requires pre-shared credentials.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-mono">
+                <span>https://apiclaw.cloud/mcp</span>
+                <button
+                  onClick={() => copy("https://apiclaw.cloud/mcp", "banner-url")}
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+                  title="Copy"
+                >
+                  {copiedField === "banner-url" ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div style={field}>
-          <label style={label}>Redirect URIs (one per line)</label>
-          <textarea
-            style={{ ...input, minHeight: 84, fontFamily: "ui-monospace, monospace" }}
-            value={redirectInput}
-            onChange={(e) => setRedirectInput(e.target.value)}
-            placeholder="https://your-client.com/oauth/callback"
-          />
-          <p style={hint}>
-            HTTPS only, except for <code>http://localhost</code> during development.
+        {/* Generate connector card */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 mb-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-base font-semibold">Generate a connector</h2>
+            <span className="text-xs text-[var(--text-muted)]">For clients that need pre-shared credentials</span>
+          </div>
+          <p className="text-xs text-[var(--text-muted)] mb-5">
+            Pick a preset, click <span className="text-[var(--text-primary)] font-medium">Generate</span>,
+            paste the credentials into your client. OAuth handles the rest on first use.
           </p>
-        </div>
 
-        <button onClick={onGenerate} disabled={busy} style={btnPrimary}>
-          {busy ? "Generating..." : `Generate ${selected.label} connector`}
-        </button>
-        {error && <p style={errBox}>{error}</p>}
-      </section>
-
-      {issued && (
-        <section style={{ ...panel, borderColor: "#22D3EE" }}>
-          <h2 style={h2}>Your connector — copy it now</h2>
-          <p style={muted}>
-            The client secret is shown <strong>only this once</strong>. We do
-            not store it in plaintext.
-          </p>
-          <div style={kvRow}>
-            <span style={kvLabel}>Client ID</span>
-            <div style={kvValue}>
-              <code style={mono}>{issued.clientId}</code>
-              <button style={miniBtn} onClick={() => copy(issued.clientId)}>Copy</button>
-            </div>
-          </div>
-          <div style={kvRow}>
-            <span style={kvLabel}>Client Secret</span>
-            <div style={kvValue}>
-              <code style={mono}>{issued.clientSecret}</code>
-              <button style={miniBtn} onClick={() => copy(issued.clientSecret)}>Copy</button>
-            </div>
-          </div>
-          <div style={kvRow}>
-            <span style={kvLabel}>MCP URL</span>
-            <div style={kvValue}>
-              <code style={mono}>https://apiclaw.cloud/mcp</code>
-              <button style={miniBtn} onClick={() => copy("https://apiclaw.cloud/mcp")}>Copy</button>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+            {PRESETS.map((p) => {
+              const active = p.key === preset;
+              return (
+                <button
+                  key={p.key}
+                  onClick={() => setPreset(p.key)}
+                  className={`group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition text-left ${
+                    active
+                      ? "border-[#ef4444] bg-[#ef4444]/5"
+                      : "border-[var(--border)] hover:border-[var(--text-muted)] bg-[var(--surface)]"
+                  }`}
+                >
+                  <span
+                    className={`w-7 h-7 rounded-md flex items-center justify-center font-semibold text-xs ${
+                      active
+                        ? "bg-[#ef4444] text-white"
+                        : "bg-[var(--background)] text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    {p.icon}
+                  </span>
+                  <span className={`font-medium ${active ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
+                    {p.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {issued.name.toLowerCase().includes("grok") && (
-            <details style={instructions}>
-              <summary>How to add this to Grok</summary>
-              <ol style={ol}>
-                <li>Open Grok → <strong>Settings → Connectors</strong>.</li>
-                <li>Click <strong>Add custom connector</strong>.</li>
-                <li>Paste MCP URL: <code>https://apiclaw.cloud/mcp</code></li>
-                <li>Paste the Client ID and Client Secret above.</li>
-                <li>
-                  Grok will redirect you to APIClaw — sign in with the same email,
-                  approve, and you're connected.
-                </li>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
+                Display name
+              </label>
+              <input
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder={selected.label}
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm focus:outline-none focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444]/20 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
+                Redirect URIs <span className="text-[var(--text-muted)] font-normal">(one per line)</span>
+              </label>
+              <textarea
+                value={redirectInput}
+                onChange={(e) => setRedirectInput(e.target.value)}
+                placeholder="https://your-client.com/oauth/callback"
+                rows={3}
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444]/20 transition"
+              />
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                HTTPS only, except <code className="font-mono">http://localhost</code> for dev.
+              </p>
+            </div>
+          </div>
+
+          {selected.guide && (
+            <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+              <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
+                How to add this in {selected.label}
+              </p>
+              <ol className="space-y-1.5 text-sm">
+                {selected.guide.steps.map((step, i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--background)] border border-[var(--border)] text-[var(--text-muted)] text-xs flex items-center justify-center font-mono mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-[var(--text-secondary)]">{step}</span>
+                  </li>
+                ))}
               </ol>
-            </details>
+              {selected.guide.note && (
+                <p className="mt-3 text-xs text-[var(--text-muted)] italic">{selected.guide.note}</p>
+              )}
+            </div>
           )}
 
-          <button style={btnSecondary} onClick={() => setIssued(null)}>I've saved it</button>
-        </section>
-      )}
-
-      <section style={panel}>
-        <h2 style={h2}>Active connectors</h2>
-        {loading && <p style={muted}>Loading...</p>}
-        {!loading && connectors.length === 0 && (
-          <p style={muted}>No connectors yet. Generate one above to get started.</p>
-        )}
-        {connectors.map((c) => (
-          <div key={c.clientId} style={connectorRow}>
-            <div>
-              <div style={connectorName}>
-                {c.name}
-                <span style={c.registrationKind === "dynamic" ? badgeDynamic : badgeDashboard}>
-                  {c.registrationKind === "dynamic" ? "DCR" : "Dashboard"}
-                </span>
-              </div>
-              <div style={connectorMeta}>
-                <code style={miniMono}>{c.clientId}</code>
-                <span> · created {new Date(c.createdAt).toLocaleDateString()}</span>
-                {c.lastUsedAt && <span> · last used {new Date(c.lastUsedAt).toLocaleDateString()}</span>}
-              </div>
-              <div style={connectorMeta}>
-                {c.redirectUris.map((r) => (
-                  <code key={r} style={miniMono}>{r}</code>
-                ))}
-              </div>
-            </div>
-            <button style={btnDanger} onClick={() => onRevoke(c.clientId)}>Revoke</button>
+          <div className="mt-5 flex items-center gap-3">
+            <button
+              onClick={onGenerate}
+              disabled={busy}
+              className="inline-flex items-center gap-2 rounded-md bg-[#ef4444] hover:bg-[#dc2626] active:bg-[#b91c1c] text-white px-4 py-2 text-sm font-semibold shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {busy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Generating…
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" /> Generate {selected.label} connector
+                </>
+              )}
+            </button>
+            {error && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-rose-500">
+                <AlertCircle className="w-3.5 h-3.5" /> {error}
+              </span>
+            )}
           </div>
-        ))}
-      </section>
+        </div>
+
+        {/* Issued credentials card */}
+        {issued && (
+          <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-6 mb-6">
+            <div className="flex items-center gap-2 mb-1">
+              <Check className="w-4 h-4 text-emerald-500" />
+              <h2 className="text-base font-semibold">Connector ready — copy these now</h2>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mb-4">
+              The client secret is shown <span className="font-semibold text-[var(--text-secondary)]">only this once</span>.
+              We do not store it in plaintext.
+            </p>
+            <div className="space-y-3">
+              {[
+                { label: "Client ID", value: issued.clientId, field: "client-id" },
+                { label: "Client Secret", value: issued.clientSecret, field: "client-secret" },
+                { label: "MCP URL", value: "https://apiclaw.cloud/mcp", field: "mcp-url" },
+              ].map((row) => (
+                <div
+                  key={row.field}
+                  className="flex items-center justify-between gap-3 rounded-md border border-[var(--border)] bg-[var(--surface-elevated)] px-3 py-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-medium">
+                      {row.label}
+                    </p>
+                    <p className="text-xs font-mono truncate text-[var(--text-primary)]">{row.value}</p>
+                  </div>
+                  <button
+                    onClick={() => copy(row.value, row.field)}
+                    className="flex-shrink-0 inline-flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--surface)] px-2 py-1 text-xs font-medium transition"
+                  >
+                    {copiedField === row.field ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-500" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" /> Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setIssued(null)}
+              className="mt-4 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
+            >
+              I've saved it — dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Active connectors */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold">Active connectors</h2>
+            <span className="text-xs text-[var(--text-muted)]">
+              {loading ? "Loading…" : `${connectors.length} active`}
+            </span>
+          </div>
+
+          {loading && (
+            <div className="text-center py-8 text-[var(--text-muted)] text-sm">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Loading connectors…
+            </div>
+          )}
+
+          {!loading && connectors.length === 0 && (
+            <div className="rounded-lg border border-dashed border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+              <Layers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2" />
+              <p className="text-sm text-[var(--text-secondary)] mb-1">No connectors yet.</p>
+              <p className="text-xs text-[var(--text-muted)]">
+                Either paste <code className="font-mono">https://apiclaw.cloud/mcp</code> into your
+                client (auto OAuth) or generate one above.
+              </p>
+            </div>
+          )}
+
+          <div className="divide-y divide-[var(--border)]">
+            {connectors.map((c) => (
+              <div key={c.clientId} className="py-3 first:pt-0 last:pb-0 flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium truncate">{c.name}</span>
+                    <span
+                      className={`text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded ${
+                        c.registrationKind === "dynamic"
+                          ? "bg-cyan-500/10 text-cyan-500"
+                          : "bg-blue-500/10 text-blue-500"
+                      }`}
+                    >
+                      {c.registrationKind === "dynamic" ? "DCR" : "Dashboard"}
+                    </span>
+                  </div>
+                  <p className="text-xs font-mono text-[var(--text-muted)] truncate">{c.clientId}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {c.redirectUris.map((r) => (
+                      <code
+                        key={r}
+                        className="text-[11px] font-mono bg-[var(--surface)] border border-[var(--border)] px-1.5 py-0.5 rounded text-[var(--text-secondary)] truncate max-w-xs"
+                      >
+                        {r}
+                      </code>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-[var(--text-muted)] mt-1.5">
+                    Created {new Date(c.createdAt).toLocaleDateString()}
+                    {c.lastUsedAt && ` · Last used ${new Date(c.lastUsedAt).toLocaleDateString()}`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onRevoke(c.clientId)}
+                  className="flex-shrink-0 inline-flex items-center gap-1 rounded border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-500 px-2.5 py-1.5 text-xs font-medium transition"
+                >
+                  <Trash2 className="w-3 h-3" /> Revoke
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer help */}
+        <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
+          Need help?{" "}
+          <Link href="/docs" className="underline hover:text-[var(--text-primary)] inline-flex items-center gap-1">
+            See the integrations guide <ExternalLink className="w-3 h-3" />
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
-
-const shell: React.CSSProperties = {
-  maxWidth: 880,
-  margin: "0 auto",
-  padding: "32px 24px 80px",
-  fontFamily: "Inter, system-ui, sans-serif",
-  color: "#0F172A",
-};
-const header: React.CSSProperties = { marginBottom: 24 };
-const backLink: React.CSSProperties = { color: "#0E7490", fontSize: 13, textDecoration: "none" };
-const pageTitle: React.CSSProperties = { fontSize: 28, fontWeight: 700, margin: "8px 0 4px" };
-const pageSub: React.CSSProperties = { color: "#64748B", fontSize: 14, lineHeight: 1.5 };
-const panel: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #E2E8F0",
-  borderRadius: 14,
-  padding: 24,
-  marginBottom: 16,
-};
-const h2: React.CSSProperties = { margin: "0 0 8px", fontSize: 18, fontWeight: 600 };
-const muted: React.CSSProperties = { color: "#475569", fontSize: 13.5, lineHeight: 1.5, margin: "0 0 16px" };
-const presetRow: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 };
-const presetBtn: React.CSSProperties = {
-  padding: "8px 14px",
-  border: "1px solid #CBD5E1",
-  borderRadius: 999,
-  background: "#fff",
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: "pointer",
-};
-const presetBtnActive: React.CSSProperties = {
-  ...presetBtn,
-  background: "#0F172A",
-  color: "#fff",
-  border: "1px solid #0F172A",
-};
-const field: React.CSSProperties = { marginBottom: 14, display: "flex", flexDirection: "column", gap: 4 };
-const label: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: "#475569" };
-const input: React.CSSProperties = {
-  border: "1px solid #CBD5E1",
-  borderRadius: 8,
-  padding: "9px 12px",
-  fontSize: 13,
-  background: "#fff",
-  color: "#0F172A",
-  fontFamily: "inherit",
-};
-const hint: React.CSSProperties = { fontSize: 11, color: "#94A3B8", margin: 0 };
-const btnPrimary: React.CSSProperties = {
-  background: "#0F172A",
-  color: "#fff",
-  border: 0,
-  padding: "11px 18px",
-  borderRadius: 10,
-  fontSize: 14,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-const btnSecondary: React.CSSProperties = {
-  marginTop: 12,
-  background: "#fff",
-  border: "1px solid #CBD5E1",
-  padding: "9px 14px",
-  borderRadius: 8,
-  fontSize: 13,
-  fontWeight: 500,
-  cursor: "pointer",
-};
-const btnDanger: React.CSSProperties = {
-  background: "#FEF2F2",
-  border: "1px solid #FECACA",
-  color: "#991B1B",
-  padding: "8px 12px",
-  borderRadius: 8,
-  fontSize: 12,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-const errBox: React.CSSProperties = {
-  marginTop: 12,
-  padding: 10,
-  background: "#FEF2F2",
-  border: "1px solid #FECACA",
-  color: "#991B1B",
-  fontSize: 12.5,
-  borderRadius: 8,
-};
-const kvRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 12,
-  padding: "10px 0",
-  borderBottom: "1px solid #F1F5F9",
-};
-const kvLabel: React.CSSProperties = { color: "#64748B", fontSize: 12, fontWeight: 600 };
-const kvValue: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, flex: 1, justifyContent: "flex-end" };
-const mono: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, monospace",
-  fontSize: 12,
-  background: "#F8FAFC",
-  border: "1px solid #E2E8F0",
-  padding: "4px 8px",
-  borderRadius: 6,
-  maxWidth: 360,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
-const miniBtn: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #CBD5E1",
-  padding: "4px 8px",
-  borderRadius: 6,
-  fontSize: 11,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-const instructions: React.CSSProperties = {
-  marginTop: 14,
-  padding: 12,
-  background: "#F8FAFC",
-  border: "1px solid #E2E8F0",
-  borderRadius: 8,
-  fontSize: 13,
-};
-const ol: React.CSSProperties = { margin: "8px 0 0 20px", padding: 0, lineHeight: 1.6 };
-const connectorRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 16,
-  padding: "12px 0",
-  borderBottom: "1px solid #F1F5F9",
-};
-const connectorName: React.CSSProperties = { fontSize: 14, fontWeight: 600, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 };
-const connectorMeta: React.CSSProperties = { fontSize: 12, color: "#64748B", display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 };
-const miniMono: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, monospace",
-  fontSize: 11,
-  background: "#F8FAFC",
-  padding: "1px 6px",
-  borderRadius: 4,
-  border: "1px solid #E2E8F0",
-};
-const badgeDashboard: React.CSSProperties = {
-  fontSize: 9,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  color: "#1D4ED8",
-  background: "#DBEAFE",
-  padding: "2px 6px",
-  borderRadius: 4,
-};
-const badgeDynamic: React.CSSProperties = {
-  ...badgeDashboard,
-  color: "#0E7490",
-  background: "#CFFAFE",
-};

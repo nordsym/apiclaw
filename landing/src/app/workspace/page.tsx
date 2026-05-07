@@ -655,6 +655,7 @@ export default function WorkspacePage() {
   // Secondary navigation tabs
   const secondaryTabs = [
     { id: "earn" as TabType, label: "Earn Credits", icon: Crown },
+    { id: "integrations" as TabType, label: "Integrations", icon: Layers, href: "/workspace/integrations" },
     { id: "docs" as TabType, label: "Docs", icon: BookOpen },
     { id: "feedback" as TabType, label: "Feedback", icon: MessageSquare },
   ];
@@ -925,24 +926,31 @@ export default function WorkspacePage() {
             <div className="border-t border-[var(--border)] my-3" />
 
             {/* Secondary tabs */}
-            {secondaryTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setSidebarOpen(false);
-                  router.push(`/workspace?tab=${tab.id}`);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                  activeTab === tab.id
-                    ? "bg-[#ef4444] text-white"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <tab.icon className="w-5 h-5" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {secondaryTabs.map((tab) => {
+              const isExternal = "href" in tab && typeof tab.href === "string";
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setSidebarOpen(false);
+                    if (isExternal) {
+                      router.push(tab.href as string);
+                      return;
+                    }
+                    setActiveTab(tab.id);
+                    router.push(`/workspace?tab=${tab.id}`);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+                    !isExternal && activeTab === tab.id
+                      ? "bg-[#ef4444] text-white"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
 
             {/* Separator */}
             <div className="border-t border-[var(--border)] my-3" />

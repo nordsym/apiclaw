@@ -16,8 +16,7 @@
  * the workspaceApiKeys table uses (apiKeys.ts).
  */
 import { v } from "convex/values";
-import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { mutation, query, internalMutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
 // ============================================
@@ -585,5 +584,75 @@ export const revokeToken = mutation({
       await ctx.db.patch(row._id, { revokedAt: Date.now() });
     }
     return { ok: true };
+  },
+});
+
+// ============================================
+// TOOL-CALL ANALYTICS
+// ============================================
+// Fire-and-forget logger called by /mcp on every tools/call. Uses the
+// generic analytics table so existing dashboards pick this up without
+// schema changes.
+
+export const logToolCall = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    clientId: v.string(),
+    tool: v.string(),
+    durationMs: v.number(),
+    success: v.boolean(),
+    errorCode: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("analytics", {
+      event: "mcp_tool_call",
+      provider: undefined,
+      identifier: args.clientId,
+      workspaceId: args.workspaceId,
+      metadata: {
+        tool: args.tool,
+        durationMs: args.durationMs,
+        success: args.success,
+        errorCode: args.errorCode ?? null,
+      },
+      timestamp: Date.now(),
+    });
+  },
+});
+
+// ============================================
+// CLEANUP CRON (called from convex/crons.ts)
+// ============================================
+// Deletes expired access codes + revoked-or-expired tokens older than
+// 30 days. Keeps the table light without losing audit history for active
+// workspaces.
+
+export const sweepExpired = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    let codesDeleted = 0;
+    const codes = await ctx.db.query("mcpOAuthAuthCodes").collect();
+    for (const c of codes) {
+      if (c.expiresAt < now || (c.consumedAt && c.consumedAt < thirtyDaysAgo)) {
+        await ctx.db.delete(c._id);
+        codesDeleted++;
+      }
+    }
+
+    let tokensDeleted = 0;
+    const tokens = await ctx.db.query("mcpOAuthTokens").collect();
+    for (const t of tokens) {
+      const expired = t.expiresAt < now;
+      const longRevoked = t.revokedAt && t.revokedAt < thirtyDaysAgo;
+      if ((expired && t.expiresAt < thirtyDaysAgo) || longRevoked) {
+        await ctx.db.delete(t._id);
+        tokensDeleted++;
+      }
+    }
+
+    return { codesDeleted, tokensDeleted };
   },
 });
