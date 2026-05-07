@@ -4,23 +4,26 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, ArrowRight, Sun, Moon, ChevronLeft } from "lucide-react";
 
-const ALL_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"];
-
-function getTakenSlots(dateStr: string): string[] {
-  let seed = 0;
-  for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
-  const shuffled = [...ALL_SLOTS];
-  let rng = seed;
-  for (let j = shuffled.length - 1; j > 0; j--) {
-    rng = (rng * 1664525 + 1013904223) & 0xffffffff;
-    const k = Math.abs(rng) % (j + 1);
-    [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
-  }
-  return shuffled.slice(0, 3);
-}
+const ALL_SLOTS = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
 function formatDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function isSameLocalDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function pastSlotsForDate(d: Date): Set<string> {
+  const now = new Date();
+  if (!isSameLocalDay(d, now)) return new Set();
+  const cutoff = now.getHours() * 60 + now.getMinutes() + 30;
+  return new Set(
+    ALL_SLOTS.filter(s => {
+      const [h, m] = s.split(":").map(Number);
+      return h * 60 + m < cutoff;
+    })
+  );
 }
 
 function BookForm() {
@@ -89,13 +92,14 @@ function BookForm() {
     setCalYear(y);
   };
 
-  const taken = selectedDate ? getTakenSlots(formatDate(selectedDate)) : [];
+  // Past-time slots for today; the n8n backend is the source of truth for real conflicts and returns 409 if a slot is actually booked.
+  const taken = selectedDate ? pastSlotsForDate(selectedDate) : new Set<string>();
 
   const handleSubmit = async () => {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
     try {
-      const res = await fetch("/api/book", {
+      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/aeo-booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -111,6 +115,7 @@ function BookForm() {
           meetingTitle: `APIClaw Enterprise${company ? ` — ${company}` : ""}`,
           hostName: "Molle",
           hostEmail: "molle@nordsym.com",
+          timestamp: new Date().toISOString(),
         }),
       });
       if (!res.ok) throw new Error();
@@ -246,7 +251,7 @@ function BookForm() {
                 </p>
                 <div className="grid grid-cols-4 gap-2">
                   {ALL_SLOTS.map(slot => {
-                    const isTaken = taken.includes(slot);
+                    const isTaken = taken.has(slot);
                     const isSel = selectedTime === slot;
                     return (
                       <button key={slot} disabled={isTaken} onClick={() => setSelectedTime(slot)}
