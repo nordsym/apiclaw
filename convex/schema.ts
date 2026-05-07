@@ -976,4 +976,65 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_stage", ["stage"])
     .index("by_lastActivityAt", ["lastActivityAt"]),
+
+  // ============================================
+  // REMOTE MCP — OAuth 2.1 (PKCE + DCR)
+  // ============================================
+  // Clients registered to talk to https://apiclaw.cloud/mcp.
+  // Created either via the dashboard ("Generate Grok Connector") or via
+  // RFC 7591 Dynamic Client Registration. A client is just metadata; it
+  // grants nothing on its own — tokens require human consent on
+  // /oauth/authorize against an email-authenticated workspace.
+  mcpOAuthClients: defineTable({
+    clientId: v.string(),                  // public identifier (claw_mcp_<24 chars>)
+    clientSecretHash: v.optional(v.string()), // null = public client (PKCE only)
+    clientSecretPrefix: v.optional(v.string()), // "claw_mcp_secret_...last4"
+    workspaceId: v.optional(v.id("workspaces")), // bound on first authorize; null = unbound DCR client
+    name: v.string(),                      // display name (e.g. "Grok (xAI)")
+    redirectUris: v.array(v.string()),
+    grantTypes: v.array(v.string()),       // ["authorization_code", "refresh_token"]
+    tokenEndpointAuthMethod: v.string(),   // "client_secret_basic" | "none" (public PKCE client)
+    scope: v.string(),                     // space-separated scopes granted to this client
+    registrationKind: v.string(),          // "dashboard" | "dynamic"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_clientId", ["clientId"])
+    .index("by_workspaceId", ["workspaceId"]),
+
+  // Short-lived authorization codes (10 min TTL).
+  mcpOAuthAuthCodes: defineTable({
+    code: v.string(),                      // single-use opaque code
+    clientId: v.string(),
+    workspaceId: v.id("workspaces"),
+    redirectUri: v.string(),
+    scope: v.string(),
+    codeChallenge: v.string(),             // PKCE challenge
+    codeChallengeMethod: v.string(),       // "S256"
+    expiresAt: v.number(),
+    consumedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_code", ["code"])
+    .index("by_workspaceId", ["workspaceId"]),
+
+  // Bearer access + refresh tokens (hashed, never stored raw).
+  mcpOAuthTokens: defineTable({
+    tokenHash: v.string(),                 // hash of the bearer token
+    tokenPrefix: v.string(),               // "sk-mcp-...last4" for display
+    kind: v.string(),                      // "access" | "refresh"
+    clientId: v.string(),
+    workspaceId: v.id("workspaces"),
+    scope: v.string(),
+    parentTokenId: v.optional(v.id("mcpOAuthTokens")), // refresh chain
+    expiresAt: v.number(),
+    revokedAt: v.optional(v.number()),
+    lastUsedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_tokenHash", ["tokenHash"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_clientId", ["clientId"]),
 });

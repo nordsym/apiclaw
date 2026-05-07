@@ -849,7 +849,7 @@ function jsonResponse(data: unknown, status = 200) {
 async function resolveWorkspaceFromRequest(
   ctx: any,
   request: Request
-): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "identifier" | "anonymous" }> {
+): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "identifier" | "mcp-oauth" | "anonymous" }> {
   // 1a. API key via Authorization: Bearer sk-claw-...
   const authHeader = request.headers.get("Authorization");
   let rawKey: string | null = null;
@@ -872,6 +872,21 @@ async function resolveWorkspaceFromRequest(
       console.error("[Auth] API key resolution failed:", e.message);
     }
     // Invalid key → anonymous (do not fall through to other methods for this request)
+    return { authMethod: "anonymous" };
+  }
+
+  // 1c. Remote MCP OAuth bearer (Bearer sk-mcp-...)
+  if (authHeader?.startsWith("Bearer sk-mcp-")) {
+    const oauthToken = authHeader.slice(7);
+    try {
+      const resolved = await ctx.runQuery(api.mcpOAuth.resolveBearerToken, { token: oauthToken });
+      if (resolved?.ok) {
+        ctx.runMutation(api.mcpOAuth.touchToken, { tokenId: resolved.tokenId }).catch(() => {});
+        return { workspaceId: resolved.workspaceId, authMethod: "mcp-oauth" };
+      }
+    } catch (e: any) {
+      console.error("[Auth] MCP OAuth resolution failed:", e.message);
+    }
     return { authMethod: "anonymous" };
   }
 

@@ -5,10 +5,20 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
-// Routes that require an apiclaw session (cookie OR Clerk userId)
+// Routes that require an apiclaw session (cookie OR Clerk userId).
+// /oauth/authorize is gated so we can trust the session before minting codes.
 const isProtectedDashboard = createRouteMatcher([
   "/dashboard(.*)",
   "/workspace(.*)",
+  "/oauth/authorize(.*)",
+]);
+
+// Public OAuth + MCP routes — bypass any auth gate. They authenticate
+// themselves (Bearer or DCR open per RFC 7591).
+const isPublicMcpRoute = createRouteMatcher([
+  "/api/oauth/(.*)",
+  "/mcp(.*)",
+  "/.well-known/(.*)",
 ]);
 
 async function legacySessionValid(token: string): Promise<boolean> {
@@ -36,6 +46,12 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
 
+  // OAuth + MCP entry points are public by design (DCR is RFC 7591, /mcp
+  // gates itself with a Bearer). Skip the dashboard auth gate entirely.
+  if (isPublicMcpRoute(request)) {
+    return NextResponse.next();
+  }
+
   if (!isProtectedDashboard(request)) {
     return NextResponse.next();
   }
@@ -56,11 +72,17 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Unauthed → /sign-in. Preserve link / ref query params so /sign-in can
   // stash them in localStorage and the callback can replay on the way back.
+  // For /oauth/authorize, also preserve the full original URL so the consent
+  // screen reloads with all OAuth params after the user signs in.
   const signIn = new URL("/sign-in", request.url);
   const link = request.nextUrl.searchParams.get("link");
   const ref = request.nextUrl.searchParams.get("ref");
   if (link) signIn.searchParams.set("link", link);
   if (ref) signIn.searchParams.set("ref", ref);
+  if (pathname.startsWith("/oauth/authorize")) {
+    const redirectTo = pathname + (request.nextUrl.search || "");
+    signIn.searchParams.set("redirect_url", redirectTo);
+  }
   return NextResponse.redirect(signIn);
 });
 

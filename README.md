@@ -20,7 +20,7 @@ Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agen
 
 ---
 
-## Three Ways to Use APIClaw
+## Four Ways to Use APIClaw
 
 ### 1. MCP Server (Agent Discovery + Calling)
 
@@ -50,7 +50,29 @@ curl https://apiclaw.cloud/v1/chat/completions \
   }'
 ```
 
-### 3. CLI
+### 3. Remote MCP — Grok, Cursor, ChatGPT, Claude (OAuth, zero install)
+
+Paste one URL into your AI client. APIClaw handles the rest via OAuth.
+
+```
+https://apiclaw.cloud/mcp
+```
+
+Grok auto-discovers our authorization server, opens a sign-in window, you click "Authorize", and the connector is live. Standard MCP OAuth 2.1 (PKCE + RFC 7591 dynamic registration). No npm, no config file, no API keys to copy.
+
+**Connect to Grok in 20 seconds:**
+
+1. Open Grok → **Settings → Connectors → Add MCP server**
+2. Paste `https://apiclaw.cloud/mcp` and click **Connect**
+3. Sign in with your APIClaw email (or create the workspace) → **Authorize**
+
+Done. Grok now has `discover_apis`, `call_api`, `get_api_details`, `list_categories`, `list_connected`, and `check_balance`.
+
+**Same flow works in Cursor, ChatGPT (custom GPT), Claude Desktop, and any MCP-compliant client** — just point them at `https://apiclaw.cloud/mcp`.
+
+Need pre-shared credentials instead of OAuth? Open [Workspace → Integrations](https://apiclaw.cloud/workspace/integrations), click **Generate connector**, copy the Client ID and Secret.
+
+### 4. CLI
 
 Humans in the terminal, scripts, CI. Ships with `@nordsym/apiclaw`:
 
@@ -61,7 +83,7 @@ apiclaw discover "transcribe audio file"      # search registry
 apiclaw-http                                  # stand up local HTTP gateway
 ```
 
-All three interfaces route through the same `apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry.
+All four interfaces route through the same `apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry. Email-verified workspace required for any token issuance — discovery is open, execution requires auth.
 
 One endpoint. Automatic provider routing. The gateway selects the optimal provider based on your workspace settings:
 
