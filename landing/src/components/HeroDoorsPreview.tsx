@@ -42,7 +42,7 @@ const DOORS: Door[] = [
       <>
         <span className="text-text-muted">$ </span>
         <span className="text-text-primary">apiclaw mission start </span>
-        <span className="text-accent">genprd</span>
+        <span className="text-accent">&lt;template&gt;</span>
         <span className="text-text-primary"> --topic </span>
         <span className="text-accent">{`"checkout flow"`}</span>
       </>

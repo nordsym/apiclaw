@@ -204,7 +204,7 @@ Same auth, same logs, same workspace across all four.
 
 Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_connected, list_capabilities, list_models, call_api, capability, check_balance, estimate_cost, get_usage_summary, check_workspace_status, get_chain_status, resume_chain, start_mission, mission_status, list_missions, list_mission_templates, apiclaw_help.
 
-Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a template like genprd to generate a structured PRD; more land regularly.
+Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a mission template to generate a structured PRD; more land regularly.
 
 Pricing: free tier of 25 calls/month after email signup. Email signup is required for every tool, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
 
@@ -682,7 +682,7 @@ Install:
                 { n: "03", t: "Execute", d: "Single calls or full multi-step missions." },
                 { n: "04", t: "Observe", d: "Audit log, cost, latency tagged per call." },
               ].map((s) => (
-                <div key={s.n} className="p-6 transition-colors duration-200 hover:bg-surface/40">
+                <div key={s.n} className="group p-6 transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface/60 hover:shadow-[0_14px_32px_-28px_rgba(239,68,68,0.35)]">
                   <div className="text-[11px] tracking-widest text-accent font-mono mb-3">{s.n}</div>
                   <div className="text-base font-semibold mb-1.5 tracking-tight">{s.t}</div>
                   <p className="text-[13px] text-text-secondary leading-relaxed">{s.d}</p>
@@ -713,10 +713,10 @@ Install:
               ].map((d) => (
                 <div
                   key={d.tag}
-                  className="rounded-xl border border-border bg-surface p-4 transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(239,68,68,0.25)]"
+                  className="group rounded-xl border border-border bg-surface p-4 transition-all duration-300 transform-gpu hover:border-accent/40 hover:-translate-y-1 hover:bg-surface-elevated hover:shadow-[0_14px_26px_-22px_rgba(239,68,68,0.28)]"
                 >
                   <div className="flex items-center gap-2 mb-2.5">
-                    <span className="inline-flex w-7 h-7 rounded-md bg-accent/10 text-accent items-center justify-center">{d.icon}</span>
+                    <span className="inline-flex w-7 h-7 rounded-md bg-accent/10 text-accent items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-0.5">{d.icon}</span>
                     <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">{d.tag}</span>
                   </div>
                   <div className="text-sm font-semibold mb-1 tracking-tight">{d.h}</div>
@@ -757,10 +757,10 @@ Install:
             ].map((b) => (
               <div
                 key={b.tag}
-                className="rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(239,68,68,0.25)]"
+                className="group rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-300 transform-gpu hover:border-accent/40 hover:-translate-y-1 hover:bg-surface hover:shadow-[0_16px_28px_-24px_rgba(239,68,68,0.3)]"
               >
                 <div className="inline-flex items-center gap-2 mb-3">
-                  <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center">{b.icon}</span>
+                  <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-0.5">{b.icon}</span>
                   <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">{b.tag}</span>
                 </div>
                 <div className="text-base font-semibold mb-1 tracking-tight">{b.t}</div>
@@ -839,8 +839,8 @@ Install:
                   { t: "Per-call analytics", d: "See exactly which agents call your API, with what capability, at what cost. Ranking improves with usage." },
                   { t: "Managed-partner upgrade", d: "Hand over key custody and APIClaw becomes the credential vault for your API. Commercial terms agreed per partner." },
                 ].map((row) => (
-                  <div key={row.t} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                  <div key={row.t} className="group rounded-xl border border-transparent p-3 -m-3 transition-all duration-300 hover:border-border-subtle hover:bg-surface hover:translate-x-0.5 hover:shadow-sm">
+                    <Check className="w-4 h-4 text-accent mt-1 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
                     <div>
                       <div className="text-[14px] font-semibold mb-0.5">{row.t}</div>
                       <p className="text-[13px] text-text-secondary leading-relaxed">{row.d}</p>
@@ -872,8 +872,8 @@ Install:
                   { n: "03", t: "Go live", d: "Your API is searchable by 26,704 indexed peers within minutes." },
                   { n: "04", t: "Optional: become managed", d: "Hand us the credential. We hold custody, agents call your API without keys, commercial terms agreed per partner." },
                 ].map((step) => (
-                  <li key={step.n} className="flex items-start gap-4">
-                    <span className="text-[11px] font-mono text-accent mt-0.5 flex-shrink-0 tracking-widest">{step.n}</span>
+                  <li key={step.n} className="group flex items-start gap-4 rounded-xl p-3 -mx-3 transition-all duration-300 hover:bg-surface/60 hover:translate-x-0.5">
+                    <span className="text-[11px] font-mono text-accent mt-0.5 flex-shrink-0 tracking-widest transition-transform duration-300 group-hover:translate-x-0.5">{step.n}</span>
                     <div>
                       <div className="text-[14px] font-semibold mb-0.5">{step.t}</div>
                       <p className="text-[13px] text-text-secondary leading-relaxed">{step.d}</p>
@@ -924,10 +924,10 @@ Install:
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl p-8 flex flex-col relative ${
+                  className={`group rounded-2xl p-8 flex flex-col relative transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-[0_18px_40px_-30px_rgba(239,68,68,0.35)] ${
                     plan.highlight
-                      ? "border-2 border-accent bg-surface-elevated glow"
-                      : "border border-border bg-surface-elevated"
+                      ? "border-2 border-accent bg-surface-elevated glow hover:border-accent/70"
+                      : "border border-border bg-surface-elevated hover:border-accent/40 hover:bg-surface"
                   }`}
                 >
                   {plan.highlight && (
@@ -1024,7 +1024,7 @@ Install:
               },
               {
                 q: "How do I list my own API?",
-                a: `Sign up, head to Workspace, follow the self-service onboarding. Your API is discoverable by agents immediately. A managed-partner upgrade is available from the same workspace if you want APIClaw to hold credentials on your behalf.`
+                a: `Sign in, then follow the self-service onboarding in Workspace. Your API is discoverable by agents immediately. A managed-partner upgrade is available from the same workspace if you want APIClaw to hold credentials on your behalf.`
               }
             ].map((faq, i) => (
               <div
@@ -1033,11 +1033,11 @@ Install:
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full py-5 sm:py-6 flex items-center justify-between text-left group"
+                  className="group w-full py-5 sm:py-6 flex items-center justify-between text-left rounded-xl transition-colors hover:bg-surface/30"
                 >
-                  <h3 className="text-base sm:text-[17px] font-medium text-text-primary group-hover:text-text-primary pr-6">{faq.q}</h3>
+                  <h3 className="text-base sm:text-[17px] font-medium text-text-primary group-hover:text-accent transition-colors pr-6">{faq.q}</h3>
                   <ChevronDown
-                    className={`w-4 h-4 text-text-muted flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-text-muted flex-shrink-0 transition-all duration-200 group-hover:text-accent ${openFaq === i ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openFaq === i && (

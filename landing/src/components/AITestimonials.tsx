@@ -54,7 +54,7 @@ export function AITestimonials() {
   }, [isPaused, nextSlide]);
 
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-surface/30 overflow-hidden">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-b from-surface/25 via-background to-background overflow-hidden">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-4">
@@ -146,18 +146,20 @@ function AICard({
 }) {
   return (
     <div
-      className={`relative p-5 sm:p-6 rounded-2xl border transition-all duration-300 ${
+      className={`group relative overflow-hidden p-5 sm:p-6 rounded-2xl border transition-all duration-300 transform-gpu ${
         isActive
-          ? "bg-surface-elevated border-accent/30 shadow-lg shadow-accent/5"
-          : "bg-surface border-border hover:border-border-subtle"
+          ? "bg-surface-elevated border-accent/30 shadow-lg shadow-accent/5 scale-[1.01]"
+          : "bg-surface border-border hover:border-border-subtle hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5"
       }`}
     >
-      <div className={`absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${testimonial.color} opacity-60`} />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className={`absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${testimonial.color} opacity-70`} />
+      <div className="absolute right-4 top-2 text-5xl leading-none text-text-muted/10 select-none">“</div>
       <p className="text-text-primary text-sm sm:text-base leading-relaxed mb-6 min-h-[4.5rem]">
         &ldquo;{testimonial.quote}&rdquo;
       </p>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center p-1.5">
+        <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-105">
           <Image src={testimonial.logo} alt={testimonial.model} width={28} height={28} className="object-contain" />
         </div>
         <div>
