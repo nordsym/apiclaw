@@ -6,7 +6,11 @@
 // can auto-discover the auth server and run the OAuth flow without manual
 // configuration.
 import { NextRequest, NextResponse } from "next/server";
-import { CONVEX_BASE_URL, convexQuery, convexMutation } from "@/lib/convex";
+import { convexQuery, convexMutation } from "@/lib/convex";
+import {
+  CANONICAL_MCP_TOOLS,
+  dispatchCanonicalTool,
+} from "@/lib/mcp-tools-canon";
 
 export const runtime = "nodejs";
 
@@ -31,63 +35,9 @@ type WorkspaceContext = {
 
 type ContextDenial = { ok: false; status: number; body: unknown; headers?: Record<string, string> };
 
-const TOOLS = [
-  {
-    name: "discover_apis",
-    description:
-      "Search APIClaw's catalog of 26,000+ APIs by capability. Use this when the user asks 'what API can do X?' or needs provider recommendations.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        query: { type: "string", description: "Natural language query (e.g., 'send SMS to Sweden')" },
-        category: { type: "string", description: "Optional category filter" },
-        callable_only: { type: "boolean", description: "Only return APIs APIClaw can execute right now", default: false },
-        max_results: { type: "number", description: "Max results to return", default: 5 },
-      },
-      required: ["query"],
-    },
-  },
-  {
-    name: "get_api_details",
-    description: "Full specs, pricing, auth, and usage examples for a specific API.",
-    inputSchema: {
-      type: "object",
-      properties: { name: { type: "string", description: "API or provider name" } },
-      required: ["name"],
-    },
-  },
-  {
-    name: "call_api",
-    description:
-      "Execute a callable API through APIClaw's gateway. Auth is handled automatically for managed providers.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        api: { type: "string", description: "API or provider name" },
-        path: { type: "string", description: "API path (e.g., /v1/messages)", default: "/" },
-        method: { type: "string", enum: ["GET", "POST", "PUT", "PATCH", "DELETE"], default: "GET" },
-        params: { type: "object", description: "Query string parameters" },
-        body: { description: "Request body for POST/PUT/PATCH" },
-      },
-      required: ["api"],
-    },
-  },
-  {
-    name: "list_categories",
-    description: "Browse APIClaw's API catalog by category.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-  },
-  {
-    name: "list_connected",
-    description: "List all managed providers ready for instant calls.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-  },
-  {
-    name: "check_balance",
-    description: "Check workspace balance, tier, and remaining calls.",
-    inputSchema: { type: "object", properties: {}, required: [] },
-  },
-] as const;
+// Tool surface lives in mcp-tools-canon.ts so /mcp and any future sibling
+// routes (e.g. /mcp/sse) read from one definition and stay drift-free.
+const TOOLS = CANONICAL_MCP_TOOLS;
 
 function jsonRpcResult(id: JsonRpcId, result: unknown) {
   return NextResponse.json({ jsonrpc: "2.0", id, result }, {
@@ -156,30 +106,6 @@ async function resolveContext(req: NextRequest): Promise<WorkspaceContext | Cont
   }
 }
 
-async function callConvexHttp(
-  path: string,
-  body: unknown,
-  ctx: WorkspaceContext
-): Promise<unknown> {
-  const siteUrl = CONVEX_BASE_URL.replace(".convex.cloud", ".convex.site");
-  const res = await fetch(`${siteUrl}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${ctx.bearer}`,
-      "X-APIClaw-Source": "remote-mcp",
-    },
-    body: JSON.stringify(body ?? {}),
-  });
-  const text = await res.text();
-  let parsed: unknown = text;
-  try { parsed = JSON.parse(text); } catch { /* keep as text */ }
-  if (!res.ok) {
-    throw new Error(typeof parsed === "string" ? parsed : JSON.stringify(parsed));
-  }
-  return parsed;
-}
-
 function logToolCallFireAndForget(
   ctx: WorkspaceContext,
   tool: string,
@@ -199,41 +125,7 @@ function logToolCallFireAndForget(
 }
 
 async function dispatchTool(name: string, args: Record<string, unknown>, ctx: WorkspaceContext): Promise<unknown> {
-  switch (name) {
-    case "discover_apis": {
-      const data = await callConvexHttp("/v1/discover", {
-        query: args.query ?? "",
-        category: args.category,
-        callable_only: args.callable_only ?? false,
-        limit: args.max_results ?? 5,
-      }, ctx);
-      return data;
-    }
-    case "get_api_details": {
-      return await callConvexHttp("/api/details", { name: args.name }, ctx);
-    }
-    case "call_api": {
-      return await callConvexHttp("/v1/call", {
-        api: args.api,
-        path: args.path ?? "/",
-        method: args.method ?? "GET",
-        params: args.params,
-        body: args.body,
-      }, ctx);
-    }
-    case "list_categories": {
-      // /v1/discover with empty query returns categories aggregate.
-      return await callConvexHttp("/v1/discover", { query: "", limit: 1 }, ctx);
-    }
-    case "list_connected": {
-      return await callConvexHttp("/api/balance", {}, ctx);
-    }
-    case "check_balance": {
-      return await callConvexHttp("/api/balance", {}, ctx);
-    }
-    default:
-      throw new Error(`Unknown tool: ${name}`);
-  }
+  return await dispatchCanonicalTool(name, args, { bearer: ctx.bearer });
 }
 
 async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
@@ -250,7 +142,7 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
         version: "1.0.0",
       },
       instructions:
-        "APIClaw exposes 26,000+ APIs through one MCP server. Search with discover_apis, then execute with call_api. check_balance shows your remaining quota.",
+        "APIClaw — the Control Plane for AI Agents. Discover 26,000+ APIs (discover_apis), execute managed providers (call_api), route by capability (capability), or run full multi-step missions (start_mission). Workspace observability lives in get_usage_summary, check_balance, and mission_status. All state belongs to the email-verified workspace this token authorized.",
     });
   }
 

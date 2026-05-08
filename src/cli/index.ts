@@ -14,6 +14,7 @@ import { uninstallCommand } from './commands/uninstall.js';
 import { loginCommand } from './commands/login.js';
 import { demoCommand } from './commands/demo.js';
 import { missionCommand } from './commands/mission.js';
+import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './commands/direct.js';
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
@@ -139,6 +140,34 @@ program
   .option('-c, --client <client>', 'Target specific client (claude-desktop, claude-code)')
   .option('--dry-run', 'Show what would be done without making changes')
   .action(uninstallCommand);
+
+// Direct CLI parity with the MCP tool surface.
+program
+  .command('discover <query>')
+  .description('Search APIClaw\'s catalog of 26,000+ APIs')
+  .option('-c, --category <cat>', 'Filter by category')
+  .option('--callable', 'Only return APIs APIClaw can execute')
+  .option('-l, --limit <n>', 'Max results', (v) => parseInt(v, 10))
+  .action(discoverCommand);
+
+program
+  .command('call <api>')
+  .description('Execute a callable API through APIClaw\'s gateway')
+  .option('-p, --path <path>', 'API path (default /)')
+  .option('-m, --method <method>', 'HTTP method (GET/POST/PUT/PATCH/DELETE)')
+  .option('--params <json>', 'Query string parameters as JSON')
+  .option('-d, --body <json>', 'Request body as JSON')
+  .action(callCommand);
+
+program
+  .command('details <api>')
+  .description('Get full specs, pricing, auth for a specific API')
+  .action(detailsCommand);
+
+program
+  .command('balance')
+  .description('Workspace balance, tier, remaining calls')
+  .action(balanceCommand);
 
 // Control Plane — Missions
 //
