@@ -126,10 +126,10 @@ export function HeroDoorsPreview() {
               <button
                 key={door.id}
                 onClick={() => handleClick(idx)}
-                className={`w-full text-left px-4 sm:px-5 py-4 sm:py-5 transition-all relative ${
+                className={`w-full text-left px-4 sm:px-5 py-4 sm:py-5 transition-all duration-200 relative group ${
                   active
                     ? "bg-accent/5"
-                    : "hover:bg-surface"
+                    : "hover:bg-surface hover:pl-5 sm:hover:pl-6"
                 }`}
               >
                 <div

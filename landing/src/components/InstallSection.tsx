@@ -2,22 +2,14 @@
 
 import { useEffect, useState } from "react";
 import {
-  Apple,
   Terminal as TerminalIcon,
   Copy,
   Check,
   Download,
-  ExternalLink,
-  KeyRound,
-  Bot,
-  Code2,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
-import statsData from "@/lib/stats.json";
 
 type OS = "mac" | "win" | "linux" | "unknown";
-type Door = "mcp" | "cli" | "workspace" | "remote";
 
 const ONE_LINERS: Record<OS, { label: string; cmd: string; sub?: string }> = {
   mac: {
@@ -88,7 +80,6 @@ function CopyableLine({
 
 export function InstallSection() {
   const [os, setOs] = useState<OS>("unknown");
-  const [door, setDoor] = useState<Door>("mcp");
 
   useEffect(() => {
     setOs(detectOS());
@@ -98,19 +89,19 @@ export function InstallSection() {
 
   return (
     <section id="install" className="py-20 sm:py-24 px-4 sm:px-6 relative">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12">
-          <span className="section-label">INSTALL</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 tracking-tighter">
-            Four doors. One control plane.
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8 sm:mb-10">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">Get installed</span>
+          <h2 className="text-3xl sm:text-4xl md:text-[2.75rem] font-semibold mt-3 tracking-[-0.02em] leading-[1.1]">
+            Up and running in 30 seconds.
           </h2>
-          <p className="text-text-secondary text-base sm:text-lg mt-3 sm:mt-4 max-w-2xl mx-auto">
-            Pick the entry point that fits your stack: local MCP client, terminal, your own backend, or a remote OAuth-MCP runtime. Identical workspace, identical auth, identical logs underneath.
+          <p className="text-text-secondary text-base sm:text-lg mt-3 leading-relaxed">
+            Pick a door from the section above. Each one connects to the same workspace.
           </p>
         </div>
 
         {/* Quick install card */}
-        <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-surface-elevated p-5 sm:p-6 mb-10 sm:mb-12 shadow-xl">
+        <div className="rounded-2xl border border-border bg-surface-elevated p-5 sm:p-6 shadow-xl transition-all duration-200 hover:shadow-[0_20px_60px_-20px_rgba(239,68,68,0.18)]">
           <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
             <div className="flex items-center gap-2.5">
               <span className="inline-flex w-9 h-9 rounded-lg bg-accent/10 items-center justify-center text-accent">
@@ -128,7 +119,7 @@ export function InstallSection() {
                 <button
                   key={o}
                   onClick={() => setOs(o)}
-                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
                     os === o
                       ? "bg-accent text-white"
                       : "text-text-muted hover:text-text-primary"
@@ -145,350 +136,35 @@ export function InstallSection() {
             prompt={os === "win" ? "PS>" : "$"}
           />
 
-          <div className="grid sm:grid-cols-2 gap-3 mt-4">
+          <div className="grid sm:grid-cols-3 gap-3 mt-4">
             <a
               href="/apiclaw.mcpb"
               download
-              className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white font-semibold text-sm shadow-lg shadow-accent/20 transition-all"
+              className="group inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-[13px] shadow-sm transition-all duration-200 hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98]"
             >
-              <Download className="w-4 h-4" />
-              Install for Claude Desktop
-              <span className="text-[10px] font-mono uppercase tracking-widest bg-white/20 px-1.5 py-0.5 rounded ml-1">
-                .mcpb
-              </span>
+              <Download className="w-3.5 h-3.5" />
+              .mcpb for Claude
             </a>
             <a
-              href="/install"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-sm transition-all"
+              href="/workspace"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-[13px] transition-all duration-200 active:scale-[0.98]"
             >
-              Full install guide
-              <ArrowRight className="w-4 h-4" />
+              Workspace key
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="/docs"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-[13px] transition-all duration-200 active:scale-[0.98]"
+            >
+              Read the docs
             </a>
           </div>
-          <div className="text-[11px] text-text-muted mt-3 text-center sm:text-left">
-            No terminal needed with the .mcpb. Double-click the file in Claude Desktop.
-          </div>
-        </div>
-
-        {/* Four doors tabs */}
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 sm:gap-6">
-          <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible -mx-4 px-4 lg:mx-0 lg:px-0">
-            <DoorTab
-              active={door === "mcp"}
-              onClick={() => setDoor("mcp")}
-              icon={<Bot className="w-5 h-5" />}
-              title="MCP"
-              subtitle="Claude Desktop, Cursor, local clients"
-              audience="Humans running an existing AI client."
-            />
-            <DoorTab
-              active={door === "cli"}
-              onClick={() => setDoor("cli")}
-              icon={<Code2 className="w-5 h-5" />}
-              title="CLI"
-              subtitle="Terminal, scripts, CI/CD"
-              audience="Engineers in a shell or pipeline."
-            />
-            <DoorTab
-              active={door === "workspace"}
-              onClick={() => setDoor("workspace")}
-              icon={<KeyRound className="w-5 h-5" />}
-              title="HTTP Gateway"
-              subtitle="OpenAI-compatible · sk-claw-…"
-              audience="Agent runtimes shipping their own product (OpenClaw, Hermes, your stack)."
-            />
-            <DoorTab
-              active={door === "remote"}
-              onClick={() => setDoor("remote")}
-              icon={<Sparkles className="w-5 h-5" />}
-              title="Remote MCP"
-              subtitle="apiclaw.cloud/mcp · OAuth"
-              audience="Grok, ChatGPT, Cursor remote. Paste one URL."
-            />
-          </div>
-
-          <div className="rounded-2xl border border-border bg-surface-elevated p-5 sm:p-7 min-h-[360px]">
-            {door === "mcp" && <DoorMCP />}
-            {door === "cli" && <DoorCLI />}
-            {door === "workspace" && <DoorWorkspace />}
-            {door === "remote" && <DoorRemote />}
-          </div>
+          <p className="text-[11px] text-text-muted mt-4 inline-flex items-center gap-1.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Free email signup required for every door, including discovery.
+          </p>
         </div>
       </div>
     </section>
-  );
-}
-
-function DoorTab({
-  active,
-  onClick,
-  icon,
-  title,
-  subtitle,
-  audience,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  audience: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex-shrink-0 lg:w-full text-left rounded-xl border px-4 py-3.5 transition-all ${
-        active
-          ? "border-accent/50 bg-accent/5 shadow-[0_0_30px_-15px_rgba(239,68,68,0.4)]"
-          : "border-border bg-surface hover:border-accent/30 hover:bg-surface-elevated"
-      }`}
-    >
-      <div className="flex items-center gap-2.5 mb-1">
-        <span
-          className={`inline-flex w-8 h-8 rounded-lg items-center justify-center ${
-            active ? "bg-accent text-white" : "bg-accent/10 text-accent"
-          }`}
-        >
-          {icon}
-        </span>
-        <div>
-          <div
-            className={`font-semibold text-sm ${
-              active ? "text-text-primary" : "text-text-primary"
-            }`}
-          >
-            {title}
-          </div>
-          <div className="text-[11px] text-text-muted leading-tight">{subtitle}</div>
-        </div>
-      </div>
-      <div className="text-xs text-text-secondary leading-snug hidden lg:block">
-        {audience}
-      </div>
-    </button>
-  );
-}
-
-function DoorMCP() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          MCP: for humans running existing AI clients
-        </h3>
-        <p className="text-text-secondary text-sm sm:text-base">
-          Drop APIClaw into Claude Desktop, Cursor, or any MCP-compatible client. Zero
-          code, zero key handling. Your AI suddenly speaks {statsData.apiCount.toLocaleString()}+ APIs.
-        </p>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Option A · One-click (no terminal)
-        </div>
-        <a
-          href="/apiclaw.mcpb"
-          download
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold shadow-lg shadow-accent/20 transition"
-        >
-          <Download className="w-4 h-4" />
-          Download apiclaw.mcpb
-        </a>
-        <div className="text-xs text-text-muted mt-2">
-          Double-click the file. Claude Desktop installs it as an extension.
-        </div>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Option B · Terminal
-        </div>
-        <CopyableLine cmd="npx -y @nordsym/apiclaw mcp-install" />
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Or paste this into your MCP config manually
-        </div>
-        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["-y", "@nordsym/apiclaw"]
-    }
-  }
-}`}</pre>
-      </div>
-    </div>
-  );
-}
-
-function DoorCLI() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          CLI: for devs in a shell
-        </h3>
-        <p className="text-text-secondary text-sm sm:text-base">
-          Hit any APIClaw-callable provider straight from a terminal, a script, or a CI
-          job. Same auth, same gateway, same logs as the MCP path.
-        </p>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Install
-        </div>
-        <CopyableLine cmd="npm install -g @nordsym/apiclaw" />
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Link your workspace
-        </div>
-        <CopyableLine cmd="apiclaw login" />
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Call any API
-        </div>
-        <CopyableLine cmd={`apiclaw call openrouter/chat -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'`} />
-      </div>
-
-      <div className="rounded-xl border border-border-subtle bg-surface p-3 text-xs text-text-muted">
-        <span className="font-semibold text-text-secondary">Tip:</span> the CLI is the
-        same binary as the MCP server. One install, two ways to use it.
-      </div>
-    </div>
-  );
-}
-
-function DoorRemote() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          Remote MCP: full runtime over OAuth
-        </h3>
-        <p className="text-text-secondary text-sm sm:text-base">
-          Paste one URL into Grok, ChatGPT, Cursor (remote), Claude Desktop, or any OAuth-aware MCP client. RFC 7591 dynamic registration plus PKCE plus email-verified consent. The client auto-discovers, registers itself, and gets the full control plane: discovery, execution, capability routing, missions, observability.
-        </p>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Paste this into your client
-        </div>
-        <CopyableLine cmd="https://apiclaw.cloud/mcp" prompt="MCP" />
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          What the client receives
-        </div>
-        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`tools/list  →  19 tools
-  discover_apis · get_api_details · list_models
-  call_api · capability · check_balance
-  start_mission · mission_status · …
-
-initialize  →  full Control Plane handshake
-auth        →  Bearer sk-mcp-…  (OAuth 2.1, PKCE, DCR)`}</pre>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Pre-shared credentials (alternative to OAuth)
-        </div>
-        <a
-          href="/workspace/integrations"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface hover:border-accent/40 text-text-primary text-sm font-medium transition"
-        >
-          Generate a connector
-          <ArrowRight className="w-4 h-4" />
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function DoorWorkspace() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          HTTP Gateway: every model, one endpoint
-        </h3>
-        <p className="text-text-secondary text-sm sm:text-base">
-          One base URL, one bearer, every model. Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter (800+), Replicate, ElevenLabs, plus the long tail of public APIs the catalog has indexed. Drop it in behind OpenClaw (the open-source agent runtime APIClaw powers), behind Symbot (NordSym's production agent), behind n8n, behind your own backend. APIClaw routes the request, holds the credentials, returns the result.
-        </p>
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-3">
-        <a
-          href="/workspace"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold shadow-lg shadow-accent/20 transition"
-        >
-          Get a workspace key
-          <ArrowRight className="w-4 h-4" />
-        </a>
-        <a
-          href="/docs"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface hover:border-accent/40 text-text-primary text-sm font-medium transition"
-        >
-          API reference
-          <ExternalLink className="w-4 h-4" />
-        </a>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Any model, one call
-        </div>
-        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`POST https://api.apiclaw.cloud/v1/chat/completions
-Authorization: Bearer sk-claw-…
-
-{
-  "model": "anthropic/claude-sonnet-4-6",
-  // or "xai/grok-4-fast", "groq/llama-3.3-70b",
-  // or "mistral/codestral", "cohere/command-r-plus",
-  // or "openrouter/auto", or any id from /v1/models
-  "messages": [{ "role": "user", "content": "..." }]
-}`}</pre>
-      </div>
-
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Anything else: /v1/call routes by provider + action
-        </div>
-        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`POST https://api.apiclaw.cloud/v1/call
-Authorization: Bearer sk-claw-…
-
-{ "api": "replicate", "path": "/predictions",
-  "method": "POST", "body": { "version": "...", "input": {...} } }`}</pre>
-      </div>
-
-      <div className="grid sm:grid-cols-3 gap-2 text-[11px]">
-        <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Powers OpenClaw + Symbot</div>
-          <div className="text-text-muted leading-snug">
-            Already running NordSym's production agent stack.
-          </div>
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Server-side credentials</div>
-          <div className="text-text-muted leading-snug">
-            Provider keys never reach end users.
-          </div>
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Per-call observability</div>
-          <div className="text-text-muted leading-snug">
-            Cost, provider, latency tagged per workspace.
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

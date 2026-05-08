@@ -497,14 +497,14 @@ Install:
                 <a
                   href="/apiclaw.mcpb"
                   download
-                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-text-primary hover:bg-text-secondary text-background font-semibold text-sm sm:text-[15px] transition-colors"
+                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-text-primary hover:bg-text-secondary text-background font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
                 >
                   Install for Claude Desktop
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </a>
                 <a
                   href="/workspace"
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated text-text-primary font-semibold text-sm sm:text-[15px] transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated hover:border-accent/30 text-text-primary font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98]"
                 >
                   Get a workspace key
                 </a>
@@ -673,29 +673,29 @@ Install:
       {/* How It Works — The Control Plane */}
       <section id="how-it-works" className="py-24 px-6 relative">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-14 max-w-3xl">
+          <div className="mb-12 max-w-2xl">
             <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">The Control Plane</span>
             <h2 className="text-3xl md:text-[2.75rem] font-semibold mt-4 tracking-[-0.02em] leading-[1.1]">
               One runtime. Four doors. Every model.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg mt-4 leading-relaxed">
-              APIClaw is the layer your agent talks to. It discovers the right API, holds every credential server-side, runs single calls or full multi-step missions, and returns observable results. The same workspace, the same auth, the same logs across every entry point.
+              Discovery, execution, missions, and observability behind a single workspace. Same auth, same logs, every entry point.
             </p>
           </div>
 
           {/* The runtime: 4 layers */}
-          <div className="rounded-2xl border border-border bg-surface-elevated overflow-hidden mb-10">
-            <div className="grid md:grid-cols-4 divide-x divide-border-subtle">
+          <div className="rounded-2xl border border-border bg-surface-elevated overflow-hidden mb-8">
+            <div className="grid md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border-subtle">
               {[
-                { n: "01", t: "Discover", d: "26,704 indexed APIs. Search by capability, not provider name. Every result includes auth, pricing, latency."},
-                { n: "02", t: "Route", d: "Capability resolves to the best managed provider. Fail over on circuit-breaker. No keys touch your agent." },
-                { n: "03", t: "Execute", d: "Single call or full mission. Same gateway. Multi-step orchestrations log every step with cost and duration." },
-                { n: "04", t: "Observe", d: "Per-call audit log, per-mission event stream, per-workspace billing. Every action is replayable and auditable." },
+                { n: "01", t: "Discover", d: "26,704 indexed APIs. Search by capability."},
+                { n: "02", t: "Route", d: "Auto-pick the best provider. Keys stay server-side." },
+                { n: "03", t: "Execute", d: "Single calls or full multi-step missions." },
+                { n: "04", t: "Observe", d: "Audit log, cost, latency tagged per call." },
               ].map((s) => (
-                <div key={s.n} className="p-6">
+                <div key={s.n} className="p-6 transition-colors duration-200 hover:bg-surface/40">
                   <div className="text-[11px] tracking-widest text-accent font-mono mb-3">{s.n}</div>
-                  <div className="text-base font-semibold mb-2">{s.t}</div>
-                  <p className="text-sm text-text-secondary leading-relaxed">{s.d}</p>
+                  <div className="text-base font-semibold mb-1.5 tracking-tight">{s.t}</div>
+                  <p className="text-[13px] text-text-secondary leading-relaxed">{s.d}</p>
                 </div>
               ))}
             </div>
@@ -703,38 +703,41 @@ Install:
 
           {/* Four doors map */}
           <div className="rounded-2xl border border-border bg-surface-elevated p-6 sm:p-8">
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-5">
               <div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium mb-1">Four Doors · One Control Plane</div>
-                <h3 className="text-xl font-semibold tracking-tight">Pick the entry point. The runtime is identical.</h3>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium mb-1.5">Four Doors · One Control Plane</div>
+                <h3 className="text-lg font-semibold tracking-tight">Pick the entry point. The runtime is identical.</h3>
               </div>
-              <a href="#install" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5">
-                Compare the doors
-                <ArrowRight className="w-3.5 h-3.5" />
+              <a href="#install" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5 group">
+                Get installed
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { tag: "MCP", h: "Local MCP", d: "Claude Desktop, Cursor, Windsurf, OpenClaw. Drop-in tool surface for any local MCP client.", icon: <Bot className="w-4 h-4" /> },
-                { tag: "CLI", h: "Terminal", d: "apiclaw discover, call, mission. Built for shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" /> },
-                { tag: "HTTP", h: "Gateway", d: "Bearer sk-claw against api.apiclaw.cloud. The endpoint your agent runtime is already wired for.", icon: <Terminal className="w-4 h-4" /> },
-                { tag: "OAuth", h: "Remote MCP", d: "apiclaw.cloud/mcp. Paste one URL into Grok, ChatGPT, Cursor remote. PKCE plus dynamic registration handles auth.", icon: <Sparkles className="w-4 h-4" /> },
+                { tag: "MCP", h: "Local MCP", d: "Claude Desktop, Cursor, any local client.", icon: <Bot className="w-4 h-4" /> },
+                { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" /> },
+                { tag: "HTTP", h: "Gateway", d: "Bearer sk-claw for your backend or runtime.", icon: <Terminal className="w-4 h-4" /> },
+                { tag: "OAuth", h: "Remote MCP", d: "Grok, ChatGPT, Cursor remote. Paste one URL.", icon: <Sparkles className="w-4 h-4" /> },
               ].map((d) => (
-                <div key={d.tag} className="rounded-xl border border-border bg-surface p-4 hover:border-accent/40 transition-colors">
-                  <div className="flex items-center gap-2 mb-2">
+                <div
+                  key={d.tag}
+                  className="rounded-xl border border-border bg-surface p-4 transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(239,68,68,0.25)]"
+                >
+                  <div className="flex items-center gap-2 mb-2.5">
                     <span className="inline-flex w-7 h-7 rounded-md bg-accent/10 text-accent items-center justify-center">{d.icon}</span>
                     <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">{d.tag}</span>
                   </div>
-                  <div className="text-sm font-semibold mb-1.5">{d.h}</div>
+                  <div className="text-sm font-semibold mb-1 tracking-tight">{d.h}</div>
                   <p className="text-xs text-text-secondary leading-relaxed">{d.d}</p>
                 </div>
               ))}
             </div>
 
-            <p className="mt-5 text-xs text-text-muted">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 align-middle mr-2" />
-              Free email signup at apiclaw.cloud/workspace required for every door, including discovery.
+            <p className="mt-5 text-xs text-text-muted inline-flex items-center gap-2">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Free email signup required for every door, including discovery.
             </p>
           </div>
         </div>
@@ -745,49 +748,32 @@ Install:
       {/* For Agents — runtime power */}
       <section id="for-agents" className="py-24 px-6 bg-surface/30 relative">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-12 max-w-3xl">
+          <div className="mb-10 max-w-2xl">
             <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">For AI Agents</span>
-            <h2 className="text-3xl md:text-[2.75rem] font-semibold tracking-[-0.02em] leading-[1.1] mt-3 mb-5">
+            <h2 className="text-3xl md:text-[2.75rem] font-semibold tracking-[-0.02em] leading-[1.1] mt-3 mb-4">
               The runtime your agent actually wants.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
-              Skip the boilerplate. APIClaw gives any agent the four things every serious runtime needs: a way to find the right capability, the credentials to call it, an orchestrator for multi-step work, and an audit log for every byte that moved.
+              Discovery, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
             {[
-              {
-                icon: <Search className="w-4 h-4" />,
-                tag: "Discover",
-                t: "26,704 APIs, ranked",
-                d: "Search by capability. Pricing, auth, latency, and circuit-breaker state on every result. The catalog is live, indexed, and growing.",
-              },
-              {
-                icon: <Cpu className="w-4 h-4" />,
-                tag: "Every model",
-                t: "Anthropic to OpenRouter",
-                d: "Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, and 800+ via OpenRouter. One bearer. One catalog. Zero per-provider plumbing.",
-              },
-              {
-                icon: <Layers className="w-4 h-4" />,
-                tag: "Missions",
-                t: "Multi-step orchestration",
-                d: "Templates declare the steps. The runtime executes them in parallel, logs every action, tags every cost. Cancellable, replayable, observable.",
-              },
-              {
-                icon: <Activity className="w-4 h-4" />,
-                tag: "Observe",
-                t: "Audit trail per call",
-                d: "Every tool call writes a row: workspace, provider, latency, cost, status. The same surface your billing reads. Nothing hidden.",
-              },
+              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: "26,704 APIs", d: "Search by capability. Auth, pricing, latency on every result." },
+              { icon: <Cpu className="w-4 h-4" />, tag: "Every model", t: "All providers", d: "Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter." },
+              { icon: <Layers className="w-4 h-4" />, tag: "Missions", t: "Orchestration", d: "Multi-step runs with audit log, cost tags, parallel-ready execution." },
+              { icon: <Activity className="w-4 h-4" />, tag: "Observe", t: "Per-call audit", d: "Workspace, provider, latency, cost on every tool call. Replayable." },
             ].map((b) => (
-              <div key={b.tag} className="rounded-2xl border border-border bg-surface-elevated p-5">
+              <div
+                key={b.tag}
+                className="rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(239,68,68,0.25)]"
+              >
                 <div className="inline-flex items-center gap-2 mb-3">
                   <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center">{b.icon}</span>
                   <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">{b.tag}</span>
                 </div>
-                <div className="text-base font-semibold mb-1.5 tracking-tight">{b.t}</div>
+                <div className="text-base font-semibold mb-1 tracking-tight">{b.t}</div>
                 <p className="text-[13px] text-text-secondary leading-relaxed">{b.d}</p>
               </div>
             ))}
@@ -817,12 +803,12 @@ Install:
 
             <div className="rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/5 via-transparent to-transparent p-6 sm:p-8 flex flex-col justify-between">
               <div>
-                <span className="text-[11px] uppercase tracking-[0.18em] text-accent font-medium">Already in production</span>
+                <span className="text-[11px] uppercase tracking-[0.18em] text-accent font-medium">In production</span>
                 <h3 className="text-2xl font-semibold tracking-tight mt-3 mb-3">
-                  Powering OpenClaw and Symbot.
+                  Already powering live agent runtimes.
                 </h3>
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Drop APIClaw behind your runtime. Point your client at api.apiclaw.cloud with one bearer. Every model, every API, every observability primitive your end users will see, all on day one.
+                  Drop APIClaw behind your runtime. Point your client at <code className="font-mono text-[13px]">api.apiclaw.cloud</code> with one bearer. Every model, every API, every observability primitive your end users will see, on day one.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -1044,7 +1030,7 @@ Install:
               },
               {
                 q: "I'm building my own agent runtime. Why APIClaw?",
-                a: `We power OpenClaw, the fastest-growing open-source agent runtime, and Symbot, NordSym's production agent. Drop the gateway behind your runtime, point your client at api.apiclaw.cloud, get every model and the full control plane underneath.`
+                a: `Skip provider routing, key vault, retry logic, circuit breakers, billing, and audit logging. Drop the gateway behind your runtime, point your client at api.apiclaw.cloud with one bearer, and your agent gets every model from every provider plus full control-plane observability on day one. Already powering live agent stacks including OpenClaw, the fastest-growing open-source agent runtime.`
               },
               {
                 q: "How do I list my own API?",
@@ -1085,47 +1071,45 @@ Install:
                 <span className="font-semibold text-[15px] tracking-tight">APIClaw</span>
               </div>
               <p className="text-text-muted text-sm leading-relaxed max-w-xs">
-                The Control Plane for AI Agents. Built by NordSym.
+                The Control Plane for AI Agents.
               </p>
             </div>
 
             <div className="md:col-span-2">
               <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Product</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#install" className="text-text-secondary hover:text-text-primary transition">Install</a></li>
-                <li><a href="/workspace" className="text-text-secondary hover:text-text-primary transition">Workspace</a></li>
-                <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition">Catalog</a></li>
-                <li><a href="/docs" className="text-text-secondary hover:text-text-primary transition">Docs</a></li>
+                <li><a href="#install" className="text-text-secondary hover:text-text-primary transition-colors">Install</a></li>
+                <li><a href="/workspace" className="text-text-secondary hover:text-text-primary transition-colors">Workspace</a></li>
+                <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition-colors">Catalog</a></li>
+                <li><a href="/docs" className="text-text-secondary hover:text-text-primary transition-colors">Docs</a></li>
               </ul>
             </div>
 
             <div className="md:col-span-2">
               <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Resources</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#faq" className="text-text-secondary hover:text-text-primary transition">FAQ</a></li>
-                <li><a href="/security" className="text-text-secondary hover:text-text-primary transition">Security</a></li>
-                <li><a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">GitHub</a></li>
-                <li><a href="/.well-known/oauth-authorization-server" className="text-text-secondary hover:text-text-primary transition">OAuth metadata</a></li>
+                <li><a href="#faq" className="text-text-secondary hover:text-text-primary transition-colors">FAQ</a></li>
+                <li><a href="/security" className="text-text-secondary hover:text-text-primary transition-colors">Security</a></li>
+                <li><a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">GitHub</a></li>
+                <li><a href="/docs#list-your-api" className="text-text-secondary hover:text-text-primary transition-colors">List your API</a></li>
               </ul>
             </div>
 
             <div className="md:col-span-3">
-              <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Company</h4>
+              <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Connect</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="https://nordsym.com" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">NordSym</a></li>
-                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">Twitter / X</a></li>
-                <li><a href="mailto:gustav@nordsym.com" className="text-text-secondary hover:text-text-primary transition">Contact</a></li>
+                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">X / Twitter</a></li>
+                <li><a href="mailto:support_apiclaw@nordsym.com" className="text-text-secondary hover:text-text-primary transition-colors">Support</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-text-muted">
-            <p>© 2026 NordSym AB · 559535-5768</p>
-            <div className="flex items-center gap-5">
-              <span>AES-256 at rest</span>
-              <span>MCP 2025-03-26</span>
-              <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />All systems operational</span>
-            </div>
+          <div className="pt-8 border-t border-border-subtle flex items-center justify-between gap-4 text-xs text-text-muted">
+            <span>© 2026 APIClaw</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              All systems operational
+            </span>
           </div>
         </div>
       </footer>

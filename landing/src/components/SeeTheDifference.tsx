@@ -172,10 +172,12 @@ export function SeeTheDifference() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
+      {/* Two cards in a fixed-height grid. The parent locks the height, so
+          neither column can ever push page layout while content streams. */}
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:h-[600px]">
         {/* Without APIClaw */}
-        <div className="relative rounded-2xl border border-border bg-surface-elevated overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border bg-surface">
+        <div className="relative rounded-2xl border border-border bg-surface-elevated overflow-hidden flex flex-col h-[600px] lg:h-auto">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border bg-surface flex-shrink-0">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-text-muted">
               <AlertTriangle className="w-4 h-4 text-text-muted" />
               Without APIClaw
@@ -183,56 +185,58 @@ export function SeeTheDifference() {
             <ManualClock minutes={simulatedMin} done={done && simulatedMin >= 60} />
           </div>
 
-          <div className="px-4 sm:px-5 py-4 border-b border-border-subtle">
+          <div className="px-4 sm:px-5 py-4 border-b border-border-subtle flex-shrink-0">
             <div className="text-xs uppercase tracking-widest text-text-muted mb-1">Prompt</div>
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <ol className="p-4 sm:p-5 space-y-2.5 flex-1 h-[460px] overflow-hidden">
-            {MANUAL_STEPS.map((step, i) => {
-              const visible = step.atMin <= simulatedMin;
-              const isActive = visible && i === lastVisibleManualIdx && !(done && simulatedMin >= 60);
-              return (
-                <li
-                  key={i}
-                  className={`flex items-start gap-3 transition-all duration-300 ${
-                    visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                  }`}
-                >
-                  <span
-                    className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold flex-shrink-0 ${
-                      isActive
-                        ? "bg-text-muted/20 text-text-secondary"
-                        : visible
-                          ? "bg-text-muted/10 text-text-muted"
-                          : "bg-surface text-text-muted"
+          <div className="relative flex-1 min-h-0">
+            <ol className="absolute inset-0 p-4 sm:p-5 space-y-2.5 overflow-hidden">
+              {MANUAL_STEPS.map((step, i) => {
+                const visible = step.atMin <= simulatedMin;
+                const isActive = visible && i === lastVisibleManualIdx && !(done && simulatedMin >= 60);
+                return (
+                  <li
+                    key={i}
+                    className={`flex items-start gap-3 transition-all duration-300 ${
+                      visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
                     }`}
                   >
-                    {i + 1}
-                  </span>
-                  <span
-                    className={`text-sm leading-relaxed ${
-                      isActive ? "text-text-primary" : "text-text-secondary"
-                    }`}
-                  >
-                    {step.text}
-                    {isActive && (
-                      <span className="inline-flex gap-0.5 ml-1.5 align-middle">
-                        <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" />
-                        <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.15s" }} />
-                        <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.3s" }} />
-                      </span>
-                    )}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+                    <span
+                      className={`mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold flex-shrink-0 ${
+                        isActive
+                          ? "bg-text-muted/20 text-text-secondary"
+                          : visible
+                            ? "bg-text-muted/10 text-text-muted"
+                            : "bg-surface text-text-muted"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span
+                      className={`text-sm leading-relaxed ${
+                        isActive ? "text-text-primary" : "text-text-secondary"
+                      }`}
+                    >
+                      {step.text}
+                      {isActive && (
+                        <span className="inline-flex gap-0.5 ml-1.5 align-middle">
+                          <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" />
+                          <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.15s" }} />
+                          <span className="w-1 h-1 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.3s" }} />
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </div>
 
         {/* With APIClaw */}
-        <div className="relative rounded-2xl border border-accent/30 bg-surface-elevated overflow-hidden shadow-[0_0_60px_-20px_rgba(239,68,68,0.35)] flex flex-col">
-          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-accent/20 bg-accent/5">
+        <div className="relative rounded-2xl border border-accent/30 bg-surface-elevated overflow-hidden shadow-[0_0_60px_-20px_rgba(239,68,68,0.35)] flex flex-col h-[600px] lg:h-auto">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-accent/20 bg-accent/5 flex-shrink-0">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-accent">
               <Sparkles className="w-4 h-4" />
               With APIClaw
@@ -240,72 +244,81 @@ export function SeeTheDifference() {
             <ApiClawClock ms={elapsedMs} done={done} />
           </div>
 
-          <div className="px-4 sm:px-5 py-4 border-b border-border-subtle">
+          <div className="px-4 sm:px-5 py-4 border-b border-border-subtle flex-shrink-0">
             <div className="text-xs uppercase tracking-widest text-text-muted mb-1">Prompt</div>
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-2.5 flex-1 h-[300px] overflow-hidden font-mono">
-            {visibleBeats.map((beat, i) => (
-              <div
-                key={`${beat.atMs}-${i}`}
-                className="flex items-start gap-2.5 text-[13px] sm:text-sm leading-relaxed animate-[fadeIn_0.3s_ease-out_forwards]"
-              >
-                {beat.kind === "tool" && (
-                  <ArrowRight className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                )}
-                {beat.kind === "result" && (
-                  <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                )}
-                {beat.kind === "done" && (
-                  <Sparkles className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
-                )}
-                <span
-                  className={
-                    beat.kind === "tool"
-                      ? "text-text-secondary break-all"
-                      : beat.kind === "done"
-                        ? "text-accent font-semibold"
-                        : "text-text-primary break-words"
-                  }
+          {/* The body. Beats stream into the absolute-positioned beats layer;
+              the synthesized-answer layer fades over them on done. Both
+              layers are absolutely positioned inside the same fixed-size
+              relative container. The card's outer height never changes. */}
+          <div className="relative flex-1 min-h-0">
+            <div
+              className={`absolute inset-0 p-4 sm:p-5 space-y-2.5 overflow-hidden font-mono transition-opacity duration-500 ${done ? "opacity-0" : "opacity-100"}`}
+              aria-hidden={done}
+            >
+              {visibleBeats.map((beat, i) => (
+                <div
+                  key={`${beat.atMs}-${i}`}
+                  className="flex items-start gap-2.5 text-[13px] sm:text-sm leading-relaxed animate-[fadeIn_0.3s_ease-out_forwards]"
                 >
-                  {beat.text}
-                </span>
-              </div>
-            ))}
-            {!done && visibleBeats.length < APICLAW_BEATS.length && (
-              <div className="flex items-center gap-2.5 text-sm text-text-muted">
-                <Loader2 className="w-4 h-4 animate-spin text-accent" />
-                <span>working…</span>
-              </div>
-            )}
-          </div>
-
-          {/* Synthesized answer panel — always rendered to reserve layout
-              space; opacity toggles on `done` so the card never resizes. */}
-          <div
-            aria-hidden={!done}
-            className={`mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-xl border border-accent/20 bg-gradient-to-br from-accent/5 to-transparent p-3 sm:p-4 space-y-2 transition-opacity duration-300 ${done ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          >
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-accent font-semibold mb-1">
-              <Newspaper className="w-3.5 h-3.5" />
-              Synthesized answer
-            </div>
-            {HEADLINES.map((h, i) => (
-              <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
-                <Globe className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-text-primary font-medium leading-snug">{h.title}</div>
-                  <div className="text-text-muted text-[11px] flex items-center gap-1.5 mt-0.5">
-                    <span>{h.source}</span>
-                    <span>·</span>
-                    <span>{h.via}</span>
-                    <span>·</span>
-                    <span>{h.time}</span>
-                  </div>
+                  {beat.kind === "tool" && (
+                    <ArrowRight className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  )}
+                  {beat.kind === "result" && (
+                    <Check className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  )}
+                  {beat.kind === "done" && (
+                    <Sparkles className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      beat.kind === "tool"
+                        ? "text-text-secondary break-all"
+                        : beat.kind === "done"
+                          ? "text-accent font-semibold"
+                          : "text-text-primary break-words"
+                    }
+                  >
+                    {beat.text}
+                  </span>
                 </div>
+              ))}
+              {!done && visibleBeats.length < APICLAW_BEATS.length && (
+                <div className="flex items-center gap-2.5 text-sm text-text-muted">
+                  <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                  <span>working…</span>
+                </div>
+              )}
+            </div>
+
+            <div
+              aria-hidden={!done}
+              className={`absolute inset-0 p-4 sm:p-5 overflow-hidden transition-opacity duration-500 ${done ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            >
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-accent font-semibold mb-3">
+                <Newspaper className="w-3.5 h-3.5" />
+                Synthesized answer
               </div>
-            ))}
+              <div className="space-y-3">
+                {HEADLINES.map((h, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
+                    <Globe className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-text-primary font-medium leading-snug">{h.title}</div>
+                      <div className="text-text-muted text-[11px] flex items-center gap-1.5 mt-0.5">
+                        <span>{h.source}</span>
+                        <span>·</span>
+                        <span>{h.via}</span>
+                        <span>·</span>
+                        <span>{h.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
