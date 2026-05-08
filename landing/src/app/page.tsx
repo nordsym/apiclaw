@@ -533,7 +533,7 @@ Install:
       </section>
 
       {/* Stats */}
-      <section className="py-16 px-6 bg-surface/50">
+      <section className="py-16 px-6 section-tint">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {stats.map((stat, i) => (
@@ -746,7 +746,7 @@ Install:
       <div className="divider" />
 
       {/* For Agents — runtime power */}
-      <section id="for-agents" className="py-24 px-6 bg-surface/30 relative">
+      <section id="for-agents" className="py-24 px-6 section-tint relative">
         <div className="max-w-6xl mx-auto">
           <div className="mb-10 max-w-2xl">
             <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">For AI Agents</span>
@@ -847,7 +847,7 @@ Install:
                   { t: "Discoverable on day one", d: "Indexed in the catalog the moment your spec is approved. Searchable by capability, not by your brand." },
                   { t: "Zero integration effort", d: "Submit an OpenAPI spec or your existing endpoint. APIClaw normalises auth, parameters, and pricing." },
                   { t: "Per-call analytics", d: "See exactly which agents call your API, with what capability, at what cost. Ranking improves with usage." },
-                  { t: "Managed-partner upgrade", d: "Hand over key custody and APIClaw becomes the credential vault for your API. Revenue share on volume." },
+                  { t: "Managed-partner upgrade", d: "Hand over key custody and APIClaw becomes the credential vault for your API. Commercial terms agreed per partner." },
                 ].map((row) => (
                   <div key={row.t} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
@@ -880,7 +880,7 @@ Install:
                   { n: "01", t: "Submit your spec", d: "OpenAPI 3, Swagger, or a raw base URL. We normalise it." },
                   { n: "02", t: "Approve the listing", d: "Review the auto-generated capability tags and pricing model." },
                   { n: "03", t: "Go live", d: "Your API is searchable by 26,704 indexed peers within minutes." },
-                  { n: "04", t: "Optional: become managed", d: "Hand us the key, we hold custody, you collect a revenue share on volume." },
+                  { n: "04", t: "Optional: become managed", d: "Hand us the credential. We hold custody, agents call your API without keys, commercial terms agreed per partner." },
                 ].map((step) => (
                   <li key={step.n} className="flex items-start gap-4">
                     <span className="text-[11px] font-mono text-accent mt-0.5 flex-shrink-0 tracking-widest">{step.n}</span>
@@ -905,7 +905,7 @@ Install:
       <div className="divider" />
 
       {/* Get Started */}
-      <section id="get-started" className="py-24 px-6 bg-surface/30">
+      <section id="get-started" className="py-24 px-6 section-tint">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <span className="section-label">PRICING</span>
@@ -1034,7 +1034,7 @@ Install:
               },
               {
                 q: "How do I list my own API?",
-                a: `Sign up, head to Workspace, follow the self-service onboarding. Your API is discoverable by agents immediately. Managed partner (revenue share) lives in the same workspace.`
+                a: `Sign up, head to Workspace, follow the self-service onboarding. Your API is discoverable by agents immediately. A managed-partner upgrade is available from the same workspace if you want APIClaw to hold credentials on your behalf.`
               }
             ].map((faq, i) => (
               <div

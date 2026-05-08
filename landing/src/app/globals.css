@@ -563,26 +563,38 @@ input[type="email"]::placeholder {
     linear-gradient(90deg, rgba(239, 68, 68, 0.06) 1px, transparent 1px);
 }
 
-/* Page-level grid wrapper. Renders the grid as a fixed background
-   across the entire landing viewport without affecting layout. */
-.page-grid::before {
-  content: "";
-  position: fixed;
-  inset: 0;
+/* Page-level grid background. Painted directly on the body so it
+   sits behind every section. Sections that need elevation use
+   semi-transparent surface bg variants (see .section-tint below)
+   so the grid bleeds through softly across the whole page. */
+.page-grid {
+  background-color: var(--background);
   background-image:
-    linear-gradient(rgba(239, 68, 68, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(239, 68, 68, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(239, 68, 68, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.045) 1px, transparent 1px);
   background-size: 64px 64px;
-  pointer-events: none;
-  z-index: 0;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.55) 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.55) 100%);
+  background-attachment: fixed;
 }
 
-.dark .page-grid::before {
+.dark .page-grid {
   background-image:
-    linear-gradient(rgba(239, 68, 68, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(239, 68, 68, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.07) 1px, transparent 1px);
+}
+
+/* Section tint — sits over the page-grid background. Uses the
+   surface token at low alpha so the grid is still visible. */
+.section-tint {
+  background-color: rgb(from var(--surface) r g b / 0.35);
+}
+
+@supports not (color: rgb(from white r g b / 0.5)) {
+  .section-tint {
+    background-color: rgba(245, 245, 245, 0.35);
+  }
+  .dark .section-tint {
+    background-color: rgba(20, 20, 20, 0.35);
+  }
 }
 
 /* Hero background glow */

@@ -427,7 +427,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
               {
                 n: "05",
                 t: "Optional: managed-partner upgrade",
-                d: <>Hand APIClaw the credential. We hold custody, agents call without keys, you collect a revenue share on volume. Same flow as the launched APILayer partnership.</>,
+                d: <>Hand APIClaw the credential. We hold custody and agents call without keys. Commercial terms (flat fee, share, or hybrid) are agreed per partner.</>,
               },
             ].map((step) => (
               <li key={step.n} className="flex gap-4">
@@ -443,7 +443,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
           <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-5 flex flex-wrap items-center gap-4 justify-between">
             <div>
               <div className="text-[11px] uppercase tracking-widest text-[var(--accent)] font-semibold mb-1">Always free</div>
-              <p className="text-sm text-[var(--text-secondary)]">Listing your API is free. Always. No revenue share unless you opt into managed partner.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Listing your API is free. Always. The managed-partner upgrade is opt-in.</p>
             </div>
             <a
               href="/workspace"
