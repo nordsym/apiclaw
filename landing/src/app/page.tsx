@@ -189,29 +189,32 @@ export default function Home() {
   };
 
   const copyContextToClipboard = () => {
-    const callable = statsData.callableCount.toLocaleString();
     const total = statsData.apiCount.toLocaleString();
-    const managed = statsData.managedCount;
-    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability — one unified runtime layer that gives an agent access to ${total}+ APIs across LLMs, voice, search, email, SMS, code execution, web scraping, payments, and more. ${callable}+ are callable instantly through APIClaw, ${managed} of those with managed keys (zero config on your side).
+    const callable = statsData.callableCount.toLocaleString();
+    const installs = statsData.npmDownloads.toLocaleString();
+    const context = `APIClaw — The Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total}+ discoverable APIs, ${callable}+ empirically callable, and ~${installs} agent installs.
 
 Four doors, one control plane:
-1. MCP server. Drop it into Claude Desktop, Cursor, or any MCP-compatible client. Tools: discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost, start_mission, mission_status, list_missions, list_mission_templates.
-2. CLI. Install npm i -g @nordsym/apiclaw, then call any provider from a shell or CI job: apiclaw call <provider>/<action> -d '{...}'. Run full orchestrations with apiclaw mission start <template> --<key> <value>.
-3. Workspace key (HTTP). For agent builders shipping their own product. POST https://api.apiclaw.cloud/v1/call with header Authorization: Bearer sk-claw-..., body { provider, action, params }. Same gateway, same auth, same logs.
-4. Grok / Agent-Native Runtime (remote MCP). Paste https://apiclaw.cloud/mcp into Grok, Cursor, ChatGPT, Claude Desktop, or any OAuth-MCP client. RFC 7591 dynamic registration + PKCE + email-verified consent — full control plane access with missions and parallel execution.
+1. MCP server — Claude Desktop, Cursor, any MCP client.
+2. CLI — terminal, scripts, CI/CD.
+3. HTTP gateway — server-side agents and custom integrations.
+4. Remote MCP / Full Runtime — paste apiclaw.cloud/mcp into any OAuth-capable client.
 
-OpenAI-compatible gateway also available at https://api.apiclaw.cloud/v1/chat/completions for any tool that speaks the OpenAI Chat API. Per-request model routing via the X-APIClaw-Route header (auto, fastest, best_price, or a specific provider like groq, mistral, openrouter).
+Same auth, same logs, same workspace across all four.
 
-Managed providers include OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI (embeddings), Replicate (Flux, SDXL, Whisper), Stability AI, ElevenLabs (TTS), Deepgram (STT), AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping). Pass-through is universal for any keyless public API.
+Agent surface: discover_apis, get_api_details, call_api, list_connected, list_categories, capability, check_balance, estimate_cost, start_mission, mission_status, list_missions, list_mission_templates.
 
-Pricing: free tier of 25 API calls per month with email signup, any provider counts equally. Discovery (search, list, get_api_details) is always free and unmetered. Beyond the free tier: pay-as-you-go at provider cost + 15%, no commitment, billed via Stripe.
+Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a template — for example genprd to generate a structured PRD — more land regularly.
 
-When an API call would help the task, execute it through whichever access method this agent is using. Never ask the user for an API key for any of the providers above. APIClaw holds them.
+Pricing: free tier of 25 calls/month after email signup; discovery is always free and unmetered. Beyond free tier: pay-as-you-go at underlying provider cost + 15%, billed via Stripe. No commitment.
 
-Install for Claude Desktop: download https://apiclaw.cloud/apiclaw.mcpb and double-click.
-Install via terminal: curl -fsSL https://apiclaw.cloud/install.sh | bash (macOS/Linux) or iwr -useb https://apiclaw.cloud/install.ps1 | iex (Windows).
-Workspace key signup: https://apiclaw.cloud/workspace.
-Full docs: https://apiclaw.cloud/docs.`;
+When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side — never prompt the user for them.
+
+Install:
+- Claude Desktop: https://apiclaw.cloud/apiclaw.mcpb
+- Terminal: curl -fsSL https://apiclaw.cloud/install.sh | bash
+- Remote MCP: https://apiclaw.cloud/mcp
+- Workspace + docs: https://apiclaw.cloud`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
     setTimeout(() => setShowContextCopied(false), 2500);
