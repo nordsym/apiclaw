@@ -1317,6 +1317,53 @@ Example chain:
     }
   },
   // ============================================
+  // CONTROL PLANE — MISSIONS
+  // ============================================
+  {
+    name: 'start_mission',
+    description: 'Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw\'s runtime. Use this when the user wants to spin up a multi-step task (e.g. "generate a PRD") rather than a single API call. Returns a missionId you can poll with mission_status. Templates: genprd.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        template: {
+          type: 'string',
+          description: 'Template id. Currently: genprd.',
+        },
+        params: {
+          type: 'object',
+          description: 'Template-specific parameters (see list_mission_templates for the schema).',
+        },
+      },
+      required: ['template'],
+    },
+  },
+  {
+    name: 'list_mission_templates',
+    description: 'List the Control Plane mission templates available to your agent and the parameters each one accepts.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'mission_status',
+    description: 'Check status, audit events, cost, and final result for a mission started via start_mission.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        mission_id: { type: 'string', description: 'Mission id from start_mission' },
+      },
+      required: ['mission_id'],
+    },
+  },
+  {
+    name: 'list_missions',
+    description: 'List recent missions in the current workspace (most recent first).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'number', description: 'Max rows (default 20, max 200)' },
+      },
+    },
+  },
+  // ============================================
   // CHAIN MANAGEMENT TOOLS
   // ============================================
   {
@@ -3131,9 +3178,121 @@ Docs: https://apiclaw.cloud
       }
 
       // ============================================
+      // CONTROL PLANE — MISSIONS
+      // ============================================
+
+      case 'list_mission_templates': {
+        const url = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const res = await fetch(`${url}/v1/missions/templates`);
+        const data = await res.json();
+        return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      }
+
+      case 'start_mission': {
+        const template = args?.template as string;
+        const params = (args?.params as Record<string, unknown>) ?? {};
+        if (!template) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'template is required', hint: 'call list_mission_templates' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const ctx = workspaceContext;
+        if (!ctx?.sessionToken) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated', hint: 'register_owner first' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const baseUrl = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const res = await fetch(`${baseUrl}/v1/missions/start`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-APIClaw-Session': ctx.sessionToken,
+          },
+          body: JSON.stringify({ template, params }),
+        });
+        const data = (await res.json()) as { missionId?: string; status?: string; isInternal?: boolean; poll?: string };
+        if (!res.ok) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+            isError: true,
+          };
+        }
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              ...data,
+              hint: `Poll with mission_status({ mission_id: "${data.missionId}" }) until status is "completed".`,
+            }, null, 2),
+          }],
+        };
+      }
+
+      case 'mission_status': {
+        const missionId = args?.mission_id as string;
+        if (!missionId) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'mission_id required' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const ctx = workspaceContext;
+        if (!ctx?.sessionToken) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const baseUrl = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const res = await fetch(`${baseUrl}/v1/missions/${encodeURIComponent(missionId)}`, {
+          headers: { 'X-APIClaw-Session': ctx.sessionToken },
+        });
+        const data = await res.json();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+          isError: !res.ok,
+        };
+      }
+
+      case 'list_missions': {
+        const limit = (args?.limit as number) ?? 20;
+        const ctx = workspaceContext;
+        if (!ctx?.sessionToken) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const baseUrl = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const res = await fetch(`${baseUrl}/v1/missions?limit=${limit}`, {
+          headers: { 'X-APIClaw-Session': ctx.sessionToken },
+        });
+        const data = await res.json();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+          isError: !res.ok,
+        };
+      }
+
+      // ============================================
       // CHAIN MANAGEMENT TOOLS
       // ============================================
-      
+
       case 'get_chain_status': {
         const chainId = args?.chain_id as string;
         

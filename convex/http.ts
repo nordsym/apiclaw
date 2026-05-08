@@ -1114,6 +1114,45 @@ http.route({
         (item) => !INTERNAL_ONLY_PROVIDERS.has((item.name || "").toLowerCase()),
       );
 
+      // Inbound discovery log to provider-owner workspaces (parity with MCP src/index.ts:1499).
+      // Without this, gateway/HTTP discoveries bypass partner dashboards.
+      // Keyword map mirrors the one in src/index.ts:1501 — keep in sync.
+      if (query) {
+        const PROVIDER_KEYWORDS: Record<string, string[]> = {
+          apilayer: ["exchange", "currency", "fixer", "weather", "ip", "geo", "flight", "aviation", "vat", "news", "scrape", "screenshot", "pdf", "email verif", "phone verif", "language", "user agent", "coinlayer", "marketstack", "positionstack", "ipstack", "mediastack", "serpstack", "userstack", "scrapestack", "weatherstack"],
+          filestack: ["file upload", "upload file", "file storage", "file picker", "image upload", "upload image", "file transform", "image transform", "resize image", "document upload", "upload document", "file delivery", "cdn upload", "file processing", "ocr", "virus scan", "file convert", "convert pdf", "filestack"],
+        };
+        const queryLower = String(query).toLowerCase();
+        const sessionToken = request.headers.get("X-APIClaw-Session");
+        const auth = request.headers.get("Authorization") || "";
+        // Best-effort caller workspace resolution — sessions or sk-claw-key
+        let callerWorkspaceId: string = "anonymous";
+        try {
+          if (sessionToken) {
+            const session = await ctx.runQuery(api.workspaces.getSession, { token: sessionToken });
+            if (session?.workspaceId) callerWorkspaceId = session.workspaceId as string;
+          } else if (auth.startsWith("Bearer sk-claw-")) {
+            const result = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey: auth.slice(7) });
+            if (result?.workspaceId) callerWorkspaceId = result.workspaceId as string;
+          }
+        } catch { /* ignore — anonymous fallback is fine for discovery */ }
+
+        for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
+          if (keywords.some((kw) => queryLower.includes(kw))) {
+            try {
+              await ctx.runMutation(api.providers.logDiscovery, {
+                provider,
+                query: String(query).substring(0, 100),
+                latencyMs: 0,
+                callerWorkspaceId,
+              });
+            } catch (e: any) {
+              console.error("[Discover] logDiscovery failed:", e?.message);
+            }
+          }
+        }
+      }
+
       return jsonResponse({
         apis: filteredApis,
         total: catalogData.total,
@@ -3938,6 +3977,23 @@ http.route({
         const response = await fetch(req.url, fetchOpts);
         const latencyMs = Date.now() - startTime;
 
+        // Inbound log to provider-owner workspace (parity with MCP src/index.ts:2192).
+        // Without this, gateway/HTTP calls bypass partner dashboards.
+        if (workspaceId) {
+          try {
+            await ctx.runMutation(api.logs.logProviderCall, {
+              provider,
+              action,
+              status: response.ok ? "success" : "error",
+              latencyMs,
+              callerWorkspaceId: workspaceId,
+              subagentId,
+            });
+          } catch (e: any) {
+            console.error("[Execute] logProviderCall failed:", e?.message);
+          }
+        }
+
         // Handle binary responses (audio, PDF, image, octet-stream)
         const contentType = response.headers.get("Content-Type") || "";
         const isBinary =
@@ -3985,9 +4041,23 @@ http.route({
           _apiclaw: { latencyMs, route: routeDetail, gateway: true },
         }, response.ok ? 200 : response.status);
       } catch (e: any) {
+        const latencyMs = Date.now() - startTime;
+        if (workspaceId) {
+          try {
+            await ctx.runMutation(api.logs.logProviderCall, {
+              provider,
+              action,
+              status: "error",
+              latencyMs,
+              callerWorkspaceId: workspaceId,
+              subagentId,
+              errorMessage: e?.message,
+            });
+          } catch {}
+        }
         return jsonResponse({
           success: false, provider, action, error: e.message,
-          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+          _apiclaw: { latencyMs, route: routeDetail, gateway: true },
         }, 500);
       }
     }
@@ -4487,6 +4557,145 @@ http.route({
 
 http.route({
   path: "/v1/call",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ============================================
+// CONTROL PLANE — MISSIONS
+// ============================================
+// `apiclaw mission ...` from CLI, `start_mission` from MCP, and POST from
+// /v1/missions/start over HTTP all funnel through here. Same auth, same
+// logs, same workspace boundaries as every other /v1/* endpoint.
+
+http.route({
+  path: "/v1/missions/templates",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const templates = await ctx.runQuery(api.missions.listTemplates, {});
+    return jsonResponse({ templates });
+  }),
+});
+
+http.route({
+  path: "/v1/missions/templates",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/v1/missions/start",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth.authMethod === "anonymous" || !auth.workspaceId) {
+      return unauthResponse("missions_require_auth");
+    }
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400);
+    }
+    const template = typeof body?.template === "string" ? body.template : "";
+    const params = body?.params && typeof body.params === "object" ? body.params : {};
+    if (!template) {
+      return jsonResponse({ error: { code: "missing_template", message: "Body must include { template }" } }, 400);
+    }
+    const initiatorMap: Record<string, string> = {
+      "api-key": "http",
+      session: "cli",
+      "mcp-oauth": "grok",
+      identifier: "http",
+    };
+    const initiator = initiatorMap[auth.authMethod] ?? "http";
+
+    try {
+      const created: any = await ctx.runMutation(api.missions.createMission, {
+        workspaceIdOverride: auth.workspaceId as any,
+        template,
+        params,
+        initiator,
+      });
+      // Fire-and-forget execution; CLI/MCP poll status separately.
+      ctx.runAction(api.missions.runMission, { missionId: created.missionId }).catch((e: any) => {
+        console.error("[missions] runMission failed:", e?.message);
+      });
+      return jsonResponse(
+        {
+          missionId: created.missionId,
+          status: created.status,
+          isInternal: created.isInternal,
+          poll: `/v1/missions/${created.missionId}`,
+        },
+        202
+      );
+    } catch (e: any) {
+      const msg = e?.message ?? "create_failed";
+      const code = msg.startsWith("unknown_template") ? 400 : 500;
+      return jsonResponse({ error: { code: msg.split(":")[0] || "create_failed", message: msg } }, code);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/missions/start",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+http.route({
+  path: "/v1/missions",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth.authMethod === "anonymous" || !auth.workspaceId) {
+      return unauthResponse("missions_require_auth");
+    }
+    const url = new URL(request.url);
+    const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10) || 50, 200);
+    const rows = await ctx.runQuery(api.missions.listForWorkspace, {
+      workspaceId: auth.workspaceId as any,
+      limit,
+    });
+    return jsonResponse({ missions: rows });
+  }),
+});
+
+http.route({
+  path: "/v1/missions",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// /v1/missions/<id> — single mission by ID. We use a pathPrefix so we can
+// pull the id from the URL.
+http.route({
+  pathPrefix: "/v1/missions/",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth.authMethod === "anonymous" || !auth.workspaceId) {
+      return unauthResponse("missions_require_auth");
+    }
+    const url = new URL(request.url);
+    const tail = url.pathname.replace(/^\/v1\/missions\//, "").replace(/\/$/, "");
+    if (!tail || tail === "templates" || tail === "start") {
+      return jsonResponse({ error: { code: "not_found", message: "Unknown subpath" } }, 404);
+    }
+    const data = await ctx.runQuery(api.missions.getMission, { missionId: tail as any });
+    if (!data || !data.mission) {
+      return jsonResponse({ error: { code: "not_found", message: "mission not found" } }, 404);
+    }
+    if (data.mission.workspaceId !== auth.workspaceId) {
+      return jsonResponse({ error: { code: "forbidden", message: "mission belongs to another workspace" } }, 403);
+    }
+    return jsonResponse({ mission: data.mission, events: data.events });
+  }),
+});
+
+http.route({
+  pathPrefix: "/v1/missions/",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });

@@ -8,8 +8,8 @@ import statsData from "@/lib/stats.json";
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export const metadata: Metadata = {
-  title: "APIClaw | The API Layer for AI Agents",
-  description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
+  title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
+  description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
   metadataBase: new URL("https://apiclaw.cloud"),
   icons: {
     icon: [
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "APIClaw | The API Layer for AI Agents",
-    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
+    title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
+    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
@@ -31,18 +31,18 @@ export const metadata: Metadata = {
         url: "/api/og?v=6",
         width: 1200,
         height: 630,
-        alt: "APIClaw - The API layer for AI agents",
+        alt: "APIClaw — The Control Plane for AI Agents",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "APIClaw | The API Layer for AI Agents",
-    description: `Your agent's API encyclopedia. Search by capability, call instantly. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`,
+    title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
+    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
     images: ["/api/og?v=6"],
     creator: "@nordsym",
   },
-  keywords: ["API", "AI agents", "MCP", "Claude", "GPT", "autonomous agents", "API discovery", "developer tools"],
+  keywords: ["control plane", "AI agents", "agent runtime", "MCP", "Grok", "Claude", "missions", "observability", "API gateway", "autonomous agents", "API discovery", "developer tools"],
   authors: [{ name: "NordSym", url: "https://nordsym.com" }],
   robots: "index, follow",
 };
@@ -55,7 +55,7 @@ const schemaOrg = {
       "@type": "WebSite",
       "name": "APIClaw",
       "url": "https://apiclaw.cloud",
-      "description": `Your agent's API encyclopedia. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP native.`
+      "description": `The control plane for AI agents. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP, CLI, HTTP, and Grok-ready.`
     },
     {
       "@type": "Organization",
@@ -67,7 +67,7 @@ const schemaOrg = {
       "name": "APIClaw",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
-      "description": `The API layer for AI agents. ${statsData.callableCount.toLocaleString()} callable APIs, ${statsData.endpointCount.toLocaleString()} endpoints, ${statsData.capabilityCount} capability categories. MCP native.`,
+      "description": `The control plane for AI agents. Terminal-native execution, parallel missions, real observability. ${statsData.callableCount.toLocaleString()} callable APIs across ${statsData.endpointCount.toLocaleString()} endpoints and ${statsData.capabilityCount} capability categories.`,
       "offers": {
         "@type": "Offer",
         "price": "0",

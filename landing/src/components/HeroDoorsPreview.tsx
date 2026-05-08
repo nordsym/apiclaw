@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bot, Code2, KeyRound, ArrowDown } from "lucide-react";
+import { Bot, Code2, KeyRound, ArrowDown, Sparkles } from "lucide-react";
 
 type Door = {
-  id: "mcp" | "cli" | "http";
+  id: "mcp" | "cli" | "http" | "grok";
   label: string;
   audience: string;
   icon: React.ReactNode;
@@ -41,10 +41,10 @@ const DOORS: Door[] = [
     code: (
       <>
         <span className="text-text-muted">$ </span>
-        <span className="text-text-primary">apiclaw call </span>
-        <span className="text-accent">elevenlabs/tts</span>
-        <span className="text-text-primary"> -d </span>
-        <span className="text-accent">{`'{"text":"…"}'`}</span>
+        <span className="text-text-primary">apiclaw mission start </span>
+        <span className="text-accent">genprd</span>
+        <span className="text-text-primary"> --topic </span>
+        <span className="text-accent">{`"checkout flow"`}</span>
       </>
     ),
   },
@@ -60,6 +60,23 @@ const DOORS: Door[] = [
         <span className="text-accent">api.apiclaw.cloud/v1/call</span>{"\n"}
         <span className="text-text-muted">Authorization: </span>
         <span className="text-accent">Bearer sk-claw-…</span>
+      </>
+    ),
+  },
+  {
+    id: "grok",
+    label: "Grok / Agent Native Runtime",
+    audience: "full control plane access · missions · parallel execution",
+    icon: <Sparkles className="w-4 h-4" />,
+    code: (
+      <>
+        <span className="text-text-muted">{"// remote MCP — paste the URL, OAuth handles the rest"}</span>{"\n"}
+        <span className="text-text-primary">POST </span>
+        <span className="text-accent">apiclaw.cloud/mcp</span>{"\n"}
+        <span className="text-text-muted">Authorization: </span>
+        <span className="text-accent">Bearer sk-mcp-…</span>{"\n"}
+        <span className="text-accent">tools/call </span>
+        <span className="text-text-secondary">{"→ start_mission, call_api, …"}</span>
       </>
     ),
   },
@@ -95,7 +112,7 @@ export function HeroDoorsPreview() {
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-border-subtle bg-surface">
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-text-muted font-semibold">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Three doors · one layer
+            Four doors · one control plane
           </div>
           <div className="text-[10px] text-text-muted hidden sm:block">
             {paused ? "paused" : "auto-rotate"}

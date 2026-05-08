@@ -13,6 +13,7 @@ import { restoreCommand } from './commands/restore.js';
 import { uninstallCommand } from './commands/uninstall.js';
 import { loginCommand } from './commands/login.js';
 import { demoCommand } from './commands/demo.js';
+import { missionCommand } from './commands/mission.js';
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
@@ -138,6 +139,25 @@ program
   .option('-c, --client <client>', 'Target specific client (claude-desktop, claude-code)')
   .option('--dry-run', 'Show what would be done without making changes')
   .action(uninstallCommand);
+
+// Control Plane — Missions
+//
+// Run an orchestration on APIClaw's runtime. Subcommands:
+//   apiclaw mission templates                     # show registered templates
+//   apiclaw mission start <template> [--key val]  # queue a mission
+//   apiclaw mission watch <id>                    # tail events live
+//   apiclaw mission status <id>                   # final state + result
+//   apiclaw mission list                          # recent missions
+program
+  .command('mission [subcommand] [args...]')
+  .description('Control Plane: run, watch, and inspect missions on APIClaw\'s runtime')
+  .allowUnknownOption(true)
+  .action(async (subcommand: string | undefined, args: string[]) => {
+    const argv: string[] = [];
+    if (subcommand) argv.push(subcommand);
+    if (Array.isArray(args)) argv.push(...args);
+    await missionCommand(argv);
+  });
 
 // Parse and execute
 program.parse();

@@ -192,12 +192,13 @@ export default function Home() {
     const callable = statsData.callableCount.toLocaleString();
     const total = statsData.apiCount.toLocaleString();
     const managed = statsData.managedCount;
-    const context = `APIClaw is the API layer for AI agents. One unified gateway that gives an agent access to ${total}+ APIs across LLMs, voice, search, email, SMS, code execution, web scraping, payments, and more. ${callable}+ are callable instantly through APIClaw, ${managed} of those with managed keys (zero config on your side).
+    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability — one unified runtime layer that gives an agent access to ${total}+ APIs across LLMs, voice, search, email, SMS, code execution, web scraping, payments, and more. ${callable}+ are callable instantly through APIClaw, ${managed} of those with managed keys (zero config on your side).
 
-Three ways to use APIClaw:
-1. MCP server. Drop it into Claude Desktop, Cursor, or any MCP-compatible client. Tools: discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost.
-2. CLI. Install npm i -g @nordsym/apiclaw, then call any provider from a shell or CI job: apiclaw call <provider>/<action> -d '{...}'.
-3. Workspace key (HTTP). For agent builders shipping their own product. POST https://api.apiclaw.cloud/v1/call with header Authorization: Bearer sk-claw-..., body { provider, action, params }. Same gateway, same auth, same logs as the MCP path.
+Four doors, one control plane:
+1. MCP server. Drop it into Claude Desktop, Cursor, or any MCP-compatible client. Tools: discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost, start_mission, mission_status, list_missions, list_mission_templates.
+2. CLI. Install npm i -g @nordsym/apiclaw, then call any provider from a shell or CI job: apiclaw call <provider>/<action> -d '{...}'. Run full orchestrations with apiclaw mission start <template> --<key> <value>.
+3. Workspace key (HTTP). For agent builders shipping their own product. POST https://api.apiclaw.cloud/v1/call with header Authorization: Bearer sk-claw-..., body { provider, action, params }. Same gateway, same auth, same logs.
+4. Grok / Agent-Native Runtime (remote MCP). Paste https://apiclaw.cloud/mcp into Grok, Cursor, ChatGPT, Claude Desktop, or any OAuth-MCP client. RFC 7591 dynamic registration + PKCE + email-verified consent — full control plane access with missions and parallel execution.
 
 OpenAI-compatible gateway also available at https://api.apiclaw.cloud/v1/chat/completions for any tool that speaks the OpenAI Chat API. Per-request model routing via the X-APIClaw-Route header (auto, fastest, best_price, or a specific provider like groq, mistral, openrouter).
 
@@ -476,20 +477,23 @@ Full docs: https://apiclaw.cloud/docs.`;
                   onClick={() => setShowProvidersModal(true)}
                   className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Managed: AI Models, Web Scraping, Code Execution &amp; more</span></span>
+                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Managed APIs · now with full agent runtime &amp; control plane</span></span>
                 </button>
+                <span className="badge inline-flex bg-text-primary text-background border-text-primary">
+                  <span className="flex items-center gap-2 font-semibold"><Sparkles className="w-3 h-3" />The runtime every AI agent actually wants</span>
+                </span>
               </div>
-              
+
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-[1.05] tracking-tighter">
-                <span className="gradient-text">The API Layer</span>
+                <span className="gradient-text">The Control Plane</span>
                 <br />
                 <span className="text-text-primary">for AI Agents</span>
               </h1>
-              
+
               <p className="text-lg sm:text-xl md:text-2xl text-text-secondary mb-3 sm:mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Find, evaluate, and integrate APIs in milliseconds.
+                Terminal-native execution. Parallel missions. Real observability. One unified layer.
               </p>
-              
+
               <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
                 <span className="text-accent font-medium">Managed APIs:</span> No API keys. No setup. Just call.
               </p>
@@ -532,7 +536,7 @@ Full docs: https://apiclaw.cloud/docs.`;
               </div>
             </div>
 
-            {/* Right: Three Doors preview */}
+            {/* Right: Four Doors preview */}
             <HeroDoorsPreview />
           </div>
         </div>
@@ -541,7 +545,7 @@ Full docs: https://apiclaw.cloud/docs.`;
       {/* Stats */}
       <section className="py-16 px-6 bg-surface/50">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {stats.map((stat, i) => (
               <div
                 key={i}
@@ -671,7 +675,7 @@ Full docs: https://apiclaw.cloud/docs.`;
         </div>
       )}
 
-      {/* Install — Three Doors + OS-aware quick install + .mcpb */}
+      {/* Install — Four Doors + OS-aware quick install + .mcpb */}
       <InstallSection />
 
       <div className="divider" />
@@ -764,7 +768,7 @@ Full docs: https://apiclaw.cloud/docs.`;
 
             <div className="code-preview">
               <div className="code-preview-header">
-                same flow · three doors
+                same flow · four doors · one control plane
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm">
@@ -972,11 +976,11 @@ Full docs: https://apiclaw.cloud/docs.`;
             {[
               {
                 q: "What is APIClaw?",
-                a: `APIClaw is the API layer for AI agents. Your agent queries by capability (for example "I need image generation"), gets ranked matches with metadata and pricing, and can call APIs directly through us with no keys needed.`
+                a: `APIClaw is the control plane for AI agents. One unified runtime that gives your agent terminal-native execution, parallel missions, real observability, and access to thousands of APIs through a single layer. Your agent queries by capability, runs missions, and calls APIs directly with no keys needed.`
               },
               {
                 q: "How does my agent actually call APIClaw?",
-                a: `Three doors, same gateway. (1) MCP server: drop APIClaw into Claude Desktop, Cursor, or any MCP client and your agent gets eight tools (discover_apis, call_api, get_api_details, list_connected, list_categories, capability, check_balance, estimate_cost). (2) CLI: install with npm and call providers from a terminal or CI job. (3) Workspace key: build your own agent and POST to api.apiclaw.cloud/v1/call with a Bearer sk-claw- key. Same APIs, same auth, same logs across all three.`
+                a: `Four doors, one control plane. (1) MCP server: drop APIClaw into Claude Desktop, Cursor, or any MCP client and your agent gets the discovery + call_api + start_mission tool surface. (2) CLI: install with npm and run discover, call, or full missions (apiclaw mission start <name>) from a terminal or CI. (3) Workspace key: build your own agent and POST to api.apiclaw.cloud/v1/call with a Bearer sk-claw- key. (4) Grok / Agent-Native Runtime: paste apiclaw.cloud/mcp into Grok (or any OAuth-MCP client) for full control plane access — missions, parallel execution, observability. Same APIs, same auth, same logs across all four.`
               },
               {
                 q: "How do Managed APIs work?",
@@ -996,7 +1000,7 @@ Full docs: https://apiclaw.cloud/docs.`;
               },
               {
                 q: "Do I have to use MCP?",
-                a: `No. MCP is one of three doors. If you are running Claude Desktop or Cursor, MCP is the easiest path. If you are scripting from a terminal, use the CLI. If you are building your own agent or backend, use a workspace key and POST to /v1/call. The MCP path is most popular but the choice is yours.`
+                a: `No. MCP is one of four doors. If you are running Claude Desktop or Cursor, local MCP is the easiest path. If you are scripting from a terminal, use the CLI (which now also runs full missions). If you are building your own agent or backend, use a workspace key and POST to /v1/call. If you are on Grok or any other OAuth-MCP client, paste apiclaw.cloud/mcp and OAuth handles the rest — full control plane access. Pick the door that fits your stack; the runtime is identical underneath.`
               },
               {
                 q: "How do I add my API?",
@@ -1040,8 +1044,8 @@ Full docs: https://apiclaw.cloud/docs.`;
                 <span className="font-bold text-xl tracking-tight">APIClaw</span>
               </div>
               <p className="text-text-muted mb-6 max-w-sm leading-relaxed">
-                The API layer for AI agents. 
-                Find, evaluate, and integrate APIs in milliseconds.
+                The Control Plane for AI Agents.
+                Terminal-native execution, parallel missions, real observability.
               </p>
               <div className="flex items-center gap-3">
                 <a

@@ -1020,6 +1020,52 @@ export default defineSchema({
     .index("by_code", ["code"])
     .index("by_workspaceId", ["workspaceId"]),
 
+  // ============================================
+  // CONTROL PLANE — MISSIONS
+  // ============================================
+  // A mission is a single orchestration unit (one-or-many tool/API calls
+  // executed under a named template). Powers the CLI `apiclaw mission start`,
+  // the MCP `start_mission` tool, and the Grok runtime experience.
+  // Architecturally ready for parallel sub-tasks; v1 runs sequentially.
+  missions: defineTable({
+    workspaceId: v.id("workspaces"),
+    template: v.string(),                  // "genprd" | future templates
+    title: v.string(),                     // human-readable summary
+    status: v.string(),                    // "queued" | "running" | "completed" | "failed" | "cancelled"
+    params: v.any(),                       // input args (JSON)
+    result: v.optional(v.any()),           // final output once completed
+    error: v.optional(v.string()),         // error message if failed
+    initiator: v.string(),                 // "cli" | "mcp" | "http" | "grok"
+    clientId: v.optional(v.string()),      // OAuth client_id when initiator=mcp/grok
+    parentMissionId: v.optional(v.id("missions")), // parallel sub-mission support
+    underlyingCostUsd: v.optional(v.float64()),    // raw API cost (for billing)
+    chargedCostUsd: v.optional(v.float64()),       // underlying + 15% (0 for internal workspaces)
+    isInternal: v.boolean(),               // true = NordSym workspace, no margin charged
+    createdAt: v.number(),
+    startedAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_status", ["status"])
+    .index("by_template", ["template"])
+    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"]),
+
+  // Per-mission audit log. Real observability, not magic. Every step a
+  // mission takes (LLM call, API call, sub-task spawn, error) writes a row.
+  missionEvents: defineTable({
+    missionId: v.id("missions"),
+    workspaceId: v.id("workspaces"),
+    type: v.string(),                      // "step_start" | "tool_call" | "api_call" | "step_complete" | "log" | "cost"
+    label: v.string(),                     // short human label
+    data: v.optional(v.any()),             // freeform per-event payload
+    durationMs: v.optional(v.number()),
+    costUsd: v.optional(v.float64()),
+    timestamp: v.number(),
+  })
+    .index("by_missionId", ["missionId"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_missionId_timestamp", ["missionId", "timestamp"]),
+
   // Bearer access + refresh tokens (hashed, never stored raw).
   mcpOAuthTokens: defineTable({
     tokenHash: v.string(),                 // hash of the bearer token
