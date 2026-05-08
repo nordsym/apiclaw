@@ -202,7 +202,7 @@ Four doors, one control plane:
 
 Same auth, same logs, same workspace across all four.
 
-Agent surface: discover_apis, get_api_details, call_api, list_connected, list_categories, capability, check_balance, estimate_cost, start_mission, mission_status, list_missions, list_mission_templates.
+Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_connected, list_capabilities, list_models, call_api, capability, check_balance, estimate_cost, get_usage_summary, check_workspace_status, get_chain_status, resume_chain, start_mission, mission_status, list_missions, list_mission_templates, apiclaw_help.
 
 Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a template — for example genprd to generate a structured PRD — more land regularly.
 
@@ -736,12 +736,11 @@ Install:
               </div>
               
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
-                Your agent's API encyclopedia
+                One runtime. Every model. Every API.
               </h2>
-              
+
               <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-                Stop hardcoding API choices. Let your agent discover the best API 
-                for each task dynamically, with full pricing and capability data.
+                Stop hardcoding provider choices. Your agent discovers the right capability, calls the right model, and runs full missions through one unified control plane — with cost, latency, and audit logs tagged per call.
               </p>
 
               <div className="space-y-6 mb-8">
@@ -979,35 +978,39 @@ Install:
             {[
               {
                 q: "What is APIClaw?",
-                a: `APIClaw is the control plane for AI agents. One unified runtime that gives your agent terminal-native execution, parallel missions, real observability, and access to thousands of APIs through a single layer. Your agent queries by capability, runs missions, and calls APIs directly with no keys needed.`
+                a: `The Control Plane for AI Agents. One runtime that exposes every model and every API your agent needs through a single workspace — discovery, execution, capability routing, multi-step missions, and observability. Same auth, same logs, same billing, regardless of how you connect.`
               },
               {
-                q: "How does my agent actually call APIClaw?",
-                a: `Four doors, one control plane. (1) MCP server: drop APIClaw into Claude Desktop, Cursor, or any MCP client and your agent gets the discovery + call_api + start_mission tool surface. (2) CLI: install with npm and run discover, call, or full missions (apiclaw mission start <name>) from a terminal or CI. (3) Workspace key: build your own agent and POST to api.apiclaw.cloud/v1/call with a Bearer sk-claw- key. (4) Grok / Agent-Native Runtime: paste apiclaw.cloud/mcp into Grok (or any OAuth-MCP client) for full control plane access — missions, parallel execution, observability. Same APIs, same auth, same logs across all four.`
+                q: "How does my agent connect to APIClaw?",
+                a: `Four doors, one control plane. (1) MCP — drop APIClaw into Claude Desktop, Cursor, or any local MCP client. (2) CLI — npm install -g @nordsym/apiclaw and run discover, call, or full missions from a shell. (3) HTTP gateway — Bearer sk-claw-… against api.apiclaw.cloud, the endpoint your runtime is already wired for (OpenClaw, Hermes, n8n, custom backends). (4) Remote MCP — paste apiclaw.cloud/mcp into Grok, ChatGPT, or any OAuth-MCP client; PKCE + dynamic registration handles the rest. Identical workspace, identical auth, identical logs across all four.`
               },
               {
-                q: "How do Managed APIs work?",
-                a: `Managed APIs let your agent use APIs without you handling any keys. APIClaw owns the credentials, runs the auth server-side, and proxies the call. Your agent just asks for the capability and gets the answer. Currently live for OpenRouter (800+ models), Groq, Mistral, Together AI, Cohere, Voyage AI, Replicate (1000+ ML models), Stability AI, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (27 APIs). New providers added regularly.`
+                q: "Which models can I call?",
+                a: `Every major LLM family through one bearer: Anthropic (Claude Opus/Sonnet/Haiku), OpenAI, xAI / Grok, Groq, Mistral, Together AI, Cohere, Replicate, plus 800+ more via OpenRouter. Outside LLMs: ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (27 APIs). list_models returns the live catalog. The OpenAI-compatible /v1/chat/completions endpoint accepts any model id from that list.`
               },
               {
-                q: "How are API credentials secured?",
-                a: "All credentials are encrypted with AES-256-GCM before storage. Keys are never logged or exposed in responses. Managed API requests are proxied server-side, your credentials never touch the agent. We take security seriously."
+                q: "What are missions?",
+                a: `Missions are structured, observable orchestrations on APIClaw's runtime. Templates declare the steps; the runtime executes them with full audit log, cost tracking, and parallel-execution-ready architecture. Each mission has a unique id, a status (queued / running / completed / failed), a per-step event log, and an underlying + charged cost. CLI: apiclaw mission start <template>. MCP: start_mission. HTTP: POST /v1/missions/start.`
+              },
+              {
+                q: "How are credentials secured?",
+                a: `Provider credentials live server-side. Workspace API keys (sk-claw-…) are stored as one-way hashes; the raw value is shown once at creation and never again. Managed-provider keys are encrypted at rest and never touch the agent. Per-request audit logs tag workspace + provider + cost + latency without exposing secrets.`
               },
               {
                 q: "What does it cost?",
-                a: `Free tier: 25 API calls per month, any provider, email signup required (no card). Discovery (search, list, capability lookups) is always free and unmetered, even past 25 calls. Past the free tier: pay-as-you-go at the underlying API cost plus 15%, fully transparent, no commitment. For API owners, listing is always free.`
+                a: `Free tier: 25 calls per month after email signup, any provider counts equally. Discovery (search, list, get_api_details) is always free and unmetered. Beyond the free tier: pay-as-you-go at underlying provider cost + 15%, billed via Stripe. No commitment. Internal NordSym workspaces run at zero margin (canon).`
               },
               {
                 q: "Do I have to sign up to use APIClaw?",
-                a: `Discovery and search work without signup. Calling an API requires a workspace, which is a free email signup at apiclaw.cloud/workspace. After signup you can authenticate any of three ways: (1) paste your sk-claw-… key into your MCP client config, (2) run "apiclaw login" in a terminal for browser-based session auth, or (3) pass the key as Authorization: Bearer when you call /v1/call from your own backend. Same workspace, same 25 free calls per month, you pick the door.`
+                a: `Discovery works without signup. Execution requires a workspace, which is a free email signup at apiclaw.cloud/workspace. Once you have one, all four doors share the same workspace — paste an sk-claw-… key into MCP config, run apiclaw login in a terminal, send Authorization: Bearer from your backend, or authorize a Remote MCP client over OAuth.`
               },
               {
-                q: "Do I have to use MCP?",
-                a: `No. MCP is one of four doors. If you are running Claude Desktop or Cursor, local MCP is the easiest path. If you are scripting from a terminal, use the CLI (which now also runs full missions). If you are building your own agent or backend, use a workspace key and POST to /v1/call. If you are on Grok or any other OAuth-MCP client, paste apiclaw.cloud/mcp and OAuth handles the rest — full control plane access. Pick the door that fits your stack; the runtime is identical underneath.`
+                q: "I'm building my own agent runtime. Why would I use APIClaw?",
+                a: `Because you don't want to write provider routing, key vault, retry logic, circuit breakers, observability, billing, and rate limits from scratch. The HTTP gateway is OpenAI-compatible, so OpenClaw, Hermes, LangChain agents, n8n flows, and custom backends drop in by changing the base URL. You get one bearer, one workspace, every model — and the same control plane your end users are using.`
               },
               {
                 q: "How do I add my API?",
-                a: "Go to your Workspace, sign up with your email, and follow the self-service onboarding. Your API will be discoverable by AI agents immediately. Want to become a managed partner? Set that up in your Workspace too."
+                a: `Go to /workspace, sign in with email, follow the self-service onboarding. Your API is discoverable by agents immediately. To become a managed partner with revenue share, that path is in the same workspace.`
               }
             ].map((faq, i) => (
               <div 

@@ -60,6 +60,18 @@ export const CANONICAL_MCP_TOOLS = [
     description: "List capability shortcuts (e.g. 'currency_convert', 'web_search', 'tts') that route to the best provider automatically.",
     inputSchema: { type: "object", properties: {} },
   },
+  // ----- MODELS -----
+  {
+    name: "list_models",
+    description:
+      "List every LLM the workspace can call through APIClaw — Anthropic, OpenAI, xAI/Grok, Groq, Mistral, Together, Cohere, Replicate, OpenRouter (800+ more), and any provider routed via the unified gateway. Returns OpenAI-compatible model objects.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        provider: { type: "string", description: "Optional: filter to one provider (anthropic, openai, xai, groq, mistral, together, openrouter, …)" },
+      },
+    },
+  },
   // ----- EXECUTION -----
   {
     name: "call_api",
@@ -221,6 +233,19 @@ export async function dispatchCanonicalTool(
         docs: "https://apiclaw.cloud/docs",
         catalog: "https://apiclaw.cloud/catalog",
       };
+
+    // Models
+    case "list_models": {
+      const q = args.provider ? `?provider=${encodeURIComponent(String(args.provider))}` : "";
+      const res = await fetch(`${SITE_URL}/v1/models${q}`, {
+        headers: {
+          Authorization: `Bearer ${ctx.bearer}`,
+          "X-APIClaw-Source": "remote-mcp",
+        },
+      });
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { return text; }
+    }
 
     // Discovery
     case "discover_apis":

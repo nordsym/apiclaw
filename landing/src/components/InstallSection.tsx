@@ -12,11 +12,12 @@ import {
   Bot,
   Code2,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import statsData from "@/lib/stats.json";
 
 type OS = "mac" | "win" | "linux" | "unknown";
-type Door = "mcp" | "cli" | "workspace";
+type Door = "mcp" | "cli" | "workspace" | "remote";
 
 const ONE_LINERS: Record<OS, { label: string; cmd: string; sub?: string }> = {
   mac: {
@@ -101,11 +102,10 @@ export function InstallSection() {
         <div className="text-center mb-10 sm:mb-12">
           <span className="section-label">INSTALL</span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 tracking-tighter">
-            Three doors. One layer.
+            Four doors. One control plane.
           </h2>
           <p className="text-text-secondary text-base sm:text-lg mt-3 sm:mt-4 max-w-2xl mx-auto">
-            Use APIClaw whichever way fits your stack — MCP client, terminal, or your own
-            agent calling the gateway. Same APIs, same auth, same logs.
+            Pick the entry point that fits your stack — local MCP client, terminal, your own backend, or a remote OAuth-MCP runtime. Identical workspace, identical auth, identical logs underneath.
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export function InstallSection() {
           </div>
         </div>
 
-        {/* Three doors tabs */}
+        {/* Four doors tabs */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 sm:gap-6">
           <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible -mx-4 px-4 lg:mx-0 lg:px-0">
             <DoorTab
@@ -178,24 +178,32 @@ export function InstallSection() {
               onClick={() => setDoor("mcp")}
               icon={<Bot className="w-5 h-5" />}
               title="MCP"
-              subtitle="Claude Desktop, Cursor"
-              audience="For humans running existing AI clients."
+              subtitle="Claude Desktop, Cursor, local clients"
+              audience="Humans running an existing AI client."
             />
             <DoorTab
               active={door === "cli"}
               onClick={() => setDoor("cli")}
               icon={<Code2 className="w-5 h-5" />}
               title="CLI"
-              subtitle="Terminal, scripts, CI"
-              audience="For devs in a shell."
+              subtitle="Terminal, scripts, CI/CD"
+              audience="Engineers in a shell or pipeline."
             />
             <DoorTab
               active={door === "workspace"}
               onClick={() => setDoor("workspace")}
               icon={<KeyRound className="w-5 h-5" />}
-              title="Workspace Key"
-              subtitle="Hosted /v1/call · sk-claw-…"
-              audience="For agent builders shipping their own product."
+              title="HTTP Gateway"
+              subtitle="OpenAI-compatible · sk-claw-…"
+              audience="Agent runtimes shipping their own product (OpenClaw, Hermes, your stack)."
+            />
+            <DoorTab
+              active={door === "remote"}
+              onClick={() => setDoor("remote")}
+              icon={<Sparkles className="w-5 h-5" />}
+              title="Remote MCP"
+              subtitle="apiclaw.cloud/mcp · OAuth"
+              audience="Grok, ChatGPT, Cursor remote — paste one URL."
             />
           </div>
 
@@ -203,6 +211,7 @@ export function InstallSection() {
             {door === "mcp" && <DoorMCP />}
             {door === "cli" && <DoorCLI />}
             {door === "workspace" && <DoorWorkspace />}
+            {door === "remote" && <DoorRemote />}
           </div>
         </div>
       </div>
@@ -356,18 +365,63 @@ function DoorCLI() {
   );
 }
 
+function DoorRemote() {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
+          Remote MCP — full runtime over OAuth
+        </h3>
+        <p className="text-text-secondary text-sm sm:text-base">
+          Paste one URL into Grok, ChatGPT, Cursor (remote), Claude Desktop, or any OAuth-aware MCP client. RFC 7591 dynamic registration + PKCE + email-verified consent — the client auto-discovers, registers itself, and gets the full control plane: discovery, execution, capability routing, missions, observability.
+        </p>
+      </div>
+
+      <div>
+        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
+          Paste this into your client
+        </div>
+        <CopyableLine cmd="https://apiclaw.cloud/mcp" prompt="MCP" />
+      </div>
+
+      <div>
+        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
+          What the client receives
+        </div>
+        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`tools/list  →  19 tools
+  discover_apis · get_api_details · list_models
+  call_api · capability · check_balance
+  start_mission · mission_status · …
+
+initialize  →  full Control Plane handshake
+auth        →  Bearer sk-mcp-…  (OAuth 2.1, PKCE, DCR)`}</pre>
+      </div>
+
+      <div>
+        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
+          Pre-shared credentials (alternative to OAuth)
+        </div>
+        <a
+          href="/workspace/integrations"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface hover:border-accent/40 text-text-primary text-sm font-medium transition"
+        >
+          Generate a connector
+          <ArrowRight className="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function DoorWorkspace() {
   return (
     <div className="space-y-5">
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          Workspace Key — for agent builders
+          HTTP Gateway — every model, one endpoint
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
-          Shipping your own agent? Give it API access without making every user install
-          anything. One key on your server, your agent calls{" "}
-          <code className="font-mono text-accent">/v1/call</code>, you handle the user
-          experience. The agent-economy primitive.
+          The endpoint your agent runtime is already wired for. Anthropic, xAI / Grok, Groq, Mistral, Together, Cohere, OpenRouter (800+), Replicate, ElevenLabs — every model and every provider in the catalog reachable from one base URL with one bearer key. Drop it in behind OpenClaw, Hermes, n8n, your own backend — APIClaw routes the request, holds the credentials, returns the result.
         </p>
       </div>
 
@@ -390,35 +444,48 @@ function DoorWorkspace() {
 
       <div>
         <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Call any API from any language
+          Any model, one call (OpenAI-compatible Chat API)
         </div>
-        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`curl https://api.apiclaw.cloud/v1/call \\
-  -H "Authorization: Bearer sk-claw-..." \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "provider": "replicate",
-    "action": "flux-pro",
-    "params": { "prompt": "a coffee mug" }
-  }'`}</pre>
+        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`POST https://api.apiclaw.cloud/v1/chat/completions
+Authorization: Bearer sk-claw-…
+
+{
+  "model": "anthropic/claude-sonnet-4-6",
+  // or "xai/grok-4-fast", "groq/llama-3.3-70b",
+  // or "openrouter/auto", "mistral/codestral",
+  // or any model returned by /v1/models
+  "messages": [{ "role": "user", "content": "..." }]
+}`}</pre>
+      </div>
+
+      <div>
+        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
+          Anything else: /v1/call routes by provider + action
+        </div>
+        <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`POST https://api.apiclaw.cloud/v1/call
+Authorization: Bearer sk-claw-…
+
+{ "api": "replicate", "path": "/predictions",
+  "method": "POST", "body": { "version": "...", "input": {...} } }`}</pre>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-2 text-[11px]">
         <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Server-side keys</div>
+          <div className="text-text-primary font-semibold mb-0.5">Drop-in for any agent runtime</div>
           <div className="text-text-muted leading-snug">
-            Your key never reaches end users.
+            OpenClaw, Hermes, custom — swap the base URL, ship.
           </div>
         </div>
         <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Per-call analytics</div>
+          <div className="text-text-primary font-semibold mb-0.5">Server-side credentials</div>
+          <div className="text-text-muted leading-snug">
+            Provider keys never reach end users.
+          </div>
+        </div>
+        <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
+          <div className="text-text-primary font-semibold mb-0.5">Per-call observability</div>
           <div className="text-text-muted leading-snug">
             Cost, provider, latency tagged per workspace.
-          </div>
-        </div>
-        <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">SSRF + circuit-breaker</div>
-          <div className="text-text-muted leading-snug">
-            Provider failures isolated, never bubble to your app.
           </div>
         </div>
       </div>

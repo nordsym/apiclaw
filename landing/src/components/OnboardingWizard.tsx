@@ -264,7 +264,7 @@ function BuildingStep({ value, setValue, onSubmit, busy }: {
 }
 
 function ShareStep({ onNext }: { onNext: () => void }) {
-  const tweet = "APIClaw gives my AI agent access to 26,704+ APIs through one gateway. Three doors: MCP / CLI / HTTP. https://apiclaw.cloud";
+  const tweet = "APIClaw — the Control Plane for AI Agents. Every model, every API, one runtime. Four doors (MCP · CLI · HTTP · Remote MCP), one workspace. https://apiclaw.cloud";
   const xUrl = `https://x.com/intent/post?text=${encodeURIComponent(tweet)}`;
 
   const star = () => {

@@ -25,7 +25,7 @@ export function ShareIntegrationModal({
 
   if (!isOpen) return null;
 
-  const providerUrl = `https://apiclaw.com/providers/${apiSlug}`;
+  const providerUrl = `https://apiclaw.cloud/providers/${apiSlug}`;
   
   const twitterText = `🦞 ${apiName} is now on @APIClaw!
 
@@ -37,16 +37,14 @@ ${providerUrl}
 
 #AI #API #AIAgents`;
 
-  const linkedinText = `Excited to announce that ${providerName} is now available on APIClaw — the API layer for autonomous AI agents.
+  const linkedinText = `Excited to announce that ${providerName} is now available on APIClaw — the Control Plane for AI Agents.
 
-This means AI agents can now integrate ${apiName} directly into their workflows.
+AI agents can now reach ${apiName} through the same unified runtime they already use for execution, missions, and observability.
 
-We're proud to be among the first providers on this platform. The future of API consumption is autonomous.
-
-🦞 ${providerUrl}`;
+We're proud to be among the providers on this platform. ${providerUrl}`;
 
   const badgeCode = `<a href="${providerUrl}" target="_blank" rel="noopener">
-  <img src="https://apiclaw.com/badges/available-on-apiclaw.svg" 
+  <img src="https://apiclaw.cloud/badges/available-on-apiclaw.svg" 
        alt="Available on APIClaw" 
        width="220" height="44" />
 </a>`;
