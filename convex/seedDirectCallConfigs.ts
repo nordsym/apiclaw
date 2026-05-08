@@ -72,7 +72,7 @@ const API_CONFIGS: Record<string, {
     ],
   },
   "VAT Layer": {
-    baseUrl: "https://api.apilayer.com/vat_layer",
+    baseUrl: "https://apilayer.net/api",
     actions: [
       { name: "vat_check", displayName: "Validate VAT", description: "Validate EU VAT number", method: "GET", path: "/validate", params: [
         { name: "vat_number", type: "string", required: true, description: "VAT number to validate", in: "query" },
@@ -96,7 +96,7 @@ const API_CONFIGS: Record<string, {
     ],
   },
   "Advanced Scraper API": {
-    baseUrl: "https://api.apilayer.com/adv_scraper",
+    baseUrl: "https://api.apilayer.com",
     actions: [
       { name: "scrape", displayName: "Scrape URL", description: "Scrape web page content", method: "GET", path: "/scraper", params: [
         { name: "url", type: "string", required: true, description: "URL to scrape", in: "query" },
@@ -251,6 +251,138 @@ const API_CONFIGS: Record<string, {
     ],
   },
 };
+
+/**
+ * Seed Direct Call configs for any provider by ID.
+ * Run: npx convex run seedDirectCallConfigs:seedForProvider '{"providerId":"<id>"}'
+ */
+export const seedForProvider = mutation({
+  args: { providerId: v.string() },
+  handler: async (ctx, args) => {
+    const providerId = args.providerId as any;
+    const now = Date.now();
+
+    const apis = await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_providerId", (q: any) => q.eq("providerId", providerId))
+      .collect();
+
+    let configsCreated = 0;
+    let actionsCreated = 0;
+    let skipped = 0;
+
+    for (const api of apis) {
+      const config = API_CONFIGS[api.name];
+      if (!config) { skipped++; continue; }
+
+      const existing = await ctx.db
+        .query("providerDirectCall")
+        .withIndex("by_apiId", (q: any) => q.eq("apiId", api._id))
+        .first();
+
+      let directCallId;
+      if (existing) {
+        await ctx.db.patch(existing._id, { status: "live", updatedAt: now, publishedAt: now });
+        directCallId = existing._id;
+      } else {
+        directCallId = await ctx.db.insert("providerDirectCall", {
+          providerId,
+          apiId: api._id,
+          baseUrl: config.baseUrl,
+          authType: "bearer",
+          authHeader: "apikey",
+          authPrefix: "",
+          encryptedMasterKey: "managed-by-apiclaw",
+          rateLimitPerUser: 60,
+          rateLimitPerDay: 1000,
+          pricePerRequest: 0,
+          status: "live",
+          allowCustomerKeys: false,
+          requireCustomerKeys: false,
+          createdAt: now,
+          updatedAt: now,
+          publishedAt: now,
+        });
+        configsCreated++;
+      }
+
+      for (const action of config.actions) {
+        const existingAction = await ctx.db
+          .query("providerActions")
+          .withIndex("by_directCallId_name", (q: any) => q.eq("directCallId", directCallId).eq("name", action.name))
+          .first();
+
+        if (!existingAction) {
+          await ctx.db.insert("providerActions", {
+            directCallId,
+            name: action.name,
+            displayName: action.displayName,
+            description: action.description,
+            method: action.method,
+            path: action.path,
+            params: action.params,
+            responseMapping: [],
+            enabled: true,
+            createdAt: now,
+            updatedAt: now,
+          });
+          actionsCreated++;
+        }
+      }
+    }
+
+    return { success: true, configsCreated, actionsCreated, skipped, totalApis: apis.length };
+  },
+});
+
+/**
+ * Seed individual directCallConfigs by exact apiId list.
+ * Used for APIs that don't belong to a provider batch (NASA, Filestack, etc.)
+ * Run via HTTP: POST /api/mutation {"path":"seedDirectCallConfigs:seedByApiIds","args":{...}}
+ */
+export const seedByApiIds = mutation({
+  args: {
+    configs: v.array(v.object({
+      apiId: v.string(),
+      providerId: v.string(),
+      baseUrl: v.string(),
+      authType: v.string(),
+      authHeader: v.string(),
+    })),
+  },
+  handler: async (ctx, { configs }) => {
+    const now = Date.now();
+    let created = 0;
+    let skipped = 0;
+    for (const cfg of configs) {
+      const existing = await ctx.db
+        .query("providerDirectCall")
+        .withIndex("by_apiId", (q: any) => q.eq("apiId", cfg.apiId as any))
+        .first();
+      if (existing) { skipped++; continue; }
+      await ctx.db.insert("providerDirectCall", {
+        providerId: cfg.providerId as any,
+        apiId: cfg.apiId as any,
+        baseUrl: cfg.baseUrl,
+        authType: cfg.authType,
+        authHeader: cfg.authHeader,
+        authPrefix: "",
+        encryptedMasterKey: "managed-by-apiclaw",
+        rateLimitPerUser: 60,
+        rateLimitPerDay: 1000,
+        pricePerRequest: 0,
+        status: "live",
+        allowCustomerKeys: false,
+        requireCustomerKeys: false,
+        createdAt: now,
+        updatedAt: now,
+        publishedAt: now,
+      });
+      created++;
+    }
+    return { success: true, created, skipped };
+  },
+});
 
 export const seed = mutation({
   args: {},

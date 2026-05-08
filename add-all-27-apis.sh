@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "REFUSED: this script re-seeds all 27 APILayer APIs as live, but 5 are subscription-blocked (skills, verify_number, world_news, image_crop, form_submit) as of 2026-05-08. Use convex/updateAPIStatus.ts after seeding, or update the script. To override: export FORCE_SEED=1"
+[ "${FORCE_SEED:-0}" = "1" ] || exit 1
 # Add all 27 APILayer APIs via debugAddAPI
 
 export CONVEX_DEPLOYMENT="prod:adventurous-avocet-799"

@@ -7,38 +7,38 @@ import { mutation } from "./_generated/server";
 export const update = mutation({
   args: {},
   handler: async (ctx) => {
-    const providerId = "k97cvcvadnyz8x8m4we7xqmh1s83p0ph" as any; // APILayer
-
-    const apis = await ctx.db
-      .query("providerAPIs")
-      .withIndex("by_providerId", (q: any) => q.eq("providerId", providerId))
-      .collect();
-
     // APIs that are blocked by subscription tier
-    const blocked = ["Number Verification API", "World News API", "Image Crop API", "Form API"];
+    const blocked = ["Number Verification API", "World News API", "Image Crop API", "Form API", "Skills API"];
     // PDF Layer is rate limited
     const rateLimited = ["PDF Layer"];
 
+    const providerIds = [
+      "k97cvcvadnyz8x8m4we7xqmh1s83p0ph", // OG APILayer (gustav_hemmingsson@hotmail.com)
+      "k97fj3bpy1nvp6fd1vr51kbkxs84k5dn", // Pratham (apilayer.com partner workspace)
+    ] as any[];
+
     let updated = 0;
-    for (const api of apis) {
-      let newStatus = "approved"; // default = live
-      let hasDirectCall = true;
+    let total = 0;
 
-      if (blocked.includes(api.name)) {
-        newStatus = "blocked";
-        hasDirectCall = false;
-      } else if (rateLimited.includes(api.name)) {
-        newStatus = "rate_limited";
-      }
+    for (const providerId of providerIds) {
+      const apis = await ctx.db
+        .query("providerAPIs")
+        .withIndex("by_providerId", (q: any) => q.eq("providerId", providerId))
+        .collect();
+      total += apis.length;
 
-      if (api.status !== newStatus || (api as any).hasDirectCall !== hasDirectCall) {
-        await ctx.db.patch(api._id, {
-          status: newStatus,
-        } as any);
-        updated++;
+      for (const api of apis) {
+        let newStatus = "approved";
+        if (blocked.includes(api.name)) newStatus = "blocked";
+        else if (rateLimited.includes(api.name)) newStatus = "rate_limited";
+
+        if (api.status !== newStatus) {
+          await ctx.db.patch(api._id, { status: newStatus } as any);
+          updated++;
+        }
       }
     }
 
-    return { success: true, updated, total: apis.length };
+    return { success: true, updated, total };
   },
 });

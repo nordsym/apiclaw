@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+if (process.env.FORCE_SEED !== "1") {
+  console.error("REFUSED: re-seeds all 27 APILayer APIs as live, but 5 are subscription-blocked (skills, verify_number, world_news, image_crop, form_submit) as of 2026-05-08. Use convex/updateAPIStatus.ts after seeding, or update the script. To override: FORCE_SEED=1");
+  process.exit(1);
+}
 /**
  * Direct seed - create provider + all 27 APIs via Convex admin endpoint
  */

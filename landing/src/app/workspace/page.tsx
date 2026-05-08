@@ -1267,7 +1267,7 @@ function OverviewTab({
 // ============================================
 
 const DIRECT_CALL_PROVIDERS = [
-  { name: "APILayer", apis: 27, desc: "Exchange rates, stocks, aviation, weather, geolocation, email verification, VAT, news, scraping", category: "Multi-API" },
+  { name: "APILayer", apis: 22, desc: "Exchange rates, stocks, aviation, weather, geolocation, email verification, VAT, news, scraping", category: "Multi-API" },
   { name: "Replicate", apis: 1000, desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API" },
   { name: "OpenRouter", apis: 100, desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "AI & LLM" },
   { name: "ElevenLabs", apis: 1, desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
@@ -1476,16 +1476,16 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
 // (not configured by the partner themselves). Add partner provider IDs here.
 const APICLAW_MANAGED_PROVIDERS = new Set<string>([
   "k97cvcvadnyz8x8m4we7xqmh1s83p0ph",  // APIClaw own managed provider
-  "k97fj3bpy1nvp6fd1vr51kbkxs84k5dn",  // APILayer (Pratham) — keys held server-side by NordSym
+  "k97fj3bpy1nvp6fd1vr51kbkxs84k5dn",  // APILayer partner — keys held server-side by APIClaw
 ]);
 
-// APILayer APIs that are subscription-blocked at the upstream (APILayer) side.
-// Documented in APIClaw × APILayer Partnership SoW, Section 3 (Integration Status).
+// APILayer APIs blocked at the upstream subscription level.
 const APILAYER_SUBSCRIPTION_BLOCKED_NAMES = new Set<string>([
   "Number Verification API",
   "World News API",
   "Image Crop API",
   "Form API",
+  "Skills API",
 ]);
 
 function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, providerId }: { apis: ProviderAPI[]; onAdd: () => void; showAddForm: boolean; onCloseForm: () => void; sessionToken: string | null; providerId: string | null }) {
@@ -4196,6 +4196,7 @@ function UsageTab({
                   });
                   const callCount = (matchedCall as any)?.calls || 0;
                   const discoveryCount = api.discoveryCount || 0;
+                  const isSubscriptionBlocked = APILAYER_SUBSCRIPTION_BLOCKED_NAMES.has(api.name);
                   return (
                     <tr key={api._id} className="hover:bg-[var(--surface)]/50">
                       <td className="py-3">
@@ -4217,8 +4218,8 @@ function UsageTab({
                         )}
                       </td>
                       <td className="py-3 text-right">
-                        <span className={`text-xs px-2 py-0.5 rounded ${api.status === "approved" ? "bg-green-500/10 text-green-500" : api.status === "blocked" ? "bg-red-500/10 text-red-500" : "bg-yellow-500/10 text-yellow-500"}`}>
-                          {api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}
+                        <span className={`text-xs px-2 py-0.5 rounded ${isSubscriptionBlocked ? "bg-red-500/10 text-red-500" : api.status === "approved" ? "bg-green-500/10 text-green-500" : api.status === "blocked" ? "bg-red-500/10 text-red-500" : "bg-yellow-500/10 text-yellow-500"}`}>
+                          {isSubscriptionBlocked ? "Blocked upstream" : api.status === "approved" ? "Live" : api.status === "blocked" ? "Blocked" : api.status === "rate_limited" ? "Rate Limited" : api.status}
                         </span>
                       </td>
                     </tr>

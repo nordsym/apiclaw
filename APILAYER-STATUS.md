@@ -1,64 +1,37 @@
-# APILayer Direct Call Status
+# APILayer Integration Status
 
-**Last verified:** 2026-03-25
+**Last verified:** 2026-05-08 gateway URL verification (`/tmp/verify-22.mjs`).
 
-## ✅ 10/14 Actions WORKING
+## Summary
 
-### Core Business Value (All Working)
-1. **exchange_rates** ✅ - Currency conversion
-2. **aviation** ✅ - Flight tracking  
-3. **vat_check** ✅ - EU VAT validation
-4. **market_data** ✅ - Stock market data
-5. **screenshot** ✅ - Website screenshots
-6. **scraper** ✅ - Advanced web scraping
-7. **pdf_generate** ✅ - HTML to PDF
-8. **finance_news** ✅ - Financial news
-9. **skills** ✅ - Skills database lookup
-10. **verify_email** ✅ - Email validation (slow/unreliable but functional)
+22 of 27 APILayer APIs callable via APIClaw live gateway. 1 callable with constraint. 4 blocked upstream by subscription.
 
-### Test Results
+## Live, no constraint (21)
 
-```bash
-cd ~/Projects/apiclaw
-node test-10-working.cjs  # Automated test (9/10 reliable)
-```
+**Unified (apikey header):** exchange_rates, market_data, aviation, pdf_generate, screenshot, verify_email, finance_news, scrape
 
-**verify_email note:** Works but has high latency/timeout issues. Successful test:
-```json
-{
-  "action": "verify_email",
-  "params": {"email": "support@gmail.com"},
-  "result": {
-    "email": "support@gmail.com",
-    "format_valid": true,
-    "mx_found": true,
-    "free": true,
-    "score": 0.32
-  }
-}
-```
+**Legacy (access_key qs):** vat_check, currencylayer (live + convert), coinlayer, exchangeratehost, weatherstack (current + forecast), ipstack, ipapi, positionstack (forward + reverse), languagelayer, scrapestack, serpstack, mediastack, userstack
 
-## ⚠️ 4/14 Not Working
+## Live with constraint (1)
 
-1. **verify_number** - "Request failed" (APILayer endpoint issue)
-2. **world_news** - "Request failed" (APILayer endpoint issue)  
-3. **image_crop** - "Request failed" (APILayer endpoint issue)
-4. **form_submit** - "Request failed" (APILayer endpoint issue)
+- fixer_latest -- callable. Gateway sends `base=EUR` by default. Free plan locks base to EUR; non-EUR base raises 400. `fixer_convert` is a separate paid-plan-only action and is not callable on the current subscription.
 
-All failures are APILayer provider-side issues, not implementation bugs.
+## Blocked by subscription (4)
 
-## Business Impact
+- verify_number
+- world_news
+- image_crop
+- form_submit
 
-**Success rate: 71% (10/14)**
+## Deprecated upstream (2)
 
-Core revenue-generating actions all functional:
-- B2B validation (VAT, email)
-- Data acquisition (market data, aviation, scraper)
-- Content generation (PDF, screenshot)
-- News/research (finance news, skills)
+- Zenscrape
+- Zenserp
 
-## Next Steps
+## Caveats
 
-- Document unreliable actions in MCP server
-- Monitor APILayer status for failed endpoints
-- Consider alternative providers for failed actions
+- `pdf_generate` is rate-limited in registry. Functional today but may 429 under load.
+- `finance_news` returns 2021-vintage data. Endpoint live, dataset stale.
+- `ipstack` and `ipapi` return identical responses from the same backend.
+- `serpstack` has high latency variance (12s timeout observed once; 0.3s on retry). Gateway timeout may surface intermittently.
+- `fixer_latest` free-plan monthly cap is 100 requests. Verification testing consumed a portion of this month's allocation.

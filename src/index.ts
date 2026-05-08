@@ -674,7 +674,7 @@ async function attemptDeviceLink(): Promise<{
 // ─────────────────────────────────────────────────────────────────────────
 // Suggested-call hints for discover_apis.
 //
-// APILayer wraps 27 sub-APIs behind one provider with action slugs like
+// APILayer wraps 22 callable sub-APIs behind one provider with action slugs like
 // fixer_latest, weatherstack_current, aviation. Generic discovery returns
 // names like "Weatherstack" or "Frankfurter" without the provider+action
 // shape an agent needs to call them. This helper inspects the natural-
@@ -699,7 +699,7 @@ const SUGGESTED_CALL_RULES: Array<{
       provider: 'apilayer',
       action: 'fixer_latest',
       description: 'Live FX rates across 170+ currencies via APILayer Fixer.',
-      example_params: { base: 'USD', symbols: 'EUR' },
+      example_params: { symbols: 'EUR,SEK' },
       intent: 'currency exchange / FX rates',
     },
   },
@@ -744,16 +744,6 @@ const SUGGESTED_CALL_RULES: Array<{
     },
   },
   {
-    match: /(verify[\s-]?(phone|number)|phone.*valid)/i,
-    suggestion: {
-      provider: 'apilayer',
-      action: 'number_verification',
-      description: 'Validate phone numbers and identify carriers via APILayer.',
-      example_params: { number: '+14158586273' },
-      intent: 'phone verification',
-    },
-  },
-  {
     match: /(\bvat\b|tax id|vies)/i,
     suggestion: {
       provider: 'apilayer',
@@ -761,16 +751,6 @@ const SUGGESTED_CALL_RULES: Array<{
       description: 'Validate EU VAT numbers via APILayer.',
       example_params: { vat_number: 'LU26375245' },
       intent: 'VAT validation',
-    },
-  },
-  {
-    match: /(\bnews\b|headlines|articles)/i,
-    suggestion: {
-      provider: 'apilayer',
-      action: 'world_news',
-      description: 'Latest world news from thousands of sources via APILayer.',
-      example_params: { language: 'en', categories: 'business,technology' },
-      intent: 'news / headlines',
     },
   },
   {
@@ -1453,7 +1433,7 @@ MANAGED PROVIDERS:
   OpenAI, Anthropic, xAI/Grok, Groq, Mistral, OpenRouter, Together AI,
   Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Firecrawl,
   Serper, E2B, Stability AI, Cohere, Voyage AI, GitHub,
-  APILayer (27 sub-APIs)
+  APILayer (22 callable sub-APIs)
 
 ${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()} CALLABLE (empirically verified, ${CANON_STATS.managed_directcallconfigs} managed) | Free tier: 25 calls / month, email signup required
 
@@ -1492,7 +1472,7 @@ Docs: https://apiclaw.cloud
         trackSearch(query, results.length, responseTimeMs);
 
         // Suggested-call enrichment.
-        // When a query matches a known managed sub-action (APILayer's 27-API
+        // When a query matches a known managed sub-action (APILayer's 22-callable
         // wrapper has the most non-obvious slugs), surface the exact call
         // shape so the agent doesn't have to fish for it via list_connected.
         const suggestedCalls = buildSuggestedCalls(query);

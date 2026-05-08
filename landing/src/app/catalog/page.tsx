@@ -96,7 +96,7 @@ const MANAGED_PROVIDERS: ApiEntry[] = [
   { name: "Stability AI", description: "Image generation API. Stable Diffusion, SDXL, and next-gen image models.", category: "AI & ML", baseUrl: "https://api.stability.ai", docsUrl: "https://platform.stability.ai/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
   { name: "AssemblyAI", description: "AI models for speech recognition, summarization, and audio intelligence.", category: "AI & ML", baseUrl: "https://api.assemblyai.com", docsUrl: "https://www.assemblyai.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
   { name: "GitHub API", description: "Access GitHub repositories, issues, pull requests, actions, and more programmatically.", category: "Development", baseUrl: "https://api.github.com", docsUrl: "https://docs.github.com/rest", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "APILayer", description: "27 data APIs. Currency exchange, IP geolocation, stock data, aviation, screenshots, email verification and more.", category: "Finance", baseUrl: "https://apilayer.com", docsUrl: "https://apilayer.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
+  { name: "APILayer", description: "22 callable APIs. Currency exchange, IP geolocation, stock data, aviation, screenshots, email verification and more.", category: "Finance", baseUrl: "https://apilayer.com", docsUrl: "https://apilayer.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
 ];
 
 const AUTH_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {

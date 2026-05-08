@@ -161,7 +161,7 @@ The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integra
 | Firecrawl | Web scraping and crawling | Scraping |
 | E2B | Code execution sandbox | Dev Tools |
 | GitHub | Repository and code access | Dev Tools |
-| APILayer | 27 APIs (finance, geo, scraping, news) | Multi-API |
+| APILayer | 22 callable APIs (finance, geo, scraping, news) | Multi-API |
 
 ---
 

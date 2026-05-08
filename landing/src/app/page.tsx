@@ -163,7 +163,7 @@ export default function Home() {
 
   const managedProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
     // Multi-API providers (top)
-    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 27 },
+    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 22 },
     { name: "Replicate", desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API", apis: 1000 },
     { name: "OpenRouter", desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "Multi-API", apis: 100 },
     // Single-purpose

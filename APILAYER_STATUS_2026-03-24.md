@@ -1,3 +1,5 @@
+> **STALE SNAPSHOT (2026-03-24).** Current truth: see APILAYER-STATUS.md.
+
 # APILayer 14 Services Status Report
 **Date:** 2026-03-24, 11:55 CET
 **Meeting:** Pratham (APILayer DevReal) @ 3:30pm

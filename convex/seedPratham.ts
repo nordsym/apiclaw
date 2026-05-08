@@ -93,9 +93,18 @@ export const seedPrathamWorkspace = mutation({
       { name: "Userstack", description: "User agent detection", category: "devtools", action: "userstack_detect" },
     ];
     
+    const BLOCKED_NAMES = new Set([
+      "Number Verification API",
+      "World News API",
+      "Image Crop API",
+      "Form API",
+      "Skills API",
+    ]);
+    const RATE_LIMITED_NAMES = new Set(["PDF Layer"]);
+
     let createdCount = 0;
     let existingCount = 0;
-    
+
     for (const api of apis) {
       // Check if already exists
       const existing = await ctx.db
@@ -103,8 +112,13 @@ export const seedPrathamWorkspace = mutation({
         .withIndex("by_providerId", (q) => q.eq("providerId", provider!._id))
         .filter((q) => q.eq(q.field("name"), api.name))
         .first();
-      
+
       if (!existing) {
+        const status = BLOCKED_NAMES.has(api.name)
+          ? "blocked"
+          : RATE_LIMITED_NAMES.has(api.name)
+            ? "rate_limited"
+            : "approved";
         await ctx.db.insert("providerAPIs", {
           providerId: provider._id,
           name: api.name,
@@ -112,7 +126,7 @@ export const seedPrathamWorkspace = mutation({
           category: api.category,
           pricingModel: "freemium",
           pricingNotes: "Free tier available, paid tiers for higher limits",
-          status: "approved",
+          status,
           createdAt: Date.now(),
           approvedAt: Date.now(),
           discoveryCount: 0,

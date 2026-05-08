@@ -61,7 +61,7 @@ Browse all indexed APIs at apiclaw.cloud/catalog. Search, filter by category, to
 **Communication:** Twilio (SMS/voice, global), 46elks (SMS, Nordic/EU)
 **Email:** Resend (transactional)
 **Dev Tools:** E2B (code sandbox), GitHub (repos/code)
-**Multi-API:** APILayer (27 sub-APIs)
+**Multi-API:** APILayer (22 callable sub-APIs)
 
 ## MCP Tools
 

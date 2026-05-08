@@ -5,6 +5,21 @@ import { mutation } from "./_generated/server";
  * Run with: npx convex run seedAPILayerAPIs:seedAll '{"email":"gustav_hemmingsson@hotmail.com"}'
  */
 
+const APILAYER_BLOCKED_NAMES = new Set([
+  "Number Verification API",
+  "World News API",
+  "Image Crop API",
+  "Form API",
+  "Skills API",
+]);
+const APILAYER_RATE_LIMITED_NAMES = new Set(["PDF Layer"]);
+
+function statusForApiName(name: string): "approved" | "blocked" | "rate_limited" {
+  if (APILAYER_BLOCKED_NAMES.has(name)) return "blocked";
+  if (APILAYER_RATE_LIMITED_NAMES.has(name)) return "rate_limited";
+  return "approved";
+}
+
 export const cleanAndReseed = mutation({
   args: {},
   handler: async (ctx) => {
@@ -67,7 +82,7 @@ export const cleanAndReseed = mutation({
         category: api.category,
         pricingModel: "freemium",
         pricingNotes: "Free tier available, paid tiers for higher limits",
-        status: "approved",
+        status: statusForApiName(api.name),
         createdAt: Date.now(),
         approvedAt: Date.now(),
         discoveryCount: 0,
@@ -162,7 +177,7 @@ export const seedAll = mutation({
           category: api.category,
           pricingModel: "freemium",
           pricingNotes: "Free tier available, paid tiers for higher limits",
-          status: "approved",
+          status: statusForApiName(api.name),
           createdAt: Date.now(),
           approvedAt: Date.now(),
           discoveryCount: 0,

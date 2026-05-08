@@ -317,7 +317,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
                   <li><code className="text-[var(--accent)]">elevenlabs</code> - Text-to-speech</li>
                   <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
                   <li><code className="text-[var(--accent)]">firecrawl</code> - Web scraping</li>
-                  <li><code className="text-[var(--accent)]">apilayer</code> - 27 APIs (rates, stocks, PDF, etc.)</li>
+                  <li><code className="text-[var(--accent)]">apilayer</code> - 22 callable APIs (rates, stocks, PDF, etc.)</li>
                 </ul>
               </div>
             </div>

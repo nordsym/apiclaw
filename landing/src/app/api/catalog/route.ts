@@ -40,6 +40,12 @@ interface VerificationStatus {
 // registry's auth field is unreliable (often "apiKey" even when we proxy
 // with our own credentials), so we identify them by name match — including
 // "{brand} api" variants since the registry sometimes has those.
+// NOTE: This allowlist auto-promotes any registry row whose brand starts with these
+// names to tier:"managed", verified:true, callable:true. As of 2026-05-08 some
+// APILayer sub-APIs (Skills, Number Verification, World News, Image Crop, Form) are
+// upstream-blocked despite being managed. Per-action status lives in
+// providerDirectCall + APILAYER_SUBSCRIPTION_BLOCKED_NAMES; this allowlist is
+// brand-level only.
 const MANAGED_BRAND_NAMES = new Set([
   "openai", "openai api",
   "anthropic", "anthropic api", "anthropic claude", "anthropic messages api",
