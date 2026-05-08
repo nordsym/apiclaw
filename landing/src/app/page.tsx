@@ -472,69 +472,56 @@ Install:
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Left: Copy */}
             <div className="text-center lg:text-left">
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="badge badge-live inline-flex">
-                  <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />Live - {statsData.apiCount.toLocaleString()} APIs indexed</span>
-                </div>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-7 sm:mb-9">
                 <button
                   onClick={() => setShowProvidersModal(true)}
-                  className="badge inline-flex bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium text-text-secondary border border-border hover:border-text-muted hover:text-text-primary transition-colors"
                 >
-                  <span className="flex items-center gap-2"><Zap className="w-3 h-3" /><span>Managed APIs · now with full agent runtime &amp; control plane</span></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {statsData.apiCount.toLocaleString()} APIs · {statsData.callableCount.toLocaleString()} callable · live
                 </button>
-                <span className="badge inline-flex bg-text-primary text-background border-text-primary">
-                  <span className="flex items-center gap-2 font-semibold"><Sparkles className="w-3 h-3" />The runtime every AI agent actually wants</span>
-                </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 leading-[1.05] tracking-tighter">
-                <span className="gradient-text">The Control Plane</span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.5rem] font-semibold mb-6 sm:mb-7 leading-[1.02] tracking-[-0.04em]">
+                The Control Plane
                 <br />
-                <span className="text-text-primary">for AI Agents</span>
+                <span className="text-text-muted font-normal">for AI Agents</span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-text-secondary mb-3 sm:mb-4 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Terminal-native execution. Parallel missions. Real observability. One unified layer.
-              </p>
-
-              <p className="text-text-muted mb-6 max-w-lg mx-auto lg:mx-0">
-                <span className="text-accent font-medium">Managed APIs:</span> No API keys. No setup. Just call.
+              <p className="text-lg sm:text-xl text-text-secondary mb-9 sm:mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                Terminal-native execution, parallel missions, and real observability across every model and every API. One runtime, four entry points, one workspace.
               </p>
 
               {/* Primary CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="flex flex-col sm:flex-row gap-3 mb-5">
                 <a
                   href="/apiclaw.mcpb"
                   download
-                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-accent hover:bg-accent-hover text-white font-bold text-sm sm:text-base shadow-lg shadow-accent/25 hover:shadow-xl hover:shadow-accent/30 transition-all duration-300"
+                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-text-primary hover:bg-text-secondary text-background font-semibold text-sm sm:text-[15px] transition-colors"
                 >
-                  <Download className="w-5 h-5" />
                   Install for Claude Desktop
-                  <span className="text-[10px] font-mono uppercase tracking-widest bg-white/20 px-1.5 py-0.5 rounded ml-0.5">
-                    .mcpb
-                  </span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </a>
                 <a
                   href="/workspace"
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-bold text-sm sm:text-base transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated text-text-primary font-semibold text-sm sm:text-[15px] transition-colors"
                 >
                   Get a workspace key
-                  <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
-                <a href="#install" className="hover:text-accent transition inline-flex items-center gap-1">
+                <a href="#install" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5" />
                   All install paths
                 </a>
                 <span className="text-border">·</span>
                 <button
                   onClick={copyContextToClipboard}
-                  className="hover:text-accent transition inline-flex items-center gap-1"
+                  className="hover:text-text-primary transition inline-flex items-center gap-1.5"
                 >
-                  {showContextCopied ? <Check className="w-3.5 h-3.5 text-accent" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  {showContextCopied ? "Copied! Paste to your AI" : "Copy context for your AI"}
+                  {showContextCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {showContextCopied ? "Copied" : "Copy context for your AI"}
                 </button>
               </div>
             </div>
@@ -1013,22 +1000,22 @@ Install:
                 a: `Go to /workspace, sign in with email, follow the self-service onboarding. Your API is discoverable by agents immediately. To become a managed partner with revenue share, that path is in the same workspace.`
               }
             ].map((faq, i) => (
-              <div 
-                key={i} 
-                className="rounded-2xl bg-surface-elevated border border-border overflow-hidden"
+              <div
+                key={i}
+                className="border-b border-border last:border-b-0"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full p-6 flex items-center justify-between text-left hover:bg-surface/50 transition-colors"
+                  className="w-full py-5 sm:py-6 flex items-center justify-between text-left group"
                 >
-                  <h3 className="font-bold text-lg">{faq.q}</h3>
-                  <ChevronDown 
-                    className={`w-5 h-5 text-text-muted transition-transform ${openFaq === i ? 'rotate-180' : ''}`} 
+                  <h3 className="text-base sm:text-[17px] font-medium text-text-primary group-hover:text-text-primary pr-6">{faq.q}</h3>
+                  <ChevronDown
+                    className={`w-4 h-4 text-text-muted flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-6">
-                    <p className="text-text-secondary leading-relaxed">{faq.a}</p>
+                  <div className="pb-6 pr-10">
+                    <p className="text-text-secondary leading-[1.7] text-[15px]">{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -1038,82 +1025,55 @@ Install:
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-16 px-6 bg-surface/30">
+      <footer className="border-t border-border-subtle pt-20 pb-12 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            {/* Brand */}
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">
-                  🦞
-                </div>
-                <span className="font-bold text-xl tracking-tight">APIClaw</span>
+          <div className="grid md:grid-cols-12 gap-12 mb-16">
+            <div className="md:col-span-5">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-7 h-7 rounded-md bg-text-primary text-background flex items-center justify-center font-semibold text-sm">A</div>
+                <span className="font-semibold text-[15px] tracking-tight">APIClaw</span>
               </div>
-              <p className="text-text-muted mb-6 max-w-sm leading-relaxed">
-                The Control Plane for AI Agents.
-                Terminal-native execution, parallel missions, real observability.
+              <p className="text-text-muted text-sm leading-relaxed max-w-xs">
+                The Control Plane for AI Agents. Built by NordSym.
               </p>
-              <div className="flex items-center gap-3">
-                <a
-                  href="https://github.com/nordsym/apiclaw"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-surface-elevated border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:border-accent transition"
-                >
-                  <Github className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://x.com/APIClaw"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-surface-elevated border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:border-accent transition"
-                >
-                  <Twitter className="w-5 h-5" />
-                </a>
-              </div>
             </div>
 
-            {/* Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-3 text-text-muted">
-                <li><a href="#how-it-works" className="hover:text-text-primary transition">How It Works</a></li>
-                <li><a href="#for-agents" className="hover:text-text-primary transition">For Agents</a></li>
-                <li><a href="#for-providers" className="hover:text-text-primary transition">For API Owners</a></li>
-                <li><a href="/workspace" className="hover:text-text-primary transition">Workspace</a></li>
-                <li><a href="#get-started" className="hover:text-text-primary transition">Get Started</a></li>
-                <li><a href="#faq" className="hover:text-text-primary transition">FAQ</a></li>
-                <li><a href="/docs" className="hover:text-text-primary transition">Documentation</a></li>
-                <li><a href="/security" className="hover:text-text-primary transition flex items-center gap-1.5"><Shield className="w-3 h-3" />Security</a></li>
+            <div className="md:col-span-2">
+              <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Product</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><a href="#install" className="text-text-secondary hover:text-text-primary transition">Install</a></li>
+                <li><a href="/workspace" className="text-text-secondary hover:text-text-primary transition">Workspace</a></li>
+                <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition">Catalog</a></li>
+                <li><a href="/docs" className="text-text-secondary hover:text-text-primary transition">Docs</a></li>
               </ul>
             </div>
 
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-3 text-text-muted">
-                <li><a href="https://nordsym.com" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">NordSym</a></li>
-                <li><a href="https://github.com/nordsym" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">GitHub</a></li>
-                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition">Twitter / X</a></li>
+            <div className="md:col-span-2">
+              <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Resources</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><a href="#faq" className="text-text-secondary hover:text-text-primary transition">FAQ</a></li>
+                <li><a href="/security" className="text-text-secondary hover:text-text-primary transition">Security</a></li>
+                <li><a href="https://github.com/nordsym/apiclaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">GitHub</a></li>
+                <li><a href="/.well-known/oauth-authorization-server" className="text-text-secondary hover:text-text-primary transition">OAuth metadata</a></li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-3">
+              <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Company</h4>
+              <ul className="space-y-2.5 text-sm">
+                <li><a href="https://nordsym.com" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">NordSym</a></li>
+                <li><a href="https://x.com/APIClaw" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition">Twitter / X</a></li>
+                <li><a href="mailto:gustav@nordsym.com" className="text-text-secondary hover:text-text-primary transition">Contact</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-text-muted text-sm">
-              © 2026 NordSym. Get in front of every AI agent. White-glove onboarding available.
-            </p>
-            <div className="flex items-center gap-4">
-              <a href="/security" className="badge hover:border-green-500/30 transition-colors">
-                <Shield className="w-3 h-3 text-green-500" />
-                <span className="text-green-500">AES-256 Encrypted</span>
-              </a>
-              <div className="badge">
-                <Shield className="w-3 h-3" />
-                MCP Compatible
-              </div>
-              <div className="badge badge-live">
-                Live
-              </div>
+          <div className="pt-8 border-t border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-text-muted">
+            <p>© 2026 NordSym AB · 559535-5768</p>
+            <div className="flex items-center gap-5">
+              <span>AES-256 at rest</span>
+              <span>MCP 2025-03-26</span>
+              <span className="inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />All systems operational</span>
             </div>
           </div>
         </div>
