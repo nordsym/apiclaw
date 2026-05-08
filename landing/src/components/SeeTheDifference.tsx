@@ -172,9 +172,9 @@ export function SeeTheDifference() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
         {/* Without APIClaw */}
-        <div className="relative rounded-2xl border border-border bg-surface-elevated overflow-hidden">
+        <div className="relative rounded-2xl border border-border bg-surface-elevated overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border bg-surface">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-text-muted">
               <AlertTriangle className="w-4 h-4 text-text-muted" />
@@ -188,7 +188,7 @@ export function SeeTheDifference() {
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <ol className="p-4 sm:p-5 space-y-2.5 min-h-[320px]">
+          <ol className="p-4 sm:p-5 space-y-2.5 flex-1 h-[460px] overflow-hidden">
             {MANUAL_STEPS.map((step, i) => {
               const visible = step.atMin <= simulatedMin;
               const isActive = visible && i === lastVisibleManualIdx && !(done && simulatedMin >= 60);
@@ -231,7 +231,7 @@ export function SeeTheDifference() {
         </div>
 
         {/* With APIClaw */}
-        <div className="relative rounded-2xl border border-accent/30 bg-surface-elevated overflow-hidden shadow-[0_0_60px_-20px_rgba(239,68,68,0.35)]">
+        <div className="relative rounded-2xl border border-accent/30 bg-surface-elevated overflow-hidden shadow-[0_0_60px_-20px_rgba(239,68,68,0.35)] flex flex-col">
           <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-accent/20 bg-accent/5">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-widest text-accent">
               <Sparkles className="w-4 h-4" />
@@ -245,7 +245,7 @@ export function SeeTheDifference() {
             <div className="text-sm sm:text-base text-text-primary font-medium">{PROMPT}</div>
           </div>
 
-          <div className="p-4 sm:p-5 space-y-2.5 min-h-[320px] font-mono">
+          <div className="p-4 sm:p-5 space-y-2.5 flex-1 h-[300px] overflow-hidden font-mono">
             {visibleBeats.map((beat, i) => (
               <div
                 key={`${beat.atMs}-${i}`}
@@ -281,29 +281,32 @@ export function SeeTheDifference() {
             )}
           </div>
 
-          {done && (
-            <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-xl border border-accent/20 bg-gradient-to-br from-accent/5 to-transparent p-3 sm:p-4 space-y-2 animate-[fadeIn_0.4s_ease-out_forwards]">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-accent font-semibold mb-1">
-                <Newspaper className="w-3.5 h-3.5" />
-                Synthesized answer
-              </div>
-              {HEADLINES.map((h, i) => (
-                <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
-                  <Globe className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-text-primary font-medium leading-snug">{h.title}</div>
-                    <div className="text-text-muted text-[11px] flex items-center gap-1.5 mt-0.5">
-                      <span>{h.source}</span>
-                      <span>·</span>
-                      <span>{h.via}</span>
-                      <span>·</span>
-                      <span>{h.time}</span>
-                    </div>
+          {/* Synthesized answer panel — always rendered to reserve layout
+              space; opacity toggles on `done` so the card never resizes. */}
+          <div
+            aria-hidden={!done}
+            className={`mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-xl border border-accent/20 bg-gradient-to-br from-accent/5 to-transparent p-3 sm:p-4 space-y-2 transition-opacity duration-300 ${done ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          >
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-accent font-semibold mb-1">
+              <Newspaper className="w-3.5 h-3.5" />
+              Synthesized answer
+            </div>
+            {HEADLINES.map((h, i) => (
+              <div key={i} className="flex items-start gap-2.5 text-xs sm:text-sm">
+                <Globe className="w-3.5 h-3.5 text-text-muted mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-text-primary font-medium leading-snug">{h.title}</div>
+                  <div className="text-text-muted text-[11px] flex items-center gap-1.5 mt-0.5">
+                    <span>{h.source}</span>
+                    <span>·</span>
+                    <span>{h.via}</span>
+                    <span>·</span>
+                    <span>{h.time}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

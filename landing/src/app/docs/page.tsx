@@ -392,6 +392,68 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             </ul>
           </div>
         </section>
+
+        {/* List your API */}
+        <section id="list-your-api" className="mb-16 scroll-mt-24">
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span className="text-[var(--accent)]">📡</span> List your API on APIClaw
+          </h2>
+          <p className="text-[var(--text-secondary)] mb-6">
+            APIClaw indexes 26,704 APIs and 2,895 are empirically callable. Adding yours takes one OpenAPI spec and a free email signup.
+          </p>
+
+          <ol className="space-y-5 mb-8">
+            {[
+              {
+                n: "01",
+                t: "Sign up for a free workspace",
+                d: <>Email signup at <a href="/workspace" className="text-[var(--accent)] hover:underline">apiclaw.cloud/workspace</a>. Same workspace covers your discoverable listing and any agent calls you make.</>,
+              },
+              {
+                n: "02",
+                t: "Submit your spec",
+                d: <>Open <strong>Workspace → My APIs → Add API</strong>. Paste an OpenAPI 3 / Swagger URL, or describe the endpoint manually. APIClaw normalises auth, parameters, and pricing.</>,
+              },
+              {
+                n: "03",
+                t: "Approve the listing",
+                d: <>Review the auto-generated capability tags (the keywords agents will match on), the pricing model, and a working example. Edit any field before going live.</>,
+              },
+              {
+                n: "04",
+                t: "Live and discoverable",
+                d: <>Your API is searchable by <code className="font-mono text-sm bg-[var(--surface-elevated)] px-1.5 py-0.5 rounded">discover_apis</code> immediately. Per-call analytics show in your dashboard from the first agent that calls you.</>,
+              },
+              {
+                n: "05",
+                t: "Optional: managed-partner upgrade",
+                d: <>Hand APIClaw the credential. We hold custody, agents call without keys, you collect a revenue share on volume. Same flow as the launched APILayer partnership.</>,
+              },
+            ].map((step) => (
+              <li key={step.n} className="flex gap-4">
+                <span className="text-[11px] font-mono text-[var(--accent)] mt-1 tracking-widest flex-shrink-0">{step.n}</span>
+                <div>
+                  <h3 className="font-semibold mb-1">{step.t}</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed">{step.d}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-5 flex flex-wrap items-center gap-4 justify-between">
+            <div>
+              <div className="text-[11px] uppercase tracking-widest text-[var(--accent)] font-semibold mb-1">Always free</div>
+              <p className="text-sm text-[var(--text-secondary)]">Listing your API is free. Always. No revenue share unless you opt into managed partner.</p>
+            </div>
+            <a
+              href="/workspace"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover,_#dc2626)] text-white text-sm font-semibold transition-colors"
+            >
+              List your API
+              <span aria-hidden>→</span>
+            </a>
+          </div>
+        </section>
       </div>
 
       {/* Footer */}
