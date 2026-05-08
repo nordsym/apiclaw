@@ -347,23 +347,13 @@ Install:
           
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
-            {isLoggedIn ? (
-              <a
-                href="/workspace"
-                className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
-              >
-                <Zap className="w-4 h-4" />
-                Workspace
-              </a>
-            ) : (
-              <a
-                href="/workspace"
-                className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
-              >
-                <Zap className="w-4 h-4" />
-                Workspace
-              </a>
-            )}
+            <a
+              href="/login"
+              className="text-sm text-text-muted hover:text-accent transition flex items-center gap-1"
+            >
+              <Zap className="w-4 h-4" />
+              Sign in
+            </a>
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-lg hover:bg-surface transition"
@@ -442,12 +432,12 @@ Install:
               </a>
               <div className="border-t border-border pt-3 mt-1 flex flex-col space-y-3">
                 <a
-                  href="/workspace"
+                  href="/login"
                   onClick={() => setMobileMenuOpen(false)}
                   className="py-2 text-accent font-medium flex items-center gap-2"
                 >
                   <Zap className="w-4 h-4" />
-                  Workspace
+                  Sign in
                 </a>
                 <a
                   href="https://github.com/nordsym/apiclaw"
@@ -503,10 +493,10 @@ Install:
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </a>
                 <a
-                  href="/workspace"
+                  href="/login"
                   className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated hover:border-accent/30 text-text-primary font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98]"
                 >
-                  Get a workspace key
+                  Sign in
                 </a>
               </div>
 
@@ -863,7 +853,7 @@ Install:
                   <div className="text-[11px] uppercase tracking-widest text-text-muted font-mono mb-1">Always free</div>
                   <p className="text-sm text-text-secondary">Listing is free for every API owner. Always.</p>
                 </div>
-                <a href="/workspace" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors">
+                <a href="/login" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors">
                   List your API
                   <ArrowRight className="w-4 h-4" />
                 </a>
@@ -979,7 +969,7 @@ Install:
           {/* For API Owners - smaller section below */}
           <div className="mt-12 text-center">
             <p className="text-text-muted mb-4">Are you an API owner?</p>
-            <a href="/workspace?tab=my-apis" className="text-accent hover:underline font-medium">
+            <a href="/login" className="text-accent hover:underline font-medium">
               List your API for free →
             </a>
           </div>
@@ -1079,7 +1069,7 @@ Install:
               <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Product</h4>
               <ul className="space-y-2.5 text-sm">
                 <li><a href="#install" className="text-text-secondary hover:text-text-primary transition-colors">Install</a></li>
-                <li><a href="/workspace" className="text-text-secondary hover:text-text-primary transition-colors">Workspace</a></li>
+                <li><a href="/login" className="text-text-secondary hover:text-text-primary transition-colors">Sign in</a></li>
                 <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition-colors">Catalog</a></li>
                 <li><a href="/docs" className="text-text-secondary hover:text-text-primary transition-colors">Docs</a></li>
               </ul>

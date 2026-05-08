@@ -146,10 +146,10 @@ export function InstallSection() {
               .mcpb for Claude
             </a>
             <a
-              href="/workspace"
+              href="/login"
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-[13px] transition-all duration-200 active:scale-[0.98]"
             >
-              Workspace key
+              Sign in
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
             <a
