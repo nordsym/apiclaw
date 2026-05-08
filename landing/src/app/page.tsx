@@ -192,23 +192,23 @@ export default function Home() {
     const total = statsData.apiCount.toLocaleString();
     const callable = statsData.callableCount.toLocaleString();
     const installs = statsData.npmDownloads.toLocaleString();
-    const context = `APIClaw — The Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total}+ discoverable APIs, ${callable}+ empirically callable, and ~${installs} agent installs.
+    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total}+ discoverable APIs, ${callable}+ empirically callable, and ~${installs} agent installs.
 
 Four doors, one control plane:
-1. MCP server — Claude Desktop, Cursor, any MCP client.
-2. CLI — terminal, scripts, CI/CD.
-3. HTTP gateway — server-side agents and custom integrations.
-4. Remote MCP / Full Runtime — paste apiclaw.cloud/mcp into any OAuth-capable client.
+1. MCP server: Claude Desktop, Cursor, any MCP client.
+2. CLI: terminal, scripts, CI/CD.
+3. HTTP gateway: server-side agents and custom integrations.
+4. Remote MCP / Full Runtime: paste apiclaw.cloud/mcp into any OAuth-capable client.
 
 Same auth, same logs, same workspace across all four.
 
 Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_connected, list_capabilities, list_models, call_api, capability, check_balance, estimate_cost, get_usage_summary, check_workspace_status, get_chain_status, resume_chain, start_mission, mission_status, list_missions, list_mission_templates, apiclaw_help.
 
-Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a template — for example genprd to generate a structured PRD — more land regularly.
+Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a template like genprd to generate a structured PRD; more land regularly.
 
-Pricing: free tier of 25 calls/month after email signup; discovery is always free and unmetered. Beyond free tier: pay-as-you-go at underlying provider cost + 15%, billed via Stripe. No commitment.
+Pricing: free tier of 25 calls/month after email signup. Email signup is required for every tool, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
 
-When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side — never prompt the user for them.
+When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
 
 Install:
 - Claude Desktop: https://apiclaw.cloud/apiclaw.mcpb
@@ -297,8 +297,8 @@ Install:
   return (
     <main className="min-h-screen overflow-x-hidden">
       {/* Early Access Banner */}
-      <div className="fixed top-0 w-full z-[60] bg-accent text-background text-center py-2 px-4 text-sm font-medium">
-        🦞 <span className="font-bold">Early Access</span> — Join the first wave of agents
+      <div className="fixed top-0 w-full z-[60] bg-accent text-white text-center py-2 px-4 text-[13px] font-medium tracking-tight">
+        🦞 <span className="font-semibold">Early access.</span> Join the first wave of agents.
       </div>
       
       {/* Header */}
@@ -649,7 +649,7 @@ Install:
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-text-muted mb-4">{statsData.openApiCount.toLocaleString()} APIs with full OpenAPI/Swagger specs — ready for instant integration.</p>
+            <p className="text-text-muted mb-4">{statsData.openApiCount.toLocaleString()} APIs with full OpenAPI/Swagger specs, ready for instant integration.</p>
             <div className="space-y-2">
               {Object.entries(statsData.categoryBreakdown || {})
                 .sort(([,a], [,b]) => (b as number) - (a as number))
@@ -660,7 +660,7 @@ Install:
                 </div>
               ))}
             </div>
-            <p className="text-xs text-text-muted mt-4">Open APIs have machine-readable specs — your agent can integrate without reading docs.</p>
+            <p className="text-xs text-text-muted mt-4">Open APIs have machine-readable specs, so your agent can integrate without reading docs.</p>
           </div>
         </div>
       )}
@@ -673,14 +673,13 @@ Install:
       {/* How It Works */}
       <section id="how-it-works" className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="section-label">HOW IT WORKS</span>
-            <h2 className="text-3xl md:text-5xl font-bold mt-4 tracking-tight">
+          <div className="mb-16 max-w-2xl">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">How it works</span>
+            <h2 className="text-3xl md:text-[2.75rem] font-semibold mt-4 tracking-[-0.02em] leading-[1.1]">
               Three steps. No API keys.
             </h2>
-            <p className="text-text-secondary text-lg mt-4 max-w-2xl mx-auto">
-              Your agent asks, APIClaw matches, and calls the API --
-              no keys needed.
+            <p className="text-text-secondary text-base sm:text-lg mt-4 leading-relaxed">
+              Your agent asks. APIClaw matches. The call goes through. Credentials stay server-side; the agent never holds a key.
             </p>
           </div>
 
@@ -717,17 +716,14 @@ Install:
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
-                <Bot className="w-4 h-4" />
-                For AI Agents
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">For AI Agents</span>
+
+              <h2 className="text-3xl md:text-[2.75rem] font-semibold tracking-[-0.02em] leading-[1.1] mt-3 mb-6">
                 One runtime. Every model. Every API.
               </h2>
 
-              <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-                Stop hardcoding provider choices. Your agent discovers the right capability, calls the right model, and runs full missions through one unified control plane — with cost, latency, and audit logs tagged per call.
+              <p className="text-text-secondary text-base sm:text-lg mb-8 leading-relaxed max-w-lg">
+                Stop hardcoding provider choices. Your agent discovers the right capability, calls the right model, and runs full missions through one unified control plane, with cost, latency, and audit logs tagged per call.
               </p>
 
               <div className="space-y-6 mb-8">
@@ -757,25 +753,26 @@ Install:
 
             <div className="code-preview">
               <div className="code-preview-header">
-                same flow · four doors · one control plane
+                Same flow. Four doors. One control plane.
               </div>
               <div className="code-preview-body">
                 <pre className="text-sm">
-                  <span className="text-gray-500">{"// 1. MCP — Claude Desktop, Cursor, any MCP client"}</span>{"\n"}
+                  <span className="text-gray-500">{"// 1. MCP. Claude Desktop, Cursor, any MCP client"}</span>{"\n"}
                   <span className="text-blue-400">discover_apis</span>({"{ "}<span className="text-red-400">query</span>: <span className="text-green-400">"tts in spanish"</span>{" }"}){"\n"}
                   <span className="text-blue-400">call_api</span>({"{ "}<span className="text-red-400">provider</span>: <span className="text-green-400">"elevenlabs"</span>, <span className="text-red-400">action</span>: <span className="text-green-400">"tts"</span>, <span className="text-red-400">params</span>: {"{...}"} {"}"}){"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// 2. CLI — terminal, scripts, CI"}</span>{"\n"}
+                  <span className="text-gray-500">{"// 2. CLI. Terminal, scripts, CI"}</span>{"\n"}
                   <span className="text-green-400">$</span> apiclaw discover <span className="text-green-400">"tts in spanish"</span>{"\n"}
                   <span className="text-green-400">$</span> apiclaw call elevenlabs/tts -d <span className="text-green-400">'{"{...}"}'</span>{"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// 3. Workspace key — your own agent over HTTP"}</span>{"\n"}
+                  <span className="text-gray-500">{"// 3. HTTP. Your agent runtime over Bearer sk-claw"}</span>{"\n"}
                   fetch(<span className="text-green-400">"https://api.apiclaw.cloud/v1/call"</span>, {"{"}{"\n"}
                   {"  "}<span className="text-red-400">headers</span>: {"{ "}<span className="text-red-400">Authorization</span>: <span className="text-green-400">"Bearer sk-claw-..."</span> {"}"},{"\n"}
-                  {"  "}<span className="text-red-400">body</span>: JSON.stringify({"{ provider, action, params }"}){"\n"}
+                  {"  "}<span className="text-red-400">body</span>: JSON.stringify({"{ api, path, method, params }"}){"\n"}
                   {"}"}){"\n"}
                   {"\n"}
-                  <span className="text-gray-500">{"// Same gateway. Same auth. Same logs. 🦞"}</span>
+                  <span className="text-gray-500">{"// 4. Remote MCP. apiclaw.cloud/mcp + OAuth"}</span>{"\n"}
+                  <span className="text-gray-500">{"// Same gateway, same auth, same logs."}</span>
                 </pre>
               </div>
             </div>
@@ -833,18 +830,14 @@ Install:
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
-                <Building2 className="w-4 h-4" />
-                For API Owners
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">For API Owners</span>
+
+              <h2 className="text-3xl md:text-[2.75rem] font-semibold tracking-[-0.02em] leading-[1.1] mt-3 mb-6">
                 Reach the agent economy
               </h2>
-              
-              <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-                AI agents are the new developers. They don't browse landing pages. 
-                they query capabilities. Get your API in front of them.
+
+              <p className="text-text-secondary text-base sm:text-lg mb-8 leading-relaxed max-w-lg">
+                AI agents are the new developers. They don't browse landing pages, they query capabilities. Get your API in front of them.
               </p>
 
               <div className="space-y-6">
@@ -965,35 +958,35 @@ Install:
             {[
               {
                 q: "What is APIClaw?",
-                a: `The Control Plane for AI Agents. One runtime that exposes every model and every API your agent needs through a single workspace — discovery, execution, capability routing, multi-step missions, and observability. Same auth, same logs, same billing, regardless of how you connect.`
+                a: `The Control Plane for AI Agents. One runtime that exposes every model and every API your agent needs through a single workspace. Discovery, execution, capability routing, multi-step missions, and observability all live behind one auth layer. Same logs, same billing, regardless of how you connect.`
               },
               {
                 q: "How does my agent connect to APIClaw?",
-                a: `Four doors, one control plane. (1) MCP — drop APIClaw into Claude Desktop, Cursor, or any local MCP client. (2) CLI — npm install -g @nordsym/apiclaw and run discover, call, or full missions from a shell. (3) HTTP gateway — Bearer sk-claw-… against api.apiclaw.cloud, the endpoint your runtime is already wired for (OpenClaw, Hermes, n8n, custom backends). (4) Remote MCP — paste apiclaw.cloud/mcp into Grok, ChatGPT, or any OAuth-MCP client; PKCE + dynamic registration handles the rest. Identical workspace, identical auth, identical logs across all four.`
+                a: `Four doors, one control plane. (1) MCP: drop APIClaw into Claude Desktop, Cursor, or any local MCP client. (2) CLI: npm install -g @nordsym/apiclaw and run discover, call, or full missions from a shell. (3) HTTP gateway: Bearer sk-claw against api.apiclaw.cloud for any backend, agent runtime (we power OpenClaw, the fastest-growing open-source agent), or workflow tool (n8n, Make). (4) Remote MCP: paste apiclaw.cloud/mcp into Grok, ChatGPT, or any OAuth-MCP client; PKCE plus dynamic registration handles the rest. Identical workspace, identical auth, identical logs across all four.`
               },
               {
-                q: "Which models can I call?",
-                a: `Every major LLM family through one bearer: Anthropic (Claude Opus/Sonnet/Haiku), OpenAI, xAI / Grok, Groq, Mistral, Together AI, Cohere, Replicate, plus 800+ more via OpenRouter. Outside LLMs: ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, and the full APILayer suite (27 APIs). list_models returns the live catalog. The OpenAI-compatible /v1/chat/completions endpoint accepts any model id from that list.`
+                q: "What can I actually call?",
+                a: `26,704 discoverable APIs and 2,895 empirically callable, including every major LLM family in one place: Anthropic (Claude Opus, Sonnet, Haiku), xAI Grok, Groq, Mistral, Together AI, Cohere, OpenAI, plus 800 more via OpenRouter. Beyond LLMs: ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, Replicate, Stability AI, the full APILayer suite, and the long tail of public REST APIs the catalog has indexed. Use list_models for the live LLM catalog and discover_apis for everything else.`
               },
               {
                 q: "What are missions?",
-                a: `Missions are structured, observable orchestrations on APIClaw's runtime. Templates declare the steps; the runtime executes them with full audit log, cost tracking, and parallel-execution-ready architecture. Each mission has a unique id, a status (queued / running / completed / failed), a per-step event log, and an underlying + charged cost. CLI: apiclaw mission start <template>. MCP: start_mission. HTTP: POST /v1/missions/start.`
+                a: `Missions are structured, observable orchestrations on APIClaw's runtime. Templates declare the steps; the runtime executes them with a full audit log, cost tracking, and parallel-ready architecture. Each mission has a unique id, a status (queued, running, completed, failed), a per-step event log, and an underlying plus charged cost. CLI: apiclaw mission start <template>. MCP: start_mission. HTTP: POST /v1/missions/start.`
               },
               {
                 q: "How are credentials secured?",
-                a: `Provider credentials live server-side. Workspace API keys (sk-claw-…) are stored as one-way hashes; the raw value is shown once at creation and never again. Managed-provider keys are encrypted at rest and never touch the agent. Per-request audit logs tag workspace + provider + cost + latency without exposing secrets.`
+                a: `Provider credentials live server-side. Workspace API keys (sk-claw) are stored as one-way hashes; the raw value is shown once at creation and never again. Managed-provider keys are encrypted at rest and never reach the agent. Per-request audit logs tag workspace, provider, cost, and latency without exposing secrets.`
               },
               {
                 q: "What does it cost?",
-                a: `Free tier: 25 calls per month after email signup, any provider counts equally. Discovery (search, list, get_api_details) is always free and unmetered. Beyond the free tier: pay-as-you-go at underlying provider cost + 15%, billed via Stripe. No commitment. Internal NordSym workspaces run at zero margin (canon).`
+                a: `Free tier: 25 calls per month after email signup, any provider counts equally. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment. Internal NordSym workspaces run at zero margin (canon).`
               },
               {
                 q: "Do I have to sign up to use APIClaw?",
-                a: `Discovery works without signup. Execution requires a workspace, which is a free email signup at apiclaw.cloud/workspace. Once you have one, all four doors share the same workspace — paste an sk-claw-… key into MCP config, run apiclaw login in a terminal, send Authorization: Bearer from your backend, or authorize a Remote MCP client over OAuth.`
+                a: `Yes. A free email signup at apiclaw.cloud/workspace is required for every tool, including discovery. Once you have a workspace, all four doors share it: paste an sk-claw key into MCP config, run apiclaw login in a terminal, send Authorization: Bearer from your backend, or authorize a Remote MCP client over OAuth. The workspace is the control plane; everything else is an entry point into it.`
               },
               {
                 q: "I'm building my own agent runtime. Why would I use APIClaw?",
-                a: `Because you don't want to write provider routing, key vault, retry logic, circuit breakers, observability, billing, and rate limits from scratch. The HTTP gateway is OpenAI-compatible, so OpenClaw, Hermes, LangChain agents, n8n flows, and custom backends drop in by changing the base URL. You get one bearer, one workspace, every model — and the same control plane your end users are using.`
+                a: `Because you don't want to write provider routing, key vault, retry logic, circuit breakers, observability, billing, and rate limits from scratch. APIClaw already powers OpenClaw, the fastest-growing open-source agent runtime, and Symbot, NordSym's production agent. Point your existing chat-completions client at api.apiclaw.cloud with one bearer and you get every model from every provider plus the full control plane your end users will see. One auth layer, one billing rail, one log stream. Whatever your runtime, APIClaw is the layer underneath.`
               },
               {
                 q: "How do I add my API?",

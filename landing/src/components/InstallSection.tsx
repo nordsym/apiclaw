@@ -105,7 +105,7 @@ export function InstallSection() {
             Four doors. One control plane.
           </h2>
           <p className="text-text-secondary text-base sm:text-lg mt-3 sm:mt-4 max-w-2xl mx-auto">
-            Pick the entry point that fits your stack — local MCP client, terminal, your own backend, or a remote OAuth-MCP runtime. Identical workspace, identical auth, identical logs underneath.
+            Pick the entry point that fits your stack: local MCP client, terminal, your own backend, or a remote OAuth-MCP runtime. Identical workspace, identical auth, identical logs underneath.
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export function InstallSection() {
             </a>
           </div>
           <div className="text-[11px] text-text-muted mt-3 text-center sm:text-left">
-            No terminal needed with the .mcpb — double-click the file in Claude Desktop.
+            No terminal needed with the .mcpb. Double-click the file in Claude Desktop.
           </div>
         </div>
 
@@ -203,7 +203,7 @@ export function InstallSection() {
               icon={<Sparkles className="w-5 h-5" />}
               title="Remote MCP"
               subtitle="apiclaw.cloud/mcp · OAuth"
-              audience="Grok, ChatGPT, Cursor remote — paste one URL."
+              audience="Grok, ChatGPT, Cursor remote. Paste one URL."
             />
           </div>
 
@@ -274,11 +274,11 @@ function DoorMCP() {
     <div className="space-y-5">
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          MCP — for humans running existing AI clients
+          MCP: for humans running existing AI clients
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
           Drop APIClaw into Claude Desktop, Cursor, or any MCP-compatible client. Zero
-          code, zero key handling — your AI suddenly speaks {statsData.apiCount.toLocaleString()}+ APIs.
+          code, zero key handling. Your AI suddenly speaks {statsData.apiCount.toLocaleString()}+ APIs.
         </p>
       </div>
 
@@ -328,7 +328,7 @@ function DoorCLI() {
     <div className="space-y-5">
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          CLI — for devs in a shell
+          CLI: for devs in a shell
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
           Hit any APIClaw-callable provider straight from a terminal, a script, or a CI
@@ -359,7 +359,7 @@ function DoorCLI() {
 
       <div className="rounded-xl border border-border-subtle bg-surface p-3 text-xs text-text-muted">
         <span className="font-semibold text-text-secondary">Tip:</span> the CLI is the
-        same binary as the MCP server — one install, two ways to use it.
+        same binary as the MCP server. One install, two ways to use it.
       </div>
     </div>
   );
@@ -370,10 +370,10 @@ function DoorRemote() {
     <div className="space-y-5">
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          Remote MCP — full runtime over OAuth
+          Remote MCP: full runtime over OAuth
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
-          Paste one URL into Grok, ChatGPT, Cursor (remote), Claude Desktop, or any OAuth-aware MCP client. RFC 7591 dynamic registration + PKCE + email-verified consent — the client auto-discovers, registers itself, and gets the full control plane: discovery, execution, capability routing, missions, observability.
+          Paste one URL into Grok, ChatGPT, Cursor (remote), Claude Desktop, or any OAuth-aware MCP client. RFC 7591 dynamic registration plus PKCE plus email-verified consent. The client auto-discovers, registers itself, and gets the full control plane: discovery, execution, capability routing, missions, observability.
         </p>
       </div>
 
@@ -418,10 +418,10 @@ function DoorWorkspace() {
     <div className="space-y-5">
       <div>
         <h3 className="text-xl sm:text-2xl font-bold text-text-primary mb-2">
-          HTTP Gateway — every model, one endpoint
+          HTTP Gateway: every model, one endpoint
         </h3>
         <p className="text-text-secondary text-sm sm:text-base">
-          The endpoint your agent runtime is already wired for. Anthropic, xAI / Grok, Groq, Mistral, Together, Cohere, OpenRouter (800+), Replicate, ElevenLabs — every model and every provider in the catalog reachable from one base URL with one bearer key. Drop it in behind OpenClaw, Hermes, n8n, your own backend — APIClaw routes the request, holds the credentials, returns the result.
+          One base URL, one bearer, every model. Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter (800+), Replicate, ElevenLabs, plus the long tail of public APIs the catalog has indexed. Drop it in behind OpenClaw (the open-source agent runtime APIClaw powers), behind Symbot (NordSym's production agent), behind n8n, behind your own backend. APIClaw routes the request, holds the credentials, returns the result.
         </p>
       </div>
 
@@ -444,7 +444,7 @@ function DoorWorkspace() {
 
       <div>
         <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          Any model, one call (OpenAI-compatible Chat API)
+          Any model, one call
         </div>
         <pre className="rounded-xl border border-border bg-surface p-4 text-xs sm:text-sm font-mono text-text-primary overflow-x-auto">{`POST https://api.apiclaw.cloud/v1/chat/completions
 Authorization: Bearer sk-claw-…
@@ -452,8 +452,8 @@ Authorization: Bearer sk-claw-…
 {
   "model": "anthropic/claude-sonnet-4-6",
   // or "xai/grok-4-fast", "groq/llama-3.3-70b",
-  // or "openrouter/auto", "mistral/codestral",
-  // or any model returned by /v1/models
+  // or "mistral/codestral", "cohere/command-r-plus",
+  // or "openrouter/auto", or any id from /v1/models
   "messages": [{ "role": "user", "content": "..." }]
 }`}</pre>
       </div>
@@ -471,9 +471,9 @@ Authorization: Bearer sk-claw-…
 
       <div className="grid sm:grid-cols-3 gap-2 text-[11px]">
         <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
-          <div className="text-text-primary font-semibold mb-0.5">Drop-in for any agent runtime</div>
+          <div className="text-text-primary font-semibold mb-0.5">Powers OpenClaw + Symbot</div>
           <div className="text-text-muted leading-snug">
-            OpenClaw, Hermes, custom — swap the base URL, ship.
+            Already running NordSym's production agent stack.
           </div>
         </div>
         <div className="rounded-lg border border-border-subtle bg-surface p-2.5">
