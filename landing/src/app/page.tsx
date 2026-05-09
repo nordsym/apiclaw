@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import {
   ArrowRight, Zap, Shield, Terminal, ExternalLink,
-  Github, Check, Twitter, Sparkles, Code2, Link, Sun, Moon,
+  Github, Check, Twitter, Sparkles, Code2, Sun, Moon,
   Bot, Building2, Search, Rocket, Clock, Globe, Database,
   Play, ChevronRight, ChevronDown, Star, Users, Cpu, Activity, Copy, FileText,
   Menu, X, Download, Layers,
@@ -145,7 +146,7 @@ const whoIsThisFor = [
     tag: "CLI",
     title: "Terminal-native teams",
     description: "Shells, scripts, and CI/CD workflows when the agent already lives in a repo or pipeline.",
-    href: "/docs#codex",
+    href: "/docs#cli",
     cta: "Open CLI docs",
   },
   {
@@ -161,8 +162,8 @@ const whoIsThisFor = [
     tag: "Remote MCP",
     title: "Connected clients",
     description: "OAuth-capable runtimes that connect through your workspace and use Integrations.",
-    href: "/workspace/integrations",
-    cta: "Open integrations",
+    href: "/sign-in",
+    cta: "Sign in",
   },
 ];
 
@@ -608,10 +609,10 @@ Install:
               </div>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
-                <a href="#who-is-this-for" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5" />
-                  Choose a door
-                </a>
+              <a href="#who-is-this-for" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
+                <Terminal className="w-3.5 h-3.5" />
+                See paths
+              </a>
                 <span className="text-border">·</span>
                 <button
                   onClick={copyContextToClipboard}
@@ -667,9 +668,10 @@ Install:
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {whoIsThisFor.map((card) => (
-              <div
+              <Link
                 key={card.tag}
-                className="group rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-300 transform-gpu hover:-translate-y-1 hover:border-accent/40 hover:bg-surface hover:shadow-[0_16px_28px_-24px_rgba(239,68,68,0.28)]"
+                href={card.href}
+                className="group rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-300 transform-gpu hover:-translate-y-1 hover:border-accent/40 hover:bg-surface hover:shadow-[0_16px_28px_-24px_rgba(239,68,68,0.28)] flex flex-col"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center transition-transform duration-300 group-hover:scale-105">
@@ -679,7 +681,11 @@ Install:
                 </div>
                 <div className="text-base font-semibold mb-2 tracking-tight">{card.title}</div>
                 <p className="text-sm text-text-secondary leading-relaxed">{card.description}</p>
-              </div>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent group-hover:text-accent-hover transition-colors">
+                  {card.cta}
+                  <ArrowRight className="w-3 h-3" />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -818,7 +824,7 @@ Install:
                 <h3 className="text-lg font-semibold tracking-tight">Pick the entry point. The runtime is identical.</h3>
               </div>
               <a href="#who-is-this-for" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5 group">
-                Open the doors
+                See paths
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
@@ -826,9 +832,9 @@ Install:
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
                 { tag: "Install", h: "Local MCP", d: "Claude Desktop and other local MCP clients.", icon: <Bot className="w-4 h-4" />, href: "/install", cta: "Open install" },
-                { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" />, href: "/docs#codex", cta: "Open CLI docs" },
+                { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" />, href: "/docs#cli", cta: "Open CLI docs" },
                 { tag: "HTTP", h: "HTTP", d: "Server-side agents and OpenClaw-style agents.", icon: <Terminal className="w-4 h-4" />, href: "/docs#gateway", cta: "Open HTTP docs" },
-                { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" />, href: "/workspace/integrations", cta: "Open integrations" },
+                { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" />, href: "/sign-in", cta: "Sign in" },
               ].map((d) => (
                 <div
                   key={d.tag}

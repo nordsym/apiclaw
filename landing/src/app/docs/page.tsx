@@ -4,6 +4,34 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
+const docsNav = [
+  {
+    label: "Install",
+    href: "/install",
+    note: "Local MCP setup",
+  },
+  {
+    label: "CLI",
+    href: "#cli",
+    note: "Codex, scripts, CI/CD",
+  },
+  {
+    label: "HTTP",
+    href: "#gateway",
+    note: "Server-side runtime",
+  },
+  {
+    label: "Remote MCP",
+    href: "/sign-in",
+    note: "Sign in, then integrations",
+  },
+  {
+    label: "List your API",
+    href: "#list-your-api",
+    note: "Owner path",
+  },
+];
+
 export default function DocsPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
@@ -36,7 +64,6 @@ export default function DocsPage() {
           <nav className="flex items-center gap-4 md:gap-6">
             <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Home</Link>
             <span className="hidden md:block text-[var(--accent)] font-medium text-sm md:text-base">Docs</span>
-            <Link href="#list-your-api" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">List your API</Link>
             <a 
               href="https://github.com/nordsym/apiclaw" 
               target="_blank"
@@ -55,141 +82,220 @@ export default function DocsPage() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-16">
-        {/* Hero */}
-        <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">
-              Documentation
-            </span>
-          </h1>
-          <p className="text-xl text-[var(--text-secondary)]">
-            Everything you need to integrate APIClaw into your AI agent.
-          </p>
-        </div>
-
-        {/* Quick Start */}
-        <section id="codex" className="mb-16 scroll-mt-24">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">⚡</span> Quick Start
-          </h2>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 mb-6">
-            <p className="text-[var(--text-secondary)] mb-4">Get running in 30 seconds:</p>
-            <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm">
-                <span className="text-[var(--text-muted)]"># Auto-install to Claude Desktop/Code</span>{'\n'}
-                curl -fsSL https://apiclaw.cloud/install.sh | bash{'\n\n'}
-                <span className="text-[var(--text-muted)]"># Or run the MCP server directly</span>{'\n'}
-                <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span>
-              </code>
-            </pre>
-          </div>
-          <p className="text-[var(--text-secondary)]">
-            APIClaw runs as an MCP server. Add it to your Claude Desktop or any local MCP-compatible client.
-          </p>
-        </section>
-
-        {/* MCP Config */}
-        <section id="gateway" className="mb-16 scroll-mt-24">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">⚙️</span> MCP Configuration
-          </h2>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-            <p className="text-[var(--text-secondary)] mb-4">Add to your MCP config (e.g., Claude Desktop):</p>
-            <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-[var(--text-primary)]">
-{`{
-  "mcpServers": {
-    "apiclaw": {
-      "command": "npx",
-      "args": ["@nordsym/apiclaw"]
-    }
-  }
-}`}
-              </code>
-            </pre>
-          </div>
-        </section>
-
-        {/* Codex Setup */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">⌨️</span> Codex (OpenAI CLI)
-          </h2>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-            <p className="text-[var(--text-secondary)]">
-              APIClaw integrates with Codex via its MCP install command. Codex must be installed and available in your PATH.
-            </p>
-            <div>
-              <p className="text-sm font-medium mb-2">Verify Codex install path:</p>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm text-[var(--text-primary)]">which codex</code>
-              </pre>
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="grid lg:grid-cols-[280px_minmax(0,1fr)] gap-10 items-start">
+          <aside className="lg:sticky lg:top-24 self-start">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 shadow-sm">
+              <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-muted)] font-semibold mb-3">
+                Pick your path
+              </div>
+              <p className="text-sm text-[var(--text-secondary)] mb-4">
+                Choose the setup that matches how you run agents.
+              </p>
+              <nav className="space-y-2">
+                {docsNav.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="group block rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] px-4 py-3 transition-colors hover:border-[var(--accent)]/40 hover:bg-[var(--surface)]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                          {item.label}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] mt-1">
+                          {item.note}
+                        </div>
+                      </div>
+                      <span className="text-[var(--accent)] text-sm">→</span>
+                    </div>
+                  </Link>
+                ))}
+              </nav>
             </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Install APIClaw into Codex:</p>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw setup --client codex</code>
-              </pre>
-              <p className="text-xs text-[var(--text-muted)] mt-2">
-                This runs <code>codex mcp add apiclaw -- npx -y @nordsym/apiclaw</code> and verifies the install.
+          </aside>
+
+          <main className="min-w-0">
+            {/* Hero */}
+            <div className="mb-16">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="gradient-text">
+                  Documentation
+                </span>
+              </h1>
+              <p className="text-xl text-[var(--text-secondary)] max-w-2xl">
+                Everything you need to choose a door, set up the right runtime, and connect APIClaw to your agent stack.
               </p>
             </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Check status:</p>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw doctor</code>
-              </pre>
-              <p className="text-xs text-[var(--text-muted)] mt-2">Shows Codex binary path, connection status, and all MCP client configurations.</p>
-            </div>
-          </div>
-        </section>
 
-        {/* Gateway / OpenClaw */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">⚡</span> Intelligent Gateway
-          </h2>
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-            <p className="text-[var(--text-secondary)]">
-              APIClaw exposes an OpenAI-compatible LLM gateway. Use it from OpenClaw, n8n, Codex, or any tool that accepts an OpenAI-style base URL and API key.
-            </p>
+            {/* Install */}
+            <section id="install" className="mb-16 scroll-mt-24">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-[var(--accent)]">⬇️</span> Install
+              </h2>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+                <p className="text-[var(--text-secondary)]">
+                  Local MCP setup for Claude Desktop, Cursor, and other local clients. The full OS-specific install flow lives on the install page.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/install"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover,_#dc2626)] text-white text-sm font-semibold transition-colors"
+                  >
+                    Open install
+                    <span aria-hidden>→</span>
+                  </Link>
+                  <Link
+                    href="/sign-in"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[var(--accent)]/40 text-[var(--text-primary)] text-sm font-semibold transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Quick install:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm">
+                      <span className="text-[var(--text-muted)]"># Auto-install to Claude Desktop</span>{'\n'}
+                      curl -fsSL https://apiclaw.cloud/install.sh | bash{'\n\n'}
+                      <span className="text-[var(--text-muted)]"># Or run the MCP server directly</span>{'\n'}
+                      <span className="text-emerald-500 dark:text-emerald-400">npx</span> <span className="text-[var(--accent)]">@nordsym/apiclaw</span>
+                    </code>
+                  </pre>
+                </div>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  OS-specific commands for macOS, Windows, and Linux live in the install guide. Use this page as the hub, not the full manual.
+                </p>
+              </div>
+            </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Endpoint</p>
-                <code className="text-sm font-mono text-[var(--accent)] break-all">https://api.apiclaw.cloud/v1</code>
-              </div>
-              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Default model</p>
-                <code className="text-sm font-mono text-[var(--accent)]">apiclaw/openai/gpt-5.4-20260305</code>
-              </div>
-              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
-                <p className="text-xs text-[var(--text-muted)] mb-1">API key</p>
-                <code className="text-sm font-mono text-[var(--accent)]">sk-claw-...</code>
-                <p className="text-[10px] text-[var(--text-muted)] mt-1">Generate in workspace → API Keys</p>
-              </div>
-            </div>
+            {/* CLI alias */}
+            <div id="codex" className="scroll-mt-24" aria-hidden />
 
-            <div>
-              <p className="text-sm font-medium mb-2">Environment config (OpenClaw or any OpenAI-compatible client):</p>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm text-[var(--text-primary)]">{`OPENAI_BASE_URL=https://api.apiclaw.cloud/v1
+            {/* CLI */}
+            <section id="cli" className="mb-16 scroll-mt-24">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-[var(--accent)]">⌨️</span> CLI
+              </h2>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+                <p className="text-[var(--text-secondary)]">
+                  Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category.
+                </p>
+                <div>
+                  <p className="text-sm font-medium mb-2">Verify your CLI install path:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">which codex</code>
+                  </pre>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Install APIClaw into Codex:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw setup --client codex</code>
+                  </pre>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">
+                    This runs <code>codex mcp add apiclaw -- npx -y @nordsym/apiclaw</code> and verifies the install.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Check status:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw doctor</code>
+                  </pre>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">Shows CLI path, connection status, and all client configurations.</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Gateway / OpenClaw */}
+            <section id="gateway" className="mb-16 scroll-mt-24">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-[var(--accent)]">⚡</span> HTTP
+              </h2>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+                <p className="text-[var(--text-secondary)]">
+                  Server-side agents and custom runtimes. Use it from OpenClaw or any backend that sends requests with a workspace-generated key.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Endpoint</p>
+                    <code className="text-sm font-mono text-[var(--accent)] break-all">https://api.apiclaw.cloud/v1</code>
+                  </div>
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Default model</p>
+                    <code className="text-sm font-mono text-[var(--accent)]">apiclaw/openai/gpt-5.4-20260305</code>
+                  </div>
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">API key</p>
+                    <code className="text-sm font-mono text-[var(--accent)]">sk-claw-...</code>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-1">Generate in workspace → API Keys</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Environment config:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">{`OPENAI_BASE_URL=https://api.apiclaw.cloud/v1
 OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
-              </pre>
-            </div>
+                  </pre>
+                </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Override route or model per request:</p>
-              <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                <code className="text-sm text-[var(--text-primary)]">{`X-APIClaw-Route: fastest   # or: best_price, highest_quality, balanced`}</code>
-              </pre>
-              <p className="text-xs text-[var(--text-muted)] mt-2">
-                Response includes <code>_apiclaw</code> metadata: provider used, route reason, model resolved.
-              </p>
-            </div>
-          </div>
-        </section>
+                <div>
+                  <p className="text-sm font-medium mb-2">Override route or model per request:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">{`X-APIClaw-Route: fastest   # or: best_price, highest_quality, balanced`}</code>
+                  </pre>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">
+                    Response includes <code>_apiclaw</code> metadata: provider used, route reason, model resolved.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Remote MCP */}
+            <section id="remote-mcp" className="mb-16 scroll-mt-24">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-[var(--accent)]">🔗</span> Remote MCP
+              </h2>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+                <p className="text-[var(--text-secondary)]">
+                  Connected clients go through your workspace. Sign in first, then open Integrations to add or edit a connector. Grok, ChatGPT, Cursor, and other OAuth-capable clients fit here.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/sign-in"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover,_#dc2626)] text-white text-sm font-semibold transition-colors"
+                  >
+                    Sign in
+                    <span aria-hidden>→</span>
+                  </Link>
+                  <Link
+                    href="/workspace/integrations"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[var(--accent)]/40 text-[var(--text-primary)] text-sm font-semibold transition-colors"
+                  >
+                    Open integrations
+                  </Link>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Step 1</p>
+                    <p className="text-sm font-semibold">Free email signup</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Required for every door.</p>
+                  </div>
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Step 2</p>
+                    <p className="text-sm font-semibold">Workspace</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Same auth, same logs, same gateway.</p>
+                  </div>
+                  <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Step 3</p>
+                    <p className="text-sm font-semibold">Integrations</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Generate a connector for your client.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
 
         {/* Examples */}
         <section className="mb-16">
@@ -426,6 +532,8 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             </a>
           </div>
         </section>
+          </main>
+        </div>
       </div>
 
       {/* Footer */}
