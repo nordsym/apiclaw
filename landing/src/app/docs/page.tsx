@@ -85,7 +85,7 @@ export default function DocsPage() {
             </pre>
           </div>
           <p className="text-[var(--text-secondary)]">
-            APIClaw runs as an MCP server. Add it to your Claude Desktop, Cursor, or any MCP-compatible client.
+            APIClaw runs as an MCP server. Add it to your Claude Desktop or any local MCP-compatible client.
           </p>
         </section>
 
@@ -152,7 +152,7 @@ export default function DocsPage() {
           </h2>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
             <p className="text-[var(--text-secondary)]">
-              APIClaw exposes an OpenAI-compatible LLM gateway. Use it from OpenClaw, Cursor, n8n, Codex, or any tool that accepts an OpenAI-style base URL and API key.
+              APIClaw exposes an OpenAI-compatible LLM gateway. Use it from OpenClaw, n8n, Codex, or any tool that accepts an OpenAI-style base URL and API key.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -172,7 +172,7 @@ export default function DocsPage() {
             </div>
 
             <div>
-              <p className="text-sm font-medium mb-2">Environment config (OpenClaw, Cursor, any OpenAI-compatible client):</p>
+              <p className="text-sm font-medium mb-2">Environment config (OpenClaw or any OpenAI-compatible client):</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm text-[var(--text-primary)]">{`OPENAI_BASE_URL=https://api.apiclaw.cloud/v1
 OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
