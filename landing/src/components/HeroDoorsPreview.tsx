@@ -157,11 +157,6 @@ export function HeroDoorsPreview() {
                       </div>
                     </div>
                   </div>
-                  {active && (
-                    <span className="text-[10px] uppercase tracking-widest text-accent font-semibold animate-[fadeIn_0.3s_ease-out_forwards]">
-                      live
-                    </span>
-                  )}
                 </div>
                 <pre
                   className={`font-mono text-[12px] sm:text-[13px] leading-relaxed pl-9 whitespace-pre-wrap break-all ${
