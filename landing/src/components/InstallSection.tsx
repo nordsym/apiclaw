@@ -96,7 +96,7 @@ export function InstallSection() {
             Up and running in 30 seconds.
           </h2>
           <p className="text-text-secondary text-base sm:text-lg mt-3 leading-relaxed">
-            Pick a door from the section above. Each one connects to the same workspace.
+            Pick a door from the section above. Each one requires email signup and connects to the same workspace.
           </p>
         </div>
 

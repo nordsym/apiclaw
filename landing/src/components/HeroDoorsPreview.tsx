@@ -15,7 +15,7 @@ const DOORS: Door[] = [
   {
     id: "mcp",
     label: "MCP",
-    audience: "Local execution in Claude Desktop, Cursor, any MCP client",
+    audience: "Local execution in Claude Desktop and other local MCP clients",
     icon: <Bot className="w-4 h-4" />,
     code: (
       <>
@@ -65,12 +65,12 @@ const DOORS: Door[] = [
   },
   {
     id: "grok",
-    label: "Remote MCP / Full Runtime",
-    audience: "Full control plane access · missions · parallel execution",
+    label: "Remote MCP",
+    audience: "Connected clients and OAuth-capable runtimes",
     icon: <Sparkles className="w-4 h-4" />,
     code: (
       <>
-        <span className="text-text-muted">{"// remote MCP – paste the URL, OAuth handles the rest"}</span>{"\n"}
+        <span className="text-text-muted">{"// remote MCP - connect through your workspace"}</span>{"\n"}
         <span className="text-text-primary">POST </span>
         <span className="text-accent">apiclaw.cloud/mcp</span>{"\n"}
         <span className="text-text-muted">Authorization: </span>

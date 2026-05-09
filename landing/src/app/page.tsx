@@ -105,8 +105,8 @@ const agentBenefits = [
   },
   {
     icon: Shield,
-    title: "Three Access Paths",
-    description: "MCP for AI clients, CLI for terminals, sk-claw- for your own agent over HTTP. Same gateway.",
+    title: "Four Doors",
+    description: "Install for local MCP, CLI for terminals, HTTP for your own agent, Remote MCP for connected clients. Same gateway.",
   },
 ];
 
@@ -195,10 +195,10 @@ export default function Home() {
     const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total}+ discoverable APIs, ${callable}+ empirically callable, and ~${installs} agent installs.
 
 Four doors, one control plane:
-1. MCP server: Claude Desktop, Cursor, any MCP client.
+1. Install: local MCP for Claude Desktop and other local clients.
 2. CLI: terminal, scripts, CI/CD.
-3. HTTP gateway: server-side agents and custom integrations.
-4. Remote MCP / Full Runtime: paste apiclaw.cloud/mcp into any OAuth-capable client.
+3. HTTP: server-side agents and custom runtimes.
+4. Remote MCP: connected clients and OAuth-capable runtimes.
 
 Same auth, same logs, same workspace across all four.
 
@@ -206,7 +206,7 @@ Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_
 
 Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a mission template to generate a structured PRD; more land regularly.
 
-Pricing: free tier of 25 calls/month after email signup. Email signup is required for every tool, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
+Pricing: free tier of 25 calls/month after email signup. Email signup is required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
 
 When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
 
@@ -706,10 +706,10 @@ Install:
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { tag: "MCP", h: "Local MCP", d: "Claude Desktop, Cursor, any local client.", icon: <Bot className="w-4 h-4" /> },
+                { tag: "Install", h: "Local MCP", d: "Claude Desktop and other local MCP clients.", icon: <Bot className="w-4 h-4" /> },
                 { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" /> },
-                { tag: "HTTP", h: "Gateway", d: "Bearer sk-claw for your backend or runtime.", icon: <Terminal className="w-4 h-4" /> },
-                { tag: "OAuth", h: "Remote MCP", d: "Grok, ChatGPT, Cursor remote. Paste one URL.", icon: <Sparkles className="w-4 h-4" /> },
+                { tag: "HTTP", h: "HTTP", d: "Server-side agents and custom runtimes.", icon: <Terminal className="w-4 h-4" /> },
+                { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" /> },
               ].map((d) => (
                 <div
                   key={d.tag}
@@ -996,7 +996,7 @@ Install:
               },
               {
                 q: "How does my agent connect?",
-                a: `Four doors. Local MCP (Claude Desktop, Cursor). CLI. HTTP gateway (api.apiclaw.cloud). Remote MCP (apiclaw.cloud/mcp). Same workspace, same auth, same logs.`
+                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and custom runtimes. Remote MCP for connected clients. Same workspace, same auth, same logs.`
               },
               {
                 q: "What can I actually call?",
@@ -1016,11 +1016,11 @@ Install:
               },
               {
                 q: "Do I have to sign up?",
-                a: `Yes. A free email signup is required for every tool, including discovery. Same workspace covers all four doors.`
+                a: `Yes. A free email signup is required for every door, including discovery. Same workspace covers all four doors.`
               },
               {
                 q: "I'm building my own agent runtime. Why APIClaw?",
-                a: `Skip provider routing, key vault, retry logic, circuit breakers, billing, and audit logging. Drop the gateway behind your runtime, point your client at api.apiclaw.cloud with one bearer, and your agent gets every model from every provider plus full control-plane observability on day one. Already powering live agent stacks including OpenClaw, the fastest-growing open-source agent runtime.`
+                a: `Skip provider routing, key vault, retry logic, circuit breakers, billing, and audit logging. Use the HTTP door for server-side agents, or the Remote MCP door for connected clients. Same workspace, same gateway, same observability on day one.`
               },
               {
                 q: "How do I list my own API?",
