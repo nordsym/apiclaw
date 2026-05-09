@@ -218,7 +218,7 @@ function generatePreviewAnalytics(): ProviderAnalytics {
 export default function WorkspacePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const signInPath = CLERK_ENABLED ? "/sign-in" : "/login";
+  const signInPath = "/sign-in";
   
   // Handle null searchParams
   if (!searchParams) {
@@ -478,8 +478,8 @@ export default function WorkspacePage() {
         // Fetch all approved APIs for the catalog
         await fetchApprovedAPIs();
 
-        // If no session, redirect to login. Preserve any pending device-link
-        // code via localStorage; /login → /workspace will pick it up.
+        // If no session, redirect to sign-in. Preserve any pending device-link
+        // code via localStorage; /sign-in → /workspace will pick it up.
         if (!token) {
           const pending = localStorage.getItem("apiclaw_pending_link");
           router.push(pending ? `${signInPath}?link=${pending}` : signInPath);
@@ -4757,7 +4757,7 @@ function BillingTab({
     try {
       const token = sessionToken;
       if (!token) {
-        window.location.href = CLERK_ENABLED ? "/sign-in" : "/login";
+        window.location.href = "/sign-in";
         return;
       }
       const res = await fetch("/api/billing/checkout", {

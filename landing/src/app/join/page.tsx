@@ -21,8 +21,8 @@ function JoinContent() {
       localStorage.setItem("apiclaw_referral_code", refCode);
     }
 
-    // Redirect to login page
-    router.push("/login");
+    // Redirect to Clerk sign-in
+    router.push("/sign-in");
   }, [refCode, router]);
 
   return (
@@ -30,7 +30,7 @@ function JoinContent() {
       <div className="text-center">
         <span className="text-6xl animate-bounce">🦞</span>
         <p className="mt-4 text-[var(--text-secondary)]">
-          {refCode ? "Processing your invite..." : "Redirecting to login..."}
+          {refCode ? "Processing your invite..." : "Redirecting to sign in..."}
         </p>
       </div>
     </div>

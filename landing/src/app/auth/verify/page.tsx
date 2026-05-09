@@ -87,7 +87,7 @@ function VerifyContent() {
           localStorage.setItem("apiclaw_workspace_session", data.sessionToken);
           // Auto-redirect to workspace after 2 seconds. Preserve any pending
           // device-link code (set when the user came from the MCP install
-          // flow at /workspace?link=CODE → /login?link=CODE → magic email).
+          // flow at /workspace?link=CODE → /sign-in?link=CODE → Clerk).
           const pendingLink = localStorage.getItem("apiclaw_pending_link");
           const dest = pendingLink ? `/workspace?link=${pendingLink}` : "/workspace";
           setTimeout(() => {

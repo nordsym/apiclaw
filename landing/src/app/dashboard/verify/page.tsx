@@ -88,7 +88,7 @@ function VerifyContent() {
             </div>
             <h1 className="text-2xl font-bold mb-2">Verification Failed</h1>
             <p className="text-red-500 mb-6">{error}</p>
-            <Link href="/login" className="btn-primary">
+            <Link href="/sign-in" className="btn-primary">
               Try Again
             </Link>
           </>

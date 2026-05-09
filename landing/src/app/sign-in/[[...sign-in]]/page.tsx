@@ -7,7 +7,7 @@ export default function SignInPage() {
   // Capture device-link code (?link=) and referral code (?ref=) into
   // localStorage so they survive the Clerk OAuth round-trip. The callback
   // page replays them when redirecting to /workspace. Mirrors the legacy
-  // /login behavior.
+  // email-sign-in behavior.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);

@@ -197,7 +197,7 @@ export default function ChainsPage() {
     const init = async () => {
       const token = localStorage.getItem("apiclaw_workspace_session");
       if (!token) {
-        router.push("/login");
+        router.push("/sign-in");
         return;
       }
       setSessionToken(token);
