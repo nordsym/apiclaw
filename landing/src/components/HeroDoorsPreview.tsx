@@ -51,7 +51,7 @@ const DOORS: Door[] = [
   {
     id: "http",
     label: "HTTP",
-    audience: "Server-side agents & custom integrations",
+    audience: "Server-side agents & OpenClaw-style agents",
     icon: <KeyRound className="w-4 h-4" />,
     code: (
       <>
@@ -98,7 +98,7 @@ export function HeroDoorsPreview() {
 
   const handleClick = (idx: number) => {
     setActiveIdx(idx);
-    const target = document.getElementById("install");
+    const target = document.getElementById("who-is-this-for");
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -176,10 +176,10 @@ export function HeroDoorsPreview() {
         </div>
 
         <a
-          href="#install"
+          href="#who-is-this-for"
           className="flex items-center justify-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-text-muted hover:text-accent border-t border-border-subtle bg-surface transition"
         >
-          Install for your stack
+          See who this is for
           <ArrowDown className="w-3.5 h-3.5" />
         </a>
       </div>

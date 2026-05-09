@@ -13,8 +13,6 @@ import { useState, useEffect, useRef } from "react";
 import { HeroDoorsPreview } from "@/components/HeroDoorsPreview";
 import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
-import { SeeTheDifference } from "@/components/SeeTheDifference";
-import { InstallSection } from "@/components/InstallSection";
 
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
@@ -133,6 +131,33 @@ const providerBenefits = [
   },
 ];
 
+const whoIsThisFor = [
+  {
+    icon: Bot,
+    tag: "Install",
+    title: "Local MCP builders",
+    description: "Claude Desktop and other local clients when you want the fastest path to a first call.",
+  },
+  {
+    icon: Terminal,
+    tag: "CLI",
+    title: "Terminal-native teams",
+    description: "Shells, scripts, and CI/CD workflows when the agent already lives in a repo or pipeline.",
+  },
+  {
+    icon: Globe,
+    tag: "HTTP",
+    title: "Server-side runtimes",
+    description: "Workspace-generated keys for backend agents, OpenClaw-style agents, and custom runtimes.",
+  },
+  {
+    icon: Sparkles,
+    tag: "Remote MCP",
+    title: "Connected clients",
+    description: "OAuth-capable runtimes that connect through your workspace and use Integrations.",
+  },
+];
+
 const terminalLines = [
   { type: "prompt", text: "curl -fsSL https://apiclaw.cloud/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
@@ -160,6 +185,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const mainRef = useRef<HTMLElement | null>(null);
 
   const managedProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
     // Multi-API providers (top)
@@ -197,7 +223,7 @@ export default function Home() {
 Four doors, one control plane:
 1. Install: local MCP for Claude Desktop and other local clients.
 2. CLI: terminal, scripts, CI/CD.
-3. HTTP: server-side agents and custom runtimes.
+3. HTTP: server-side agents and OpenClaw-style agents.
 4. Remote MCP: connected clients and OAuth-capable runtimes.
 
 Same auth, same logs, same workspace across all four.
@@ -287,6 +313,63 @@ Install:
     setIsLoggedIn(!!(workspaceSession || providerSession));
   }, []);
 
+  useEffect(() => {
+    const node = mainRef.current;
+    if (!node) return;
+
+    let raf = 0;
+    const pointer = { x: window.innerWidth / 2, y: window.innerHeight * 0.22 };
+
+    const apply = () => {
+      const x = pointer.x;
+      const y = pointer.y;
+      const nx = x / Math.max(window.innerWidth, 1) - 0.5;
+      const ny = y / Math.max(window.innerHeight, 1) - 0.5;
+      node.style.setProperty("--pointer-x", `${x}px`);
+      node.style.setProperty("--pointer-y", `${y}px`);
+      node.style.setProperty("--pointer-opacity", "1");
+      node.style.setProperty("--grid-offset-x", `${(nx * 26).toFixed(2)}px`);
+      node.style.setProperty("--grid-offset-y", `${(ny * 26).toFixed(2)}px`);
+      node.style.setProperty("--pointer-tilt-x", `${(nx * 18).toFixed(2)}px`);
+      node.style.setProperty("--pointer-tilt-y", `${(ny * 18).toFixed(2)}px`);
+    };
+
+    const onMove = (event: PointerEvent) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+
+    const onEnter = (event: PointerEvent) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      apply();
+    };
+
+    const onLeave = () => {
+      node.style.setProperty("--pointer-opacity", "0");
+      node.style.setProperty("--pointer-x", "50%");
+      node.style.setProperty("--pointer-y", "20%");
+      node.style.setProperty("--grid-offset-x", "0px");
+      node.style.setProperty("--grid-offset-y", "0px");
+      node.style.setProperty("--pointer-tilt-x", "0px");
+      node.style.setProperty("--pointer-tilt-y", "0px");
+    };
+
+    node.addEventListener("pointermove", onMove);
+    node.addEventListener("pointerenter", onEnter);
+    node.addEventListener("pointerleave", onLeave);
+    apply();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      node.removeEventListener("pointermove", onMove);
+      node.removeEventListener("pointerenter", onEnter);
+      node.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
@@ -295,7 +378,23 @@ Install:
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden page-grid relative">
+    <main
+      ref={mainRef}
+      className="min-h-screen overflow-x-hidden page-grid relative"
+      style={
+        {
+          "--pointer-x": "50%",
+          "--pointer-y": "20%",
+          "--pointer-opacity": 0,
+          "--grid-offset-x": "0px",
+          "--grid-offset-y": "0px",
+          "--pointer-tilt-x": "0px",
+          "--pointer-tilt-y": "0px",
+        } as React.CSSProperties
+      }
+    >
+      <div className="pointer-ambient" />
+
       {/* Early Access Banner */}
       <div className="fixed top-0 w-full z-[60] bg-accent text-white text-center py-2 px-4 text-[13px] font-medium tracking-tight">
         🦞 <span className="font-semibold">Early access.</span> Join the first wave of agents.
@@ -489,7 +588,7 @@ Install:
                   download
                   className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-text-primary hover:bg-text-secondary text-background font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
                 >
-                  Install for Claude Desktop
+                  .mcpb for Claude
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </a>
                 <a
@@ -501,9 +600,9 @@ Install:
               </div>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
-                <a href="#install" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
+                <a href="#who-is-this-for" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5" />
-                  All install paths
+                  Choose a door
                 </a>
                 <span className="text-border">·</span>
                 <button
@@ -545,24 +644,41 @@ Install:
         </div>
       </section>
 
-      {/* AI Testimonials Carousel */}
-      <AITestimonials />
-
-      {/* See the Difference v2 — racing clock, side-by-side */}
-      <section className="py-20 px-4 sm:px-6">
+      {/* Who is this for */}
+      <section id="who-is-this-for" className="py-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
-            <span className="section-label">SEE THE DIFFERENCE</span>
+            <span className="section-label">WHO IS THIS FOR</span>
             <h2 className="text-3xl md:text-5xl font-bold mt-3 sm:mt-4 tracking-tighter">
-              Same prompt. Two paths.
+              Choose the door that matches how you run agents.
             </h2>
             <p className="text-text-muted text-base sm:text-lg mt-3 max-w-2xl mx-auto">
-              One finishes in 1.4 seconds. The other is still going.
+              Free email signup is required for every door. The workspace is the same after you enter.
             </p>
           </div>
-          <SeeTheDifference />
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {whoIsThisFor.map((card) => (
+              <div
+                key={card.tag}
+                className="group rounded-2xl border border-border bg-surface-elevated p-5 transition-all duration-300 transform-gpu hover:-translate-y-1 hover:border-accent/40 hover:bg-surface hover:shadow-[0_16px_28px_-24px_rgba(239,68,68,0.28)]"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                    <card.icon className="w-4 h-4" />
+                  </span>
+                  <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">{card.tag}</span>
+                </div>
+                <div className="text-base font-semibold mb-2 tracking-tight">{card.title}</div>
+                <p className="text-sm text-text-secondary leading-relaxed">{card.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
+      {/* AI Testimonials Carousel */}
+      <AITestimonials />
 
       {/* Managed APIs Modal */}
       {showManagedModal && (
@@ -655,11 +771,6 @@ Install:
         </div>
       )}
 
-      {/* Install — Four Doors + OS-aware quick install + .mcpb */}
-      <InstallSection />
-
-      <div className="divider" />
-
       {/* How It Works — The Control Plane */}
       <section id="how-it-works" className="py-24 px-6 relative">
         <div className="max-w-6xl mx-auto">
@@ -698,8 +809,8 @@ Install:
                 <div className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium mb-1.5">Four Doors · One Control Plane</div>
                 <h3 className="text-lg font-semibold tracking-tight">Pick the entry point. The runtime is identical.</h3>
               </div>
-              <a href="#install" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5 group">
-                Get installed
+              <a href="#who-is-this-for" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5 group">
+                Choose a door
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
@@ -708,7 +819,7 @@ Install:
               {[
                 { tag: "Install", h: "Local MCP", d: "Claude Desktop and other local MCP clients.", icon: <Bot className="w-4 h-4" /> },
                 { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" /> },
-                { tag: "HTTP", h: "HTTP", d: "Server-side agents and custom runtimes.", icon: <Terminal className="w-4 h-4" /> },
+                { tag: "HTTP", h: "HTTP", d: "Server-side agents and OpenClaw-style agents.", icon: <Terminal className="w-4 h-4" /> },
                 { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" /> },
               ].map((d) => (
                 <div
@@ -744,13 +855,13 @@ Install:
               The runtime your agent actually wants.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
-              Discovery, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
+              26,704 discoverable APIs, 2,895 callable APIs, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
             {[
-              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: "26,704 APIs", d: "Search by capability. Auth, pricing, latency on every result." },
+              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: "26,704 discoverable / 2,895 callable", d: "Search by capability. Auth, pricing, latency on every result." },
               { icon: <Cpu className="w-4 h-4" />, tag: "Every model", t: "All providers", d: "Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter." },
               { icon: <Layers className="w-4 h-4" />, tag: "Missions", t: "Orchestration", d: "Multi-step runs with audit log, cost tags, parallel-ready execution." },
               { icon: <Activity className="w-4 h-4" />, tag: "Observe", t: "Per-call audit", d: "Workspace, provider, latency, cost on every tool call. Replayable." },
@@ -802,7 +913,7 @@ Install:
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <a href="#install" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors">
+                <a href="#who-is-this-for" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors">
                   Start building
                   <ArrowRight className="w-4 h-4" />
                 </a>
@@ -821,7 +932,7 @@ Install:
           <div className="mb-12 max-w-3xl">
             <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">For API Owners</span>
             <h2 className="text-3xl md:text-[2.75rem] font-semibold tracking-[-0.02em] leading-[1.1] mt-3 mb-5">
-              Be in front of every AI agent. Today.
+              Get your API in front of agents. Today.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
               Agents do not browse landing pages. They search capabilities. List your API on APIClaw and the next time an agent queries for what you do, you appear in the result with auth, pricing, and a working example baked in.
@@ -996,7 +1107,7 @@ Install:
               },
               {
                 q: "How does my agent connect?",
-                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and custom runtimes. Remote MCP for connected clients. Same workspace, same auth, same logs.`
+                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and OpenClaw-style agents. Remote MCP for connected clients. Same workspace, same auth, same logs.`
               },
               {
                 q: "What can I actually call?",
@@ -1068,7 +1179,7 @@ Install:
             <div className="md:col-span-2">
               <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Product</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#install" className="text-text-secondary hover:text-text-primary transition-colors">Install</a></li>
+                <li><a href="#who-is-this-for" className="text-text-secondary hover:text-text-primary transition-colors">Install</a></li>
                 <li><a href="/sign-in" className="text-text-secondary hover:text-text-primary transition-colors">Sign in</a></li>
                 <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition-colors">Catalog</a></li>
                 <li><a href="/docs" className="text-text-secondary hover:text-text-primary transition-colors">Docs</a></li>
