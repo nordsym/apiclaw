@@ -600,6 +600,10 @@ input[type="email"]::placeholder {
   will-change: opacity, background;
 }
 
+.light .page-grid::before {
+  mix-blend-mode: multiply;
+}
+
 .dark .page-grid::before {
   background:
     radial-gradient(circle 680px at var(--pointer-x, 50%) var(--pointer-y, 20%), rgba(239, 68, 68, 0.44) 0%, rgba(239, 68, 68, 0.18) 20%, transparent 72%),
@@ -640,6 +644,12 @@ input[type="email"]::placeholder {
   mix-blend-mode: screen;
   filter: blur(20px);
   transform: translateZ(0);
+}
+
+.light .pointer-ambient {
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+  filter: blur(28px) saturate(1.2);
 }
 
 .dark .pointer-ambient {
