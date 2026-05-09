@@ -69,7 +69,7 @@ export default function DocsPage() {
         </div>
 
         {/* Quick Start */}
-        <section className="mb-16">
+        <section id="codex" className="mb-16 scroll-mt-24">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <span className="text-[var(--accent)]">⚡</span> Quick Start
           </h2>
@@ -90,7 +90,7 @@ export default function DocsPage() {
         </section>
 
         {/* MCP Config */}
-        <section className="mb-16">
+        <section id="gateway" className="mb-16 scroll-mt-24">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
             <span className="text-[var(--accent)]">⚙️</span> MCP Configuration
           </h2>

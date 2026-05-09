@@ -137,24 +137,32 @@ const whoIsThisFor = [
     tag: "Install",
     title: "Local MCP builders",
     description: "Claude Desktop and other local clients when you want the fastest path to a first call.",
+    href: "/install",
+    cta: "Open install",
   },
   {
     icon: Terminal,
     tag: "CLI",
     title: "Terminal-native teams",
     description: "Shells, scripts, and CI/CD workflows when the agent already lives in a repo or pipeline.",
+    href: "/docs#codex",
+    cta: "Open CLI docs",
   },
   {
     icon: Globe,
     tag: "HTTP",
     title: "Server-side runtimes",
     description: "Workspace-generated keys for backend agents, OpenClaw-style agents, and custom runtimes.",
+    href: "/docs#gateway",
+    cta: "Open HTTP docs",
   },
   {
     icon: Sparkles,
     tag: "Remote MCP",
     title: "Connected clients",
     description: "OAuth-capable runtimes that connect through your workspace and use Integrations.",
+    href: "/workspace/integrations",
+    cta: "Open integrations",
   },
 ];
 
@@ -810,17 +818,17 @@ Install:
                 <h3 className="text-lg font-semibold tracking-tight">Pick the entry point. The runtime is identical.</h3>
               </div>
               <a href="#who-is-this-for" className="text-sm text-accent hover:underline font-medium inline-flex items-center gap-1.5 group">
-                Choose a door
+                Open the doors
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { tag: "Install", h: "Local MCP", d: "Claude Desktop and other local MCP clients.", icon: <Bot className="w-4 h-4" /> },
-                { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" /> },
-                { tag: "HTTP", h: "HTTP", d: "Server-side agents and OpenClaw-style agents.", icon: <Terminal className="w-4 h-4" /> },
-                { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" /> },
+                { tag: "Install", h: "Local MCP", d: "Claude Desktop and other local MCP clients.", icon: <Bot className="w-4 h-4" />, href: "/install", cta: "Open install" },
+                { tag: "CLI", h: "Terminal", d: "Shells, scripts, CI/CD pipelines.", icon: <Code2 className="w-4 h-4" />, href: "/docs#codex", cta: "Open CLI docs" },
+                { tag: "HTTP", h: "HTTP", d: "Server-side agents and OpenClaw-style agents.", icon: <Terminal className="w-4 h-4" />, href: "/docs#gateway", cta: "Open HTTP docs" },
+                { tag: "Remote MCP", h: "Connected clients", d: "Grok, ChatGPT, and other OAuth-capable runtimes.", icon: <Sparkles className="w-4 h-4" />, href: "/workspace/integrations", cta: "Open integrations" },
               ].map((d) => (
                 <div
                   key={d.tag}
@@ -832,6 +840,13 @@ Install:
                   </div>
                   <div className="text-sm font-semibold mb-1 tracking-tight">{d.h}</div>
                   <p className="text-xs text-text-secondary leading-relaxed">{d.d}</p>
+                  <a
+                    href={d.href}
+                    className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent hover:text-accent-hover transition-colors"
+                  >
+                    {d.cta}
+                    <ArrowRight className="w-3 h-3" />
+                  </a>
                 </div>
               ))}
             </div>
