@@ -36,7 +36,7 @@ export default function DocsPage() {
           <nav className="flex items-center gap-4 md:gap-6">
             <Link href="/" className="hidden sm:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Home</Link>
             <span className="hidden md:block text-[var(--accent)] font-medium text-sm md:text-base">Docs</span>
-            <Link href="/providers/dashboard" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">Providers</Link>
+            <Link href="#list-your-api" className="hidden md:block text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors text-sm md:text-base">List your API</Link>
             <a 
               href="https://github.com/nordsym/apiclaw" 
               target="_blank"
@@ -247,9 +247,6 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
           </div>
         </section>
 
-        {/* For Providers */}
-        <section className="mb-16">
-
         {/* Tools Reference */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -273,7 +270,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send SMS to Sweden&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;send alerts to Sweden&quot;</span>,{'\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">max_results</span>: <span className="text-amber-600 dark:text-amber-400">5</span>{'\n'}
                   {'}'})
                 </code>
@@ -347,27 +344,6 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             </div>
           </div>
         </section>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <span className="text-[var(--accent)]">🤝</span> For API Providers
-          </h2>
-          <div className="bg-gradient-to-r from-[var(--accent)]/10 to-orange-500/10 border border-[var(--accent)]/20 rounded-xl p-6">
-            <p className="text-[var(--text-primary)] mb-4">
-              Want your API discoverable by 1000s of AI agents? Join APIClaw as a provider.
-            </p>
-            <ul className="list-disc list-inside text-[var(--text-secondary)] space-y-2 mb-6">
-              <li>Get discovered by AI agents searching for your capabilities</li>
-              <li>Direct Connect integration. Agents use your API instantly</li>
-              <li>Analytics dashboard. See how agents use your API</li>
-              <li>Revenue share on premium tiers</li>
-            </ul>
-            <Link 
-              href="/providers/register"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-orange-500 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity"
-            >
-              Register as Provider →
-            </Link>
-          </div>
-        </section>
 
         {/* Support */}
         <section>
@@ -377,10 +353,6 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
           <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
             <p className="text-[var(--text-secondary)] mb-4">Need help? Reach out:</p>
             <ul className="space-y-2 text-[var(--text-primary)]">
-              <li>
-                <strong>Telegram:</strong>{' '}
-                <a href="https://t.me/Symbot_apiclaw_bot" className="text-[var(--accent)] hover:underline">@Symbot_apiclaw_bot</a>
-              </li>
               <li>
                 <strong>GitHub:</strong>{' '}
                 <a href="https://github.com/nordsym/apiclaw/issues" className="text-[var(--accent)] hover:underline">Issues</a>
@@ -406,8 +378,8 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             {[
               {
                 n: "01",
-                t: "Sign up for a free workspace",
-                d: <>Email signup at <a href="/workspace" className="text-[var(--accent)] hover:underline">apiclaw.cloud/workspace</a>. Same workspace covers your discoverable listing and any agent calls you make.</>,
+                t: "Use the same workspace",
+                d: <>Sign in at <a href="/workspace" className="text-[var(--accent)] hover:underline">apiclaw.cloud/workspace</a>. The same workspace covers your discoverable listing and any agent calls you make.</>,
               },
               {
                 n: "02",

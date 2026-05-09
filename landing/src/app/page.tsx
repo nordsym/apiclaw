@@ -1104,22 +1104,6 @@ Install:
         </div>
       </footer>
 
-      {/* Telegram Chat Bubble - TEMPORARILY DISABLED */}
-      {/* <a
-        href="https://t.me/Symbot_nordsym_bot?start=apiclaw"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 group"
-      >
-        <div className="flex items-center gap-2 bg-[#0088cc] hover:bg-[#0077b5] text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-          <span className="text-xl">🦞</span>
-          <span className="font-medium text-sm hidden sm:inline">Chat with the bot</span>
-        </div>
-        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-surface-elevated border border-border rounded-lg text-xs whitespace-nowrap shadow-lg">
-          <span className="text-text-primary font-medium">Talk to the Clawdbot building this</span>
-        </div>
-      </a> */}
-
       {/* Managed Providers Modal */}
       {showProvidersModal && (
         <div
