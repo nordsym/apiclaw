@@ -4562,14 +4562,31 @@ async function consumeCodexResponsesSSE(body: ReadableStream<Uint8Array> | null)
   return { response: baseResponse, error: null };
 }
 
+function extractChatgptAccountId(token: string): string | null {
+  try {
+    const t = token.replace(/^Bearer\s+/i, "").trim();
+    const parts = t.split(".");
+    if (parts.length !== 3) return null;
+    let b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4 !== 0) b64 += "=";
+    const payload = JSON.parse(atob(b64));
+    return payload?.["https://api.openai.com/auth"]?.chatgpt_account_id ?? null;
+  } catch { return null; }
+}
+
 function buildCodexHeaders(oauthToken: string): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     Authorization: oauthToken.startsWith("Bearer ") ? oauthToken : `Bearer ${oauthToken}`,
     "Content-Type": "application/json",
     "originator": CODEX_ORIGINATOR,
     "User-Agent": "apiclaw_gateway/1.0 (Convex; +https://apiclaw.cloud)",
     "openai-beta": "responses=experimental",
   };
+  // ChatGPT-Account-ID is required by /backend-api/codex (matches Codex CLI's BearerAuthProvider).
+  // Extract from the OAuth JWT's chatgpt_account_id claim.
+  const accountId = extractChatgptAccountId(oauthToken);
+  if (accountId) headers["ChatGPT-Account-ID"] = accountId;
+  return headers;
 }
 
 // Chat Completions → Responses API request translator (for Codex routing on /v1/chat/completions)
