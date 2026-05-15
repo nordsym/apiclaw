@@ -2983,11 +2983,31 @@ http.route({
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
 
-    // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT,
-    // translate Chat Completions → Responses and forward to chatgpt.com/backend-api/codex/responses.
+    // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT
+    // AND their workspace tier permits it (founder/partner only), translate Chat
+    // Completions → Responses and forward to chatgpt.com/backend-api/codex/responses.
     // Cost = $0 to apiclaw (caller's ChatGPT subscription pays).
+    //
+    // Canon: BYOK is NOT a public concept in apiclaw. OAuth-passthrough is restricted to
+    // founder/partner workspaces so external customers can't pipe their own subs through
+    // the gateway. They go through apiclaw's managed keys + pass-through pricing instead.
     const codexOauth = request.headers.get("X-APIClaw-OAuth");
     if (isCodexJwt(codexOauth)) {
+      // Load workspace tier to gate OAuth passthrough.
+      let codexTier = "free";
+      try {
+        const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+        codexTier = ws?.tier ?? "free";
+      } catch {}
+      if (codexTier !== "founder" && codexTier !== "partner") {
+        return jsonResponse({
+          error: {
+            message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must use apiclaw's managed routing (omit X-APIClaw-OAuth header).",
+            type: "permission_error",
+            code: "byok_not_permitted",
+          },
+        }, 403);
+      }
       let codexModel = model || "gpt-5.4";
       if (codexModel.startsWith("openai-codex/")) codexModel = codexModel.slice("openai-codex/".length);
       if (codexModel.startsWith("openai/")) codexModel = codexModel.slice("openai/".length);
@@ -4776,9 +4796,26 @@ http.route({
     if (modelId.startsWith("openai/")) modelId = modelId.slice("openai/".length);
     if (modelId.startsWith("openai-codex/")) modelId = modelId.slice("openai-codex/".length);
 
-    // Route: Codex JWT in X-APIClaw-OAuth header → chatgpt.com, else api.openai.com
+    // Route: Codex JWT in X-APIClaw-OAuth header → chatgpt.com, else api.openai.com.
+    // Canon: BYOK / OAuth-passthrough restricted to founder/partner workspaces.
     const oauthHeader = request.headers.get("X-APIClaw-OAuth");
-    const useCodex = isCodexJwt(oauthHeader);
+    let useCodex = isCodexJwt(oauthHeader);
+    if (useCodex) {
+      let respTier = "free";
+      try {
+        const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+        respTier = ws?.tier ?? "free";
+      } catch {}
+      if (respTier !== "founder" && respTier !== "partner") {
+        return jsonResponse({
+          error: {
+            message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must omit X-APIClaw-OAuth (use apiclaw's managed routing).",
+            type: "permission_error",
+            code: "byok_not_permitted",
+          },
+        }, 403);
+      }
+    }
 
     const upstreamUrl = useCodex ? `${OPENAI_CODEX_RESPONSES_BASE_URL}/responses` : OPENAI_NATIVE_RESPONSES_URL;
     const upstreamHeaders = useCodex
