@@ -2992,7 +2992,11 @@ http.route({
       if (codexModel.startsWith("openai-codex/")) codexModel = codexModel.slice("openai-codex/".length);
       if (codexModel.startsWith("openai/")) codexModel = codexModel.slice("openai/".length);
 
-      const codexBody = chatCompletionsToResponsesRequest(codexModel, messages, { ...rest, stream });
+      // Codex backend ALWAYS requires stream=true on the wire. We force it upstream;
+      // for non-streaming callers we consume SSE serverside and reconstruct the response.
+      // Also strip max_output_tokens (Codex doesn't accept it — server controls length).
+      const codexBody = chatCompletionsToResponsesRequest(codexModel, messages, { ...rest, stream: true });
+      delete codexBody.max_output_tokens;
 
       try {
         await ctx.runMutation(api.analytics.log, {
@@ -3025,11 +3029,25 @@ http.route({
           body: JSON.stringify(codexBody),
         });
 
+        // Non-2xx → map Codex { detail } to OpenAI error shape and return early.
+        if (!upstream.ok) {
+          let detail: any = null;
+          try { detail = await upstream.json(); } catch { detail = { detail: await upstream.text() }; }
+          const errMsg = detail?.error?.message ?? detail?.detail ?? `Codex upstream HTTP ${upstream.status}`;
+          return jsonResponse({
+            error: {
+              message: errMsg,
+              type: "codex_error",
+              code: detail?.error?.code ?? `http_${upstream.status}`,
+            },
+            _apiclaw: { provider: "openai-codex", via: "codex-oauth", upstream_status: upstream.status, latencyMs: Date.now() - startTime },
+          }, upstream.status);
+        }
+
         if (stream && upstream.body) {
-          // NOTE: passes Responses SSE through as-is. OpenAI-shape clients expecting
-          // chat.completion.chunk events won't parse this correctly. For Codex-routed
-          // streaming use /v1/responses directly. Translating Responses SSE → Chat
-          // Completions SSE is a separate effort (deferred).
+          // Caller wants streaming — passes Responses SSE through as-is.
+          // (Chat-Completions-shape SSE translation deferred; clients should
+          // use /v1/responses directly when they need Codex streaming.)
           return new Response(upstream.body, {
             status: upstream.status,
             headers: {
@@ -3041,10 +3059,22 @@ http.route({
           });
         }
 
-        const responsesData = await upstream.json();
+        // Non-streaming caller: consume SSE serverside, take response.completed payload.
+        const { response: responsesData, error: sseError } = await consumeCodexResponsesSSE(upstream.body);
         const latencyMs = Date.now() - startTime;
 
-        if (responsesData?.error) return jsonResponse(responsesData, upstream.status);
+        if (sseError) {
+          return jsonResponse({
+            error: { message: sseError.message ?? "Codex stream error", type: "codex_error", code: sseError.code ?? "stream_error" },
+            _apiclaw: { provider: "openai-codex", via: "codex-oauth", latencyMs },
+          }, 502);
+        }
+        if (!responsesData) {
+          return jsonResponse({
+            error: { message: "Codex stream completed without response payload", type: "codex_error", code: "empty_stream" },
+            _apiclaw: { provider: "openai-codex", via: "codex-oauth", latencyMs },
+          }, 502);
+        }
 
         const chatData = responsesToChatCompletionsResponse(responsesData, codexModel);
         (chatData as any)._apiclaw = {
@@ -4474,6 +4504,64 @@ const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CODEX_ORIGINATOR = "apiclaw_gateway";
 
+// Codex backend requires streaming. When caller wants non-streaming, we consume
+// the SSE stream serverside and reconstruct the final response. With store:false
+// (which Codex requires), `response.completed.response.output` is empty — we must
+// collect output items from `response.output_item.done` events.
+async function consumeCodexResponsesSSE(body: ReadableStream<Uint8Array> | null): Promise<{ response: any | null; error: any | null }> {
+  if (!body) return { response: null, error: { message: "empty stream" } };
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  let baseResponse: any = null;       // snapshot from response.completed (with usage, id, status)
+  const itemsByIndex: Record<number, any> = {};
+  let errorPayload: any = null;
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) !== -1) {
+        const block = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        const dataLines = block.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim());
+        if (dataLines.length === 0) continue;
+        const payload = dataLines.join("");
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const evt = JSON.parse(payload);
+          const t = evt?.type;
+          if (t === "response.output_item.done" && evt.item) {
+            itemsByIndex[evt.output_index ?? 0] = evt.item;
+          } else if (t === "response.completed" && evt.response) {
+            baseResponse = evt.response;
+          } else if (t === "response.failed" && evt.response) {
+            baseResponse = evt.response;
+          } else if (t === "error" || t === "response.error") {
+            errorPayload = evt.error ?? evt;
+          }
+        } catch { /* skip non-JSON SSE lines */ }
+      }
+    }
+  } finally {
+    try { reader.releaseLock(); } catch {}
+  }
+
+  if (errorPayload) return { response: null, error: errorPayload };
+  if (!baseResponse) return { response: null, error: { message: "no response.completed event received" } };
+
+  // Synthesize: take baseResponse and fill output from collected item.done events
+  const orderedItems = Object.keys(itemsByIndex)
+    .map((k) => parseInt(k, 10))
+    .sort((a, b) => a - b)
+    .map((k) => itemsByIndex[k]);
+  baseResponse.output = orderedItems;
+
+  return { response: baseResponse, error: null };
+}
+
 function buildCodexHeaders(oauthToken: string): Record<string, string> {
   return {
     Authorization: oauthToken.startsWith("Bearer ") ? oauthToken : `Bearer ${oauthToken}`,
@@ -4552,8 +4640,10 @@ function chatCompletionsToResponsesRequest(
     input,
     stream: !!rest.stream,
     store: false,
+    // Codex backend requires `instructions` to be present (errors with "Instructions are required").
+    // If caller didn't supply a system message, set a neutral default so the request goes through.
+    instructions: instructions || "You are a helpful assistant.",
   };
-  if (instructions) body.instructions = instructions;
   if (rest.max_tokens !== undefined || rest.max_completion_tokens !== undefined) {
     body.max_output_tokens = rest.max_tokens ?? rest.max_completion_tokens;
   }
