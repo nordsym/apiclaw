@@ -1083,4 +1083,25 @@ export default defineSchema({
     .index("by_tokenHash", ["tokenHash"])
     .index("by_workspaceId", ["workspaceId"])
     .index("by_clientId", ["clientId"]),
+
+  // Live model catalog — populated by internal.modelCatalog.refresh (6h cron).
+  // Single source of truth for /v1/models. Replaces the old hardcoded 25-entry list.
+  modelCatalog: defineTable({
+    id: v.string(),                          // canonical apiclaw-routable ID e.g. "openai/gpt-4o"
+    ownedBy: v.string(),                     // "openai" | "anthropic" | "mistral" | ...
+    via: v.string(),                         // "direct" (managed by apiclaw) | "openrouter" (fallback) | "managed-fallback"
+    endpoint: v.string(),                    // "/v1/chat/completions" | "/v1/embeddings" | "/v1/messages"
+    name: v.optional(v.string()),            // display name
+    contextWindow: v.optional(v.number()),
+    inputModalities: v.optional(v.array(v.string())),  // ["text","image","audio"]
+    source: v.string(),                      // provider that returned this entry
+    deprecated: v.optional(v.boolean()),     // true when not seen in last refresh window
+    firstSeenAt: v.number(),
+    lastSeenAt: v.number(),
+  })
+    .index("by_canonical_id", ["id"])
+    .index("by_ownedBy", ["ownedBy"])
+    .index("by_via", ["via"])
+    .index("by_endpoint", ["endpoint"])
+    .index("by_lastSeenAt", ["lastSeenAt"]),
 });

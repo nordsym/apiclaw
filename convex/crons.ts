@@ -70,4 +70,13 @@ crons.daily(
   internal.mcpOAuth.sweepExpired
 );
 
+// Model catalog refresh — every 6h. Pulls /models from each managed provider,
+// upserts to modelCatalog table, marks stale entries deprecated. /v1/models reads from this table.
+crons.interval(
+  "model-catalog-refresh",
+  { hours: 6 },
+  internal.modelCatalog.refresh,
+  {}
+);
+
 export default crons;

@@ -277,6 +277,18 @@ const PROVIDERS: Record<string, ProviderMeta> = {
     speed: "medium",
     costTier: "cheap",
   },
+  genprd: {
+    name: "GenPRD",
+    description: "AI-powered PRD generator. Produces structured Markdown Product Requirement Documents from a topic, audience, and constraints. Managed by NordSym AB.",
+    category: "ai",
+    pricing: "AI compute cost + 15%",
+    regions: ["Global"],
+    tags: ["prd", "product", "requirements", "ai", "markdown"],
+    isLLM: false,
+    envKey: "GENPRD_API_KEY",
+    speed: "medium",
+    costTier: "medium",
+  },
   github: {
     name: "GitHub",
     description: "GitHub API. Search repos, manage code, access developer data.",
@@ -3241,6 +3253,17 @@ function buildManagedRequest(
 
   // Provider-specific request builders
   switch (provider) {
+    case "genprd": {
+      if (action !== "generate_prd") return null;
+      const { topic, audience, constraints, model, format } = params;
+      if (!topic) return null;
+      return {
+        url: "https://genprd.se/api/generate",
+        method: "POST",
+        headers: { "X-GenPRD-Key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, audience, constraints, model, format }),
+      };
+    }
     case "brave_search": {
       if (action !== "search") return null;
       const url = new URL("https://api.search.brave.com/res/v1/web/search");
@@ -4133,50 +4156,52 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
-// /v1/models — List available models through APIClaw
+// /v1/models — Live catalog from modelCatalog table (populated by internal.modelCatalog.refresh, 6h cron).
+// Replaces the legacy 25-entry hardcoded list. Source of truth: Convex modelCatalog table.
+// Query params:
+//   ?endpoint=/v1/chat/completions   filter to chat models only
+//   ?endpoint=/v1/embeddings         filter to embedding models only
+//   ?owned_by=openai                 filter to a single owner
+//   ?include_deprecated=true         include rows marked stale by last refresh sweep
 http.route({
   path: "/v1/models",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
-    // API key auth optional for models listing
-    const models = [
-      // OpenRouter models (main LLM backbone)
-      // Anthropic direct models
-      { id: "anthropic/claude-sonnet-4-6", object: "model", owned_by: "anthropic", via: "direct" },
-      { id: "anthropic/claude-opus-4-6", object: "model", owned_by: "anthropic", via: "direct" },
-      { id: "anthropic/claude-3.5-sonnet", object: "model", owned_by: "anthropic", via: "direct" },
-      { id: "anthropic/claude-haiku-4-5", object: "model", owned_by: "anthropic", via: "direct" },
-      { id: "openai/gpt-4o", object: "model", owned_by: "openai", via: "openrouter" },
-      { id: "openai/gpt-4o-mini", object: "model", owned_by: "openai", via: "openrouter" },
-      { id: "openai/o3-mini", object: "model", owned_by: "openai", via: "openrouter" },
-      { id: "google/gemini-2.5-pro-preview", object: "model", owned_by: "google", via: "openrouter" },
-      { id: "google/gemini-2.5-flash-preview", object: "model", owned_by: "google", via: "openrouter" },
-      { id: "meta-llama/llama-3.3-70b-instruct", object: "model", owned_by: "meta", via: "openrouter" },
-      { id: "mistralai/mistral-large-latest", object: "model", owned_by: "mistral", via: "openrouter" },
-      { id: "deepseek/deepseek-r1", object: "model", owned_by: "deepseek", via: "openrouter" },
-      { id: "deepseek/deepseek-chat", object: "model", owned_by: "deepseek", via: "openrouter" },
-      { id: "qwen/qwen-2.5-72b-instruct", object: "model", owned_by: "qwen", via: "openrouter" },
+    const url = new URL(request.url);
+    const endpoint = url.searchParams.get("endpoint") ?? undefined;
+    const ownedBy = url.searchParams.get("owned_by") ?? undefined;
+    const includeDeprecated = url.searchParams.get("include_deprecated") === "true";
 
-      // Embedding models via /v1/embeddings
-      { id: "voyage/voyage-3-large", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
-      { id: "voyage/voyage-3", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
-      { id: "voyage/voyage-3-lite", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
-      { id: "voyage/voyage-code-3", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
-      { id: "voyage/voyage-multilingual-2", object: "model", owned_by: "voyage", via: "voyage", endpoint: "/v1/embeddings" },
-      { id: "mistral/mistral-embed", object: "model", owned_by: "mistral", via: "mistral", endpoint: "/v1/embeddings" },
-      { id: "openai/text-embedding-3-small", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
-      { id: "openai/text-embedding-3-large", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
-      { id: "openai/text-embedding-ada-002", object: "model", owned_by: "openai", via: "openai", endpoint: "/v1/embeddings" },
-      { id: "cohere/embed-v4.0", object: "model", owned_by: "cohere", via: "cohere", endpoint: "/v1/embeddings" },
-      { id: "cohere/embed-multilingual-v3", object: "model", owned_by: "cohere", via: "cohere", endpoint: "/v1/embeddings" },
-    ];
+    const rows = await ctx.runQuery(internal.modelCatalog.list, {
+      ...(endpoint ? { endpoint } : {}),
+      ...(ownedBy ? { ownedBy } : {}),
+      includeDeprecated,
+    });
+    const stats = await ctx.runQuery(internal.modelCatalog.stats, {});
+
+    const data = rows.map((m: any) => ({
+      id: m.id,
+      object: "model",
+      owned_by: m.ownedBy,
+      via: m.via,
+      endpoint: m.endpoint,
+      ...(m.name ? { name: m.name } : {}),
+      ...(m.contextWindow ? { context_window: m.contextWindow } : {}),
+      ...(m.inputModalities ? { input_modalities: m.inputModalities } : {}),
+      ...(m.deprecated ? { deprecated: true } : {}),
+    }));
 
     return jsonResponse({
       object: "list",
-      data: models,
+      data,
       _apiclaw: {
         gateway: "v1",
-        note: "These models are available through APIClaw's unified gateway. All 800+ OpenRouter chat models + embedding models across Voyage, Mistral, OpenAI, and Cohere.",
+        catalog_source: "live",
+        total: data.length,
+        by_owner: stats.byOwner,
+        by_via: stats.byVia,
+        last_refreshed_at: stats.lastSeenAt ? new Date(stats.lastSeenAt).toISOString() : null,
+        note: "Live model catalog. Every entry is routable via /v1/chat/completions or /v1/embeddings. Refreshed every 6h from upstream provider /models endpoints. POST /v1/chat/completions with model=<id> to call any of these.",
         non_llm_apis: Object.keys(PROVIDERS).length + " Direct Call providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
       },
     });
