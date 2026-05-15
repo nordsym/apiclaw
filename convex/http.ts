@@ -2984,6 +2984,7 @@ http.route({
     }
 
     // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT
+    // AND the requested model is Codex-routable (gpt-5.x, codex-*)
     // AND their workspace tier permits it (founder/partner only), translate Chat
     // Completions → Responses and forward to chatgpt.com/backend-api/codex/responses.
     // Cost = $0 to apiclaw (caller's ChatGPT subscription pays).
@@ -2992,7 +2993,13 @@ http.route({
     // founder/partner workspaces so external customers can't pipe their own subs through
     // the gateway. They go through apiclaw's managed keys + pass-through pricing instead.
     const codexOauth = request.headers.get("X-APIClaw-OAuth");
-    if (isCodexJwt(codexOauth)) {
+    // Codex backend serves gpt-5.x variants and codex-* slugs. Other models (gpt-4o, o3,
+    // anthropic/*, mistralai/*, etc.) must not be short-circuited — they fall through to
+    // normal routing and the OAuth header is harmlessly ignored.
+    const modelStr = (model || "").toString().toLowerCase();
+    const bareModel = modelStr.startsWith("openai/") ? modelStr.slice("openai/".length) : modelStr.startsWith("openai-codex/") ? modelStr.slice("openai-codex/".length) : modelStr;
+    const codexRoutableModel = /^(gpt-5\.|gpt-5-codex|codex-)/.test(bareModel) || bareModel === "gpt-5";
+    if (isCodexJwt(codexOauth) && codexRoutableModel) {
       // Load workspace tier to gate OAuth passthrough.
       let codexTier = "free";
       try {
