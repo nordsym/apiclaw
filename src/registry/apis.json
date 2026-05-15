@@ -96165,23 +96165,23 @@
     },
     {
       "name": "Frankfurter",
-      "description": "Exchange rates, currency conversion and time series",
-      "category": "Utilities",
-      "baseUrl": "https://www.frankfurter.app/docs",
-      "docsUrl": "",
-      "auth": "None",
-      "pricing": "unknown",
-      "callable": false
+      "description": "Free currency exchange rates API. Latest rates, historical data, time series. No auth required.",
+      "category": "Finance",
+      "baseUrl": "https://api.frankfurter.dev/v1",
+      "docsUrl": "https://www.frankfurter.dev/",
+      "auth": "none",
+      "pricing": "free",
+      "callable": true
     },
     {
       "name": "Frankfurter API",
-      "description": "Exchange rates",
-      "category": "Utilities",
-      "baseUrl": "https://www.frankfurter.app/docs",
-      "docsUrl": "",
-      "auth": "apiKey",
-      "pricing": "unknown",
-      "callable": false
+      "description": "Free currency exchange rates API (alias for Frankfurter). No auth required.",
+      "category": "Finance",
+      "baseUrl": "https://api.frankfurter.dev/v1",
+      "docsUrl": "https://www.frankfurter.dev/",
+      "auth": "none",
+      "pricing": "free",
+      "callable": true
     },
     {
       "name": "Frankie Financial API",
