@@ -757,52 +757,258 @@ async function routeLLMRequest(
 // Translates OpenAI chat format to/from Anthropic Messages API
 // ==============================================
 
+// ============================================================================
+// OpenAI ↔ Anthropic translator (full fidelity — PR2 of "everything via apiclaw")
+// ============================================================================
+// Handles: tools/tool_choice, tool_use/tool_result message pairs, vision blocks
+// (image_url → image source), cache_control passthrough, thinking config,
+// reasoning_content (thinking blocks → OpenAI's reasoning_content field), full
+// stop_reason mapping, cache token usage in prompt_tokens_details.
+// ============================================================================
+
+function openaiToolsToAnthropic(tools: any[]): any[] {
+  return tools
+    .filter((t) => t && (t.type === "function" || t.function))
+    .map((t) => {
+      const fn = t.function ?? t;
+      return {
+        name: fn.name,
+        description: fn.description,
+        input_schema: fn.parameters ?? { type: "object", properties: {} },
+      };
+    });
+}
+
+function openaiToolChoiceToAnthropic(choice: any): any | undefined {
+  if (choice === undefined || choice === null) return undefined;
+  if (choice === "auto") return { type: "auto" };
+  if (choice === "required" || choice === "any") return { type: "any" };
+  if (choice === "none") return { type: "none" };
+  if (typeof choice === "object" && choice.type === "function" && choice.function?.name) {
+    return { type: "tool", name: choice.function.name };
+  }
+  return undefined;
+}
+
+function openaiContentToAnthropic(content: any): any {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return content;
+  return content.map((block: any) => {
+    if (!block || typeof block !== "object") return block;
+    // text passthrough (preserve cache_control if present)
+    if (block.type === "text") {
+      const out: any = { type: "text", text: block.text };
+      if (block.cache_control) out.cache_control = block.cache_control;
+      return out;
+    }
+    // image_url → image source (OpenAI uses image_url, Anthropic uses image)
+    if (block.type === "image_url" && block.image_url) {
+      const url: string = block.image_url.url || block.image_url;
+      if (url.startsWith("data:")) {
+        // data:image/png;base64,...
+        const m = url.match(/^data:(.+?);base64,(.+)$/);
+        if (m) {
+          const out: any = { type: "image", source: { type: "base64", media_type: m[1], data: m[2] } };
+          if (block.cache_control) out.cache_control = block.cache_control;
+          return out;
+        }
+      }
+      const out: any = { type: "image", source: { type: "url", url } };
+      if (block.cache_control) out.cache_control = block.cache_control;
+      return out;
+    }
+    // Already-Anthropic shapes (image, tool_use, tool_result, document, thinking) pass through
+    if (["image", "tool_use", "tool_result", "document", "thinking"].includes(block.type)) {
+      return block;
+    }
+    return block;
+  });
+}
+
+function openaiMessagesToAnthropic(messages: any[]): { system?: any; messages: any[] } {
+  // System: collect all system messages, preserve cache_control
+  const systemBlocks: any[] = [];
+  const nonSystem: any[] = [];
+
+  for (const m of messages) {
+    if (m.role === "system" || m.role === "developer") {
+      if (typeof m.content === "string") {
+        systemBlocks.push({ type: "text", text: m.content });
+      } else if (Array.isArray(m.content)) {
+        for (const b of m.content) {
+          if (typeof b === "string") systemBlocks.push({ type: "text", text: b });
+          else systemBlocks.push(b);
+        }
+      }
+    } else {
+      nonSystem.push(m);
+    }
+  }
+
+  // Map non-system: handle tool messages, assistant tool_calls
+  const out: any[] = [];
+  for (const m of nonSystem) {
+    if (m.role === "tool") {
+      // OpenAI tool result → Anthropic user message with tool_result block
+      out.push({
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: m.tool_call_id,
+            content: typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+          },
+        ],
+      });
+      continue;
+    }
+    if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+      // Convert tool_calls to tool_use blocks; combine with text content if present
+      const content: any[] = [];
+      const textContent = typeof m.content === "string" ? m.content : null;
+      if (textContent) content.push({ type: "text", text: textContent });
+      for (const tc of m.tool_calls) {
+        let input: any = {};
+        try {
+          input = typeof tc.function?.arguments === "string"
+            ? JSON.parse(tc.function.arguments || "{}")
+            : tc.function?.arguments || {};
+        } catch {
+          input = { _raw: tc.function?.arguments };
+        }
+        content.push({
+          type: "tool_use",
+          id: tc.id,
+          name: tc.function?.name,
+          input,
+        });
+      }
+      out.push({ role: "assistant", content });
+      continue;
+    }
+    out.push({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: openaiContentToAnthropic(m.content),
+    });
+  }
+
+  return systemBlocks.length > 0
+    ? { system: systemBlocks.length === 1 && !systemBlocks[0].cache_control ? systemBlocks[0].text : systemBlocks, messages: out }
+    : { messages: out };
+}
+
 function openaiToAnthropicRequest(
   model: string,
   messages: Array<{ role: string; content: any }>,
   rest: Record<string, any>
 ): { body: any; headers: Record<string, string> } {
-  // Extract system message
-  const systemMessages = messages.filter(m => m.role === "system");
-  const nonSystemMessages = messages.filter(m => m.role !== "system");
-  const systemText = systemMessages.map(m => typeof m.content === "string" ? m.content : JSON.stringify(m.content)).join("\n\n");
+  const { system, messages: anthropicMessages } = openaiMessagesToAnthropic(messages);
 
   const body: any = {
     model,
-    messages: nonSystemMessages.map(m => ({
-      role: m.role === "assistant" ? "assistant" : "user",
-      content: m.content,
-    })),
-    max_tokens: rest.max_tokens || rest.max_completion_tokens || 4096,
+    messages: anthropicMessages,
+    // No more 4096 cap — pass user's value or use a reasonable default for Anthropic (8192).
+    max_tokens: rest.max_tokens ?? rest.max_completion_tokens ?? 8192,
   };
-  if (systemText) body.system = systemText;
+  if (system !== undefined) body.system = system;
   if (rest.temperature !== undefined) body.temperature = rest.temperature;
   if (rest.top_p !== undefined) body.top_p = rest.top_p;
+  if (rest.top_k !== undefined) body.top_k = rest.top_k;
   if (rest.stop) body.stop_sequences = Array.isArray(rest.stop) ? rest.stop : [rest.stop];
+  if (rest.metadata) body.metadata = rest.metadata;
+  if (rest.thinking) body.thinking = rest.thinking;
+  if (Array.isArray(rest.tools) && rest.tools.length > 0) {
+    body.tools = openaiToolsToAnthropic(rest.tools);
+    const tc = openaiToolChoiceToAnthropic(rest.tool_choice);
+    if (tc) body.tool_choice = tc;
+  }
+  // response_format: Anthropic has no native JSON mode; inject as system guidance when requested.
+  if (rest.response_format?.type === "json_object" || rest.response_format?.type === "json_schema") {
+    const guidance = rest.response_format.type === "json_schema"
+      ? `Respond ONLY with valid JSON matching this schema: ${JSON.stringify(rest.response_format.json_schema?.schema ?? rest.response_format.json_schema)}`
+      : "Respond ONLY with valid JSON. No prose.";
+    if (typeof body.system === "string") body.system = `${body.system}\n\n${guidance}`;
+    else if (Array.isArray(body.system)) body.system.push({ type: "text", text: guidance });
+    else body.system = guidance;
+  }
 
   return { body, headers: {} };
 }
 
+function anthropicStopReasonToOpenai(stopReason?: string, hasToolUse?: boolean): string {
+  if (hasToolUse) return "tool_calls";
+  switch (stopReason) {
+    case "end_turn": return "stop";
+    case "stop_sequence": return "stop";
+    case "max_tokens": return "length";
+    case "tool_use": return "tool_calls";
+    default: return stopReason || "stop";
+  }
+}
+
 function anthropicToOpenaiResponse(anthropicData: any, model: string): any {
-  const content = anthropicData.content?.[0]?.text || "";
-  const inputTokens = anthropicData.usage?.input_tokens || 0;
-  const outputTokens = anthropicData.usage?.output_tokens || 0;
+  const blocks: any[] = Array.isArray(anthropicData.content) ? anthropicData.content : [];
+
+  let textParts: string[] = [];
+  const toolCalls: any[] = [];
+  const thinkingParts: string[] = [];
+
+  for (const b of blocks) {
+    if (!b || typeof b !== "object") continue;
+    if (b.type === "text" && typeof b.text === "string") {
+      textParts.push(b.text);
+    } else if (b.type === "tool_use") {
+      toolCalls.push({
+        id: b.id,
+        type: "function",
+        function: {
+          name: b.name,
+          arguments: JSON.stringify(b.input ?? {}),
+        },
+      });
+    } else if (b.type === "thinking" && typeof b.thinking === "string") {
+      thinkingParts.push(b.thinking);
+    }
+  }
+
+  const usage = anthropicData.usage ?? {};
+  const inputTokens = usage.input_tokens ?? 0;
+  const outputTokens = usage.output_tokens ?? 0;
+  const cacheCreation = usage.cache_creation_input_tokens ?? 0;
+  const cacheRead = usage.cache_read_input_tokens ?? 0;
+
+  const message: any = {
+    role: "assistant",
+    content: textParts.length > 0 ? textParts.join("") : null,
+  };
+  if (toolCalls.length > 0) message.tool_calls = toolCalls;
+  if (thinkingParts.length > 0) message.reasoning_content = thinkingParts.join("\n\n");
+
+  const usageOut: any = {
+    prompt_tokens: inputTokens + cacheCreation + cacheRead,
+    completion_tokens: outputTokens,
+    total_tokens: inputTokens + cacheCreation + cacheRead + outputTokens,
+  };
+  if (cacheCreation > 0 || cacheRead > 0) {
+    usageOut.prompt_tokens_details = {
+      cached_tokens: cacheRead,
+      cache_creation_input_tokens: cacheCreation,
+    };
+  }
 
   return {
     id: anthropicData.id || `chatcmpl-${Date.now()}`,
     object: "chat.completion",
     created: Math.floor(Date.now() / 1000),
     model,
-    choices: [{
-      index: 0,
-      message: { role: "assistant", content },
-      finish_reason: anthropicData.stop_reason === "end_turn" ? "stop" : (anthropicData.stop_reason || "stop"),
-    }],
-    usage: {
-      prompt_tokens: inputTokens,
-      completion_tokens: outputTokens,
-      total_tokens: inputTokens + outputTokens,
-    },
+    choices: [
+      {
+        index: 0,
+        message,
+        finish_reason: anthropicStopReasonToOpenai(anthropicData.stop_reason, toolCalls.length > 0),
+      },
+    ],
+    usage: usageOut,
   };
 }
 
@@ -4152,6 +4358,158 @@ http.route({
 
 http.route({
   path: "/v1/execute",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ============================================================================
+// /v1/messages — Native Anthropic Messages API passthrough.
+// PR2 of "everything via apiclaw". Same shape as api.anthropic.com/v1/messages,
+// no translation. Auth via sk-claw-/sk-mcp-/session. Logged + cost-tracked.
+// ============================================================================
+http.route({
+  path: "/v1/messages",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    const authResult = await requireApiKeyAuth(ctx, request);
+    if (authResult instanceof Response) return authResult;
+    const { workspaceId } = authResult;
+
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "Invalid JSON body" } }, 400);
+    }
+    if (!body.model) {
+      return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "model is required" } }, 400);
+    }
+    if (!Array.isArray(body.messages)) {
+      return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "messages array is required" } }, 400);
+    }
+
+    // Normalize model id: accept "anthropic/claude-..." or "claude-..." — Anthropic API expects the bare form.
+    let modelId: string = body.model;
+    if (modelId.startsWith("anthropic/")) modelId = modelId.slice("anthropic/".length);
+
+    const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+    if (!ANTHROPIC_API_KEY) {
+      return jsonResponse({ type: "error", error: { type: "api_error", message: "ANTHROPIC_API_KEY not configured on apiclaw gateway. Contact gustav@nordsym.com." } }, 503);
+    }
+
+    // Pass anthropic-version through (client may set it) or default to a current value.
+    const anthropicVersion = request.headers.get("anthropic-version") || "2023-06-01";
+    const anthropicBeta = request.headers.get("anthropic-beta") || undefined;
+
+    const upstreamHeaders: Record<string, string> = {
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": anthropicVersion,
+      "Content-Type": "application/json",
+    };
+    if (anthropicBeta) upstreamHeaders["anthropic-beta"] = anthropicBeta;
+
+    const forwardBody = { ...body, model: modelId };
+    const stream = !!body.stream;
+
+    // Log call (fire-and-forget)
+    try {
+      await ctx.runMutation(api.analytics.log, {
+        event: "api_call",
+        provider: "anthropic",
+        identifier: workspaceId,
+        workspaceId: workspaceId as any,
+        metadata: {
+          action: "messages",
+          model: modelId,
+          via: "direct",
+          authMethod: "api-key",
+        },
+      });
+      await ctx.runMutation(api.logs.createProxyLog, {
+        workspaceId: workspaceId as any,
+        provider: "anthropic",
+        action: "messages",
+        subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+      });
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: workspaceId as any,
+      });
+    } catch (e: any) {
+      console.error("[/v1/messages] logging failed:", e?.message);
+    }
+
+    try {
+      const upstream = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: upstreamHeaders,
+        body: JSON.stringify(forwardBody),
+      });
+
+      // Streaming: passthrough SSE
+      if (stream && upstream.body) {
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers: {
+            "Content-Type": upstream.headers.get("Content-Type") || "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            ...corsHeaders,
+          },
+        });
+      }
+
+      // Non-streaming: read JSON, log cost, inject _apiclaw metadata, return
+      const data = await upstream.json();
+      const latencyMs = Date.now() - startTime;
+
+      // Cost calc — reuse existing calculateCallCost. Anthropic's usage shape differs from OpenAI;
+      // map cache_creation + cache_read + input → prompt_tokens for the cost helper.
+      const u = (data as any)?.usage ?? {};
+      const promptTokens = (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0);
+      const completionTokens = u.output_tokens ?? 0;
+      const { providerCost, apiclawCost } = calculateCallCost(
+        `anthropic/${modelId}`,
+        { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: promptTokens + completionTokens }
+      );
+
+      if (apiclawCost > 0) {
+        ctx.runMutation(internal.billing.logCallCost, {
+          workspaceId: workspaceId as any,
+          provider: "anthropic",
+          model: modelId,
+          providerCostUsd: providerCost,
+          apiclawCostUsd: apiclawCost,
+          inputTokens: promptTokens,
+          outputTokens: completionTokens,
+        }).catch(() => {});
+      }
+
+      if (data && typeof data === "object" && !("error" in data)) {
+        (data as any)._apiclaw = {
+          gateway: "v1",
+          endpoint: "/v1/messages",
+          provider: "anthropic",
+          model: modelId,
+          latencyMs,
+          cost: {
+            providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
+            totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+            margin: "15%",
+          },
+        };
+      }
+
+      return jsonResponse(data, upstream.status);
+    } catch (e: any) {
+      return jsonResponse({ type: "error", error: { type: "api_error", message: e?.message ?? String(e) } }, 502);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/messages",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
