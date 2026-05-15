@@ -2983,6 +2983,85 @@ http.route({
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
 
+    // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT,
+    // translate Chat Completions → Responses and forward to chatgpt.com/backend-api/codex/responses.
+    // Cost = $0 to apiclaw (caller's ChatGPT subscription pays).
+    const codexOauth = request.headers.get("X-APIClaw-OAuth");
+    if (isCodexJwt(codexOauth)) {
+      let codexModel = model || "gpt-5.4";
+      if (codexModel.startsWith("openai-codex/")) codexModel = codexModel.slice("openai-codex/".length);
+      if (codexModel.startsWith("openai/")) codexModel = codexModel.slice("openai/".length);
+
+      const codexBody = chatCompletionsToResponsesRequest(codexModel, messages, { ...rest, stream });
+
+      try {
+        await ctx.runMutation(api.analytics.log, {
+          event: "api_call",
+          provider: "openai-codex",
+          identifier: workspaceId,
+          workspaceId: workspaceId as any,
+          metadata: {
+            action: "chat_completions_via_codex",
+            model: codexModel,
+            via: "codex-oauth",
+            authMethod: "api-key",
+          },
+        });
+        await ctx.runMutation(api.logs.createProxyLog, {
+          workspaceId: workspaceId as any,
+          provider: "openai-codex",
+          action: "chat_completions",
+          subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+        });
+        await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+      } catch (e: any) {
+        console.error("[/v1/chat/completions Codex] logging failed:", e?.message);
+      }
+
+      try {
+        const upstream = await fetch(`${OPENAI_CODEX_RESPONSES_BASE_URL}/responses`, {
+          method: "POST",
+          headers: buildCodexHeaders(codexOauth!),
+          body: JSON.stringify(codexBody),
+        });
+
+        if (stream && upstream.body) {
+          // NOTE: passes Responses SSE through as-is. OpenAI-shape clients expecting
+          // chat.completion.chunk events won't parse this correctly. For Codex-routed
+          // streaming use /v1/responses directly. Translating Responses SSE → Chat
+          // Completions SSE is a separate effort (deferred).
+          return new Response(upstream.body, {
+            status: upstream.status,
+            headers: {
+              "Content-Type": upstream.headers.get("Content-Type") || "text/event-stream",
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive",
+              ...corsHeaders,
+            },
+          });
+        }
+
+        const responsesData = await upstream.json();
+        const latencyMs = Date.now() - startTime;
+
+        if (responsesData?.error) return jsonResponse(responsesData, upstream.status);
+
+        const chatData = responsesToChatCompletionsResponse(responsesData, codexModel);
+        (chatData as any)._apiclaw = {
+          gateway: "v1",
+          endpoint: "/v1/chat/completions",
+          provider: "openai-codex",
+          via: "codex-oauth",
+          model: codexModel,
+          latencyMs,
+          cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" },
+        };
+        return jsonResponse(chatData, upstream.status);
+      } catch (e: any) {
+        return jsonResponse({ error: { message: e?.message ?? String(e), type: "api_error" } }, 502);
+      }
+    }
+
     // Request-level overrides (X-APIClaw-Route header)
     const routeOverride = request.headers.get("X-APIClaw-Route"); // e.g. "fastest" or "groq"
 
@@ -4358,6 +4437,346 @@ http.route({
 
 http.route({
   path: "/v1/execute",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
+// ============================================================================
+// PR3: Codex OAuth routing — chat.openai.com/backend-api/codex/responses
+// ============================================================================
+// Two surfaces:
+//   1. /v1/responses — native OpenAI Responses API. Passes through. Routes:
+//        Codex JWT (X-APIClaw-OAuth header)  → chatgpt.com/backend-api/codex/responses (caller pays via Team sub, $0 to apiclaw)
+//        otherwise                           → api.openai.com/v1/responses (apiclaw's managed key)
+//   2. /v1/chat/completions Codex routing — when X-APIClaw-OAuth has a Codex
+//      JWT, translates Chat Completions → Responses, forwards to chatgpt.com,
+//      translates response back. Lets clients use OpenAI-compat shape and still
+//      bypass via ChatGPT Team subscription.
+
+function isCodexJwt(token: string | null | undefined): boolean {
+  if (!token) return false;
+  const t = token.replace(/^Bearer\s+/i, "").trim();
+  // Codex JWTs are signed by auth.openai.com and carry a `chatgpt_account_id` claim.
+  // V8-safe base64url decode (Convex isolate has no Buffer).
+  try {
+    const parts = t.split(".");
+    if (parts.length !== 3) return false;
+    let b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4 !== 0) b64 += "=";
+    const payload = JSON.parse(atob(b64));
+    return payload?.iss === "https://auth.openai.com" || !!payload?.["https://api.openai.com/auth"]?.chatgpt_account_id;
+  } catch {
+    return false;
+  }
+}
+
+const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
+const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const CODEX_ORIGINATOR = "apiclaw_gateway";
+
+function buildCodexHeaders(oauthToken: string): Record<string, string> {
+  return {
+    Authorization: oauthToken.startsWith("Bearer ") ? oauthToken : `Bearer ${oauthToken}`,
+    "Content-Type": "application/json",
+    "originator": CODEX_ORIGINATOR,
+    "User-Agent": "apiclaw_gateway/1.0 (Convex; +https://apiclaw.cloud)",
+    "openai-beta": "responses=experimental",
+  };
+}
+
+// Chat Completions → Responses API request translator (for Codex routing on /v1/chat/completions)
+function chatCompletionsToResponsesRequest(
+  model: string,
+  messages: any[],
+  rest: Record<string, any>
+): any {
+  // System messages → instructions (Responses API)
+  const systemMessages = messages.filter((m) => m.role === "system" || m.role === "developer");
+  const nonSystem = messages.filter((m) => m.role !== "system" && m.role !== "developer");
+  const instructions = systemMessages
+    .map((m) => (typeof m.content === "string" ? m.content : Array.isArray(m.content) ? m.content.map((b: any) => b.text ?? "").join("") : ""))
+    .filter(Boolean)
+    .join("\n\n");
+
+  // Map non-system messages → input items
+  const input: any[] = [];
+  for (const m of nonSystem) {
+    if (m.role === "tool") {
+      input.push({
+        type: "function_call_output",
+        call_id: m.tool_call_id,
+        output: typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+      });
+      continue;
+    }
+    if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+      if (typeof m.content === "string" && m.content) {
+        input.push({
+          type: "message",
+          role: "assistant",
+          content: [{ type: "output_text", text: m.content }],
+        });
+      }
+      for (const tc of m.tool_calls) {
+        input.push({
+          type: "function_call",
+          call_id: tc.id,
+          name: tc.function?.name,
+          arguments: typeof tc.function?.arguments === "string" ? tc.function.arguments : JSON.stringify(tc.function?.arguments ?? {}),
+        });
+      }
+      continue;
+    }
+    // Plain user/assistant message: content can be string or array of parts
+    const role = m.role === "assistant" ? "assistant" : "user";
+    let contentBlocks: any[];
+    if (typeof m.content === "string") {
+      contentBlocks = [{ type: role === "assistant" ? "output_text" : "input_text", text: m.content }];
+    } else if (Array.isArray(m.content)) {
+      contentBlocks = m.content.map((b: any) => {
+        if (b?.type === "text") return { type: role === "assistant" ? "output_text" : "input_text", text: b.text };
+        if (b?.type === "image_url") {
+          const url = b.image_url?.url ?? b.image_url;
+          return { type: "input_image", image_url: url };
+        }
+        return b;
+      });
+    } else {
+      contentBlocks = [{ type: "input_text", text: String(m.content ?? "") }];
+    }
+    input.push({ type: "message", role, content: contentBlocks });
+  }
+
+  const body: any = {
+    model,
+    input,
+    stream: !!rest.stream,
+    store: false,
+  };
+  if (instructions) body.instructions = instructions;
+  if (rest.max_tokens !== undefined || rest.max_completion_tokens !== undefined) {
+    body.max_output_tokens = rest.max_tokens ?? rest.max_completion_tokens;
+  }
+  if (rest.temperature !== undefined) body.temperature = rest.temperature;
+  if (rest.top_p !== undefined) body.top_p = rest.top_p;
+  if (rest.metadata) body.metadata = rest.metadata;
+  if (rest.user) body.user = rest.user;
+  if (rest.reasoning_effort) body.reasoning = { effort: rest.reasoning_effort };
+  if (Array.isArray(rest.tools) && rest.tools.length > 0) {
+    body.tools = rest.tools.map((t: any) => ({
+      type: "function",
+      name: t.function?.name ?? t.name,
+      description: t.function?.description ?? t.description,
+      parameters: t.function?.parameters ?? t.parameters,
+    }));
+  }
+  if (rest.tool_choice !== undefined) {
+    if (rest.tool_choice === "auto" || rest.tool_choice === "none" || rest.tool_choice === "required") {
+      body.tool_choice = rest.tool_choice;
+    } else if (typeof rest.tool_choice === "object" && rest.tool_choice.function?.name) {
+      body.tool_choice = { type: "function", function: { name: rest.tool_choice.function.name } };
+    }
+  }
+  return body;
+}
+
+// Responses API response → Chat Completions response translator
+function responsesToChatCompletionsResponse(responsesData: any, model: string): any {
+  const output: any[] = Array.isArray(responsesData.output) ? responsesData.output : [];
+  const toolCalls: any[] = [];
+  const textParts: string[] = [];
+  const reasoningParts: string[] = [];
+
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    if (item.type === "message" && Array.isArray(item.content)) {
+      for (const part of item.content) {
+        if (part?.type === "output_text" && typeof part.text === "string") textParts.push(part.text);
+        if (part?.type === "refusal" && typeof part.refusal === "string") textParts.push(part.refusal);
+      }
+    } else if (item.type === "function_call") {
+      toolCalls.push({
+        id: item.call_id ?? item.id,
+        type: "function",
+        function: {
+          name: item.name,
+          arguments: typeof item.arguments === "string" ? item.arguments : JSON.stringify(item.arguments ?? {}),
+        },
+      });
+    } else if (item.type === "reasoning" && Array.isArray(item.summary)) {
+      for (const s of item.summary) {
+        if (s?.type === "summary_text" && typeof s.text === "string") reasoningParts.push(s.text);
+      }
+    }
+  }
+
+  const message: any = {
+    role: "assistant",
+    content: textParts.length > 0 ? textParts.join("") : null,
+  };
+  if (toolCalls.length > 0) message.tool_calls = toolCalls;
+  if (reasoningParts.length > 0) message.reasoning_content = reasoningParts.join("\n\n");
+
+  const usage = responsesData.usage ?? {};
+  const promptTokens = usage.input_tokens ?? 0;
+  const completionTokens = usage.output_tokens ?? 0;
+  const cachedTokens = usage.input_tokens_details?.cached_tokens ?? 0;
+
+  const usageOut: any = {
+    prompt_tokens: promptTokens,
+    completion_tokens: completionTokens,
+    total_tokens: usage.total_tokens ?? promptTokens + completionTokens,
+  };
+  if (cachedTokens > 0) usageOut.prompt_tokens_details = { cached_tokens: cachedTokens };
+
+  let finishReason = "stop";
+  if (toolCalls.length > 0) finishReason = "tool_calls";
+  else if (responsesData.status === "incomplete" && responsesData.incomplete_details?.reason === "max_output_tokens") finishReason = "length";
+
+  return {
+    id: responsesData.id || `chatcmpl-${Date.now()}`,
+    object: "chat.completion",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [{ index: 0, message, finish_reason: finishReason }],
+    usage: usageOut,
+  };
+}
+
+// /v1/responses — native OpenAI Responses API passthrough with optional Codex routing
+http.route({
+  path: "/v1/responses",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const startTime = Date.now();
+
+    const authResult = await requireApiKeyAuth(ctx, request);
+    if (authResult instanceof Response) return authResult;
+    const { workspaceId } = authResult;
+
+    let body: any;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
+    }
+    if (!body.model || (!body.input && !body.messages)) {
+      return jsonResponse({ error: { message: "model and input are required", type: "invalid_request_error" } }, 400);
+    }
+
+    // Normalize model id
+    let modelId: string = body.model;
+    if (modelId.startsWith("openai/")) modelId = modelId.slice("openai/".length);
+    if (modelId.startsWith("openai-codex/")) modelId = modelId.slice("openai-codex/".length);
+
+    // Route: Codex JWT in X-APIClaw-OAuth header → chatgpt.com, else api.openai.com
+    const oauthHeader = request.headers.get("X-APIClaw-OAuth");
+    const useCodex = isCodexJwt(oauthHeader);
+
+    const upstreamUrl = useCodex ? `${OPENAI_CODEX_RESPONSES_BASE_URL}/responses` : OPENAI_NATIVE_RESPONSES_URL;
+    const upstreamHeaders = useCodex
+      ? buildCodexHeaders(oauthHeader!)
+      : { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" };
+
+    if (!useCodex && !process.env.OPENAI_API_KEY) {
+      return jsonResponse({ error: { message: "OPENAI_API_KEY not configured", type: "api_error" } }, 503);
+    }
+
+    const forwardBody = { ...body, model: modelId };
+    const stream = !!body.stream;
+
+    try {
+      await ctx.runMutation(api.analytics.log, {
+        event: "api_call",
+        provider: useCodex ? "openai-codex" : "openai",
+        identifier: workspaceId,
+        workspaceId: workspaceId as any,
+        metadata: {
+          action: "responses",
+          model: modelId,
+          via: useCodex ? "codex-oauth" : "direct",
+          authMethod: "api-key",
+        },
+      });
+      await ctx.runMutation(api.logs.createProxyLog, {
+        workspaceId: workspaceId as any,
+        provider: useCodex ? "openai-codex" : "openai",
+        action: "responses",
+        subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+      });
+      await ctx.runMutation(api.workspaces.incrementUsage, {
+        workspaceId: workspaceId as any,
+      });
+    } catch (e: any) {
+      console.error("[/v1/responses] logging failed:", e?.message);
+    }
+
+    try {
+      const upstream = await fetch(upstreamUrl, {
+        method: "POST",
+        headers: upstreamHeaders,
+        body: JSON.stringify(forwardBody),
+      });
+
+      if (stream && upstream.body) {
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers: {
+            "Content-Type": upstream.headers.get("Content-Type") || "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            ...corsHeaders,
+          },
+        });
+      }
+
+      const data = await upstream.json();
+      const latencyMs = Date.now() - startTime;
+
+      // Cost tracking: Codex OAuth = $0 to apiclaw (caller's ChatGPT sub pays).
+      // Direct OpenAI = pass-through + 15% (or 0% for internal workspaces).
+      if (!useCodex) {
+        const u = data?.usage ?? {};
+        const promptTokens = u.input_tokens ?? 0;
+        const completionTokens = u.output_tokens ?? 0;
+        const { providerCost, apiclawCost } = calculateCallCost(
+          `openai/${modelId}`,
+          { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: promptTokens + completionTokens }
+        );
+        if (apiclawCost > 0) {
+          ctx.runMutation(internal.billing.logCallCost, {
+            workspaceId: workspaceId as any,
+            provider: "openai",
+            model: modelId,
+            providerCostUsd: providerCost,
+            apiclawCostUsd: apiclawCost,
+            inputTokens: promptTokens,
+            outputTokens: completionTokens,
+          }).catch(() => {});
+        }
+      }
+
+      if (data && typeof data === "object" && !("error" in data)) {
+        (data as any)._apiclaw = {
+          gateway: "v1",
+          endpoint: "/v1/responses",
+          provider: useCodex ? "openai-codex" : "openai",
+          via: useCodex ? "codex-oauth" : "direct",
+          model: modelId,
+          latencyMs,
+          ...(useCodex ? { cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" } } : {}),
+        };
+      }
+
+      return jsonResponse(data, upstream.status);
+    } catch (e: any) {
+      return jsonResponse({ error: { message: e?.message ?? String(e), type: "api_error" } }, 502);
+    }
+  }),
+});
+
+http.route({
+  path: "/v1/responses",
   method: "OPTIONS",
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
