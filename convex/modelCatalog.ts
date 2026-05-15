@@ -203,6 +203,30 @@ async function pullOpenRouter(key?: string): Promise<Entry[]> {
   return out;
 }
 
+async function pullAnthropic(key?: string): Promise<Entry[]> {
+  if (!key) return [];
+  const json = await fetchJson("https://api.anthropic.com/v1/models", {
+    headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
+  });
+  const out: Entry[] = [];
+  for (const m of json.data ?? []) {
+    const id = `anthropic/${m.id}`;
+    const ep = classifyEndpoint(id, "anthropic", m.display_name || m.id);
+    if (!ep) continue;
+    out.push({
+      id,
+      ownedBy: "anthropic",
+      via: "direct",
+      endpoint: ep,
+      name: m.display_name || humanName(m.id),
+      contextWindow: 200_000,
+      inputModalities: ["text", "image"],
+      source: "anthropic",
+    });
+  }
+  return out;
+}
+
 async function pullDeepInfra(key?: string): Promise<Entry[]> {
   if (!key) return [];
   const json = await fetchJson("https://api.deepinfra.com/v1/openai/models", { headers: { Authorization: `Bearer ${key}` } });
@@ -245,8 +269,9 @@ export const refresh = internalAction({
   handler: async (ctx, _args) => {
     const startedAt = Date.now();
 
-    const [openai, xai, groq, mistral, cohere, openrouter, deepinfra] = await Promise.all([
+    const [openai, anthropic, xai, groq, mistral, cohere, openrouter, deepinfra] = await Promise.all([
       safe("openai", () => pullOpenAI(process.env.OPENAI_API_KEY)),
+      safe("anthropic", () => pullAnthropic(process.env.ANTHROPIC_API_KEY)),
       safe("xai", () => pullXai(process.env.XAI_API_KEY)),
       safe("groq", () => pullGroq(process.env.GROQ_API_KEY)),
       safe("mistral", () => pullMistral(process.env.MISTRAL_API_KEY)),
@@ -255,15 +280,18 @@ export const refresh = internalAction({
       safe("deepinfra", () => pullDeepInfra(process.env.DEEPINFRA_API_KEY)),
     ]);
 
+    // Anthropic hardcoded list is only used if live pull failed (no key, downtime, etc.).
+    const anthropicEntries = anthropic.length > 0 ? anthropic : ANTHROPIC_HARDCODED;
+
     const all: Entry[] = [
       ...openai,
+      ...anthropicEntries,
       ...xai,
       ...groq,
       ...mistral,
       ...cohere,
       ...openrouter,
       ...deepinfra,
-      ...ANTHROPIC_HARDCODED,
       ...VOYAGE_HARDCODED,
     ];
 
