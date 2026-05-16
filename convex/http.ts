@@ -3072,13 +3072,13 @@ http.route({
         }
 
         if (stream && upstream.body) {
-          // Caller wants streaming — passes Responses SSE through as-is.
-          // (Chat-Completions-shape SSE translation deferred; clients should
-          // use /v1/responses directly when they need Codex streaming.)
-          return new Response(upstream.body, {
+          // Translate Responses-API SSE → Chat Completions SSE so OpenAI-compat
+          // clients (OpenClaw, LangChain, Cursor, etc) can parse the stream.
+          const translated = translateCodexSSEToChatCompletions(upstream.body, codexModel);
+          return new Response(translated, {
             status: upstream.status,
             headers: {
-              "Content-Type": upstream.headers.get("Content-Type") || "text/event-stream",
+              "Content-Type": "text/event-stream",
               "Cache-Control": "no-cache",
               "Connection": "keep-alive",
               ...corsHeaders,
@@ -4530,6 +4530,118 @@ function isCodexJwt(token: string | null | undefined): boolean {
 const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CODEX_ORIGINATOR = "apiclaw_gateway";
+
+// Codex Responses SSE → Chat Completions SSE translator.
+// Wraps the upstream Responses-API stream and emits Chat-Completions-shape
+// chunks that OpenAI-compat clients (OpenClaw, Cursor, LangChain, etc) can parse.
+function translateCodexSSEToChatCompletions(
+  upstreamBody: ReadableStream<Uint8Array>,
+  model: string,
+): ReadableStream<Uint8Array> {
+  const chatId = `chatcmpl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const created = Math.floor(Date.now() / 1000);
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const toolCallsByIndex: Record<number, { id: string; name: string; args: string }> = {};
+  let buf = "";
+  let sentRole = false;
+  let finishEmitted = false;
+
+  function emitChunk(controller: ReadableStreamDefaultController<Uint8Array>, delta: any, finishReason: string | null = null, usage: any = null) {
+    const chunk: any = {
+      id: chatId,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [{ index: 0, delta, finish_reason: finishReason }],
+    };
+    if (usage) chunk.usage = usage;
+    controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+  }
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstreamBody.getReader();
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf("\n\n")) !== -1) {
+            const block = buf.slice(0, idx);
+            buf = buf.slice(idx + 2);
+            const dataLines = block.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim());
+            if (dataLines.length === 0) continue;
+            const payload = dataLines.join("");
+            if (!payload || payload === "[DONE]") continue;
+            let evt: any;
+            try { evt = JSON.parse(payload); } catch { continue; }
+            const t = evt?.type;
+
+            if (t === "response.output_text.delta" && typeof evt.delta === "string") {
+              if (!sentRole) { emitChunk(controller, { role: "assistant", content: "" }); sentRole = true; }
+              emitChunk(controller, { content: evt.delta });
+            } else if (t === "response.output_item.added" && evt.item?.type === "function_call") {
+              const idx = evt.output_index ?? 0;
+              toolCallsByIndex[idx] = { id: evt.item.call_id ?? evt.item.id, name: evt.item.name ?? "", args: "" };
+              if (!sentRole) { emitChunk(controller, { role: "assistant", content: null }); sentRole = true; }
+              emitChunk(controller, {
+                tool_calls: [{
+                  index: idx,
+                  id: toolCallsByIndex[idx].id,
+                  type: "function",
+                  function: { name: toolCallsByIndex[idx].name, arguments: "" },
+                }],
+              });
+            } else if (t === "response.function_call_arguments.delta" && typeof evt.delta === "string") {
+              const idx = evt.output_index ?? 0;
+              if (toolCallsByIndex[idx]) toolCallsByIndex[idx].args += evt.delta;
+              emitChunk(controller, {
+                tool_calls: [{
+                  index: idx,
+                  function: { arguments: evt.delta },
+                }],
+              });
+            } else if (t === "response.completed" || t === "response.failed") {
+              if (finishEmitted) continue;
+              finishEmitted = true;
+              const hasToolCalls = Object.keys(toolCallsByIndex).length > 0;
+              const stopReason = hasToolCalls ? "tool_calls" : (t === "response.failed" ? "stop" : "stop");
+              const u = evt.response?.usage ?? {};
+              const promptTokens = u.input_tokens ?? 0;
+              const completionTokens = u.output_tokens ?? 0;
+              const cachedTokens = u.input_tokens_details?.cached_tokens ?? 0;
+              const usageOut: any = {
+                prompt_tokens: promptTokens,
+                completion_tokens: completionTokens,
+                total_tokens: u.total_tokens ?? promptTokens + completionTokens,
+              };
+              if (cachedTokens > 0) usageOut.prompt_tokens_details = { cached_tokens: cachedTokens };
+              emitChunk(controller, {}, stopReason, usageOut);
+            } else if (t === "response.error" || t === "error") {
+              const errPayload = {
+                id: chatId,
+                object: "chat.completion.chunk",
+                created,
+                model,
+                error: evt.error ?? evt,
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(errPayload)}\n\n`));
+            }
+          }
+        }
+        if (!finishEmitted) emitChunk(controller, {}, "stop");
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      } catch (e: any) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: { message: e?.message ?? String(e), type: "stream_translator_error" } })}\n\n`));
+      } finally {
+        controller.close();
+        try { reader.releaseLock(); } catch {}
+      }
+    },
+  });
+}
 
 // Codex backend requires streaming. When caller wants non-streaming, we consume
 // the SSE stream serverside and reconstruct the final response. With store:false
