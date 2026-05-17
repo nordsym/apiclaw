@@ -12,6 +12,67 @@ All notable changes to APIClaw.
 
 ---
 
+## [2.7.0] — 2026-05-17
+
+### Added — Missions v2 architecture (data-driven primitives)
+
+- **Five typed primitives** as the building blocks of every mission: `fetch`, `transform`, `decide`, `validate`, `execute`. Implementations live in `convex/missionRunner.ts`; types + validators in `convex/missionPrimitives.ts`.
+- **`missionTemplates` table** for data-driven compositions. Versioned (slug + version pinned per mission row), ownership-scoped (private / public / marketplace), with mustache-style bindings (`{{params.X}}`, `{{steps.Y.output.Z}}`, `{{env.NAME}}`) threading values through `mission.state`.
+- **`runV2` executor** walks template steps, dispatches per primitive, persists one `missionEvents` + outbound `apiLogs` row per external call, applies the existing 15%-margin / internal-zero pricing rule, halts on `budgetUsd` overrun.
+- **Managed-provider auto-attribution**: when a step's `apiLog` provider tag matches a row in `providers`, the runner writes both an outbound row on the caller workspace and an inbound row on the provider-owner workspace. Generalises the per-product `logGenPRDCall` pattern to every managed provider automatically.
+- **`prd-generation v1` template**: first data-driven mission template (fetch → rules-mode validate). End-to-end smoke against prod returns a real Markdown PRD via the v2 pipeline. Legacy `genprd` slug aliases to it via `TEMPLATE_SLUG_ALIASES`.
+- **Web Crypto AES-256-GCM decryption on Convex** for the `execute` primitive — matches `src/crypto.ts` format. Requires `APICLAW_KEY_ENCRYPTION_SECRET` in Convex env (set 2026-05-17). Smoke verified end-to-end against GenPRD's managed routing.
+
+### Added — Discovery upgrades
+
+- **`discover_apis` defaults `callable_only=true`** — filter pushed into `discoverAPIs` itself so MCP / HTTP / Vercel all share one source of truth. Smoke `"send sms"` went from 7/10 non-callable to 10/10 callable.
+- **Live success-rate scoring**: new `providerHealth` Convex table + hourly aggregate cron over 30 days of outbound `apiLogs`. MCP discovery fetches the health map every 15 min and applies a `[0.5, 1.0]` multiplier × latency penalty. 26 providers currently scored from ~4,800 logs; `brave_search` at 80 % success now down-ranks automatically.
+- **Managed providers surface in `discover_apis`**: new `providerDiscovery:listForDiscovery` query exposes live + managed + active `providerAPIs` rows to the MCP-side scanner. GenPRD now ranks #1 for `"generate PRD product"` (47.7); NASA #1 for `"NASA satellite imagery"` (43). Closes the gap where managed providers were invisible to agent semantic search.
+- **`discover_missions` MCP tool + HTTP route** for ranked template discovery. Keyword score × weakest-link `providerHealth` multiplier across each template's step providers. Available on both Local and Remote MCP doors.
+
+### Added — Door parity
+
+- **Local MCP gains `list_models`** so the local door matches Remote MCP's model-catalog surface.
+- **Remote MCP gains `discover_missions` + `template_version` on `start_mission`** so the remote door matches Local MCP's mission surface.
+- Auth tools (`register_owner`, `verify_code`, `purchase_access`, `add_credits`, `remind_owner`, `setup_metered_billing`) remain Local-only by design — Remote MCP uses OAuth 2.1 + DCR.
+
+### Changed — Canon
+
+- **Canon-managed comms providers removed from callable surface**: Twilio, Resend, 46elks dropped from `DIRECT_CALL_SPECS` + `PROXY_PROVIDERS`. 36 Twilio-* / Resend / 46elks registry rows flipped to `callable: false`. They remain discoverable; system OTP-mail flow (`src/index.ts:2668`) intact. Net callable count: 2,895 → 2,872.
+- **`DIRECT_CALL_SPECS` → `MANAGED_PROVIDER_SPECS`** in `src/discovery.ts` to align with the 2026-04-15 canon retiring the "Direct Call tier" label.
+- **`proxyMode: "direct_call"` → `proxyMode: "managed"`** with backfill (48 rows patched, readers accept both during transition).
+- **86 prose references** to "Direct Call" / "direct call" / "direct-call" rewritten across 21 files to canonical "managed-provider" / "managed" phrasing.
+- **File renames**: `convex/directCall.ts` → `convex/managedRouting.ts`, `convex/seedDirectCallConfigs.ts` → `convex/seedManagedRouting.ts`. Backwards-compat shim `convex/directCall.ts` re-exports from the new module so legacy npm-install function-path lookups (`directCall:getByApiSlug` etc.) keep resolving.
+
+### Fixed — security
+
+- **Encrypted 17 plaintext upstream-provider keys** that were stored raw in `providerDirectCall.encryptedMasterKey`: Resend, Brave, OpenRouter, ElevenLabs, Replicate, GitHub, Groq, Deepgram, Serper, Cohere, Stability AI, 46elks, Firecrawl, E2B, Mistral, Together AI, AssemblyAI. Each row re-encrypted with `src/crypto.ts.encryptKey` (12-byte IV AES-GCM); plaintext never left the developer's machine.
+- **5 placeholder rows** (`""`, `":"`, `"YOUR_TWILIO_SID:..."`) set to `status="draft"` so `/v1/call` refuses to route through them.
+- **IV format alignment**: `src/crypto.ts` switched from 16-byte to 12-byte IVs (Web Crypto standard for AES-GCM). Node-side decryption stays compatible with both. One-shot migration script (`scripts/migrate-iv-format.mjs`) re-encrypts any remaining 16-byte-IV rows.
+
+### Fixed
+
+- **Usage-report email leak**: `usageReports.getReportableWorkspaces` now respects the nurture `partner-locked` / `excluded` stages, closing the weekly/monthly cron that was hitting `apilayer.com` and other partner workspaces.
+- **`modelCatalog.refresh` typecheck**: explicit return type annotation breaks the self-reference inference cycle that had been emitting silent TS7022/TS7023 errors.
+- **`verifyGenPRD` lookup**: aligned to the actual seeded name `"GenPRD"` (was `"GenPRD — PRD Generator"`).
+- **`providerHealth.aggregate` p50 latency**: filter zero-latency rows so the median reflects real timing only.
+
+### Internal
+
+- Convex backfills: 48 `proxyMode` rows + 17 plaintext-key rows + 5 placeholder draft-marks.
+- New Convex tables: `missionTemplates`, `providerHealth`.
+- New Convex modules: `missionRunner`, `missionPrimitives`, `providerHealth`, `providerDiscovery`, `managedRouting` (renamed from `directCall`), `seedManagedRouting` (renamed from `seedDirectCallConfigs`), `seedGenPRD`.
+- Canon-stats: `callable: 2_895 → 2_872`; landing hero strings refactored to read from `statsData` so future canon refreshes don't need string-jagar.
+
+### Upgrade
+
+```
+npx -y @nordsym/apiclaw@2.7.0
+```
+…or restart Claude Desktop / Cursor to pull the latest via your existing `npx` MCP config. `.mcpb` users: re-download from apiclaw.cloud after the next Vercel deploy.
+
+---
+
 ## [2.5.1] — 2026-04-23
 
 ### Fixed — production hotfix
