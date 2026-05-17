@@ -251,7 +251,7 @@ export default function CatalogPage() {
   );
 
   const indexedCount = statsData.apiCount || 26704;
-  const callableHeadline = statsData.callableCount ?? 2895;
+  const callableHeadline = statsData.callableCount ?? 2872;
   const managedHeadline = statsData.managedCount ?? totalManaged ?? 49;
 
   return (

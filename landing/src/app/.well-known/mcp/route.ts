@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import statsData from "@/lib/stats.json";
 
 // Discovery hint for MCP-aware clients and directories. There is no formal
 // /.well-known/mcp standard yet (as of 2026-05) but several emerging MCP
@@ -8,10 +9,13 @@ import { NextResponse } from "next/server";
 const ISSUER = "https://apiclaw.cloud";
 
 export async function GET() {
+  const apiCount = statsData.apiCount.toLocaleString();
+  const callable = statsData.callableCount.toLocaleString();
+  const managed = statsData.managedCount;
   const meta = {
     name: "APIClaw",
     description:
-      "The API layer for AI agents. 26,704 discoverable APIs, 2,895 empirically callable, 49 fully managed (OpenAI, Anthropic, xAI, Groq, Mistral, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer, and more). Universal pass-through proxy for keyless public APIs.",
+      `The API layer for AI agents. ${apiCount} discoverable APIs, ${callable} empirically callable, ${managed} fully managed (OpenAI, Anthropic, xAI, Groq, Mistral, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer, and more). Universal pass-through proxy for keyless public APIs.`,
     vendor: "NordSym AB",
     homepage: ISSUER,
     documentation: `${ISSUER}/docs`,

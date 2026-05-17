@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
+import statsData from '@/lib/stats.json';
 
 const docsNav = [
   {
@@ -477,7 +478,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             <span className="text-[var(--accent)]">📡</span> List your API on APIClaw
           </h2>
           <p className="text-[var(--text-secondary)] mb-6">
-            APIClaw indexes 26,704 APIs and 2,895 are empirically callable. Adding yours takes one OpenAPI spec and a free email signup.
+            APIClaw indexes {statsData.apiCount.toLocaleString()} APIs and {statsData.callableCount.toLocaleString()} are empirically callable. Adding yours takes one OpenAPI spec and a free email signup.
           </p>
 
           <ol className="space-y-5 mb-8">

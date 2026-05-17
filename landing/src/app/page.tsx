@@ -1132,7 +1132,7 @@ Install:
               },
               {
                 q: "What can I actually call?",
-                a: `26,704 discoverable APIs. 2,895 callable. Every major LLM (Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter) plus voice, search, scraping, payments, and the long tail of public REST APIs.`
+                a: `${statsData.apiCount.toLocaleString()} discoverable APIs. ${statsData.callableCount.toLocaleString()} callable. Every major LLM (Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter) plus voice, search, scraping, payments, and the long tail of public REST APIs.`
               },
               {
                 q: "What are missions?",
