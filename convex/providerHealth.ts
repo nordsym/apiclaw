@@ -98,7 +98,11 @@ export const aggregate = internalAction({
       const b = buckets.get(l.provider) ?? { calls: 0, successes: 0, latencies: [] };
       b.calls++;
       if (l.status === "success") b.successes++;
-      if (typeof l.latencyMs === "number") b.latencies.push(l.latencyMs);
+      // Drop zero/missing latencies — many legacy apiLogs rows were written
+      // without a real measurement and would otherwise drag the median to 0.
+      if (typeof l.latencyMs === "number" && l.latencyMs > 0) {
+        b.latencies.push(l.latencyMs);
+      }
       buckets.set(l.provider, b);
     }
 
