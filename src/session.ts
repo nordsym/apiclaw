@@ -6,6 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { readAuthConfig } from './auth-config.js';
 
 export interface SessionData {
   sessionToken: string;
@@ -32,6 +33,23 @@ function ensureSessionDir(): void {
  * Returns null if no session file exists or if it's invalid
  */
 export function readSession(): SessionData | null {
+  // A-22: prefer ~/.apiclaw.toml (canonical from v2.8) — written by
+  // `apiclaw auth login`. Falls through to legacy paths so existing
+  // installs keep working until next `auth login`.
+  try {
+    const cfg = readAuthConfig();
+    if (cfg) {
+      return {
+        sessionToken: cfg.sessionToken,
+        workspaceId: cfg.workspaceId,
+        email: cfg.email,
+        createdAt: cfg.createdAt,
+      };
+    }
+  } catch {
+    // fall through to legacy
+  }
+
   try {
     // Try primary session file first
     if (fs.existsSync(SESSION_FILE)) {

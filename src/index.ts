@@ -339,11 +339,11 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
         error: `Hourly rate limit (${ANONYMOUS_HOURLY_LIMIT} calls/hour)`,
         retry_after_minutes: calculateMinutesUntilNextHour(),
         hint: "Rate limit resets at top of hour",
-        action: "Register to get higher limits: register_owner({ email: 'you@example.com' })"
+        action: "Authenticate for higher limits: npx @nordsym/apiclaw auth login"
       }, null, 2)
     };
   }
-  
+
   // Check weekly limit
   if (state.weeklyCount >= ANONYMOUS_WEEKLY_LIMIT) {
     return {
@@ -351,8 +351,8 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       error: JSON.stringify({
         success: false,
         error: `⚡ You've hit your free tier limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
-        hint: "Register for 50 calls/week, or upgrade for unlimited",
-        action: "Run: register_owner({ email: 'you@example.com' })",
+        hint: "Authenticate for 50 calls/month, or upgrade for unlimited",
+        action: "Run in terminal: npx @nordsym/apiclaw auth login",
         upgrade_url: "https://apiclaw.cloud/upgrade",
         retry_after: getNextMonthUTC()
       }, null, 2)
@@ -373,7 +373,7 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
 async function validateSession(): Promise<boolean> {
   const session = readSession();
   if (!session) {
-    console.error('[APIClaw] No session found. Use register_owner to authenticate.');
+    console.error('[APIClaw] No session found. Run `npx @nordsym/apiclaw auth login` to authenticate.');
     return false;
   }
   
@@ -498,17 +498,21 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
       return {
         allowed: false,
         error: JSON.stringify({
-          status: 'registration_required',
-          error: 'Registration required to call APIs.',
-          message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
-          action: 'register_owner',
-          free_tier: '50 API calls/month -- completely free.',
+          status: 'agent_auth_required',
+          error: 'Authentication required to call APIs.',
+          message: 'APIClaw uses an agent-native auth flow. Run the CLI command below in the user\'s terminal. A browser opens, the user signs in with one click, and the CLI writes ~/.apiclaw.toml. Then re-call this tool.',
+          action: 'agent_auth_required',
+          command: 'npx @nordsym/apiclaw auth login',
+          estimated_seconds: 15,
+          fallback: 'If no browser available (SSH/headless): npx @nordsym/apiclaw auth login --email-fallback',
+          legacy_action: 'register_owner ({ email: "..." }) is still supported but slower (inbox round-trip).',
+          free_tier: '50 API calls/month — completely free.',
         }, null, 2),
         isAnonymous: true,
       };
     }
   }
-  
+
   if (workspaceContext.status !== 'active') {
     return {
       allowed: false,
@@ -521,10 +525,13 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     return {
       allowed: false,
       error: JSON.stringify({
-        status: 'registration_required',
+        status: 'agent_auth_required',
         error: 'An account is required to use APIClaw.',
-        message: 'Call register_owner({ email: "you@example.com" }) to sign up. Free tier: 25 calls/month.',
-        action: 'register_owner',
+        message: 'Run `npx @nordsym/apiclaw auth login` in the user\'s terminal. Browser opens, user clicks once, CLI writes ~/.apiclaw.toml. Then re-call this tool.',
+        action: 'agent_auth_required',
+        command: 'npx @nordsym/apiclaw auth login',
+        estimated_seconds: 15,
+        fallback: 'register_owner({ email: "..." }) — legacy email magic-link flow, still works.',
       }, null, 2),
       isAnonymous: true,
     };
@@ -1049,7 +1056,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, email, SMS, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires free registration; if not registered, call register_owner first.
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace; if not authenticated, the response will return action="agent_auth_required" with the CLI command to run (npx @nordsym/apiclaw auth login). The legacy register_owner / verify_code flow still works as a fallback.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -1242,7 +1249,7 @@ Example chain:
   // ============================================
   {
     name: 'register_owner',
-    description: 'REQUIRED before using any API. Register your email to create a workspace. A 6-digit verification code will be sent to your email. After calling this, ask the user for the code and call verify_code.',
+    description: 'LEGACY auth path (kept for back-compat). The canonical agent-native flow is `npx @nordsym/apiclaw auth login` — when a tool returns action="agent_auth_required", run that CLI command instead of this tool. register_owner sends a 6-digit code to the email and requires the user to paste it back via verify_code.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -2060,7 +2067,7 @@ Docs: https://apiclaw.cloud
               text: JSON.stringify({
                 status: 'error',
                 error: access.error,
-                hint: 'Use register_owner to authenticate your workspace.',
+                hint: 'Run `npx @nordsym/apiclaw auth login` to authenticate your workspace. (register_owner still works as a fallback.)',
               }, null, 2)
             }],
             isError: true
@@ -2410,7 +2417,7 @@ Docs: https://apiclaw.cloud
         if (result.success && workspaceContext && !workspaceContext.email) {
           const remaining = UNREGISTERED_CALL_LIMIT - (workspaceContext.usageCount || 0);
           if (remaining > 0 && remaining <= 3) {
-            responseData._notice = `${remaining} free calls remaining. Run register_owner to unlock more.`;
+            responseData._notice = `${remaining} free calls remaining. Run \`npx @nordsym/apiclaw auth login\` to unlock more.`;
           }
         }
 
