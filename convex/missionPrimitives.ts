@@ -163,6 +163,24 @@ export interface StepResult {
 //   { url: "{{steps.fetchA.output.url}}" } → object with bindings resolved
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Templates may reference selected environment variables via {{env.NAME}}.
+// The allowlist is intentionally narrow — every entry here is something
+// any template can pull, so adding to it grants ambient access to every
+// future template author. Workspace-scoped secrets land in their own
+// table when that lifts off the backlog.
+const ENV_BINDING_ALLOWLIST = new Set<string>([
+  "GENPRD_API_KEY",
+]);
+
+export function getAllowedEnv(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of ENV_BINDING_ALLOWLIST) {
+    const v = process.env[k];
+    if (typeof v === "string") out[k] = v;
+  }
+  return out;
+}
+
 const BINDING_RE = /\{\{\s*([^}]+?)\s*\}\}/g;
 
 function getByPath(obj: unknown, path: string): unknown {

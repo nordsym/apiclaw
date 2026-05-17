@@ -24,7 +24,7 @@ import {
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { Step, StepResult } from "./missionPrimitives";
-import { resolveBindings } from "./missionPrimitives";
+import { resolveBindings, getAllowedEnv } from "./missionPrimitives";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Primitive handlers
@@ -45,10 +45,99 @@ type PrimitiveArgs = {
   inputs: any;
 };
 
-async function runFetch(_: PrimitiveArgs): Promise<StepResult> {
+async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
+  const { config, inputs } = args;
+  const source: string = config?.source ?? "http";
+  const startedAt = Date.now();
+
+  if (source === "http") {
+    const url: string | undefined = inputs?.url;
+    if (!url || typeof url !== "string") {
+      return {
+        ok: false,
+        error: "fetch_http:missing_url",
+        costUsd: 0,
+        latencyMs: 0,
+      };
+    }
+    const method: string = (inputs?.method ?? config?.method ?? "GET").toUpperCase();
+    const userHeaders: Record<string, string> = inputs?.headers ?? {};
+    const body = inputs?.body;
+    const expect: "json" | "text" = config?.expect ?? "json";
+
+    const headers: Record<string, string> = { ...userHeaders };
+    let bodyText: string | undefined;
+    if (method !== "GET" && body != null) {
+      if (typeof body === "string") {
+        bodyText = body;
+      } else {
+        bodyText = JSON.stringify(body);
+        if (!headers["Content-Type"]) headers["Content-Type"] = "application/json";
+      }
+    }
+
+    let res: Response;
+    try {
+      res = await fetch(url, { method, headers, body: bodyText });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "fetch_failed";
+      return {
+        ok: false,
+        error: `fetch_http_network:${msg}`,
+        costUsd: 0,
+        latencyMs: Date.now() - startedAt,
+      };
+    }
+    const latency = Date.now() - startedAt;
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      return {
+        ok: false,
+        error: `fetch_http_${res.status}:${txt.slice(0, 200)}`,
+        costUsd: 0,
+        latencyMs: latency,
+        meta: { status: res.status },
+      };
+    }
+
+    let output: unknown;
+    try {
+      output = expect === "text" ? await res.text() : await res.json();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "parse_failed";
+      return {
+        ok: false,
+        error: `fetch_http_parse:${expect}:${msg}`,
+        costUsd: 0,
+        latencyMs: latency,
+        meta: { status: res.status },
+      };
+    }
+
+    return {
+      ok: true,
+      output,
+      costUsd: 0,
+      latencyMs: latency,
+      meta: { status: res.status },
+    };
+  }
+
+  if (source === "providerAction") {
+    // Hook for the managed-provider routing path. Implemented when the
+    // existing call_api gateway adapter is brought into the runner.
+    return {
+      ok: false,
+      error: "fetch_providerAction:not_implemented",
+      costUsd: 0,
+      latencyMs: 0,
+    };
+  }
+
   return {
     ok: false,
-    error: "primitive_not_implemented:fetch",
+    error: `fetch:unknown_source:${source}`,
     costUsd: 0,
     latencyMs: 0,
   };
@@ -211,10 +300,142 @@ async function runDecide(_: PrimitiveArgs): Promise<StepResult> {
   };
 }
 
-async function runValidate(_: PrimitiveArgs): Promise<StepResult> {
+function getByPath(obj: unknown, path: string): unknown {
+  const parts = path.split(".");
+  let cur: any = obj;
+  for (const p of parts) {
+    if (cur == null) return undefined;
+    cur = cur[p];
+  }
+  return cur;
+}
+
+function evaluateRule(rule: any, input: any): { pass: boolean; reason: string } {
+  const type = rule?.type;
+  if (type === "field_present") {
+    const path = rule.field;
+    const val = getByPath(input, path);
+    return val != null && val !== ""
+      ? { pass: true, reason: "" }
+      : { pass: false, reason: `field "${path}" missing or empty` };
+  }
+  if (type === "min_length") {
+    const path = rule.field;
+    const val = getByPath(input, path);
+    const len =
+      typeof val === "string"
+        ? val.length
+        : Array.isArray(val)
+          ? val.length
+          : 0;
+    const min = rule.min ?? 1;
+    return len >= min
+      ? { pass: true, reason: "" }
+      : { pass: false, reason: `"${path}" length ${len} < ${min}` };
+  }
+  if (type === "contains_substring") {
+    const path = rule.field;
+    const val = getByPath(input, path);
+    const sub = rule.substring;
+    return typeof val === "string" && val.includes(sub)
+      ? { pass: true, reason: "" }
+      : { pass: false, reason: `"${path}" missing substring "${sub}"` };
+  }
+  if (type === "regex_match") {
+    const path = rule.field;
+    const val = getByPath(input, path);
+    try {
+      const re = new RegExp(rule.pattern, rule.flags ?? "");
+      return typeof val === "string" && re.test(val)
+        ? { pass: true, reason: "" }
+        : { pass: false, reason: `"${path}" fails pattern /${rule.pattern}/` };
+    } catch (e) {
+      return { pass: false, reason: `invalid regex pattern "${rule.pattern}"` };
+    }
+  }
+  return { pass: false, reason: `unknown rule type: ${type}` };
+}
+
+async function runValidate(args: PrimitiveArgs): Promise<StepResult> {
+  const { config, inputs } = args;
+  const mode: string = config?.mode ?? "rules";
+  const startedAt = Date.now();
+
+  if (mode === "rules") {
+    const rules: any[] = config?.rules ?? [];
+    const failures: string[] = [];
+    for (const rule of rules) {
+      const result = evaluateRule(rule, inputs);
+      if (!result.pass) failures.push(result.reason);
+    }
+    return {
+      ok: failures.length === 0,
+      output: { pass: failures.length === 0, failures },
+      failures: failures.length > 0 ? failures : undefined,
+      costUsd: 0,
+      latencyMs: Date.now() - startedAt,
+    };
+  }
+
+  if (mode === "llm") {
+    const model: string = config?.model ?? "anthropic/claude-haiku-4-5";
+    const contract: string = config?.contract ?? "";
+    const judgePromptTemplate: string = config?.judgePromptTemplate ?? "";
+
+    // The judge prompt has access to the validate-step's resolved inputs
+    // (the candidate output) plus the contract text under {{contract}}.
+    const promptCtx = { input: inputs, contract };
+    const userText = String(resolveBindings(judgePromptTemplate, promptCtx) ?? "");
+
+    const judge = await runTransform({
+      ctx: args.ctx,
+      config: {
+        model,
+        systemPrompt:
+          "You are a strict quality judge. Return only the JSON shape required. " +
+          "Set pass=true if every contract requirement is met; otherwise pass=false " +
+          "and list specific, actionable failure messages in failures[].",
+        userPromptTemplate: userText,
+        outputSchema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["pass", "failures"],
+          properties: {
+            pass: { type: "boolean" },
+            failures: { type: "array", items: { type: "string" } },
+          },
+        },
+        temperature: 0.0,
+      },
+      inputs: {},
+    });
+
+    if (!judge.ok || typeof judge.output !== "object" || judge.output == null) {
+      return {
+        ok: false,
+        error: judge.error ?? "validate_llm_judge_failed",
+        costUsd: judge.costUsd,
+        latencyMs: judge.latencyMs,
+        model: judge.model,
+        meta: judge.meta,
+      };
+    }
+
+    const verdict = judge.output as { pass: boolean; failures: string[] };
+    return {
+      ok: verdict.pass === true,
+      output: verdict,
+      failures: verdict.failures && verdict.failures.length > 0 ? verdict.failures : undefined,
+      costUsd: judge.costUsd,
+      latencyMs: judge.latencyMs,
+      model: judge.model,
+      meta: judge.meta,
+    };
+  }
+
   return {
     ok: false,
-    error: "primitive_not_implemented:validate",
+    error: `validate:unknown_mode:${mode}`,
     costUsd: 0,
     latencyMs: 0,
   };
@@ -268,6 +489,8 @@ export const getMissionForRun = internalQuery({
       status: m.status,
       budgetUsd: m.budgetUsd,
       isInternal: m.isInternal,
+      result: m.result,
+      error: m.error,
     };
   },
 });
@@ -353,6 +576,185 @@ export const markFailed = internalMutation({
       chargedCostUsd,
       completedAt: Date.now(),
     });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Template seed: prd-generation
+//
+// First template that exercises the full v2 path:
+//   fetch (POST to genprd.se) → validate (rules check on returned PRD)
+//
+// The fetch step's Authorization header pulls from {{env.GENPRD_API_KEY}}
+// so the template itself stays secret-free. Idempotent via slug + version.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const seedPRDTemplate = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const ownerWs = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", "gustav@nordsym.com"))
+      .first();
+    if (!ownerWs) throw new Error("owner_workspace_not_found");
+
+    const now = Date.now();
+    const tmpl = {
+      slug: "prd-generation",
+      version: 1,
+      ownerWorkspaceId: ownerWs._id,
+      visibility: "private" as const,
+      title: "Generate PRD",
+      description:
+        "Generate a structured Markdown PRD via genprd.se with a rule-based quality gate.",
+      inputSchema: {
+        type: "object",
+        required: ["topic"],
+        properties: {
+          topic: { type: "string" },
+          audience: { type: "string" },
+          constraints: { type: "string" },
+          model: { type: "string" },
+          format: { type: "string", enum: ["lean", "standard", "detailed"] },
+        },
+      },
+      outputSchema: {
+        type: "object",
+        required: ["prd"],
+        properties: {
+          prd: { type: "string" },
+          model: { type: "string" },
+          tokens: {
+            type: "object",
+            properties: {
+              input: { type: "number" },
+              output: { type: "number" },
+            },
+          },
+        },
+      },
+      contractAssertions: [],
+      steps: [
+        {
+          id: "generate",
+          kind: "fetch",
+          inputs: {
+            url: "https://genprd.se/api/generate",
+            method: "POST",
+            headers: { "X-GenPRD-Key": "{{env.GENPRD_API_KEY}}" },
+            body: {
+              topic: "{{params.topic}}",
+              audience: "{{params.audience}}",
+              constraints: "{{params.constraints}}",
+              model: "{{params.model}}",
+              format: "{{params.format}}",
+            },
+          },
+          config: { source: "http", method: "POST", expect: "json" },
+        },
+        {
+          id: "qualityCheck",
+          kind: "validate",
+          inputs: {
+            prd: "{{steps.generate.output.prd}}",
+          },
+          config: {
+            mode: "rules",
+            rules: [
+              { type: "field_present", field: "prd" },
+              { type: "min_length", field: "prd", min: 500 },
+              { type: "contains_substring", field: "prd", substring: "Goals" },
+              { type: "contains_substring", field: "prd", substring: "User Stories" },
+            ],
+          },
+        },
+      ],
+      enabled: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const existing = await ctx.db
+      .query("missionTemplates")
+      .withIndex("by_slug_version", (q) =>
+        q.eq("slug", "prd-generation").eq("version", 1),
+      )
+      .first();
+
+    if (existing) {
+      const { createdAt: _omit, ...rest } = tmpl;
+      await ctx.db.patch(existing._id, rest);
+      return { ok: true, id: existing._id, note: "patched" };
+    }
+    const id = await ctx.db.insert("missionTemplates", tmpl);
+    return { ok: true, id, note: "created" };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Smoke harness for the full v2 pipeline against the prd-generation template
+//
+// Creates an ephemeral mission row, runs it through runV2, returns the
+// final status + cost + result snippet. Owner workspace (Gustav) so margin
+// is zero and isInternal=true.
+//
+// Run: npx convex run missionRunner:smokePRDTemplate '{"topic":"AI agents for SMEs"}'
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const createSmokeMission = internalMutation({
+  args: { topic: v.string() },
+  handler: async (ctx, { topic }) => {
+    const ownerWs = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", "gustav@nordsym.com"))
+      .first();
+    if (!ownerWs) throw new Error("owner_workspace_not_found");
+
+    const id = await ctx.db.insert("missions", {
+      workspaceId: ownerWs._id,
+      template: "prd-generation",
+      templateVersion: 1,
+      title: `[smoke] PRD for ${topic.slice(0, 40)}`,
+      status: "queued",
+      params: { topic, format: "lean" },
+      initiator: "cli",
+      isInternal: true,
+      createdAt: Date.now(),
+    });
+    return id;
+  },
+});
+
+export const smokePRDTemplate = internalAction({
+  args: { topic: v.string() },
+  handler: async (
+    ctx,
+    { topic },
+  ): Promise<{
+    missionId: Id<"missions">;
+    run: {
+      ok: boolean;
+      status: string;
+      underlyingCostUsd: number;
+      chargedCostUsd: number;
+      error?: string;
+    };
+    finalResultSample: string;
+  }> => {
+    const missionId: Id<"missions"> = await ctx.runMutation(
+      internal.missionRunner.createSmokeMission,
+      { topic },
+    );
+    const run = await ctx.runAction(internal.missionRunner.runV2, { missionId });
+    const finalMission = await ctx.runQuery(internal.missionRunner.getMissionForRun, {
+      missionId,
+    });
+    const result = (finalMission as any)?.result ?? null;
+    const sample =
+      result && typeof result === "object" && typeof (result as any).prd === "string"
+        ? ((result as any).prd as string).slice(0, 240) + "..."
+        : JSON.stringify(result).slice(0, 240);
+    return { missionId, run, finalResultSample: sample };
   },
 });
 
@@ -486,7 +888,10 @@ export const runV2 = internalAction({
         };
       }
 
-      const resolvedInputs = resolveBindings(step.inputs, state);
+      // env is injected fresh per step from the process.env allowlist; it
+      // is never persisted into mission.state so secrets stay off the DB.
+      const bindCtx = { ...state, env: getAllowedEnv() };
+      const resolvedInputs = resolveBindings(step.inputs, bindCtx);
 
       const result: StepResult = await handler({
         ctx: { missionId, workspaceId: mission.workspaceId },
