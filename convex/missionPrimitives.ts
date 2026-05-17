@@ -50,7 +50,7 @@ export type PrimitiveKind = (typeof PRIMITIVE_KINDS)[number];
 export const fetchConfig = v.object({
   source: v.union(
     v.literal("http"),                // raw HTTP — `url`, `method`, `headers`, `body` from inputs
-    v.literal("providerAction"),      // call_api into a registered provider action
+    v.literal("providerAction"),      // call_api into a registered managed-provider action
   ),
   // For providerAction:
   providerId: v.optional(v.string()),
@@ -58,6 +58,12 @@ export const fetchConfig = v.object({
   // For http:
   method: v.optional(v.string()),     // "GET" | "POST"; default GET
   expect: v.optional(v.union(v.literal("json"), v.literal("text"))),
+  // Override the auto-derived provider tag used when writing the apiLogs
+  // row. Defaults to the URL hostname for http source, providerId for
+  // providerAction source. Set this to "genprd" (etc) when fetching a
+  // managed provider's endpoint directly so analytics line up with the
+  // existing inbound-attribution side.
+  attributeAs: v.optional(v.string()),
 });
 
 // transform — LLM call that produces structured output matching outputSchema.
@@ -149,6 +155,12 @@ export interface StepResult {
   failures?: string[];                // present when validate returns ok=false
   error?: string;
   meta?: Record<string, unknown>;     // primitive-specific extras (token counts, http status, etc.)
+  // When a primitive performed an external call, it sets apiLog so the
+  // runner can persist a row to the apiLogs table. That makes the call
+  // visible to providerHealth aggregation, workspace analytics, and the
+  // existing /v1/* analytics surfaces. Validators in rules-mode have no
+  // external call and leave this undefined.
+  apiLog?: { provider: string; action: string };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

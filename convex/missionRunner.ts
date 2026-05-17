@@ -76,6 +76,17 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
       }
     }
 
+    // Derive the apiLogs provider tag early so error paths can attribute too.
+    let attributedProvider = config?.attributeAs as string | undefined;
+    if (!attributedProvider) {
+      try {
+        attributedProvider = new URL(url).hostname.replace(/^www\./, "");
+      } catch {
+        attributedProvider = "external_http";
+      }
+    }
+    const fetchApiLog = { provider: attributedProvider, action: "fetch" };
+
     let res: Response;
     try {
       res = await fetch(url, { method, headers, body: bodyText });
@@ -86,6 +97,7 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
         error: `fetch_http_network:${msg}`,
         costUsd: 0,
         latencyMs: Date.now() - startedAt,
+        apiLog: fetchApiLog,
       };
     }
     const latency = Date.now() - startedAt;
@@ -98,6 +110,7 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
         costUsd: 0,
         latencyMs: latency,
         meta: { status: res.status },
+        apiLog: fetchApiLog,
       };
     }
 
@@ -112,6 +125,7 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
         costUsd: 0,
         latencyMs: latency,
         meta: { status: res.status },
+        apiLog: fetchApiLog,
       };
     }
 
@@ -121,6 +135,7 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
       costUsd: 0,
       latencyMs: latency,
       meta: { status: res.status },
+      apiLog: fetchApiLog,
     };
   }
 
@@ -233,6 +248,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
       costUsd: 0,
       latencyMs: Date.now() - startedAt,
       model,
+      apiLog: { provider: "openrouter", action: "transform" },
     };
   }
   const latency = Date.now() - startedAt;
@@ -245,6 +261,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
       costUsd: 0,
       latencyMs: latency,
       model,
+      apiLog: { provider: "openrouter", action: "transform" },
     };
   }
 
@@ -277,6 +294,10 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
           tokens: { input: inTok, output: outTok },
           rawContentSample: content.slice(0, 500),
         },
+        // openrouter responded, schema enforcement failed downstream.
+        // Counts as a transform-step failure for the step's ok=false but
+        // we still tag the apiLog so analytics reflect the real call.
+        apiLog: { provider: "openrouter", action: "transform" },
       };
     }
   }
@@ -288,6 +309,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
     latencyMs: latency,
     model: json.model ?? model,
     meta: { tokens: { input: inTok, output: outTok } },
+    apiLog: { provider: "openrouter", action: "transform" },
   };
 }
 
@@ -558,6 +580,34 @@ export const markComplete = internalMutation({
   },
 });
 
+// One outbound apiLogs row per primitive call that hit an external
+// service. This is what providerHealth aggregates and what workspace
+// analytics surfaces — without it, mission steps would be invisible to
+// every existing stats pipeline.
+export const writeStepApiLog = internalMutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    provider: v.string(),
+    action: v.string(),
+    status: v.union(v.literal("success"), v.literal("error")),
+    latencyMs: v.number(),
+    errorMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("apiLogs", {
+      workspaceId: args.workspaceId,
+      sessionToken: "",
+      provider: args.provider,
+      action: args.action,
+      status: args.status,
+      latencyMs: args.latencyMs,
+      errorMessage: args.errorMessage,
+      direction: "outbound",
+      createdAt: Date.now(),
+    });
+  },
+});
+
 export const markFailed = internalMutation({
   args: {
     missionId: v.id("missions"),
@@ -603,7 +653,7 @@ export const seedPRDTemplate = internalMutation({
       slug: "prd-generation",
       version: 1,
       ownerWorkspaceId: ownerWs._id,
-      visibility: "private" as const,
+      visibility: "public" as const,
       title: "Generate PRD",
       description:
         "Generate a structured Markdown PRD via genprd.se with a rule-based quality gate.",
@@ -651,7 +701,7 @@ export const seedPRDTemplate = internalMutation({
               format: "{{params.format}}",
             },
           },
-          config: { source: "http", method: "POST", expect: "json" },
+          config: { source: "http", method: "POST", expect: "json", attributeAs: "genprd" },
         },
         {
           id: "qualityCheck",
@@ -931,6 +981,21 @@ export const runV2 = internalAction({
         missionId,
         state,
       });
+
+      // Persist an apiLogs row whenever the primitive made an external call.
+      // This is the bridge from mission-events (internal observability) to
+      // apiLogs (the stats substrate shared by providerHealth, workspace
+      // analytics, and every other consumer of the /v1/* surfaces).
+      if (result.apiLog) {
+        await ctx.runMutation(internal.missionRunner.writeStepApiLog, {
+          workspaceId: mission.workspaceId,
+          provider: result.apiLog.provider,
+          action: result.apiLog.action,
+          status: result.ok ? "success" : "error",
+          latencyMs: result.latencyMs,
+          errorMessage: result.error,
+        });
+      }
 
       // Budget check
       if (
