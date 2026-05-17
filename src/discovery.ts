@@ -96,6 +96,66 @@ if (typeof setInterval === 'function') {
   if (typeof (t as any).unref === 'function') (t as any).unref();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Managed-provider catalogue cache
+//
+// providerAPIs rows describing managed providers (GenPRD, the APILayer
+// stack, etc.) live in Convex and are invisible to the local apis.json
+// scanner. Without this cache, discover_apis would skip them entirely —
+// agents searching "generate PRD" would not see GenPRD even though it's
+// callable through the managed-routing path.
+//
+// Same refresh pattern as the providerHealth cache: a non-blocking
+// initial fetch on module load + a 15-minute interval. Empty cache
+// during cold start means managed providers simply don't surface yet;
+// safe, never crashes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ManagedProviderEntry {
+  providerName: string;
+  description: string;
+  category: string;
+  docsUrl: string;
+  baseUrl: string;
+}
+
+let managedProvidersCache: ManagedProviderEntry[] = [];
+let managedProvidersFetchedAt = 0;
+let managedProvidersInflight = false;
+
+async function refreshManagedProvidersCache(): Promise<void> {
+  if (managedProvidersInflight) return;
+  managedProvidersInflight = true;
+  try {
+    const res = await fetch(`${CONVEX_URL_HEALTH}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'providerDiscovery:listForDiscovery', args: {} }),
+    });
+    if (!res.ok) return;
+    const payload = (await res.json()) as {
+      status?: string;
+      value?: ManagedProviderEntry[];
+    };
+    if (!Array.isArray(payload.value)) return;
+    managedProvidersCache = payload.value;
+    managedProvidersFetchedAt = Date.now();
+  } catch {
+    // Network failure: keep prior cache. Discovery still works against
+    // apis.json; managed providers just stay stale.
+  } finally {
+    managedProvidersInflight = false;
+  }
+}
+
+refreshManagedProvidersCache().catch(() => {});
+if (typeof setInterval === 'function') {
+  const t = setInterval(() => {
+    refreshManagedProvidersCache().catch(() => {});
+  }, HEALTH_REFRESH_MS);
+  if (typeof (t as any).unref === 'function') (t as any).unref();
+}
+
 /**
  * Returns a multiplier in the range [0.5, 1.0] applied to relevance scores.
  *
@@ -503,10 +563,92 @@ export function discoverAPIs(
       });
     }
   }
-  
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Managed providers from Convex providerAPIs. Scored with the same rules
+  // as apis.json entries so a managed provider ranks alongside open APIs on
+  // the same query. Always callable (managed routing path holds the key).
+  // ───────────────────────────────────────────────────────────────────────────
+  for (const mp of managedProvidersCache) {
+    if (category && mp.category !== category) continue;
+
+    // Build a synthetic APIProvider so SearchResult shape stays consistent.
+    // Fields not present on managed-provider rows default to safe values.
+    const synth: APIProvider & { callable?: boolean; managed?: boolean } = {
+      id: mp.providerName.toLowerCase().replace(/\s+/g, '_'),
+      name: mp.providerName,
+      description: mp.description,
+      category: mp.category,
+      capabilities: [],
+      keywords: [],
+      pricing: { model: 'managed', free_tier: false, minimum_purchase: null },
+      auth_type: 'managed',
+      docs_url: mp.docsUrl,
+      base_url: mp.baseUrl,
+      endpoints: [],
+      features: [],
+      compliance: [],
+      regions: ['global'],
+      agent_success_rate: 1.0,
+      avg_latency_ms: 500,
+      callable: true,
+      managed: true,
+    };
+
+    let mscore = 0;
+    const mreasons: string[] = ['managed'];
+    for (const word of queryWords) {
+      if (synth.name.toLowerCase().includes(word)) {
+        mscore += 20;
+        mreasons.push(`name:${word}`);
+      }
+      if (synth.description.toLowerCase().includes(word)) {
+        mscore += 5;
+        mreasons.push(`description:${word}`);
+      }
+      if (synth.category.toLowerCase().includes(word)) {
+        mscore += 8;
+        mreasons.push(`category:${word}`);
+      }
+    }
+
+    // Mirror the baseline boosts open APIs receive so a managed provider
+    // ranks on par with an equally-matched open one rather than always
+    // falling below. Success-rate boost uses the synthetic 1.0 since
+    // managed providers route through APIClaw's gateway (no upstream
+    // BYOK failure mode); latency boost uses the synthetic 500 ms.
+    mscore += 10;                              // success_rate × 10
+    mscore += 5;                               // latency (1000-500)/100
+    mscore += 3;                               // managed-vetted bonus
+    mreasons.push('managed-vetted');
+
+    // Apply the same live success-rate multiplier — managed providers
+    // attribute to their providerName in providerHealth via the runner's
+    // dual-logging, so the lookup key works here too. providerHealth
+    // stores providerId lowercased by convention; the synthetic id we
+    // built matches that.
+    const mliveMult = healthMultiplier(synth.id);
+    if (mliveMult < 1.0) {
+      const h = healthCache.get(synth.id);
+      if (h) {
+        const pct = Math.round(h.successRate * 100);
+        mreasons.push(`live success ${pct}% (n=${h.callCount})`);
+      }
+    }
+    mscore = mscore * mliveMult;
+
+    if (mscore > 0) {
+      results.push({
+        provider: synth,
+        relevance_score: Math.round(mscore * 100) / 100,
+        match_reasons: [...new Set(mreasons)],
+      });
+    }
+  }
+
   // Sort by relevance
   results.sort((a, b) => b.relevance_score - a.relevance_score);
-  
+
   return results.slice(0, maxResults);
 }
 
