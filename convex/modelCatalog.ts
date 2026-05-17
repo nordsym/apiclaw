@@ -266,7 +266,10 @@ const VOYAGE_HARDCODED: Entry[] = [
 
 export const refresh = internalAction({
   args: { force: v.optional(v.boolean()) },
-  handler: async (ctx, _args) => {
+  handler: async (
+    ctx,
+    _args,
+  ): Promise<{ upserted: number; deprecated: number; elapsedMs: number }> => {
     const startedAt = Date.now();
 
     const [openai, anthropic, xai, groq, mistral, cohere, openrouter, deepinfra] = await Promise.all([

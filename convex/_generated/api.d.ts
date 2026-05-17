@@ -45,6 +45,7 @@ import type * as mou from "../mou.js";
 import type * as nurture from "../nurture.js";
 import type * as onboarding from "../onboarding.js";
 import type * as pipelineAlign from "../pipelineAlign.js";
+import type * as providerHealth from "../providerHealth.js";
 import type * as providers from "../providers.js";
 import type * as purchases from "../purchases.js";
 import type * as ratelimit from "../ratelimit.js";
@@ -110,6 +111,7 @@ declare const fullApi: ApiFromModules<{
   nurture: typeof nurture;
   onboarding: typeof onboarding;
   pipelineAlign: typeof pipelineAlign;
+  providerHealth: typeof providerHealth;
   providers: typeof providers;
   purchases: typeof purchases;
   ratelimit: typeof ratelimit;
