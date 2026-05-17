@@ -18,6 +18,12 @@ import type { Id } from "./_generated/dataModel";
 // ============================================
 // MISSION TEMPLATES
 // ============================================
+//
+// TEMPLATE_REGISTRY is the legacy in-process catalogue. Every entry that
+// used to live here has been migrated to a data-driven row in the
+// missionTemplates table. The registry stays as a typed shell so legacy
+// callers compile and so future temporary registry-only templates have a
+// place to land if needed.
 
 const TEMPLATE_REGISTRY: Record<
   string,
@@ -26,19 +32,135 @@ const TEMPLATE_REGISTRY: Record<
     description: string;
     paramSchema: Record<string, { type: string; required?: boolean; description: string }>;
   }
-> = {
-  genprd: {
-    title: "Generate PRD",
-    description:
-      "Generate a structured product requirements document for a feature or product. Uses APIClaw's Managed LLM gateway (advisor routing) to produce a Markdown PRD with goals, user stories, requirements, and success metrics.",
-    paramSchema: {
-      topic: { type: "string", required: true, description: "What the PRD is about (one sentence is enough)" },
-      audience: { type: "string", required: false, description: "Who the product is for" },
-      constraints: { type: "string", required: false, description: "Hard constraints (timeline, stack, budget)" },
-      model: { type: "string", required: false, description: "Override LLM model (default: anthropic/claude-sonnet-4-6)" },
-    },
-  },
+> = {};
+
+// Old template slugs continue to work via this alias map. createMission
+// rewrites args.template before any lookup, then the mission row stores
+// the canonical slug + the resolved v2 templateVersion. New work should
+// use the canonical slug directly.
+const TEMPLATE_SLUG_ALIASES: Record<string, string> = {
+  genprd: "prd-generation",
 };
+
+// ============================================
+// DISCOVER MISSIONS
+// ============================================
+//
+// Ranks publicly-available mission templates against a natural-language
+// query. Mirrors discover_apis' shape so agents have a single mental
+// model: query in, ranked list out, with reasons. Ranking layers a
+// keyword score with the same providerHealth-derived multiplier that
+// discover_apis uses, applied to each step's attributed provider; the
+// weakest step's health drives the multiplier (weakest-link semantics).
+
+export const discover = query({
+  args: { query: v.string(), maxResults: v.optional(v.number()) },
+  handler: async (ctx, { query, maxResults }) => {
+    const limit = Math.min(Math.max(maxResults ?? 5, 1), 25);
+
+    const publicRows = await ctx.db
+      .query("missionTemplates")
+      .withIndex("by_visibility_enabled", (q) =>
+        q.eq("visibility", "public").eq("enabled", true),
+      )
+      .collect();
+
+    const marketplaceRows = await ctx.db
+      .query("missionTemplates")
+      .withIndex("by_visibility_enabled", (q) =>
+        q.eq("visibility", "marketplace").eq("enabled", true),
+      )
+      .collect();
+
+    const candidates = [...publicRows, ...marketplaceRows];
+
+    const healthRows = await ctx.db.query("providerHealth").collect();
+    const healthMap = new Map(healthRows.map((h) => [h.providerId, h]));
+    const MIN_CALLS = 5;
+
+    const queryLower = query.toLowerCase();
+    const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 2);
+
+    type Scored = {
+      slug: string;
+      version: number;
+      title: string;
+      description: string;
+      visibility: string;
+      paramSchema: any;
+      relevanceScore: number;
+      matchReasons: string[];
+    };
+
+    const scored: Scored[] = [];
+    for (const tmpl of candidates) {
+      let raw = 0;
+      const reasons: string[] = [];
+
+      for (const word of queryWords) {
+        if (tmpl.slug.toLowerCase().includes(word)) {
+          raw += 20;
+          reasons.push(`slug:${word}`);
+        }
+        if (tmpl.title.toLowerCase().includes(word)) {
+          raw += 15;
+          reasons.push(`title:${word}`);
+        }
+        if (tmpl.description.toLowerCase().includes(word)) {
+          raw += 5;
+          reasons.push(`desc:${word}`);
+        }
+        const propNames = Object.keys(
+          (tmpl.inputSchema && (tmpl.inputSchema as any).properties) ?? {},
+        )
+          .join(" ")
+          .toLowerCase();
+        if (propNames.includes(word)) {
+          raw += 3;
+          reasons.push(`param:${word}`);
+        }
+      }
+
+      // Weakest-link health multiplier across this template's steps.
+      // If no step is attributed to a known managed provider, multiplier
+      // stays at 1.0 (no penalty).
+      let minMult = 1.0;
+      const steps = (tmpl.steps as any[]) ?? [];
+      for (const step of steps) {
+        const providerName: string | undefined =
+          step?.config?.attributeAs ?? step?.config?.providerId;
+        if (!providerName) continue;
+        const h = healthMap.get(providerName);
+        if (!h || h.callCount < MIN_CALLS) continue;
+        const successComponent =
+          0.5 + 0.5 * Math.max(0, Math.min(1, h.successRate));
+        const latencyPenalty = h.p50LatencyMs > 2000 ? 0.9 : 1.0;
+        const stepMult = successComponent * latencyPenalty;
+        if (stepMult < minMult) minMult = stepMult;
+      }
+      if (minMult < 1.0) {
+        reasons.push(`health:${Math.round(minMult * 100) / 100}`);
+      }
+
+      const finalScore = raw * minMult;
+      if (finalScore > 0) {
+        scored.push({
+          slug: tmpl.slug,
+          version: tmpl.version,
+          title: tmpl.title,
+          description: tmpl.description,
+          visibility: tmpl.visibility,
+          paramSchema: tmpl.inputSchema,
+          relevanceScore: Math.round(finalScore * 100) / 100,
+          matchReasons: [...new Set(reasons)],
+        });
+      }
+    }
+
+    scored.sort((a, b) => b.relevanceScore - a.relevanceScore);
+    return scored.slice(0, limit);
+  },
+});
 
 export const listTemplates = query({
   args: {},
@@ -110,6 +232,12 @@ export const createMission = mutation({
     title: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Normalise legacy slugs to their canonical counterparts before any
+    // lookup. Old "genprd" calls land on the new prd-generation template
+    // without the caller having to know about the migration.
+    const canonicalSlug = TEMPLATE_SLUG_ALIASES[args.template] ?? args.template;
+    args = { ...args, template: canonicalSlug };
+
     // Resolve the template definition from either path so we fail-fast on
     // an unknown slug before inserting a mission row.
     let legacyTmpl: { title: string } | null = TEMPLATE_REGISTRY[args.template] ?? null;
@@ -334,32 +462,10 @@ export const runMission = action({
         return { ok: true };
       }
 
-      let result: unknown;
-      let costUsd = 0;
-      const t0 = Date.now();
-
-      if (m.template === "genprd") {
-        const out = await runGenPRD(ctx, args.missionId, m, m.params as Record<string, unknown>);
-        result = out.result;
-        costUsd = out.costUsd;
-      } else {
-        throw new Error(`template_runtime_missing: ${m.template}`);
-      }
-
-      await ctx.runMutation(internal.missions.recordEvent, {
-        missionId: args.missionId,
-        type: "step_complete",
-        label: "mission complete",
-        durationMs: Date.now() - t0,
-        costUsd,
-      });
-      await ctx.runMutation(internal.missions.setStatus, {
-        missionId: args.missionId,
-        status: "completed",
-        result,
-        underlyingCostUsd: costUsd,
-      });
-      return { ok: true, result };
+      // Legacy in-process templates have all been migrated to v2. A
+      // mission without templateVersion at this point is either an
+      // unaliased unknown slug or an in-flight row from before migration.
+      throw new Error(`template_runtime_missing: ${m.template}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "execution_failed";
       await ctx.runMutation(internal.missions.recordEvent, {
@@ -378,157 +484,6 @@ export const runMission = action({
   },
 });
 
-// ============================================
-// TEMPLATE: GenPRD
-// Routes to genprd.se/api/generate — GenPRD is the quality engine.
-// APIClaw orchestrates, observes, and attributes usage.
-// ============================================
-
-export const logGenPRDCall = internalMutation({
-  args: {
-    callerWorkspaceId: v.id("workspaces"),
-    status: v.union(v.literal("success"), v.literal("error")),
-    latencyMs: v.number(),
-    action: v.string(),
-    errorMessage: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // Log inbound entry to GenPRD's provider workspace (Gustav's) so analytics
-    // attribute the call to the workspace that listed GenPRD.
-    const ownerWs = await ctx.db
-      .query("workspaces")
-      .withIndex("by_email", (q) => q.eq("email", "gustav@nordsym.com"))
-      .first();
-    if (!ownerWs) return;
-
-    await ctx.db.insert("apiLogs", {
-      workspaceId: ownerWs._id,
-      sessionToken: "",
-      provider: "genprd",
-      action: args.action,
-      status: args.status,
-      latencyMs: args.latencyMs,
-      direction: "inbound",
-      callerWorkspaceId: args.callerWorkspaceId.toString(),
-      errorMessage: args.errorMessage,
-      createdAt: Date.now(),
-    });
-
-    // Also log outbound entry on the calling workspace for their own audit trail.
-    if (args.callerWorkspaceId !== ownerWs._id) {
-      await ctx.db.insert("apiLogs", {
-        workspaceId: args.callerWorkspaceId,
-        sessionToken: "",
-        provider: "genprd",
-        action: args.action,
-        status: args.status,
-        latencyMs: args.latencyMs,
-        direction: "outbound",
-        errorMessage: args.errorMessage,
-        createdAt: Date.now(),
-      });
-    }
-  },
-});
-
-async function runGenPRD(
-  ctx: any,
-  missionId: Id<"missions">,
-  mission: { workspaceId: Id<"workspaces"> },
-  params: Record<string, unknown>
-): Promise<{ result: { markdown: string; model: string; tokens: { input: number; output: number } }; costUsd: number }> {
-  const topic = String(params.topic ?? "").trim();
-  if (!topic) throw new Error("topic_required");
-  const audience = params.audience ? String(params.audience) : null;
-  const constraints = params.constraints ? String(params.constraints) : null;
-  const model = (params.model as string) || "anthropic/claude-sonnet-4-5";
-  const format = (params.format as string) || "standard";
-
-  await ctx.runMutation(internal.missions.recordEvent, {
-    missionId,
-    type: "log",
-    label: `routing to genprd.se: "${topic}"`,
-    data: { audience, constraints, model, format },
-  });
-
-  const genprdKey = process.env.GENPRD_API_KEY;
-  if (!genprdKey) throw new Error("GENPRD_API_KEY missing on Convex");
-
-  const t0 = Date.now();
-  let res: Response;
-  try {
-    res = await fetch("https://genprd.se/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-GenPRD-Key": genprdKey,
-        "X-APIClaw-Mission": missionId,
-      },
-      body: JSON.stringify({ topic, audience, constraints, model, format }),
-    });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "fetch_failed";
-    await ctx.runMutation(internal.missions.logGenPRDCall, {
-      callerWorkspaceId: mission.workspaceId,
-      status: "error",
-      latencyMs: Date.now() - t0,
-      action: "generate_prd",
-      errorMessage: msg,
-    });
-    throw new Error(`genprd_network: ${msg}`);
-  }
-
-  const latencyMs = Date.now() - t0;
-
-  if (!res.ok) {
-    const txt = await res.text().catch(() => "");
-    await ctx.runMutation(internal.missions.logGenPRDCall, {
-      callerWorkspaceId: mission.workspaceId,
-      status: "error",
-      latencyMs,
-      action: "generate_prd",
-      errorMessage: `http_${res.status}`,
-    });
-    throw new Error(`genprd_${res.status}: ${txt.slice(0, 200)}`);
-  }
-
-  const json = (await res.json()) as {
-    prd: string;
-    model: string;
-    tokens: { input: number; output: number };
-    metadata?: { generatedAt?: string; durationMs?: number; version?: string };
-  };
-
-  const markdown = json.prd ?? "";
-  const inTok = json.tokens?.input ?? 0;
-  const outTok = json.tokens?.output ?? 0;
-
-  // Cost estimate: Sonnet-4.5 ~$3/M input + $15/M output.
-  const costUsd = (inTok * 3 + outTok * 15) / 1_000_000;
-
-  await ctx.runMutation(internal.missions.recordEvent, {
-    missionId,
-    type: "tool_call",
-    label: `genprd.se → ${json.model}`,
-    data: {
-      tokens: { input: inTok, output: outTok },
-      durationMs: latencyMs,
-      genprdVersion: json.metadata?.version,
-    },
-    durationMs: latencyMs,
-    costUsd,
-  });
-
-  // Attribute this call to GenPRD's workspace in analytics.
-  await ctx.runMutation(internal.missions.logGenPRDCall, {
-    callerWorkspaceId: mission.workspaceId,
-    status: "success",
-    latencyMs,
-    action: "generate_prd",
-  });
-
-  return { result: { markdown, model: json.model, tokens: { input: inTok, output: outTok } }, costUsd };
-}
 
 // ============================================
 // CANCEL
