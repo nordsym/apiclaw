@@ -243,11 +243,41 @@ export const _exchangeVerified = internalMutation({
       .withIndex("by_code", (q) => q.eq("code", args.code))
       .first();
 
-    if (!row) return { success: false, error: "code_not_found" };
-    if (row.status !== "claimed") return { success: false, error: "bad_status" };
-    if (row.expiresAt < Date.now()) return { success: false, error: "expired" };
-    if (row.challenge !== args.challenge) return { success: false, error: "pkce_mismatch" };
-    if (!row.email) return { success: false, error: "no_email" };
+    const emitFailure = async (reason: string) => {
+      try {
+        await ctx.db.insert("funnelEvents", {
+          event: "cli_browser_callback_failed",
+          classification: "human",
+          fingerprint: args.fingerprint,
+          email: row?.email,
+          props: { reason },
+          timestamp: Date.now(),
+        });
+      } catch {
+        // never block the auth path on telemetry
+      }
+    };
+
+    if (!row) {
+      await emitFailure("code_not_found");
+      return { success: false, error: "code_not_found" };
+    }
+    if (row.status !== "claimed") {
+      await emitFailure("bad_status");
+      return { success: false, error: "bad_status" };
+    }
+    if (row.expiresAt < Date.now()) {
+      await emitFailure("expired");
+      return { success: false, error: "expired" };
+    }
+    if (row.challenge !== args.challenge) {
+      await emitFailure("pkce_mismatch");
+      return { success: false, error: "pkce_mismatch" };
+    }
+    if (!row.email) {
+      await emitFailure("no_email");
+      return { success: false, error: "no_email" };
+    }
 
     const email = row.email;
     const clerkUserId = row.clerkUserId || "";
@@ -329,6 +359,24 @@ export const _exchangeVerified = internalMutation({
       name: `cli-auth ${new Date().toISOString().slice(0, 10)}`,
       createdAt: Date.now(),
     });
+
+    // Emit canonical activation event for the agent-native auth path.
+    // dedupeKey ensures one event per workspace per day even on retries.
+    try {
+      const day = new Date().toISOString().slice(0, 10);
+      await ctx.db.insert("funnelEvents", {
+        event: "cli_browser_callback_success",
+        classification: "human",
+        workspaceId: workspace._id,
+        fingerprint: fp,
+        email,
+        dedupeKey: `cli_browser_callback_success:${workspace._id}:${day}`,
+        props: { is_new: isNew, has_api_key: true, tier: workspace.tier },
+        timestamp: Date.now(),
+      });
+    } catch {
+      // never block the auth path on telemetry
+    }
 
     return {
       success: true,

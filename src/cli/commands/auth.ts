@@ -156,6 +156,30 @@ async function convexMutation<T = unknown>(path: string, args: Record<string, un
   return (data.value ?? data) as T;
 }
 
+/**
+ * Fire-and-forget funnel event. Never blocks the auth path on telemetry.
+ * Uses the public funnel:recordEvent mutation (no auth required for these events).
+ */
+async function emitFailure(reason: string, fingerprint?: string): Promise<void> {
+  try {
+    await fetch(`${CONVEX_URL}/api/mutation`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: 'funnel:recordEvent',
+        args: {
+          event: 'cli_browser_callback_failed',
+          classification: 'human',
+          fingerprint,
+          props: { reason },
+        },
+      }),
+    });
+  } catch {
+    // best-effort
+  }
+}
+
 async function convexAction<T = unknown>(path: string, args: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${CONVEX_URL}/api/action`, {
     method: 'POST',
@@ -253,7 +277,9 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
 
   // Wait for callback
   const waitSpinner = ora('Waiting for browser sign-in...').start();
+  let timedOut = false;
   const timeout = setTimeout(() => {
+    timedOut = true;
     waitSpinner.fail('Timed out after 5 minutes');
     loop.server.close();
   }, LOOPBACK_TIMEOUT_MS);
@@ -265,6 +291,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
     clearTimeout(timeout);
     waitSpinner.fail(`Callback failed: ${(err as Error).message}`);
     loop.server.close();
+    await emitFailure(timedOut ? 'timeout' : 'callback_error', fingerprint);
     return null;
   }
   clearTimeout(timeout);
@@ -272,6 +299,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
 
   if (callback.state !== state) {
     waitSpinner.fail('State mismatch — possible CSRF, aborting');
+    await emitFailure('state_mismatch', fingerprint);
     return null;
   }
   waitSpinner.succeed('Browser sign-in received');

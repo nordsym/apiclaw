@@ -23,6 +23,9 @@ import { v } from "convex/values";
 export const FUNNEL_EVENTS = [
   "install",
   "first_run",
+  // Agent-native auth (A-22, canonical from v2.8). Primary activation event.
+  "cli_browser_callback_success",
+  // Legacy email magic-link path — kept for back-compat reporting.
   "register_owner",
   "verify_code",
   "first_call_api_success",
@@ -35,6 +38,9 @@ export type FunnelEvent = (typeof FUNNEL_EVENTS)[number];
 export const DIAGNOSTIC_EVENTS = [
   "register_owner_failed", // props: { reason: "invalid_email" | "email_send_failed" }
   "verify_code_failed", // props: { reason: "invalid" | "expired" | "attempts_exceeded" }
+  // CLI browser-loopback failures (A-22). Track drop-off causes for the
+  // canonical auth path so we can debug regressions in conversion.
+  "cli_browser_callback_failed", // props: { reason: "port_collision" | "state_mismatch" | "pkce_mismatch" | "timeout" | "browser_open_failed" | "code_not_found" | "expired" }
   "call_api_blocked", // props: { reason: "no_session" | "pending_verification" | "quota_exceeded" | "not_verified" }
   "call_api_error", // props: { provider, action, errorCode }
   "quota_hit", // props: { tier, limit }
