@@ -201,7 +201,7 @@ export const verifyGenPRD = mutation({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", ws._id))
       .collect();
 
-    const genprdApi = apis.find((a) => a.name === "GenPRD — PRD Generator");
+    const genprdApi = apis.find((a) => a.name === "GenPRD");
 
     const allProviders = await ctx.db.query("providers").collect();
     const genprdProvider = allProviders.find(
