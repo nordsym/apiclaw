@@ -41,6 +41,10 @@ type PrimitiveCtx = {
 
 type PrimitiveArgs = {
   ctx: PrimitiveCtx;
+  // The real Convex action context, needed by primitives that call
+  // runQuery / runMutation (currently just execute). Optional so simple
+  // primitives can be invoked from harness code without one.
+  convexCtx?: any;
   config: any;
   inputs: any;
 };
@@ -609,6 +613,46 @@ function substitutePathParams(
 // Lookup the providerDirectCall config + matching providerAction for a
 // (providerName, actionName) pair. Public-ish surface kept on the action
 // itself; the internal query just reads rows.
+// ─────────────────────────────────────────────────────────────────────────────
+// IV-format migration (one-shot)
+//
+// Existing encryptedMasterKey rows were written by src/crypto.ts when it
+// used 16-byte IVs. Web Crypto on Convex enforces 12-byte IVs for AES-GCM,
+// so the on-Convex execute primitive can't decrypt those rows. These two
+// helpers let a local Node script re-encrypt every row using the new
+// 12-byte IV format without ever decoding plaintext on the wire:
+//   1. listEncryptedRoutingForMigration returns (_id, encryptedMasterKey)
+//      pairs to the script
+//   2. script decrypts with Node (handles 16-byte IVs), re-encrypts with
+//      the updated src/crypto.ts (12-byte IV), and patches each row via
+//   3. patchEncryptedMasterKey
+// Internal-only; both remove themselves from the public surface after.
+
+export const listEncryptedRoutingForMigration = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("providerDirectCall").collect();
+    return rows.map((r) => ({
+      _id: r._id,
+      providerId: r.providerId,
+      encryptedMasterKey: r.encryptedMasterKey,
+    }));
+  },
+});
+
+export const patchEncryptedMasterKey = internalMutation({
+  args: {
+    rowId: v.id("providerDirectCall"),
+    encryptedMasterKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.rowId, {
+      encryptedMasterKey: args.encryptedMasterKey,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const lookupManagedAction = internalQuery({
   args: { providerName: v.string(), actionName: v.string() },
   handler: async (ctx, { providerName, actionName }) => {
@@ -666,8 +710,18 @@ async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
     };
   }
 
-  // Look up routing config + action shape.
-  const cfg = await (args.ctx as any).runQuery(
+  // Look up routing config + action shape. Requires the Convex action
+  // context — runV2 passes its own ctx through; smoke harness wires
+  // its action ctx in directly.
+  if (!args.convexCtx) {
+    return {
+      ok: false,
+      error: "execute:convex_ctx_missing",
+      costUsd: 0,
+      latencyMs: 0,
+    };
+  }
+  const cfg = await args.convexCtx.runQuery(
     internal.missionRunner.lookupManagedAction,
     { providerName, actionName },
   );
@@ -1182,6 +1236,27 @@ export const smokePRDTemplate = internalAction({
 // Run: npx convex run missionRunner:smokeTransform --prod '{"topic":"test"}'
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Smoke harness for the execute primitive against a real managed
+// provider. Confirms the on-Convex Web Crypto decryption path matches
+// the npm-side src/crypto.ts format and that managed routing works
+// end-to-end through providerDirectCall + providerActions.
+//
+// Run: npx convex run missionRunner:smokeExecute '{"topic":"smoke"}'
+export const smokeExecute = internalAction({
+  args: { topic: v.string() },
+  handler: async (ctx, { topic }): Promise<StepResult> => {
+    return await runExecute({
+      ctx: {
+        missionId: "smoke" as unknown as Id<"missions">,
+        workspaceId: "smoke" as unknown as Id<"workspaces">,
+      },
+      convexCtx: ctx,
+      config: { providerId: "GenPRD", actionName: "generate_prd" },
+      inputs: { topic, format: "lean" },
+    });
+  },
+});
+
 export const smokeTransform = internalAction({
   args: { topic: v.string() },
   handler: async (_ctx, { topic }): Promise<StepResult> => {
@@ -1309,6 +1384,7 @@ export const runV2 = internalAction({
 
       const result: StepResult = await handler({
         ctx: { missionId, workspaceId: mission.workspaceId },
+        convexCtx: ctx,
         config: step.config,
         inputs: resolvedInputs,
       });

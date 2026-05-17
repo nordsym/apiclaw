@@ -17,7 +17,10 @@ function getKey(): Buffer {
 
 export function encryptKey(plainKey: string): string {
   const key = getKey();
-  const iv = randomBytes(16);
+  // 12-byte IV is the AES-GCM standard. Web Crypto on the Convex runtime
+  // enforces this; Node's crypto accepts both 12- and 16-byte IVs for
+  // backward decryption compatibility.
+  const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
   const encrypted = Buffer.concat([cipher.update(plainKey, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
