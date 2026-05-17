@@ -54,13 +54,151 @@ async function runFetch(_: PrimitiveArgs): Promise<StepResult> {
   };
 }
 
-async function runTransform(_: PrimitiveArgs): Promise<StepResult> {
-  // Implemented in Spike 2.
+// Pricing per million tokens. Defaults to Sonnet numbers if the model
+// slug isn't listed. Source of truth long-term: modelCatalog. Inlined
+// for spike 2 so transform is self-contained.
+const TRANSFORM_PRICING: Record<string, { input: number; output: number }> = {
+  "anthropic/claude-sonnet-4-5": { input: 3, output: 15 },
+  "anthropic/claude-sonnet-4-6": { input: 3, output: 15 },
+  "anthropic/claude-opus-4-7": { input: 15, output: 75 },
+  "anthropic/claude-haiku-4-5": { input: 0.8, output: 4 },
+  "openai/gpt-4o": { input: 2.5, output: 10 },
+  "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
+};
+
+function estimateTransformCost(model: string, inTok: number, outTok: number): number {
+  const p = TRANSFORM_PRICING[model] ?? { input: 3, output: 15 };
+  return (inTok * p.input + outTok * p.output) / 1_000_000;
+}
+
+async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
+  const { config, inputs } = args;
+  const model: string = config?.model ?? "anthropic/claude-sonnet-4-5";
+  const systemPrompt: string = config?.systemPrompt ?? "";
+  const userPromptTemplate: string = config?.userPromptTemplate ?? "";
+  const outputSchema = config?.outputSchema;
+  const temperature: number = config?.temperature ?? 0.4;
+  const maxTokens: number | undefined = config?.maxTokens;
+
+  // userPromptTemplate is template-author copy; bind it against the
+  // step's runtime inputs. Bindings use the same {{path}} syntax as
+  // missionPrimitives.resolveBindings but rooted at `input` for clarity.
+  const promptBindingContext = { input: inputs };
+  const userPrompt = resolveBindings(userPromptTemplate, promptBindingContext);
+  const userText = typeof userPrompt === "string" ? userPrompt : JSON.stringify(userPrompt);
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return {
+      ok: false,
+      error: "OPENROUTER_API_KEY missing on Convex",
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+    };
+  }
+
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userText },
+    ],
+    temperature,
+  };
+  if (maxTokens) body.max_tokens = maxTokens;
+
+  // Strict structured output when the template author declared a schema.
+  // OpenRouter forwards json_schema to providers that support it natively
+  // (Anthropic, OpenAI, etc); for the rest it falls back to json_object
+  // + best-effort prompt nudging.
+  if (outputSchema) {
+    body.response_format = {
+      type: "json_schema",
+      json_schema: {
+        name: "transform_output",
+        strict: true,
+        schema: outputSchema,
+      },
+    };
+  }
+
+  const startedAt = Date.now();
+  let res: Response;
+  try {
+    res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://apiclaw.cloud",
+        "X-Title": "APIClaw Mission Runner",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "fetch_failed";
+    return {
+      ok: false,
+      error: `openrouter_network:${msg}`,
+      costUsd: 0,
+      latencyMs: Date.now() - startedAt,
+      model,
+    };
+  }
+  const latency = Date.now() - startedAt;
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    return {
+      ok: false,
+      error: `openrouter_${res.status}: ${txt.slice(0, 200)}`,
+      costUsd: 0,
+      latencyMs: latency,
+      model,
+    };
+  }
+
+  const json = (await res.json()) as {
+    choices: Array<{ message: { content: string } }>;
+    usage?: { prompt_tokens?: number; completion_tokens?: number };
+    model?: string;
+  };
+
+  const content = json.choices?.[0]?.message?.content ?? "";
+  const inTok = json.usage?.prompt_tokens ?? 0;
+  const outTok = json.usage?.completion_tokens ?? 0;
+  const cost = estimateTransformCost(model, inTok, outTok);
+
+  // If a schema was requested, parse the returned JSON. Parse failure is
+  // a primitive-level failure so the template author finds out immediately
+  // rather than getting a string masquerading as structured output.
+  let output: unknown = content;
+  if (outputSchema) {
+    try {
+      output = JSON.parse(content);
+    } catch {
+      return {
+        ok: false,
+        error: "structured_output_parse_failed",
+        costUsd: cost,
+        latencyMs: latency,
+        model: json.model ?? model,
+        meta: {
+          tokens: { input: inTok, output: outTok },
+          rawContentSample: content.slice(0, 500),
+        },
+      };
+    }
+  }
+
   return {
-    ok: false,
-    error: "primitive_not_implemented:transform",
-    costUsd: 0,
-    latencyMs: 0,
+    ok: true,
+    output,
+    costUsd: cost,
+    latencyMs: latency,
+    model: json.model ?? model,
+    meta: { tokens: { input: inTok, output: outTok } },
   };
 }
 
@@ -214,6 +352,45 @@ export const markFailed = internalMutation({
       underlyingCostUsd,
       chargedCostUsd,
       completedAt: Date.now(),
+    });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Smoke-test harness for the transform primitive
+//
+// Invokes runTransform with a self-contained config and no mission state,
+// useful for verifying the OpenRouter wiring + structured-output parsing
+// after a Convex deploy. Not part of the production execution path.
+//
+// Run: npx convex run missionRunner:smokeTransform --prod '{"topic":"test"}'
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const smokeTransform = internalAction({
+  args: { topic: v.string() },
+  handler: async (_ctx, { topic }): Promise<StepResult> => {
+    return await runTransform({
+      ctx: {
+        missionId: "smoke" as unknown as Id<"missions">,
+        workspaceId: "smoke" as unknown as Id<"workspaces">,
+      },
+      config: {
+        model: "anthropic/claude-haiku-4-5",
+        systemPrompt:
+          "You return a short structured summary. Output strictly matches the schema.",
+        userPromptTemplate: "Topic: {{input.topic}}\n\nReturn a one-line headline and a tag list.",
+        outputSchema: {
+          type: "object",
+          additionalProperties: false,
+          required: ["headline", "tags"],
+          properties: {
+            headline: { type: "string" },
+            tags: { type: "array", items: { type: "string" } },
+          },
+        },
+        temperature: 0.3,
+      },
+      inputs: { topic },
     });
   },
 });
