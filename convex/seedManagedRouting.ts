@@ -5,7 +5,7 @@ import { v } from "convex/values";
  * Seed managed routing configs + actions for all 27 APILayer APIs
  * Sets status: "live" and creates action records matching MCP proxy
  *
- * Run: npx convex run seedDirectCallConfigs:seed
+ * Run: npx convex run seedManagedRouting:seed
  */
 
 const API_CONFIGS: Record<string, {
@@ -254,7 +254,7 @@ const API_CONFIGS: Record<string, {
 
 /**
  * Seed managed routing configs for any provider by ID.
- * Run: npx convex run seedDirectCallConfigs:seedForProvider '{"providerId":"<id>"}'
+ * Run: npx convex run seedManagedRouting:seedForProvider '{"providerId":"<id>"}'
  */
 export const seedForProvider = mutation({
   args: { providerId: v.string() },
@@ -338,7 +338,7 @@ export const seedForProvider = mutation({
 /**
  * Seed individual directCallConfigs by exact apiId list.
  * Used for APIs that don't belong to a provider batch (NASA, Filestack, etc.)
- * Run via HTTP: POST /api/mutation {"path":"seedDirectCallConfigs:seedByApiIds","args":{...}}
+ * Run via HTTP: POST /api/mutation {"path":"seedManagedRouting:seedByApiIds","args":{...}}
  */
 export const seedByApiIds = mutation({
   args: {

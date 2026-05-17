@@ -118,7 +118,7 @@ export async function hasDynamicConfig(providerId: string): Promise<boolean> {
  */
 export async function getProviderConfig(providerId: string): Promise<ProviderDirectCallConfig | null> {
   // First try by API slug (for agent execution by name)
-  const bySlug = await convexQuery<ProviderDirectCallConfig>('directCall:getByApiSlug', { slug: providerId });
+  const bySlug = await convexQuery<ProviderDirectCallConfig>('managedRouting:getByApiSlug', { slug: providerId });
   // Check for error response from Convex (not a real config)
   const bySlugAny = bySlug as any;
   if (bySlug && !(bySlugAny.status === 'error' || bySlugAny.errorMessage)) {
@@ -128,7 +128,7 @@ export async function getProviderConfig(providerId: string): Promise<ProviderDir
   // Only try direct provider ID lookup if it looks like a Convex ID (starts with valid prefix)
   // Convex IDs typically look like: k97xxx...
   if (providerId.match(/^[a-z][a-z0-9]{2,}/)) {
-    const byId = await convexQuery<ProviderDirectCallConfig>('directCall:getDirectCallConfig', { providerId });
+    const byId = await convexQuery<ProviderDirectCallConfig>('managedRouting:getDirectCallConfig', { providerId });
     const byIdAny = byId as any;
     if (byId && !(byIdAny.status === 'error' || byIdAny.errorMessage)) {
       return byId;
@@ -146,7 +146,7 @@ export async function getActionConfig(providerId: string, actionName: string): P
   const config = await getProviderConfig(providerId);
   if (!config) return null;
   
-  return convexQuery<ProviderAction>('directCall:getActionByName', { 
+  return convexQuery<ProviderAction>('managedRouting:getActionByName', { 
     directCallId: config._id, 
     name: actionName 
   });
@@ -605,7 +605,7 @@ export async function listDynamicActions(providerId: string): Promise<string[]> 
     return [];
   }
   
-  const actions = await convexQuery<ProviderAction[]>('directCall:getActions', { 
+  const actions = await convexQuery<ProviderAction[]>('managedRouting:getActions', { 
     directCallId: config._id 
   });
   
