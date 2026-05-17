@@ -14,7 +14,14 @@
  *   - WORKING_JSON: 2895 (returned 200 + parseable JSON) — counted as callable
  *   - All other buckets (working_other, auth, needs_ctx, dead) are NOT callable
  *
- * We only cite the directly-measured 2895 figure. The other 4176 untestable
+ * 2026-05-17 canon-comms gate: Twilio (22 sub-rows), Resend (2 rows), and
+ * 46elks (2 rows) were intentionally moved from callable: true to false
+ * because they're NordSym canon-credential providers — keys we hold for
+ * our own ops, not for random users to send mail/SMS through. Net effect
+ * on callable count: -36. They remain discoverable, just not in the
+ * default callable bucket. Honest measurement updated below.
+ *
+ * We only cite directly-measured figures. The other ~4140 untestable
  * providers (POST-only, required path-vars / query params) have valid OpenAPI
  * specs but we can't smoketest them blindly, so they sit in Discovery rather
  * than Callable. Honest measurement over flattering extrapolation.
@@ -22,13 +29,14 @@
 
 export const CANON_STATS = {
   /** Updated each time canon refreshes. */
-  generated_at: '2026-04-29',
+  generated_at: '2026-05-17',
 
   /** Indexed for discovery — searchable, free, no auth. */
   discoverable: 26_704,
 
-  /** Empirically verified callable: smoketest returned 200 + parseable JSON. */
-  callable: 2_895,
+  /** Empirically verified callable: smoketest returned 200 + parseable JSON,
+   *  minus canon-credential providers we gate from the public callable surface. */
+  callable: 2_872,
 
   /**
    * Managed providers — APIClaw owns the keys. Subset of `callable`.
@@ -38,10 +46,10 @@ export const CANON_STATS = {
   managed_directcallconfigs: 49,
 
   /** All-time npm installs (canon as of last vault sync). */
-  npm_installs: 13_552,
+  npm_installs: 14_667,
 
   /** API Surface narrative (used in marketing copy). */
-  hero_line: '26,704 indexed APIs · 2,895 callable',
+  hero_line: '26,704 indexed APIs · 2,872 callable',
   hero_line_short: '26.7k discoverable · 2.9k callable',
 } as const;
 

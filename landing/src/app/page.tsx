@@ -876,13 +876,13 @@ Install:
               The runtime your agent actually wants.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
-              26,704 discoverable APIs, 2,895 callable APIs, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
+              {statsData.apiCount.toLocaleString()} discoverable APIs, {statsData.callableCount.toLocaleString()} callable APIs, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
             {[
-              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: "26,704 discoverable / 2,895 callable", d: "Search by capability. Auth, pricing, latency on every result." },
+              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: `${statsData.apiCount.toLocaleString()} discoverable / ${statsData.callableCount.toLocaleString()} callable`, d: "Search by capability. Auth, pricing, latency on every result." },
               { icon: <Cpu className="w-4 h-4" />, tag: "Every model", t: "All providers", d: "Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter." },
               { icon: <Layers className="w-4 h-4" />, tag: "Missions", t: "Orchestration", d: "Multi-step runs with audit log, cost tags, parallel-ready execution." },
               { icon: <Activity className="w-4 h-4" />, tag: "Observe", t: "Per-call audit", d: "Workspace, provider, latency, cost on every tool call. Replayable." },

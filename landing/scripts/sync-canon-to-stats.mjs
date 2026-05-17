@@ -18,9 +18,9 @@ const VERIFICATION_PATH = resolve(__dirname, '../src/lib/verification-status.jso
 
 // Mirror of src/canon-stats.ts. Update both when bumping canon.
 const CANON = {
-  generated_at: '2026-04-29',
+  generated_at: '2026-05-17',
   discoverable: 26_704,
-  callable: 2_895,
+  callable: 2_872, // -36 vs prior smoketest: canon-comms providers (Twilio, Resend, 46elks) gated off the public callable surface 2026-05-17
   managed_brands: 19,
   managed_directcallconfigs: 49,
 };
