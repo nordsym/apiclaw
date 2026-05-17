@@ -1336,13 +1336,17 @@ Example chain:
   // ============================================
   {
     name: 'start_mission',
-    description: 'Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw\'s runtime. Use this when the user wants to spin up a multi-step task (e.g. "generate a PRD") rather than a single API call. Returns a missionId you can poll with mission_status. Templates: genprd.',
+    description: 'Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw\'s runtime. Use this when the user wants to spin up a multi-step task rather than a single API call. Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.',
     inputSchema: {
       type: 'object',
       properties: {
         template: {
           type: 'string',
-          description: 'Template id. Currently: genprd.',
+          description: 'Template slug — call list_mission_templates to see what is available.',
+        },
+        template_version: {
+          type: 'number',
+          description: 'Optional pinned version for data-driven (v2) templates. Omit to use latest enabled.',
         },
         params: {
           type: 'object',
@@ -3220,7 +3224,7 @@ Docs: https://apiclaw.cloud
             'Content-Type': 'application/json',
             'X-APIClaw-Session': ctx.sessionToken,
           },
-          body: JSON.stringify({ template, params }),
+          body: JSON.stringify({ template, params, templateVersion: args?.template_version }),
         });
         const data = (await res.json()) as { missionId?: string; status?: string; isInternal?: boolean; poll?: string };
         if (!res.ok) {

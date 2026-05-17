@@ -42,13 +42,38 @@ const TEMPLATE_REGISTRY: Record<
 
 export const listTemplates = query({
   args: {},
-  handler: async () =>
-    Object.entries(TEMPLATE_REGISTRY).map(([id, t]) => ({
+  handler: async (ctx) => {
+    // Legacy hand-coded templates from the in-process registry.
+    const legacy = Object.entries(TEMPLATE_REGISTRY).map(([id, t]) => ({
       id,
+      version: undefined as number | undefined,
+      runtime: "legacy" as const,
       title: t.title,
       description: t.description,
       paramSchema: t.paramSchema,
-    })),
+    }));
+
+    // v2 templates from the missionTemplates table. Surface every enabled
+    // version so agents can pin if they want; latest is what start_mission
+    // uses by default when template_version is omitted.
+    const v2Rows = await ctx.db
+      .query("missionTemplates")
+      .withIndex("by_visibility_enabled", (q) =>
+        q.eq("visibility", "public").eq("enabled", true),
+      )
+      .collect();
+
+    const v2 = v2Rows.map((row) => ({
+      id: row.slug,
+      version: row.version,
+      runtime: "v2" as const,
+      title: row.title,
+      description: row.description,
+      paramSchema: row.inputSchema,
+    }));
+
+    return [...legacy, ...v2];
+  },
 });
 
 // ============================================
@@ -78,14 +103,42 @@ export const createMission = mutation({
     apiKeyHash: v.optional(v.string()), // pre-resolved when invoked from /mcp or /v1
     workspaceIdOverride: v.optional(v.id("workspaces")),
     template: v.string(),
+    templateVersion: v.optional(v.number()), // when set, runs through v2 missionRunner
     params: v.any(),
     initiator: v.string(),
     clientId: v.optional(v.string()),
     title: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    if (!TEMPLATE_REGISTRY[args.template]) {
-      throw new Error(`unknown_template: ${args.template}`);
+    // Resolve the template definition from either path so we fail-fast on
+    // an unknown slug before inserting a mission row.
+    let legacyTmpl: { title: string } | null = TEMPLATE_REGISTRY[args.template] ?? null;
+    let v2Tmpl: { title: string; version: number } | null = null;
+
+    if (args.templateVersion != null) {
+      const row = await ctx.db
+        .query("missionTemplates")
+        .withIndex("by_slug_version", (q) =>
+          q.eq("slug", args.template).eq("version", args.templateVersion!),
+        )
+        .first();
+      if (!row || !row.enabled) {
+        throw new Error(`unknown_template: ${args.template}@v${args.templateVersion}`);
+      }
+      v2Tmpl = { title: row.title, version: row.version };
+    } else if (!legacyTmpl) {
+      // Caller did not pin a version. Try v2 latest before bailing.
+      const latest = await ctx.db
+        .query("missionTemplates")
+        .withIndex("by_slug_enabled", (q) =>
+          q.eq("slug", args.template).eq("enabled", true),
+        )
+        .collect();
+      if (latest.length === 0) {
+        throw new Error(`unknown_template: ${args.template}`);
+      }
+      const picked = latest.sort((a, b) => b.version - a.version)[0];
+      v2Tmpl = { title: picked.title, version: picked.version };
     }
 
     let workspaceId: Id<"workspaces"> | null = args.workspaceIdOverride ?? null;
@@ -103,13 +156,15 @@ export const createMission = mutation({
     if (!ws) throw new Error("workspace_not_found");
     if (ws.status !== "active") throw new Error("workspace_inactive");
 
-    const tmpl = TEMPLATE_REGISTRY[args.template];
-    const summary = args.title ?? deriveTitle(args.template, args.params);
+    const summary =
+      args.title ?? deriveTitle(args.template, args.params, v2Tmpl?.title);
     const isInternal = isInternalEmail(ws.email);
+    const resolvedVersion = v2Tmpl?.version;
 
     const missionId = await ctx.db.insert("missions", {
       workspaceId,
       template: args.template,
+      templateVersion: resolvedVersion,
       title: summary,
       status: "queued",
       params: args.params ?? {},
@@ -123,23 +178,29 @@ export const createMission = mutation({
       missionId,
       workspaceId,
       type: "step_start",
-      label: `mission queued: ${tmpl.title}`,
-      data: { template: args.template, params: args.params },
+      label: `mission queued: ${v2Tmpl?.title ?? legacyTmpl?.title ?? args.template}`,
+      data: {
+        template: args.template,
+        templateVersion: resolvedVersion,
+        params: args.params,
+      },
       timestamp: Date.now(),
     });
 
-    return { missionId, status: "queued", isInternal };
+    return { missionId, status: "queued", isInternal, templateVersion: resolvedVersion };
   },
 });
 
-function deriveTitle(template: string, params: Record<string, unknown>): string {
-  const tmpl = TEMPLATE_REGISTRY[template];
-  if (!tmpl) return template;
-  if (template === "genprd") {
+function deriveTitle(
+  template: string,
+  params: Record<string, unknown>,
+  v2Title?: string,
+): string {
+  if (template === "genprd" || template === "prd-generation") {
     const t = (params?.topic as string) || "untitled";
     return `PRD: ${t.slice(0, 60)}`;
   }
-  return tmpl.title;
+  return TEMPLATE_REGISTRY[template]?.title ?? v2Title ?? template;
 }
 
 export const getMission = query({
@@ -264,6 +325,15 @@ export const runMission = action({
     });
 
     try {
+      // v2 missions (those that pin templateVersion) route through the
+      // data-driven runner. It writes its own missionEvents + apiLogs and
+      // sets the final status/cost on the missions row, so we just early-
+      // return here to avoid double-finalising.
+      if (m.templateVersion != null) {
+        await ctx.runAction(internal.missionRunner.runV2, { missionId: args.missionId });
+        return { ok: true };
+      }
+
       let result: unknown;
       let costUsd = 0;
       const t0 = Date.now();

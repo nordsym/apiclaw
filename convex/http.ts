@@ -5664,6 +5664,8 @@ http.route({
     }
     const template = typeof body?.template === "string" ? body.template : "";
     const params = body?.params && typeof body.params === "object" ? body.params : {};
+    const templateVersion =
+      typeof body?.templateVersion === "number" ? body.templateVersion : undefined;
     if (!template) {
       return jsonResponse({ error: { code: "missing_template", message: "Body must include { template }" } }, 400);
     }
@@ -5679,6 +5681,7 @@ http.route({
       const created: any = await ctx.runMutation(api.missions.createMission, {
         workspaceIdOverride: auth.workspaceId as any,
         template,
+        templateVersion,
         params,
         initiator,
       });
