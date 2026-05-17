@@ -180,53 +180,6 @@ const DIRECT_CALL_SPECS: Record<string, {
       },
     },
   },
-  resend: {
-    description: 'Email API',
-    auth: 'bearer',
-    docs: 'https://resend.com/docs',
-    actions: {
-      send_email: {
-        desc: 'Send email',
-        params: [
-          { name: 'to', required: true, desc: 'Recipient email' },
-          { name: 'subject', required: true, desc: 'Email subject' },
-          { name: 'html', required: false, desc: 'HTML body' },
-          { name: 'text', required: false, desc: 'Plain text body' },
-          { name: 'from', required: false, desc: 'Sender (default: noreply@apiclaw.cloud)' },
-        ],
-      },
-    },
-  },
-  '46elks': {
-    description: 'Swedish SMS and voice API',
-    auth: 'basic',
-    docs: 'https://46elks.com/docs',
-    actions: {
-      send_sms: {
-        desc: 'Send SMS message',
-        params: [
-          { name: 'to', required: true, desc: 'Phone number (+46...)' },
-          { name: 'message', required: true, desc: 'SMS text (max 160 chars for 1 segment)' },
-          { name: 'from', required: false, desc: 'Sender ID (default: APIClaw)' },
-        ],
-      },
-    },
-  },
-  twilio: {
-    description: 'Global SMS and voice API',
-    auth: 'basic',
-    docs: 'https://www.twilio.com/docs',
-    actions: {
-      send_sms: {
-        desc: 'Send SMS message',
-        params: [
-          { name: 'to', required: true, desc: 'Phone number (E.164 format)' },
-          { name: 'message', required: true, desc: 'SMS text' },
-          { name: 'from', required: false, desc: 'Sender phone number' },
-        ],
-      },
-    },
-  },
   apilayer: {
     description: 'APILayer marketplace — currency, news, scraping, PDFs, verification & more',
     auth: 'api_key',

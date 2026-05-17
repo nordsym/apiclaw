@@ -51,4 +51,7 @@ export async function callProxy(provider: string, params: any): Promise<any> {
   return response.json();
 }
 
-export const PROXY_PROVIDERS = ["openrouter", "brave_search", "resend", "elevenlabs", "46elks", "twilio", "replicate", "firecrawl", "e2b", "groq", "deepgram", "serper", "mistral", "cohere", "together", "stability", "assemblyai", "github", "apilayer", "nasa"];
+// twilio, resend, 46elks intentionally excluded: canon-managed comms
+// providers are discoverable in the registry but not callable through
+// APIClaw's gateway. Users must integrate these with their own credentials.
+export const PROXY_PROVIDERS = ["openrouter", "brave_search", "elevenlabs", "replicate", "firecrawl", "e2b", "groq", "deepgram", "serper", "mistral", "cohere", "together", "stability", "assemblyai", "github", "apilayer", "nasa"];
