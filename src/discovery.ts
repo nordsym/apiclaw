@@ -118,9 +118,13 @@ function healthMultiplier(providerId: string): number {
   return successComponent * latencyPenalty;
 }
 
-// Direct Call provider specs (hardcoded handlers with params)
-// Ordered: AI-first (models, LLM routing, audio), then infrastructure (code, web, search, email, SMS)
-const DIRECT_CALL_SPECS: Record<string, {
+// Managed-provider specs (hardcoded handlers + params). Renamed from
+// DIRECT_CALL_SPECS to align with the 2026-04-15 canon refresh that
+// retired the "Direct Call tier" label in favour of Discovery / Callable
+// (Open + Managed). Adapter-providers we hold the key for live here.
+// Ordered: AI-first (models, LLM routing, audio), then infrastructure
+// (code, web, search, email, SMS).
+const MANAGED_PROVIDER_SPECS: Record<string, {
   description: string;
   auth: string;
   docs: string;
@@ -518,7 +522,7 @@ export function getAPIDetails(
   const { compact = false } = options;
   
   // Check if it's a Direct Call provider (hardcoded handlers)
-  const directSpec = DIRECT_CALL_SPECS[apiId];
+  const directSpec = MANAGED_PROVIDER_SPECS[apiId];
   if (directSpec) {
     if (compact) {
       // Minified format: ~60% smaller
