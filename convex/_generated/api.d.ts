@@ -39,6 +39,8 @@ import type * as migrateFilestack from "../migrateFilestack.js";
 import type * as migratePartnersProd from "../migratePartnersProd.js";
 import type * as migratePratham from "../migratePratham.js";
 import type * as migrateProviderWorkspaces from "../migrateProviderWorkspaces.js";
+import type * as missionPrimitives from "../missionPrimitives.js";
+import type * as missionRunner from "../missionRunner.js";
 import type * as missions from "../missions.js";
 import type * as modelCatalog from "../modelCatalog.js";
 import type * as mou from "../mou.js";
@@ -105,6 +107,8 @@ declare const fullApi: ApiFromModules<{
   migratePartnersProd: typeof migratePartnersProd;
   migratePratham: typeof migratePratham;
   migrateProviderWorkspaces: typeof migrateProviderWorkspaces;
+  missionPrimitives: typeof missionPrimitives;
+  missionRunner: typeof missionRunner;
   missions: typeof missions;
   modelCatalog: typeof modelCatalog;
   mou: typeof mou;

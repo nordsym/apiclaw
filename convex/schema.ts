@@ -1048,15 +1048,18 @@ export default defineSchema({
   // Architecturally ready for parallel sub-tasks; v1 runs sequentially.
   missions: defineTable({
     workspaceId: v.id("workspaces"),
-    template: v.string(),                  // "genprd" | future templates
+    template: v.string(),                  // template slug. v1 templates resolve via TEMPLATE_REGISTRY; v2 via missionTemplates table.
+    templateVersion: v.optional(v.number()), // pinned version for v2 template-driven missions. omit for legacy v1.
     title: v.string(),                     // human-readable summary
-    status: v.string(),                    // "queued" | "running" | "completed" | "failed" | "cancelled"
+    status: v.string(),                    // "queued" | "running" | "needs_validation" | "needs_revision" | "completed" | "failed" | "cancelled"
     params: v.any(),                       // input args (JSON)
+    state: v.optional(v.any()),            // v2: accumulated step outputs keyed by stepId
     result: v.optional(v.any()),           // final output once completed
     error: v.optional(v.string()),         // error message if failed
     initiator: v.string(),                 // "cli" | "mcp" | "http" | "grok"
     clientId: v.optional(v.string()),      // OAuth client_id when initiator=mcp/grok
     parentMissionId: v.optional(v.id("missions")), // parallel sub-mission support
+    budgetUsd: v.optional(v.float64()),    // halt + alert if costUsd exceeds this
     underlyingCostUsd: v.optional(v.float64()),    // raw API cost (for billing)
     chargedCostUsd: v.optional(v.float64()),       // underlying + 15% (0 for internal workspaces)
     isInternal: v.boolean(),               // true = NordSym workspace, no margin charged
@@ -1084,6 +1087,45 @@ export default defineSchema({
     .index("by_missionId", ["missionId"])
     .index("by_workspaceId", ["workspaceId"])
     .index("by_missionId_timestamp", ["missionId", "timestamp"]),
+
+  // ============================================
+  // MISSION TEMPLATES (v2 — data-driven compositions)
+  // ============================================
+  //
+  // A template is a composition of primitives (fetch, transform, decide,
+  // validate, execute) chained via sequence / parallel / branch. The runner
+  // walks the steps array and dispatches each step to its primitive handler.
+  //
+  // Templates are versioned: missions pin (slug, version) so a template
+  // edit cannot retroactively change the behavior of in-flight runs.
+  // Steps are stored as v.any() because their shape is primitive-specific;
+  // validation happens via the Zod-style validators in missionPrimitives.ts
+  // before write and at runtime.
+
+  missionTemplates: defineTable({
+    slug: v.string(),                       // "prd-generation", "competitive-analysis"
+    version: v.number(),                    // monotonic per slug; never reuse
+    ownerWorkspaceId: v.id("workspaces"),
+    visibility: v.union(
+      v.literal("private"),                 // only owner workspace can run
+      v.literal("public"),                  // any authenticated workspace can run
+      v.literal("marketplace"),             // listed in discover_missions; revenue share
+    ),
+    title: v.string(),
+    description: v.string(),
+    inputSchema: v.any(),                   // JSON-schema describing mission.params shape
+    outputSchema: v.any(),                  // JSON-schema describing mission.result shape
+    contractAssertions: v.array(v.any()),   // typed pass/fail rules for validators
+    pricingPerRunUsd: v.optional(v.float64()), // surcharge on top of underlying cost; for marketplace templates
+    steps: v.array(v.any()),                // composition graph; see missionPrimitives.ts for step shape
+    enabled: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_slug_version", ["slug", "version"])
+    .index("by_slug_enabled", ["slug", "enabled"])
+    .index("by_visibility_enabled", ["visibility", "enabled"])
+    .index("by_ownerWorkspaceId", ["ownerWorkspaceId"]),
 
   // Bearer access + refresh tokens (hashed, never stored raw).
   mcpOAuthTokens: defineTable({
