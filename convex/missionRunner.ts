@@ -634,6 +634,7 @@ export const seedPRDTemplate = internalMutation({
         },
       },
       contractAssertions: [],
+      resultStepId: "generate",
       steps: [
         {
           id: "generate",
@@ -1000,9 +1001,18 @@ export const runV2 = internalAction({
       }
     }
 
-    // Final result: by convention, the last step's output unless an
-    // explicit `result` step id is named on the template (TBD).
-    const finalStepId = steps.length > 0 ? steps[steps.length - 1].id : null;
+    // Final result: prefer the template's declared resultStepId; otherwise
+    // fall back to the last step's output. validate-as-last-step is the
+    // common case but it returns {pass, failures} rather than the payload
+    // a caller actually wants, so authors almost always want to point at
+    // the producing step explicitly.
+    const declaredResultStepId = (template as any).resultStepId as string | undefined;
+    const finalStepId =
+      declaredResultStepId && state.steps[declaredResultStepId]
+        ? declaredResultStepId
+        : steps.length > 0
+          ? steps[steps.length - 1].id
+          : null;
     const finalResult =
       finalStepId && state.steps[finalStepId]
         ? state.steps[finalStepId].output

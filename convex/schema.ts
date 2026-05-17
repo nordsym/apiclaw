@@ -1117,6 +1117,7 @@ export default defineSchema({
     outputSchema: v.any(),                  // JSON-schema describing mission.result shape
     contractAssertions: v.array(v.any()),   // typed pass/fail rules for validators
     pricingPerRunUsd: v.optional(v.float64()), // surcharge on top of underlying cost; for marketplace templates
+    resultStepId: v.optional(v.string()),   // which step's output to surface as mission.result. defaults to last step.
     steps: v.array(v.any()),                // composition graph; see missionPrimitives.ts for step shape
     enabled: v.boolean(),
     createdAt: v.number(),
