@@ -157,14 +157,28 @@ export const CANONICAL_MCP_TOOLS = [
   {
     name: "start_mission",
     description:
-      "Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw's runtime. Use for multi-step tasks (e.g. 'generate a PRD'). Returns a missionId you can poll with mission_status. Templates: genprd.",
+      "Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw's runtime. Use for multi-step tasks (e.g. 'generate a PRD'). Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.",
     inputSchema: {
       type: "object",
       properties: {
-        template: { type: "string", description: "Template id (use list_mission_templates)" },
+        template: { type: "string", description: "Template slug — call list_mission_templates to see what is available." },
+        template_version: { type: "number", description: "Optional pinned version for data-driven (v2) templates. Omit to use latest enabled." },
         params: { type: "object", description: "Template-specific parameters" },
       },
       required: ["template"],
+    },
+  },
+  {
+    name: "discover_missions",
+    description:
+      "Search mission templates by natural-language query. Returns ranked templates with slug, version, title, description, paramSchema, and match reasons. Ranking combines keyword relevance with live success-rate signal from providerHealth — templates whose steps call providers that have been degrading in the last 30 days slide down automatically. Use this to find the right template by intent before calling start_mission.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Natural-language description of what the agent wants done." },
+        max_results: { type: "number", description: "Default 5, max 25.", default: 5 },
+      },
+      required: ["query"],
     },
   },
   {
@@ -309,12 +323,18 @@ export async function dispatchCanonicalTool(
     case "start_mission":
       return callGateway("/v1/missions/start", "POST", ctx, {
         template: args.template,
+        templateVersion: typeof args.template_version === "number" ? args.template_version : undefined,
         params: args.params ?? {},
       });
     case "mission_status":
       return callGateway(`/v1/missions/${encodeURIComponent(String(args.mission_id))}`, "GET", ctx);
     case "list_missions":
       return callGateway(`/v1/missions?limit=${Math.min(Number(args.limit ?? 20), 200)}`, "GET", ctx);
+    case "discover_missions": {
+      const q = encodeURIComponent(String(args.query ?? ""));
+      const max = Math.min(Math.max(Number(args.max_results ?? 5), 1), 25);
+      return callGateway(`/v1/missions/discover?query=${q}&max_results=${max}`, "GET", ctx);
+    }
 
     default:
       throw new Error(`Unknown tool: ${name}`);

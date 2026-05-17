@@ -1227,6 +1227,16 @@ Example chain:
       properties: {}
     }
   },
+  {
+    name: 'list_models',
+    description: 'List every LLM the workspace can call through APIClaw — Anthropic, OpenAI, xAI/Grok, Groq, Mistral, Together, Cohere, Replicate, OpenRouter (800+ more), and any provider routed via the unified gateway. Returns OpenAI-compatible model objects.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        provider: { type: 'string', description: 'Optional: filter to one provider (anthropic, openai, xai, groq, mistral, together, openrouter, …)' },
+      },
+    },
+  },
   // ============================================
   // WORKSPACE TOOLS
   // ============================================
@@ -2587,6 +2597,25 @@ Docs: https://apiclaw.cloud
               hint: 'If this list is too broad, ask for a specific capability like search, sms, email, tts, invoice, or llm.',
             })
           }]
+        };
+      }
+
+      case 'list_models': {
+        const provider = typeof args?.provider === 'string' ? args.provider : '';
+        const q = provider ? `?provider=${encodeURIComponent(provider)}` : '';
+        const baseUrl = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (workspaceContext?.sessionToken) {
+          headers['X-APIClaw-Session'] = workspaceContext.sessionToken;
+        }
+        const res = await fetch(`${baseUrl}/v1/models${q}`, { headers });
+        const data = await res.json();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+          isError: !res.ok,
         };
       }
 
