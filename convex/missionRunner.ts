@@ -313,12 +313,83 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
   };
 }
 
-async function runDecide(_: PrimitiveArgs): Promise<StepResult> {
+async function runDecide(args: PrimitiveArgs): Promise<StepResult> {
+  const { config, inputs } = args;
+  const model: string = config?.model ?? "anthropic/claude-haiku-4-5";
+  const systemPrompt: string = config?.systemPrompt ?? "";
+  const userPromptTemplate: string = config?.userPromptTemplate ?? "";
+  const choices: string[] = Array.isArray(config?.choices) ? config.choices : [];
+
+  if (choices.length === 0) {
+    return {
+      ok: false,
+      error: "decide:no_choices_configured",
+      costUsd: 0,
+      latencyMs: 0,
+    };
+  }
+
+  // decide is a constrained-output transform: the model picks exactly one
+  // value from `choices`. We delegate to runTransform with a forced enum
+  // schema and unwrap the .choice field on the way out. The branch logic
+  // in runV2 expects a primitive value (string), so we surface the
+  // chosen value as `result.output` directly rather than the wrapper.
+  const judge = await runTransform({
+    ctx: args.ctx,
+    config: {
+      model,
+      systemPrompt:
+        (systemPrompt ? systemPrompt + "\n\n" : "") +
+        `Return only the JSON shape required. Choose exactly one value from the enum.`,
+      userPromptTemplate,
+      outputSchema: {
+        type: "object",
+        additionalProperties: false,
+        required: ["choice"],
+        properties: {
+          choice: { type: "string", enum: choices },
+        },
+      },
+      temperature: 0.0,
+    },
+    inputs,
+  });
+
+  if (!judge.ok || typeof judge.output !== "object" || judge.output == null) {
+    return {
+      ok: false,
+      error: judge.error ?? "decide_classifier_failed",
+      costUsd: judge.costUsd,
+      latencyMs: judge.latencyMs,
+      model: judge.model,
+      meta: judge.meta,
+      apiLog: judge.apiLog
+        ? { provider: judge.apiLog.provider, action: "decide" }
+        : undefined,
+    };
+  }
+
+  const verdict = judge.output as { choice: string };
+  if (!choices.includes(verdict.choice)) {
+    return {
+      ok: false,
+      error: `decide:choice_not_in_enum:${verdict.choice}`,
+      costUsd: judge.costUsd,
+      latencyMs: judge.latencyMs,
+      model: judge.model,
+      meta: judge.meta,
+      apiLog: { provider: "openrouter", action: "decide" },
+    };
+  }
+
   return {
-    ok: false,
-    error: "primitive_not_implemented:decide",
-    costUsd: 0,
-    latencyMs: 0,
+    ok: true,
+    output: verdict.choice,                  // surface raw string so branchOn matches it
+    costUsd: judge.costUsd,
+    latencyMs: judge.latencyMs,
+    model: judge.model,
+    meta: { ...(judge.meta ?? {}), choices },
+    apiLog: { provider: "openrouter", action: "decide" },
   };
 }
 
@@ -463,12 +534,283 @@ async function runValidate(args: PrimitiveArgs): Promise<StepResult> {
   };
 }
 
-async function runExecute(_: PrimitiveArgs): Promise<StepResult> {
+// ─────────────────────────────────────────────────────────────────────────────
+// Web Crypto AES-256-GCM decryption helper
+//
+// Mirrors src/crypto.ts on the npm side. Format: "ivHex:tagHex:dataHex" with
+// IV=16 bytes, tag=16 bytes, AES-256-GCM, key=32-byte hex from
+// APICLAW_KEY_ENCRYPTION_SECRET. Web Crypto expects ciphertext || tag
+// concatenated, so we splice the auth tag onto the data before calling
+// crypto.subtle.decrypt.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+  }
+  return bytes;
+}
+
+async function decryptManagedKey(encryptedKey: string): Promise<string> {
+  const secret = process.env.APICLAW_KEY_ENCRYPTION_SECRET;
+  if (!secret) throw new Error("APICLAW_KEY_ENCRYPTION_SECRET_missing");
+  if (secret.length !== 64) {
+    throw new Error("APICLAW_KEY_ENCRYPTION_SECRET_invalid_length");
+  }
+
+  const parts = encryptedKey.split(":");
+  if (parts.length !== 3) throw new Error("invalid_encrypted_key_format");
+  const [ivHex, tagHex, dataHex] = parts;
+  if (!ivHex || !tagHex || !dataHex) throw new Error("invalid_encrypted_key_format");
+
+  const keyBytes = hexToBytes(secret);
+  const iv = hexToBytes(ivHex);
+  const tag = hexToBytes(tagHex);
+  const data = hexToBytes(dataHex);
+
+  const combined = new Uint8Array(data.length + tag.length);
+  combined.set(data, 0);
+  combined.set(tag, data.length);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyBytes as BufferSource,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"],
+  );
+
+  const plaintextBuffer = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv as BufferSource },
+    cryptoKey,
+    combined as BufferSource,
+  );
+
+  return new TextDecoder().decode(plaintextBuffer);
+}
+
+// Replace {token} placeholders in a path with values from params. Returns
+// the modified path plus the set of param keys that were consumed by the
+// path so the caller can omit them from query/body.
+function substitutePathParams(
+  path: string,
+  params: Record<string, unknown>,
+): { path: string; consumed: Set<string> } {
+  const consumed = new Set<string>();
+  const out = path.replace(/\{([^}]+)\}/g, (_m, name) => {
+    consumed.add(name);
+    const v = params[name];
+    return v == null ? "" : encodeURIComponent(String(v));
+  });
+  return { path: out, consumed };
+}
+
+// Lookup the providerDirectCall config + matching providerAction for a
+// (providerName, actionName) pair. Public-ish surface kept on the action
+// itself; the internal query just reads rows.
+export const lookupManagedAction = internalQuery({
+  args: { providerName: v.string(), actionName: v.string() },
+  handler: async (ctx, { providerName, actionName }) => {
+    // Find the provider row by name. Convex doesn't store the provider
+    // slug separately from "name" so we match case-insensitive.
+    const allProviders = await ctx.db.query("providers").collect();
+    const provider = allProviders.find(
+      (p) => p.name.toLowerCase() === providerName.toLowerCase(),
+    );
+    if (!provider) return null;
+
+    const dc = await ctx.db
+      .query("providerDirectCall")
+      .withIndex("by_providerId", (q) => q.eq("providerId", provider._id))
+      .first();
+    if (!dc || dc.status !== "live") return null;
+
+    const action = await ctx.db
+      .query("providerActions")
+      .withIndex("by_directCallId_name", (q) =>
+        q.eq("directCallId", dc._id).eq("name", actionName),
+      )
+      .first();
+    if (!action || !action.enabled) return null;
+
+    return {
+      providerName: provider.name,
+      baseUrl: dc.baseUrl,
+      authType: dc.authType,
+      authHeader: dc.authHeader,
+      authPrefix: dc.authPrefix,
+      encryptedMasterKey: dc.encryptedMasterKey,
+      action: {
+        name: action.name,
+        method: action.method,
+        path: action.path,
+        params: action.params,
+        requiresConfirmation: action.requiresConfirmation ?? false,
+      },
+    };
+  },
+});
+
+async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
+  const { config, inputs } = args;
+  const providerName: string = config?.providerId ?? "";
+  const actionName: string = config?.actionName ?? "";
+
+  if (!providerName || !actionName) {
+    return {
+      ok: false,
+      error: "execute:missing_providerId_or_actionName",
+      costUsd: 0,
+      latencyMs: 0,
+    };
+  }
+
+  // Look up routing config + action shape.
+  const cfg = await (args.ctx as any).runQuery(
+    internal.missionRunner.lookupManagedAction,
+    { providerName, actionName },
+  );
+  if (!cfg) {
+    return {
+      ok: false,
+      error: `execute:managed_action_not_found:${providerName}.${actionName}`,
+      costUsd: 0,
+      latencyMs: 0,
+    };
+  }
+
+  // Decrypt the master key. Surfaces APICLAW_KEY_ENCRYPTION_SECRET_missing
+  // as a clear error so deploy ops know what's needed in Convex env.
+  let plainKey: string;
+  try {
+    plainKey = await decryptManagedKey(cfg.encryptedMasterKey);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "decrypt_failed";
+    return {
+      ok: false,
+      error: `execute:decrypt:${msg}`,
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog: { provider: providerName, action: actionName },
+    };
+  }
+
+  // Inputs are the resolved per-step bindings from the template. Pull out
+  // path params first so they don't double up in the body.
+  const inputParams: Record<string, unknown> =
+    inputs && typeof inputs === "object" ? (inputs as Record<string, unknown>) : {};
+  const { path: substitutedPath, consumed } = substitutePathParams(
+    cfg.action.path,
+    inputParams,
+  );
+
+  // Split remaining params by `in: body | query | path` declared on the
+  // action's param list. Unknown keys default to body for POST/PUT/PATCH
+  // and query for GET.
+  const paramSpec: Array<{ name: string; in: string }> = Array.isArray(cfg.action.params)
+    ? cfg.action.params
+    : [];
+  const paramByName = new Map(paramSpec.map((p) => [p.name, p.in]));
+
+  const queryParams: Record<string, string> = {};
+  const bodyParams: Record<string, unknown> = {};
+  const method = (cfg.action.method ?? "POST").toUpperCase();
+
+  for (const [name, value] of Object.entries(inputParams)) {
+    if (consumed.has(name)) continue;
+    const declared = paramByName.get(name);
+    const defaultBucket = method === "GET" ? "query" : "body";
+    const bucket = declared ?? defaultBucket;
+    if (bucket === "query") {
+      if (value != null) queryParams[name] = String(value);
+    } else {
+      bodyParams[name] = value;
+    }
+  }
+
+  // Build URL.
+  let url: URL;
+  try {
+    url = new URL(
+      substitutedPath.startsWith("/") ? substitutedPath.slice(1) : substitutedPath,
+      cfg.baseUrl.endsWith("/") ? cfg.baseUrl : cfg.baseUrl + "/",
+    );
+  } catch (e) {
+    return {
+      ok: false,
+      error: `execute:bad_url:${cfg.baseUrl}${substitutedPath}`,
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog: { provider: providerName, action: actionName },
+    };
+  }
+  for (const [k, v] of Object.entries(queryParams)) url.searchParams.set(k, v);
+
+  // Auth header.
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    [cfg.authHeader]: `${cfg.authPrefix}${plainKey}`,
+  };
+
+  const startedAt = Date.now();
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), {
+      method,
+      headers,
+      body:
+        method === "GET" || method === "DELETE"
+          ? undefined
+          : JSON.stringify(bodyParams),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "fetch_failed";
+    return {
+      ok: false,
+      error: `execute:network:${msg}`,
+      costUsd: 0,
+      latencyMs: Date.now() - startedAt,
+      apiLog: { provider: providerName, action: actionName },
+    };
+  }
+  const latency = Date.now() - startedAt;
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    return {
+      ok: false,
+      error: `execute_${res.status}:${txt.slice(0, 200)}`,
+      costUsd: 0,
+      latencyMs: latency,
+      meta: { status: res.status },
+      apiLog: { provider: providerName, action: actionName },
+    };
+  }
+
+  let output: unknown;
+  try {
+    const ct = res.headers.get("content-type") ?? "";
+    output = ct.includes("application/json") ? await res.json() : await res.text();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "parse_failed";
+    return {
+      ok: false,
+      error: `execute_parse:${msg}`,
+      costUsd: 0,
+      latencyMs: latency,
+      meta: { status: res.status },
+      apiLog: { provider: providerName, action: actionName },
+    };
+  }
+
   return {
-    ok: false,
-    error: "primitive_not_implemented:execute",
+    ok: true,
+    output,
     costUsd: 0,
-    latencyMs: 0,
+    latencyMs: latency,
+    meta: { status: res.status },
+    apiLog: { provider: providerName, action: actionName },
   };
 }
 
@@ -580,10 +922,12 @@ export const markComplete = internalMutation({
   },
 });
 
-// One outbound apiLogs row per primitive call that hit an external
-// service. This is what providerHealth aggregates and what workspace
-// analytics surfaces — without it, mission steps would be invisible to
-// every existing stats pipeline.
+// One apiLogs row per primitive call. This is what providerHealth
+// aggregates and what workspace analytics surfaces — without it, mission
+// steps would be invisible to every existing stats pipeline. Direction
+// is parameterised so the same mutation handles both the outbound row on
+// the caller workspace and the inbound row on the provider-owner
+// workspace for managed providers.
 export const writeStepApiLog = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
@@ -592,6 +936,8 @@ export const writeStepApiLog = internalMutation({
     status: v.union(v.literal("success"), v.literal("error")),
     latencyMs: v.number(),
     errorMessage: v.optional(v.string()),
+    direction: v.optional(v.union(v.literal("outbound"), v.literal("inbound"))),
+    callerWorkspaceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("apiLogs", {
@@ -602,9 +948,26 @@ export const writeStepApiLog = internalMutation({
       status: args.status,
       latencyMs: args.latencyMs,
       errorMessage: args.errorMessage,
-      direction: "outbound",
+      direction: args.direction ?? "outbound",
+      callerWorkspaceId: args.callerWorkspaceId,
       createdAt: Date.now(),
     });
+  },
+});
+
+// Resolve the owner workspace of a managed provider by name. Returns
+// null when the provider isn't registered (e.g. raw third-party hostnames
+// from fetch http with no attributeAs override). The runner uses this to
+// dual-log inbound traffic on the provider-owner side automatically.
+export const lookupProviderOwnerWorkspace = internalQuery({
+  args: { providerName: v.string() },
+  handler: async (ctx, { providerName }) => {
+    const providers = await ctx.db.query("providers").collect();
+    const provider = providers.find(
+      (p) => p.name.toLowerCase() === providerName.toLowerCase(),
+    );
+    if (!provider || !(provider as any).workspaceId) return null;
+    return (provider as any).workspaceId as string;
   },
 });
 
@@ -987,6 +1350,7 @@ export const runV2 = internalAction({
       // apiLogs (the stats substrate shared by providerHealth, workspace
       // analytics, and every other consumer of the /v1/* surfaces).
       if (result.apiLog) {
+        // Outbound row on the caller workspace.
         await ctx.runMutation(internal.missionRunner.writeStepApiLog, {
           workspaceId: mission.workspaceId,
           provider: result.apiLog.provider,
@@ -994,7 +1358,29 @@ export const runV2 = internalAction({
           status: result.ok ? "success" : "error",
           latencyMs: result.latencyMs,
           errorMessage: result.error,
+          direction: "outbound",
         });
+
+        // If the provider tag matches a registered managed provider,
+        // mirror the call onto the provider-owner workspace as inbound.
+        // This is the same dual-logging contract logGenPRDCall implemented
+        // by hand for GenPRD, but generalised to every managed provider.
+        const ownerWsId: string | null = await ctx.runQuery(
+          internal.missionRunner.lookupProviderOwnerWorkspace,
+          { providerName: result.apiLog.provider },
+        );
+        if (ownerWsId && ownerWsId !== (mission.workspaceId as unknown as string)) {
+          await ctx.runMutation(internal.missionRunner.writeStepApiLog, {
+            workspaceId: ownerWsId as any,
+            provider: result.apiLog.provider,
+            action: result.apiLog.action,
+            status: result.ok ? "success" : "error",
+            latencyMs: result.latencyMs,
+            errorMessage: result.error,
+            direction: "inbound",
+            callerWorkspaceId: mission.workspaceId as unknown as string,
+          });
+        }
       }
 
       // Budget check
