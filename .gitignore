@@ -25,3 +25,4 @@ src/registry/generated-providers.json
 
 # Smoketest raw output (large per-record JSON; verification-status.json is the derived artifact that lives in landing/src/lib/)
 reports/smoketest/*.json
+audit-managed-keys.report.json

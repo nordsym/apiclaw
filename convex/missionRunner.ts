@@ -640,6 +640,73 @@ export const listEncryptedRoutingForMigration = internalQuery({
   },
 });
 
+// Audit query for the security cleanup: joins providerDirectCall against
+// providers so the audit script can show provider name + status alongside
+// the encryptedMasterKey format. The actual secret value is returned so
+// the local script can decide if a plaintext value should be re-encrypted
+// before deletion — plaintext keys never leave the developer's machine.
+export const auditEncryptedRouting = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("providerDirectCall").collect();
+    const providers = await ctx.db.query("providers").collect();
+    const providerById = new Map(providers.map((p) => [p._id, p]));
+
+    return rows.map((r) => {
+      const p = providerById.get(r.providerId);
+      return {
+        rowId: r._id,
+        providerId: r.providerId,
+        providerName: p?.name ?? "(unknown)",
+        providerStatus: p?.status ?? "(unknown)",
+        routingStatus: r.status,
+        baseUrl: r.baseUrl,
+        encryptedMasterKey: r.encryptedMasterKey,
+        keyLength: r.encryptedMasterKey?.length ?? 0,
+      };
+    });
+  },
+});
+
+// Re-encrypt a row's encryptedMasterKey with a fresh ciphertext built by
+// the local audit script. Same shape as patchEncryptedMasterKey but
+// distinct name so the audit log shows the security-cleanup origin.
+export const reencryptRoutingKey = internalMutation({
+  args: {
+    rowId: v.id("providerDirectCall"),
+    newEncryptedMasterKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.rowId, {
+      encryptedMasterKey: args.newEncryptedMasterKey,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Delete a row outright. Used for the placeholder cleanup path. The row's
+// providerAPIs neighbour stays — it may still be discovery-listed; only
+// the routing config goes away.
+export const deleteRoutingRow = internalMutation({
+  args: { rowId: v.id("providerDirectCall") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.rowId);
+  },
+});
+
+// Mark a row as draft so /v1/call won't route through it. Used to retire
+// placeholder routing rows that hold neither a real key nor a sentinel
+// without deleting them — keeps the providerAPIs row's history intact.
+export const setRoutingStatus = internalMutation({
+  args: { rowId: v.id("providerDirectCall"), status: v.string() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.rowId, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const patchEncryptedMasterKey = internalMutation({
   args: {
     rowId: v.id("providerDirectCall"),
