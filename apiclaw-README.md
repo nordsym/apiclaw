@@ -39,27 +39,24 @@ One `mcp-install` connects your agent to all of it.
 
 ## Quick Start
 
-**No signup required — just install and use.**
+**Two commands, ~30 seconds total.**
 
 ```bash
-# Install
+# 1. Install the MCP server
 curl -fsSL https://apiclaw.cloud/install.sh | bash
 
-# Restart your AI assistant
-# Immediately use any API (10 calls/week)
-
-# Optional: Register for 50 calls/week
-register_owner({ email: "you@example.com" })
+# 2. Authenticate (browser opens, one tap, ~10 seconds)
+npx @nordsym/apiclaw auth login
 ```
 
-That's it. All 18 Direct Call providers work instantly through NordSym's infrastructure. Your API calls are proxied, authenticated, and rate-limited automatically.
+The auth flow opens your browser, signs you in via Clerk (Google one-tap or passwordless email), and writes `~/.apiclaw.toml`. The same workspace then works across MCP, CLI, HTTP gateway, and Remote MCP — read the config from one file, never paste a key.
+
+**Headless / SSH:** `npx @nordsym/apiclaw auth login --email-fallback` runs the legacy magic-link flow instead.
 
 **Usage Limits:**
-- **Anonymous:** 10 calls/week (no registration)
-- **Registered:** 50 calls/week (5x more)
+- **Free workspace:** 25 calls/month
+- **Pay-as-you-go:** Underlying provider cost + 15%, billed via Stripe
 - **Upgrade:** See [Pricing](#pricing) below
-
-Start calling APIs immediately. No setup, no API keys, no configuration.
 
 ---
 
@@ -68,16 +65,17 @@ Start calling APIs immediately. No setup, no API keys, no configuration.
 Here's a complete agent workflow — send an SMS, generate an image, and search the web in one session:
 
 ```javascript
-// 1. Register for 50 calls/week
-register_owner({ email: "you@example.com" })
+// 0. Auth from the terminal first (one-time, ~10s):
+//    npx @nordsym/apiclaw auth login
+//    The MCP server reads ~/.apiclaw.toml on every call.
 
-// 2. Send an SMS via 46elks
+// 1. Convert currency through APILayer's Fixer
 call_api({
-  provider: "46elks",
-  action: "send_sms",
+  provider: "apilayer",
+  action: "fixer_latest",
   params: {
-    to: "+46701234567",
-    message: "APIClaw is live! 🦞"
+    base: "USD",
+    symbols: "EUR,SEK"
   }
 })
 

@@ -13,10 +13,16 @@ The API layer for AI agents.
 ## Install
 
 ```bash
+# 1. Install the MCP server
 curl -fsSL https://apiclaw.cloud/install.sh | bash
+
+# 2. Authenticate (browser opens, one tap, ~10 seconds)
+npx @nordsym/apiclaw auth login
 ```
 
-Adds APIClaw as an MCP server in your Claude, Cursor, or any MCP-compatible agent. Register your email to unlock 25 calls/month.
+Adds APIClaw as an MCP server in your Claude, Cursor, Windsurf, or any MCP-compatible agent. The auth flow opens your browser, signs you in via Clerk (Google one-tap or passwordless email), and writes `~/.apiclaw.toml`. The same workspace then works across MCP, CLI, HTTP gateway, and Remote MCP. Free tier: 25 calls/month.
+
+> **Headless server or SSH?** `npx @nordsym/apiclaw auth login --email-fallback` runs the legacy magic-link flow.
 
 ---
 
@@ -174,7 +180,7 @@ The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integra
 | `call_api` | Execute through APIClaw proxy |
 | `list_connected` | See available managed providers |
 | `check_balance` | Usage and remaining calls |
-| `register_owner` | Register email, unlock 25 calls/month |
+| `register_owner` | Legacy auth (email magic-link). Canonical flow: run `npx @nordsym/apiclaw auth login` in the terminal — the MCP server reads `~/.apiclaw.toml` and unlocks 25 calls/month |
 
 ## Pricing
 
