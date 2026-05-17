@@ -66,22 +66,23 @@ async function handleDiscover(req: IncomingMessage, res: ServerResponse, url: UR
   const agentId = url.searchParams.get('agentId');
   const category = url.searchParams.get('category') || undefined;
   const maxResults = parseInt(url.searchParams.get('maxResults') || '5');
-  
+  const callableOnly = url.searchParams.get('callable_only') !== 'false';
+
   if (!query) {
     sendJSON(res, 400, { error: 'Missing query parameter' });
     return;
   }
-  
+
   if (!(await isAuthorized(agentId || undefined))) {
-    sendJSON(res, 403, { 
-      error: 'Unauthorized', 
+    sendJSON(res, 403, {
+      error: 'Unauthorized',
       message: 'This endpoint is restricted to Hivr bees. Contact admin@nordsym.com for access.',
     });
     return;
   }
-  
+
   const startTime = Date.now();
-  const results = discoverAPIs(query, { category, maxResults });
+  const results = discoverAPIs(query, { category, maxResults, callableOnly });
   const responseTimeMs = Date.now() - startTime;
   
   // Log to analytics with product info

@@ -25,25 +25,26 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
   
-  const { query, agentId, category, maxResults } = req.query;
-  
+  const { query, agentId, category, maxResults, callable_only } = req.query;
+
   if (!query || typeof query !== 'string') {
     return res.status(400).json({ error: 'Missing query parameter' });
   }
-  
+
   const agentIdStr = typeof agentId === 'string' ? agentId : undefined;
-  
+
   if (!(await isAuthorized(agentIdStr))) {
-    return res.status(403).json({ 
-      error: 'Unauthorized', 
+    return res.status(403).json({
+      error: 'Unauthorized',
       message: 'This endpoint is restricted. Contact admin@nordsym.com',
     });
   }
-  
+
   const startTime = Date.now();
-  const results = discoverAPIs(query, { 
+  const results = discoverAPIs(query, {
     category: typeof category === 'string' ? category : undefined,
     maxResults: typeof maxResults === 'string' ? parseInt(maxResults) : 5,
+    callableOnly: callable_only !== 'false',
   });
   const responseTimeMs = Date.now() - startTime;
   

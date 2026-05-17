@@ -413,7 +413,24 @@ async function validateSession(): Promise<boolean> {
     
     return true;
   } catch (error) {
-    console.error('[APIClaw] Error validating session:', error);
+    // Convex unreachable at startup (cold boot, network blip, etc.).
+    // Trust the local session file rather than wiping context entirely.
+    // The token will be validated on the first real API call anyway.
+    console.error('[APIClaw] Convex unreachable during startup validation — using cached session:', (error as Error).message);
+    const cached = readSession();
+    if (cached?.sessionToken && cached?.workspaceId && cached?.email) {
+      workspaceContext = {
+        sessionToken: cached.sessionToken,
+        workspaceId: cached.workspaceId,
+        email: cached.email,
+        tier: 'founder',       // conservative fallback — overwritten on next live query
+        usageRemaining: 999999,
+        usageCount: 0,
+        status: 'active',
+      };
+      console.error(`[APIClaw] ✓ Restored session from cache for ${cached.email}`);
+      return true;
+    }
     return false;
   }
 }
@@ -462,17 +479,34 @@ const UNREGISTERED_CALL_LIMIT = 5;
 function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: string; isAnonymous?: boolean } {
   // All API calls require registration now
   if (!workspaceContext) {
-    return {
-      allowed: false,
-      error: JSON.stringify({
-        status: 'registration_required',
-        error: 'Registration required to call APIs.',
-        message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
-        action: 'register_owner',
-        free_tier: '50 API calls/month -- completely free.',
-      }, null, 2),
-      isAnonymous: true,
-    };
+    // Before giving up, try to restore from the local session file.
+    // This handles the case where validateSession() failed at startup
+    // (network blip, Convex cold boot) but a valid file still exists.
+    const cached = readSession();
+    if (cached?.sessionToken && cached?.workspaceId && cached?.email) {
+      workspaceContext = {
+        sessionToken: cached.sessionToken,
+        workspaceId: cached.workspaceId,
+        email: cached.email,
+        tier: 'founder',
+        usageRemaining: 999999,
+        usageCount: 0,
+        status: 'active',
+      };
+      console.error(`[APIClaw] ✓ Lazy-restored session for ${cached.email}`);
+    } else {
+      return {
+        allowed: false,
+        error: JSON.stringify({
+          status: 'registration_required',
+          error: 'Registration required to call APIs.',
+          message: 'Ask the user for their email, then call register_owner({ email: "..." }). A 6-digit code will be sent. Then call verify_code with the code.',
+          action: 'register_owner',
+          free_tier: '50 API calls/month -- completely free.',
+        }, null, 2),
+        isAnonymous: true,
+      };
+    }
   }
   
   if (workspaceContext.status !== 'active') {
@@ -482,16 +516,17 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     };
   }
 
-  // Unregistered workspaces (auto-provisioned, no email) get limited calls then must register
-  if (!workspaceContext.email && workspaceContext.usageCount >= UNREGISTERED_CALL_LIMIT) {
+  // No email = no calls. Full stop.
+  if (!workspaceContext.email) {
     return {
       allowed: false,
       error: JSON.stringify({
-        success: false,
-        error: `Register to continue. You've used ${UNREGISTERED_CALL_LIMIT} free calls.`,
-        hint: "Run register_owner with your email to unlock 50 calls/month.",
-        action: "register_owner"
-      }, null, 2)
+        status: 'registration_required',
+        error: 'An account is required to use APIClaw.',
+        message: 'Call register_owner({ email: "you@example.com" }) to sign up. Free tier: 25 calls/month.',
+        action: 'register_owner',
+      }, null, 2),
+      isAnonymous: true,
     };
   }
 
@@ -901,8 +936,8 @@ const tools: Tool[] = [
         },
         callable_only: {
           type: 'boolean',
-          description: 'If true, only return APIs APIClaw can execute right now (managed providers + keyless open APIs). If false (default) you also see discovery-only entries — useful when scoping integrations, but agents that just want to act should set this to true.',
-          default: false,
+          description: 'Default true: only return APIs APIClaw can execute right now (~2,895 callable providers). Set false to also see the ~23,800 discovery-only registry entries — useful when scoping a manual integration, not for agents that want to act now.',
+          default: true,
         },
         max_results: {
           type: 'number',
@@ -1446,28 +1481,20 @@ Docs: https://apiclaw.cloud
       }
 
       case 'discover_apis': {
+        const _discoverGate = enforceOwner("mcp:discover_apis");
+        if (!_discoverGate.ok) return _discoverGate.response;
+
         const query = args?.query as string;
         const category = args?.category as string | undefined;
         const requestedMax = (args?.max_results as number) || 5;
-        const callableOnly = args?.callable_only === true;
+        // Default callable_only = true. Explicit false opt-out for research/scoping use.
+        const callableOnly = args?.callable_only !== false;
         const region = args?.region as string | undefined;
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
 
         const startTime = Date.now();
-        // When callable_only is set, over-fetch then filter so the agent still
-        // gets the requested count of useful entries.
-        const fetchMax = callableOnly ? Math.max(requestedMax * 6, 30) : requestedMax;
-        const rawResults = discoverAPIs(query, { category, maxResults: fetchMax, region });
-        const filteredResults = callableOnly
-          ? rawResults.filter((r) => (r.provider as unknown as { callable?: boolean }).callable === true)
-          : rawResults;
-        // Stable callable-first ordering (preserve relevance order within each bucket).
-        const results = [...filteredResults].sort((a, b) => {
-          const aCall = (a.provider as unknown as { callable?: boolean }).callable === true ? 0 : 1;
-          const bCall = (b.provider as unknown as { callable?: boolean }).callable === true ? 0 : 1;
-          return aCall - bCall;
-        }).slice(0, requestedMax);
+        const results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
         const responseTimeMs = Date.now() - startTime;
         trackSearch(query, results.length, responseTimeMs);
 
@@ -1997,25 +2024,21 @@ Docs: https://apiclaw.cloud
           };
         }
         
-        // Check workspace access (skip for free/open APIs)
-        const isFreeAPI = isOpenAPI(provider);
-        if (!isFreeAPI) {
-          const access = checkWorkspaceAccess(provider);
-          if (!access.allowed) {
-            return {
-              content: [{
-                type: 'text',
-                text: JSON.stringify({
-                  status: 'error',
-                  error: access.error,
-                  hint: access.isAnonymous 
-                    ? 'Rate limit reached. Use register_owner to authenticate for higher limits.'
-                    : 'Use register_owner to authenticate your workspace.',
-                }, null, 2)
-              }],
-              isError: true
-            };
-          }
+        // All calls require a verified account — no free/open bypass.
+        const isFreeAPI = isOpenAPI(provider); // kept for routing logic below
+        const access = checkWorkspaceAccess(provider);
+        if (!access.allowed) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: access.error,
+                hint: 'Use register_owner to authenticate your workspace.',
+              }, null, 2)
+            }],
+            isError: true
+          };
         }
         
         const startTime = Date.now();
@@ -3518,9 +3541,14 @@ async function main() {
     if (result?.agentId) {
       currentAgentId = result.agentId;
     }
-    // If we got a new session token and don't have one, write it
+    // Only write a new anonymous session if no valid session file exists.
+    // Never overwrite a file that has an email — that would cause the next
+    // startup to read email:"" → delete the file → lose auth entirely.
     if (result?.isNew && result?.sessionToken && !hasValidSession) {
-      writeSession(result.sessionToken, result.workspaceId, "");
+      const existingFile = readSession();
+      if (!existingFile) {
+        writeSession(result.sessionToken, result.workspaceId, "");
+      }
     }
   } catch (e) {
     console.error('[APIClaw] Agent registration failed (non-blocking):', e);

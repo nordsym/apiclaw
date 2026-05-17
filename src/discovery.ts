@@ -340,6 +340,11 @@ const DIRECT_CALL_SPECS: Record<string, {
 /**
  * Discover APIs based on a natural language query
  * MVP uses keyword matching; production would use embeddings
+ *
+ * `callableOnly` defaults to true: agents asking "what API does X" almost
+ * always want something they can actually run through APIClaw right now.
+ * Pass `callableOnly: false` to also see the 23k discoverable-only registry
+ * entries (useful for integration scoping, not for action).
  */
 export function discoverAPIs(
   query: string,
@@ -348,19 +353,25 @@ export function discoverAPIs(
     maxResults?: number;
     maxPrice?: number;
     region?: string;
+    callableOnly?: boolean;
   } = {}
 ): SearchResult[] {
-  const { category, maxResults = 5, maxPrice, region } = options;
-  
+  const { category, maxResults = 5, maxPrice, region, callableOnly = true } = options;
+
   const queryLower = query.toLowerCase();
   const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2);
-  
+
   const results: SearchResult[] = [];
-  
+
   for (const api of apis) {
+    // Callable-only filter (default mode): drop registry entries APIClaw
+    // can't execute right now. Cast because `callable` is a registry field
+    // not yet promoted to the APIProvider type.
+    if (callableOnly && (api as unknown as { callable?: boolean }).callable !== true) continue;
+
     // Category filter
     if (category && api.category !== category) continue;
-    
+
     // Region filter
     if (region && api.regions && !api.regions.includes(region) && !api.regions.includes('global')) continue;
     
