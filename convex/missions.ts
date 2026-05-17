@@ -269,7 +269,7 @@ export const runMission = action({
       const t0 = Date.now();
 
       if (m.template === "genprd") {
-        const out = await runGenPRD(ctx, args.missionId, m.params as Record<string, unknown>);
+        const out = await runGenPRD(ctx, args.missionId, m, m.params as Record<string, unknown>);
         result = out.result;
         costUsd = out.costUsd;
       } else {
@@ -310,85 +310,154 @@ export const runMission = action({
 
 // ============================================
 // TEMPLATE: GenPRD
+// Routes to genprd.se/api/generate — GenPRD is the quality engine.
+// APIClaw orchestrates, observes, and attributes usage.
 // ============================================
+
+export const logGenPRDCall = internalMutation({
+  args: {
+    callerWorkspaceId: v.id("workspaces"),
+    status: v.union(v.literal("success"), v.literal("error")),
+    latencyMs: v.number(),
+    action: v.string(),
+    errorMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Log inbound entry to GenPRD's provider workspace (Gustav's) so analytics
+    // attribute the call to the workspace that listed GenPRD.
+    const ownerWs = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q) => q.eq("email", "gustav@nordsym.com"))
+      .first();
+    if (!ownerWs) return;
+
+    await ctx.db.insert("apiLogs", {
+      workspaceId: ownerWs._id,
+      sessionToken: "",
+      provider: "genprd",
+      action: args.action,
+      status: args.status,
+      latencyMs: args.latencyMs,
+      direction: "inbound",
+      callerWorkspaceId: args.callerWorkspaceId.toString(),
+      errorMessage: args.errorMessage,
+      createdAt: Date.now(),
+    });
+
+    // Also log outbound entry on the calling workspace for their own audit trail.
+    if (args.callerWorkspaceId !== ownerWs._id) {
+      await ctx.db.insert("apiLogs", {
+        workspaceId: args.callerWorkspaceId,
+        sessionToken: "",
+        provider: "genprd",
+        action: args.action,
+        status: args.status,
+        latencyMs: args.latencyMs,
+        direction: "outbound",
+        errorMessage: args.errorMessage,
+        createdAt: Date.now(),
+      });
+    }
+  },
+});
 
 async function runGenPRD(
   ctx: any,
   missionId: Id<"missions">,
+  mission: { workspaceId: Id<"workspaces"> },
   params: Record<string, unknown>
 ): Promise<{ result: { markdown: string; model: string; tokens: { input: number; output: number } }; costUsd: number }> {
   const topic = String(params.topic ?? "").trim();
   if (!topic) throw new Error("topic_required");
   const audience = params.audience ? String(params.audience) : null;
   const constraints = params.constraints ? String(params.constraints) : null;
-  const model = (params.model as string) || "anthropic/claude-sonnet-4-6";
+  const model = (params.model as string) || "anthropic/claude-sonnet-4-5";
+  const format = (params.format as string) || "standard";
 
   await ctx.runMutation(internal.missions.recordEvent, {
     missionId,
     type: "log",
-    label: `generating PRD for "${topic}"`,
-    data: { audience, constraints, model },
+    label: `routing to genprd.se: "${topic}"`,
+    data: { audience, constraints, model, format },
   });
 
-  const systemPrompt = `You are a senior product manager writing a tight, structured PRD. Output Markdown with these sections in order: Title, Summary (one paragraph), Goals (bullets), Non-Goals (bullets), User Stories (markdown table: persona | story), Functional Requirements (numbered list), Success Metrics (bullets, name + target), Open Questions (bullets). Keep it crisp. No fluff. No marketing language.`;
-
-  const userPrompt = [
-    `Topic: ${topic}`,
-    audience ? `Audience: ${audience}` : null,
-    constraints ? `Constraints: ${constraints}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) throw new Error("OPENROUTER_API_KEY missing on Convex");
+  const genprdKey = process.env.GENPRD_API_KEY;
+  if (!genprdKey) throw new Error("GENPRD_API_KEY missing on Convex");
 
   const t0 = Date.now();
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://apiclaw.cloud",
-      "X-Title": "APIClaw Mission: GenPRD",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.4,
-    }),
-  });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`openrouter_${res.status}: ${txt.slice(0, 200)}`);
+  let res: Response;
+  try {
+    res = await fetch("https://genprd.se/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-GenPRD-Key": genprdKey,
+        "X-APIClaw-Mission": missionId,
+      },
+      body: JSON.stringify({ topic, audience, constraints, model, format }),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "fetch_failed";
+    await ctx.runMutation(internal.missions.logGenPRDCall, {
+      callerWorkspaceId: mission.workspaceId,
+      status: "error",
+      latencyMs: Date.now() - t0,
+      action: "generate_prd",
+      errorMessage: msg,
+    });
+    throw new Error(`genprd_network: ${msg}`);
   }
-  const json = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-    usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-    model?: string;
-  };
-  const markdown = json.choices?.[0]?.message?.content ?? "";
-  const inTok = json.usage?.prompt_tokens ?? 0;
-  const outTok = json.usage?.completion_tokens ?? 0;
 
-  // Best-effort cost estimate. OpenRouter returns price metadata in headers
-  // for some models; for canon stability we estimate from token counts.
-  // Sonnet-4.6 is roughly $3/M input + $15/M output as of 2026-05.
+  const latencyMs = Date.now() - t0;
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    await ctx.runMutation(internal.missions.logGenPRDCall, {
+      callerWorkspaceId: mission.workspaceId,
+      status: "error",
+      latencyMs,
+      action: "generate_prd",
+      errorMessage: `http_${res.status}`,
+    });
+    throw new Error(`genprd_${res.status}: ${txt.slice(0, 200)}`);
+  }
+
+  const json = (await res.json()) as {
+    prd: string;
+    model: string;
+    tokens: { input: number; output: number };
+    metadata?: { generatedAt?: string; durationMs?: number; version?: string };
+  };
+
+  const markdown = json.prd ?? "";
+  const inTok = json.tokens?.input ?? 0;
+  const outTok = json.tokens?.output ?? 0;
+
+  // Cost estimate: Sonnet-4.5 ~$3/M input + $15/M output.
   const costUsd = (inTok * 3 + outTok * 15) / 1_000_000;
 
   await ctx.runMutation(internal.missions.recordEvent, {
     missionId,
     type: "tool_call",
-    label: `openrouter ${model}`,
-    data: { tokens: { input: inTok, output: outTok }, durationMs: Date.now() - t0 },
-    durationMs: Date.now() - t0,
+    label: `genprd.se → ${json.model}`,
+    data: {
+      tokens: { input: inTok, output: outTok },
+      durationMs: latencyMs,
+      genprdVersion: json.metadata?.version,
+    },
+    durationMs: latencyMs,
     costUsd,
   });
 
-  return { result: { markdown, model: json.model ?? model, tokens: { input: inTok, output: outTok } }, costUsd };
+  // Attribute this call to GenPRD's workspace in analytics.
+  await ctx.runMutation(internal.missions.logGenPRDCall, {
+    callerWorkspaceId: mission.workspaceId,
+    status: "success",
+    latencyMs,
+    action: "generate_prd",
+  });
+
+  return { result: { markdown, model: json.model, tokens: { input: inTok, output: outTok } }, costUsd };
 }
 
 // ============================================

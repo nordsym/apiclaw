@@ -304,3 +304,39 @@ export const dedupeFilestackLogs = mutation({
     return { before: logs.length, deleted: toDelete.length, after: sorted.length - toDelete.length };
   },
 });
+
+/**
+ * Admin-only: inbound call + discovery counts for a workspace by email
+ * on a given UTC day. Read-only; supports external monitoring tools that
+ * need traffic visibility without holding workspace credentials.
+ */
+export const getInboundStatsByEmail = query({
+  args: {
+    email: v.string(),
+    date: v.string(), // "YYYY-MM-DD" UTC
+  },
+  handler: async (ctx, { email, date }) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_email", (q: any) => q.eq("email", email))
+      .first();
+    if (!workspace) return { calls: 0, discoveries: 0, found: false };
+
+    const dayStart = new Date(date + "T00:00:00.000Z").getTime();
+    const dayEnd = dayStart + 86_400_000;
+
+    const logs = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_workspaceId_createdAt", (q: any) =>
+        q.eq("workspaceId", workspace._id)
+          .gte("createdAt", dayStart)
+          .lt("createdAt", dayEnd)
+      )
+      .collect();
+
+    const inbound = logs.filter((l: any) => l.direction === "inbound");
+    const calls = inbound.filter((l: any) => !l.action.startsWith("discovery:")).length;
+    const discoveries = inbound.filter((l: any) => l.action.startsWith("discovery:")).length;
+    return { calls, discoveries, found: true };
+  },
+});
