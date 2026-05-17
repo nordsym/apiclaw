@@ -51,14 +51,24 @@ export const getUsageForPeriod = internalQuery({
 });
 
 /**
- * Get all workspaces with their emails for reporting
+ * Get all workspaces with their emails for reporting.
+ * Excludes workspaces with nurture stage `partner-locked` or `excluded` so
+ * the weekly/monthly cron does not email accounts that must stay quiet.
  */
 export const getReportableWorkspaces = internalQuery({
   args: {},
   handler: async (ctx) => {
     const workspaces = await ctx.db.query("workspaces").collect();
+    const nurtureRows = await ctx.db.query("nurture").collect();
+    const skipWorkspaceIds = new Set(
+      nurtureRows
+        .filter((n) => n.stage === "partner-locked" || n.stage === "excluded")
+        .map((n) => n.workspaceId as unknown as string)
+    );
+
     return workspaces
       .filter((w) => w.email)
+      .filter((w) => !skipWorkspaceIds.has(w._id as unknown as string))
       .map((w) => ({
         id: w._id,
         email: w.email,
