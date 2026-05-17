@@ -16,6 +16,108 @@ const apisData = JSON.parse(
 );
 const apis: APIProvider[] = apisData.apis;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Provider health cache
+//
+// Discovery applies a live success-rate multiplier on top of the static
+// relevance score so providers that have been dropping calls or running slow
+// in the last 30 days slide down in results without us having to touch the
+// registry. The cache is populated from the Convex providerHealth table on
+// module load and refreshed in the background; lookups are synchronous so
+// discoverAPIs can stay a sync function.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CONVEX_URL_HEALTH =
+  process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
+const HEALTH_REFRESH_MS = 15 * 60 * 1000;
+
+interface ProviderHealthEntry {
+  successRate: number;
+  p50LatencyMs: number;
+  callCount: number;
+}
+
+let healthCache = new Map<string, ProviderHealthEntry>();
+let healthMinCalls = 5;
+let healthFetchedAt = 0;
+let healthInflight = false;
+
+async function refreshHealthCache(): Promise<void> {
+  if (healthInflight) return;
+  healthInflight = true;
+  try {
+    const res = await fetch(`${CONVEX_URL_HEALTH}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'providerHealth:getAllPublic', args: {} }),
+    });
+    if (!res.ok) return;
+    const payload = (await res.json()) as {
+      status?: string;
+      value?: {
+        minCallsForScore: number;
+        providers: Array<{
+          providerId: string;
+          successRate: number;
+          p50LatencyMs: number;
+          callCount: number;
+        }>;
+      };
+    };
+    const value = payload.value;
+    if (!value || !Array.isArray(value.providers)) return;
+    const next = new Map<string, ProviderHealthEntry>();
+    for (const p of value.providers) {
+      next.set(p.providerId, {
+        successRate: p.successRate,
+        p50LatencyMs: p.p50LatencyMs,
+        callCount: p.callCount,
+      });
+    }
+    healthCache = next;
+    healthMinCalls = value.minCallsForScore ?? 5;
+    healthFetchedAt = Date.now();
+  } catch {
+    // Network failure: keep prior cache. Discovery still works, multiplier
+    // just stays stale.
+  } finally {
+    healthInflight = false;
+  }
+}
+
+// Kick off a non-blocking initial fetch on module load. Discovery calls that
+// arrive before this resolves see an empty cache and skip the multiplier
+// (cold-start safe).
+refreshHealthCache().catch(() => {});
+if (typeof setInterval === 'function') {
+  const t = setInterval(() => {
+    refreshHealthCache().catch(() => {});
+  }, HEALTH_REFRESH_MS);
+  if (typeof (t as any).unref === 'function') (t as any).unref();
+}
+
+/**
+ * Returns a multiplier in the range [0.5, 1.0] applied to relevance scores.
+ *
+ *   ≥ minCalls observations:  0.5 + 0.5 × successRate
+ *      → 100 % success → 1.00  (no change)
+ *      →  80 % success → 0.90
+ *      →  50 % success → 0.75
+ *      →   0 % success → 0.50  (heavy down-rank)
+ *
+ *   <  minCalls observations: 1.0  (cold-start; not enough signal yet)
+ *
+ * Latency penalty is layered on top: providers with p50 > 2 s lose another
+ * 10 % so a fast-but-flaky API still beats a slow-and-flaky one.
+ */
+function healthMultiplier(providerId: string): number {
+  const h = healthCache.get(providerId);
+  if (!h || h.callCount < healthMinCalls) return 1.0;
+  const successComponent = 0.5 + 0.5 * Math.max(0, Math.min(1, h.successRate));
+  const latencyPenalty = h.p50LatencyMs > 2000 ? 0.9 : 1.0;
+  return successComponent * latencyPenalty;
+}
+
 // Direct Call provider specs (hardcoded handlers with params)
 // Ordered: AI-first (models, LLM routing, audio), then infrastructure (code, web, search, email, SMS)
 const DIRECT_CALL_SPECS: Record<string, {
@@ -376,7 +478,19 @@ export function discoverAPIs(
       score += 5;
       matchReasons.push('has free tier');
     }
-    
+
+    // Live success-rate signal from rolling 30d apiLogs. Multiplier in
+    // [0.5, 1.0]; 1.0 when we don't have enough data yet (cold-start).
+    const liveMult = healthMultiplier(api.id);
+    if (liveMult < 1.0) {
+      const h = healthCache.get(api.id);
+      if (h) {
+        const pct = Math.round(h.successRate * 100);
+        matchReasons.push(`live success ${pct}% (n=${h.callCount})`);
+      }
+    }
+    score = score * liveMult;
+
     if (score > 0) {
       results.push({
         provider: api,

@@ -79,4 +79,14 @@ crons.interval(
   {}
 );
 
+// Provider health aggregate — every 1h. Rolls 30d of outbound apiLogs into
+// per-provider success-rate + p50 latency. Discovery reads this to down-rank
+// providers whose recent reliability has degraded.
+crons.interval(
+  "provider-health-aggregate",
+  { hours: 1 },
+  internal.providerHealth.aggregate,
+  {}
+);
+
 export default crons;

@@ -626,6 +626,25 @@ export default defineSchema({
     .index("by_provider", ["provider"]),
 
   // ============================================
+  // PROVIDER HEALTH (rolling success-rate scoring)
+  // ============================================
+  // Populated by an hourly aggregate cron. Discovery consumes this to
+  // down-rank providers whose recent call success rate has degraded.
+  // One row per provider, upserted in place.
+
+  providerHealth: defineTable({
+    providerId: v.string(),         // e.g. "openrouter", "brave_search"
+    successRate: v.number(),         // 0.0 to 1.0 over the window
+    p50LatencyMs: v.number(),
+    callCount: v.number(),           // total over the window
+    successCount: v.number(),
+    windowDays: v.number(),          // typically 30
+    computedAt: v.number(),
+  })
+    .index("by_providerId", ["providerId"])
+    .index("by_computedAt", ["computedAt"]),
+
+  // ============================================
   // WAITLIST (for Direct Call provider leads)
   // ============================================
 
