@@ -174,6 +174,54 @@ export default function DocsPage() {
             {/* CLI alias */}
             <div id="codex" className="scroll-mt-24" aria-hidden />
 
+            {/* Auth */}
+            <section id="cli-auth" className="mb-16 scroll-mt-24">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-[var(--accent)]">🔑</span> Auth (all four doors)
+              </h2>
+              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+                <p className="text-[var(--text-secondary)]">
+                  One command, every door. Opens your browser, one-tap sign-in via Clerk (Google or passwordless email), writes <code>~/.apiclaw.toml</code> with mode 0600. The same file is read by the local MCP server, CLI, and HTTP gateway. Remote MCP uses its own OAuth 2.1 + DCR flow.
+                </p>
+                <div>
+                  <p className="text-sm font-medium mb-2">Canonical flow:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw auth login</code>
+                  </pre>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">
+                    Total time: ~10 seconds if you are already signed into Clerk in your browser. No inbox round-trip, no key copy-paste, no dashboard visit.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Switch accounts:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw auth login --force</code>
+                  </pre>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Show current identity:</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw auth whoami</code>
+                  </pre>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Headless server or SSH (no browser available):</p>
+                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw auth login --email-fallback</code>
+                  </pre>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">
+                    Uses the legacy email magic-link flow — the link is delivered to your inbox, you click it, the CLI catches the callback over polling.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+                  <p className="text-sm font-medium mb-2">For MCP clients — agent_auth_required action</p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    When the APIClaw MCP server has no local session, every tool returns a JSON payload with <code>action: &quot;agent_auth_required&quot;</code> and the exact CLI command to run. Agents that recognize this contract can resolve auth without human intervention.
+                  </p>
+                </div>
+              </div>
+            </section>
+
             {/* CLI */}
             <section id="cli" className="mb-16 scroll-mt-24">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -181,29 +229,29 @@ export default function DocsPage() {
               </h2>
               <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
                 <p className="text-[var(--text-secondary)]">
-                  Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category.
+                  Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category. Run <code>apiclaw auth login</code> first (see Auth above), then use the direct commands below.
                 </p>
                 <div>
-                  <p className="text-sm font-medium mb-2">Verify your CLI install path:</p>
+                  <p className="text-sm font-medium mb-2">Direct tool parity:</p>
                   <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                    <code className="text-sm text-[var(--text-primary)]">which codex</code>
+                    <code className="text-sm text-[var(--text-primary)]">{`apiclaw discover "currency conversion"
+apiclaw details apilayer/fixer-latest
+apiclaw call apilayer/fixer-latest --params '{"base":"USD","symbols":"EUR"}'
+apiclaw balance`}</code>
                   </pre>
                 </div>
                 <div>
-                  <p className="text-sm font-medium mb-2">Install APIClaw into Codex:</p>
+                  <p className="text-sm font-medium mb-2">Install APIClaw into Codex / Cursor / Windsurf:</p>
                   <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw setup --client codex</code>
+                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw setup --client codex   # or --client cursor / windsurf</code>
                   </pre>
-                  <p className="text-xs text-[var(--text-muted)] mt-2">
-                    This runs <code>codex mcp add apiclaw -- npx -y @nordsym/apiclaw</code> and verifies the install.
-                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium mb-2">Check status:</p>
                   <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                     <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw doctor</code>
                   </pre>
-                  <p className="text-xs text-[var(--text-muted)] mt-2">Shows CLI path, connection status, and all client configurations.</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-2">Shows CLI path, auth status, connection health, and all client configurations.</p>
                 </div>
               </div>
             </section>
@@ -215,7 +263,7 @@ export default function DocsPage() {
               </h2>
               <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
                 <p className="text-[var(--text-secondary)]">
-                  Server-side agents and custom runtimes. Use it from OpenClaw or any backend that sends requests with a workspace-generated key.
+                  Server-side agents and custom runtimes. Use it from OpenClaw or any backend that sends requests with a workspace API key.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -230,7 +278,7 @@ export default function DocsPage() {
                   <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4">
                     <p className="text-xs text-[var(--text-muted)] mb-1">API key</p>
                     <code className="text-sm font-mono text-[var(--accent)]">sk-claw-...</code>
-                    <p className="text-[10px] text-[var(--text-muted)] mt-1">Generate in workspace → API Keys</p>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-1">Run <code>apiclaw auth login</code> — key is written to ~/.apiclaw.toml. Or generate one manually in workspace → API Keys.</p>
                   </div>
                 </div>
 
