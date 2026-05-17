@@ -1362,6 +1362,18 @@ Example chain:
     inputSchema: { type: 'object', properties: {} },
   },
   {
+    name: 'discover_missions',
+    description: 'Search mission templates by natural-language query. Returns ranked templates with slug, version, title, description, paramSchema, and match reasons. Ranking combines keyword relevance with live success-rate signal from providerHealth — templates whose steps call providers that have been degrading in the last 30 days slide down automatically. Use this to find the right template by intent before calling start_mission.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Natural-language description of what the agent wants done.' },
+        max_results: { type: 'number', description: 'Default 5, max 25.', default: 5 },
+      },
+      required: ['query'],
+    },
+  },
+  {
     name: 'mission_status',
     description: 'Check status, audit events, cost, and final result for a mission started via start_mission.',
     inputSchema: {
@@ -3196,6 +3208,29 @@ Docs: https://apiclaw.cloud
         const res = await fetch(`${url}/v1/missions/templates`);
         const data = await res.json();
         return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+      }
+
+      case 'discover_missions': {
+        const query = args?.query as string;
+        const maxResults = (args?.max_results as number) ?? 5;
+        if (!query) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'query is required' }, null, 2) }],
+            isError: true,
+          };
+        }
+        const baseUrl = process.env.APICLAW_GATEWAY_URL ||
+          (CONVEX_URL.includes('convex.cloud')
+            ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
+            : 'https://adventurous-avocet-799.convex.site');
+        const res = await fetch(
+          `${baseUrl}/v1/missions/discover?query=${encodeURIComponent(query)}&max_results=${maxResults}`,
+        );
+        const data = await res.json();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+          isError: !res.ok,
+        };
       }
 
       case 'start_mission': {

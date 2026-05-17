@@ -5648,6 +5648,33 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
+// Rank publicly-available mission templates against a natural-language
+// query. Mirrors /v1/discover shape so agents have a single mental model.
+http.route({
+  path: "/v1/missions/discover",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const query = url.searchParams.get("query") ?? "";
+    const maxRaw = url.searchParams.get("max_results");
+    const maxResults = maxRaw ? parseInt(maxRaw, 10) : 5;
+    if (!query) {
+      return jsonResponse(
+        { error: { code: "missing_query", message: "Pass ?query=<text>" } },
+        400,
+      );
+    }
+    const results = await ctx.runQuery(api.missions.discover, { query, maxResults });
+    return jsonResponse({ query, results, count: results.length });
+  }),
+});
+
+http.route({
+  path: "/v1/missions/discover",
+  method: "OPTIONS",
+  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
+});
+
 http.route({
   path: "/v1/missions/start",
   method: "POST",
