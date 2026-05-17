@@ -20,6 +20,7 @@ import type * as backfillSearchLogs from "../backfillSearchLogs.js";
 import type * as billing from "../billing.js";
 import type * as capabilities from "../capabilities.js";
 import type * as chains from "../chains.js";
+import type * as cliAuth from "../cliAuth.js";
 import type * as credits from "../credits.js";
 import type * as crons from "../crons.js";
 import type * as debugFilestackLogs from "../debugFilestackLogs.js";
@@ -90,6 +91,7 @@ declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   capabilities: typeof capabilities;
   chains: typeof chains;
+  cliAuth: typeof cliAuth;
   credits: typeof credits;
   crons: typeof crons;
   debugFilestackLogs: typeof debugFilestackLogs;

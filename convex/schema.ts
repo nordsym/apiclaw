@@ -246,6 +246,26 @@ export default defineSchema({
     .index("by_token", ["token"])
     .index("by_email", ["email"]),
 
+  // CLI browser-loopback auth codes (A-22 agent-native auth).
+  // Three-phase: start() → claim() (after Clerk) → exchange() (PKCE verified).
+  cliAuthCodes: defineTable({
+    authId: v.string(),         // CLI nonce, looked up by browser page
+    state: v.string(),          // CSRF nonce, returned to localhost callback
+    challenge: v.string(),      // PKCE: base64url(sha256(verifier))
+    port: v.number(),           // loopback port (informational)
+    fingerprint: v.optional(v.string()),
+    status: v.string(),         // "pending" | "claimed" | "exchanged"
+    code: v.optional(v.string()),
+    clerkUserId: v.optional(v.string()),
+    email: v.optional(v.string()),
+    claimedAt: v.optional(v.number()),
+    exchangedAt: v.optional(v.number()),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_authId", ["authId"])
+    .index("by_code", ["code"]),
+
   // Credit top-ups (from Stripe payments)
   creditTopups: defineTable({
     agentId: v.string(),
