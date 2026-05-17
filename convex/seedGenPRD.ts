@@ -88,7 +88,7 @@ export const seedGenPRD = mutation({
         status: "active",
         listingStatus: "live",
         authType: "managed",
-        proxyMode: "direct_call",
+        proxyMode: "managed",
         healthStatus: "healthy",
         createdAt: now,
         approvedAt: now,

@@ -29,17 +29,38 @@ export const classifyManaged = mutation({
       if (
         api.listingStatus === "live" &&
         api.authType === "managed" &&
-        api.proxyMode === "direct_call"
+        (api.proxyMode === "managed" || api.proxyMode === "direct_call")
       ) continue;
       await ctx.db.patch(api._id, {
         listingStatus: "live",
         authType: "managed",
-        proxyMode: "direct_call",
+        proxyMode: "managed",
         healthStatus: api.healthStatus ?? "healthy",
       });
       patched++;
     }
     return { scope: "managed", patched };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Step 1b — one-shot backfill: rewrite proxyMode "direct_call" → "managed"
+// on every providerAPIs row that still carries the retired literal. New
+// writers already emit "managed"; readers accept both during the transition
+// so this can run any time without coordination.
+// ---------------------------------------------------------------------------
+export const backfillProxyModeToManaged = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query("providerAPIs").collect();
+    let patched = 0;
+    for (const row of rows) {
+      if (row.proxyMode === "direct_call") {
+        await ctx.db.patch(row._id, { proxyMode: "managed" });
+        patched++;
+      }
+    }
+    return { patched, total: rows.length };
   },
 });
 
@@ -290,7 +311,7 @@ export const promoteToManaged = mutation({
     const patch: any = {
       authType: "managed",
       listingStatus: "live",
-      proxyMode: "direct_call",
+      proxyMode: "managed",
       healthStatus: row.healthStatus ?? "healthy",
       consecutiveFailures: 0,
     };
