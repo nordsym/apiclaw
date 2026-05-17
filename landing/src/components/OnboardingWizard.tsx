@@ -311,12 +311,13 @@ function DoorsStep({ onFinish, busy }: { onFinish: () => void; busy: boolean }) 
         <h3 className="text-lg font-semibold">You&apos;re set up</h3>
       </div>
       <p className="text-sm text-[var(--text-muted)] mb-4">
-        Three ways to use APIClaw. Pick whichever fits — or use them all.
+        Four ways to use APIClaw. One auth, every door — run `apiclaw auth login` once.
       </p>
       <div className="space-y-2">
-        <DoorRow title="MCP" desc="Install the .mcpb extension and your agent gets discover_apis, call_api, etc. No keys needed." />
-        <DoorRow title="CLI" desc="`npx @nordsym/apiclaw login` then `apiclaw discover` — for terminal, scripts, CI. No keys needed." />
-        <DoorRow title="HTTP gateway" desc="Generate an sk-claw- key for app integrations (n8n, custom backends, OpenAI-compatible clients). Optional." />
+        <DoorRow title="MCP (local)" desc="Install the .mcpb extension or paste the JSON config. Your agent gets discover_apis, call_api, etc." />
+        <DoorRow title="CLI" desc={`apiclaw discover "currency" then apiclaw call apilayer/fixer-latest — for terminal, scripts, CI.`} />
+        <DoorRow title="HTTP gateway" desc="export APICLAW_API_KEY=sk-claw-... (the key is written to ~/.apiclaw.toml by auth login). OpenAI-compatible." />
+        <DoorRow title="Remote MCP" desc="Point any OAuth-aware host at apiclaw.cloud/mcp. DCR + PKCE handled. Works in Grok and any DCR-compatible client." />
       </div>
       <button
         onClick={onFinish}

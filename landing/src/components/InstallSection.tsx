@@ -7,6 +7,7 @@ import {
   Check,
   Download,
   ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 
 type OS = "mac" | "win" | "linux" | "unknown";
@@ -33,6 +34,27 @@ const ONE_LINERS: Record<OS, { label: string; cmd: string; sub?: string }> = {
     sub: "Requires Node.js 18+.",
   },
 };
+
+// Cursor deeplink for one-click MCP install (Cursor accepts a base64-encoded
+// JSON config in the cursor:// protocol).
+const CURSOR_CONFIG = btoa(
+  JSON.stringify({
+    "@nordsym/apiclaw": {
+      command: "npx",
+      args: ["-y", "@nordsym/apiclaw"],
+    },
+  })
+);
+const CURSOR_DEEPLINK = `cursor://anysphere.cursor-mcp/install?name=apiclaw&config=${CURSOR_CONFIG}`;
+
+const GENERIC_MCP_JSON = `{
+  "mcpServers": {
+    "apiclaw": {
+      "command": "npx",
+      "args": ["-y", "@nordsym/apiclaw"]
+    }
+  }
+}`;
 
 function detectOS(): OS {
   if (typeof navigator === "undefined") return "unknown";
@@ -78,8 +100,30 @@ function CopyableLine({
   );
 }
 
+function CopyableBlock({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handle = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="relative rounded-xl border border-border bg-surface p-3 font-mono text-xs">
+      <button
+        onClick={handle}
+        aria-label="Copy snippet"
+        className="absolute top-2 right-2 p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition"
+      >
+        {copied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4" />}
+      </button>
+      <pre className="text-text-primary whitespace-pre overflow-x-auto pr-8 scrollbar-none">{text}</pre>
+    </div>
+  );
+}
+
 export function InstallSection() {
   const [os, setOs] = useState<OS>("unknown");
+  const [snippetOpen, setSnippetOpen] = useState(false);
 
   useEffect(() => {
     setOs(detectOS());
@@ -96,7 +140,7 @@ export function InstallSection() {
             Up and running in 30 seconds.
           </h2>
           <p className="text-text-secondary text-base sm:text-lg mt-3 leading-relaxed">
-            Pick a door from the section above. Each one requires email signup and connects to the same workspace.
+            One install, one auth. The same workspace works across all four doors — local MCP, CLI, HTTP, Remote MCP.
           </p>
         </div>
 
@@ -109,7 +153,7 @@ export function InstallSection() {
               </span>
               <div>
                 <div className="text-sm font-semibold text-text-primary">
-                  Quick install · detected {oneLiner.label}
+                  1. Install · detected {oneLiner.label}
                 </div>
                 <div className="text-xs text-text-muted">{oneLiner.sub}</div>
               </div>
@@ -136,6 +180,7 @@ export function InstallSection() {
             prompt={os === "win" ? "PS>" : "$"}
           />
 
+          {/* Alternate install paths */}
           <div className="grid sm:grid-cols-3 gap-3 mt-4">
             <a
               href="/apiclaw.mcpb"
@@ -143,25 +188,59 @@ export function InstallSection() {
               className="group inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-[13px] shadow-sm transition-all duration-200 hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98]"
             >
               <Download className="w-3.5 h-3.5" />
-              .mcpb for Claude
+              .mcpb for Claude Desktop
             </a>
             <a
-              href="/sign-in"
+              href={CURSOR_DEEPLINK}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-[13px] transition-all duration-200 active:scale-[0.98]"
             >
-              Sign in
+              Add to Cursor
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
-            <a
-              href="/docs"
+            <button
+              type="button"
+              onClick={() => setSnippetOpen((v) => !v)}
               className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border bg-surface hover:border-accent/40 hover:bg-surface-elevated text-text-primary font-medium text-[13px] transition-all duration-200 active:scale-[0.98]"
             >
-              Read the docs
-            </a>
+              Other MCP clients
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${snippetOpen ? "rotate-180" : ""}`}
+              />
+            </button>
           </div>
+
+          {snippetOpen && (
+            <div className="mt-3 space-y-2">
+              <p className="text-xs text-text-muted">
+                Paste this into your MCP client config (Windsurf, Continue, Zed, custom backends):
+              </p>
+              <CopyableBlock text={GENERIC_MCP_JSON} />
+            </div>
+          )}
+        </div>
+
+        {/* Step 2: auth login — the canonical agent-native flow */}
+        <div className="rounded-2xl border border-border bg-surface-elevated p-5 sm:p-6 shadow-xl mt-4 transition-all duration-200 hover:shadow-[0_20px_60px_-20px_rgba(239,68,68,0.18)]">
+          <div className="flex items-center gap-2.5 mb-4">
+            <span className="inline-flex w-9 h-9 rounded-lg bg-accent/10 items-center justify-center text-accent">
+              <TerminalIcon className="w-5 h-5" />
+            </span>
+            <div>
+              <div className="text-sm font-semibold text-text-primary">
+                2. Authenticate · once, for every door
+              </div>
+              <div className="text-xs text-text-muted">
+                Opens your browser, one-tap sign-in via Clerk, writes ~/.apiclaw.toml.
+              </div>
+            </div>
+          </div>
+          <CopyableLine cmd="npx @nordsym/apiclaw auth login" prompt="$" />
           <p className="text-[11px] text-text-muted mt-4 inline-flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Free email signup required for every door, including discovery.
+            Same auth across MCP, CLI, HTTP gateway, and Remote MCP. No dashboard visit, no key copy-paste, no inbox round-trip.
+          </p>
+          <p className="text-[11px] text-text-muted mt-2">
+            On a headless server or SSH? Add <code className="text-accent">--email-fallback</code> for the magic-link flow.
           </p>
         </div>
       </div>

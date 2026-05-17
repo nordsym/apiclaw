@@ -241,7 +241,11 @@ Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_
 
 Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a mission template to generate a structured PRD; more land regularly.
 
-Pricing: free tier of 25 calls/month after email signup. Email signup is required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
+Pricing: free tier of 25 calls/month per workspace. Workspace required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
+
+Auth (agent-native, ~10s, zero inbox):
+  npx @nordsym/apiclaw auth login
+Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), writes ~/.apiclaw.toml. The same auth covers MCP, CLI, HTTP, and Remote MCP. If a tool returns action="agent_auth_required", run that exact command. Headless/SSH: add --email-fallback.
 
 When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
 
@@ -662,7 +666,7 @@ Install:
               Choose the door that matches how you run agents.
             </h2>
             <p className="text-text-muted text-base sm:text-lg mt-3 max-w-2xl mx-auto">
-              Free email signup is required for every door. The workspace is the same after you enter.
+              One auth, every door. <code className="text-accent">apiclaw auth login</code> opens your browser, signs you in, writes ~/.apiclaw.toml — and every door reads the same workspace from there.
             </p>
           </div>
 
@@ -859,7 +863,7 @@ Install:
 
             <p className="mt-5 text-xs text-text-muted inline-flex items-center gap-2">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Free email signup required for every door, including discovery.
+              One <code className="text-accent">apiclaw auth login</code> covers all four doors. Same workspace, no dashboard visit.
             </p>
           </div>
         </div>
@@ -1128,7 +1132,11 @@ Install:
               },
               {
                 q: "How does my agent connect?",
-                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and OpenClaw-style agents. Remote MCP for connected clients. Same workspace, same auth, same logs.`
+                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and OpenClaw-style agents. Remote MCP for connected clients. Same workspace, same auth, same logs. One \`apiclaw auth login\` covers all four.`
+              },
+              {
+                q: "How does signup work?",
+                a: `Run \`npx @nordsym/apiclaw auth login\` in your terminal. Your browser opens, you click once via Google or passwordless email (powered by Clerk), and the CLI writes ~/.apiclaw.toml. ~10 seconds, no inbox round-trip. The same auth then works across MCP, CLI, HTTP, and Remote MCP. Headless / SSH? Add --email-fallback for the magic-link flow.`
               },
               {
                 q: "What can I actually call?",
@@ -1148,7 +1156,7 @@ Install:
               },
               {
                 q: "Do I have to sign up?",
-                a: `Yes. A free email signup is required for every door, including discovery. Same workspace covers all four doors.`
+                a: `Yes — a free workspace is required for every door, including discovery. The signup IS the auth flow: \`apiclaw auth login\` creates the workspace on first sign-in. Free tier: 25 calls/month.`
               },
               {
                 q: "I'm building my own agent runtime. Why APIClaw?",
