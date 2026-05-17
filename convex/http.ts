@@ -13,7 +13,7 @@ import {
 
 const http = httpRouter();
 
-// Provider catalog — all 20 Direct Call providers
+// Provider catalog — all 20 managed providers
 interface ProviderMeta {
   name: string;
   description: string;
@@ -3326,7 +3326,7 @@ http.route({
 // /v1/embeddings — OpenAI-compatible embedding gateway
 // ==============================================
 // Accepts: Authorization: Bearer sk-claw-...
-// Routes by model prefix to Direct Call embedding providers:
+// Routes by model prefix to managed-provider embedding providers:
 //   voyage/*   → Voyage AI  (default: voyage-3-large)
 //   mistral/*  → Mistral     (mistral-embed)
 //   openai/*   → OpenAI      (text-embedding-3-small, -large, ada-002)
@@ -5242,7 +5242,7 @@ http.route({
         by_via: stats.byVia,
         last_refreshed_at: stats.lastSeenAt ? new Date(stats.lastSeenAt).toISOString() : null,
         note: "Live model catalog. Every entry is routable via /v1/chat/completions or /v1/embeddings. Refreshed every 6h from upstream provider /models endpoints. POST /v1/chat/completions with model=<id> to call any of these.",
-        non_llm_apis: Object.keys(PROVIDERS).length + " Direct Call providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
+        non_llm_apis: Object.keys(PROVIDERS).length + " managed providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
       },
     });
   }),

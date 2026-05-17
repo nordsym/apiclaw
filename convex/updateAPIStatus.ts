@@ -1,7 +1,7 @@
 import { mutation } from "./_generated/server";
 
 /**
- * Update providerAPIs status to reflect actual Direct Call status
+ * Update providerAPIs status to reflect actual managed-provider status
  * Run: npx convex run updateAPIStatus:update
  */
 export const update = mutation({

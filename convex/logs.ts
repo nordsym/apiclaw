@@ -8,7 +8,7 @@ import { api } from "./_generated/api";
 
 /**
  * Create a log entry for an API call
- * Called after each Direct Call execution
+ * Called after each managed-provider execution
  */
 export const createLog = mutation({
   args: {

@@ -1,5 +1,5 @@
 /**
- * APIClaw Direct Call - Execute API calls through connected providers
+ * APIClaw managed-provider routing - Execute API calls through connected providers
  */
 
 import { getCredentials } from './credentials.js';

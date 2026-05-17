@@ -521,7 +521,7 @@ export function getAPIDetails(
 ): APIDetailsResponse | null {
   const { compact = false } = options;
   
-  // Check if it's a Direct Call provider (hardcoded handlers)
+  // Check if it's a managed provider (hardcoded handlers)
   const directSpec = MANAGED_PROVIDER_SPECS[apiId];
   if (directSpec) {
     if (compact) {

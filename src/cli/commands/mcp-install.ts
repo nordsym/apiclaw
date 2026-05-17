@@ -350,7 +350,7 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
       console.log(chalk.bold('What you get:\n'));
       console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
       console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
-      console.log(chalk.cyan('  🔑 Direct Call') + ' 1,500+ premium (APIClaw manages keys)');
+      console.log(chalk.cyan('  🔑 Managed') + ' 1,500+ premium (APIClaw manages keys)');
       console.log('');
       console.log('Next:');
       console.log('  1. Restart your MCP client');
@@ -362,7 +362,7 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
       console.log(chalk.bold('What you have:\n'));
       console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
       console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
-      console.log(chalk.cyan('  🔑 Direct Call') + ' 1,500+ premium (APIClaw manages keys)');
+      console.log(chalk.cyan('  🔑 Managed') + ' 1,500+ premium (APIClaw manages keys)');
       console.log('');
       console.log('Run with --force to reinstall (coming soon).\n');
     }

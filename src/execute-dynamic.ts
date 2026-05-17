@@ -1,6 +1,6 @@
 /**
  * APIClaw Dynamic Executor
- * Executes provider-configured actions via self-service Direct Call
+ * Executes provider-configured actions via self-service managed-provider routing
  */
 
 import { decryptKey, validateBaseUrl } from './crypto.js';
@@ -114,7 +114,7 @@ export async function hasDynamicConfig(providerId: string): Promise<boolean> {
 }
 
 /**
- * Fetch provider direct call configuration from Convex
+ * Fetch managed-provider routing configuration from Convex
  */
 export async function getProviderConfig(providerId: string): Promise<ProviderDirectCallConfig | null> {
   // First try by API slug (for agent execution by name)
@@ -142,7 +142,7 @@ export async function getProviderConfig(providerId: string): Promise<ProviderDir
  * Fetch action configuration from Convex
  */
 export async function getActionConfig(providerId: string, actionName: string): Promise<ProviderAction | null> {
-  // First get the direct call config to get directCallId
+  // First get the managed routing config to get directCallId
   const config = await getProviderConfig(providerId);
   if (!config) return null;
   

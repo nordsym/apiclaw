@@ -55,7 +55,7 @@ async function convertCurrency(): Promise<void> {
 
   console.log('');
   console.log(
-    chalk.dim('  Powered by APIClaw Direct Call · exchangerates_data via APILayer')
+    chalk.dim('  Powered by APIClaw managed-provider routing · exchangerates_data via APILayer')
   );
   console.log(
     chalk.dim(`  No API key needed. Your agent can call this too.\n`)
@@ -92,7 +92,7 @@ export async function demoCommand(): Promise<void> {
     await convertCurrency();
     spinner.stop();
 
-    console.log(chalk.green('  ✓ That was a live Direct Call through APIClaw.'));
+    console.log(chalk.green('  ✓ That was a live managed-provider call through APIClaw.'));
     console.log(chalk.dim('  20 providers, hundreds of APIs. Zero API keys needed.\n'));
     console.log(
       chalk.bold('  Next step:') +

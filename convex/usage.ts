@@ -141,7 +141,7 @@ export const getProviderUsage = query({
 });
 
 /**
- * Get Direct Call specific usage stats
+ * Get managed-provider specific usage stats
  */
 export const getDirectCallUsage = query({
   args: {

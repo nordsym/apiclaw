@@ -498,7 +498,7 @@ export const getApiById = query({
     try {
       const api = await ctx.db.get(args.apiId as any);
       if (api) {
-        // Check if it has Direct Call configured
+        // Check if it has managed routing configured
         const directCall = await ctx.db
           .query("providerDirectCall")
           .filter((q) => q.eq(q.field("apiId"), args.apiId))
@@ -512,7 +512,7 @@ export const getApiById = query({
   },
 });
 
-// Get provider APIs with Direct Call status
+// Get provider APIs with managed-provider status
 export const getProviderAPIsWithStatus = query({
   args: { providerId: v.string() },
   handler: async (ctx, args) => {
@@ -521,7 +521,7 @@ export const getProviderAPIsWithStatus = query({
       .filter((q) => q.eq(q.field("providerId"), args.providerId as any))
       .collect();
     
-    // Add Direct Call status to each API
+    // Add managed-provider status to each API
     const apisWithStatus = await Promise.all(
       apis.map(async (api) => {
         const directCall = await ctx.db
@@ -652,7 +652,7 @@ export const deleteAPI = mutation({
     // Delete the API
     await ctx.db.delete(args.apiId as any);
 
-    // Also delete any Direct Call config
+    // Also delete any managed routing config
     const directCallConfig = await ctx.db
       .query("providerDirectCall")
       .filter((q) => q.eq(q.field("apiId"), args.apiId))
@@ -722,7 +722,7 @@ export const debugDeleteProvider = mutation({
     const apis = await ctx.db.query("providerAPIs").filter(q => q.eq(q.field("providerId"), providerId)).collect();
     for (const a of apis) await ctx.db.delete(a._id);
     
-    // Delete direct call configs
+    // Delete managed routing configs
     const configs = await ctx.db.query("providerDirectCall").filter(q => q.eq(q.field("providerId"), providerId)).collect();
     for (const c of configs) {
       // Delete actions for this config
@@ -821,7 +821,7 @@ export const getAnalytics = query({
 
     const periodLogs = allLogs.filter((l) => l.createdAt >= startTime);
 
-    // Split into direct calls vs discovery
+    // Split into managed-provider rows vs discovery
     const directCalls = periodLogs.filter((l) => !(l as any).action?.startsWith("discovery:"));
     const discoveries = periodLogs.filter((l) => (l as any).action?.startsWith("discovery:"));
 

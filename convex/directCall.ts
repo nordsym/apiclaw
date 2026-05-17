@@ -6,7 +6,7 @@ import { mutation, query } from "./_generated/server";
 // ============================================
 
 /**
- * Save/update provider's Direct Call configuration
+ * Save/update provider's managed routing configuration
  */
 export const saveDirectCallConfig = mutation({
   args: {
@@ -61,7 +61,7 @@ export const saveDirectCallConfig = mutation({
 });
 
 /**
- * Save Direct Call config with token auth (used by frontend)
+ * Save managed routing config with token auth (used by frontend)
  */
 export const saveConfig = mutation({
   args: {
@@ -165,7 +165,7 @@ export const saveConfig = mutation({
 });
 
 /**
- * Create/update an action for a Direct Call config
+ * Create/update an action for a managed routing config
  */
 export const saveAction = mutation({
   args: {
@@ -240,7 +240,7 @@ export const deleteAction = mutation({
 });
 
 /**
- * Publish Direct Call - set status to live
+ * Publish managed-provider - set status to live
  * Also marks apiListed earn progress for the provider's workspace
  */
 export const publishDirectCall = mutation({
@@ -250,10 +250,10 @@ export const publishDirectCall = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
     
-    // Get the direct call config to find the provider
+    // Get the managed routing config to find the provider
     const config = await ctx.db.get(args.id);
     if (!config) {
-      throw new Error("Direct Call config not found");
+      throw new Error("managed routing config not found");
     }
 
     await ctx.db.patch(args.id, {
@@ -338,7 +338,7 @@ function calculateEarnTotal(progress: any): number {
 }
 
 /**
- * Set Direct Call status (draft, testing, live)
+ * Set managed-provider status (draft, testing, live)
  */
 export const setStatus = mutation({
   args: {
@@ -364,7 +364,7 @@ export const setStatus = mutation({
 // ============================================
 
 /**
- * Get Direct Call config by providerId
+ * Get managed routing config by providerId
  */
 export const getDirectCallConfig = query({
   args: {
@@ -379,7 +379,7 @@ export const getDirectCallConfig = query({
 });
 
 /**
- * Get Direct Call config by ID
+ * Get managed routing config by ID
  */
 export const getDirectCallConfigById = query({
   args: {
@@ -391,7 +391,7 @@ export const getDirectCallConfigById = query({
 });
 
 /**
- * Get Direct Call config by API ID
+ * Get managed routing config by API ID
  */
 export const getDirectCallConfigByApiId = query({
   args: {
@@ -406,7 +406,7 @@ export const getDirectCallConfigByApiId = query({
 });
 
 /**
- * Get all actions for a Direct Call config
+ * Get all actions for a managed routing config
  */
 export const getActions = query({
   args: {
@@ -451,7 +451,7 @@ export const getActionById = query({
 });
 
 /**
- * DEBUG: Get all Direct Call configs
+ * DEBUG: Get all managed routing configs
  */
 export const getAllConfigs = query({
   args: {},
@@ -461,7 +461,7 @@ export const getAllConfigs = query({
 });
 
 /**
- * Get all live Direct Call configs (for public API discovery)
+ * Get all live managed routing configs (for public API discovery)
  */
 export const getLiveConfigs = query({
   args: {},
@@ -474,7 +474,7 @@ export const getLiveConfigs = query({
 });
 
 /**
- * Get Direct Call config by API ID (for test console)
+ * Get managed routing config by API ID (for test console)
  */
 export const getConfig = query({
   args: {
@@ -493,8 +493,8 @@ export const getConfig = query({
 });
 
 /**
- * Get Direct Call config by API slug (for MCP/agent execution)
- * Looks up API by name, then gets the Direct Call config
+ * Get managed routing config by API slug (for MCP/agent execution)
+ * Looks up API by name, then gets the managed routing config
  */
 export const getByApiSlug = query({
   args: {
@@ -515,7 +515,7 @@ export const getByApiSlug = query({
       return null;
     }
     
-    // Get Direct Call config for this API
+    // Get managed routing config for this API
     const config = await ctx.db
       .query("providerDirectCall")
       .withIndex("by_apiId")
@@ -590,7 +590,7 @@ export const testAction = mutation({
     if (!config) {
       return {
         success: false,
-        error: "Direct Call config not found",
+        error: "managed routing config not found",
         latencyMs: Date.now() - startTime,
       };
     }

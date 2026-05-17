@@ -304,7 +304,7 @@ export default defineSchema({
     //   "discovery" — searchable in registry, not callable
     listingStatus: v.optional(v.string()),
     // How /v1/call authenticates upstream:
-    //   "managed" — APIClaw holds the provider key (46 Direct Call adapters)
+    //   "managed" — APIClaw holds the provider key (46 managed-provider adapters)
     //   "none"    — keyless public API, universal pass-through
     //   "unknown" — auth model not mapped, cannot be called (= discovery lane)
     authType: v.optional(v.string()),
@@ -525,7 +525,7 @@ export default defineSchema({
   // SELF-SERVICE DIRECT CALL TABLES
   // ============================================
 
-  // Provider Direct Call configuration (master key, limits, pricing)
+  // Provider managed routing configuration (master key, limits, pricing)
   providerDirectCall: defineTable({
     providerId: v.id("providers"),
     workspaceId: v.optional(v.id("workspaces")), // Parallel workspace link
@@ -551,7 +551,7 @@ export default defineSchema({
     .index("by_apiId", ["apiId"])
     .index("by_status", ["status"]),
 
-  // Actions defined by providers for their Direct Call APIs
+  // Actions defined by providers for their managed-provider APIs
   providerActions: defineTable({
     directCallId: v.id("providerDirectCall"),
     name: v.string(), // machine name, e.g. "send_sms"
@@ -581,7 +581,7 @@ export default defineSchema({
     .index("by_directCallId", ["directCallId"])
     .index("by_directCallId_name", ["directCallId", "name"]),
 
-  // Usage logs for Direct Call actions
+  // Usage logs for managed-provider actions
   usageLog: defineTable({
     userId: v.string(),
     providerId: v.id("providers"),
@@ -645,7 +645,7 @@ export default defineSchema({
     .index("by_computedAt", ["computedAt"]),
 
   // ============================================
-  // WAITLIST (for Direct Call provider leads)
+  // WAITLIST (for managed provider leads)
   // ============================================
 
   waitlist: defineTable({

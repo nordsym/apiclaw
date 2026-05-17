@@ -180,13 +180,13 @@ async function discover(query: string): Promise<void> {
     
     log(`\n${colors.bright}Found ${results.length} APIs:${colors.reset}\n`);
     
-    // Get connected providers for Direct Call detection
+    // Get connected providers for managed-provider detection
     const connected = getConnectedProviders().map(p => p.provider.toLowerCase());
     
     for (const result of results) {
       const api = result.provider;
       const isDirectCall = connected.includes(api.id?.toLowerCase() || api.name.toLowerCase().replace(/\s+/g, '_'));
-      const directCallBadge = isDirectCall ? `${colors.green}[Direct Call]${colors.reset}` : '';
+      const directCallBadge = isDirectCall ? `${colors.green}[managed]${colors.reset}` : '';
       log(`${colors.cyan}${api.name}${colors.reset} ${directCallBadge}`);
       log(`   ${api.description}`);
       log(`   Category: ${api.category}`);
@@ -202,7 +202,7 @@ async function listConnected(): Promise<void> {
   try {
     const providers = getConnectedProviders();
     
-    log(`\n${colors.bright}Direct Call Providers (no API key needed):${colors.reset}\n`);
+    log(`\n${colors.bright}managed-provider Providers (no API key needed):${colors.reset}\n`);
     
     for (const p of providers) {
       log(`${colors.cyan}${p.provider}${colors.reset}`);
@@ -246,7 +246,7 @@ ${colors.cyan}Commands:${colors.reset}
   register <email>      Send magic link to authenticate
   status                Check authentication status
   discover <query>      Search for APIs by capability
-  list                  Show Direct Call providers
+  list                  Show managed providers
   call <provider> <action> <json-params>
                         Call an API (e.g., call brave_search search {"q":"test"})
   help                  Show this help

@@ -325,7 +325,7 @@ function calculateMaxEarnable(): number {
 // ============================================
 
 /**
- * Mark first direct call as complete
+ * Mark first managed-provider call as complete
  */
 export const markFirstDirectCall = mutation({
   args: {
@@ -719,7 +719,7 @@ export const trackApiCallInternal = internalMutation({
     const updates: Record<string, any> = { updatedAt: now };
     let earnedCalls = 0;
 
-    // Check first direct call
+    // Check first managed-provider call
     if (!progress.firstDirectCall) {
       updates.firstDirectCall = true;
       updates.firstDirectCallAt = now;

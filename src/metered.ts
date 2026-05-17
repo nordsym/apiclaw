@@ -29,7 +29,7 @@ interface MeteredOptions {
   customerId?: string;
   /** Skip usage reporting (for testing/free tier) */
   skipBilling?: boolean;
-  /** Provider-specific API key (Direct Call mode) */
+  /** Provider-specific API key (managed-provider mode) */
   customerKey?: string;
   /** User ID for dynamic providers */
   userId?: string;

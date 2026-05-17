@@ -163,7 +163,7 @@ async function handleCallAPI(req: IncomingMessage, res: ServerResponse): Promise
       error = result.error;
     } else {
       apiType = 'direct';
-      // For Direct Call APIs, use Hivr's workspace/credentials
+      // For managed-provider APIs, use Hivr's workspace/credentials
       // TODO: Get Hivr workspace token from env or config
       const customerKey = process.env.APICLAW_HIVR_CUSTOMER_KEY;
       const stripeCustomerId = process.env.APICLAW_HIVR_STRIPE_CUSTOMER;

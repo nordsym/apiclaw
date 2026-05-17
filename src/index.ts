@@ -441,7 +441,7 @@ async function validateSession(): Promise<boolean> {
  */
 async function trackEarnProgress(workspaceId: string, provider: string, action: string): Promise<void> {
   try {
-    // Track first direct call
+    // Track first managed-provider call
     await convex.mutation("earnProgress:markFirstDirectCall" as any, {
       workspaceId: workspaceId as any,
     });
@@ -1694,7 +1694,7 @@ Docs: https://apiclaw.cloud
               text: safeJsonStringify({
                 status: 'error',
                 message: `API not found: ${apiId}`,
-                hint: 'Try discover_apis to search, or list_connected for direct-call APIs',
+                hint: 'Try discover_apis to search, or list_connected for managed-provider APIs',
               })
               }
             ]
@@ -3600,7 +3600,7 @@ async function main() {
 
 ✓ 19,000+ APIs indexed
 ✓ 23 categories  
-✓ 9 direct-call providers ready
+✓ 9 managed providers ready
 ${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - use register_owner'}
 
 Quick Start:
@@ -3608,7 +3608,7 @@ Quick Start:
   discover_apis("search the web")
   call_api({ provider: "brave_search", ... })
 
-Direct Call (no API key needed):
+Managed (no API key needed — APIClaw holds them):
   list_connected()
 
 Interactive CLI mode:

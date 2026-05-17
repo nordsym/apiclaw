@@ -5,7 +5,7 @@ import { mutation, query } from "./_generated/server";
  * GTM alignment: binary funnel.
  *
  *   Discovery — searchable universe (full 20k+ registry)
- *   Callable  — 46 managed Direct Call + ~1,635 keyless Open APIs
+ *   Callable  — 46 managed managed-provider + ~1,635 keyless Open APIs
  *
  * Rules (IRONCLAD):
  *   - No row is ever deleted.
@@ -15,7 +15,7 @@ import { mutation, query } from "./_generated/server";
  */
 
 // ---------------------------------------------------------------------------
-// Step 1 — Flag the existing 46 managed Direct Call providers.
+// Step 1 — Flag the existing 46 managed managed providers.
 // Identifies them by presence of providerId (the 1,660 registry seed has none).
 // ---------------------------------------------------------------------------
 export const classifyManaged = mutation({

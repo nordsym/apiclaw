@@ -518,9 +518,9 @@ export function getOpenAPIStats(): {
  *
  *  - Tier 1 (Discovery): the indexed registry — searchable, free, no auth
  *  - Tier 2 (Open API): callable without keys, free
- *  - Tier 3 (Direct Call): premium, APIClaw owns the keys
+ *  - Tier 3 (managed): premium, APIClaw owns the keys
  *
- * The Direct Call count is intentionally a constant here. It's small,
+ * The managed-provider count is intentionally a constant here. It's small,
  * changes rarely, and lives canonically in the Apiclaw MOC. If it ever
  * grows past a handful, replace this constant with a Convex query.
  */

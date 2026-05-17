@@ -1,6 +1,6 @@
 /**
  * APIClaw Analytics - Track all API usage
- * Both Direct Call and Open API calls are logged here
+ * Both managed and Open API calls are logged here
  */
 
 import { appendFileSync, existsSync, mkdirSync } from 'fs';

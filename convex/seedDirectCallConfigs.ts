@@ -2,7 +2,7 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
- * Seed Direct Call configs + actions for all 27 APILayer APIs
+ * Seed managed routing configs + actions for all 27 APILayer APIs
  * Sets status: "live" and creates action records matching MCP proxy
  *
  * Run: npx convex run seedDirectCallConfigs:seed
@@ -253,7 +253,7 @@ const API_CONFIGS: Record<string, {
 };
 
 /**
- * Seed Direct Call configs for any provider by ID.
+ * Seed managed routing configs for any provider by ID.
  * Run: npx convex run seedDirectCallConfigs:seedForProvider '{"providerId":"<id>"}'
  */
 export const seedForProvider = mutation({
@@ -403,7 +403,7 @@ export const seed = mutation({
       const config = API_CONFIGS[api.name];
       if (!config) continue;
 
-      // Check if Direct Call config already exists
+      // Check if managed routing config already exists
       const existing = await ctx.db
         .query("providerDirectCall")
         .withIndex("by_apiId", (q: any) => q.eq("apiId", api._id))
