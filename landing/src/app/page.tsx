@@ -185,6 +185,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [showContextCopied, setShowContextCopied] = useState(false);
+  const [showHeroCmdCopied, setShowHeroCmdCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
   const [showManagedModal, setShowManagedModal] = useState(false);
@@ -601,16 +602,31 @@ Install:
                   download
                   className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-text-primary hover:bg-text-secondary text-background font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
                 >
-                  .mcpb for Claude
+                  Install to Claude Desktop
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </a>
-                <a
-                href="/sign-in"
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated hover:border-accent/30 text-text-primary font-semibold text-sm sm:text-[15px] transition-all duration-200 active:scale-[0.98]"
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("npx @nordsym/apiclaw auth login");
+                    setShowHeroCmdCopied(true);
+                    setTimeout(() => setShowHeroCmdCopied(false), 2000);
+                  }}
+                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated hover:border-accent/40 text-text-primary font-mono text-xs sm:text-sm transition-all duration-200 active:scale-[0.98]"
+                  title="Copy command"
                 >
-                  Sign in
-                </a>
+                  <span className="text-accent select-none">$</span>
+                  <span>npx @nordsym/apiclaw auth login</span>
+                  {showHeroCmdCopied ? (
+                    <Check className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors" />
+                  )}
+                </button>
               </div>
+              <p className="text-xs text-text-muted mb-5 max-w-xl">
+                One install for Claude Desktop, one command for everywhere else. Same workspace across MCP, CLI, HTTP, and Remote MCP — works on macOS, Linux, and Windows.
+              </p>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
               <a href="#who-is-this-for" className="hover:text-text-primary transition inline-flex items-center gap-1.5">
