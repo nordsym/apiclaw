@@ -861,10 +861,29 @@ Install:
               ))}
             </div>
 
-            <p className="mt-5 text-xs text-text-muted inline-flex items-center gap-2">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              One <code className="text-accent">apiclaw auth login</code> covers all four doors. Same workspace, no dashboard visit.
-            </p>
+            <div className="mt-5 rounded-xl border border-border bg-surface px-4 py-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-xs text-text-muted">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  One command. Same workspace across all four doors.
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("npx @nordsym/apiclaw auth login");
+                  }}
+                  className="font-mono text-xs sm:text-sm text-text-primary bg-surface-elevated border border-border rounded-md px-3 py-1.5 hover:border-accent/40 transition-colors flex items-center gap-2"
+                  title="Copy command"
+                >
+                  <span className="text-accent select-none">$</span>
+                  <span>npx @nordsym/apiclaw auth login</span>
+                  <Copy className="w-3.5 h-3.5 text-text-muted" />
+                </button>
+              </div>
+              <p className="text-[11px] text-text-muted mt-2.5 leading-relaxed">
+                Works on macOS, Linux, and Windows — same command everywhere Node is installed. Headless / SSH? Add <code className="text-accent">--email-fallback</code>.
+              </p>
+            </div>
           </div>
         </div>
       </section>

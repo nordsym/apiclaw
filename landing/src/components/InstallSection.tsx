@@ -237,7 +237,7 @@ export function InstallSection() {
           <CopyableLine cmd="npx @nordsym/apiclaw auth login" prompt="$" />
           <p className="text-[11px] text-text-muted mt-4 inline-flex items-center gap-1.5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Same auth across MCP, CLI, HTTP gateway, and Remote MCP. No dashboard visit, no key copy-paste, no inbox round-trip.
+            Same auth across MCP, CLI, HTTP gateway, and Remote MCP. Browser opens, one tap, ~10 seconds.
           </p>
           <p className="text-[11px] text-text-muted mt-2">
             On a headless server or SSH? Add <code className="text-accent">--email-fallback</code> for the magic-link flow.
