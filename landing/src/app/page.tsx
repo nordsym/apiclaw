@@ -251,10 +251,13 @@ Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), 
 When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
 
 Install:
-- Claude Desktop: https://apiclaw.cloud/apiclaw.mcpb
-- Terminal: curl -fsSL https://apiclaw.cloud/install.sh | bash
-- Remote MCP: https://apiclaw.cloud/mcp
-- Workspace + docs: https://apiclaw.cloud`;
+- Claude Desktop (one-click .mcpb): https://apiclaw.cloud/apiclaw.mcpb
+- Any OS via terminal (install + auth, ~30s total):
+    curl -fsSL https://apiclaw.cloud/install.sh | bash
+    npx @nordsym/apiclaw auth login
+- Remote MCP (OAuth, zero install): https://apiclaw.cloud/mcp
+- Workspace: https://apiclaw.cloud/workspace
+- Docs: https://apiclaw.cloud/docs`;
     navigator.clipboard.writeText(context);
     setShowContextCopied(true);
     setTimeout(() => setShowContextCopied(false), 2500);
