@@ -7,8 +7,9 @@ import { mutation } from "./_generated/server";
 export const update = mutation({
   args: {},
   handler: async (ctx) => {
-    // APIs that are blocked by subscription tier
-    const blocked = ["Number Verification API", "World News API", "Image Crop API", "Form API", "Skills API"];
+    // APIs that are blocked by subscription tier (HTTP 403 "cannot consume" against unified key,
+    // verified 2026-05-18). Image Crop and Skills returned 200 OK and were removed from this list.
+    const blocked = ["Number Verification API", "World News API", "Form API"];
     // PDF Layer is rate limited
     const rateLimited = ["PDF Layer"];
 

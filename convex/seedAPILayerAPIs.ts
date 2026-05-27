@@ -5,12 +5,13 @@ import { mutation } from "./_generated/server";
  * Run with: npx convex run seedAPILayerAPIs:seedAll '{"email":"gustav_hemmingsson@hotmail.com"}'
  */
 
+// Subscription-gated APIs from APILayer side (HTTP 403 "You cannot consume this service").
+// Confirmed by live test against the unified APILAYER_API_KEY on 2026-05-18.
+// Image Crop and Skills were previously here but verified callable (200 OK) — moved to approved.
 const APILAYER_BLOCKED_NAMES = new Set([
   "Number Verification API",
   "World News API",
-  "Image Crop API",
   "Form API",
-  "Skills API",
 ]);
 const APILAYER_RATE_LIMITED_NAMES = new Set(["PDF Layer"]);
 
