@@ -3067,7 +3067,14 @@ http.route({
               type: "codex_error",
               code: detail?.error?.code ?? `http_${upstream.status}`,
             },
-            _apiclaw: { provider: "openai-codex", via: "codex-oauth", upstream_status: upstream.status, latencyMs: Date.now() - startTime },
+            _apiclaw: {
+              provider: "openai-codex",
+              via: "codex-oauth",
+              authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
+              credentialSource: "founder_oauth_passthrough",
+              upstream_status: upstream.status,
+              latencyMs: Date.now() - startTime,
+            },
           }, upstream.status);
         }
 
@@ -3093,13 +3100,25 @@ http.route({
         if (sseError) {
           return jsonResponse({
             error: { message: sseError.message ?? "Codex stream error", type: "codex_error", code: sseError.code ?? "stream_error" },
-            _apiclaw: { provider: "openai-codex", via: "codex-oauth", latencyMs },
+            _apiclaw: {
+              provider: "openai-codex",
+              via: "codex-oauth",
+              authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
+              credentialSource: "founder_oauth_passthrough",
+              latencyMs,
+            },
           }, 502);
         }
         if (!responsesData) {
           return jsonResponse({
             error: { message: "Codex stream completed without response payload", type: "codex_error", code: "empty_stream" },
-            _apiclaw: { provider: "openai-codex", via: "codex-oauth", latencyMs },
+            _apiclaw: {
+              provider: "openai-codex",
+              via: "codex-oauth",
+              authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
+              credentialSource: "founder_oauth_passthrough",
+              latencyMs,
+            },
           }, 502);
         }
 
@@ -3109,6 +3128,8 @@ http.route({
           endpoint: "/v1/chat/completions",
           provider: "openai-codex",
           via: "codex-oauth",
+          authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
+          credentialSource: "founder_oauth_passthrough",
           model: codexModel,
           latencyMs,
           cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" },
@@ -3201,8 +3222,9 @@ http.route({
     // Only accepted for founder/partner tiers. Uses caller's token instead of managed key.
     const oauthPassthrough = request.headers.get("X-APIClaw-OAuth");
     const isPremiumTier = settings.tier === "founder" || settings.tier === "partner";
-    const effectiveApiKey = (oauthPassthrough && isPremiumTier && route.provider === "openai")
-      ? oauthPassthrough.replace(/^Bearer\s+/i, "")
+    const oauthPassthroughEligible = !!(oauthPassthrough && isPremiumTier && route.provider === "openai");
+    const effectiveApiKey = oauthPassthroughEligible
+      ? oauthPassthrough!.replace(/^Bearer\s+/i, "")
       : route.apiKey;
 
     // Forward to the chosen provider
@@ -3236,6 +3258,10 @@ http.route({
         };
       }
 
+      let authMode: ApiClawAuthMode = oauthPassthroughEligible
+        ? "founder_oauth_passthrough"
+        : "managed_provider_key";
+
       let response = await fetch(route.baseUrl, {
         method: "POST",
         headers,
@@ -3243,10 +3269,11 @@ http.route({
       });
 
       // OAuth fallback: if OAuth token fails with 401/403, retry with managed key
-      const usedOAuth = oauthPassthrough && isPremiumTier && route.provider === "openai" && effectiveApiKey !== route.apiKey;
+      const usedOAuth = oauthPassthroughEligible && effectiveApiKey !== route.apiKey;
       if (usedOAuth && (response.status === 401 || response.status === 403)) {
         console.log(`OAuth token failed (${response.status}), falling back to managed key for ${route.provider}`);
         headers["Authorization"] = `Bearer ${route.apiKey}`;
+        authMode = "managed_provider_key_fallback";
         response = await fetch(route.baseUrl, {
           method: "POST",
           headers,
@@ -3300,6 +3327,8 @@ http.route({
           provider: route.provider,
           routeReason: route.reason,
           model: route.model,
+          authMode,
+          credentialSource: authMode,
           gateway: "v1",
           cost: {
             providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
@@ -4527,6 +4556,11 @@ function isCodexJwt(token: string | null | undefined): boolean {
   }
 }
 
+type ApiClawAuthMode =
+  | "founder_oauth_passthrough"
+  | "managed_provider_key"
+  | "managed_provider_key_fallback";
+
 const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CODEX_ORIGINATOR = "apiclaw_gateway";
@@ -4936,6 +4970,10 @@ http.route({
       }
     }
 
+    const authMode: ApiClawAuthMode = useCodex
+      ? "founder_oauth_passthrough"
+      : "managed_provider_key";
+
     const upstreamUrl = useCodex ? `${OPENAI_CODEX_RESPONSES_BASE_URL}/responses` : OPENAI_NATIVE_RESPONSES_URL;
     const upstreamHeaders = useCodex
       ? buildCodexHeaders(oauthHeader!)
@@ -5025,6 +5063,8 @@ http.route({
           endpoint: "/v1/responses",
           provider: useCodex ? "openai-codex" : "openai",
           via: useCodex ? "codex-oauth" : "direct",
+          authMode,
+          credentialSource: authMode,
           model: modelId,
           latencyMs,
           ...(useCodex ? { cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" } } : {}),

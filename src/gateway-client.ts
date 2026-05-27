@@ -37,6 +37,8 @@ export interface GatewayResponse {
     route: string;
     gateway: boolean;
     model?: string;
+    authMode?: string;
+    credentialSource?: string;
   };
 }
 
