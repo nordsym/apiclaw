@@ -123,13 +123,25 @@ import { v } from "convex/values";
 export const findCandidates = internalQuery({
   args: { since: v.number(), cutoff: v.number() },
   handler: async (ctx, { since, cutoff }) => {
-    const verifies = await ctx.db
+    // Two activation events to watch:
+    //   - verify_code: legacy OTP path
+    //   - cli_browser_callback_success: A-22 agent-native auth path (canonical
+    //     since 2026-05-18). Most new users hit this one, not verify_code.
+    const otpFlow = await ctx.db
       .query("funnelEvents")
       .withIndex("by_event_timestamp", (q) =>
         q.eq("event", "verify_code").gte("timestamp", since),
       )
       .filter((q) => q.lte(q.field("timestamp"), cutoff))
       .collect();
+    const browserFlow = await ctx.db
+      .query("funnelEvents")
+      .withIndex("by_event_timestamp", (q) =>
+        q.eq("event", "cli_browser_callback_success").gte("timestamp", since),
+      )
+      .filter((q) => q.lte(q.field("timestamp"), cutoff))
+      .collect();
+    const verifies = [...otpFlow, ...browserFlow];
 
     const out: Array<{ _id: any; email: string | undefined }> = [];
     const seen = new Set<string>();

@@ -332,7 +332,7 @@ export const getScorecard = query({
       generatedAt: now,
       truth: {
         installs: metrics.unique.install,
-        activatedOwners: metrics.unique.verify_code,
+        activatedOwners: metrics.unique.activated_owners,
         activatedUsers: metrics.unique.first_call_api_success,
       },
       vanity: {
@@ -343,7 +343,7 @@ export const getScorecard = query({
       previous: priorMetrics
         ? {
             installs: priorMetrics.unique.install,
-            activatedOwners: priorMetrics.unique.verify_code,
+            activatedOwners: priorMetrics.unique.activated_owners,
             activatedUsers: priorMetrics.unique.first_call_api_success,
             ratios: priorMetrics.ratios,
           }
@@ -372,6 +372,15 @@ function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?
     uniq[e.event].add(k);
   }
   const u = (n: string) => uniq[n]?.size || 0;
+  // Activated owners = union of (verify_code) and (cli_browser_callback_success).
+  // The first is the legacy OTP flow; the second is the A-22 agent-native
+  // browser-loopback flow (canonical since 2026-05-18). Scorecard ratios
+  // need to count both to reflect reality.
+  const activatedSet = new Set<string>([
+    ...(uniq.verify_code ?? new Set<string>()),
+    ...(uniq.cli_browser_callback_success ?? new Set<string>()),
+  ]);
+  const activatedOwners = activatedSet.size;
   return {
     counts,
     unique: {
@@ -379,14 +388,16 @@ function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?
       first_run: u("first_run"),
       register_owner: u("register_owner"),
       verify_code: u("verify_code"),
+      cli_browser_callback_success: u("cli_browser_callback_success"),
+      activated_owners: activatedOwners,
       first_call_api_success: u("first_call_api_success"),
     },
     ratios: {
       install_to_first_run: safeRatio(u("first_run"), u("install")),
       first_run_to_register: safeRatio(u("register_owner"), u("first_run")),
-      register_to_verify: safeRatio(u("verify_code"), u("register_owner")),
-      verify_to_first_call: safeRatio(u("first_call_api_success"), u("verify_code")),
-      install_to_verify: safeRatio(u("verify_code"), u("install")),
+      register_to_verify: safeRatio(activatedOwners, u("register_owner")),
+      verify_to_first_call: safeRatio(u("first_call_api_success"), activatedOwners),
+      install_to_verify: safeRatio(activatedOwners, u("install")),
       install_to_first_call: safeRatio(u("first_call_api_success"), u("install")),
     },
   };
