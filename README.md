@@ -1,199 +1,117 @@
-# APIClaw
+<div align="center">
 
-The API layer for AI agents.
+![APIClaw](https://apiclaw.cloud/apiclaw-banner.png)
 
-[![npm version](https://img.shields.io/npm/v/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
-[![npm downloads](https://img.shields.io/npm/dw/@nordsym/apiclaw.svg)](https://www.npmjs.com/package/@nordsym/apiclaw)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-blue)](https://modelcontextprotocol.io)
+# APIClaw 🦞
 
-13,500+ installs. 26,704 discoverable APIs. 2,895 empirically callable (49 fully managed). Intelligent LLM Gateway.
+[![DOCS](https://img.shields.io/badge/DOCS-apiclaw.cloud-EF4444?style=flat-square&labelColor=0A0A0A)](https://apiclaw.cloud/docs)
+[![X](https://img.shields.io/badge/%40APIClaw-1DA1F2?style=flat-square&logo=x&labelColor=0A0A0A&logoColor=white)](https://x.com/APIClaw)
+[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-22C55E?style=flat-square&labelColor=0A0A0A)](./LICENSE)
+[![BUILT BY](https://img.shields.io/badge/BUILT%20BY-NORDSYM-9333EA?style=flat-square&labelColor=0A0A0A)](https://nordsym.com)
+[![npm](https://img.shields.io/npm/v/@nordsym/apiclaw?style=flat-square&color=EF4444&labelColor=0A0A0A&label=npm)](https://www.npmjs.com/package/@nordsym/apiclaw)
+[![installs](https://img.shields.io/npm/dt/@nordsym/apiclaw?style=flat-square&color=525252&labelColor=0A0A0A&label=installs)](https://www.npmjs.com/package/@nordsym/apiclaw)
 
-> APIClaw is in early release. Core features are live and actively expanding. Provider coverage, routing intelligence, and catalog depth grow with every update.
+</div>
+
+---
+
+**The Control Plane for AI Agents.** One runtime over every LLM provider and 26,701 indexed APIs (2,906 callable, 49 fully managed). Discovery, routing, missions, observability — all on one rail. Sign in once with `apiclaw auth login`, the same credential works across local MCP, CLI, HTTP gateway, and Remote MCP.
+
+Use any model you want — OpenAI, Anthropic, [OpenRouter](https://openrouter.ai) (800+ models), xAI, Groq, Mistral, Cohere, Together, DeepInfra, or your own endpoint. Switch with one parameter, no SDK swap, no lock-in.
+
+| | |
+|---|---|
+| **One runtime, four doors** | Install (`.mcpb`), CLI (`apiclaw`), HTTP gateway (`api.apiclaw.cloud`), Remote MCP (`apiclaw.cloud/mcp`). Same auth, same logs, same canon — all from one sign-in. |
+| **Agent-native auth** | `npx @nordsym/apiclaw auth login` opens the browser, one-tap Google sign-in, writes `~/.apiclaw.toml`. ~15 seconds. No keys to paste. Sub-15-second signup-to-first-call. |
+| **Discover 26,701 APIs** | Find providers by job-to-be-done. Health-ranked, capability-tagged, callable-or-not flagged. The `discover_apis` tool delegates to the gateway so every door returns the same canon. |
+| **Mission runtime** | Compose `fetch`, `transform`, `decide`, `validate`, `execute` primitives into typed orchestrations. Append-only `missionEvents` audit log. Cost-budget per mission with hard halt. Parallel-execution scaffolding ready. |
+| **Observability built in** | Every call logged with `_apiclaw` metadata (provider, route, latency, cost, auth mode). 80% quota warning surfaces as `_notice` before paywall. Weekly funnel scorecard mailed Monday 08:00 UTC. |
+| **Managed where it matters** | 49 directCallConfigs across 19 brands — OpenAI, Anthropic, OpenRouter, xAI, Replicate, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer's 24 callable sub-APIs, NASA, Filestack. Keys held server-side, agent never manages credentials. |
+
+---
 
 ## Install
 
 ```bash
-# 1. Install the MCP server
-curl -fsSL https://apiclaw.cloud/install.sh | bash
+# 1. Install (Claude Desktop)
+# Download and open: https://apiclaw.cloud/apiclaw.mcpb
 
-# 2. Authenticate (browser opens, one tap, ~10 seconds)
+# 2. Or any MCP-compatible client
+npm install -g @nordsym/apiclaw
+
+# 3. Sign in once. Works across all doors.
 npx @nordsym/apiclaw auth login
 ```
 
-Adds APIClaw as an MCP server in your Claude, Cursor, Windsurf, or any MCP-compatible agent. The auth flow opens your browser, signs you in via Clerk (Google one-tap or passwordless email), and writes `~/.apiclaw.toml`. The same workspace then works across MCP, CLI, HTTP gateway, and Remote MCP. Free tier: 25 calls/month.
+Adds APIClaw as an MCP server in Claude Desktop, Cursor, Windsurf, OpenClaw, or any MCP-compatible agent. The auth flow opens the browser, signs you in via Google one-tap, and writes `~/.apiclaw.toml`. Free tier: 25 calls per month. Pay-as-you-go beyond that at API cost + 15%.
 
-> **Headless server or SSH?** `npx @nordsym/apiclaw auth login --email-fallback` runs the legacy magic-link flow.
-
----
-
-## Four Ways to Use APIClaw
-
-### 1. MCP Server (Agent Discovery + Calling)
-
-Install APIClaw and your agent gets tools to discover and call APIs directly:
-
-```
-discover_apis("weather data for Stockholm")
--> Weatherstack, Visual Crossing, AccuWeather, OpenWeather...
-
-call_api("frankfurter", "latest", {"from": "USD", "to": "SEK"})
--> { "rates": { "SEK": 10.85 } }
-```
-
-The agent handles everything through MCP tools. Works in Claude Desktop, Cursor, Windsurf, OpenClaw, and any MCP-compatible client.
-
-### 2. Intelligent Gateway (OpenAI-compatible endpoint)
-
-Generate an `sk-claw-` API key at [apiclaw.cloud/workspace](https://apiclaw.cloud/workspace) and use APIClaw as an LLM gateway from any application:
-
-```bash
-curl https://apiclaw.cloud/v1/chat/completions \
-  -H "Authorization: Bearer sk-claw-..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "anthropic/claude-sonnet-4-6",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'
-```
-
-### 3. Remote MCP — Grok, Cursor, ChatGPT, Claude (OAuth, zero install)
-
-Paste one URL into your AI client. APIClaw handles the rest via OAuth.
-
-```
-https://apiclaw.cloud/mcp
-```
-
-Grok auto-discovers our authorization server, opens a sign-in window, you click "Authorize", and the connector is live. Standard MCP OAuth 2.1 (PKCE + RFC 7591 dynamic registration). No npm, no config file, no API keys to copy.
-
-**Connect to Grok in 20 seconds:**
-
-1. Open Grok → **Settings → Connectors → Add MCP server**
-2. Paste `https://apiclaw.cloud/mcp` and click **Connect**
-3. Sign in with your APIClaw email (or create the workspace) → **Authorize**
-
-Done. Grok now has `discover_apis`, `call_api`, `get_api_details`, `list_categories`, `list_connected`, and `check_balance`.
-
-**Same flow works in Cursor, ChatGPT (custom GPT), Claude Desktop, and any MCP-compliant client** — just point them at `https://apiclaw.cloud/mcp`.
-
-Need pre-shared credentials instead of OAuth? Open [Workspace → Integrations](https://apiclaw.cloud/workspace/integrations), click **Generate connector**, copy the Client ID and Secret.
-
-<details>
-<summary><strong>Troubleshooting</strong></summary>
-
-| Symptom | Fix |
-|---------|-----|
-| Grok doesn't auto-find APIClaw in connector search | Add it manually as a custom MCP server with URL `https://apiclaw.cloud/mcp`. We're rolling into the public catalogs in the next sweep. |
-| Grok shows "Connected" but says it has no access when you ask it to use APIClaw | Start a fresh Grok chat — old chats keep their tool-call cache and don't pick up newly added connectors. |
-| 401 loop after authorize | Your access token expired or was revoked. Open [Workspace → Integrations](https://apiclaw.cloud/workspace/integrations), revoke the connector, and re-add it in the client. |
-| `client_bound_to_other_workspace` | A dynamic client is bound to the first workspace that approved consent. Sign in with the same email or use [Generate connector](https://apiclaw.cloud/workspace/integrations) to create a fresh one for the new workspace. |
-| Consent screen redirects but client says "denied" | The browser blocked the redirect or you closed the tab early. Click "Authorize" again — auth codes are single-use but expire after 10 minutes so you can retry. |
-
-</details>
-
-### 4. CLI
-
-Humans in the terminal, scripts, CI. Ships with `@nordsym/apiclaw`:
-
-```bash
-npx @nordsym/apiclaw login                    # OTP auth, terminal-native
-npx @nordsym/apiclaw setup                    # auto-detect Claude, Cursor, Windsurf
-apiclaw discover "transcribe audio file"      # search registry
-apiclaw-http                                  # stand up local HTTP gateway
-```
-
-All four interfaces route through the same `apiclaw.cloud` gateway. One billing pipeline, one logging pipeline, one registry. Email-verified workspace required for any token issuance — discovery is open, execution requires auth.
-
-One endpoint. Automatic provider routing. The gateway selects the optimal provider based on your workspace settings:
-
-| Routing Mode | Behavior |
-|-------------|----------|
-| `balanced` | Default. Weighs speed, cost, and quality |
-| `fastest` | Lowest latency (Groq, Mistral) |
-| `best_price` | Cheapest available provider |
-| `highest_quality` | Best model quality |
-| `advisor` | Opt-in. Mistral Small picks the optimal model per prompt (only fires when no model is set in the request) |
-
-**Providers routed through the gateway:**
-- **Groq** -- Ultra-fast inference (Llama, Mixtral, Gemma)
-- **Mistral** -- European models (Small, Large, Codestral)
-- **Together AI** -- Open-source models (DeepSeek, Qwen, Llama)
-- **OpenRouter** -- 800+ models as fallback (GPT, Claude, Gemini, etc.)
-
-Override per-request with `X-APIClaw-Route: fastest` or target a provider directly: `X-APIClaw-Route: groq`.
-
-The Intelligent Gateway is in its first release. Routing logic, provider coverage, and model support are actively expanding.
+> Headless server or SSH session? `npx @nordsym/apiclaw login --email-fallback` runs the legacy magic-link flow.
 
 ---
 
-## API Catalog
+## Four doors · one control plane
 
-Browse all 26,704 indexed APIs at [apiclaw.cloud/catalog](https://apiclaw.cloud/catalog).
+| Door | When to use | Auth |
+|------|------|------|
+| **Install** (`.mcpb` / `@nordsym/apiclaw`) | Claude Desktop, Cursor, Windsurf, OpenClaw | `apiclaw auth login` → `~/.apiclaw.toml` |
+| **CLI** (`apiclaw`) | Terminal, scripts, CI/CD | Same file |
+| **HTTP gateway** (`api.apiclaw.cloud/v1/*`) | Server-side agents (OpenClaw, Hermes, custom backends), n8n | `Authorization: Bearer sk-claw-...` |
+| **Remote MCP** (`apiclaw.cloud/mcp`) | Grok, Cursor (remote), ChatGPT, ClaudeDesktop | OAuth 2.1 + PKCE + DCR → `Bearer sk-mcp-...` |
 
-- Search across 40+ categories
-- Filter by tier: Managed (49), Callable (2,895), Discovery only (~23,800)
-- Every "Callable" entry is empirically smoketested (HTTP 200 + parseable JSON in our last sweep)
-- Infinite scroll, category filters, instant search
-
----
-
-## Discoverable vs Callable
-
-**Discoverable (26,704 APIs)** -- Every API in the index. Your agent can search, read specs, and evaluate them. Free and unlimited.
-
-**Callable (2,895 APIs)** -- Every entry empirically smoketested: returned HTTP 200 + parseable JSON in our last sweep. Two layers:
-
-- **Managed (49 directCallConfigs across 19 brands)** -- APIClaw owns the keys. You call, APIClaw authenticates.
-- **Keyless verified (~2,846)** -- Public APIs proxied through APIClaw, smoketest-passed. Sortable by verified latency.
-
-The remaining ~6,500 OpenAPI-spec'd providers in the registry have valid integration paths but need context (POST body, path-vars, required query params) we couldn't smoketest blindly. They live in Discovery — your agent can still call them through APIClaw if it supplies the right inputs, but we don't claim them as callable until proven.
-
-### Managed Providers
-
-| Provider | What | Category |
-|----------|------|----------|
-| OpenRouter | 800+ LLMs (GPT, Claude, Gemini, Llama) | AI & ML |
-| Groq | Ultra-fast inference (Llama, Mixtral, Gemma) | AI & ML |
-| Mistral | Mistral models (Small, Large, Codestral) | AI & ML |
-| Together AI | Open-source models (DeepSeek, Qwen, Llama) | AI & ML |
-| Cohere | RAG, reranking, embeddings | AI & ML |
-| Replicate | ML models (Flux, SDXL, Whisper) | AI & ML |
-| Stability AI | Image generation (SD3, SDXL) | AI & ML |
-| ElevenLabs | Text-to-speech (29 languages) | Voice |
-| Deepgram | Speech-to-text (Nova-3) | Voice |
-| AssemblyAI | Audio intelligence, diarization | Voice |
-| Brave Search | Privacy-first web search | Search |
-| Serper | Google SERP results | Search |
-| Firecrawl | Web scraping and crawling | Scraping |
-| E2B | Code execution sandbox | Dev Tools |
-| GitHub | Repository and code access | Dev Tools |
-| APILayer | 22 callable APIs (finance, geo, scraping, news) | Multi-API |
+All four resolve to the same Convex deployment. One auth resolver, one workspace, one billing rail, one log stream.
 
 ---
 
-## MCP Tools
+## What you can call
 
-| Tool | What |
-|------|------|
-| `discover_apis` | Search 26,704 APIs by capability |
-| `get_api_details` | Full specs, pricing, auth |
-| `call_api` | Execute through APIClaw proxy |
-| `list_connected` | See available managed providers |
-| `check_balance` | Usage and remaining calls |
-| `register_owner` | Legacy auth (email magic-link). Canonical flow: run `npx @nordsym/apiclaw auth login` in the terminal — the MCP server reads `~/.apiclaw.toml` and unlocks 25 calls/month |
+### Discoverable (26,701)
+The full registry, searchable via `discover_apis(query)`. Every entry tagged by category, health-ranked by recent success-rate, callable-or-not flagged.
+
+### Callable (2,906)
+Empirically verified callable. Subset breakdown:
+
+- **Managed (49 across 19 brands)** — APIClaw owns the keys. Agent never manages credentials. OpenAI, Anthropic, OpenRouter, xAI, Replicate, ElevenLabs, Brave Search, Firecrawl, GitHub, E2B, Groq, Deepgram, Serper, Mistral, Cohere, Together, Stability, AssemblyAI, APILayer (24 sub-APIs), NASA, Filestack.
+- **Keyless verified (~2,857)** — Public APIs proxied through APIClaw without auth. Smoketested, sortable by verified latency.
+
+### Mission templates
+- `prd-generation v1` — fetch → validate, routes to GenPRD via shared secret, returns structured Markdown PRD with rule-based quality gate.
+- More on the way — `research`, `outreach-draft`, `screenshot-bundle` templates queued.
+
+---
 
 ## Pricing
 
-| Plan | Price | What you get |
-|------|-------|--------------|
-| Free | $0 forever | Discovery (always free), 25 managed calls/month |
-| Pay-as-you-go | Provider cost + 15% margin | All managed providers, no monthly fee, metered billing |
-| Enterprise | Custom | Private deployment, custom limits, SLA, [book a call](https://apiclaw.cloud/book) |
+| Plan | Price | Access |
+|------|------|------|
+| **Free** | $0 forever | 25 calls per month across the platform. Unlimited Discovery. Free email signup required (Google one-tap or magic link). |
+| **Pay as you go** | API cost + 15% margin | Unlimited calls. Per-call cost calculated from actual token usage. Soft 80% notice in success response before quota hit. |
 
-Pass-through pricing on managed provider calls + 15% margin. No hidden fees.
+Pricing canon: pass-through plus 15% margin (market standard, same as OpenRouter). Stripe metered billing live.
 
 ---
 
-[Catalog](https://apiclaw.cloud/catalog) - [Dashboard](https://apiclaw.cloud/workspace) - [Docs](https://apiclaw.cloud/docs) - [Book a Call](https://apiclaw.cloud/book)
+## Status
 
-MIT License
+- ✅ Live at `apiclaw.cloud` and `api.apiclaw.cloud`
+- ✅ npm package `@nordsym/apiclaw` — 16,485+ all-time installs
+- ✅ Claude Desktop Extension hosted at `apiclaw.cloud/apiclaw.mcpb` (~50 MB bundle, zero-key install)
+- ✅ Mission runtime v2 (5 typed primitives) live in Convex prod
+- ✅ Remote MCP via Streamable HTTP + OAuth 2.1 + PKCE + DCR, validated end-to-end in Grok
+- ✅ APILayer partnership in commercial close (24/27 callable today, 20% rev-share commercial structure)
+- 🟢 99.9% uptime since launch
+
+Daily ship cadence — see [GitHub releases](https://github.com/nordsym/apiclaw/releases) for the latest changes.
+
+---
+
+## Links
+
+- **Landing** — [apiclaw.cloud](https://apiclaw.cloud)
+- **Docs** — [apiclaw.cloud/docs](https://apiclaw.cloud/docs)
+- **Sign in** — [apiclaw.cloud/sign-in](https://apiclaw.cloud/sign-in)
+- **X** — [@APIClaw](https://x.com/APIClaw)
+- **npm** — [@nordsym/apiclaw](https://www.npmjs.com/package/@nordsym/apiclaw)
+- **Claude Desktop Extension** — [apiclaw.cloud/apiclaw.mcpb](https://apiclaw.cloud/apiclaw.mcpb)
+- **List your API** — [apiclaw.cloud/docs#list-your-api](https://apiclaw.cloud/docs#list-your-api)
+
+Built by [NordSym](https://nordsym.com). MIT licensed.
