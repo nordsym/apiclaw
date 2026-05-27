@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "apiclaw",
   "display_name": "APIClaw",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "The API layer for AI agents. 26,704 discoverable APIs, 2,872 empirically callable (49 fully managed). Zero config.",
   "long_description": "APIClaw is a unified gateway that gives your AI agent access to tens of thousands of APIs through one MCP server. 2,872 are empirically callable — every one verified by smoketest (HTTP 200 + parseable JSON). 49 of those are fully managed where APIClaw owns the keys (OpenAI, Anthropic, OpenRouter, xAI, Replicate, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer's 22 callable sub-APIs, plus more). Universal pass-through proxy for keyless public APIs. Includes capability-based routing, circuit breakers, SSRF protection, and full request logging. Built on Convex. Free tier with 25 API calls per month, email signup required.",
   "author": {

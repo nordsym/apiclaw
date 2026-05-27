@@ -62,12 +62,19 @@ export function requireVerifiedOwner(
       ok: false,
       reason: "no_session",
       payload: {
-        status: "registration_required",
-        error: "Registration required to call APIs.",
-        message:
-          "Ask the user for their email, then call register_owner({ email }). A 6-digit code will be sent. Then call verify_code with the code.",
-        action: "register_owner",
-        free_tier: "50 API calls/month -- completely free.",
+        status: "auth_required",
+        action: "agent_auth_required",
+        error: "APIClaw needs a one-time sign-in before this tool can run.",
+        instruction: "Tell the user to run this in their terminal:",
+        command: "npx @nordsym/apiclaw auth login",
+        what_happens:
+          "Opens the browser, one-tap Google sign-in, writes ~/.apiclaw.toml. About 15 seconds.",
+        after_signin:
+          "Re-call this tool — the session will be picked up automatically.",
+        fallback_for_headless:
+          "npx @nordsym/apiclaw login --email-fallback (magic link to inbox, slower).",
+        signup_url: "https://apiclaw.cloud/sign-in",
+        free_tier: "Free tier included. See https://apiclaw.cloud/pricing.",
       },
     };
   }
@@ -77,10 +84,12 @@ export function requireVerifiedOwner(
       ok: false,
       reason: "pending_verification",
       payload: {
-        status: "registration_required",
+        status: "auth_required",
+        action: "agent_auth_required",
         error: "Workspace is not linked to a verified email yet.",
-        message: "Run register_owner({ email }) and verify_code to activate.",
-        action: "register_owner",
+        instruction: "Tell the user to run this in their terminal:",
+        command: "npx @nordsym/apiclaw auth login",
+        signup_url: "https://apiclaw.cloud/sign-in",
       },
     };
   }
@@ -91,8 +100,10 @@ export function requireVerifiedOwner(
       reason: "not_verified",
       payload: {
         status: "pending_verification",
-        error: `Workspace status: ${workspaceContext.status}. Please verify your email.`,
-        action: "verify_code",
+        error: `Workspace status: ${workspaceContext.status}. Please complete sign-in.`,
+        instruction: "Tell the user to finish sign-in by running:",
+        command: "npx @nordsym/apiclaw auth login",
+        signup_url: "https://apiclaw.cloud/sign-in",
       },
     };
   }

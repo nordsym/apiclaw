@@ -44,7 +44,7 @@ export async function resolveVerifiedOwner(
       ok: false,
       reason: "no_session",
       message:
-        "Registration required. Call register_owner({ email }) then verify_code({ email, code }).",
+        "Sign-in required. Run `npx @nordsym/apiclaw auth login` to open the browser sign-in, or `npx @nordsym/apiclaw login --email-fallback` for the magic-link flow. Re-call this tool after sign-in completes.",
     };
   }
 
@@ -74,7 +74,7 @@ export async function resolveVerifiedOwner(
     return {
       ok: false,
       reason: "not_verified",
-      message: "Workspace has no verified email. Run register_owner + verify_code.",
+      message: "Workspace has no verified email. Run `npx @nordsym/apiclaw auth login` to complete sign-in.",
     };
   }
 
