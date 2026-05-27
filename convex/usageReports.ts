@@ -54,7 +54,15 @@ export const getUsageForPeriod = internalQuery({
  * Get all workspaces with their emails for reporting.
  * Excludes workspaces with nurture stage `partner-locked` or `excluded` so
  * the weekly/monthly cron does not email accounts that must stay quiet.
+ *
+ * Belt-and-suspenders 2026-05-27: also excludes any workspace where the tier
+ * itself is partner or enterprise, independent of the nurture row existing
+ * or being correctly classified. New partner workspaces created today (e.g.
+ * for John Kim at Idera before classifyAllWorkspaces has run) are protected
+ * by tier alone, even if their email domain is not yet in DOMAIN_BLOCKLIST.
  */
+const NO_EMAIL_TIERS = new Set(["partner", "enterprise"]);
+
 export const getReportableWorkspaces = internalQuery({
   args: {},
   handler: async (ctx) => {
@@ -69,6 +77,7 @@ export const getReportableWorkspaces = internalQuery({
     return workspaces
       .filter((w) => w.email)
       .filter((w) => !skipWorkspaceIds.has(w._id as unknown as string))
+      .filter((w) => !NO_EMAIL_TIERS.has((w as any).tier))
       .map((w) => ({
         id: w._id,
         email: w.email,

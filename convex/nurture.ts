@@ -32,15 +32,19 @@ const HOUR = 3600000;
 const DOMAIN_BLOCKLIST = [
   "apilayer.com",
   "filestack.com",
+  "idera.com",            // APILayer parent company; John Kim et al
   "nordsym.com",
   "cqtinvest.com",
   "apiclaw.local",        // synthetic anonymous workspaces from trafficGenerator
+  "apiclaw.test",         // synthetic prod-smoke-test workspaces
   "example.com",
   "wnbaldwy.com",         // known disposable
 ];
 
 const EMAIL_BLOCKLIST = new Set<string>([
   "pratham.kumar@apilayer.com",
+  "emma.sampayo@apilayer.com",         // APILayer team (covered by domain, belt-and-suspenders)
+  "john.kim@idera.com",                // APILayer partnership signer at Idera
   "marketing@filestack.com",
   "gustav@nordsym.com",
   "symbot@nordsym.com",

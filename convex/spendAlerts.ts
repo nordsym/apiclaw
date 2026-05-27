@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, action, internalMutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
+import { checkEmailAllowedSync } from "./emailGuards";
 
 // ============================================
 // CONSTANTS
@@ -73,6 +74,24 @@ export const recordSpend = mutation({
     const workspace = await ctx.db.get(args.workspaceId);
     if (!workspace) {
       throw new Error("Workspace not found");
+    }
+
+    // Belt-and-suspenders 2026-05-27: partner + enterprise tiers never get
+    // spend alert emails. Pratham/John/Idera workspaces would have triggered
+    // had any of them carried a budgetCap, even though nurture-stage filters
+    // exist upstream (those classifiers can lag for new partner workspaces).
+    const tier = (workspace as any).tier;
+    if (tier === "partner" || tier === "enterprise") {
+      return {
+        success: true,
+        currentSpendCents: workspace.monthlySpendCents || 0,
+        budgetCapCents: workspace.budgetCap || null,
+        budgetPercentage: null,
+        shouldSendAlert: false,
+        budgetExceeded: false,
+        email: workspace.email,
+        skippedReason: `tier:${tier}`,
+      };
     }
 
     const monthStart = getMonthStart();
@@ -285,6 +304,14 @@ export const sendBudgetAlertEmail = action({
     budgetCapCents: v.number(),
   },
   handler: async (ctx, args) => {
+    // Belt-and-suspenders email send guard. Even if computeSpend is bypassed
+    // or invoked directly, the address-level blocklist still holds.
+    const guard = checkEmailAllowedSync(args.email);
+    if (!guard.allowed) {
+      console.warn(`[spendAlerts] blocked outbound to ${args.email}: ${guard.reason}`);
+      return { success: false, skippedReason: guard.reason };
+    }
+
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     if (!RESEND_API_KEY) {
       console.error("RESEND_API_KEY not configured");
@@ -352,6 +379,13 @@ export const sendBudgetExceededEmail = action({
     isPaused: v.boolean(),
   },
   handler: async (ctx, args) => {
+    // Belt-and-suspenders email send guard.
+    const guard = checkEmailAllowedSync(args.email);
+    if (!guard.allowed) {
+      console.warn(`[spendAlerts] blocked outbound to ${args.email}: ${guard.reason}`);
+      return { success: false, skippedReason: guard.reason };
+    }
+
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     if (!RESEND_API_KEY) {
       console.error("RESEND_API_KEY not configured");
