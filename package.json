@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "2.8.2",
+  "version": "2.8.4",
   "description": "The Control Plane for AI Agents. 26,704 discoverable APIs, 2,872 callable, 49 fully managed. Agent-native auth: `apiclaw auth login` opens your browser, one-tap sign-in, writes ~/.apiclaw.toml. Four doors: local MCP, CLI, HTTP gateway, Remote MCP. One auth, every door.",
   "type": "module",
   "main": "dist/index.js",
@@ -13,11 +13,10 @@
     "url": "https://github.com/nordsym/apiclaw/issues"
   },
   "files": [
-    "dist/",
-    "src/registry/"
+    "dist/"
   ],
   "scripts": {
-    "build": "./node_modules/.bin/tsc && cp -r src/registry dist/ && chmod +x dist/bin.js dist/bin-http.js",
+    "build": "./node_modules/.bin/tsc && chmod +x dist/bin.js dist/bin-http.js",
     "prepublishOnly": "npm run build",
     "postinstall": "node dist/postinstall.js || true",
     "dev": "tsx watch src/index.ts",

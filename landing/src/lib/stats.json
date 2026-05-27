@@ -3,10 +3,10 @@
   "callableCount": 2872,
   "openApiCount": 2823,
   "managedCount": 49,
-  "npmDownloads": 15677,
+  "npmDownloads": 16485,
   "endpointCount": 0,
   "capabilityCount": 15,
-  "generatedAt": "2026-05-18T09:38:16.812Z",
+  "generatedAt": "2026-05-27T13:54:24.934Z",
   "categoryBreakdown": {
     "Customer_Relation": 1,
     "Cloud & Infrastructure": 1688,
@@ -41,7 +41,7 @@
     "Storage": 1
   },
   "managedBrands": 19,
-  "canonGeneratedAt": "2026-05-17",
+  "canonGeneratedAt": "2026-05-27",
   "verificationBuckets": {
     "verified": 2895,
     "working": 395,

@@ -45,8 +45,8 @@ export const CANON_STATS = {
   managed_brands: 19,
   managed_directcallconfigs: 49,
 
-  /** All-time npm installs (canon as of last vault sync). */
-  npm_installs: 14_667,
+  /** All-time npm installs (canon as of 2026-05-27 per npmjs dashboard). */
+  npm_installs: 16_485,
 
   /** API Surface narrative (used in marketing copy). */
   hero_line: '26,704 indexed APIs · 2,872 callable',

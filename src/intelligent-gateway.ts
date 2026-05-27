@@ -99,6 +99,10 @@ function loadArtifact(): GeneratedArtifact {
   try {
     cachedArtifact = require('./registry/generated-providers.json') as GeneratedArtifact;
   } catch {
+    // See open-apis-generated.ts loadArtifact() for context. Registry
+    // artifact excluded from npm tarball as of 2.8.3. Intelligent-gateway
+    // capability resolution falls back to managed providers + curated
+    // entries only.
     cachedArtifact = {
       version: 1,
       generatedAt: 0,

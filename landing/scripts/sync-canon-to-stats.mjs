@@ -18,11 +18,12 @@ const VERIFICATION_PATH = resolve(__dirname, '../src/lib/verification-status.jso
 
 // Mirror of src/canon-stats.ts. Update both when bumping canon.
 const CANON = {
-  generated_at: '2026-05-17',
+  generated_at: '2026-05-27',
   discoverable: 26_704,
   callable: 2_872, // -36 vs prior smoketest: canon-comms providers (Twilio, Resend, 46elks) gated off the public callable surface 2026-05-17
   managed_brands: 19,
   managed_directcallconfigs: 49,
+  npm_installs: 16_485, // npmjs dashboard 2026-05-27
 };
 
 let stats;
@@ -52,6 +53,7 @@ stats.callableCount = CANON.callable;
 stats.managedCount = CANON.managed_directcallconfigs;
 stats.managedBrands = CANON.managed_brands;
 stats.openApiCount = Math.max(0, CANON.callable - CANON.managed_directcallconfigs);
+stats.npmDownloads = CANON.npm_installs;
 stats.canonGeneratedAt = CANON.generated_at;
 stats.generatedAt = new Date().toISOString();
 // Drop any legacy fields from previous canon variants

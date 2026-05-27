@@ -1527,7 +1527,67 @@ Docs: https://apiclaw.cloud
         const aiBackend = args?.ai_backend as string | undefined;
 
         const startTime = Date.now();
-        const results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
+
+        // 2.8.4: delegate to HTTP gateway /v1/discover so every door sees the
+        // same canon (26,704 discoverable / 2,872 callable). Local registry
+        // was stripped from the tarball in 2.8.3 (saved 150MB); hardcoded
+        // curated set + Convex managed cache only ships ~53 entries standalone.
+        // Gateway-fetch makes lokal MCP tool match HTTP + Remote MCP results.
+        let results: any[] = [];
+        try {
+          const discoverResp = await fetch(`${CONVEX_URL}/v1/discover`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(workspaceContext?.sessionToken && {
+                'X-APIClaw-Session': workspaceContext.sessionToken,
+              }),
+            },
+            body: JSON.stringify({
+              query,
+              category,
+              callable_only: callableOnly,
+              limit: requestedMax,
+            }),
+          });
+          if (discoverResp.ok) {
+            const data: any = await discoverResp.json();
+            const managed = (data.managedProviders || []).map((p: any) => ({
+              provider: {
+                id: p.providerId,
+                name: p.name,
+                description: p.description,
+                category: p.category,
+                callable: true,
+                managed: true,
+              },
+              matchScore: 1.0,
+              matchedKeywords: [],
+              actions: [],
+            }));
+            const open = (data.apis || []).map((a: any) => ({
+              provider: {
+                id: String(a.name || '').toLowerCase().replace(/\s+/g, '_'),
+                name: a.name,
+                description: a.description,
+                category: a.category,
+                baseUrl: a.baseUrl,
+                callable: a.callable !== false,
+              },
+              matchScore: 0.9,
+              matchedKeywords: [],
+              actions: [],
+            }));
+            results = [...managed, ...open].slice(0, requestedMax);
+          } else {
+            // Gateway 5xx — local sparse fallback so we don't return nothing.
+            results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
+          }
+        } catch {
+          // Network failure — local sparse fallback.
+          results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
+        }
+
         const responseTimeMs = Date.now() - startTime;
         trackSearch(query, results.length, responseTimeMs);
 

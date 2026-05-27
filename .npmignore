@@ -15,3 +15,14 @@ api/
 .vercel/
 .env*
 !.env.prod
+
+# Bulk registry artifacts — 160MB combined, not required for runtime.
+# loadArtifact() in open-apis-generated.ts + intelligent-gateway.ts falls
+# back gracefully to a managed-providers-only registry. Agents needing the
+# full 26,704-API catalog should hit the /v1/discover HTTP endpoint instead.
+src/registry/generated-providers.json
+src/registry/apis.json
+src/registry/apis_expanded.json
+dist/registry/generated-providers.json
+dist/registry/apis.json
+dist/registry/apis_expanded.json
