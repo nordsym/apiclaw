@@ -15,8 +15,11 @@ landing/.env.vercel-check
 # Convex
 .convex/
 .vercel
-# Convex build artifacts
-convex/*.d.ts
+# Convex build artifacts (cover root + subdirs incl. _generated/)
+convex/**/*.d.ts
+convex/**/*.d.ts.map
+convex/**/*.js.map
+convex/_generated/
 convex/*.js
 convex/*.bak
 
