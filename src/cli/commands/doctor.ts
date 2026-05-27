@@ -222,7 +222,7 @@ function checkClient(client: MCPClient, serverName = 'apiclaw'): CheckResult {
  */
 async function checkConnectivity(): Promise<CheckResult> {
   const apiUrl = getApiUrl();
-  const convexUrl = process.env.CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
+  const convexUrl = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
   const candidates = [
     `${apiUrl}/health`,
     'https://apiclaw.cloud',

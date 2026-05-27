@@ -18,7 +18,7 @@ interface ProductSource {
 const PRODUCT_SOURCES: ProductSource[] = [
   {
     name: 'hivr',
-    convexUrl: 'https://brilliant-puffin-712.eu-west-1.convex.cloud',
+    convexUrl: 'https://adventurous-avocet-799.convex.cloud',
     queryPath: 'agents:list',
     agentIdField: 'handle', // ✅ Fixed: Hivr agents use 'handle', not 'agentId'
   },

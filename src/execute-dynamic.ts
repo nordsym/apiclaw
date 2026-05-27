@@ -70,7 +70,7 @@ interface UsageStats {
 }
 
 // Convex HTTP API
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://brilliant-puffin-712.eu-west-1.convex.cloud';
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
 
 async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T | null> {
   try {
