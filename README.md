@@ -97,7 +97,7 @@ Pricing canon: pass-through plus 15% margin (market standard, same as OpenRouter
 - ✅ Claude Desktop Extension hosted at `apiclaw.cloud/apiclaw.mcpb` (~50 MB bundle, zero-key install)
 - ✅ Mission runtime v2 (5 typed primitives) live in Convex prod
 - ✅ Remote MCP via Streamable HTTP + OAuth 2.1 + PKCE + DCR, validated end-to-end in Grok
-- ✅ APILayer partnership in commercial close (24/27 callable today, 20% rev-share commercial structure)
+- ✅ APILayer integration live — 24/27 endpoints callable through the gateway today
 - 🟢 99.9% uptime since launch
 
 Daily ship cadence — see [GitHub releases](https://github.com/nordsym/apiclaw/releases) for the latest changes.
