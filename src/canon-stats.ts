@@ -29,14 +29,17 @@
 
 export const CANON_STATS = {
   /** Updated each time canon refreshes. */
-  generated_at: '2026-05-17',
+  generated_at: '2026-05-27',
 
-  /** Indexed for discovery — searchable, free, no auth. */
-  discoverable: 26_704,
+  /** Indexed for discovery — searchable, free, no auth.
+   *  Live count from /api/catalog as of 2026-05-27 audit. */
+  discoverable: 26_701,
 
-  /** Empirically verified callable: smoketest returned 200 + parseable JSON,
-   *  minus canon-credential providers we gate from the public callable surface. */
-  callable: 2_872,
+  /** Empirically callable: registry rows with callable=true after the
+   *  2026-04-30 registry cleanup (clean-registry-flags.mjs) and the
+   *  managed-brand alias-fix that recognised all 19 brands. Reflects what
+   *  /api/catalog actually returns, not the WORKING_JSON smoketest bucket. */
+  callable: 2_906,
 
   /**
    * Managed providers — APIClaw owns the keys. Subset of `callable`.
@@ -49,7 +52,7 @@ export const CANON_STATS = {
   npm_installs: 16_485,
 
   /** API Surface narrative (used in marketing copy). */
-  hero_line: '26,704 indexed APIs · 2,872 callable',
+  hero_line: '26,701 indexed APIs · 2,906 callable',
   hero_line_short: '26.7k discoverable · 2.9k callable',
 } as const;
 

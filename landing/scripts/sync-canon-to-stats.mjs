@@ -17,10 +17,12 @@ const STATS_PATH = resolve(__dirname, '../src/lib/stats.json');
 const VERIFICATION_PATH = resolve(__dirname, '../src/lib/verification-status.json');
 
 // Mirror of src/canon-stats.ts. Update both when bumping canon.
+// Numbers anchored to live /api/catalog response (2026-05-27 audit),
+// not to hardcoded smoketest snapshots.
 const CANON = {
   generated_at: '2026-05-27',
-  discoverable: 26_704,
-  callable: 2_872, // -36 vs prior smoketest: canon-comms providers (Twilio, Resend, 46elks) gated off the public callable surface 2026-05-17
+  discoverable: 26_701,
+  callable: 2_906,
   managed_brands: 19,
   managed_directcallconfigs: 49,
   npm_installs: 16_485, // npmjs dashboard 2026-05-27

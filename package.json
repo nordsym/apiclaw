@@ -1,7 +1,7 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "2.8.4",
-  "description": "The Control Plane for AI Agents. 26,704 discoverable APIs, 2,872 callable, 49 fully managed. Agent-native auth: `apiclaw auth login` opens your browser, one-tap sign-in, writes ~/.apiclaw.toml. Four doors: local MCP, CLI, HTTP gateway, Remote MCP. One auth, every door.",
+  "version": "2.8.5",
+  "description": "The Control Plane for AI Agents. 26,701 discoverable APIs, 2,906 callable, 49 fully managed. Agent-native auth: `apiclaw auth login` opens your browser, one-tap sign-in, writes ~/.apiclaw.toml. Four doors: local MCP, CLI, HTTP gateway, Remote MCP. One auth, every door.",
   "type": "module",
   "main": "dist/index.js",
   "homepage": "https://apiclaw.cloud",
