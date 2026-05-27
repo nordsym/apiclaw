@@ -657,6 +657,12 @@ export const clearWorkspaceLogs = mutation({
 });
 
 // Log proxy API calls from external agents (Hivr bees)
+//
+// Hot-path decontention 2026-05-27: previously patched workspaces.lastActiveAt
+// and subagents.lastActiveAt synchronously per call, generating 88 OCC retries
+// against the workspaces table in a 9-hour window. Both patches are derived
+// from apiLogs.createdAt — the cron at hotPathRefresh:refreshLastActiveFromLogs
+// rolls those forward every 5 minutes from this insert.
 export const createProxyLog = mutation({
   args: {
     workspaceId: v.id("workspaces"),
@@ -666,8 +672,6 @@ export const createProxyLog = mutation({
     sessionToken: v.optional(v.string()),
   },
   handler: async (ctx, { workspaceId, provider, action, subagentId, sessionToken }) => {
-    const now = Date.now();
-    
     await ctx.db.insert("apiLogs", {
       workspaceId,
       provider,
@@ -677,25 +681,9 @@ export const createProxyLog = mutation({
       status: "success",
       latencyMs: 0,
       direction: "outbound",
-      createdAt: now,
+      createdAt: Date.now(),
     });
-    
-    // Update workspace lastActiveAt (main agent activity)
-    await ctx.db.patch(workspaceId, { lastActiveAt: now });
-    
-    // If this is a subagent call, update that subagent's timestamp
-    if (subagentId && subagentId !== "unknown" && subagentId !== "main") {
-      const subagent = await ctx.db
-        .query("subagents")
-        .withIndex("by_workspaceId_subagentId", (q) => 
-          q.eq("workspaceId", workspaceId).eq("subagentId", subagentId))
-        .first();
-      
-      if (subagent) {
-        await ctx.db.patch(subagent._id, { lastActiveAt: now });
-      }
-    }
-    
+
     return { success: true };
   },
 });

@@ -210,11 +210,21 @@ export const resolveKey = internalQuery({
 // TOUCH KEY (internal - update lastUsedAt)
 // ============================================
 
+// touchKey: kept as a no-op for callsite compatibility.
+//
+// Hot-path decontention 2026-05-27: every gateway call previously patched
+// lastUsedAt on the same workspaceApiKeys row, generating 42 OCC retries in
+// a 9-hour window. lastUsedAt is UI-only signal (key list "last used X ago")
+// and not on any critical path — the cost of synchronous patch under load
+// exceeds the value of sub-second freshness.
+//
+// If sub-minute freshness on lastUsedAt becomes a UI requirement, swap to
+// an append-only apiKeyTouchEvents table + cron aggregate.
 export const touchKey = mutation({
   args: {
     keyId: v.id("workspaceApiKeys"),
   },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.keyId, { lastUsedAt: Date.now() });
+  handler: async (_ctx, _args) => {
+    // intentional no-op
   },
 });

@@ -89,4 +89,15 @@ crons.interval(
   {}
 );
 
+// Hot-path lastActiveAt refresh — every 5min. Rolls workspaces.lastActiveAt
+// and subagents.lastActiveAt forward from apiLogs.createdAt. Replaces the
+// synchronous patches in createProxyLog that were causing 88 OCC retries
+// per 9h window against the workspaces table (Convex Insights 2026-05-27).
+crons.interval(
+  "hot-path-last-active-refresh",
+  { minutes: 5 },
+  internal.hotPathRefresh.refreshLastActiveFromLogs,
+  {}
+);
+
 export default crons;
