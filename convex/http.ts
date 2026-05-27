@@ -4237,7 +4237,10 @@ http.route({
 
       routeDetail = route.reason;
 
-      // Log usage
+      // Log usage. Capture incrementUsage result so A-17 quota_warning
+      // surfaces as _notice on the execute-LLM response (matches the
+      // open-API path pattern shipped in 2.8.4).
+      let executeLlmUsageResult: { quotaWarning?: any } | null = null;
       if (workspaceId) {
         try {
           await ctx.runMutation(api.analytics.log, {
@@ -4248,7 +4251,7 @@ http.route({
           await ctx.runMutation(api.logs.createProxyLog, {
             workspaceId: workspaceId as any, provider: route.provider, action: "chat", subagentId,
           });
-          await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+          executeLlmUsageResult = await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
         } catch (e: any) { console.error("[Execute] LLM logging failed:", e.message); }
       }
 
@@ -4320,6 +4323,7 @@ http.route({
           provider: route.provider,
           action: "chat",
           data,
+          ...(executeLlmUsageResult?.quotaWarning ? { _notice: executeLlmUsageResult.quotaWarning } : {}),
           _apiclaw: {
             latencyMs, route: routeDetail, gateway: true, model: route.model,
             cost: {

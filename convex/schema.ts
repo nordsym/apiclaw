@@ -94,6 +94,9 @@ export default defineSchema({
     lastSpendResetAt: v.optional(v.number()), // When monthly spend was last reset
     // Activity tracking
     lastActiveAt: v.optional(v.number()), // Last API call timestamp (main agent)
+    // A-15 post-verify nudge — set when the verify → first-call nudge email
+    // was sent so the cron never sends a second one to the same workspace.
+    postVerifyNudgeSentAt: v.optional(v.number()),
     // Onboarding wizard state
     onboardingCompletedAt: v.optional(v.number()), // null = wizard pending
     onboardingDismissedAt: v.optional(v.number()), // Tracks "skip for now" -- toast instead of full wizard on next visit
