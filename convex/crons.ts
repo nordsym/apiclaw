@@ -100,4 +100,13 @@ crons.interval(
   {}
 );
 
+// A-13 — Weekly scorecard email. Mondays 08:00 UTC (10:00 CEST summer /
+// 09:00 CEST winter). Reads funnel:getScorecard for the last 168h with
+// WoW comparison and mails the rendered table to gustav@nordsym.com.
+crons.weekly(
+  "weekly-scorecard-email",
+  { dayOfWeek: "monday", hourUTC: 8, minuteUTC: 0 },
+  internal.scorecardEmail.sendWeeklyScorecard,
+);
+
 export default crons;

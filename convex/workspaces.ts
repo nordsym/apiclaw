@@ -880,6 +880,35 @@ export const incrementUsage = mutation({
     const weeklyRemaining = isPaid ? Infinity : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
     const hourlyRemaining = isPaid ? Infinity : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
 
+    // A-17 — pre-flight quota warning at 80% of the weekly free tier.
+    // Surfaces a _notice payload that callers can lift into the response
+    // body so agents see a soft nudge to upgrade BEFORE the hard quota_hit.
+    let quotaWarning: {
+      type: "quota_warning_80pct";
+      tier: string;
+      usedThisWeek: number;
+      weeklyLimit: number;
+      remaining: number;
+      pct: number;
+      message: string;
+      upgradeUrl: string;
+    } | null = null;
+    if (!isPaid && workspace.tier !== "enterprise") {
+      const pct = (newWeeklyCount / FREE_WEEKLY_LIMIT) * 100;
+      if (pct >= 80) {
+        quotaWarning = {
+          type: "quota_warning_80pct",
+          tier: workspace.tier,
+          usedThisWeek: newWeeklyCount,
+          weeklyLimit: FREE_WEEKLY_LIMIT,
+          remaining: weeklyRemaining,
+          pct: Math.round(pct),
+          message: `You're at ${Math.round(pct)}% of the free tier (${newWeeklyCount}/${FREE_WEEKLY_LIMIT} this week, ${weeklyRemaining} left). Keep going at API cost + 15% with pay-as-you-go: https://apiclaw.cloud/upgrade`,
+          upgradeUrl: "https://apiclaw.cloud/upgrade",
+        };
+      }
+    }
+
     return {
       success: true,
       usageCount: newTotalCount,
@@ -887,6 +916,7 @@ export const incrementUsage = mutation({
       weeklyRemaining,
       hourlyRemaining,
       isPaid,
+      quotaWarning,
     };
   },
 });

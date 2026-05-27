@@ -4469,7 +4469,9 @@ http.route({
       }, 400);
     }
 
-    // Log usage
+    // Log usage. Capture incrementUsage result so we can surface its
+    // _notice (A-17 80% quota warning) into the success response below.
+    let openExecuteUsageResult: { quotaWarning?: any } | null = null;
     if (workspaceId) {
       try {
         await ctx.runMutation(api.analytics.log, {
@@ -4480,7 +4482,7 @@ http.route({
         await ctx.runMutation(api.logs.createProxyLog, {
           workspaceId: workspaceId as any, provider: `open:${provider}`, action, subagentId,
         });
-        await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+        openExecuteUsageResult = await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
       } catch (e: any) { console.error("[Execute] Open API logging failed:", e.message); }
     }
 
@@ -4510,6 +4512,7 @@ http.route({
         provider,
         action,
         data,
+        ...(openExecuteUsageResult?.quotaWarning ? { _notice: openExecuteUsageResult.quotaWarning } : {}),
         _apiclaw: { latencyMs, route: routeDetail, gateway: true },
       }, response.ok ? 200 : response.status);
     } catch (e: any) {
