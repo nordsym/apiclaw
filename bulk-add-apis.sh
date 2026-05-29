@@ -3,7 +3,7 @@ echo "REFUSED: this script re-seeds all 27 APILayer APIs as live, but 5 are subs
 [ "${FORCE_SEED:-0}" = "1" ] || exit 1
 # Bulk add all 27 APILayer APIs via debugAddAPI
 
-CONVEX_DEPLOYMENT="prod:brilliant-puffin-712"
+CONVEX_DEPLOYMENT="prod:adventurous-avocet-799"
 PROVIDER_ID="k57b9hpe7eqehnvbk5znxje60n83rc6p"  # Will find this first
 
 cd /Users/gustavhemmingsson/clawd/apiclaw

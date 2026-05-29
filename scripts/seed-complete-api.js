@@ -4,7 +4,7 @@
  * Usage: node scripts/seed-complete-api.js
  */
 
-const CONVEX_URL = "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+const CONVEX_URL = "https://adventurous-avocet-799.convex.cloud";
 
 async function convexMutation(path, args) {
   const res = await fetch(`${CONVEX_URL}/api/mutation`, {

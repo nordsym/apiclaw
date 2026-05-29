@@ -12,7 +12,7 @@
   },
   "servers": [
     {
-      "url": "https://brilliant-puffin-712.convex.site",
+      "url": "https://api.apiclaw.cloud",
       "description": "APIClaw Production API"
     }
   ],
