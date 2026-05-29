@@ -2,6 +2,15 @@ import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
+// Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
+// Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
+function requireAdminSecret(internalSecret: string | undefined) {
+  const expected = process.env.APICLAW_INTERNAL_SECRET;
+  if (!expected || internalSecret !== expected) {
+    throw new Error("unauthorized: admin secret required");
+  }
+}
+
 // ============================================
 // OTP AUTH FOR WORKSPACES (terminal-native)
 // ============================================
@@ -777,8 +786,10 @@ export const updateTier = mutation({
     tier: v.string(),
     usageLimit: v.number(),
     stripeCustomerId: v.optional(v.string()),
+    internalSecret: v.string(),
   },
-  handler: async (ctx, { workspaceId, tier, usageLimit, stripeCustomerId }) => {
+  handler: async (ctx, { workspaceId, tier, usageLimit, stripeCustomerId, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const updates: Record<string, unknown> = {
       tier,
       usageLimit,
@@ -1230,8 +1241,9 @@ export const getWorkspaceStatus = query({
 
 // Admin functions for Hivr integration
 export const adminActivateWorkspace = mutation({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace) {
       return { success: false, error: "not_found" };
@@ -1249,8 +1261,9 @@ export const adminActivateWorkspace = mutation({
 });
 
 export const adminCreateSession = mutation({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace || workspace.status !== "active") {
       return { success: false, error: "workspace_not_active" };
@@ -1277,8 +1290,9 @@ export const adminCreateSession = mutation({
 
 // TEMP: Admin query to debug workspace data
 export const adminGetFullWorkspace = query({
-  args: { email: v.string() },
-  handler: async (ctx, { email }) => {
+  args: { email: v.string(), internalSecret: v.string() },
+  handler: async (ctx, { email, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const workspace = await ctx.db
       .query("workspaces")
       .withIndex("by_email", (q) => q.eq("email", email.toLowerCase()))
@@ -1345,16 +1359,18 @@ export const claimAnonymousUsage = mutation({
 });
 
 export const adminUpdateEmail = mutation({
-  args: { workspaceId: v.id("workspaces"), newEmail: v.string() },
-  handler: async (ctx, { workspaceId, newEmail }) => {
+  args: { workspaceId: v.id("workspaces"), newEmail: v.string(), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, newEmail, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     await ctx.db.patch(workspaceId, { email: newEmail });
     return { success: true, email: newEmail };
   },
 });
 
 export const adminSetTier = mutation({
-  args: { workspaceId: v.id("workspaces"), tier: v.string() },
-  handler: async (ctx, { workspaceId, tier }) => {
+  args: { workspaceId: v.id("workspaces"), tier: v.string(), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, tier, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     await ctx.db.patch(workspaceId, { tier, updatedAt: Date.now() });
     return { success: true, tier };
   },
@@ -1370,8 +1386,10 @@ export const getOrCreateForClerk = mutation({
     email: v.string(),
     clerkUserId: v.string(),
     fingerprint: v.optional(v.string()),
+    internalSecret: v.string(),
   },
-  handler: async (ctx, { email, clerkUserId, fingerprint }) => {
+  handler: async (ctx, { email, clerkUserId, fingerprint, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const normalizedEmail = email.toLowerCase().trim();
 
     let workspace = await ctx.db

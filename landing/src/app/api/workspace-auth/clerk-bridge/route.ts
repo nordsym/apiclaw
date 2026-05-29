@@ -34,7 +34,12 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       path: "workspaces:getOrCreateForClerk",
-      args: { email, clerkUserId: userId, fingerprint },
+      args: {
+        email,
+        clerkUserId: userId,
+        fingerprint,
+        internalSecret: process.env.APICLAW_INTERNAL_SECRET,
+      },
     }),
   });
 
