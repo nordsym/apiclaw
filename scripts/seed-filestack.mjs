@@ -11,7 +11,7 @@
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api.js";
 
-const CONVEX_URL = "https://brilliant-puffin-712.eu-west-1.convex.cloud";
+const CONVEX_URL = "https://adventurous-avocet-799.convex.cloud";
 const client = new ConvexHttpClient(CONVEX_URL);
 
 const FILESTACK_EMAIL = "marketing@filestack.com";

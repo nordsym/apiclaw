@@ -1,7 +1,7 @@
 // Run this with: npx ts-node scripts/activate-hivr-workspace.ts
 import { ConvexHttpClient } from "convex/browser";
 
-const client = new ConvexHttpClient("https://brilliant-puffin-712.eu-west-1.convex.cloud");
+const client = new ConvexHttpClient("https://adventurous-avocet-799.convex.cloud");
 
 async function main() {
   // The workspace ID for symbot@nordsym.com

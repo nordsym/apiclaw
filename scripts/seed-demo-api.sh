@@ -1,7 +1,7 @@
 #!/bin/bash
 # Seed a complete demo API with Direct Call for NordSym
 
-CONVEX_URL="https://brilliant-puffin-712.eu-west-1.convex.cloud"
+CONVEX_URL="https://adventurous-avocet-799.convex.cloud"
 
 # First, get Gustav's provider ID by listing APIs
 echo "Looking up NordSym provider..."
