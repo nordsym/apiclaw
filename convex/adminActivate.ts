@@ -1,9 +1,18 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// Server-to-server guard. Callers must pass the shared APICLAW_INTERNAL_SECRET.
+function requireAdminSecret(internalSecret: string | undefined) {
+  const expected = process.env.APICLAW_INTERNAL_SECRET;
+  if (!expected || internalSecret !== expected) {
+    throw new Error("unauthorized: admin secret required");
+  }
+}
+
 export const activateWorkspace = mutation({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace) {
       return { success: false, error: "not_found" };
@@ -31,8 +40,9 @@ function generateToken(): string {
 }
 
 export const createSessionForWorkspace = mutation({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
+  handler: async (ctx, { workspaceId, internalSecret }) => {
+    requireAdminSecret(internalSecret);
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace || workspace.status !== "active") {
       return { success: false, error: "workspace_not_active" };
