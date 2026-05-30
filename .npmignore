@@ -14,7 +14,6 @@ add-apilayer-*
 api/
 .vercel/
 .env*
-!.env.prod
 
 # Bulk registry artifacts — 160MB combined, not required for runtime.
 # loadArtifact() in open-apis-generated.ts + intelligent-gateway.ts falls
