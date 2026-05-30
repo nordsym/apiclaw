@@ -5,12 +5,9 @@ dist/
 *.log
 .DS_Store
 
-# Environment
-.env
-.env.local
-.env.*.local
-.env.vercel-check
-landing/.env.vercel-check
+# Environment — ignore ALL .env files anywhere (they hold secrets)
+.env*
+!.env.example
 
 # Convex
 .convex/
