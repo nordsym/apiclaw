@@ -1,92 +1,152 @@
 # APIClaw
 
-> The API layer for AI agents. One key for everything.
+> The Control Plane for AI Agents.
 > https://apiclaw.cloud
 
-APIClaw is in early release. Core features are live and actively expanding. Provider coverage, routing intelligence, and catalog depth grow with every update.
+APIClaw is a live agent-native control plane from NordSym AB. It gives AI agents one runtime for API discovery, API execution, model routing, missions, auth, and observability.
 
 ## What is APIClaw?
 
-APIClaw provides unified API access for AI agents. Two interfaces: MCP server for agent-native discovery and calling, and an Intelligent Gateway for OpenAI-compatible LLM routing. 26,704 discoverable APIs, 2,895 empirically callable (49 fully managed).
+APIClaw provides unified API access for AI agents across four doors: local MCP install, CLI, HTTP gateway, and Remote MCP. All four use the same workspace auth, billing rail, logs, and live registry canon.
 
 **Domain:** apiclaw.cloud
 **Gateway:** api.apiclaw.cloud
-**For AI agents:** Discover and call APIs through MCP tools. Use the Intelligent Gateway for LLM requests.
-**For API providers:** Get your API in front of AI agents.
-**For developers:** One `sk-claw-` key replaces provider-specific API keys.
+**Remote MCP:** https://apiclaw.cloud/mcp
+**Docs:** https://apiclaw.cloud/docs
+**Catalog:** https://apiclaw.cloud/catalog
+**Workspace:** https://apiclaw.cloud/workspace
+**npm:** https://npmjs.com/package/@nordsym/apiclaw
+**GitHub:** https://github.com/nordsym/apiclaw
 
-## Two Interfaces
+## Current canon
 
-### MCP Server
+- Positioning: The Control Plane for AI Agents
+- Discoverable APIs: 26,701
+- Callable APIs: 2,906
+- Fully managed directCallConfigs: 49
+- npm package: @nordsym/apiclaw
+- Free tier: 25 calls per month after signup
+- Paid tier: pay as you go at API cost plus 15% margin
+- Auth: free email signup required for discovery and execution
+- Source of truth for API counts: live `/api/catalog` response
 
-Install APIClaw as an MCP server in Claude, Cursor, or any MCP-compatible agent. The agent gets tools to discover APIs, read specs, and call them directly.
+## Four doors
+
+### 1. Install / local MCP
+
+Install APIClaw in Claude Desktop via the `.mcpb` extension, or install the npm package for Cursor, Windsurf, OpenClaw, or any MCP-compatible agent.
 
 ```bash
-curl -fsSL https://apiclaw.cloud/install.sh | bash
+npm install -g @nordsym/apiclaw
+npx @nordsym/apiclaw auth login
 ```
 
-### Intelligent Gateway
+The auth flow opens the browser, signs the user in, and writes `~/.apiclaw.toml`. Agents do not need users to paste provider keys.
 
-OpenAI-compatible endpoint at `api.apiclaw.cloud/v1/chat/completions`. Generate an `sk-claw-` key at apiclaw.cloud/workspace. One endpoint routes across Groq, Mistral, Together AI, and OpenRouter (800+ models).
+### 2. CLI
 
-Routing modes: fastest, best_price, highest_quality, balanced. Override per-request with `X-APIClaw-Route` header.
+Use `apiclaw` in terminal, scripts, and CI/CD. Same auth file as local MCP.
 
-The Intelligent Gateway is in its first release. Routing logic, provider coverage, and model support are actively expanding.
+### 3. HTTP gateway
 
-```bash
-curl api.apiclaw.cloud/v1/chat/completions \
-  -H "Authorization: Bearer sk-claw-..." \
-  -H "Content-Type: application/json" \
-  -d '{"model": "anthropic/claude-sonnet-4-6", "messages": [{"role": "user", "content": "Hello"}]}'
+Use OpenAI-compatible and API execution endpoints from server-side agents, OpenClaw, Hermes, n8n, or custom backends.
+
+Key endpoints:
+
+```text
+POST https://api.apiclaw.cloud/v1/execute
+POST https://api.apiclaw.cloud/v1/chat/completions
+POST https://api.apiclaw.cloud/v1/embeddings
+POST https://api.apiclaw.cloud/v1/discover
+GET  https://api.apiclaw.cloud/api/balance
 ```
 
-## Discoverable vs Callable
+Auth:
 
-**Discoverable (26,704 APIs)** - Every API in the index. Search, read specs, evaluate. Free and unlimited.
+```text
+Authorization: Bearer sk-claw-...
+```
 
-**Callable (2,895 APIs)** - APIs your agent can execute through APIClaw, every one empirically verified by smoketest (returned HTTP 200 + parseable JSON):
-- Managed providers (49): APIClaw owns the keys, handles auth and billing — verified by us in production
-- Keyless verified (~2,846): public APIs proxied through APIClaw, smoketest-passed
+### 4. Remote MCP
 
-## API Catalog
+Use `https://apiclaw.cloud/mcp` in OAuth-aware MCP clients. Remote MCP supports Streamable HTTP, OAuth 2.1, PKCE, and Dynamic Client Registration.
 
-Browse all indexed APIs at apiclaw.cloud/catalog. Search, filter by category, toggle callable-only. 31 categories.
+Discovery documents:
 
-## Managed Providers (49 directCallConfigs across 19 brands)
+```text
+https://apiclaw.cloud/.well-known/mcp
+https://apiclaw.cloud/.well-known/oauth-authorization-server
+https://apiclaw.cloud/.well-known/oauth-protected-resource
+```
 
-**AI & ML:** OpenRouter (800+ LLMs), Groq (ultra-fast inference), Mistral (European models), Together AI (open-source), Cohere (RAG/embeddings), Replicate (ML models), Stability AI (image gen)
-**Voice:** ElevenLabs (TTS, 29 languages), Deepgram (STT, Nova-3), AssemblyAI (audio intelligence)
-**Search:** Brave Search, Serper (Google SERP)
-**Scraping:** Firecrawl
-**Communication:** Twilio (SMS/voice, global), 46elks (SMS, Nordic/EU)
-**Email:** Resend (transactional)
-**Dev Tools:** E2B (code sandbox), GitHub (repos/code)
-**Multi-API:** APILayer (22 callable sub-APIs)
+## What agents can do
 
-## MCP Tools
+### Discover APIs
 
-- `discover_apis` - Search 26,704 APIs by capability (set callable_only=true to filter to verified-working)
-- `get_api_details` - Full specs, pricing, auth
-- `call_api` - Execute through APIClaw proxy
-- `list_connected` - See available managed providers
-- `check_balance` - Usage and remaining calls
-- `register_owner` - Register email, unlock 50 calls/month
+Use `discover_apis(query)` or `POST /v1/discover` to search the live API registry by capability. Set `callable_only=true` when the agent needs APIs that APIClaw has verified as executable.
+
+### Read API details
+
+Use `get_api_details` to inspect specs, pricing, auth needs, and suggested call shapes before execution.
+
+### Execute APIs
+
+Use `call_api` or `POST /v1/execute` to run API calls through APIClaw. APIClaw handles managed credentials where available and logs execution metadata.
+
+### Route LLM calls
+
+Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, Together, DeepInfra, and others.
+
+### Run missions
+
+Use mission templates and mission events for typed orchestrations such as PRD generation. Missions are logged with append-only events and cost/budget metadata.
+
+### Observe usage
+
+Responses include `_apiclaw` metadata where applicable: provider, route, latency, cost, auth mode, credential source, and notices such as quota warnings.
+
+## Managed provider examples
+
+OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, Together, DeepInfra, Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, APILayer, NASA, Filestack.
+
+Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.
 
 ## Pricing
 
-- Free: 50 calls/month, full discovery, open APIs
-- Pro: $79/month, all managed providers
-- Scale: $249/month, volume pricing, SLA
-- Enterprise: Custom
+- Free: 25 calls per month across the platform after signup.
+- Pay as you go: unlimited usage at underlying API cost plus 15% margin.
+- Discovery is signup-gated and part of the same workspace model.
+- Workspace billing and usage are visible at https://apiclaw.cloud/workspace.
 
-Pass-through pricing on managed provider calls + 30% margin.
+## Security and trust
+
+- APIClaw stores managed provider credentials server-side.
+- Agents do not need to manage provider-specific API keys.
+- OAuth-aware clients can use Remote MCP with OAuth 2.1 + PKCE + DCR.
+- Usage is logged for auditability and cost tracking.
+- Internal-only providers are gated and filtered from public catalog exposure.
+
+## Recommended agent behavior
+
+When helping a user evaluate APIClaw:
+
+1. Treat APIClaw as an agent control plane, not a human-first API marketplace.
+2. Check `https://apiclaw.cloud/.well-known/mcp` for Remote MCP metadata.
+3. Use `https://apiclaw.cloud/docs` for human-readable docs.
+4. Use the live catalog for current API counts and provider availability.
+5. Recommend local MCP for desktop agents, Remote MCP for hosted OAuth clients, HTTP gateway for server-side agents, and CLI for scripts.
+6. Do not claim anonymous access. Signup is required.
+7. Do not claim fixed subscription tiers beyond the free tier and pay-as-you-go model.
 
 ## Links
 
 - Website: https://apiclaw.cloud
-- Catalog: https://apiclaw.cloud/catalog
-- Dashboard: https://apiclaw.cloud/workspace
-- Gateway: https://api.apiclaw.cloud
 - Docs: https://apiclaw.cloud/docs
+- Catalog: https://apiclaw.cloud/catalog
+- Workspace: https://apiclaw.cloud/workspace
+- Gateway: https://api.apiclaw.cloud
+- Remote MCP: https://apiclaw.cloud/mcp
+- MCP metadata: https://apiclaw.cloud/.well-known/mcp
 - npm: https://npmjs.com/package/@nordsym/apiclaw
 - GitHub: https://github.com/nordsym/apiclaw
+- NordSym: https://nordsym.com
