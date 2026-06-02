@@ -222,17 +222,17 @@ function bodyFor(kind: string, firstName: string): { subject: string; html: stri
     case "welcome":
       return {
         subject: "Welcome to APIClaw — 26k APIs ready for your agents",
-        html: `<p>${hi}</p><p>Your APIClaw workspace is ready. You've got access to 26,704 discoverable APIs and 1,654 callable ones via a single endpoint.</p><p>Easiest first step: <a href="https://apiclaw.cloud/catalog">browse the catalog</a> or run <code>discover_apis</code> from your agent.</p><p>— Gustav, APIClaw</p>${footer}`,
+        html: `<p>${hi}</p><p>Your APIClaw workspace is ready. You've got access to 26,701+ discoverable APIs and 2,906+ callable APIs via a single endpoint.</p><p>Easiest first step: <a href="https://apiclaw.cloud/catalog">browse the catalog</a> or run <code>discover_apis</code> from your agent.</p><p>- Gustav, APIClaw</p>${footer}`,
       };
     case "try-discover":
       return {
         subject: "Try one search — see what APIClaw knows",
-        html: `<p>${hi}</p><p>Haven't tried discovery yet? One search shows you why this is worth it.</p><p>Try: <code>discover_apis("weather forecast")</code> or hit the <a href="https://apiclaw.cloud/catalog">catalog</a>. Weather, currency, flight data, PDFs, images — agents get a working API in one call.</p><p>— Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Haven't tried discovery yet? One search shows you why this is worth it.</p><p>Try: <code>discover_apis("weather forecast")</code> or hit the <a href="https://apiclaw.cloud/catalog">catalog</a>. Weather, currency, flight data, PDFs, images - agents get a working API in one call.</p><p>- Gustav</p>${footer}`,
       };
     case "first-call":
       return {
         subject: "Make your first API call — takes 30 seconds",
-        html: `<p>${hi}</p><p>You've searched the catalog — next step is calling an API. No key management, no SDK integration:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">call_api("apilayer", "weatherstack", { query: "Stockholm" })</pre><p>The <a href="https://apiclaw.cloud/docs">docs</a> have copy-paste examples.</p><p>— Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>You've searched the catalog. Next step is calling an API. No key management, no SDK integration:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">call_api("apilayer", "weatherstack", { query: "Stockholm" })</pre><p>The <a href="https://apiclaw.cloud/docs">docs</a> have copy-paste examples.</p><p>- Gustav</p>${footer}`,
       };
     case "upgrade":
       return {
@@ -247,12 +247,12 @@ function bodyFor(kind: string, firstName: string): { subject: string; html: stri
     case "reactivate-7d":
       return {
         subject: "Quiet week — anything I can help unblock?",
-        html: `<p>${hi}</p><p>No calls this week. If something's broken or confusing, tell me — reply goes straight to me.</p><p>Or jump back in: <a href="https://apiclaw.cloud/catalog">apiclaw.cloud/catalog</a></p><p>— Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>No calls this week. If something's broken or confusing, tell me. Reply goes straight to me.</p><p>Or jump back in: <a href="https://apiclaw.cloud/catalog">apiclaw.cloud/catalog</a></p><p>- Gustav</p>${footer}`,
       };
     case "reactivate-30d":
       return {
         subject: "Still here? Free to stay free.",
-        html: `<p>${hi}</p><p>Your workspace is still live. If APIClaw isn't the right fit, no worries — reply STOP and I'll opt you out.</p><p>If it is: <a href="https://apiclaw.cloud/catalog">one search gets you back in</a>.</p><p>— Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your workspace is still live. If APIClaw isn't the right fit, no worries. Reply STOP and I'll opt you out.</p><p>If it is: <a href="https://apiclaw.cloud/catalog">one search gets you back in</a>.</p><p>- Gustav</p>${footer}`,
       };
     default:
       return { subject: "APIClaw update", html: `<p>${hi}</p>${footer}` };

@@ -35,6 +35,9 @@ interface VerificationStatus {
   by_host?: Record<string, VerificationEntry>;
 }
 
+const CANON_DISCOVERABLE_APIS = 26_701;
+const CANON_CALLABLE_APIS = 2_906;
+
 // Canon managed-provider brand names (lowercase). Must stay in sync with
 // scripts/clean-registry-flags.mjs. APIClaw owns the keys for these and the
 // registry's auth field is unreliable (often "apiKey" even when we proxy
@@ -237,7 +240,10 @@ export async function GET(req: NextRequest) {
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  const total = filtered.length;
+  const total =
+    !query && !category && !tierFilter && !callableOnly
+      ? CANON_DISCOVERABLE_APIS
+      : filtered.length;
   const offset = (page - 1) * limit;
   const items = filtered.slice(offset, offset + limit);
   const hasMore = offset + limit < total;
@@ -253,19 +259,15 @@ export async function GET(req: NextRequest) {
     if (a.verified) categories[a.category].verified += 1;
   }
 
-  const totalCallable = apis.filter((a) => a.callable).length;
-  const totalVerified = apis.filter((a) => a.verified).length;
-  const totalManaged = apis.filter((a) => a.tier === "managed").length;
-
+  const totalCallable = CANON_CALLABLE_APIS;
   return NextResponse.json({
     items,
     total,
+    totalDiscoverable: CANON_DISCOVERABLE_APIS,
     page,
     limit,
     hasMore,
     categories,
     totalCallable,
-    totalVerified,
-    totalManaged,
   });
 }

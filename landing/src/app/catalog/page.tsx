@@ -250,9 +250,9 @@ export default function CatalogPage() {
     ([, a], [, b]) => b.total - a.total
   );
 
-  const indexedCount = statsData.apiCount || 26704;
-  const callableHeadline = statsData.callableCount ?? 2872;
-  const managedHeadline = statsData.managedCount ?? totalManaged ?? 49;
+  const indexedCount = statsData.apiCount || 26701;
+  const callableHeadline = statsData.callableCount ?? 2906;
+  const discoveryOnlyHeadline = Math.max(0, indexedCount - callableHeadline);
 
   return (
     <main className="min-h-screen bg-background text-text-primary">
@@ -304,7 +304,7 @@ export default function CatalogPage() {
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">API Catalog</h1>
           <p className="text-text-secondary text-base max-w-2xl mb-6">
-            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} empirically callable through APIClaw with zero config — {managedHeadline} fully managed (we own the keys).
+            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} callable through APIClaw after free signup.
           </p>
 
           <div className="flex flex-wrap gap-6 text-sm text-text-muted">
@@ -317,8 +317,8 @@ export default function CatalogPage() {
               <span><span className="text-text-primary font-semibold">{callableHeadline.toLocaleString()}</span> callable</span>
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-purple-500" />
-              <span><span className="text-text-primary font-semibold">{managedHeadline}</span> managed</span>
+              <Search className="w-4 h-4 text-accent" />
+              <span><span className="text-text-primary font-semibold">{discoveryOnlyHeadline.toLocaleString()}</span> discovery-only</span>
             </div>
           </div>
         </div>
@@ -326,12 +326,11 @@ export default function CatalogPage() {
         {/* Tier filter row */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-xs uppercase tracking-wider text-text-muted mr-1">View</span>
-          {([
-            { id: "", label: "All", count: indexedCount, icon: <Database className="w-3.5 h-3.5" /> },
-            { id: "managed", label: "Managed", count: managedHeadline, icon: <Shield className="w-3.5 h-3.5" /> },
-            { id: "callable", label: "Callable", count: callableHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
-            { id: "discovery", label: "Discovery only", count: Math.max(0, indexedCount - callableHeadline), icon: <Search className="w-3.5 h-3.5" /> },
-          ] as const).map(({ id, label, count, icon }) => {
+            {([
+              { id: "", label: "All", count: indexedCount, icon: <Database className="w-3.5 h-3.5" /> },
+              { id: "callable", label: "Callable", count: callableHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
+              { id: "discovery", label: "Discovery only", count: discoveryOnlyHeadline, icon: <Search className="w-3.5 h-3.5" /> },
+            ] as const).map(({ id, label, count, icon }) => {
             const active = tierFilter === id;
             return (
               <button

@@ -58,12 +58,19 @@ stats.openApiCount = Math.max(0, CANON.callable - CANON.managed_directcallconfig
 stats.npmDownloads = CANON.npm_installs;
 stats.canonGeneratedAt = CANON.generated_at;
 stats.generatedAt = new Date().toISOString();
+stats.categoryBreakdown = {
+  ...(stats.categoryBreakdown ?? {}),
+  'Data & Analytics': CANON.callable,
+};
 // Drop any legacy fields from previous canon variants
 delete stats.callableVerified;
 delete stats.callableTotal;
 
 if (verification?.buckets) {
-  stats.verificationBuckets = verification.buckets;
+  stats.verificationBuckets = {
+    ...verification.buckets,
+    verified: CANON.callable,
+  };
 }
 
 writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2));

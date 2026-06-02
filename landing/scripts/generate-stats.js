@@ -129,14 +129,10 @@ try {
     if (npmData.downloads) npmDownloads = npmData.downloads;
   } catch { /* use fallback */ }
 
-  // Canonical catalog numbers used on the hero / meta tags.
-  // Sourced from convex/pipelineAlign:funnelCounts on 2026-04-27:
-  //   discovery (discovery + indexed + unclassified) = 26,740
-  //   callable (listingStatus=live) = 1,679
-  //   managed providers (authType=managed, subset of callable) = 47
-  const CANON_API_COUNT = 26740;
-  const CANON_CALLABLE = 1679;
-  const CANON_MANAGED = 47;
+  // Baseline before sync-canon-to-stats.mjs applies the current public canon.
+  const CANON_API_COUNT = 26701;
+  const CANON_CALLABLE = 2906;
+  const CANON_MANAGED = 49;
 
   const stats = {
     apiCount: CANON_API_COUNT,

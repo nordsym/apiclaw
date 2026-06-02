@@ -825,7 +825,7 @@ Install:
           <div className="rounded-2xl border border-border bg-surface-elevated overflow-hidden mb-8">
             <div className="grid md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border-subtle">
               {[
-                { n: "01", t: "Discover", d: "26,704 indexed APIs. Search by capability."},
+                { n: "01", t: "Discover", d: "26,701+ discoverable APIs. Search by capability."},
                 { n: "02", t: "Route", d: "Auto-pick the best provider. Keys stay server-side." },
                 { n: "03", t: "Execute", d: "Single calls or full multi-step missions." },
                 { n: "04", t: "Observe", d: "Audit log, cost, latency tagged per call." },
@@ -1043,7 +1043,7 @@ Install:
                 {[
                   { n: "01", t: "Submit your spec", d: "OpenAPI 3, Swagger, or a raw base URL. We normalise it." },
                   { n: "02", t: "Approve the listing", d: "Review the auto-generated capability tags and pricing model." },
-                  { n: "03", t: "Go live", d: "Your API is searchable by 26,704 indexed peers within minutes." },
+                  { n: "03", t: "Go live", d: "Your API is searchable by 26,701+ discoverable APIs within minutes." },
                   { n: "04", t: "Optional: become managed", d: "Hand us the credential. We hold custody, agents call your API without keys, commercial terms agreed per partner." },
                 ].map((step) => (
                   <li key={step.n} className="group flex items-start gap-4 rounded-xl p-3 -mx-3 transition-all duration-300 hover:bg-surface/60 hover:translate-x-0.5">
