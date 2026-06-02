@@ -9,9 +9,6 @@
  *   5. Wait for /callback?code=X&state=Y on loopback (max 5 min).
  *   6. Validate state, POST cliAuth:exchange with {code, codeVerifier} → session+key.
  *   7. Write ~/.apiclaw.toml, verify, print success + next-step hints.
- *
- * Email fallback: --email-fallback delegates to the existing magic-link
- * loginCommand for headless/SSH users.
  */
 
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
@@ -22,7 +19,6 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
-import { loginCommand as emailLogin } from './login.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
@@ -32,7 +28,6 @@ const LOOPBACK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 const PREFERRED_PORT = 41789;
 
 interface AuthLoginOptions {
-  emailFallback?: boolean;
   printMcpToken?: boolean;
   force?: boolean;
   noOpen?: boolean;
@@ -220,20 +215,6 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
       );
       return existing;
     }
-  }
-
-  // Email-fallback branch — delegate to existing magic-link command.
-  if (options.emailFallback) {
-    const result = await emailLogin({ force: options.force });
-    if (!result) return null;
-    const cfg: AuthConfig = {
-      workspaceId: result.workspaceId,
-      email: result.email,
-      sessionToken: result.sessionToken,
-      createdAt: Date.now(),
-    };
-    writeAuthConfig(cfg);
-    return cfg;
   }
 
   console.log('');

@@ -7,7 +7,7 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import { readSession } from '../../session.js';
-import { loginCommand } from './login.js';
+import { authLoginCommand } from './auth.js';
 
 const CONVEX_SITE = 'https://adventurous-avocet-799.convex.site';
 
@@ -72,7 +72,7 @@ export async function demoCommand(): Promise<void> {
   let session = readSession();
   if (!session) {
     console.log(chalk.yellow('  Sign in first to run the demo:\n'));
-    const result = await loginCommand({});
+    const result = await authLoginCommand({});
     if (!result) {
       console.error(chalk.red('\n  Login failed. Run: npx @nordsym/apiclaw login\n'));
       process.exit(1);

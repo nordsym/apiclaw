@@ -6,7 +6,7 @@
 import { existsSync } from 'fs';
 import { detectOS, getOSDisplayName } from '../../utils/os.js';
 import { readSession } from '../../session.js';
-import { loginCommand } from './login.js';
+import { authLoginCommand } from './auth.js';
 import { 
   getAllClients, 
   getConfigPath, 
@@ -195,7 +195,7 @@ export async function setupCommand(options: SetupOptions): Promise<void> {
     const session = readSession();
     if (!session) {
       console.log('First, sign in to link your workspace:\n');
-      const loginResult = await loginCommand({});
+      const loginResult = await authLoginCommand({});
       if (!loginResult) {
         console.error('\n❌ Login failed. Setup cancelled.');
         process.exit(1);

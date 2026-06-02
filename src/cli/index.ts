@@ -11,7 +11,6 @@ import { mcpInstallCommand } from './commands/mcp-install.js';
 import { doctorCommand } from './commands/doctor.js';
 import { restoreCommand } from './commands/restore.js';
 import { uninstallCommand } from './commands/uninstall.js';
-import { loginCommand } from './commands/login.js';
 import { authLoginCommand, authLogoutCommand, authWhoamiCommand } from './commands/auth.js';
 import { demoCommand } from './commands/demo.js';
 import { missionCommand } from './commands/mission.js';
@@ -19,7 +18,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '1.0.0';
+const VERSION = '2.8.6';
 
 const program = new Command();
 
@@ -112,9 +111,8 @@ program
   .option('-f, --force', 'Remove even if not configured')
   .action(uninstallCommand);
 
-// Auth — agent-native browser-loopback flow (canonical from v2.8).
-// `apiclaw auth login` is the recommended path; `apiclaw login` aliases the
-// new flow but keeps the old --email path for back-compat.
+// Auth — agent-native browser-loopback flow (the only login path).
+// `apiclaw auth login` is canonical; `apiclaw login` is a thin alias.
 const authCmd = program
   .command('auth')
   .description('Authenticate the APIClaw CLI (Modal-style browser-loopback flow)');
@@ -123,13 +121,11 @@ authCmd
   .command('login')
   .description('Open browser, sign in via Clerk, write ~/.apiclaw.toml')
   .option('-f, --force', 'Re-authenticate even if already signed in')
-  .option('--email-fallback', 'Use the legacy email magic-link flow (for headless/SSH)')
   .option('--print-mcp-token', 'Also issue an sk-mcp-* token for Remote MCP fallback (not yet implemented)')
   .option('--no-open', 'Print the URL instead of opening the browser')
   .action(async (options) => {
     await authLoginCommand({
       force: options.force,
-      emailFallback: options.emailFallback,
       printMcpToken: options.printMcpToken,
       noOpen: !options.open, // commander inverts --no-open
     });
@@ -149,28 +145,13 @@ authCmd
     await authWhoamiCommand();
   });
 
-// Login / signup command — preserved for back-compat.
-// Defaults to the new browser-loopback flow; --email keeps the legacy magic-link path.
+// `apiclaw login` — thin alias for `apiclaw auth login` (browser-loopback).
 program
   .command('login')
   .description('Sign in or create a free APIClaw workspace (alias of `auth login`)')
-  .option('-e, --email <email>', 'Email address to use (legacy magic-link flow)')
   .option('-f, --force', 'Force re-login even if already signed in')
-  .option('--no-demo', 'Skip the demo after login')
   .action(async (options) => {
-    // If --email is given, user explicitly wants the old magic-link flow.
-    if (options.email) {
-      const result = await loginCommand({ email: options.email, force: options.force });
-      if (result && options.demo !== false) {
-        await demoCommand();
-      }
-      return;
-    }
-    // Otherwise use the canonical browser-loopback flow.
-    const result = await authLoginCommand({ force: options.force });
-    if (result && options.demo !== false) {
-      await demoCommand();
-    }
+    await authLoginCommand({ force: options.force });
   });
 
 // Demo command — fire a live API call in the terminal
