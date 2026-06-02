@@ -17,11 +17,9 @@ function requireAdminSecret(internalSecret: string | undefined) {
 
 function generateOTP(): string {
   const digits = "0123456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += digits.charAt(Math.floor(Math.random() * digits.length));
-  }
-  return code;
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => digits[b % digits.length]).join("");
 }
 
 // Create OTP code and return it (MCP server sends the email)
@@ -111,10 +109,9 @@ export const verifyOTP = mutation({
       let attempts = 0;
       do {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let rc = "";
-        for (let i = 0; i < 6; i++) {
-          rc += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        const bytes = new Uint8Array(6);
+        crypto.getRandomValues(bytes);
+        const rc = Array.from(bytes, (b) => chars[b % chars.length]).join("");
         referralCode = `CLAW-${rc}`;
         const existingRef = await ctx.db
           .query("workspaces")
@@ -225,10 +222,9 @@ export const createMagicLink = mutation({
 // Generate a unique referral code (CLAW-XXXXXX format)
 function generateReferralCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  const code = Array.from(bytes, (b) => chars[b % chars.length]).join("");
   return `CLAW-${code}`;
 }
 
@@ -1194,11 +1190,9 @@ export const createAgentSession = mutation({
 
 function generateToken(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < 48; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  const bytes = new Uint8Array(48);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
 }
 
 // Get workspace status (for MCP check_workspace_status tool)
@@ -1269,12 +1263,7 @@ export const adminCreateSession = mutation({
       return { success: false, error: "workspace_not_active" };
     }
     
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let token = '';
-    for (let i = 0; i < 32; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    const sessionToken = "apiclaw_" + token;
+    const sessionToken = "apiclaw_" + generateToken();
     
     await ctx.db.insert("agentSessions", {
       workspaceId,

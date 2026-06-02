@@ -29,37 +29,24 @@ const CODE_EXPIRES_MS = 2 * 60 * 1000;  // 2 minutes after claim
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 function randomString(length: number): string {
-  let out = "";
-  for (let i = 0; i < length; i++) {
-    out += CHARS.charAt(Math.floor(Math.random() * CHARS.length));
-  }
-  return out;
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => CHARS[b % CHARS.length]).join("");
 }
 
 function generateReferralCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  const code = Array.from(bytes, (b) => chars[b % chars.length]).join("");
   return `CLAW-${code}`;
 }
 
 // Deterministic hash used elsewhere in this codebase (apiKeys.ts) for key lookup.
-function hashKey(key: string): string {
-  let h1 = 0;
-  for (let i = 0; i < key.length; i++) {
-    h1 = ((h1 << 5) - h1 + key.charCodeAt(i)) | 0;
-  }
-  let h2 = 0;
-  for (let i = 0; i < key.length; i++) {
-    h2 = ((h2 << 7) - h2 + key.charCodeAt(i) * 31) | 0;
-  }
-  let h3 = 0;
-  for (let i = 0; i < key.length; i++) {
-    h3 = ((h3 << 11) - h3 + key.charCodeAt(i) * 127) | 0;
-  }
-  return `${(h1 >>> 0).toString(36)}-${(h2 >>> 0).toString(36)}-${(h3 >>> 0).toString(36)}`;
+async function hashKey(key: string): Promise<string> {
+  const data = new TextEncoder().encode(key);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 function getKeyPrefix(key: string): string {
@@ -354,7 +341,7 @@ export const _exchangeVerified = internalMutation({
     await ctx.db.insert("workspaceApiKeys", {
       workspaceId: workspace._id,
       key: "",
-      keyHash: hashKey(rawKey),
+      keyHash: await hashKey(rawKey),
       keyPrefix: getKeyPrefix(rawKey),
       name: `cli-auth ${new Date().toISOString().slice(0, 10)}`,
       createdAt: Date.now(),

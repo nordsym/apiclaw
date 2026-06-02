@@ -268,6 +268,9 @@ export async function reportUsage(
   if (!stripe) {
     return { success: false, error: 'Stripe not configured' };
   }
+  if (!idempotencyKey) {
+    return { success: false, error: 'idempotencyKey is required for Stripe usage reporting' };
+  }
 
   try {
     // Use Stripe's meter event API
@@ -278,9 +281,7 @@ export async function reportUsage(
         value: calls.toString(),
       },
       timestamp: Math.floor(Date.now() / 1000),
-    }, {
-      idempotencyKey: idempotencyKey || `usage_${customerId}_${Date.now()}_${Math.random()}`,
-    });
+    }, { idempotencyKey });
 
     return { success: true, eventId: event.identifier };
   } catch (error) {

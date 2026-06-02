@@ -13,6 +13,9 @@ import {
 
 const http = httpRouter();
 
+const CANON_DISCOVERABLE_APIS = 26_701;
+const CANON_CALLABLE_APIS = 2_906;
+
 // Provider catalog — all 20 managed providers
 interface ProviderMeta {
   name: string;
@@ -1020,13 +1023,12 @@ const corsHeaders = {
 };
 
 // ============================================
-// SHADOW-MODE GATE (staged rollout to enforce)
+// AUTH GATE
 // ============================================
 // AUTH_ENFORCEMENT env var controls the gate behavior:
 //   "shadow"  (default) → log unauth calls to funnel.call_api_unauth, pass through
 //   "enforce"           → reject anonymous calls with 401 + signup link
 // Per-workspace override: workspaces.gatingEnabled === true forces enforce for that workspace.
-// /v1/discover stays open unconditionally.
 function isEnforceMode(): boolean {
   return (process.env.APICLAW_AUTH_ENFORCEMENT ?? "shadow") === "enforce";
 }
@@ -1043,6 +1045,24 @@ function unauthResponse(reason: string) {
         signupUrl: "https://apiclaw.cloud/workspace",
         docsUrl: "https://apiclaw.cloud/install",
         freeTierCalls: 25,
+      },
+    },
+    401
+  );
+}
+
+function discoverAuthResponse(reason: string) {
+  return jsonResponse(
+    {
+      error: {
+        message:
+          "Signup required for API discovery. Discovery is free after signup. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw login`.",
+        type: "auth_error",
+        code: "signup_required",
+        reason,
+        signupUrl: "https://apiclaw.cloud/sign-up",
+        docsUrl: "https://apiclaw.cloud/install",
+        discoveryCost: "free",
       },
     },
     401
@@ -1123,13 +1143,7 @@ async function resolveWorkspaceFromRequest(
     return { authMethod: "anonymous" };
   }
 
-  // 3. Legacy identifier header
-  const identifier = request.headers.get("X-APIClaw-Identifier");
-  if (identifier && !identifier.startsWith("anon:") && identifier !== "unknown" && identifier.length > 20) {
-    return { workspaceId: identifier, authMethod: "identifier" };
-  }
-
-  // 4. Anonymous
+  // 3. Anonymous
   return { authMethod: "anonymous" };
 }
 
@@ -1270,7 +1284,7 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
-// Full registry discovery — proxies to Vercel catalog (26,704 APIs)
+// Full registry discovery. Signup required, discovery is free.
 http.route({
   path: "/v1/discover",
   method: "OPTIONS",
@@ -1282,6 +1296,11 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
+      const authResult = await requireApiKeyAuth(ctx, request);
+      if (authResult instanceof Response) {
+        return discoverAuthResponse("discover_requires_signup");
+      }
+
       const body = await request.json();
       const query = body.query || "";
       const category = body.category || "";
@@ -1314,20 +1333,7 @@ http.route({
         totalCallable: number;
       };
 
-      // Also include managed providers from PROVIDERS catalog.
-      // Filter out internal-only providers so they never appear in public discovery.
-      const managedProviders = Object.entries(PROVIDERS)
-        .filter(([id]) => !INTERNAL_ONLY_PROVIDERS.has(id.toLowerCase()))
-        .map(([id, p]) => ({
-          providerId: id,
-          name: p.name,
-          description: p.description,
-          category: p.category,
-          managed: true,
-        }));
-
-      // Also strip them from the catalog items in case the upstream registry
-      // happens to include them.
+      // Strip internal-infrastructure providers from public discovery.
       const filteredApis = (catalogData.items || []).filter(
         (item) => !INTERNAL_ONLY_PROVIDERS.has((item.name || "").toLowerCase()),
       );
@@ -1378,11 +1384,13 @@ http.route({
         limit: catalogData.limit,
         hasMore: catalogData.hasMore,
         categories: catalogData.categories,
-        totalCallable: catalogData.totalCallable,
-        managedProviders: managedProviders,
+        totalDiscoverable: CANON_DISCOVERABLE_APIS,
+        totalCallable: CANON_CALLABLE_APIS,
         _meta: {
-          registry: "26,704 discoverable APIs",
-          managed: `${managedProviders.length} managed providers`,
+          discoverable: `${CANON_DISCOVERABLE_APIS.toLocaleString("en-US")}+ discoverable APIs`,
+          callable: `${CANON_CALLABLE_APIS.toLocaleString("en-US")}+ callable APIs`,
+          discoveryRequiresSignup: true,
+          discoveryCost: "free",
           docs: "https://apiclaw.cloud/docs",
         },
       });

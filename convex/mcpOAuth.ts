@@ -12,8 +12,7 @@
  *      Connector" and gets a one-shot client_id+secret pre-bound to their
  *      workspace. Skips the consent screen for repeat installs.
  *
- * Tokens are SHA-ish hashed for lookup, never stored raw. Same convention
- * the workspaceApiKeys table uses (apiKeys.ts).
+ * Tokens are SHA-256 hashed for lookup, never stored raw.
  */
 import { v } from "convex/values";
 import { mutation, query, internalMutation } from "./_generated/server";
@@ -33,24 +32,22 @@ const ALLOWED_SCOPES = new Set(["mcp", "mcp:read", "mcp:call", "mcp:billing"]);
 // HELPERS
 // ============================================
 
-const URL_SAFE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
 function randomString(len: number): string {
-  let out = "";
-  for (let i = 0; i < len; i++) {
-    out += URL_SAFE_CHARS.charAt(Math.floor(Math.random() * URL_SAFE_CHARS.length));
-  }
-  return out;
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => (b % 36).toString(36)).join("");
 }
 
-// Same deterministic hash as apiKeys.ts. Convex's V8 runtime has no node:crypto;
-// this is purely for indexed lookup, not a security primitive. Token entropy
-// (48+ chars from 62-symbol alphabet) is the actual security boundary.
-function hashToken(token: string): string {
+async function hashToken(token: string): Promise<string> {
+  const data = new TextEncoder().encode(token);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function legacyHashToken(token: string): string {
   let h1 = 0;
   for (let i = 0; i < token.length; i++) {
-    const c = token.charCodeAt(i);
-    h1 = ((h1 << 5) - h1 + c) | 0;
+    h1 = ((h1 << 5) - h1 + token.charCodeAt(i)) | 0;
   }
   let h2 = 0;
   for (let i = 0; i < token.length; i++) {
@@ -61,6 +58,10 @@ function hashToken(token: string): string {
     h3 = ((h3 << 11) - h3 + token.charCodeAt(i) * 127) | 0;
   }
   return `${(h1 >>> 0).toString(36)}-${(h2 >>> 0).toString(36)}-${(h3 >>> 0).toString(36)}`;
+}
+
+async function matchesStoredHash(raw: string, storedHash: string): Promise<boolean> {
+  return (await hashToken(raw)) === storedHash || legacyHashToken(raw) === storedHash;
 }
 
 function tokenPrefix(token: string): string {
@@ -149,7 +150,7 @@ export const registerDynamicClient = mutation({
     let clientSecretPrefix: string | undefined;
     if (!isPublic) {
       clientSecret = generateClientSecret();
-      clientSecretHash = hashToken(clientSecret);
+      clientSecretHash = await hashToken(clientSecret);
       clientSecretPrefix = `${clientSecret.slice(0, 16)}...${clientSecret.slice(-4)}`;
     }
 
@@ -220,7 +221,7 @@ export const createDashboardConnector = mutation({
     const now = Date.now();
     await ctx.db.insert("mcpOAuthClients", {
       clientId,
-      clientSecretHash: hashToken(clientSecret),
+      clientSecretHash: await hashToken(clientSecret),
       clientSecretPrefix: `${clientSecret.slice(0, 16)}...${clientSecret.slice(-4)}`,
       workspaceId: session.workspaceId,
       name: trimmedName,
@@ -408,7 +409,7 @@ export const exchangeAuthCode = mutation({
     // Authenticate the client.
     if (client.tokenEndpointAuthMethod === "client_secret_basic") {
       if (!args.clientSecret) throw new Error("invalid_client");
-      if (!client.clientSecretHash || hashToken(args.clientSecret) !== client.clientSecretHash) {
+      if (!client.clientSecretHash || !(await matchesStoredHash(args.clientSecret, client.clientSecretHash))) {
         throw new Error("invalid_client");
       }
     }
@@ -436,11 +437,18 @@ export const exchangeRefreshToken = mutation({
     clientSecret: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const refreshHash = hashToken(args.refreshToken);
-    const row = await ctx.db
+    const refreshHash = await hashToken(args.refreshToken);
+    const legacyRefreshHash = legacyHashToken(args.refreshToken);
+    let row = await ctx.db
       .query("mcpOAuthTokens")
       .withIndex("by_tokenHash", (q) => q.eq("tokenHash", refreshHash))
       .first();
+    if (!row) {
+      row = await ctx.db
+        .query("mcpOAuthTokens")
+        .withIndex("by_tokenHash", (q) => q.eq("tokenHash", legacyRefreshHash))
+        .first();
+    }
     if (!row || row.kind !== "refresh" || row.revokedAt || Date.now() > row.expiresAt) {
       throw new Error("invalid_grant");
     }
@@ -453,7 +461,7 @@ export const exchangeRefreshToken = mutation({
     if (!client || client.revokedAt) throw new Error("invalid_client");
     if (client.tokenEndpointAuthMethod === "client_secret_basic") {
       if (!args.clientSecret) throw new Error("invalid_client");
-      if (!client.clientSecretHash || hashToken(args.clientSecret) !== client.clientSecretHash) {
+      if (!client.clientSecretHash || !(await matchesStoredHash(args.clientSecret, client.clientSecretHash))) {
         throw new Error("invalid_client");
       }
     }
@@ -483,7 +491,7 @@ async function issueTokenPair(
   const refresh = generateRefreshToken();
   const now = Date.now();
   const accessId = await ctx.db.insert("mcpOAuthTokens", {
-    tokenHash: hashToken(access),
+    tokenHash: await hashToken(access),
     tokenPrefix: tokenPrefix(access),
     kind: "access",
     clientId: input.clientId,
@@ -493,7 +501,7 @@ async function issueTokenPair(
     createdAt: now,
   });
   await ctx.db.insert("mcpOAuthTokens", {
-    tokenHash: hashToken(refresh),
+    tokenHash: await hashToken(refresh),
     tokenPrefix: tokenPrefix(refresh),
     kind: "refresh",
     clientId: input.clientId,
@@ -539,10 +547,18 @@ async function sha256Base64Url(input: string): Promise<string> {
 export const resolveBearerToken = query({
   args: { token: v.string() },
   handler: async (ctx, args) => {
-    const row = await ctx.db
+    const tokenHash = await hashToken(args.token);
+    const legacyTokenHash = legacyHashToken(args.token);
+    let row = await ctx.db
       .query("mcpOAuthTokens")
-      .withIndex("by_tokenHash", (q) => q.eq("tokenHash", hashToken(args.token)))
+      .withIndex("by_tokenHash", (q) => q.eq("tokenHash", tokenHash))
       .first();
+    if (!row) {
+      row = await ctx.db
+        .query("mcpOAuthTokens")
+        .withIndex("by_tokenHash", (q) => q.eq("tokenHash", legacyTokenHash))
+        .first();
+    }
     if (!row) return { ok: false as const, reason: "token_not_found" };
     if (row.kind !== "access") return { ok: false as const, reason: "wrong_token_kind" };
     if (row.revokedAt) return { ok: false as const, reason: "token_revoked" };
@@ -576,10 +592,18 @@ export const touchToken = mutation({
 export const revokeToken = mutation({
   args: { token: v.string() },
   handler: async (ctx, args) => {
-    const row = await ctx.db
+    const tokenHash = await hashToken(args.token);
+    const legacyTokenHash = legacyHashToken(args.token);
+    let row = await ctx.db
       .query("mcpOAuthTokens")
-      .withIndex("by_tokenHash", (q) => q.eq("tokenHash", hashToken(args.token)))
+      .withIndex("by_tokenHash", (q) => q.eq("tokenHash", tokenHash))
       .first();
+    if (!row) {
+      row = await ctx.db
+        .query("mcpOAuthTokens")
+        .withIndex("by_tokenHash", (q) => q.eq("tokenHash", legacyTokenHash))
+        .first();
+    }
     if (row && !row.revokedAt) {
       await ctx.db.patch(row._id, { revokedAt: Date.now() });
     }

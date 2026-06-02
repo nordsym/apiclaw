@@ -1,6 +1,13 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+function requireAdminSecret(internalSecret: string | undefined) {
+  const expected = process.env.APICLAW_INTERNAL_SECRET;
+  if (!expected || internalSecret !== expected) {
+    throw new Error("unauthorized: admin secret required");
+  }
+}
+
 // ============================================
 // MUTATIONS
 // ============================================
@@ -21,8 +28,10 @@ export const saveDirectCallConfig = mutation({
     rateLimitPerUser: v.number(),
     rateLimitPerDay: v.number(),
     pricePerRequest: v.number(),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     const now = Date.now();
 
     if (args.id) {
@@ -80,8 +89,10 @@ export const saveConfig = mutation({
       allowCustomerKeys: v.optional(v.boolean()),
       requireCustomerKeys: v.optional(v.boolean()),
     }),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     // Verify session (unified: agentSessions first, fallback to legacy sessions)
     let providerId: any = null;
 
@@ -189,8 +200,10 @@ export const saveAction = mutation({
       path: v.string(),
     })),
     enabled: v.boolean(),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     const now = Date.now();
 
     if (args.id) {
@@ -232,8 +245,10 @@ export const saveAction = mutation({
 export const deleteAction = mutation({
   args: {
     id: v.id("providerActions"),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     await ctx.db.delete(args.id);
     return { success: true };
   },
@@ -246,8 +261,10 @@ export const deleteAction = mutation({
 export const publishDirectCall = mutation({
   args: {
     id: v.id("providerDirectCall"),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     const now = Date.now();
     
     // Get the managed routing config to find the provider
@@ -344,8 +361,10 @@ export const setStatus = mutation({
   args: {
     id: v.id("providerDirectCall"),
     status: v.string(),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    requireAdminSecret(args.internalSecret);
     const now = Date.now();
     const update: { status: string; updatedAt: number; publishedAt?: number } = {
       status: args.status,

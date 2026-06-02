@@ -717,8 +717,11 @@ export const reportUsageToStripe = internalAction({
       }
 
       const stripeKey = process.env.STRIPE_SECRET_KEY;
-      // Idempotency key prevents Stripe from double-counting on retry.
-      const idempotencyKey = `apiclaw_${args.workspaceId}_${Date.now()}`;
+      const usageRecordKey = usageRecords
+        .map((r: { _id: Id<"usageRecords"> }) => r._id)
+        .sort()
+        .join("_");
+      const idempotencyKey = `apiclaw_${args.workspaceId}_${usageRecordKey}`;
 
       const meterEventResponse = await fetch(
         `https://api.stripe.com/v1/billing/meter_events`,

@@ -5,9 +5,7 @@
  * Tools:
  * - discover_apis: Search for APIs by capability
  * - get_api_details: Get full info about an API
- * - purchase_access: Buy API access with credits
  * - check_balance: Check credits and active purchases
- * - add_credits: Add credits to account (for testing)
  */
 
 import { spawn } from 'node:child_process';
@@ -21,15 +19,7 @@ import {
 
 import { discoverAPIs, getAPIDetails, getCategories, getAllAPIs } from './discovery.js';
 import { trackStartup, trackSearch, trackExecute, trackDiscovery } from './telemetry.js';
-import { 
-  getAgentCredits, 
-  addCredits, 
-  purchaseAPIAccess, 
-  getBalanceSummary,
-  getAgentPurchases,
-  getProvidersWithRealCredentials 
-} from './credits.js';
-import { hasRealCredentials } from './credentials.js';
+import { getBalanceSummary } from './credits.js';
 import { getConnectedProviders } from './execute.js';
 import { executeMetered } from './metered.js';
 import { logAPICall } from './mcp-analytics.js';
@@ -943,7 +933,7 @@ const tools: Tool[] = [
         },
         callable_only: {
           type: 'boolean',
-          description: 'Default true: only return APIs APIClaw can execute right now (~2,895 callable providers). Set false to also see the ~23,800 discovery-only registry entries — useful when scoping a manual integration, not for agents that want to act now.',
+          description: 'Default true: only return APIs APIClaw can execute right now (2,906+ callable APIs). Set false to also see the full 26,701+ discoverable registry. Signup is required, discovery is free.',
           default: true,
         },
         max_results: {
@@ -987,28 +977,6 @@ const tools: Tool[] = [
     }
   },
   {
-    name: 'purchase_access',
-    description: 'Purchase access to an API using your credit balance. Returns API credentials on success.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        api_id: {
-          type: 'string',
-          description: 'The API provider ID to purchase access to'
-        },
-        amount_usd: {
-          type: 'number',
-          description: 'Amount in USD to spend on this API'
-        },
-        agent_id: {
-          type: 'string',
-          description: 'Your agent identifier (optional, uses default if not provided)'
-        }
-      },
-      required: ['api_id', 'amount_usd']
-    }
-  },
-  {
     name: 'check_balance',
     description: 'Check your credit balance and list active API purchases.',
     inputSchema: {
@@ -1019,24 +987,6 @@ const tools: Tool[] = [
           description: 'Your agent identifier (optional, uses default if not provided)'
         }
       }
-    }
-  },
-  {
-    name: 'add_credits',
-    description: 'Add credits to your workspace. (For testing/demo purposes)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        amount_usd: {
-          type: 'number',
-          description: 'Amount in USD to add to your balance'
-        },
-        agent_id: {
-          type: 'string',
-          description: 'Your agent identifier (optional, uses default if not provided)'
-        }
-      },
-      required: ['amount_usd']
     }
   },
   {
@@ -1485,11 +1435,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 ${!isAuthenticated ? `
 GET STARTED (free):
   1. register_owner({ email: "you@example.com" })  — sends 6-digit code
-  2. verify_code({ email: "you@example.com", code: "123456" })  — activates workspace
+  2. verify_code({ email: "you@example.com", code: "123456" })  - activates workspace
 ` : `
 STATUS: Authenticated as ${workspaceContext!.email} (${workspaceContext!.tier} tier)
 `}
-DISCOVER APIs (free, no registration needed):
+DISCOVER APIs (signup required, free):
   discover_apis({ query: "send SMS to Sweden" })
   discover_apis({ query: "text to speech", category: "ai" })
 
@@ -1497,13 +1447,7 @@ CALL APIs (requires free registration):
   call_api({ provider: "brave_search", action: "search", params: { q: "AI agents" } })
   call_api({ provider: "elevenlabs", action: "tts", params: { text: "Hello" } })
 
-MANAGED PROVIDERS:
-  OpenAI, Anthropic, xAI/Grok, Groq, Mistral, OpenRouter, Together AI,
-  Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Firecrawl,
-  Serper, E2B, Stability AI, Cohere, Voyage AI, GitHub,
-  APILayer (22 callable sub-APIs)
-
-${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()} CALLABLE (empirically verified, ${CANON_STATS.managed_directcallconfigs} managed) | Free tier: 25 calls / month, email signup required
+${CANON_STATS.discoverable.toLocaleString()}+ DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()}+ CALLABLE | Discovery is free after signup | Free tier: 25 calls / month
 
 Docs: https://apiclaw.cloud
 `;
@@ -1528,8 +1472,8 @@ Docs: https://apiclaw.cloud
 
         const startTime = Date.now();
 
-        // 2.8.4: delegate to HTTP gateway /v1/discover so every door sees the
-        // same canon (26,704 discoverable / 2,872 callable). Local registry
+        // Delegate to HTTP gateway /v1/discover so every door sees the same
+        // canon (26,701+ discoverable / 2,906+ callable). Local registry
         // was stripped from the tarball in 2.8.3 (saved 150MB); hardcoded
         // curated set + Convex managed cache only ships ~53 entries standalone.
         // Gateway-fetch makes lokal MCP tool match HTTP + Remote MCP results.
@@ -1552,19 +1496,6 @@ Docs: https://apiclaw.cloud
           });
           if (discoverResp.ok) {
             const data: any = await discoverResp.json();
-            const managed = (data.managedProviders || []).map((p: any) => ({
-              provider: {
-                id: p.providerId,
-                name: p.name,
-                description: p.description,
-                category: p.category,
-                callable: true,
-                managed: true,
-              },
-              matchScore: 1.0,
-              matchedKeywords: [],
-              actions: [],
-            }));
             const open = (data.apis || []).map((a: any) => ({
               provider: {
                 id: String(a.name || '').toLowerCase().replace(/\s+/g, '_'),
@@ -1578,7 +1509,7 @@ Docs: https://apiclaw.cloud
               matchedKeywords: [],
               actions: [],
             }));
-            results = [...managed, ...open].slice(0, requestedMax);
+            results = open.slice(0, requestedMax);
           } else {
             // Gateway 5xx — local sparse fallback so we don't return nothing.
             results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
@@ -1811,56 +1742,6 @@ Docs: https://apiclaw.cloud
         };
       }
 
-      case 'purchase_access': {
-        const apiId = args?.api_id as string;
-        const amountUsd = args?.amount_usd as number;
-        const agentId = (args?.agent_id as string) || DEFAULT_AGENT_ID;
-
-        const result = purchaseAPIAccess(agentId, apiId, amountUsd);
-
-        if (!result.success) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify({
-                  status: 'error',
-                  message: result.error
-                }, null, 2)
-              }
-            ]
-          };
-        }
-
-        const api = getAPIDetails(apiId);
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                status: 'success',
-                message: `Successfully purchased access to ${apiId}`,
-                purchase: {
-                  id: result.purchase!.id,
-                  provider: apiId,
-                  amount_paid_usd: amountUsd,
-                  credits_received: result.purchase!.credits_purchased,
-                  status: result.purchase!.status,
-                  real_credentials: hasRealCredentials(apiId)
-                },
-                credentials: result.purchase!.credentials,
-                access: {
-                  base_url: api?.base_url,
-                  docs_url: api?.docs_url,
-                  auth_type: api?.auth_type
-                }
-              }, null, 2)
-            }
-          ]
-        };
-      }
-
       case 'check_balance': {
         const agentId = (args?.agent_id as string) || DEFAULT_AGENT_ID;
         const summary = getBalanceSummary(agentId);
@@ -1875,34 +1756,12 @@ Docs: https://apiclaw.cloud
                 balance_usd: summary.credits.balance_usd,
                 currency: summary.credits.currency,
                 total_spent_usd: summary.total_spent_usd,
-                real_credential_providers: summary.real_credentials_available,
                 active_purchases: summary.active_purchases.map(p => ({
                   id: p.id,
                   provider: p.provider_id,
                   credits_remaining: p.credits_purchased,
-                  status: p.status,
-                  real_credentials: hasRealCredentials(p.provider_id)
+                  status: p.status
                 }))
-              }, null, 2)
-            }
-          ]
-        };
-      }
-
-      case 'add_credits': {
-        const amountUsd = args?.amount_usd as number;
-        const agentId = (args?.agent_id as string) || DEFAULT_AGENT_ID;
-
-        const credits = addCredits(agentId, amountUsd);
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify({
-                status: 'success',
-                message: `Added $${amountUsd.toFixed(2)} to your workspace`,
-                new_balance_usd: credits.balance_usd
               }, null, 2)
             }
           ]

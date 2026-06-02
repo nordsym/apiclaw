@@ -9,6 +9,7 @@
 
 import { executeAPICall } from './execute.js';
 import { reportUsage, hasActiveMeteredSubscription, METERED_BILLING } from './stripe.js';
+import { createHash } from 'node:crypto';
 
 interface MeteredResult {
   success: boolean;
@@ -85,10 +86,14 @@ export async function executeMetered(
   }
 
   // Report usage to Stripe meter
+  const fingerprint = createHash('sha256')
+    .update(JSON.stringify({ customerId, providerId, action, params, success: result.success, data: result.data }))
+    .digest('hex')
+    .slice(0, 32);
   const usageReport = await reportUsage(
     customerId,
     1,
-    `${customerId}_${providerId}_${action}_${Date.now()}`
+    `${customerId}_${providerId}_${action}_${fingerprint}`
   );
 
   if (usageReport.success) {

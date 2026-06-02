@@ -8,24 +8,27 @@ import { mutation, query, internalQuery } from "./_generated/server";
 // in any agent config, automation, or script.
 // ============================================
 
-function generateRawKey(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < 48; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `sk-claw-${result}`;
+function randomUrlSafe(length: number): string {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => (b % 36).toString(36)).join("");
 }
 
-// Simple hash for key lookup (SHA-256 not available in Convex runtime, use deterministic hash)
-function hashKey(key: string): string {
-  let hash = 0;
+function generateRawKey(): string {
+  return `sk-claw-${randomUrlSafe(48)}`;
+}
+
+async function hashKey(key: string): Promise<string> {
+  const data = new TextEncoder().encode(key);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function legacyHashKey(key: string): string {
+  let h1 = 0;
   for (let i = 0; i < key.length; i++) {
-    const char = key.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
+    h1 = ((h1 << 5) - h1 + key.charCodeAt(i)) | 0;
   }
-  // Create a longer hash by running multiple rounds with offsets
-  let h1 = hash;
   let h2 = 0;
   for (let i = 0; i < key.length; i++) {
     h2 = ((h2 << 7) - h2 + key.charCodeAt(i) * 31) | 0;
@@ -88,7 +91,7 @@ export const generateKey = mutation({
     await ctx.db.insert("workspaceApiKeys", {
       workspaceId,
       key: "", // We don't store the raw key
-      keyHash: hashKey(rawKey),
+      keyHash: await hashKey(rawKey),
       keyPrefix: getKeyPrefix(rawKey),
       name: args.name,
       createdAt: now,
@@ -183,12 +186,19 @@ export const resolveKey = internalQuery({
     rawKey: v.string(),
   },
   handler: async (ctx, args) => {
-    const keyHash = hashKey(args.rawKey);
+    const keyHash = await hashKey(args.rawKey);
+    const legacyHash = legacyHashKey(args.rawKey);
 
-    const keyDoc = await ctx.db
+    let keyDoc = await ctx.db
       .query("workspaceApiKeys")
       .withIndex("by_keyHash", (q) => q.eq("keyHash", keyHash))
       .first();
+    if (!keyDoc) {
+      keyDoc = await ctx.db
+        .query("workspaceApiKeys")
+        .withIndex("by_keyHash", (q) => q.eq("keyHash", legacyHash))
+        .first();
+    }
 
     if (!keyDoc) {
       return null;

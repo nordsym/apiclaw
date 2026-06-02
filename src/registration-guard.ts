@@ -42,9 +42,7 @@ export const FREE_CALL_PATHS = new Set<string>([
   "get_usage_summary",
   "estimate_cost",
   "check_balance",
-  "add_credits",
   "get_api_details",
-  "purchase_access",
 ]);
 
 // Paths that MUST go through requireVerifiedOwner.
