@@ -1,6 +1,8 @@
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
+import { checkEmailAllowedSync } from "./emailGuards";
 
 /**
  * APIClaw nurture system.
@@ -20,7 +22,7 @@ import type { Id, Doc } from "./_generated/dataModel";
  *   try-discover  — day 2-3 if no searches yet (stage=new)
  *   first-call    — day 5-7 after first search, no calls (stage=activating)
  *   upgrade       — day 14 for active users (stage=active)
- *   power-upgrade — power users, upsell to scale/pro
+ *   power-upgrade — power users, nudge to add a card for PAYG
  *   reactivate-7d — dormant workspace, soft nudge
  *   reactivate-30d — lost workspace, last-chance nudge
  */
@@ -29,7 +31,7 @@ const DAY = 86400000;
 const HOUR = 3600000;
 
 // Permanent no-email list — partner domains, tests, disposable
-const DOMAIN_BLOCKLIST = [
+export const DOMAIN_BLOCKLIST = [
   "apilayer.com",
   "filestack.com",
   "idera.com",            // APILayer parent company; John Kim et al
@@ -41,7 +43,7 @@ const DOMAIN_BLOCKLIST = [
   "wnbaldwy.com",         // known disposable
 ];
 
-const EMAIL_BLOCKLIST = new Set<string>([
+export const EMAIL_BLOCKLIST = new Set<string>([
   "pratham.kumar@apilayer.com",
   "emma.sampayo@apilayer.com",         // APILayer team (covered by domain, belt-and-suspenders)
   "john.kim@idera.com",                // APILayer partnership signer at Idera
@@ -53,20 +55,20 @@ const EMAIL_BLOCKLIST = new Set<string>([
   "gustav_hemmingsson@hotmail.com",
   "test@example.com",
   "m6jgi9d8i1@wnbaldwy.com",
-  "maxence.dabrowski81@gmail.com",     // real external user — opt-out default
-  "andylopeslindao@gmail.com",
 ]);
 
-function domainOf(email: string): string {
+export function domainOf(email: string): string {
   const at = email.lastIndexOf("@");
   return at === -1 ? "" : email.slice(at + 1).toLowerCase();
 }
 
-function isBlocked(email: string): boolean {
+export function isBlocked(email: string): boolean {
   const lower = email.toLowerCase();
   if (EMAIL_BLOCKLIST.has(lower)) return true;
   const dom = domainOf(lower);
   if (DOMAIN_BLOCKLIST.includes(dom)) return true;
+  const guard = checkEmailAllowedSync(lower);
+  if (!guard.allowed) return true;
   return false;
 }
 
@@ -138,13 +140,18 @@ export const classifyAllWorkspaces = internalMutation({
       // pre-auth agent identity, not a real customer workspace.
       let stage: Doc<"nurture">["stage"] = "new";
       const hasBlockedEmail = email && isBlocked(email);
+      const noEmailTier = w.tier === "partner" || w.tier === "enterprise";
       let notes: string | undefined;
       if (!email) {
         stage = "excluded";
         notes = "pre-auth agent identity; no verified workspace email";
+      } else if (noEmailTier) {
+        stage = "partner-locked";
+        notes = `workspace tier ${w.tier}; automated nurture disabled`;
       } else if (hasBlockedEmail) {
         const dom = domainOf(email);
-        stage = (dom === "apilayer.com" || dom === "filestack.com") ? "partner-locked" : "excluded";
+        stage = (dom === "apilayer.com" || dom === "filestack.com" || dom === "idera.com") ? "partner-locked" : "excluded";
+        notes = `blocked outbound email domain ${dom}`;
       } else {
         // Compute activity
         const ageMs = now - w.createdAt;
@@ -220,35 +227,38 @@ export const classifyAllWorkspaces = internalMutation({
 // ═══════════════════════════════════════════════════════════════
 const SYMBOT_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
 
-function bodyFor(kind: string, firstName: string): { subject: string; html: string } {
+export function bodyFor(kind: string, firstName: string): { subject: string; html: string } {
   const hi = firstName ? `Hi ${firstName},` : "Hi,";
-  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw — The API layer for AI agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a></p>`;
+  const prompt = `Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.`;
+  const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
+  const cta = `<p><a href="https://apiclaw.cloud/docs" style="display:inline-block;background:#dc2626;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Open the quickstart</a></p>`;
+  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>No keys to manage. 25 free calls/month, then pay as you go at API cost + 15%.</p>`;
 
   switch (kind) {
     case "welcome":
       return {
-        subject: "Welcome to APIClaw — 26k APIs ready for your agents",
-        html: `<p>${hi}</p><p>Your APIClaw workspace is ready. You've got access to 26,701+ discoverable APIs and 2,906+ callable APIs via a single endpoint.</p><p>Easiest first step: <a href="https://apiclaw.cloud/catalog">browse the catalog</a> or run <code>discover_apis</code> from your agent.</p><p>- Gustav, APIClaw</p>${footer}`,
+        subject: "Welcome to APIClaw - your agent can call APIs now",
+        html: `<p>${hi}</p><p>Your APIClaw workspace is live. You now have one control plane for discovery and execution across 26,701 discoverable APIs and 2,906 callable APIs.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
       };
     case "try-discover":
       return {
-        subject: "Try one search — see what APIClaw knows",
-        html: `<p>${hi}</p><p>Haven't tried discovery yet? One search shows you why this is worth it.</p><p>Try: <code>discover_apis("weather forecast")</code> or hit the <a href="https://apiclaw.cloud/catalog">catalog</a>. Weather, currency, flight data, PDFs, images - agents get a working API in one call.</p><p>- Gustav</p>${footer}`,
+        subject: "Try one API search in APIClaw",
+        html: `<p>${hi}</p><p>If you have not tried discovery yet, run one search from your agent:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">discover_apis({ query: "web search" })</pre><p>APIClaw will show callable options first, then your agent can use <code>call_api</code> with the best match.</p>${cta}<p>- Gustav</p>${footer}`,
       };
     case "first-call":
       return {
-        subject: "Make your first API call — takes 30 seconds",
-        html: `<p>${hi}</p><p>You've searched the catalog. Next step is calling an API. No key management, no SDK integration:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">call_api("apilayer", "weatherstack", { query: "Stockholm" })</pre><p>The <a href="https://apiclaw.cloud/docs">docs</a> have copy-paste examples.</p><p>- Gustav</p>${footer}`,
+        subject: "Make your first APIClaw call",
+        html: `<p>${hi}</p><p>You have seen the catalog. The next step is one real call. No provider keys, no SDK setup.</p>${promptBlock}${cta}<p>- Gustav</p>${footer}`,
       };
     case "upgrade":
       return {
-        subject: "Two weeks in — worth going Pro?",
-        html: `<p>${hi}</p><p>Your agent has been busy. Free tier is 50 calls/week — Pro is unlimited + priority routing + deeper analytics.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">See Pro pricing</a></p><p>— Gustav</p>${footer}`,
+        subject: "Keep your agent running beyond the free tier",
+        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Free includes 25 calls/month. Add a payment method when you want it to keep going without interruption.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "power-upgrade":
       return {
-        subject: "You're a heavy user — Scale tier saves you money",
-        html: `<p>${hi}</p><p>You're making 50+ calls every two weeks. At that rate, Scale tier ($49/mo for 10k calls) beats per-call pricing.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Move to Scale</a></p><p>— Gustav</p>${footer}`,
+        subject: "Your APIClaw workspace is getting real usage",
+        html: `<p>${hi}</p><p>Your workspace is making regular API calls. Add a payment method to continue on pay-as-you-go at API cost + 15% when free usage runs out.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "reactivate-7d":
       return {
@@ -278,7 +288,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
   }
 }
 
-function pickEmailKind(n: Doc<"nurture">, wsCreatedAt: number): string | null {
+export function pickEmailKind(n: Pick<Doc<"nurture">, "stage" | "emailsSent" | "lastEmailSentAt" | "lastEmailKind" | "unsubscribed">, wsCreatedAt: number): string | null {
   const now = Date.now();
   const ageMs = now - wsCreatedAt;
   const lastEmailMs = n.lastEmailSentAt ? now - n.lastEmailSentAt : Infinity;
@@ -312,19 +322,17 @@ function pickEmailKind(n: Doc<"nurture">, wsCreatedAt: number): string | null {
   return null;
 }
 
-export const sendDailyNurture = internalMutation({
+export const getSendCandidates = internalQuery({
   args: { maxSends: v.optional(v.number()), dryRun: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
     const cap = args.maxSends ?? 12;     // conservative daily send cap
-    const dryRun = args.dryRun ?? false;
 
     const rows = await ctx.db.query("nurture").collect();
-    let sent = 0;
     let considered = 0;
-    const sentLog: Array<{ email: string; kind: string }> = [];
+    const candidates: Array<{ nurtureId: Id<"nurture">; email: string; kind: string }> = [];
 
     for (const n of rows) {
-      if (sent >= cap) break;
+      if (candidates.length >= cap) break;
       if (!n.email) continue;
       if (n.unsubscribed) continue;
       if (n.stage === "partner-locked" || n.stage === "excluded") continue;
@@ -337,29 +345,77 @@ export const sendDailyNurture = internalMutation({
       considered++;
       if (!kind) continue;
 
-      const firstName = (n.email.split("@")[0] || "").split(/[._-]/)[0];
+      candidates.push({ nurtureId: n._id, email: n.email, kind });
+    }
+
+    return { considered, candidates };
+  },
+});
+
+export const markEmailSent = internalMutation({
+  args: { nurtureId: v.id("nurture"), kind: v.string() },
+  handler: async (ctx, args) => {
+    const n = await ctx.db.get(args.nurtureId);
+    if (!n) return { success: false, reason: "not_found" };
+    await ctx.db.patch(n._id, {
+      emailsSent: n.emailsSent + 1,
+      lastEmailSentAt: Date.now(),
+      lastEmailKind: args.kind,
+      updatedAt: Date.now(),
+    });
+    return { success: true };
+  },
+});
+
+export const sendDailyNurture = internalAction({
+  args: { maxSends: v.optional(v.number()), dryRun: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    const cap = args.maxSends ?? 12;
+    const dryRun = args.dryRun ?? false;
+    const { considered, candidates } = await ctx.runQuery(internal.nurture.getSendCandidates, {
+      maxSends: cap,
+      dryRun,
+    });
+    let sent = 0;
+    let skipped = 0;
+    const skipReasons: Record<string, number> = {};
+    const sentLog: Array<{ email: string; kind: string }> = [];
+
+    for (const candidate of candidates) {
+      const guard = checkEmailAllowedSync(candidate.email);
+      if (!guard.allowed) {
+        skipped++;
+        skipReasons[guard.reason] = (skipReasons[guard.reason] ?? 0) + 1;
+        continue;
+      }
+
+      const kind = candidate.kind;
+      const email = candidate.email;
+      const firstName = (email.split("@")[0] || "").split(/[._-]/)[0];
       const firstNamePretty = firstName.charAt(0).toUpperCase() + firstName.slice(1);
       const { subject, html } = bodyFor(kind, firstNamePretty);
 
       if (dryRun) {
-        sentLog.push({ email: n.email, kind });
+        sentLog.push({ email, kind });
         sent++;
         continue;
       }
 
-      const ok = await sendEmail(n.email, subject, html);
-      if (!ok) continue;
+      const ok = await sendEmail(email, subject, html);
+      if (!ok) {
+        skipped++;
+        skipReasons.send_failed = (skipReasons.send_failed ?? 0) + 1;
+        continue;
+      }
 
-      await ctx.db.patch(n._id, {
-        emailsSent: n.emailsSent + 1,
-        lastEmailSentAt: Date.now(),
-        lastEmailKind: kind,
-        updatedAt: Date.now(),
+      await ctx.runMutation(internal.nurture.markEmailSent, {
+        nurtureId: candidate.nurtureId,
+        kind,
       });
-      sentLog.push({ email: n.email, kind });
+      sentLog.push({ email, kind });
       sent++;
     }
 
-    return { sent, considered, capacity: cap, dryRun, sentLog };
+    return { sent, skipped, skipReasons, considered, capacity: cap, dryRun, sentLog };
   },
 });

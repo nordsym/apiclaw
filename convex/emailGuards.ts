@@ -41,8 +41,6 @@ const EMAIL_BLOCKLIST = new Set<string>([
   "gustav_hemmingsson@hotmail.com",
   "test@example.com",
   "m6jgi9d8i1@wnbaldwy.com",
-  "maxence.dabrowski81@gmail.com",
-  "andylopeslindao@gmail.com",
 ]);
 
 const NO_EMAIL_TIERS = new Set<string>(["partner", "enterprise"]);
