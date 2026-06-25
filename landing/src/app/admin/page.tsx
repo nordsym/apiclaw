@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield, Users, Zap, TrendingUp, Check, X, Clock, ExternalLink, RefreshCw, Eye } from "lucide-react";
+import { Shield, Users, Zap, TrendingUp, Check, X, Clock, ExternalLink, RefreshCw, Eye, Activity, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
@@ -39,8 +39,61 @@ interface ProviderAPI {
   createdAt: number;
 }
 
+interface WorkspaceTruth {
+  workspaceRows: number;
+  verifiedWorkspaces: number;
+  preAuthAgentRows: number;
+  activatedWorkspaces: number;
+  byStatus: Record<string, number>;
+  byTier: Record<string, number>;
+}
+
+interface Scorecard {
+  windowHours: number;
+  truth: {
+    installs: number;
+    activatedOwners: number;
+    activatedUsers: number;
+  };
+  ratios: Record<string, number>;
+  diagnostics?: Record<string, Record<string, number>>;
+}
+
+interface OperatorWorkspace {
+  maskedEmail: string;
+  domain: string;
+  tier: string;
+  usageCount: number;
+  usageLimit: number;
+  usagePct: number;
+  quotaRisk: string;
+  windowCallCount: number;
+  lastActiveAt: number;
+}
+
+interface OperatorSnapshot {
+  reportedWorkspaces: number;
+  activeReportedWorkspaces: number;
+  nearCapWorkspaces: number;
+  atCapWorkspaces: number;
+  workspaces: OperatorWorkspace[];
+}
+
 // Simple admin password check (set via env or hardcode for MVP)
 const ADMIN_PASSWORD = "nordsym2026";
+
+async function queryConvex<T>(path: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${CONVEX_URL}/api/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args }),
+  });
+  const json = await res.json();
+  if (json.status === "error") {
+    throw new Error(json.errorMessage || `Convex query failed: ${path}`);
+  }
+  return (json.value !== undefined ? json.value : json) as T;
+}
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,8 +101,12 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [apis, setApis] = useState<ProviderAPI[]>([]);
+  const [workspaceTruth, setWorkspaceTruth] = useState<WorkspaceTruth | null>(null);
+  const [scorecard, setScorecard] = useState<Scorecard | null>(null);
+  const [operatorSnapshot, setOperatorSnapshot] = useState<OperatorSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+  const [loadErrors, setLoadErrors] = useState<string[]>([]);
 
   useEffect(() => {
     // Check if already authenticated this session
@@ -76,38 +133,33 @@ export default function AdminPage() {
 
   const loadData = async () => {
     setIsLoading(true);
-    try {
-      // Load stats
-      const statsRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "providers:getProviderStats", args: {} }),
-      });
-      const statsData = await statsRes.json();
-      setStats(statsData);
+    const errors: string[] = [];
+    const safeQuery = async <T,>(path: string, args: Record<string, unknown>): Promise<T | null> => {
+      try {
+        return await queryConvex<T>(path, args);
+      } catch (error) {
+        console.error(`Failed to load ${path}:`, error);
+        errors.push(path);
+        return null;
+      }
+    };
 
-      // Load all providers (using a simple query)
-      const providersRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "providers:getAllProviders", args: {} }),
-      });
-      const providersData = await providersRes.json();
-      setProviders(providersData || []);
+    const [statsData, providersData, truthData, scorecardData, snapshotData] = await Promise.all([
+      safeQuery<Stats>("providers:getProviderStats", {}),
+      safeQuery<Provider[]>("providers:getAllProviders", {}),
+      safeQuery<WorkspaceTruth>("adminStats:getWorkspaceTruth", {}),
+      safeQuery<Scorecard>("funnel:getScorecard", { hoursBack: 168, classification: "human", compare: true }),
+      safeQuery<OperatorSnapshot>("adminStats:getOperatorUsageSnapshot", { hoursBack: 720 }),
+    ]);
 
-      // Load all APIs
-      const apisRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "providers:getAllAPIs", args: {} }),
-      });
-      const apisData = await apisRes.json();
-      setApis(apisData || []);
-    } catch (error) {
-      console.error("Failed to load admin data:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    setStats(statsData);
+    setProviders(providersData || []);
+    setApis([]);
+    setWorkspaceTruth(truthData);
+    setScorecard(scorecardData);
+    setOperatorSnapshot(snapshotData);
+    setLoadErrors(errors);
+    setIsLoading(false);
   };
 
   if (!isAuthenticated) {
@@ -170,6 +222,114 @@ export default function AdminPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {(workspaceTruth || scorecard || operatorSnapshot) && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold">Activation</h2>
+                <p className="text-sm text-text-muted">Verified workspace and first-call truth</p>
+              </div>
+              <span className="text-xs text-text-muted">Human funnel, last 7 days</span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+              <StatCard
+                icon={Users}
+                label="Verified workspaces"
+                value={workspaceTruth?.verifiedWorkspaces ?? 0}
+                subValue={`${workspaceTruth?.workspaceRows ?? 0} raw rows`}
+              />
+              <StatCard
+                icon={Activity}
+                label="Pre-auth agent rows"
+                value={workspaceTruth?.preAuthAgentRows ?? 0}
+                subValue="not user traction"
+              />
+              <StatCard
+                icon={TrendingUp}
+                label="7d human installs"
+                value={scorecard?.truth.installs ?? 0}
+                subValue="install signal"
+              />
+              <StatCard
+                icon={Check}
+                label="Activated users"
+                value={scorecard?.truth.activatedUsers ?? 0}
+                subValue={`${Math.round(((scorecard?.ratios.install_to_first_call ?? 0) as number) * 100)}% install to call`}
+              />
+              <StatCard
+                icon={Zap}
+                label="External workspaces"
+                value={operatorSnapshot?.reportedWorkspaces ?? 0}
+                subValue={`${operatorSnapshot?.activeReportedWorkspaces ?? 0} used`}
+              />
+              <StatCard
+                icon={AlertTriangle}
+                label="Near cap"
+                value={(operatorSnapshot?.nearCapWorkspaces ?? 0) + (operatorSnapshot?.atCapWorkspaces ?? 0)}
+                subValue="free workspaces"
+                accent
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-surface-elevated rounded-2xl border border-border overflow-hidden">
+                <div className="p-5 border-b border-border">
+                  <h3 className="font-semibold">Recent external workspaces</h3>
+                </div>
+                <div className="divide-y divide-border">
+                  {(operatorSnapshot?.workspaces ?? []).slice(0, 6).map((workspace) => (
+                    <div key={`${workspace.maskedEmail}-${workspace.domain}`} className="px-5 py-3 flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{workspace.maskedEmail}</p>
+                        <p className="text-xs text-text-muted">{workspace.domain} · {workspace.tier}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-semibold">{workspace.usageCount}/{workspace.usageLimit}</p>
+                        <p className={workspace.quotaRisk === "near_cap" || workspace.quotaRisk === "at_cap" ? "text-xs text-yellow-600" : "text-xs text-text-muted"}>
+                          {workspace.quotaRisk.replace("_", " ")}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {(operatorSnapshot?.workspaces ?? []).length === 0 && (
+                    <div className="px-5 py-8 text-sm text-text-muted">No external workspaces in snapshot.</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-surface-elevated rounded-2xl border border-border overflow-hidden">
+                <div className="p-5 border-b border-border">
+                  <h3 className="font-semibold">Top blockers</h3>
+                </div>
+                <div className="p-5 space-y-3">
+                  {scorecard?.diagnostics && Object.keys(scorecard.diagnostics).length > 0 ? (
+                    Object.entries(scorecard.diagnostics).slice(0, 6).map(([event, reasons]) => (
+                      <div key={event}>
+                        <p className="text-sm font-medium">{event}</p>
+                        <p className="text-xs text-text-muted">
+                          {Object.entries(reasons).map(([reason, count]) => `${reason}: ${count}`).join(" · ")}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-text-muted">No human diagnostic blockers in the current 7d window.</p>
+                  )}
+                  <div className="pt-3 border-t border-border text-xs text-text-muted">
+                    Status split: active {workspaceTruth?.byStatus.active ?? 0} · pending {workspaceTruth?.byStatus.pending ?? 0} · unclaimed {workspaceTruth?.byStatus.unclaimed ?? 0}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {loadErrors.length > 0 && (
+          <div className="mb-8 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-700">
+            Some admin panels could not load: {loadErrors.join(", ")}
+          </div>
+        )}
+
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -219,7 +379,6 @@ export default function AdminPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {providers.map((provider) => {
-                  const apiCount = apis.filter((a) => a.providerId === provider._id).length;
                   return (
                     <tr key={provider._id} className="hover:bg-surface/50">
                       <td className="px-6 py-4">
@@ -242,7 +401,7 @@ export default function AdminPage() {
                           {provider.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm">{apiCount}</td>
+                      <td className="px-6 py-4 text-sm text-text-muted">Use stats summary</td>
                       <td className="px-6 py-4 text-sm text-text-muted">
                         {new Date(provider.createdAt).toLocaleDateString()}
                       </td>
