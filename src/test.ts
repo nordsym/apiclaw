@@ -25,7 +25,14 @@ assert.equal(FREE_CALL_PATHS.has("add_credits"), false);
 assert.equal(ENFORCED_CALL_PATHS.has("call_api"), true);
 assert.equal(ENFORCED_CALL_PATHS.has("capability"), true);
 
-assert.equal(requireVerifiedOwner(null).ok, false);
+const noSessionResult = requireVerifiedOwner(null);
+assert.equal(noSessionResult.ok, false);
+if (!noSessionResult.ok) {
+  assert.equal(noSessionResult.payload.action, "agent_auth_required");
+  assert.equal(typeof noSessionResult.payload.first_call_prompt, "string");
+  assert.match(noSessionResult.payload.first_call_prompt as string, /discover_apis/);
+  assert.match(noSessionResult.payload.first_call_prompt as string, /call_api/);
+}
 assert.equal(requireVerifiedOwner(activeContext()).ok, true);
 
 const quotaResult = requireVerifiedOwner(activeContext({ usageRemaining: 0 }));

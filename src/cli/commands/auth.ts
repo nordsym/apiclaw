@@ -19,6 +19,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
+import { FIRST_CALL_PROMPT } from '../../registration-guard.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
@@ -327,10 +328,12 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log(chalk.dim(`     Config written to ${AUTH_CONFIG_PATH}`));
 
   console.log('');
-  console.log(chalk.bold('  Try it:'));
-  console.log(chalk.dim('     apiclaw discover "currency conversion"'));
-  console.log(chalk.dim('     apiclaw call apilayer/fixer-latest --params \'{"base":"USD","symbols":"EUR"}\''));
-  console.log(chalk.dim('     apiclaw call openrouter/auto --body \'{"prompt":"hello"}\''));
+  console.log(chalk.bold('  Copy/paste into your agent:'));
+  console.log(chalk.dim(`     ${FIRST_CALL_PROMPT}`));
+  console.log('');
+  console.log(chalk.bold('  CLI equivalent:'));
+  console.log(chalk.dim('     apiclaw discover "web search"'));
+  console.log(chalk.dim('     apiclaw call brave_search/search --params \'{"q":"AI agent infrastructure news"}\''));
   if (result.apiKey) {
     console.log('');
     console.log(chalk.bold('  For HTTP runtimes:'));

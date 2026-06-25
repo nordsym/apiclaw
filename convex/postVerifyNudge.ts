@@ -29,11 +29,8 @@ function renderHtml(): string {
     <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find an API for sending<br>SMS to Sweden, then call it with the<br>message "hello from APIClaw".</p>
   </div>
 
-  <p style="font-size:14px;color:#737373;margin:0 0 16px;line-height:1.6">Your agent will:</p>
-  <ol style="font-size:14px;color:#A3A3A3;margin:0 0 24px;padding-left:20px;line-height:1.8">
-    <li><code style="font-family:'JetBrains Mono',monospace;color:#EF4444">discover_apis("send sms sweden")</code> — finds the right provider</li>
-    <li><code style="font-family:'JetBrains Mono',monospace;color:#EF4444">call_api(provider, "send_sms", ...)</code> — runs the call through APIClaw</li>
-  </ol>
+  <p style="font-size:14px;color:#737373;margin:0 0 16px;line-height:1.6">Copy this into your agent:</p>
+  <pre style="font-family:'JetBrains Mono',monospace;color:#EF4444;background:#F5F5F5;border-radius:8px;padding:14px;white-space:pre-wrap;font-size:13px;line-height:1.6">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.</pre>
 
   <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">No keys needed. 25 calls per month free. Pay-as-you-go beyond that at API cost + 15%.</p>
 

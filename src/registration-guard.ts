@@ -26,6 +26,9 @@ export type GuardReason =
   | "quota_exceeded"
   | "pending_verification";
 
+export const FIRST_CALL_PROMPT =
+  'Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.';
+
 // Paths that are allowed without a verified owner.
 export const FREE_CALL_PATHS = new Set<string>([
   "discover_apis",
@@ -73,6 +76,7 @@ export function requireVerifiedOwner(
           "npx @nordsym/apiclaw login --email-fallback (magic link to inbox, slower).",
         signup_url: "https://apiclaw.cloud/sign-in",
         free_tier: "Free tier included. See https://apiclaw.cloud/pricing.",
+        first_call_prompt: FIRST_CALL_PROMPT,
       },
     };
   }
@@ -88,6 +92,7 @@ export function requireVerifiedOwner(
         instruction: "Tell the user to run this in their terminal:",
         command: "npx @nordsym/apiclaw auth login",
         signup_url: "https://apiclaw.cloud/sign-in",
+        first_call_prompt: FIRST_CALL_PROMPT,
       },
     };
   }
@@ -102,6 +107,7 @@ export function requireVerifiedOwner(
         instruction: "Tell the user to finish sign-in by running:",
         command: "npx @nordsym/apiclaw auth login",
         signup_url: "https://apiclaw.cloud/sign-in",
+        first_call_prompt: FIRST_CALL_PROMPT,
       },
     };
   }

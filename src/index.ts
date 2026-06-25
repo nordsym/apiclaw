@@ -37,7 +37,7 @@ import {
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
-import { requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { FIRST_CALL_PROMPT, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -507,6 +507,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           fallback: 'If no browser available (SSH/headless): npx @nordsym/apiclaw auth login --email-fallback',
           legacy_action: 'register_owner ({ email: "..." }) is still supported but slower (inbox round-trip).',
           free_tier: 'Free managed calls are included after signup. Continue beyond the free tier at API cost + 15%.',
+          first_call_prompt: FIRST_CALL_PROMPT,
         }, null, 2),
         isAnonymous: true,
       };
@@ -532,6 +533,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
         command: 'npx @nordsym/apiclaw auth login',
         estimated_seconds: 15,
         fallback: 'register_owner({ email: "..." }) — legacy email magic-link flow, still works.',
+        first_call_prompt: FIRST_CALL_PROMPT,
       }, null, 2),
       isAnonymous: true,
     };
@@ -2846,6 +2848,7 @@ Docs: https://apiclaw.cloud
                   usageLimit: result.workspace!.usageLimit,
                 },
                 ready: 'You can now use discover_apis and call_api.',
+                first_call_prompt: FIRST_CALL_PROMPT,
               }, null, 2)
             }]
           };
