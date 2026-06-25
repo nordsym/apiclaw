@@ -76,6 +76,16 @@ interface WorkspaceContext {
   status: string;
 }
 
+type IncrementUsageResult = {
+  success: boolean;
+  usageCount: number;
+  usageLimit: number;
+  usageRemaining: number;
+  weeklyUsageCount: number;
+  weeklyRemaining: number;
+  quotaWarning?: unknown;
+};
+
 let workspaceContext: WorkspaceContext | null = null;
 let currentAgentId: string | null = null; // Agent ID from agents table (set on startup)
 let pendingRegistrationEmail: string | null = null; // Email waiting for OTP verification
@@ -2206,9 +2216,9 @@ Docs: https://apiclaw.cloud
             try {
               const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
                 workspaceId: workspaceContext.workspaceId as any,
-              }) as { success: boolean; weeklyRemaining?: number };
+              }) as IncrementUsageResult;
               if (usageResult.success) {
-                workspaceContext.usageRemaining = usageResult.weeklyRemaining ?? -1;
+                workspaceContext.usageRemaining = usageResult.usageRemaining ?? -1;
                 workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
               }
 

@@ -909,6 +909,8 @@ export const incrementUsage = mutation({
     return {
       success: true,
       usageCount: newTotalCount,
+      usageLimit: isPaid ? -1 : FREE_WEEKLY_LIMIT,
+      usageRemaining: weeklyRemaining,
       weeklyUsageCount: newWeeklyCount,
       weeklyRemaining,
       hourlyRemaining,
