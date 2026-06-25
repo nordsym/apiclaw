@@ -1,6 +1,38 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
+const INTERNAL_OR_NON_CUSTOMER_DOMAINS = new Set([
+  "nordsym.com",
+  "apiclaw.cloud",
+  "apiclaw.test",
+  "apiclaw.local",
+  "cqtinvest.com",
+  "example.com",
+  "apilayer.com",
+  "filestack.com",
+  "idera.com",
+  "wnbaldwy.com",
+]);
+
+function emailDomain(email: string): string {
+  const at = email.lastIndexOf("@");
+  return at === -1 ? "" : email.slice(at + 1).toLowerCase();
+}
+
+function isExternalWorkspaceEmail(email: string): boolean {
+  const domain = emailDomain(email);
+  return !!domain && !INTERNAL_OR_NON_CUSTOMER_DOMAINS.has(domain);
+}
+
+function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at <= 0) return "(invalid)";
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const head = local.slice(0, Math.min(2, local.length));
+  return `${head}${local.length > 2 ? "***" : "*"}@${domain}`;
+}
+
 // Get total user/workspace count
 export const getTotalWorkspaces = query({
   args: {},
@@ -76,6 +108,115 @@ export const listWorkspaces = query({
       createdAt: w.createdAt,
       lastActiveAt: w.lastActiveAt,
     }));
+  },
+});
+
+// Operator snapshot: who is using APIClaw right now?
+// Defaults to external verified workspaces only and masks emails for safe chat use.
+export const getOperatorUsageSnapshot = query({
+  args: {
+    hoursBack: v.optional(v.number()),
+    includeEmail: v.optional(v.boolean()),
+    includeInternal: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const hoursBack = args.hoursBack ?? 24 * 30;
+    const since = Date.now() - hoursBack * 3600000;
+    const workspaces = await ctx.db.query("workspaces").collect();
+    const verified = workspaces.filter(w => !!(w.email && w.email.trim()));
+    const visible = verified.filter(w => args.includeInternal || isExternalWorkspaceEmail(w.email));
+
+    const rows = [];
+    for (const workspace of visible) {
+      const logs = await ctx.db
+        .query("apiLogs")
+        .withIndex("by_workspaceId_createdAt", (q) => q.eq("workspaceId", workspace._id))
+        .collect();
+      const windowLogs = logs.filter(l => l.createdAt >= since);
+      const outboundLogs = windowLogs.filter(l => !l.direction || l.direction === "outbound");
+
+      const byProvider: Record<string, { calls: number; success: number; error: number }> = {};
+      const byAction: Record<string, number> = {};
+      let lastLogAt = 0;
+      for (const log of outboundLogs) {
+        lastLogAt = Math.max(lastLogAt, log.createdAt);
+        byProvider[log.provider] = byProvider[log.provider] || { calls: 0, success: 0, error: 0 };
+        byProvider[log.provider].calls++;
+        if (log.status === "success") byProvider[log.provider].success++;
+        else byProvider[log.provider].error++;
+
+        const actionKey = `${log.provider}:${log.action}`;
+        byAction[actionKey] = (byAction[actionKey] || 0) + 1;
+      }
+
+      const weeklyLimit = workspace.weeklyUsageLimit || workspace.usageLimit || 50;
+      const weeklyUsed = workspace.weeklyUsageCount || 0;
+      const weeklyRemaining = weeklyLimit > 0 ? Math.max(0, weeklyLimit - weeklyUsed) : -1;
+      const weeklyPct = weeklyLimit > 0 ? Math.round((weeklyUsed / weeklyLimit) * 100) : 0;
+      const usageLimit = workspace.usageLimit || 50;
+      const usageCount = workspace.usageCount || 0;
+      const usageRemaining = usageLimit > 0 ? Math.max(0, usageLimit - usageCount) : -1;
+      const usagePct = usageLimit > 0 ? Math.round((usageCount / usageLimit) * 100) : 0;
+      const highestQuotaPct = Math.max(weeklyPct, usagePct);
+      const quotaRisk =
+        workspace.tier === "free" && highestQuotaPct >= 100
+          ? "at_cap"
+          : workspace.tier === "free" && highestQuotaPct >= 80
+            ? "near_cap"
+            : "normal";
+
+      rows.push({
+        workspaceId: workspace._id,
+        email: args.includeEmail ? workspace.email : undefined,
+        maskedEmail: maskEmail(workspace.email),
+        domain: emailDomain(workspace.email),
+        createdAt: workspace.createdAt,
+        status: workspace.status,
+        tier: workspace.tier,
+        hasPaymentMethod: !!(workspace.hasPaymentMethod || workspace.hasCardAttached),
+        cardBrand: args.includeEmail ? workspace.cardBrand : undefined,
+        usageCount,
+        usageLimit,
+        usageRemaining,
+        usagePct,
+        weeklyUsageCount: weeklyUsed,
+        weeklyUsageLimit: weeklyLimit,
+        weeklyRemaining,
+        weeklyPct,
+        quotaRisk,
+        monthlySpendCents: workspace.monthlySpendCents || 0,
+        lastActiveAt: Math.max(workspace.lastActiveAt || 0, lastLogAt),
+        windowHours: hoursBack,
+        windowCallCount: outboundLogs.length,
+        providerBreakdown: Object.entries(byProvider)
+          .map(([provider, stats]) => ({ provider, ...stats }))
+          .sort((a, b) => b.calls - a.calls),
+        topActions: Object.entries(byAction)
+          .map(([action, calls]) => ({ action, calls }))
+          .sort((a, b) => b.calls - a.calls)
+          .slice(0, 5),
+      });
+    }
+
+    rows.sort((a, b) => {
+      const usageDelta = b.usageCount - a.usageCount;
+      if (usageDelta !== 0) return usageDelta;
+      return (b.lastActiveAt || 0) - (a.lastActiveAt || 0);
+    });
+
+    return {
+      generatedAt: Date.now(),
+      windowHours: hoursBack,
+      includeInternal: !!args.includeInternal,
+      emailMode: args.includeEmail ? "full" : "masked",
+      workspaceRows: workspaces.length,
+      verifiedWorkspaces: verified.length,
+      reportedWorkspaces: rows.length,
+      activeReportedWorkspaces: rows.filter(r => r.usageCount > 0 || r.windowCallCount > 0).length,
+      nearCapWorkspaces: rows.filter(r => r.quotaRisk === "near_cap").length,
+      atCapWorkspaces: rows.filter(r => r.quotaRisk === "at_cap").length,
+      workspaces: rows,
+    };
   },
 });
 
