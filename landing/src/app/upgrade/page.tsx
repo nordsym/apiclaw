@@ -125,7 +125,7 @@ function UpgradeContent() {
     );
   }
 
-  const isPro = billing?.tier === "pro" || billing?.tier === "enterprise";
+  const isPaid = billing?.tier === "usage_based" || billing?.tier === "pro" || billing?.tier === "enterprise" || billing?.tier === "partner";
 
   return (
     <div className="min-h-screen bg-gray-950 py-12 px-4">
@@ -144,7 +144,7 @@ function UpgradeContent() {
         {success && (
           <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-8 text-center">
             <div className="text-green-400 font-medium">
-              🎉 Upgrade successful! Welcome to APIClaw Pro.
+              Payment method added. Managed calls now continue at API cost + 15%.
             </div>
           </div>
         )}
@@ -156,13 +156,13 @@ function UpgradeContent() {
               <div className="text-sm text-gray-400 mb-1">Current Plan</div>
               <div className="text-2xl font-bold text-white capitalize">
                 {billing?.tier || "Free"}
-                {isPro && <span className="ml-2 text-sm text-emerald-400">✓ Active</span>}
+                {isPaid && <span className="ml-2 text-sm text-emerald-400">Active</span>}
               </div>
             </div>
             <div className={`px-4 py-2 rounded-full text-sm font-medium ${
-              isPro ? "bg-emerald-500/20 text-emerald-400" : "bg-gray-800 text-gray-400"
+              isPaid ? "bg-emerald-500/20 text-emerald-400" : "bg-gray-800 text-gray-400"
             }`}>
-              {isPro ? "Pro" : "Free Tier"}
+              {isPaid ? "Pay as you go" : "Free Tier"}
             </div>
           </div>
 
@@ -183,7 +183,7 @@ function UpgradeContent() {
                 style={{ width: `${Math.min(billing?.usagePercent || 0, 100)}%` }}
               />
             </div>
-            {!isPro && billing && billing.usageRemaining > 0 && billing.usageRemaining < 20 && (
+            {!isPaid && billing && billing.usageRemaining > 0 && billing.usageRemaining < 20 && (
               <div className="text-sm text-yellow-400 mt-2">
                 ⚠️ Only {billing.usageRemaining} calls remaining
               </div>
@@ -193,39 +193,39 @@ function UpgradeContent() {
           {/* Plan Features */}
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-400">
-              <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>{isPro ? "Unlimited" : "50"} API calls{isPro ? "" : "/week"}</span>
+              <span className={isPaid ? "text-emerald-400" : "text-gray-600"}>✓</span>
+              <span>{isPaid ? "Usage-based managed calls" : "Free managed calls"}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
-              <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
-              <span>{isPro ? "10/hour" : "Priority support"}</span>
+              <span className={isPaid ? "text-emerald-400" : "text-gray-600"}>✓</span>
+              <span>{isPaid ? "API cost + 15%" : "Add card to continue"}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
-              <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
+              <span className={isPaid ? "text-emerald-400" : "text-gray-600"}>✓</span>
               <span>All managed providers</span>
             </div>
             <div className="flex items-center gap-2 text-gray-400">
-              <span className={isPro ? "text-emerald-400" : "text-gray-600"}>✓</span>
+              <span className={isPaid ? "text-emerald-400" : "text-gray-600"}>✓</span>
               <span>API discovery</span>
             </div>
           </div>
         </div>
 
         {/* Upgrade Card (only show for free tier) */}
-        {!isPro && (
+        {!isPaid && (
           <div className="bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-red-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-xl font-bold text-white mb-1">
-                  Upgrade to Pro
+                  Add payment method
                 </div>
                 <div className="text-gray-400">
-                  Unlimited managed API calls, pay as you go
+                  Continue managed calls at API cost + 15%
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-white">$79</div>
-                <div className="text-gray-400 text-sm">/month</div>
+                <div className="text-3xl font-bold text-white">PAYG</div>
+                <div className="text-gray-400 text-sm">no subscription</div>
               </div>
             </div>
 
@@ -253,7 +253,7 @@ function UpgradeContent() {
                   Processing...
                 </span>
               ) : (
-                "Upgrade to Pro"
+                "Add payment method"
               )}
             </button>
 
@@ -263,8 +263,8 @@ function UpgradeContent() {
           </div>
         )}
 
-        {/* Already Pro Message */}
-        {isPro && !success && (
+        {/* Already paid message */}
+        {isPaid && !success && (
           <div className="text-center text-gray-400">
             You&apos;re on a paid plan. Manage your subscription from the workspace billing tab.
           </div>

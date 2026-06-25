@@ -319,7 +319,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log('');
   if (result.isNew) {
     console.log(chalk.bold(`  ✅ Workspace created for ${chalk.green(result.email)}`));
-    console.log(chalk.dim(`     Free tier: 50 calls/month. Tier: ${result.tier ?? 'free'}.`));
+    console.log(chalk.dim(`     Free tier active. Continue beyond it at API cost + 15%. Tier: ${result.tier ?? 'free'}.`));
   } else {
     console.log(chalk.bold(`  ✅ Authenticated as ${chalk.green(result.email)}`));
     console.log(chalk.dim(`     Tier: ${result.tier ?? 'free'}`));

@@ -108,7 +108,7 @@ function limitReachedEmailTemplate(upgradeUrl: string): string {
     </h2>
 
     <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #525252; text-align: center;">
-      Your AI agent has used all 50 free API calls this month. Add a payment method to keep going — pay-as-you-go, no subscription.
+      Your AI agent has reached the free tier limit. Add a payment method to keep going with pay-as-you-go, no subscription.
     </p>
 
     <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
@@ -405,4 +405,3 @@ export const sendLimitReachedEmail = action({
     return { success: true };
   },
 });
-

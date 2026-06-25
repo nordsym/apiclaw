@@ -84,7 +84,7 @@ Empirically verified callable. Subset breakdown:
 | Plan | Price | Access |
 |------|------|------|
 | **Free** | $0 forever | 25 calls per month across the platform. Unlimited Discovery. Free email signup required (Google one-tap or magic link). |
-| **Pay as you go** | API cost + 15% margin | Unlimited calls. Per-call cost calculated from actual token usage. Soft 80% notice in success response before quota hit. |
+| **Pay as you go** | API cost + 15% margin | Managed calls continue after the free tier. Per-call cost calculated from actual token usage. Soft 80% notice in success response before quota hit. |
 
 Pricing canon: pass-through plus 15% margin (market standard, same as OpenRouter). Stripe metered billing live.
 

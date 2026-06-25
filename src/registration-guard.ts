@@ -114,10 +114,10 @@ export function requireVerifiedOwner(
         status: "quota_exceeded",
         error:
           workspaceContext.tier === "free"
-            ? "You've hit the free tier limit. Upgrade at https://apiclaw.cloud/upgrade."
+            ? "You've hit the free tier limit. Add a payment method to keep going at API cost + 15%: https://apiclaw.cloud/upgrade."
             : "Quota exceeded.",
         upgrade_url: "https://apiclaw.cloud/upgrade",
-        action: "upgrade",
+        action: "add_payment_method",
       },
     };
   }

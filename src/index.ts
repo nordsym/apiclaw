@@ -103,7 +103,7 @@ const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
 // Rate limit constants
 const ANONYMOUS_HOURLY_LIMIT = 5;
 const ANONYMOUS_WEEKLY_LIMIT = 10;
-const FREE_MONTHLY_LIMIT = 50;
+const FREE_WEEKLY_LIMIT = 50;
 const MAX_MCP_TOOL_RESULT_BYTES = 900_000;
 
 type TransportCompactLimits = {
@@ -351,7 +351,7 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       error: JSON.stringify({
         success: false,
         error: `⚡ You've hit your free tier limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
-        hint: "Authenticate for 50 calls/month, or upgrade for unlimited",
+        hint: "Authenticate for free managed calls, then continue at API cost + 15% with pay-as-you-go.",
         action: "Run in terminal: npx @nordsym/apiclaw auth login",
         upgrade_url: "https://apiclaw.cloud/upgrade",
         retry_after: getNextMonthUTC()
@@ -461,7 +461,7 @@ async function trackEarnProgress(workspaceId: string, provider: string, action: 
 /**
  * Rate limiting for anonymous proxy usage
  * Limits: 10 calls/week, 5 calls/hour (anonymous)
- *         50 calls/month, 10 calls/hour (authenticated)
+ *         50 calls/week, 10 calls/hour (authenticated)
  */
 interface RateLimitState {
   hourly: { count: number; resetAt: number };
@@ -506,7 +506,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           estimated_seconds: 15,
           fallback: 'If no browser available (SSH/headless): npx @nordsym/apiclaw auth login --email-fallback',
           legacy_action: 'register_owner ({ email: "..." }) is still supported but slower (inbox round-trip).',
-          free_tier: '50 API calls/month — completely free.',
+          free_tier: 'Free managed calls are included after signup. Continue beyond the free tier at API cost + 15%.',
         }, null, 2),
         isAnonymous: true,
       };
@@ -544,8 +544,8 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
         allowed: false, 
         error: JSON.stringify({
           success: false,
-          error: `⚡ You've hit your free tier limit (${FREE_MONTHLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
-          hint: "Upgrade to Pro for unlimited calls",
+          error: `You've hit your free tier limit (${FREE_WEEKLY_LIMIT} calls/week). Add a payment method to keep going at API cost + 15%.`,
+          hint: "Continue with pay-as-you-go. No Pro subscription required.",
           upgrade_url: "https://apiclaw.cloud/upgrade",
           retry_after: getNextMonthUTC()
         }, null, 2)
@@ -555,7 +555,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     // Other tiers (shouldn't happen, but handle gracefully)
     return { 
       allowed: false, 
-      error: `⚡ You've hit your free tier limit (${FREE_MONTHLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade` 
+      error: `You've hit your free tier limit (${FREE_WEEKLY_LIMIT} calls/week). Add a payment method to keep going at API cost + 15%: https://apiclaw.cloud/upgrade` 
     };
   }
   

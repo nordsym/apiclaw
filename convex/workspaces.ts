@@ -286,7 +286,7 @@ export const verifyMagicLink = mutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50, // 50 calls/month for free tier
+        usageLimit: 50, // 50 calls/week for free tier
         weeklyUsageCount: 0,
         weeklyUsageLimit: 50, // Monthly limit (field name is legacy)
         hourlyUsageCount: 0,

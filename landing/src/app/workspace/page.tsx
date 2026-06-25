@@ -260,7 +260,7 @@ export default function WorkspacePage() {
     const portalParam = searchParams.get("portal");
     
     if (billingParam === "success") {
-      showToast("Payment method added! You now have unlimited API calls.", "success");
+      showToast("Payment method added. Managed calls now continue at API cost + 15%.", "success");
       // Clean up URL
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete("billing");
@@ -4855,7 +4855,7 @@ function BillingTab({
 
       {/* Fine print */}
       <p className="text-xs text-center text-[var(--text-muted)]">
-        All plans include unlimited search and Open API access. Managed API calls billed at API cost + 15%.
+        Search and Open API access stay unmetered. Managed API calls are billed at API cost + 15%.
       </p>
 
       <p className="text-xs text-center text-[var(--text-muted)]">
@@ -6354,7 +6354,7 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
           <p className="text-xs text-[var(--text-muted)] text-center">
             {hasStripeCustomer 
               ? "Update card, view invoices, or cancel subscription via Stripe"
-              : "Add a payment method to unlock unlimited API calls"
+              : "Add a payment method to continue managed calls at API cost + 15%"
             }
           </p>
         </div>
