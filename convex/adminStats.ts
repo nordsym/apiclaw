@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // Get total user/workspace count
@@ -7,25 +7,57 @@ export const getTotalWorkspaces = query({
   handler: async (ctx) => {
     const workspaces = await ctx.db.query("workspaces").collect();
     const providers = await ctx.db.query("providers").collect();
+    const verifiedWorkspaces = workspaces.filter(w => !!(w.email && w.email.trim()));
+    const preAuthWorkspaces = workspaces.filter(w => !(w.email && w.email.trim()));
     
     return {
-      totalWorkspaces: workspaces.length,
+      totalWorkspaces: verifiedWorkspaces.length,
+      workspaceRows: workspaces.length,
+      verifiedWorkspaces: verifiedWorkspaces.length,
+      preAuthWorkspaces: preAuthWorkspaces.length,
       totalProviders: providers.length,
-      activeWorkspaces: workspaces.filter(w => w.status === "active").length,
-      paid: workspaces.filter(w => ["pro", "scale", "usage_based"].includes(w.tier)).length,
+      activeWorkspaces: verifiedWorkspaces.filter(w => w.status === "active").length,
+      paid: verifiedWorkspaces.filter(w => ["pro", "scale", "usage_based"].includes(w.tier)).length,
       workspaceBreakdown: {
-        free: workspaces.filter(w => w.tier === "free").length,
-        pro: workspaces.filter(w => w.tier === "pro").length,
-        scale: workspaces.filter(w => w.tier === "scale").length,
-        usage_based: workspaces.filter(w => w.tier === "usage_based").length,
-        enterprise: workspaces.filter(w => w.tier === "enterprise").length,
-        partner: workspaces.filter(w => w.tier === "partner").length,
+        free: verifiedWorkspaces.filter(w => w.tier === "free").length,
+        pro: verifiedWorkspaces.filter(w => w.tier === "pro").length,
+        scale: verifiedWorkspaces.filter(w => w.tier === "scale").length,
+        usage_based: verifiedWorkspaces.filter(w => w.tier === "usage_based").length,
+        enterprise: verifiedWorkspaces.filter(w => w.tier === "enterprise").length,
+        partner: verifiedWorkspaces.filter(w => w.tier === "partner").length,
       },
       providerBreakdown: {
         pending: providers.filter(p => p.status === "pending").length,
         approved: providers.filter(p => p.status === "approved").length,
         rejected: providers.filter(p => p.status === "rejected").length,
       }
+    };
+  },
+});
+
+// Workspace truth: separates raw rows from verified customer workspaces.
+export const getWorkspaceTruth = query({
+  args: {},
+  handler: async (ctx) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    const verified = workspaces.filter(w => !!(w.email && w.email.trim()));
+    const preAuth = workspaces.filter(w => !(w.email && w.email.trim()));
+    const activated = verified.filter(w => (w.usageCount || 0) > 0 || (w.lastActiveAt || 0) > 0);
+
+    const byStatus: Record<string, number> = {};
+    const byTier: Record<string, number> = {};
+    for (const w of workspaces) {
+      byStatus[w.status] = (byStatus[w.status] || 0) + 1;
+      byTier[w.tier] = (byTier[w.tier] || 0) + 1;
+    }
+
+    return {
+      workspaceRows: workspaces.length,
+      verifiedWorkspaces: verified.length,
+      preAuthAgentRows: preAuth.length,
+      activatedWorkspaces: activated.length,
+      byStatus,
+      byTier,
     };
   },
 });
@@ -37,12 +69,35 @@ export const listWorkspaces = query({
     const workspaces = await ctx.db.query("workspaces").collect();
     return workspaces.map(w => ({
       email: w.email,
+      isVerifiedWorkspace: !!(w.email && w.email.trim()),
       status: w.status,
       tier: w.tier,
       usageCount: w.usageCount,
       createdAt: w.createdAt,
       lastActiveAt: w.lastActiveAt,
     }));
+  },
+});
+
+// One-way data hygiene: old MCP startup rows were created as active workspaces
+// with email "". They are pre-auth agent identities, not verified workspaces.
+export const markPreAuthWorkspacesUnclaimed = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    let patched = 0;
+
+    for (const ws of workspaces) {
+      if ((!ws.email || !ws.email.trim()) && ws.status !== "unclaimed") {
+        await ctx.db.patch(ws._id, {
+          status: "unclaimed",
+          updatedAt: Date.now(),
+        });
+        patched++;
+      }
+    }
+
+    return { patched };
   },
 });
 

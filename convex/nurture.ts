@@ -134,11 +134,15 @@ export const classifyAllWorkspaces = internalMutation({
         .withIndex("by_workspaceId", (q) => q.eq("workspaceId", w._id))
         .first();
 
-      // Partner / excluded classification takes precedence only if email IS blocked
-      // (Missing email = anonymous workspace → stays in lifecycle, just unreachable by sender)
+      // Partner / excluded classification takes precedence. Missing email means
+      // pre-auth agent identity, not a real customer workspace.
       let stage: Doc<"nurture">["stage"] = "new";
       const hasBlockedEmail = email && isBlocked(email);
-      if (hasBlockedEmail) {
+      let notes: string | undefined;
+      if (!email) {
+        stage = "excluded";
+        notes = "pre-auth agent identity; no verified workspace email";
+      } else if (hasBlockedEmail) {
         const dom = domainOf(email);
         stage = (dom === "apilayer.com" || dom === "filestack.com") ? "partner-locked" : "excluded";
       } else {
@@ -183,6 +187,7 @@ export const classifyAllWorkspaces = internalMutation({
           stage,
           email: email || undefined,
           lastActivityAt: w.lastActiveAt,
+          notes,
           updatedAt: now,
         });
       } else {
@@ -193,6 +198,7 @@ export const classifyAllWorkspaces = internalMutation({
           lastActivityAt: w.lastActiveAt,
           emailsSent: 0,
           unsubscribed: false,
+          notes,
           createdAt: now,
           updatedAt: now,
         });

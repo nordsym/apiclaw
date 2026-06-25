@@ -766,7 +766,7 @@ export const ensureAgent = mutation({
       // 3. No workspace at all — auto-provision free tier
       workspaceId = await ctx.db.insert("workspaces", {
         email: "", // no email yet — added when user registers
-        status: "active",
+        status: "unclaimed",
         tier: "free",
         usageCount: 0,
         usageLimit: 50,
@@ -831,6 +831,7 @@ export const linkEmailToWorkspace = mutation({
         // Add email to existing workspace
         await ctx.db.patch(workspace._id, {
           email,
+          status: "active",
           updatedAt: Date.now(),
         });
         return { workspaceId: workspace._id, linked: true };
