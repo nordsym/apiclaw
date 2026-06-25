@@ -29,6 +29,8 @@ import { checkEmailAllowedSync } from "./emailGuards";
 
 const DAY = 86400000;
 const HOUR = 3600000;
+const MAX_NURTURE_EMAILS_PER_WORKSPACE = 3;
+const REACTIVATION_COOLDOWN_MS = 30 * DAY;
 
 // Permanent no-email list — partner domains, tests, disposable
 export const DOMAIN_BLOCKLIST = [
@@ -293,6 +295,8 @@ export function pickEmailKind(n: Pick<Doc<"nurture">, "stage" | "emailsSent" | "
   const ageMs = now - wsCreatedAt;
   const lastEmailMs = n.lastEmailSentAt ? now - n.lastEmailSentAt : Infinity;
 
+  if (n.emailsSent >= MAX_NURTURE_EMAILS_PER_WORKSPACE) return null;
+
   // Never stack emails closer than 72h except for the onboarding welcome which can follow signup quickly
   if (lastEmailMs < 72 * HOUR && n.lastEmailKind !== null && n.lastEmailKind !== undefined) return null;
 
@@ -316,6 +320,7 @@ export function pickEmailKind(n: Pick<Doc<"nurture">, "stage" | "emailsSent" | "
   if (n.stage === "power" && n.lastEmailKind !== "power-upgrade") return "power-upgrade";
 
   // Reactivation
+  if (n.lastEmailKind?.startsWith("reactivate-") && lastEmailMs < REACTIVATION_COOLDOWN_MS) return null;
   if (n.stage === "dormant" && n.lastEmailKind !== "reactivate-7d") return "reactivate-7d";
   if (n.stage === "lost" && n.lastEmailKind !== "reactivate-30d") return "reactivate-30d";
 

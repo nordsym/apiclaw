@@ -38,6 +38,51 @@ assert.equal(
   null,
 );
 
+assert.equal(
+  pickEmailKind(
+    {
+      stage: "new",
+      emailsSent: 3,
+      lastEmailKind: "first-call",
+      lastEmailSentAt: now - 10 * 24 * 60 * 60 * 1000,
+      unsubscribed: false,
+    } as any,
+    now - 10 * 24 * 60 * 60 * 1000,
+  ),
+  null,
+  "workspace must stop receiving nurture after three lifecycle emails",
+);
+
+assert.equal(
+  pickEmailKind(
+    {
+      stage: "lost",
+      emailsSent: 1,
+      lastEmailKind: "reactivate-7d",
+      lastEmailSentAt: now - 10 * 24 * 60 * 60 * 1000,
+      unsubscribed: false,
+    } as any,
+    now - 45 * 24 * 60 * 60 * 1000,
+  ),
+  null,
+  "reactivation emails must have a 30 day cooldown",
+);
+
+assert.equal(
+  pickEmailKind(
+    {
+      stage: "lost",
+      emailsSent: 1,
+      lastEmailKind: "reactivate-7d",
+      lastEmailSentAt: now - 31 * 24 * 60 * 60 * 1000,
+      unsubscribed: false,
+    } as any,
+    now - 60 * 24 * 60 * 60 * 1000,
+  ),
+  "reactivate-30d",
+  "reactivation can progress after the 30 day cooldown",
+);
+
 const welcome = bodyFor("welcome", "Gustav");
 assert.match(welcome.subject, /Welcome to APIClaw/);
 assert.match(welcome.html, /discover_apis/);
