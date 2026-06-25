@@ -231,18 +231,7 @@ export const getFunnel = query({
 
     const filtered = events.filter((e) => includes.includes(e.classification));
 
-    const countsByEvent: Record<string, number> = {};
-    const uniqByEvent: Record<string, Set<string>> = {};
-    for (const e of FUNNEL_EVENTS) {
-      countsByEvent[e] = 0;
-      uniqByEvent[e] = new Set<string>();
-    }
-
-    for (const e of filtered) {
-      countsByEvent[e.event] = (countsByEvent[e.event] || 0) + 1;
-      const k = (e.workspaceId as string | undefined) || e.fingerprint || e._id;
-      uniqByEvent[e.event].add(k);
-    }
+    const rollup = rollupCanonicalFunnel(filtered);
 
     // Classification breakdown across all events in window.
     const byClass: Record<string, number> = { human: 0, ci: 0, bot: 0, internal: 0 };
@@ -250,29 +239,13 @@ export const getFunnel = query({
       byClass[e.classification] = (byClass[e.classification] || 0) + 1;
     }
 
-    const funnel = FUNNEL_EVENTS.map((name) => ({
-      event: name,
-      count: countsByEvent[name],
-      unique: uniqByEvent[name].size,
-    }));
-
-    // Conversion ratios (unique-based).
-    const get = (n: string) => uniqByEvent[n]?.size || 0;
-    const ratios = {
-      install_to_first_run: safeRatio(get("first_run"), get("install")),
-      first_run_to_register: safeRatio(get("register_owner"), get("first_run")),
-      register_to_verify: safeRatio(get("verify_code"), get("register_owner")),
-      verify_to_first_call: safeRatio(get("first_call_api_success"), get("verify_code")),
-      install_to_verify: safeRatio(get("verify_code"), get("install")),
-      install_to_first_call: safeRatio(get("first_call_api_success"), get("install")),
-    };
-
     return {
       windowHours: hoursBack,
       includeClassifications: includes,
-      totalEvents: filtered.length,
-      funnel,
-      ratios,
+      totalEvents: rollup.totalCanonicalEvents,
+      diagnosticEvents: rollup.diagnosticEvents,
+      funnel: rollup.funnel,
+      ratios: rollup.ratios,
       classificationBreakdown: byClass,
     };
   },
@@ -357,6 +330,58 @@ type FunnelBucket = {
   unique: Record<string, number>;
   ratios: Record<string, number>;
 };
+
+type FunnelRollupInput = {
+  event: string;
+  workspaceId?: unknown;
+  fingerprint?: unknown;
+  _id: unknown;
+};
+
+export function rollupCanonicalFunnel(events: FunnelRollupInput[]) {
+  const countsByEvent: Record<string, number> = {};
+  const uniqByEvent: Record<string, Set<string>> = {};
+  for (const e of FUNNEL_EVENTS) {
+    countsByEvent[e] = 0;
+    uniqByEvent[e] = new Set<string>();
+  }
+
+  let diagnosticEvents = 0;
+  for (const e of events) {
+    if (!FUNNEL_EVENTS.includes(e.event as FunnelEvent)) {
+      diagnosticEvents++;
+      continue;
+    }
+
+    countsByEvent[e.event]++;
+    const k = String(e.workspaceId || e.fingerprint || e._id);
+    uniqByEvent[e.event].add(k);
+  }
+
+  const get = (n: string) => uniqByEvent[n]?.size || 0;
+  const activatedOwners = new Set<string>([
+    ...(uniqByEvent.verify_code ?? new Set<string>()),
+    ...(uniqByEvent.cli_browser_callback_success ?? new Set<string>()),
+  ]).size;
+
+  return {
+    totalCanonicalEvents: FUNNEL_EVENTS.reduce((sum, event) => sum + countsByEvent[event], 0),
+    diagnosticEvents,
+    funnel: FUNNEL_EVENTS.map((name) => ({
+      event: name,
+      count: countsByEvent[name],
+      unique: uniqByEvent[name].size,
+    })),
+    ratios: {
+      install_to_first_run: safeRatio(get("first_run"), get("install")),
+      first_run_to_register: safeRatio(get("register_owner"), get("first_run")),
+      register_to_verify: safeRatio(activatedOwners, get("register_owner")),
+      verify_to_first_call: safeRatio(get("first_call_api_success"), activatedOwners),
+      install_to_verify: safeRatio(activatedOwners, get("install")),
+      install_to_first_call: safeRatio(get("first_call_api_success"), get("install")),
+    },
+  };
+}
 
 function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?: any; _id: any }[]): FunnelBucket {
   const counts: Record<string, number> = {};

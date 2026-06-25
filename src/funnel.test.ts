@@ -165,13 +165,15 @@ test('matrix: free and enforced sets are disjoint', () => {
 // ------------------------------------------------------------------
 import type { FunnelEventName } from './funnel-client.js';
 
-test('event canon: all 11 approved events are typed', () => {
+test('event canon: all 13 approved events are typed', () => {
   const names: FunnelEventName[] = [
     'install',
     'first_run',
+    'cli_browser_callback_success',
     'register_owner',
     'verify_code',
     'first_call_api_success',
+    'cli_browser_callback_failed',
     'register_owner_failed',
     'verify_code_failed',
     'call_api_blocked',
@@ -179,7 +181,7 @@ test('event canon: all 11 approved events are typed', () => {
     'quota_hit',
     'gateway_retry',
   ];
-  assert.equal(names.length, 11);
+  assert.equal(names.length, 13);
 });
 
 console.log('');

@@ -13,10 +13,12 @@ const CONVEX_URL = process.env.CONVEX_URL || "https://adventurous-avocet-799.con
 export type FunnelEventName =
   | "install"
   | "first_run"
+  | "cli_browser_callback_success"
   | "register_owner"
   | "verify_code"
   | "first_call_api_success"
   // Diagnostics
+  | "cli_browser_callback_failed"
   | "register_owner_failed"
   | "verify_code_failed"
   | "call_api_blocked"
