@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { FREE_HOURLY_LIMIT, FREE_WEEKLY_LIMIT, getHourStart, getQuotaState, getWeekStart } from "./quota";
 
 // Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
 // Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
@@ -802,28 +803,37 @@ export const updateTier = mutation({
 });
 
 // Increment usage count
-// Constants for rate limiting
-const FREE_WEEKLY_LIMIT = 50;
-const FREE_HOURLY_LIMIT = 10;
-// Rate limiting constants
 
-// Helper: Get start of current week (Monday 00:00 UTC)
-function getWeekStart(): number {
-  const now = new Date();
-  const dayOfWeek = now.getUTCDay();
-  const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday = 0
-  const monday = new Date(now);
-  monday.setUTCDate(now.getUTCDate() - diff);
-  monday.setUTCHours(0, 0, 0, 0);
-  return monday.getTime();
-}
+export const checkCallQuota = query({
+  args: {
+    workspaceId: v.id("workspaces"),
+    amount: v.optional(v.number()),
+  },
+  handler: async (ctx, { workspaceId, amount = 1 }) => {
+    const workspace = await ctx.db.get(workspaceId);
+    if (!workspace) {
+      return {
+        allowed: false,
+        reason: "workspace_not_found",
+        message: "Workspace not found",
+      };
+    }
+    if (workspace.status !== "active") {
+      return {
+        allowed: false,
+        reason: "workspace_inactive",
+        message: `Workspace status is ${workspace.status}`,
+      };
+    }
 
-// Helper: Get start of current hour
-function getHourStart(): number {
-  const now = new Date();
-  now.setUTCMinutes(0, 0, 0);
-  return now.getTime();
-}
+    return {
+      workspaceId,
+      tier: workspace.tier,
+      usageCount: workspace.usageCount || 0,
+      ...getQuotaState(workspace, amount),
+    };
+  },
+});
 
 export const incrementUsage = mutation({
   args: {
@@ -837,39 +847,19 @@ export const incrementUsage = mutation({
     }
 
     const now = Date.now();
-    const weekStart = getWeekStart();
-    const hourStart = getHourStart();
-    
+
     // Check if paid tier (unlimited usage)
     const isPaid = ["pro", "scale", "usage_based", "partner", "founder"].includes(workspace.tier);
-    
-    // Initialize weekly/hourly counters if needed
-    let weeklyCount = workspace.weeklyUsageCount || 0;
-    let hourlyCount = workspace.hourlyUsageCount || 0;
-    
-    // Reset weekly counter if new week
-    if (!workspace.lastWeeklyResetAt || workspace.lastWeeklyResetAt < weekStart) {
-      weeklyCount = 0;
-    }
-    
-    // Reset hourly counter if new hour
-    if (!workspace.lastHourlyResetAt || workspace.lastHourlyResetAt < hourStart) {
-      hourlyCount = 0;
-    }
-    
-    // Check rate limits for free tier
-    if (!isPaid && workspace.tier !== "enterprise") {
-      // Check hourly limit (10/hour for free)
-      if (hourlyCount + amount > FREE_HOURLY_LIMIT) {
-        throw new Error(`Hourly rate limit exceeded (${FREE_HOURLY_LIMIT}/hour). Upgrade to Pro for unlimited.`);
-      }
 
-      // Check weekly limit (50/week for free)
-      if (weeklyCount + amount > FREE_WEEKLY_LIMIT) {
-        throw new Error(`Weekly limit exceeded (${FREE_WEEKLY_LIMIT}/week). Upgrade to Pro for unlimited.`);
-      }
+    const quota = getQuotaState(workspace, amount);
+    if (!quota.allowed) {
+      throw new Error(quota.message || quota.reason || "quota_exceeded");
     }
 
+    const weekStart = getWeekStart();
+    const hourStart = getHourStart();
+    const weeklyCount = quota.weeklyCount;
+    const hourlyCount = quota.hourlyCount;
     const newTotalCount = workspace.usageCount + amount;
     const newWeeklyCount = weeklyCount + amount;
     const newHourlyCount = hourlyCount + amount;
@@ -884,8 +874,8 @@ export const incrementUsage = mutation({
     });
 
     // Calculate remaining for free tier
-    const weeklyRemaining = isPaid ? Infinity : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
-    const hourlyRemaining = isPaid ? Infinity : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
+    const weeklyRemaining = isPaid ? -1 : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
+    const hourlyRemaining = isPaid ? -1 : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
 
     // A-17 — pre-flight quota warning at 80% of the weekly free tier.
     // Surfaces a _notice payload that callers can lift into the response

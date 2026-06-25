@@ -1166,6 +1166,67 @@ function internalOnlyResponse(provider: string) {
   );
 }
 
+function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
+  return jsonResponse(
+    {
+      error: {
+        code: "quota_exceeded",
+        reason: quota.reason || "quota_exceeded",
+        message:
+          quota.message ||
+          "Free tier quota exceeded. Keep going at API cost + 15% with pay-as-you-go: https://apiclaw.cloud/upgrade",
+        type: "quota_error",
+        tier: quota.tier,
+        provider,
+        action,
+        path,
+        weeklyUsageCount: quota.weeklyCount,
+        weeklyUsageLimit: quota.weeklyLimit,
+        weeklyRemaining: quota.weeklyRemaining,
+        hourlyUsageCount: quota.hourlyCount,
+        hourlyUsageLimit: quota.hourlyLimit,
+        hourlyRemaining: quota.hourlyRemaining,
+        upgradeUrl: quota.upgradeUrl || "https://apiclaw.cloud/upgrade",
+      },
+    },
+    402
+  );
+}
+
+async function enforcePreCallQuota(
+  ctx: any,
+  workspaceId: string | undefined,
+  provider: string,
+  action: string,
+  path: string
+): Promise<Response | null> {
+  if (!workspaceId) return null;
+
+  const quota = await ctx.runQuery(api.workspaces.checkCallQuota, {
+    workspaceId: workspaceId as any,
+  });
+  if (quota?.allowed) return null;
+
+  try {
+    await ctx.runMutation(api.funnel.recordEvent, {
+      event: "quota_hit",
+      classification: "human",
+      props: {
+        reason: quota?.reason || "quota_exceeded",
+        provider,
+        action,
+        path,
+        tier: quota?.tier,
+      },
+      workspaceId: workspaceId as any,
+    });
+  } catch (e: any) {
+    console.error("[Quota] Funnel log failed:", e?.message);
+  }
+
+  return quotaExceededResponse(quota || {}, provider, action, path);
+}
+
 // Helper to validate session and log API usage.
 // Returns a Response (401) when AUTH_ENFORCEMENT=enforce and the caller is anonymous.
 // Returns a Response (403) when the provider is reserved for internal infrastructure.
@@ -1218,6 +1279,15 @@ async function validateAndLogProxyCall(
     }
     // shadow mode: fall through, record analytics, pass the call
   }
+
+  const quotaBlock = await enforcePreCallQuota(
+    ctx,
+    resolvedWorkspaceId,
+    provider,
+    action,
+    `/proxy/${provider}`
+  );
+  if (quotaBlock) return quotaBlock;
 
   // ALWAYS log to analytics (mirrors existing behavior for dashboard continuity)
   try {
@@ -2991,6 +3061,15 @@ http.route({
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
 
+    const quotaBlock = await enforcePreCallQuota(
+      ctx,
+      workspaceId,
+      "llm",
+      "chat_completions",
+      "/v1/chat/completions"
+    );
+    if (quotaBlock) return quotaBlock;
+
     // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT
     // AND the requested model is Codex-routable (gpt-5.x, codex-*)
     // AND their workspace tier permits it (founder/partner only), translate Chat
@@ -4195,6 +4274,15 @@ http.route({
 
     const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
 
+    const quotaBlock = await enforcePreCallQuota(
+      ctx,
+      workspaceId,
+      provider,
+      action,
+      "/v1/execute"
+    );
+    if (quotaBlock) return quotaBlock;
+
     // Determine execution path
     let routeDetail = "";
 
@@ -4959,6 +5047,15 @@ http.route({
       return jsonResponse({ error: { message: "model and input are required", type: "invalid_request_error" } }, 400);
     }
 
+    const quotaBlock = await enforcePreCallQuota(
+      ctx,
+      workspaceId,
+      "openai",
+      "responses",
+      "/v1/responses"
+    );
+    if (quotaBlock) return quotaBlock;
+
     // Normalize model id
     let modelId: string = body.model;
     if (modelId.startsWith("openai/")) modelId = modelId.slice("openai/".length);
@@ -5126,6 +5223,15 @@ http.route({
     if (!Array.isArray(body.messages)) {
       return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "messages array is required" } }, 400);
     }
+
+    const quotaBlock = await enforcePreCallQuota(
+      ctx,
+      workspaceId,
+      "anthropic",
+      "messages",
+      "/v1/messages"
+    );
+    if (quotaBlock) return quotaBlock;
 
     // Normalize model id: accept "anthropic/claude-..." or "claude-..." — Anthropic API expects the bare form.
     let modelId: string = body.model;
@@ -5751,6 +5857,15 @@ http.route({
     if (!template) {
       return jsonResponse({ error: { code: "missing_template", message: "Body must include { template }" } }, 400);
     }
+    const quotaBlock = await enforcePreCallQuota(
+      ctx,
+      auth.workspaceId,
+      "mission",
+      template,
+      "/v1/missions/start"
+    );
+    if (quotaBlock) return quotaBlock;
+
     const initiatorMap: Record<string, string> = {
       "api-key": "http",
       session: "cli",

@@ -2206,9 +2206,9 @@ Docs: https://apiclaw.cloud
             try {
               const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
                 workspaceId: workspaceContext.workspaceId as any,
-              }) as { success: boolean; remaining?: number };
+              }) as { success: boolean; weeklyRemaining?: number };
               if (usageResult.success) {
-                workspaceContext.usageRemaining = usageResult.remaining ?? -1;
+                workspaceContext.usageRemaining = usageResult.weeklyRemaining ?? -1;
                 workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
               }
 
