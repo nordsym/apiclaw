@@ -4272,6 +4272,16 @@ http.route({
       return jsonResponse({ error: { message: "action is required", type: "invalid_request" } }, 400);
     }
 
+    // Internal-only provider gate. Same set as /proxy/* and /v1/call — reserved
+    // providers (Twilio/46elks/Resend) only accept X-APIClaw-Internal auth.
+    // /v1/execute was missing this check, unlike its sibling routes.
+    if (
+      INTERNAL_ONLY_PROVIDERS.has(String(provider).toLowerCase()) &&
+      authMethod !== "internal"
+    ) {
+      return internalOnlyResponse(provider);
+    }
+
     const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
 
     const quotaBlock = await enforcePreCallQuota(
