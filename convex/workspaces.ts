@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { FREE_HOURLY_LIMIT, FREE_WEEKLY_LIMIT, getHourStart, getQuotaState, getWeekStart } from "./quota";
@@ -1226,7 +1226,7 @@ export const getWorkspaceStatus = query({
 });
 
 // Admin functions for Hivr integration
-export const adminActivateWorkspace = mutation({
+export const adminActivateWorkspace = internalMutation({
   args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, internalSecret }) => {
     requireAdminSecret(internalSecret);
@@ -1246,7 +1246,7 @@ export const adminActivateWorkspace = mutation({
   },
 });
 
-export const adminCreateSession = mutation({
+export const adminCreateSession = internalMutation({
   args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, internalSecret }) => {
     requireAdminSecret(internalSecret);
@@ -1270,7 +1270,7 @@ export const adminCreateSession = mutation({
 });
 
 // TEMP: Admin query to debug workspace data
-export const adminGetFullWorkspace = query({
+export const adminGetFullWorkspace = internalQuery({
   args: { email: v.string(), internalSecret: v.string() },
   handler: async (ctx, { email, internalSecret }) => {
     requireAdminSecret(internalSecret);
@@ -1339,7 +1339,7 @@ export const claimAnonymousUsage = mutation({
   },
 });
 
-export const adminUpdateEmail = mutation({
+export const adminUpdateEmail = internalMutation({
   args: { workspaceId: v.id("workspaces"), newEmail: v.string(), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, newEmail, internalSecret }) => {
     requireAdminSecret(internalSecret);
@@ -1348,7 +1348,7 @@ export const adminUpdateEmail = mutation({
   },
 });
 
-export const adminSetTier = mutation({
+export const adminSetTier = internalMutation({
   args: { workspaceId: v.id("workspaces"), tier: v.string(), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, tier, internalSecret }) => {
     requireAdminSecret(internalSecret);

@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // Server-to-server guard. Callers must pass the shared APICLAW_INTERNAL_SECRET.
@@ -9,7 +9,7 @@ function requireAdminSecret(internalSecret: string | undefined) {
   }
 }
 
-export const activateWorkspace = mutation({
+export const activateWorkspace = internalMutation({
   args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, internalSecret }) => {
     requireAdminSecret(internalSecret);
@@ -37,7 +37,7 @@ function generateToken(): string {
   return Array.from(bytes, (b) => chars[b % chars.length]).join("");
 }
 
-export const createSessionForWorkspace = mutation({
+export const createSessionForWorkspace = internalMutation({
   args: { workspaceId: v.id("workspaces"), internalSecret: v.string() },
   handler: async (ctx, { workspaceId, internalSecret }) => {
     requireAdminSecret(internalSecret);
