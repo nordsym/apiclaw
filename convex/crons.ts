@@ -89,6 +89,21 @@ crons.interval(
   {}
 );
 
+// Catalog sweep — every 30min. GET-only reachability probe over a rotating
+// 100-provider batch of the Open (keyless, free) tier of providerAPIs, least-
+// recently-checked first. Feeds the existing circuit-breaker fields
+// (healthStatus/consecutiveFailures/circuitOpenUntil) so cold open-catalog
+// providers get a health signal without waiting for real user traffic to
+// hit a dead endpoint. Never touches Managed providers (they cost money or
+// have side effects) — passive providerHealth.aggregate covers those from
+// real usage instead.
+crons.interval(
+  "catalog-sweep",
+  { minutes: 30 },
+  internal.catalogSweep.sweep,
+  {}
+);
+
 // Hot-path lastActiveAt refresh — every 5min. Rolls workspaces.lastActiveAt
 // and subagents.lastActiveAt forward from apiLogs.createdAt. Replaces the
 // synchronous patches in createProxyLog that were causing 88 OCC retries
