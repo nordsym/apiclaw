@@ -11,10 +11,23 @@ import { openAPIs, isOpenAPI } from './open-apis.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const apisData = JSON.parse(
-  readFileSync(join(__dirname, 'registry', 'apis.json'), 'utf-8')
-);
-const apis: APIProvider[] = apisData.apis;
+function loadLocalRegistry(): APIProvider[] {
+  try {
+    const apisData = JSON.parse(
+      readFileSync(join(__dirname, 'registry', 'apis.json'), 'utf-8')
+    ) as { apis?: APIProvider[] };
+    return Array.isArray(apisData.apis) ? apisData.apis : [];
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== 'ENOENT') throw error;
+    // The full registry is intentionally excluded from npm packages. MCP
+    // discovery delegates to /v1/discover; this empty array is its offline,
+    // fail-safe fallback and must not prevent the server from starting.
+    return [];
+  }
+}
+
+const apis: APIProvider[] = loadLocalRegistry();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider health cache
