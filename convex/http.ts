@@ -3276,6 +3276,28 @@ http.route({
       return jsonResponse({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
     }
 
+    const isFounderOrPartner = settings.tier === "founder" || settings.tier === "partner";
+    const requestedModelForGuard = String(effectiveModel || route.model || "");
+    const codexSubscriptionModel = /^(openai\/|openai-codex\/)?(gpt-5(\.|-|$)|codex-)/i.test(requestedModelForGuard);
+    if (isFounderOrPartner && route.provider === "openai" && codexSubscriptionModel) {
+      return jsonResponse({
+        error: {
+          message: "Founder OpenAI GPT-5/Codex routing requires valid Codex OAuth passthrough. Refusing managed OpenAI API key fallback.",
+          type: "permission_error",
+          code: "oauth_passthrough_required",
+        },
+        _apiclaw: {
+          gateway: "v1",
+          endpoint: "/v1/chat/completions",
+          provider: "openai",
+          routeReason: route.reason,
+          model: route.model,
+          authMode: "founder_oauth_required" satisfies ApiClawAuthMode,
+          credentialSource: "managed_provider_key_blocked",
+        },
+      }, 403);
+    }
+
     // Log usage
     try {
       await ctx.runMutation(api.analytics.log, {
@@ -3355,17 +3377,25 @@ http.route({
         body: JSON.stringify(requestBody),
       });
 
-      // OAuth fallback: if OAuth token fails with 401/403, retry with managed key
+      // OAuth passthrough failures must not fall back to managed OpenAI billing.
       const usedOAuth = oauthPassthroughEligible && effectiveApiKey !== route.apiKey;
       if (usedOAuth && (response.status === 401 || response.status === 403)) {
-        console.log(`OAuth token failed (${response.status}), falling back to managed key for ${route.provider}`);
-        headers["Authorization"] = `Bearer ${route.apiKey}`;
-        authMode = "managed_provider_key_fallback";
-        response = await fetch(route.baseUrl, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(requestBody),
-        });
+        return jsonResponse({
+          error: {
+            message: `OAuth passthrough failed with ${response.status}. Managed OpenAI API key fallback is disabled for founder/partner workspaces.`,
+            type: "permission_error",
+            code: "oauth_passthrough_failed",
+          },
+          _apiclaw: {
+            gateway: "v1",
+            endpoint: "/v1/chat/completions",
+            provider: route.provider,
+            routeReason: route.reason,
+            model: route.model,
+            authMode,
+            credentialSource: "managed_provider_key_blocked",
+          },
+        }, response.status);
       }
 
       // For streaming responses, proxy the stream directly
@@ -4672,7 +4702,8 @@ function isCodexJwt(token: string | null | undefined): boolean {
 type ApiClawAuthMode =
   | "founder_oauth_passthrough"
   | "managed_provider_key"
-  | "managed_provider_key_fallback";
+  | "managed_provider_key_fallback"
+  | "founder_oauth_required";
 
 const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
