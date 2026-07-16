@@ -106,7 +106,8 @@ assert.match(welcome.html, /call_api/);
 for (const kind of ["welcome", "try-discover", "first-call", "upgrade", "power-upgrade"]) {
   const rendered = bodyFor(kind, "Gustav");
   assert.doesNotMatch(rendered.subject, /\b(Pro|Scale)\b/i, `${kind} subject should not use stale tier copy`);
-  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|25 free calls\/month|50 calls\/week|unlimited/i, `${kind} body should not use stale tier copy`);
+  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|25 free calls\/month|50 calls\/month|unlimited/i, `${kind} body should not use stale tier copy`);
+  assert.match(rendered.html, /50 managed calls per week/i, `${kind} body should state the enforced weekly allowance`);
   assert.doesNotMatch(rendered.html, /APILayer/i, `${kind} body should not mention APILayer in nurture`);
 }
 

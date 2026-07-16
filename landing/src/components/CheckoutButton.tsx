@@ -166,10 +166,10 @@ export function UsageExceededBanner({
           <div>
             <h3 className="font-bold text-lg text-[#ef4444]">API Limit Reached</h3>
             <p className="text-sm text-[var(--text-muted)] mb-1">
-              You&apos;ve used all {usageLimit.toLocaleString()} free API calls this month.
+              You&apos;ve used all {usageLimit.toLocaleString()} free managed calls this week.
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
-              Add a payment method to unlock unlimited usage at <span className="font-semibold text-[#ef4444]">$0.002/call</span>.
+              Add a payment method to continue at the underlying API cost plus 15%.
             </p>
           </div>
         </div>

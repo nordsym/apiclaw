@@ -1038,7 +1038,7 @@ function unauthResponse(reason: string) {
     {
       error: {
         message:
-          "Workspace required. APIClaw is free for the first 25 calls per month. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
+          "Workspace required. APIClaw includes 50 managed calls per week. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
         type: "auth_error",
         code: "unauth",
         reason,
@@ -2783,7 +2783,7 @@ http.route({
 <h2>An AI Agent Wants to Connect</h2>
 <p>Click below to verify your email and activate your workspace.</p>
 <p><a href="${verifyUrl}" style="background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;display:inline-block;">Verify Email</a></p>
-<p style="color:#666;font-size:13px;">Free tier: 50 API calls. This link expires in 1 hour.</p>
+<p style="color:#666;font-size:13px;">Free tier: 50 managed calls per week. This link expires in 1 hour.</p>
 <p style="color:#999;font-size:11px;">Or copy this link: ${verifyUrl}</p>
 </div>`;
       

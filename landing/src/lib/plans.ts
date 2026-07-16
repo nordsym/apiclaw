@@ -24,8 +24,8 @@ export const PLANS: Plan[] = [
     name: "Free",
     price: "$0",
     period: "forever",
-    calls: "25",
-    callsSub: "API calls per month",
+    calls: "50",
+    callsSub: "managed calls per week",
     features: [
       "Email signup required, no card",
       "All callable APIs count equally",

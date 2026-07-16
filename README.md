@@ -43,7 +43,7 @@ npm install -g @nordsym/apiclaw
 npx @nordsym/apiclaw auth login
 ```
 
-Adds APIClaw as an MCP server in Claude Desktop, Cursor, Windsurf, OpenClaw, or any MCP-compatible agent. The auth flow opens the browser, signs you in via Google one-tap, and writes `~/.apiclaw.toml`. Free tier: 25 calls per month. Pay-as-you-go beyond that at API cost + 15%.
+Adds APIClaw as an MCP server in Claude Desktop, Cursor, Windsurf, OpenClaw, or any MCP-compatible agent. The auth flow opens the browser, signs you in via Google one-tap, and writes `~/.apiclaw.toml`. Free tier: 50 managed calls per week. Pay-as-you-go beyond that at API cost + 15%.
 
 > Headless server or SSH session? `npx @nordsym/apiclaw login --email-fallback` runs the legacy magic-link flow.
 
@@ -83,7 +83,7 @@ Empirically verified callable. Subset breakdown:
 
 | Plan | Price | Access |
 |------|------|------|
-| **Free** | $0 forever | 25 calls per month across the platform. Unlimited Discovery. Free email signup required (Google one-tap or magic link). |
+| **Free** | $0 forever | 50 managed calls per week across the platform. Unlimited Discovery. Free email signup required (Google one-tap or magic link). |
 | **Pay as you go** | API cost + 15% margin | Managed calls continue after the free tier. Per-call cost calculated from actual token usage. Soft 80% notice in success response before quota hit. |
 
 Pricing canon: pass-through plus 15% margin (market standard, same as OpenRouter). Stripe metered billing live.

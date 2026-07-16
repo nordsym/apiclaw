@@ -66,7 +66,7 @@ function magicLinkEmailTemplate(verifyUrl: string): string {
   html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
   html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
   html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
+  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 managed calls per week. This link expires in 1 hour.</p>";
   html += "</td></tr></table>";
   html += "</td></tr></table></body></html>";
   return html;
@@ -224,13 +224,13 @@ export const sendMagicLinkEmail = action({
     html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
     html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
     html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 API calls. This link expires in 1 hour.</p>";
+    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 managed calls per week. This link expires in 1 hour.</p>";
     html += "</td></tr></table>";
     html += "</td></tr></table></body></html>";
     
     var textContent = "APIClaw - An AI Agent Wants to Connect\n\n";
     textContent += "Click the link: " + verifyUrl + "\n\n";
-    textContent += "Free tier: 50 API calls. Expires in 1 hour.";
+    textContent += "Free tier: 50 managed calls per week. Expires in 1 hour.";
     
     var response = await fetch("https://api.resend.com/emails", {
       method: "POST",

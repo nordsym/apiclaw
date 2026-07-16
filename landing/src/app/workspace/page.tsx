@@ -90,7 +90,6 @@ import {
   UsageExceededBanner,
 } from "@/components/CheckoutButton";
 import { Toast, useToast } from "@/components/Toast";
-import { EarnCreditsTab } from "@/components/EarnCreditsTab";
 import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import statsData from "@/lib/stats.json";
@@ -175,7 +174,7 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "api-keys" | "analytics" | "webhooks" | "earn" | "docs" | "feedback" | "settings" | "billing";
+type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "api-keys" | "analytics" | "webhooks" | "docs" | "feedback" | "settings" | "billing";
 type AnalyticsSubtab = "overview" | "usage" | "logs" | "chains";
 
 // Generate preview analytics data for demo
@@ -282,7 +281,7 @@ export default function WorkspacePage() {
   }, [searchParams, showToast]);
 
   useEffect(() => {
-    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "api-keys", "analytics", "webhooks", "earn", "docs", "feedback", "settings", "billing"];
+    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "api-keys", "analytics", "webhooks", "docs", "feedback", "settings", "billing"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       if (tabFromUrl === "analytics") {
@@ -654,7 +653,6 @@ export default function WorkspacePage() {
 
   // Secondary navigation tabs
   const secondaryTabs = [
-    { id: "earn" as TabType, label: "Earn Credits", icon: Crown },
     { id: "integrations" as TabType, label: "Integrations", icon: Layers, href: "/workspace/integrations" },
     { id: "docs" as TabType, label: "Docs", icon: BookOpen },
     { id: "feedback" as TabType, label: "Feedback", icon: MessageSquare },
@@ -1070,9 +1068,6 @@ export default function WorkspacePage() {
           {activeTab === "billing" && (
             <BillingTab workspace={workspace} sessionToken={sessionToken} />
           )}
-          {activeTab === "earn" && (
-            <EarnCreditsTab showToast={showToast} />
-          )}
           {activeTab === "docs" && (
             <DocsTab />
           )}
@@ -1172,7 +1167,7 @@ function OverviewTab({
               <div className="min-w-0">
                 <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
                 <p className="text-sm text-[var(--text-muted)]">
-                  {isPaid ? "calls this month" : `of ${workspace?.usageLimit || 50} calls`}
+                  {isPaid ? "calls this week" : `of ${workspace?.usageLimit || 50} this week`}
                 </p>
                 {!isPaid && workspace && (
                   <p className="text-xs text-[var(--text-muted)] mt-1">{workspace.usageRemaining} remaining</p>
@@ -4799,7 +4794,7 @@ function BillingTab({
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm text-[var(--text-muted)]">Managed API usage this month</p>
+          <p className="text-sm text-[var(--text-muted)]">Managed API usage this week</p>
           <p className="text-xl font-bold mt-0.5">
             {isPaid || isPartner ? `${workspace?.usageCount || 0} calls` : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || 50}`}
           </p>
@@ -5231,7 +5226,7 @@ function WebhooksTab({ sessionToken }: { sessionToken: string | null }) {
     {
       id: "usage.threshold.80",
       label: "Usage at 80%",
-      description: "Email when 80% of your monthly managed call quota is used.",
+      description: "Email when 80% of your weekly managed call quota is used.",
       icon: AlertCircle,
       color: "text-yellow-400",
     },

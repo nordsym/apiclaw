@@ -22,7 +22,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "start:http": "tsx src/http-server-minimal.ts",
-    "test": "tsx src/test.ts",
+    "test": "tsx src/test.ts && tsx src/product-truth.test.ts",
     "test:e2e": "tsx src/test.ts",
     "webhook": "tsx src/webhook.ts",
     "convex:dev": "npx convex dev",

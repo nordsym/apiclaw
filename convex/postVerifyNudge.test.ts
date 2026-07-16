@@ -7,7 +7,8 @@ import {
 const preActivationWelcome = renderWelcomeHtml(false);
 assert.match(preActivationWelcome, /haven't made an API call yet/);
 assert.match(preActivationWelcome, /AI agent infrastructure news/);
-assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|25 free calls\/month|50 calls\/week/);
+assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|25 free calls\/month|50 calls\/month/);
+assert.match(preActivationWelcome, /50 managed calls per week/);
 
 const activatedWelcome = renderWelcomeHtml(true);
 assert.match(activatedWelcome, /first APIClaw call is through/);

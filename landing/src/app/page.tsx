@@ -242,7 +242,7 @@ Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_
 
 Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a mission template to generate a structured PRD; more land regularly.
 
-Pricing: free tier of 25 calls/month per workspace. Workspace required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
+Pricing: free tier of 50 managed calls/week per workspace. Workspace required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
 
 Auth (agent-native, ~10s, zero inbox):
   npx @nordsym/apiclaw auth login
@@ -1077,7 +1077,7 @@ Install:
               Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              25 free API calls per month, any provider. Discovery is always free, unmetered.<br />
+              50 free managed calls per week, any provider. Discovery is always free, unmetered.<br />
               Past the free tier: API cost plus 15%, no commitment.
             </p>
           </div>
@@ -1190,11 +1190,11 @@ Install:
               },
               {
                 q: "What does it cost?",
-                a: `Free tier: 25 calls per month after email signup. Past that: underlying provider cost plus 15%, billed via Stripe. No commitment.`
+                a: `Free tier: 50 managed calls per week after email signup. Past that: underlying provider cost plus 15%, billed via Stripe. No commitment.`
               },
               {
                 q: "Do I have to sign up?",
-                a: `Yes — a free workspace is required for every door, including discovery. The signup IS the auth flow: \`apiclaw auth login\` creates the workspace on first sign-in. Free tier: 25 calls/month.`
+                a: `Yes — a free workspace is required for every door, including discovery. The signup IS the auth flow: \`apiclaw auth login\` creates the workspace on first sign-in. Free tier: 50 managed calls/week.`
               },
               {
                 q: "I'm building my own agent runtime. Why APIClaw?",

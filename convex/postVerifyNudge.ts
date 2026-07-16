@@ -22,6 +22,20 @@ const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
 const NUDGE_AGE_MIN_MS = 10 * 60 * 1000;    // wait at least 10min after verify
 const NUDGE_AGE_MAX_MS = 24 * 60 * 60 * 1000; // give up after 24h
 
+type WelcomeCandidate = {
+  _id: Id<"workspaces">;
+  email?: string;
+  activated: boolean;
+};
+
+type WelcomeRunResult = {
+  sent: number;
+  skipped?: number;
+  skipReasons?: Record<string, number>;
+  candidates?: number;
+  reason?: string;
+};
+
 export function renderWelcomeHtml(activated: boolean): string {
   const intro = activated
     ? "Your first APIClaw call is through. Your workspace, gateway, and usage tracking are live. Keep this prompt for the next useful run:"
@@ -37,7 +51,7 @@ export function renderWelcomeHtml(activated: boolean): string {
     <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
   </div>
 
-  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes a free managed-call allowance. Pay-as-you-go continues at API cost + 15% when the allowance is exhausted.</p>
+  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes 50 managed calls per week. Pay-as-you-go continues at API cost + 15% when the allowance is exhausted.</p>
 
   <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Need help? Open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.</p>
 </div>
@@ -46,7 +60,7 @@ export function renderWelcomeHtml(activated: boolean): string {
 
 export const sendPostVerifyNudges = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<WelcomeRunResult> => {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       console.error("[postVerifyNudge] RESEND_API_KEY not set");
@@ -60,7 +74,7 @@ export const sendPostVerifyNudges = internalAction({
     const candidates = await ctx.runQuery(
       internal.postVerifyNudge.findCandidates,
       { since, cutoff },
-    );
+    ) as WelcomeCandidate[];
 
     let sent = 0;
     let skipped = 0;

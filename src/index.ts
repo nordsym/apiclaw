@@ -25,6 +25,7 @@ import { executeMetered } from './metered.js';
 import { logAPICall } from './mcp-analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
 import { CANON_STATS } from './canon-stats.js';
+import { FREE_MANAGED_CALLS_PER_WEEK, nextWeeklyResetUtc } from './product-truth.js';
 import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
@@ -103,7 +104,7 @@ const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
 // Rate limit constants
 const ANONYMOUS_HOURLY_LIMIT = 5;
 const ANONYMOUS_WEEKLY_LIMIT = 10;
-const FREE_WEEKLY_LIMIT = 50;
+const FREE_WEEKLY_LIMIT = FREE_MANAGED_CALLS_PER_WEEK;
 const MAX_MCP_TOOL_RESULT_BYTES = 900_000;
 
 type TransportCompactLimits = {
@@ -290,15 +291,6 @@ function calculateMinutesUntilNextHour(): number {
 }
 
 /**
- * Get next Monday 00:00 UTC as ISO string
- */
-function getNextMonthUTC(): string {
-  const now = new Date();
-  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
-  return nextMonth.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
-}
-
-/**
  * Check anonymous rate limits for proxy provider usage
  */
 function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error?: string; isAnonymous?: boolean } {
@@ -354,7 +346,7 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
         hint: "Authenticate for free managed calls, then continue at API cost + 15% with pay-as-you-go.",
         action: "Run in terminal: npx @nordsym/apiclaw auth login",
         upgrade_url: "https://apiclaw.cloud/upgrade",
-        retry_after: getNextMonthUTC()
+        retry_after: nextWeeklyResetUtc()
       }, null, 2)
     };
   }
@@ -549,7 +541,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           error: `You've hit your free tier limit (${FREE_WEEKLY_LIMIT} calls/week). Add a payment method to keep going at API cost + 15%.`,
           hint: "Continue with pay-as-you-go. No Pro subscription required.",
           upgrade_url: "https://apiclaw.cloud/upgrade",
-          retry_after: getNextMonthUTC()
+          retry_after: nextWeeklyResetUtc()
         }, null, 2)
       };
     }
@@ -1459,7 +1451,7 @@ CALL APIs (requires free registration):
   call_api({ provider: "brave_search", action: "search", params: { q: "AI agents" } })
   call_api({ provider: "elevenlabs", action: "tts", params: { text: "Hello" } })
 
-${CANON_STATS.discoverable.toLocaleString()}+ DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()}+ CALLABLE | Discovery is free after signup | Free tier: 25 calls / month
+${CANON_STATS.discoverable.toLocaleString()}+ DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()}+ CALLABLE | Discovery is free after signup | Free tier: 50 managed calls / week
 
 Docs: https://apiclaw.cloud
 `;
@@ -2397,7 +2389,7 @@ Docs: https://apiclaw.cloud
             managed_directcallconfigs: CANON_STATS.managed_directcallconfigs,
           },
           managed_providers: {
-            description: 'APIClaw owns the keys. Free tier: 25 calls/month across the whole platform, then pay-as-you-go (provider cost + 15%).',
+            description: 'APIClaw owns the keys. Free tier: 50 managed calls/week across the whole platform, then pay-as-you-go (provider cost + 15%).',
             providers: directProviders,
           },
           open_apis_summary: {

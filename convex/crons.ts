@@ -135,4 +135,15 @@ crons.interval(
   {},
 );
 
+// Activation watchdog - every 15 minutes, reports a new human workspace once
+// when it remains without first_call_api_success for at least 60 minutes.
+// Backfills, internal/test traffic, partner tiers, and rows older than 48h are
+// excluded so deployment cannot produce a retroactive alert storm.
+crons.interval(
+  "activation-stalled-watchdog",
+  { minutes: 15 },
+  internal.activationWatchdog.checkForStalledActivations,
+  {},
+);
+
 export default crons;

@@ -4,6 +4,22 @@ import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
 import { checkEmailAllowedSync } from "./emailGuards";
 
+type NurtureSendCandidate = {
+  nurtureId: Id<"nurture">;
+  email: string;
+  kind: string;
+};
+
+type NurtureRunResult = {
+  sent: number;
+  skipped: number;
+  skipReasons: Record<string, number>;
+  considered: number;
+  capacity: number;
+  dryRun: boolean;
+  sentLog: Array<{ email: string; kind: string }>;
+};
+
 /**
  * APIClaw nurture system.
  *
@@ -234,7 +250,7 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
   const prompt = `Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.`;
   const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
   const cta = `<p><a href="https://apiclaw.cloud/docs" style="display:inline-block;background:#dc2626;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Open the quickstart</a></p>`;
-  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes a free managed-call allowance. Pay as you go at API cost + 15% when it is exhausted.</p>`;
+  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes 50 managed calls per week. Pay as you go at API cost + 15% when the allowance is exhausted.</p>`;
 
   switch (kind) {
     case "welcome":
@@ -255,7 +271,7 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
     case "upgrade":
       return {
         subject: "Keep your agent running beyond the free tier",
-        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want it to keep going without interruption after the free managed-call allowance is exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want it to keep going without interruption after the 50 managed calls included each week are exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "power-upgrade":
       return {
@@ -376,13 +392,13 @@ export const markEmailSent = internalMutation({
 
 export const sendDailyNurture = internalAction({
   args: { maxSends: v.optional(v.number()), dryRun: v.optional(v.boolean()) },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<NurtureRunResult> => {
     const cap = args.maxSends ?? 12;
     const dryRun = args.dryRun ?? false;
     const { considered, candidates } = await ctx.runQuery(internal.nurture.getSendCandidates, {
       maxSends: cap,
       dryRun,
-    });
+    }) as { considered: number; candidates: NurtureSendCandidate[] };
     let sent = 0;
     let skipped = 0;
     const skipReasons: Record<string, number> = {};

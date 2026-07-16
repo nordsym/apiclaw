@@ -445,13 +445,15 @@ export const getSession = query({
     const workspace = await ctx.db.get(session.workspaceId);
     if (!workspace) return null;
 
+    const usage = getWorkspaceUsageDisplay(workspace);
+
     return {
       workspaceId: workspace._id,
       email: workspace.email,
       tier: workspace.tier,
       status: workspace.status,
-      usageCount: workspace.usageCount,
-      usageLimit: workspace.usageLimit,
+      usageCount: usage.usageCount,
+      usageLimit: usage.usageLimit,
     };
   },
 });
@@ -513,12 +515,9 @@ export const getWorkspaceDashboard = query({
       agentSessions.some(s => p.agentId === s.sessionToken)
     );
 
-    // Calculate usage remaining -- paid tiers have high limits
-    const now = Date.now();
-    const isPaidTier = ["pro", "scale", "usage_based", "partner", "founder"].includes(workspace.tier);
-    const effectiveLimit = isPaidTier ? -1 : workspace.usageLimit; // -1 = unlimited
-    const usageRemaining = isPaidTier ? -1 : Math.max(0, workspace.usageLimit - workspace.usageCount);
-    const usagePercentage = isPaidTier ? 0 : (workspace.usageCount / workspace.usageLimit) * 100;
+    // Customer-facing quota display must use the same weekly state as the
+    // pre-call enforcement gate. Lifetime usage remains stored separately.
+    const usage = getWorkspaceUsageDisplay(workspace);
 
     // Budget status (PRD 2.6)
     const monthStart = getMonthStartForBudget();
@@ -535,10 +534,10 @@ export const getWorkspaceDashboard = query({
         workspaceName: workspace.workspaceName,
         tier: workspace.tier,
         status: workspace.status,
-        usageCount: workspace.usageCount,
-        usageLimit: effectiveLimit,
-        usageRemaining,
-        usagePercentage,
+        usageCount: usage.usageCount,
+        usageLimit: usage.usageLimit,
+        usageRemaining: usage.usageRemaining,
+        usagePercentage: usage.usagePercentage,
         stripeCustomerId: workspace.stripeCustomerId,
         createdAt: workspace.createdAt,
         mainAgentName: workspace.mainAgentName,
@@ -1234,18 +1233,16 @@ export const getWorkspaceStatus = query({
       return { authenticated: false };
     }
     
-    const usageRemaining = workspace.usageLimit > 0 
-      ? workspace.usageLimit - workspace.usageCount 
-      : -1; // -1 = unlimited
+    const usage = getWorkspaceUsageDisplay(workspace);
     
     return {
       authenticated: true,
       email: workspace.email,
       status: workspace.status,
       tier: workspace.tier,
-      usageCount: workspace.usageCount,
-      usageLimit: workspace.usageLimit,
-      usageRemaining,
+      usageCount: usage.usageCount,
+      usageLimit: usage.usageLimit,
+      usageRemaining: usage.usageRemaining,
       hasStripe: !!workspace.stripeCustomerId,
       createdAt: workspace.createdAt,
     };
@@ -1502,3 +1499,17 @@ export const getOrCreateForClerk = mutation({
     };
   },
 });
+export function getWorkspaceUsageDisplay(workspace: {
+  tier: string;
+  weeklyUsageCount?: number;
+  hourlyUsageCount?: number;
+  lastWeeklyResetAt?: number;
+  lastHourlyResetAt?: number;
+}, nowMs = Date.now()) {
+  const quota = getQuotaState(workspace, 0, nowMs);
+  const usageCount = quota.weeklyCount;
+  const usageLimit = quota.weeklyLimit;
+  const usageRemaining = quota.weeklyRemaining;
+  const usagePercentage = usageLimit === -1 ? 0 : (usageCount / usageLimit) * 100;
+  return { usageCount, usageLimit, usageRemaining, usagePercentage };
+}
