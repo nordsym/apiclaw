@@ -3,9 +3,9 @@ import { internal } from "./_generated/api";
 import { checkEmailAllowedSync } from "./emailGuards";
 
 /**
- * A-15 — Post-verify onboarding nudge.
+ * A-15 - Post-verify onboarding nudge.
  *
- * If a workspace fired verify_code more than 10 minutes ago but never fired
+ * If a workspace authenticated more than 10 minutes ago but never fired
  * first_call_api_success, send a single Resend email with a 3-line agent
  * recipe. Marks workspaces.postVerifyNudgeSentAt so we never send twice.
  *
@@ -23,7 +23,7 @@ function renderHtml(): string {
 <body style="margin:0;padding:32px;background:#0A0A0A;color:#FAFAFA;font-family:Inter,system-ui,sans-serif">
 <div style="max-width:560px;margin:0 auto">
   <h1 style="font-size:24px;font-weight:700;letter-spacing:-0.02em;margin:0 0 16px;color:#FAFAFA">Your APIClaw workspace is live 🦞</h1>
-  <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">You verified your email but haven't made an API call yet. Paste this into your agent right now — takes about ten seconds:</p>
+  <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">You verified your email but haven't made an API call yet. Paste this into your agent right now. It takes about ten seconds:</p>
 
   <div style="background:#141414;border:1px solid #262626;border-radius:12px;padding:20px;margin-bottom:24px">
     <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find an API for sending<br>SMS to Sweden, then call it with the<br>message "hello from APIClaw".</p>
@@ -32,7 +32,7 @@ function renderHtml(): string {
   <p style="font-size:14px;color:#737373;margin:0 0 16px;line-height:1.6">Copy this into your agent:</p>
   <pre style="font-family:'JetBrains Mono',monospace;color:#EF4444;background:#F5F5F5;border-radius:8px;padding:14px;white-space:pre-wrap;font-size:13px;line-height:1.6">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.</pre>
 
-  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">No keys needed. 25 calls per month free. Pay-as-you-go beyond that at API cost + 15%.</p>
+  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes a free managed-call allowance. Pay-as-you-go continues at API cost + 15% when the allowance is exhausted.</p>
 
   <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Stuck? Reply to this email or open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.</p>
 </div>
@@ -83,7 +83,7 @@ export const sendPostVerifyNudges = internalAction({
         body: JSON.stringify({
           from: EMAIL_FROM,
           to: w.email,
-          subject: "Your APIClaw workspace is ready — try this prompt",
+          subject: "Your APIClaw workspace is ready - try this prompt",
           html: renderHtml(),
         }),
       });
@@ -111,7 +111,7 @@ export const sendPostVerifyNudges = internalAction({
 });
 
 /**
- * Find workspaces that verified between (now - 24h) and (now - 10min) but
+ * Find workspaces that authenticated between (now - 24h) and (now - 10min) but
  * never fired first_call_api_success and never received this nudge.
  */
 import { internalQuery, internalMutation } from "./_generated/server";
@@ -120,30 +120,22 @@ import { v } from "convex/values";
 export const findCandidates = internalQuery({
   args: { since: v.number(), cutoff: v.number() },
   handler: async (ctx, { since, cutoff }) => {
-    // Two activation events to watch:
-    //   - verify_code: legacy OTP path
-    //   - cli_browser_callback_success: A-22 agent-native auth path (canonical
-    //     since 2026-05-18). Most new users hit this one, not verify_code.
-    const otpFlow = await ctx.db
+    // workspace_authenticated is emitted server-side for every successful
+    // auth door. Historical backfills are deliberately excluded so a data
+    // repair can never contact an existing user.
+    const verifies = await ctx.db
       .query("funnelEvents")
       .withIndex("by_event_timestamp", (q) =>
-        q.eq("event", "verify_code").gte("timestamp", since),
+        q.eq("event", "workspace_authenticated").gte("timestamp", since),
       )
       .filter((q) => q.lte(q.field("timestamp"), cutoff))
       .collect();
-    const browserFlow = await ctx.db
-      .query("funnelEvents")
-      .withIndex("by_event_timestamp", (q) =>
-        q.eq("event", "cli_browser_callback_success").gte("timestamp", since),
-      )
-      .filter((q) => q.lte(q.field("timestamp"), cutoff))
-      .collect();
-    const verifies = [...otpFlow, ...browserFlow];
 
     const out: Array<{ _id: any; email: string | undefined }> = [];
     const seen = new Set<string>();
 
     for (const v of verifies) {
+      if ((v.props as any)?.backfilled === true) continue;
       const wsId = v.workspaceId as any;
       if (!wsId) continue;
       const key = String(wsId);
@@ -155,7 +147,7 @@ export const findCandidates = internalQuery({
       if ((ws as any).postVerifyNudgeSentAt) continue;
 
       // Skip if this workspace already fired first_call_api_success at any
-      // point — even before the verify event we're scanning, in case of
+      // point, even before the auth event we're scanning, in case of
       // out-of-order processing.
       const firstCall = await ctx.db
         .query("funnelEvents")

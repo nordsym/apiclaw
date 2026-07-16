@@ -4,8 +4,9 @@
  * Canon events (ordered):
  *   install            — package installed (postinstall hook, once per fingerprint)
  *   first_run          — MCP server first successful startup
+ *   workspace_authenticated — workspace completed any supported auth path
  *   register_owner     — user called register_owner (OTP sent)
- *   verify_code        — user verified OTP, workspace active
+ *   verify_code        — user verified OTP, workspace active (legacy)
  *   first_call_api_success — workspace's first successful call_api (non-discover)
  *
  * Classification (source):
@@ -14,16 +15,22 @@
  *   bot      — scanner/crawler (User-Agent matches crawler list)
  *   internal — NordSym test traffic (fingerprint prefix, allowlisted emails)
  *
- * Truth metrics are built from (event=verify_code AND source=human) and
+ * Truth metrics are built from (event=workspace_authenticated AND source=human) and
  * (event=first_call_api_success AND source=human). Vanity = install count.
  */
 import { mutation, query, internalMutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 
 export const FUNNEL_EVENTS = [
   "install",
   "first_run",
+  // One semantic, server-side auth event across Clerk web, CLI browser, and
+  // legacy OTP/magic-link auth. Deduped exactly once per workspace.
+  "workspace_authenticated",
   // Agent-native auth (A-22, canonical from v2.8). Primary activation event.
+  // Kept for historical compatibility; workspace_authenticated is canonical.
   "cli_browser_callback_success",
   // Legacy email magic-link path — kept for back-compat reporting.
   "register_owner",
@@ -53,6 +60,12 @@ export type AnyEvent = FunnelEvent | DiagnosticEvent;
 const ALL_EVENTS = [...FUNNEL_EVENTS, ...DIAGNOSTIC_EVENTS] as readonly string[];
 
 export type Classification = "human" | "ci" | "bot" | "internal";
+
+export type WorkspaceAuthMethod =
+  | "clerk_web"
+  | "cli_browser"
+  | "otp"
+  | "legacy_magic_link";
 
 // Keep these predicates pure and exported so tests can hit them directly.
 const CI_ENV_KEYS = [
@@ -129,8 +142,58 @@ export function classifySource(input: {
   return "human";
 }
 
+/**
+ * Record the canonical auth event once per workspace, regardless of which
+ * auth door was used or how often the user signs in again.
+ *
+ * This helper runs in the caller's mutation transaction. Callers should catch
+ * telemetry errors so auth itself remains available if event recording fails.
+ */
+export async function recordWorkspaceAuthenticated(
+  ctx: Pick<MutationCtx, "db">,
+  args: {
+    workspaceId: Id<"workspaces">;
+    email: string;
+    authMethod: WorkspaceAuthMethod;
+    fingerprint?: string;
+    isNew?: boolean;
+    tier?: string;
+  }
+) {
+  const dedupeKey = `workspace_authenticated:${args.workspaceId}`;
+  const existing = await ctx.db
+    .query("funnelEvents")
+    .withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", dedupeKey))
+    .first();
+
+  if (existing) {
+    return { id: existing._id, deduped: true };
+  }
+
+  const id = await ctx.db.insert("funnelEvents", {
+    event: "workspace_authenticated",
+    classification: classifySource({
+      email: args.email,
+      fingerprint: args.fingerprint,
+    }),
+    workspaceId: args.workspaceId,
+    fingerprint: args.fingerprint,
+    email: args.email,
+    dedupeKey,
+    props: {
+      auth_method: args.authMethod,
+      is_new: args.isNew ?? false,
+      tier: args.tier,
+    },
+    timestamp: Date.now(),
+  });
+
+  return { id, deduped: false };
+}
+
 // Record a funnel event. Idempotent per (workspaceId|fingerprint, event) for
-// first-time events (install, first_run, first_call_api_success) via
+// first-time events (install, first_run, workspace_authenticated,
+// first_call_api_success) via
 // dedupeKey. register_owner and verify_code can recur legitimately.
 export const recordEvent = mutation({
   args: {
@@ -150,6 +213,9 @@ export const recordEvent = mutation({
   handler: async (ctx, args) => {
     if (!ALL_EVENTS.includes(args.event)) {
       return { success: false, error: `unknown_event:${args.event}` };
+    }
+    if (args.event === "workspace_authenticated") {
+      return { success: false, error: "server_managed_event:workspace_authenticated" };
     }
     const allowedClass: Classification[] = ["human", "ci", "bot", "internal"];
     if (!allowedClass.includes(args.classification as Classification)) {
@@ -199,17 +265,106 @@ export const recordEventInternal = internalMutation({
   },
   handler: async (ctx, args) => {
     if (!ALL_EVENTS.includes(args.event)) return null;
-    if (args.dedupeKey) {
+    const dedupeKey = args.event === "workspace_authenticated" && args.workspaceId
+      ? `workspace_authenticated:${args.workspaceId}`
+      : args.dedupeKey;
+    if (dedupeKey) {
       const existing = await ctx.db
         .query("funnelEvents")
-        .withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", args.dedupeKey!))
+        .withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", dedupeKey))
         .first();
       if (existing) return existing._id;
     }
     return await ctx.db.insert("funnelEvents", {
       ...args,
+      dedupeKey,
       timestamp: Date.now(),
     });
+  },
+});
+
+/**
+ * One-time migration for workspaces authenticated before
+ * workspace_authenticated existed. It only considers active workspaces that
+ * already have an agent session, uses the earliest session as event time, and
+ * never overwrites or duplicates an existing canonical event.
+ *
+ * Run with dryRun=true first. This mutation is internal and is not scheduled or
+ * invoked automatically.
+ */
+export const backfillWorkspaceAuthenticated = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { dryRun = true }) => {
+    const workspaces = await ctx.db.query("workspaces").collect();
+    let eligible = 0;
+    let inserted = 0;
+    let skippedAlreadyAuthenticated = 0;
+    let skippedInactive = 0;
+    let skippedNoSession = 0;
+
+    for (const workspace of workspaces) {
+      if (workspace.status !== "active") {
+        skippedInactive++;
+        continue;
+      }
+
+      const existingEvents = await ctx.db
+        .query("funnelEvents")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace._id))
+        .collect();
+      if (existingEvents.some((event) => event.event === "workspace_authenticated")) {
+        skippedAlreadyAuthenticated++;
+        continue;
+      }
+
+      const sessions = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace._id))
+        .collect();
+      if (sessions.length === 0) {
+        skippedNoSession++;
+        continue;
+      }
+
+      const earliestSession = sessions.reduce((earliest, session) =>
+        session.createdAt < earliest.createdAt ? session : earliest
+      );
+      eligible++;
+
+      if (!dryRun) {
+        await ctx.db.insert("funnelEvents", {
+          event: "workspace_authenticated",
+          classification: classifySource({
+            email: workspace.email,
+            fingerprint: earliestSession.fingerprint,
+          }),
+          workspaceId: workspace._id,
+          fingerprint: earliestSession.fingerprint,
+          email: workspace.email,
+          dedupeKey: `workspace_authenticated:${workspace._id}`,
+          props: {
+            auth_method: "legacy_backfill",
+            backfilled: true,
+            is_new: false,
+            tier: workspace.tier,
+          },
+          timestamp: earliestSession.createdAt,
+        });
+        inserted++;
+      }
+    }
+
+    return {
+      dryRun,
+      scanned: workspaces.length,
+      eligible,
+      inserted,
+      skippedAlreadyAuthenticated,
+      skippedInactive,
+      skippedNoSession,
+    };
   },
 });
 
@@ -305,6 +460,8 @@ export const getScorecard = query({
       generatedAt: now,
       truth: {
         installs: metrics.unique.install,
+        authenticatedWorkspaces: metrics.unique.activated_owners,
+        // Compatibility alias for current admin/scorecard consumers.
         activatedOwners: metrics.unique.activated_owners,
         activatedUsers: metrics.unique.first_call_api_success,
       },
@@ -314,8 +471,9 @@ export const getScorecard = query({
       ratios: metrics.ratios,
       diagnostics,
       previous: priorMetrics
-        ? {
+          ? {
             installs: priorMetrics.unique.install,
+            authenticatedWorkspaces: priorMetrics.unique.activated_owners,
             activatedOwners: priorMetrics.unique.activated_owners,
             activatedUsers: priorMetrics.unique.first_call_api_success,
             ratios: priorMetrics.ratios,
@@ -359,14 +517,12 @@ export function rollupCanonicalFunnel(events: FunnelRollupInput[]) {
   }
 
   const get = (n: string) => uniqByEvent[n]?.size || 0;
-  const activatedOwners = new Set<string>([
-    ...(uniqByEvent.verify_code ?? new Set<string>()),
-    ...(uniqByEvent.cli_browser_callback_success ?? new Set<string>()),
-  ]).size;
+  const activatedOwners = authenticatedWorkspaceKeys(uniqByEvent).size;
 
   return {
     totalCanonicalEvents: FUNNEL_EVENTS.reduce((sum, event) => sum + countsByEvent[event], 0),
     diagnosticEvents,
+    authenticatedWorkspaces: activatedOwners,
     funnel: FUNNEL_EVENTS.map((name) => ({
       event: name,
       count: countsByEvent[name],
@@ -383,7 +539,7 @@ export function rollupCanonicalFunnel(events: FunnelRollupInput[]) {
   };
 }
 
-function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?: any; _id: any }[]): FunnelBucket {
+export function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?: any; _id: any }[]): FunnelBucket {
   const counts: Record<string, number> = {};
   const uniq: Record<string, Set<string>> = {};
   for (const e of FUNNEL_EVENTS) {
@@ -397,20 +553,14 @@ function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?
     uniq[e.event].add(k);
   }
   const u = (n: string) => uniq[n]?.size || 0;
-  // Activated owners = union of (verify_code) and (cli_browser_callback_success).
-  // The first is the legacy OTP flow; the second is the A-22 agent-native
-  // browser-loopback flow (canonical since 2026-05-18). Scorecard ratios
-  // need to count both to reflect reality.
-  const activatedSet = new Set<string>([
-    ...(uniq.verify_code ?? new Set<string>()),
-    ...(uniq.cli_browser_callback_success ?? new Set<string>()),
-  ]);
+  const activatedSet = authenticatedWorkspaceKeys(uniq);
   const activatedOwners = activatedSet.size;
   return {
     counts,
     unique: {
       install: u("install"),
       first_run: u("first_run"),
+      workspace_authenticated: u("workspace_authenticated"),
       register_owner: u("register_owner"),
       verify_code: u("verify_code"),
       cli_browser_callback_success: u("cli_browser_callback_success"),
@@ -426,6 +576,21 @@ function computeMetrics(events: { event: string; workspaceId?: any; fingerprint?
       install_to_first_call: safeRatio(u("first_call_api_success"), u("install")),
     },
   };
+}
+
+/**
+ * workspace_authenticated is the primary semantic event. Legacy events are a
+ * fallback for workspaces authenticated before it existed. A Set union keeps a
+ * workspace that has both canonical and legacy events from being counted twice.
+ */
+function authenticatedWorkspaceKeys(
+  uniqueByEvent: Record<string, Set<string>>
+): Set<string> {
+  return new Set<string>([
+    ...(uniqueByEvent.workspace_authenticated ?? new Set<string>()),
+    ...(uniqueByEvent.verify_code ?? new Set<string>()),
+    ...(uniqueByEvent.cli_browser_callback_success ?? new Set<string>()),
+  ]);
 }
 
 // Diagnostics-only query — reasons for drop-off and errors.

@@ -2,6 +2,7 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { FREE_HOURLY_LIMIT, FREE_WEEKLY_LIMIT, getHourStart, getQuotaState, getWeekStart } from "./quota";
+import { recordWorkspaceAuthenticated } from "./funnel";
 
 // Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
 // Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
@@ -157,6 +158,19 @@ export const verifyOTP = mutation({
       lastUsedAt: Date.now(),
       createdAt: Date.now(),
     });
+
+    try {
+      await recordWorkspaceAuthenticated(ctx, {
+        workspaceId: workspace._id,
+        email: workspace.email,
+        authMethod: "otp",
+        fingerprint,
+        isNew: isNewUser,
+        tier: workspace.tier,
+      });
+    } catch {
+      // Never block authentication on telemetry.
+    }
 
     return {
       success: true,
@@ -341,6 +355,19 @@ export const verifyMagicLink = mutation({
         lastUsedAt: Date.now(),
         createdAt: Date.now(),
       });
+    }
+
+    try {
+      await recordWorkspaceAuthenticated(ctx, {
+        workspaceId: workspace!._id,
+        email: workspace!.email,
+        authMethod: "legacy_magic_link",
+        fingerprint: userFingerprint2,
+        isNew: isNewUser,
+        tier: workspace!.tier,
+      });
+    } catch {
+      // Never block authentication on telemetry.
     }
 
     // Link agent record to workspace (if agent exists for this fingerprint)
@@ -1437,6 +1464,19 @@ export const getOrCreateForClerk = mutation({
         lastUsedAt: Date.now(),
         createdAt: Date.now(),
       });
+    }
+
+    try {
+      await recordWorkspaceAuthenticated(ctx, {
+        workspaceId: workspace._id,
+        email: workspace.email,
+        authMethod: "clerk_web",
+        fingerprint: fingerprint || `clerk:${clerkUserId}`,
+        isNew: isNewUser,
+        tier: workspace.tier,
+      });
+    } catch {
+      // Never block authentication on telemetry.
     }
 
     if (isNewUser) {

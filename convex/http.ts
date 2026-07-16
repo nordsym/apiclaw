@@ -1227,6 +1227,31 @@ async function enforcePreCallQuota(
   return quotaExceededResponse(quota || {}, provider, action, path);
 }
 
+async function recordFirstSuccessfulGatewayCall(
+  ctx: any,
+  args: {
+    workspaceId?: string;
+    path: string;
+    authMethod: string;
+    provider?: string;
+    action?: string;
+  }
+): Promise<void> {
+  if (!args.workspaceId || args.authMethod === "anonymous") return;
+  try {
+    await ctx.runMutation((internal as any).activation.recordFirstCallApiSuccess, {
+      workspaceId: args.workspaceId as any,
+      path: args.path,
+      authMethod: args.authMethod,
+      provider: args.provider,
+      action: args.action,
+    });
+  } catch (e: any) {
+    // Activation telemetry must never turn a successful API call into a failure.
+    console.error("[Activation] first-call recording failed:", e?.message);
+  }
+}
+
 // Helper to validate session and log API usage.
 // Returns a Response (401) when AUTH_ENFORCEMENT=enforce and the caller is anonymous.
 // Returns a Response (403) when the provider is reserved for internal infrastructure.
@@ -3046,7 +3071,7 @@ http.route({
     // Require API key auth
     const authResult = await requireApiKeyAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
-    const { workspaceId } = authResult;
+    const { workspaceId, authMethod } = authResult;
 
     // Parse body
     let body: any;
@@ -3166,6 +3191,13 @@ http.route({
         }
 
         if (stream && upstream.body) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/chat/completions",
+            authMethod,
+            provider: "openai-codex",
+            action: "chat_completions",
+          });
           // Translate Responses-API SSE → Chat Completions SSE so OpenAI-compat
           // clients (OpenClaw, LangChain, Cursor, etc) can parse the stream.
           const translated = translateCodexSSEToChatCompletions(upstream.body, codexModel);
@@ -3208,6 +3240,14 @@ http.route({
             },
           }, 502);
         }
+
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/chat/completions",
+          authMethod,
+          provider: "openai-codex",
+          action: "chat_completions",
+        });
 
         const chatData = responsesToChatCompletionsResponse(responsesData, codexModel);
         (chatData as any)._apiclaw = {
@@ -3398,6 +3438,16 @@ http.route({
         }, response.status);
       }
 
+      if (response.ok) {
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/chat/completions",
+          authMethod,
+          provider: route.provider,
+          action: "chat_completions",
+        });
+      }
+
       // For streaming responses, proxy the stream directly
       if (stream && response.body) {
         return new Response(response.body, {
@@ -3562,7 +3612,7 @@ http.route({
 
     const authResult = await requireApiKeyAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
-    const { workspaceId } = authResult;
+    const { workspaceId, authMethod } = authResult;
 
     let body: any;
     try {
@@ -3667,6 +3717,14 @@ http.route({
           response.status
         );
       }
+
+      await recordFirstSuccessfulGatewayCall(ctx, {
+        workspaceId,
+        path: "/v1/embeddings",
+        authMethod,
+        provider: backend.provider,
+        action: "embeddings",
+      });
 
       // Normalize Cohere response to OpenAI format
       let openAIData: any;
@@ -4421,6 +4479,16 @@ http.route({
           method: "POST", headers, body: JSON.stringify(finalBody),
         });
 
+        if (response.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/execute",
+            authMethod,
+            provider: route.provider,
+            action: "chat",
+          });
+        }
+
         // Streaming
         if (params.stream && response.body) {
           return new Response(response.body, {
@@ -4510,6 +4578,16 @@ http.route({
 
         const response = await fetch(req.url, fetchOpts);
         const latencyMs = Date.now() - startTime;
+
+        if (response.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/execute",
+            authMethod,
+            provider,
+            action,
+          });
+        }
 
         // Inbound log to provider-owner workspace (parity with MCP src/index.ts:2192).
         // Without this, gateway/HTTP calls bypass partner dashboards.
@@ -4638,6 +4716,16 @@ http.route({
 
       const response = await fetch(baseUrl, fetchOpts);
       const latencyMs = Date.now() - startTime;
+
+      if (response.ok) {
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/execute",
+          authMethod,
+          provider: `open:${provider}`,
+          action,
+        });
+      }
 
       let data: any;
       const ct = response.headers.get("Content-Type") || "";
@@ -5076,7 +5164,7 @@ http.route({
 
     const authResult = await requireApiKeyAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
-    const { workspaceId } = authResult;
+    const { workspaceId, authMethod } = authResult;
 
     let body: any;
     try {
@@ -5172,6 +5260,16 @@ http.route({
         body: JSON.stringify(forwardBody),
       });
 
+      if (upstream.ok) {
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/responses",
+          authMethod,
+          provider: useCodex ? "openai-codex" : "openai",
+          action: "responses",
+        });
+      }
+
       if (stream && upstream.body) {
         return new Response(upstream.body, {
           status: upstream.status,
@@ -5250,7 +5348,7 @@ http.route({
 
     const authResult = await requireApiKeyAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
-    const { workspaceId } = authResult;
+    const { workspaceId, authMethod } = authResult;
 
     let body: any;
     try {
@@ -5330,6 +5428,16 @@ http.route({
         headers: upstreamHeaders,
         body: JSON.stringify(forwardBody),
       });
+
+      if (upstream.ok) {
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/messages",
+          authMethod,
+          provider: "anthropic",
+          action: "messages",
+        });
+      }
 
       // Streaming: passthrough SSE
       if (stream && upstream.body) {
@@ -5683,6 +5791,15 @@ http.route({
           body: JSON.stringify({ path: userPath, method, params, body: userBody, ...userBody }),
           signal: AbortSignal.timeout(25000),
         });
+        if (forwardRes.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/call",
+            authMethod: auth.authMethod,
+            provider: row.name,
+            action: `${method} ${userPath}`,
+          });
+        }
         const respText = await forwardRes.text();
         const ok = forwardRes.status >= 200 && forwardRes.status < 500;
         if (ok) await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: row.id });
@@ -5741,6 +5858,16 @@ http.route({
           fetchInit.body = typeof userBody === "string" ? userBody : JSON.stringify(userBody);
         }
         const upstream = await fetch(target.toString(), fetchInit);
+
+        if (upstream.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/call",
+            authMethod: auth.authMethod,
+            provider: row.name,
+            action: `${method} ${userPath}`,
+          });
+        }
 
         // 10 MB response cap
         const reader = upstream.body?.getReader();

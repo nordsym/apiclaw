@@ -19,6 +19,7 @@
 import { v } from "convex/values";
 import { mutation, action, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { recordWorkspaceAuthenticated } from "./funnel";
 
 const AUTHID_LENGTH = 32;
 const CODE_LENGTH = 48;
@@ -347,7 +348,20 @@ export const _exchangeVerified = internalMutation({
       createdAt: Date.now(),
     });
 
-    // Emit canonical activation event for the agent-native auth path.
+    try {
+      await recordWorkspaceAuthenticated(ctx, {
+        workspaceId: workspace._id,
+        email,
+        authMethod: "cli_browser",
+        fingerprint: fp,
+        isNew,
+        tier: workspace.tier,
+      });
+    } catch {
+      // Never block authentication on telemetry.
+    }
+
+    // Preserve the legacy auth event for historical reporting.
     // dedupeKey ensures one event per workspace per day even on retries.
     try {
       const day = new Date().toISOString().slice(0, 10);
