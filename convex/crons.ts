@@ -124,10 +124,10 @@ crons.weekly(
   internal.scorecardEmail.sendWeeklyScorecard,
 );
 
-// A-15 — Post-verify onboarding nudge. Every 10 min, scans for workspaces
-// that fired verify_code > 10 min ago but never first_call_api_success.
-// Sends a single Resend email with a 3-line agent recipe. Marks the
-// workspace so the same address never gets pinged twice.
+// A-15 - Post-auth welcome. Every 10 min, scans for new canonical
+// workspace_authenticated events and sends one activation-aware welcome.
+// The successful send is recorded in the shared nurture ledger so daily
+// lifecycle spacing, frequency caps, and opt-out rules remain authoritative.
 crons.interval(
   "post-verify-nudge",
   { minutes: 10 },

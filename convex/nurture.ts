@@ -18,7 +18,7 @@ import { checkEmailAllowedSync } from "./emailGuards";
  *   excluded       — internal/test/opted-out
  *
  * Emails (sent via symbot-gmail webhook):
- *   welcome       — day 0-1 after signup (stage=new)
+ *   welcome       — day 1 fallback only if the 10-minute post-auth welcome did not send
  *   try-discover  — day 2-3 if no searches yet (stage=new)
  *   first-call    — day 5-7 after first search, no calls (stage=activating)
  *   upgrade       — day 14 for active users (stage=active)
@@ -234,7 +234,7 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
   const prompt = `Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.`;
   const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
   const cta = `<p><a href="https://apiclaw.cloud/docs" style="display:inline-block;background:#dc2626;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Open the quickstart</a></p>`;
-  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>No keys to manage. 25 free calls/month, then pay as you go at API cost + 15%.</p>`;
+  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes a free managed-call allowance. Pay as you go at API cost + 15% when it is exhausted.</p>`;
 
   switch (kind) {
     case "welcome":
@@ -255,7 +255,7 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
     case "upgrade":
       return {
         subject: "Keep your agent running beyond the free tier",
-        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Free includes 25 calls/month. Add a payment method when you want it to keep going without interruption.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want it to keep going without interruption after the free managed-call allowance is exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "power-upgrade":
       return {
@@ -304,8 +304,10 @@ export function pickEmailKind(n: Pick<Doc<"nurture">, "stage" | "emailsSent" | "
 
   if (n.stage === "partner-locked" || n.stage === "excluded") return null;
 
-  // Welcome (day 0-2)
-  if (n.emailsSent === 0 && ageMs < 2 * DAY) return "welcome";
+  // Welcome fallback (day 1-2). The canonical post-auth sender owns the first
+  // 24h and records its success in this same ledger. This path exists only so
+  // a temporary Resend failure cannot make a real signup miss all onboarding.
+  if (n.emailsSent === 0 && ageMs >= DAY && ageMs < 2 * DAY) return "welcome";
 
   // Try-discover (day 2-4, stage still "new")
   if (n.stage === "new" && ageMs >= 2 * DAY && ageMs < 5 * DAY && n.lastEmailKind !== "try-discover") return "try-discover";

@@ -1,13 +1,18 @@
-import { internalAction } from "./_generated/server";
+import { internalAction, internalQuery, internalMutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 import { checkEmailAllowedSync } from "./emailGuards";
 
 /**
  * A-15 - Post-verify onboarding nudge.
  *
- * If a workspace authenticated more than 10 minutes ago but never fired
- * first_call_api_success, send a single Resend email with a 3-line agent
- * recipe. Marks workspaces.postVerifyNudgeSentAt so we never send twice.
+ * If a workspace authenticated more than 10 minutes ago, send one welcome
+ * email. The copy adapts based on whether first_call_api_success already
+ * fired. The successful send is also recorded as the nurture "welcome"
+ * email so the daily lifecycle sender cannot send a duplicate welcome and
+ * its 72-hour spacing and three-email cap apply to the whole sequence.
  *
  * Runs from a Convex cron every 10 minutes. Uses the same email-safety
  * guard as scorecardEmail / spendAlerts.
@@ -17,24 +22,24 @@ const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
 const NUDGE_AGE_MIN_MS = 10 * 60 * 1000;    // wait at least 10min after verify
 const NUDGE_AGE_MAX_MS = 24 * 60 * 60 * 1000; // give up after 24h
 
-function renderHtml(): string {
+export function renderWelcomeHtml(activated: boolean): string {
+  const intro = activated
+    ? "Your first APIClaw call is through. Your workspace, gateway, and usage tracking are live. Keep this prompt for the next useful run:"
+    : "You signed in but haven't made an API call yet. Paste this into your agent right now. It takes about ten seconds:";
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:32px;background:#0A0A0A;color:#FAFAFA;font-family:Inter,system-ui,sans-serif">
 <div style="max-width:560px;margin:0 auto">
   <h1 style="font-size:24px;font-weight:700;letter-spacing:-0.02em;margin:0 0 16px;color:#FAFAFA">Your APIClaw workspace is live 🦞</h1>
-  <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">You verified your email but haven't made an API call yet. Paste this into your agent right now. It takes about ten seconds:</p>
+  <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">${intro}</p>
 
   <div style="background:#141414;border:1px solid #262626;border-radius:12px;padding:20px;margin-bottom:24px">
-    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find an API for sending<br>SMS to Sweden, then call it with the<br>message "hello from APIClaw".</p>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
   </div>
-
-  <p style="font-size:14px;color:#737373;margin:0 0 16px;line-height:1.6">Copy this into your agent:</p>
-  <pre style="font-family:'JetBrains Mono',monospace;color:#EF4444;background:#F5F5F5;border-radius:8px;padding:14px;white-space:pre-wrap;font-size:13px;line-height:1.6">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.</pre>
 
   <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes a free managed-call allowance. Pay-as-you-go continues at API cost + 15% when the allowance is exhausted.</p>
 
-  <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Stuck? Reply to this email or open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.</p>
+  <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Need help? Open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.</p>
 </div>
 </body></html>`;
 }
@@ -84,7 +89,7 @@ export const sendPostVerifyNudges = internalAction({
           from: EMAIL_FROM,
           to: w.email,
           subject: "Your APIClaw workspace is ready - try this prompt",
-          html: renderHtml(),
+          html: renderWelcomeHtml(w.activated),
         }),
       });
 
@@ -111,12 +116,9 @@ export const sendPostVerifyNudges = internalAction({
 });
 
 /**
- * Find workspaces that authenticated between (now - 24h) and (now - 10min) but
- * never fired first_call_api_success and never received this nudge.
+ * Find workspaces that authenticated between (now - 24h) and (now - 10min)
+ * and never received the canonical welcome.
  */
-import { internalQuery, internalMutation } from "./_generated/server";
-import { v } from "convex/values";
-
 export const findCandidates = internalQuery({
   args: { since: v.number(), cutoff: v.number() },
   handler: async (ctx, { since, cutoff }) => {
@@ -131,7 +133,7 @@ export const findCandidates = internalQuery({
       .filter((q) => q.lte(q.field("timestamp"), cutoff))
       .collect();
 
-    const out: Array<{ _id: any; email: string | undefined }> = [];
+    const out: Array<{ _id: any; email: string | undefined; activated: boolean }> = [];
     const seen = new Set<string>();
 
     for (const v of verifies) {
@@ -145,26 +147,80 @@ export const findCandidates = internalQuery({
       const ws = await ctx.db.get(wsId);
       if (!ws) continue;
       if ((ws as any).postVerifyNudgeSentAt) continue;
+      if ((ws as any).tier === "partner" || (ws as any).tier === "enterprise") continue;
+      if (!(ws as any).email || !checkEmailAllowedSync((ws as any).email).allowed) continue;
 
-      // Skip if this workspace already fired first_call_api_success at any
-      // point, even before the auth event we're scanning, in case of
-      // out-of-order processing.
+      // Share one lifecycle ledger with the daily nurture sequence. A prior
+      // welcome or explicit opt-out always wins over this faster 10-minute
+      // path, preventing duplicate welcome emails.
+      const nurture = await ctx.db
+        .query("nurture")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", wsId))
+        .first();
+      if (nurture?.unsubscribed) continue;
+      if (nurture?.stage === "partner-locked") continue;
+      if (nurture?.lastEmailKind === "welcome") continue;
+
+      // Activation changes the welcome copy but never suppresses the welcome.
       const firstCall = await ctx.db
         .query("funnelEvents")
         .withIndex("by_workspaceId", (q) => q.eq("workspaceId", wsId))
         .filter((q) => q.eq(q.field("event"), "first_call_api_success"))
         .first();
-      if (firstCall) continue;
 
-      out.push({ _id: ws._id, email: (ws as any).email });
+      out.push({ _id: ws._id, email: (ws as any).email, activated: Boolean(firstCall) });
     }
     return out;
   },
 });
 
+export async function markPostAuthWelcomeInTransaction(
+  ctx: Pick<MutationCtx, "db">,
+  workspaceId: Id<"workspaces">,
+  now = Date.now(),
+) {
+  const workspace = await ctx.db.get(workspaceId);
+  if (!workspace) return { success: false, reason: "workspace_not_found" as const };
+
+  await ctx.db.patch(workspaceId, { postVerifyNudgeSentAt: now });
+
+  const existing = await ctx.db
+    .query("nurture")
+    .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+    .first();
+
+  if (existing) {
+    await ctx.db.patch(existing._id, {
+      email: workspace.email || existing.email,
+      stage: existing.stage === "excluded" ? "new" : existing.stage,
+      emailsSent: existing.emailsSent + 1,
+      lastEmailSentAt: now,
+      lastEmailKind: "welcome",
+      updatedAt: now,
+    });
+    return { success: true, nurtureId: existing._id, inserted: false };
+  }
+
+  const nurtureId = await ctx.db.insert("nurture", {
+    workspaceId,
+    email: workspace.email || undefined,
+    stage: "new",
+    lastActivityAt: workspace.lastActiveAt,
+    emailsSent: 1,
+    lastEmailSentAt: now,
+    lastEmailKind: "welcome",
+    unsubscribed: false,
+    notes: "post-auth welcome recorded by 10-minute activation nudge",
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { success: true, nurtureId, inserted: true };
+}
+
 export const markSent = internalMutation({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, { workspaceId }) => {
-    await ctx.db.patch(workspaceId, { postVerifyNudgeSentAt: Date.now() });
+    return await markPostAuthWelcomeInTransaction(ctx, workspaceId);
   },
 });

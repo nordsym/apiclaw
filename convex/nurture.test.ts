@@ -19,9 +19,24 @@ assert.equal(
       lastEmailSentAt: undefined,
       unsubscribed: false,
     } as any,
-    now - 60 * 60 * 1000,
+    now - 25 * 60 * 60 * 1000,
   ),
   "welcome",
+);
+
+assert.equal(
+  pickEmailKind(
+    {
+      stage: "new",
+      emailsSent: 0,
+      lastEmailKind: undefined,
+      lastEmailSentAt: undefined,
+      unsubscribed: false,
+    } as any,
+    now - 60 * 60 * 1000,
+  ),
+  null,
+  "daily nurture must not race the canonical 10-minute welcome",
 );
 
 assert.equal(
@@ -91,7 +106,7 @@ assert.match(welcome.html, /call_api/);
 for (const kind of ["welcome", "try-discover", "first-call", "upgrade", "power-upgrade"]) {
   const rendered = bodyFor(kind, "Gustav");
   assert.doesNotMatch(rendered.subject, /\b(Pro|Scale)\b/i, `${kind} subject should not use stale tier copy`);
-  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|50 calls\/week|unlimited/i, `${kind} body should not use stale tier copy`);
+  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|25 free calls\/month|50 calls\/week|unlimited/i, `${kind} body should not use stale tier copy`);
   assert.doesNotMatch(rendered.html, /APILayer/i, `${kind} body should not mention APILayer in nurture`);
 }
 
