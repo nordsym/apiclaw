@@ -1,5 +1,5 @@
 const INTERNAL_PROVIDER_PATTERN = /(^|[^a-z0-9])(46elks|twilio|resend)([^a-z0-9]|$)/i;
-const UNAVAILABLE_MANAGED_PATTERN = /(^|[^a-z0-9])(together(?: ai)?|deepgram|assemblyai|replicate|stability(?: ai)?|e2b)([^a-z0-9]|$)/i;
+const UNAVAILABLE_MANAGED_PATTERN = /(^|[^a-z0-9])(together(?: ai)?|assemblyai)([^a-z0-9]|$)/i;
 
 type CatalogReference = {
   name?: string;

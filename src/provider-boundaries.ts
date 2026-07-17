@@ -1,15 +1,11 @@
 export const INTERNAL_ONLY_PROVIDER_IDS = ["46elks", "twilio", "resend"] as const;
 export const UNAVAILABLE_PUBLIC_MANAGED_PROVIDER_IDS = [
   "together",
-  "deepgram",
   "assemblyai",
-  "replicate",
-  "stability",
-  "e2b",
 ] as const;
 
 const INTERNAL_PROVIDER_PATTERN = /(^|[^a-z0-9])(46elks|twilio|resend)([^a-z0-9]|$)/i;
-const UNAVAILABLE_MANAGED_PATTERN = /(^|[^a-z0-9])(together(?: ai)?|deepgram|assemblyai|replicate|stability(?: ai)?|e2b)([^a-z0-9]|$)/i;
+const UNAVAILABLE_MANAGED_PATTERN = /(^|[^a-z0-9])(together(?: ai)?|assemblyai)([^a-z0-9]|$)/i;
 
 export function isInternalOnlyProvider(value: string | undefined | null): boolean {
   return typeof value === "string" && INTERNAL_PROVIDER_PATTERN.test(value.trim());
