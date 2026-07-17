@@ -2,6 +2,9 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { resolveVerifiedOwnerByWorkspaceId } from "./guards";
+import { resolveDirectModelRoute } from "./modelRouting";
+import { resolveManagedCredential } from "./managedCredentials";
+import { resolveFrontierModelCost } from "./modelPricing";
 import {
   createCheckoutSession,
   createPortalSession,
@@ -16,7 +19,7 @@ const http = httpRouter();
 const CANON_DISCOVERABLE_APIS = 26_701;
 const CANON_CALLABLE_APIS = 2_906;
 
-// Provider catalog — all 20 managed providers
+// Provider catalog - runtime provider capabilities and credential handles.
 interface ProviderMeta {
   name: string;
   description: string;
@@ -416,8 +419,11 @@ const APICLAW_MARGIN = 0.15;
 function calculateCallCost(model: string, usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): { providerCost: number; apiclawCost: number } {
   if (!usage) return { providerCost: 0, apiclawCost: 0 };
 
-  // Find cost entry (try exact match, then partial)
-  let costs = MODEL_COSTS[model];
+  const inputTokens = usage.prompt_tokens || 0;
+  const outputTokens = usage.completion_tokens || 0;
+
+  // Find cost entry (try current frontier price, exact legacy match, then partial)
+  let costs = resolveFrontierModelCost(model, inputTokens) ?? MODEL_COSTS[model];
   if (!costs) {
     const modelLower = model.toLowerCase();
     const key = Object.keys(MODEL_COSTS).find(k => modelLower.includes(k.toLowerCase()));
@@ -427,9 +433,6 @@ function calculateCallCost(model: string, usage?: { prompt_tokens?: number; comp
     // Unknown model -- estimate at medium tier
     costs = { input: 1.00, output: 3.00 };
   }
-
-  const inputTokens = usage.prompt_tokens || 0;
-  const outputTokens = usage.completion_tokens || 0;
 
   const providerCost = (inputTokens * costs.input + outputTokens * costs.output) / 1_000_000;
   const apiclawCost = providerCost * (1 + APICLAW_MARGIN);
@@ -441,77 +444,8 @@ function calculateCallCost(model: string, usage?: { prompt_tokens?: number; comp
 // INTELLIGENT LLM ROUTER
 // ==============================================
 
-// Model-to-provider mapping: which direct providers can serve which model patterns
-const MODEL_PROVIDER_MAP: { pattern: RegExp; provider: string; nativeModel: string }[] = [
-  // Groq-native models (ultra-fast inference)
-  { pattern: /^(groq\/)?llama-3\.3-70b/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
-  { pattern: /^(groq\/)?llama-3\.1-8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
-  { pattern: /^(groq\/)?llama-3\.1-70b/i, provider: "groq", nativeModel: "llama-3.1-70b-versatile" },
-  { pattern: /^(groq\/)?gemma2?-9b/i, provider: "groq", nativeModel: "gemma2-9b-it" },
-  { pattern: /^(groq\/)?mixtral-8x7b/i, provider: "groq", nativeModel: "mixtral-8x7b-32768" },
-  // Mistral-native models
-  { pattern: /^(mistralai\/)?mistral-small/i, provider: "mistral", nativeModel: "mistral-small-latest" },
-  { pattern: /^(mistralai\/)?mistral-large/i, provider: "mistral", nativeModel: "mistral-large-latest" },
-  { pattern: /^(mistralai\/)?mistral-medium/i, provider: "mistral", nativeModel: "mistral-medium-latest" },
-  { pattern: /^(mistralai\/)?codestral/i, provider: "mistral", nativeModel: "codestral-latest" },
-  { pattern: /^(mistralai\/)?pixtral/i, provider: "mistral", nativeModel: "pixtral-large-latest" },
-  { pattern: /^(mistralai\/)?mistral-nemo/i, provider: "mistral", nativeModel: "open-mistral-nemo" },
-  // Together-native models (open-source at scale)
-  { pattern: /^(together\/)?meta-llama\/Llama-3\.3-70B/i, provider: "together", nativeModel: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
-  { pattern: /^(together\/)?Qwen\/Qwen2\.5-72B/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
-  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-R1/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
-  { pattern: /^(together\/)?deepseek-ai\/DeepSeek-V3$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
-  // DeepInfra-native models (cheapest open-weights)
-  { pattern: /^(deepinfra\/)?moonshotai\/Kimi-K2\.6/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
-  { pattern: /^(deepinfra\/)?moonshotai\/Kimi-K2\.5/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.5" },
-  { pattern: /^kimi-?k?2\.6$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
-  { pattern: /^kimi-?k?2\.5$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.5" },
-  { pattern: /^kimi$/i, provider: "deepinfra", nativeModel: "moonshotai/Kimi-K2.6" },
-  { pattern: /^(deepinfra\/)?deepseek-ai\/DeepSeek-V3\.2/i, provider: "deepinfra", nativeModel: "deepseek-ai/DeepSeek-V3.2" },
-  { pattern: /^deepseek-v3\.2$/i, provider: "deepinfra", nativeModel: "deepseek-ai/DeepSeek-V3.2" },
-  // OpenAI direct models
-  { pattern: /^(openai\/)?gpt-5\.4/i, provider: "openai", nativeModel: "gpt-5.4" },
-  { pattern: /^(openai\/)?gpt-5/i, provider: "openai", nativeModel: "gpt-5" },
-  { pattern: /^(openai\/)?gpt-4o/i, provider: "openai", nativeModel: "gpt-4o" },
-  { pattern: /^(openai\/)?gpt-4\.1/i, provider: "openai", nativeModel: "gpt-4.1" },
-  { pattern: /^(openai\/)?o3/i, provider: "openai", nativeModel: "o3" },
-  { pattern: /^(openai\/)?o4-mini/i, provider: "openai", nativeModel: "o4-mini" },
-  // xAI/Grok models
-  { pattern: /^(xai\/)?grok-4/i, provider: "xai", nativeModel: "grok-4.20-reasoning" },
-  { pattern: /^(xai\/)?grok-3-mini/i, provider: "xai", nativeModel: "grok-3-mini" },
-  { pattern: /^(xai\/)?grok-3/i, provider: "xai", nativeModel: "grok-3" },
-  { pattern: /^(xai\/)?grok-2/i, provider: "xai", nativeModel: "grok-2-latest" },
-  // Anthropic direct models
-  { pattern: /^(anthropic\/)?claude-sonnet-4-6/i, provider: "anthropic", nativeModel: "claude-sonnet-4-6-20250514" },
-  { pattern: /^(anthropic\/)?claude-4-sonnet/i, provider: "anthropic", nativeModel: "claude-sonnet-4-6-20250514" },
-  { pattern: /^(anthropic\/)?claude-opus-4/i, provider: "anthropic", nativeModel: "claude-opus-4-6-20250514" },
-  { pattern: /^(anthropic\/)?claude-4-opus/i, provider: "anthropic", nativeModel: "claude-opus-4-6-20250514" },
-  { pattern: /^(anthropic\/)?claude-3[\.\-]5-sonnet/i, provider: "anthropic", nativeModel: "claude-3-5-sonnet-20241022" },
-  { pattern: /^(anthropic\/)?claude-haiku-4/i, provider: "anthropic", nativeModel: "claude-haiku-4-5-20251001" },
-  { pattern: /^(anthropic\/)?claude-3[\.\-]5-haiku/i, provider: "anthropic", nativeModel: "claude-3-5-haiku-20241022" },
-  // Shorthand aliases -- route common names to cheapest/fastest direct provider
-  { pattern: /^deepseek-r1$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-R1" },
-  { pattern: /^deepseek-v3$/i, provider: "together", nativeModel: "deepseek-ai/DeepSeek-V3" },
-  { pattern: /^llama-?3\.?3/i, provider: "groq", nativeModel: "llama-3.3-70b-versatile" },
-  { pattern: /^llama-?3\.?1-?8b/i, provider: "groq", nativeModel: "llama-3.1-8b-instant" },
-  { pattern: /^qwen-?2\.?5/i, provider: "together", nativeModel: "Qwen/Qwen2.5-72B-Instruct-Turbo" },
-  // Catch-all passthrough — runs LAST. Routes any provider-prefixed or
-  // canonically-named model to its direct provider with the user's exact id.
-  // Sentinel "__passthrough__" tells the router to strip the provider prefix
-  // and forward the rest verbatim to the provider's API. Lets latest models
-  // (claude-opus-4.7, gpt-5.5, grok-4.3, etc.) work the day they ship without
-  // updating MODEL_PROVIDER_MAP.
-  { pattern: /^(anthropic\/)?claude-/i, provider: "anthropic", nativeModel: "__passthrough__" },
-  { pattern: /^(openai\/)?(gpt-|o\d|chatgpt-)/i, provider: "openai", nativeModel: "__passthrough__" },
-  { pattern: /^(xai\/|x-ai\/)?grok-/i, provider: "xai", nativeModel: "__passthrough__" },
-  { pattern: /^(mistralai\/)?(mistral-|codestral|pixtral|magistral|ministral|open-)/i, provider: "mistral", nativeModel: "__passthrough__" },
-];
-
-// Strip provider prefix from a model id for passthrough routing.
-function stripProviderPrefix(modelId: string): string {
-  return modelId.replace(/^(anthropic|openai|xai|x-ai|mistralai|google|meta-llama|qwen|deepseek|moonshotai|groq|together)\//i, "");
-}
-
+// Exact direct-provider model routing lives in modelRouting.ts so it can be
+// regression-tested without loading the Convex HTTP runtime.
 interface RoutingDecision {
   provider: string;
   model: string;
@@ -619,38 +553,27 @@ async function routeLLMRequest(
   },
   messages?: Array<{ role: string; content: string }>
 ): Promise<RoutingDecision | null> {
-  // 1. Direct provider match -- always wins, no advisor needed
-  for (const mapping of MODEL_PROVIDER_MAP) {
-    if (!mapping.pattern.test(requestedModel)) continue;
-    if (settings.blockedProviders.includes(mapping.provider)) continue;
-
-    const providerMeta = PROVIDERS[mapping.provider];
-    if (!providerMeta?.isLLM || !providerMeta.envKey || !providerMeta.baseUrl) continue;
-
-    const apiKey = process.env[providerMeta.envKey];
-    if (!apiKey) continue;
-
-    // For "highest_quality" mode, prefer OpenRouter (more model options)
-    if (settings.routingMode === "highest_quality" && !settings.preferredProviders.includes(mapping.provider)) {
-      continue;
+  // 1. Canonical direct-provider IDs preserve the exact upstream slug.
+  const directRoute = resolveDirectModelRoute(requestedModel);
+  if (directRoute && !settings.blockedProviders.includes(directRoute.provider)) {
+    const providerMeta = PROVIDERS[directRoute.provider];
+    if (providerMeta?.isLLM && providerMeta.envKey && providerMeta.baseUrl) {
+      const apiKey = process.env[providerMeta.envKey];
+      const preferOpenRouter = settings.routingMode === "highest_quality" &&
+        !settings.preferredProviders.includes(directRoute.provider);
+      if (apiKey && !preferOpenRouter) {
+        return {
+          provider: directRoute.provider,
+          model: directRoute.model,
+          baseUrl: providerMeta.baseUrl,
+          apiKey,
+          reason: directRoute.reason,
+        };
+      }
     }
-
-    const resolvedModel = mapping.nativeModel === "__passthrough__"
-      ? stripProviderPrefix(requestedModel)
-      : mapping.nativeModel;
-
-    return {
-      provider: mapping.provider,
-      model: resolvedModel,
-      baseUrl: providerMeta.baseUrl,
-      apiKey,
-      reason: mapping.nativeModel === "__passthrough__"
-        ? `direct_${mapping.provider}_passthrough`
-        : `direct_${mapping.provider}`,
-    };
   }
 
-  // 2. ADVISOR -- intelligent model selection (OPT-IN ONLY)
+  // 2. ADVISOR
   // Triggers when: routingMode === "advisor" AND model is "auto" or unspecified.
   // Callers who specify a model name skip the advisor entirely (handled in step 1).
   // Default mode "balanced" intentionally does NOT invoke the advisor anymore --
@@ -3549,6 +3472,9 @@ function resolveEmbeddingBackend(requestedModel: string | undefined): EmbeddingB
   if (raw.startsWith("voyage/")) {
     provider = "voyage";
     model = raw.slice(7);
+  } else if (raw.startsWith("mistralai/")) {
+    provider = "mistral";
+    model = raw.slice(10);
   } else if (raw.startsWith("mistral/")) {
     provider = "mistral";
     model = raw.slice(8);
@@ -3794,7 +3720,7 @@ function buildManagedRequest(
   const meta = PROVIDERS[provider];
   if (!meta?.envKey) return null;
 
-  const apiKey = process.env[meta.envKey];
+  const apiKey = resolveManagedCredential(provider, meta.envKey, process.env);
   if (!apiKey) return null;
 
   // Provider-specific request builders
@@ -5512,6 +5438,7 @@ http.route({
 //   ?endpoint=/v1/chat/completions   filter to chat models only
 //   ?endpoint=/v1/embeddings         filter to embedding models only
 //   ?owned_by=openai                 filter to a single owner
+//   ?provider=openrouter             filter to the serving catalog source
 //   ?include_deprecated=true         include rows marked stale by last refresh sweep
 http.route({
   path: "/v1/models",
@@ -5520,11 +5447,13 @@ http.route({
     const url = new URL(request.url);
     const endpoint = url.searchParams.get("endpoint") ?? undefined;
     const ownedBy = url.searchParams.get("owned_by") ?? undefined;
+    const provider = url.searchParams.get("provider") ?? undefined;
     const includeDeprecated = url.searchParams.get("include_deprecated") === "true";
 
     const rows = await ctx.runQuery(internal.modelCatalog.list, {
       ...(endpoint ? { endpoint } : {}),
       ...(ownedBy ? { ownedBy } : {}),
+      ...(provider ? { provider } : {}),
       includeDeprecated,
     });
     const stats = await ctx.runQuery(internal.modelCatalog.stats, {});
@@ -5534,6 +5463,7 @@ http.route({
       object: "model",
       owned_by: m.ownedBy,
       via: m.via,
+      served_by: m.source.replace(/-hardcoded$/, ""),
       endpoint: m.endpoint,
       ...(m.name ? { name: m.name } : {}),
       ...(m.contextWindow ? { context_window: m.contextWindow } : {}),
@@ -5551,7 +5481,7 @@ http.route({
         by_owner: stats.byOwner,
         by_via: stats.byVia,
         last_refreshed_at: stats.lastSeenAt ? new Date(stats.lastSeenAt).toISOString() : null,
-        note: "Live model catalog. Every entry is routable via /v1/chat/completions or /v1/embeddings. Refreshed every 6h from upstream provider /models endpoints. POST /v1/chat/completions with model=<id> to call any of these.",
+        note: "Live model inventory refreshed every 6h from upstream provider /models endpoints. Use each entry's endpoint field. Catalog presence proves upstream discovery, while successful execution also requires a healthy configured route and provider entitlement.",
         non_llm_apis: Object.keys(PROVIDERS).length + " managed providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
       },
     });

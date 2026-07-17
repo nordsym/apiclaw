@@ -1190,7 +1190,7 @@ Example chain:
   },
   {
     name: 'list_models',
-    description: 'List every LLM the workspace can call through APIClaw — Anthropic, OpenAI, xAI/Grok, Groq, Mistral, Together, Cohere, Replicate, OpenRouter (800+ more), and any provider routed via the unified gateway. Returns OpenAI-compatible model objects.',
+    description: 'List the live APIClaw model catalog. Entries identify their provider, route source, and compatible gateway endpoint. Use the returned endpoint and model ID for execution.',
     inputSchema: {
       type: 'object',
       properties: {

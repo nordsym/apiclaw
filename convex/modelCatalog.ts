@@ -12,8 +12,8 @@
  *   4. internal.modelCatalog.markStale (mutation, end-of-refresh sweep)
  *
  * Provider keys live in Convex env (see `npx convex env list --prod`).
- * Anthropic key is deliberately NOT set (per Gustav 2026-04-17) — Claude routes via OpenRouter markup.
- * For Anthropic we use a hardcoded fallback list (canonical model IDs published by Anthropic).
+ * If a direct Anthropic key is unavailable, refresh uses a small hardcoded
+ * fallback list while execution can still route supported IDs via OpenRouter.
  */
 
 import { v } from "convex/values";
@@ -35,15 +35,28 @@ type Entry = {
   source: string;
 };
 
+export const MODEL_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
+
+export function modelSourceMatchesProvider(source: string, provider: string): boolean {
+  return source.replace(/-hardcoded$/, "").toLowerCase() === provider.toLowerCase();
+}
+
 // ============================================================
 // Classifiers
 // ============================================================
 
-function classifyEndpoint(id: string, ownedBy: string, name?: string): Entry["endpoint"] | null {
+export function classifyModelEndpoint(
+  id: string,
+  ownedBy: string,
+  name?: string,
+  outputModalities?: string[],
+): Entry["endpoint"] | null {
   const blob = `${id} ${name ?? ""}`.toLowerCase();
+  const outputs = (outputModalities ?? []).map((value) => value.toLowerCase());
+  if (outputs.length > 0 && !outputs.includes("text")) return null;
   // exclude non-LLM
   if (/whisper|tts|audio-|transcrib|voice-|realtime/.test(blob)) return null;
-  if (/dall-e|sdxl|stable-diffusion|flux|imagen|midjourney/.test(blob)) return null;
+  if (/dall-e|sdxl|stable-diffusion|flux|imagen|midjourney|grok-imagine|gpt-[\w.-]*image|sora|veo|seedance|text-to-video|t2v/.test(blob)) return null;
   if (/moderation/.test(blob)) return null;
   if (/embed|embedding/.test(blob)) return "/v1/embeddings";
   // anthropic-native models also surface on /v1/messages (PR2); /v1/chat/completions still works via translator
@@ -108,7 +121,7 @@ async function pullOpenAI(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.data ?? []) {
     const id = `openai/${m.id}`;
-    const ep = classifyEndpoint(id, "openai", m.id);
+    const ep = classifyModelEndpoint(id, "openai", m.id);
     if (!ep) continue;
     out.push({ id, ownedBy: "openai", via: "direct", endpoint: ep, name: humanName(m.id), source: "openai" });
   }
@@ -121,7 +134,7 @@ async function pullXai(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.data ?? []) {
     const id = `x-ai/${m.id}`;
-    const ep = classifyEndpoint(id, "xai", m.id);
+    const ep = classifyModelEndpoint(id, "xai", m.id);
     if (!ep) continue;
     out.push({ id, ownedBy: "xai", via: "direct", endpoint: ep, name: humanName(m.id), source: "xai" });
   }
@@ -134,7 +147,7 @@ async function pullGroq(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.data ?? []) {
     const id = `groq/${m.id}`;
-    const ep = classifyEndpoint(id, "groq", m.id);
+    const ep = classifyModelEndpoint(id, "groq", m.id);
     if (!ep) continue;
     const e: Entry = { id, ownedBy: "groq", via: "direct", endpoint: ep, name: humanName(m.id), source: "groq" };
     if (typeof m.context_window === "number") e.contextWindow = m.context_window;
@@ -149,7 +162,7 @@ async function pullMistral(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.data ?? []) {
     const id = `mistralai/${m.id}`;
-    const ep = classifyEndpoint(id, "mistral", m.id);
+    const ep = classifyModelEndpoint(id, "mistral", m.id);
     if (!ep) continue;
     const e: Entry = { id, ownedBy: "mistral", via: "direct", endpoint: ep, name: humanName(m.id), source: "mistral" };
     if (typeof m.max_context_length === "number") e.contextWindow = m.max_context_length;
@@ -164,7 +177,7 @@ async function pullCohere(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.models ?? []) {
     const id = `cohere/${m.name}`;
-    const ep = classifyEndpoint(id, "cohere", m.name);
+    const ep = classifyModelEndpoint(id, "cohere", m.name);
     if (!ep) continue;
     const e: Entry = { id, ownedBy: "cohere", via: "direct", endpoint: ep, name: humanName(m.name), source: "cohere" };
     if (typeof m.context_length === "number") e.contextWindow = m.context_length;
@@ -182,7 +195,13 @@ async function pullOpenRouter(key?: string): Promise<Entry[]> {
   for (const m of json.data ?? []) {
     const id: string = m.id;
     const ownedBy = id.includes("/") ? id.split("/", 1)[0] : inferOwnedBy(id);
-    const ep = classifyEndpoint(id, ownedBy, m.name);
+    const outputModalities = m.architecture?.output_modalities;
+    const ep = classifyModelEndpoint(
+      id,
+      ownedBy,
+      m.name,
+      Array.isArray(outputModalities) ? outputModalities : undefined,
+    );
     if (!ep) continue;
     const e: Entry = {
       id,
@@ -211,7 +230,7 @@ async function pullAnthropic(key?: string): Promise<Entry[]> {
   const out: Entry[] = [];
   for (const m of json.data ?? []) {
     const id = `anthropic/${m.id}`;
-    const ep = classifyEndpoint(id, "anthropic", m.display_name || m.id);
+    const ep = classifyModelEndpoint(id, "anthropic", m.display_name || m.id);
     if (!ep) continue;
     out.push({
       id,
@@ -234,7 +253,7 @@ async function pullDeepInfra(key?: string): Promise<Entry[]> {
   for (const m of json.data ?? []) {
     const id = m.id.includes("/") ? m.id : `deepinfra/${m.id}`;
     const ownedBy = id.split("/", 1)[0];
-    const ep = classifyEndpoint(id, ownedBy, m.id);
+    const ep = classifyModelEndpoint(id, ownedBy, m.id);
     if (!ep) continue;
     out.push({ id, ownedBy, via: "direct", endpoint: ep, name: humanName(m.id), source: "deepinfra" });
   }
@@ -242,8 +261,11 @@ async function pullDeepInfra(key?: string): Promise<Entry[]> {
 }
 
 // Anthropic hardcoded fallback — canonical IDs published by Anthropic.
-// Updated 2026-05-15. Refresh whenever Anthropic ships new flagships.
+// Updated 2026-07-17. Refresh whenever Anthropic ships new flagships.
 const ANTHROPIC_HARDCODED: Entry[] = [
+  { id: "anthropic/claude-fable-5", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Fable 5", contextWindow: 1_000_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
+  { id: "anthropic/claude-opus-4-8", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Opus 4.8", contextWindow: 1_000_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
+  { id: "anthropic/claude-sonnet-5", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Sonnet 5", contextWindow: 1_000_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
   { id: "anthropic/claude-opus-4-6", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Opus 4.6", contextWindow: 200_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
   { id: "anthropic/claude-sonnet-4-6", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Sonnet 4.6", contextWindow: 1_000_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
   { id: "anthropic/claude-haiku-4-5", ownedBy: "anthropic", via: "direct", endpoint: "/v1/chat/completions", name: "Claude Haiku 4.5", contextWindow: 200_000, inputModalities: ["text", "image"], source: "anthropic-hardcoded" },
@@ -318,7 +340,9 @@ export const refresh = internalAction({
     }
 
     // mark stale (not seen this run) as deprecated
-    const stale = await ctx.runMutation(internal.modelCatalog.markStale, { cutoff: startedAt - 60_000 });
+    const stale = await ctx.runMutation(internal.modelCatalog.markStale, {
+      cutoff: startedAt - MODEL_STALE_AFTER_MS,
+    });
 
     const elapsed = Date.now() - startedAt;
     console.log(`[modelCatalog] refresh complete: ${upserted} upserted, ${stale} marked deprecated, elapsed=${elapsed}ms`);
@@ -399,9 +423,10 @@ export const list = internalQuery({
   args: {
     endpoint: v.optional(v.string()),
     ownedBy: v.optional(v.string()),
+    provider: v.optional(v.string()),
     includeDeprecated: v.optional(v.boolean()),
   },
-  handler: async (ctx, { endpoint, ownedBy, includeDeprecated }) => {
+  handler: async (ctx, { endpoint, ownedBy, provider, includeDeprecated }) => {
     let q;
     if (endpoint) {
       q = ctx.db.query("modelCatalog").withIndex("by_endpoint", (i) => i.eq("endpoint", endpoint));
@@ -414,6 +439,7 @@ export const list = internalQuery({
     return rows
       .filter((r) => includeDeprecated || !r.deprecated)
       .filter((r) => !ownedBy || r.ownedBy === ownedBy)
+      .filter((r) => !provider || modelSourceMatchesProvider(r.source, provider))
       .filter((r) => !endpoint || r.endpoint === endpoint);
   },
 });
