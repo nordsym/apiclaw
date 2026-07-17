@@ -2375,36 +2375,8 @@ http.route({
       return jsonResponse({ error: "E2B not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { code, language = "python", template = "base" } = body;
-      if (!code) {
-        return jsonResponse({ error: "code required" }, 400);
-      }
-      const response = await fetch("https://api.e2b.dev/sandboxes", {
-        method: "POST",
-        headers: {
-          "X-API-Key": E2B_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ templateID: template, metadata: { language } }),
-      });
-      const sandbox = await response.json();
-      if (!response.ok) {
-        return jsonResponse(sandbox, response.status);
-      }
-      const execResponse = await fetch(
-        `https://api.e2b.dev/sandboxes/${sandbox.sandboxID}/code/execution`,
-        {
-          method: "POST",
-          headers: {
-            "X-API-Key": E2B_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ code, language }),
-        }
-      );
-      const result = await execResponse.json();
-      return jsonResponse(result, execResponse.status);
+      const result = await executeE2BCode(E2B_KEY, await request.json());
+      return jsonResponse(result.data, result.status);
     } catch (e: any) {
       return jsonResponse({ error: e.message }, 500);
     }
@@ -3723,7 +3695,7 @@ function buildManagedRequest(
   provider: string,
   action: string,
   params: Record<string, any>
-): { url: string; method: string; headers: Record<string, string>; body?: string } | null {
+): { url: string; method: string; headers: Record<string, string>; body?: BodyInit } | null {
   const meta = PROVIDERS[provider];
   if (!meta?.envKey) return null;
 
@@ -3851,11 +3823,19 @@ function buildManagedRequest(
     }
     case "stability": {
       if (action !== "generate") return null;
+      const form = new FormData();
+      const allowed = ["prompt", "negative_prompt", "aspect_ratio", "seed", "output_format", "style_preset"];
+      for (const key of allowed) {
+        const value = params[key];
+        if (value !== undefined && value !== null) form.append(key, String(value));
+      }
+      form.set("model", String(params.model || "sd3.5-flash"));
+      if (!form.has("output_format")) form.set("output_format", "png");
       return {
         url: "https://api.stability.ai/v2beta/stable-image/generate/sd3",
         method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(params),
+        headers: { "Authorization": `Bearer ${apiKey}`, "Accept": "application/json" },
+        body: form,
       };
     }
     case "github": {
@@ -3873,16 +3853,8 @@ function buildManagedRequest(
       }
       return null;
     }
-    case "e2b": {
-      // E2B sandbox execution is complex (create sandbox, then run code). Simplified for gateway.
-      if (action !== "run_code") return null;
-      return {
-        url: "https://api.e2b.dev/v1/sandboxes",
-        method: "POST",
-        headers: { "X-API-Key": apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ template: params.template || "base", ...params }),
-      };
-    }
+    case "e2b":
+      return null; // Multi-step create/execute/cleanup is handled in executeE2BCode.
     case "46elks": {
       if (action !== "send_sms") return null;
       // 46elks uses Basic auth with username:password (envKey has format user:pass)
@@ -4217,6 +4189,77 @@ function buildManagedRequest(
   }
 }
 
+async function executeE2BCode(
+  apiKey: string,
+  params: Record<string, any>
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const code = typeof params.code === "string" ? params.code : "";
+  if (!code) {
+    return { ok: false, status: 400, data: { error: "code required" } };
+  }
+
+  let sandboxId: string | undefined;
+  try {
+    const createResponse = await fetch("https://api.e2b.app/sandboxes", {
+      method: "POST",
+      headers: { "X-API-Key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        templateID: params.template || "code-interpreter-v1",
+        timeout: Math.min(Math.max(Number(params.timeout_seconds) || 30, 15), 300),
+        secure: true,
+        metadata: { source: "apiclaw" },
+      }),
+    });
+    const createData = await createResponse.json() as {
+      sandboxID?: string;
+      envdAccessToken?: string;
+      trafficAccessToken?: string;
+      message?: string;
+      error?: string;
+    };
+    if (!createResponse.ok || !createData.sandboxID || !/^[a-zA-Z0-9-]+$/.test(createData.sandboxID)) {
+      return {
+        ok: false,
+        status: createResponse.status,
+        data: { error: createData.message || createData.error || "E2B sandbox creation failed" },
+      };
+    }
+
+    sandboxId = createData.sandboxID;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (createData.envdAccessToken) headers["X-Access-Token"] = createData.envdAccessToken;
+    if (createData.trafficAccessToken) headers["E2B-Traffic-Access-Token"] = createData.trafficAccessToken;
+
+    const executionResponse = await fetch(`https://49999-${sandboxId}.e2b.app/execute`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        code,
+        language: params.language || "python",
+        env_vars: params.envs || undefined,
+      }),
+    });
+    const raw = await executionResponse.text();
+    const events = raw.split("\n").filter(Boolean).map((line) => {
+      try { return JSON.parse(line); } catch { return { text: line }; }
+    });
+    return {
+      ok: executionResponse.ok,
+      status: executionResponse.status,
+      data: { events },
+    };
+  } catch (error: any) {
+    return { ok: false, status: 502, data: { error: error?.message || "E2B execution failed" } };
+  } finally {
+    if (sandboxId) {
+      await fetch(`https://api.e2b.app/sandboxes/${sandboxId}`, {
+        method: "DELETE",
+        headers: { "X-API-Key": apiKey },
+      }).catch(() => {});
+    }
+  }
+}
+
 // Resolve auth for /v1/execute.
 // Accepts: X-APIClaw-Internal (server-to-server), Bearer sk-claw-… or X-APIClaw-Api-Key (permanent keys), X-APIClaw-Session (CLI login).
 // Shadow-mode: anonymous is logged to funnel.call_api_blocked and returned as authMethod=anonymous
@@ -4298,6 +4341,13 @@ http.route({
     // /v1/execute was missing this check, unlike its sibling routes.
     if (
       isInternalProviderReference(String(provider)) &&
+      authMethod !== "internal"
+    ) {
+      return internalOnlyResponse(provider);
+    }
+    if (
+      PROVIDERS[String(provider)] &&
+      !isPubliclyAvailableManagedProvider(String(provider)) &&
       authMethod !== "internal"
     ) {
       return internalOnlyResponse(provider);
@@ -4480,8 +4530,9 @@ http.route({
       // Managed provider path
       routeDetail = `direct_${provider}`;
 
-      const req = buildManagedRequest(provider, action, params);
-      if (!req) {
+      const isE2BRun = provider === "e2b" && action === "run_code";
+      const req = isE2BRun ? null : buildManagedRequest(provider, action, params);
+      if (!req && !isE2BRun) {
         return jsonResponse({
           success: false,
           error: `Unknown action "${action}" for provider "${provider}"`,
@@ -4506,6 +4557,31 @@ http.route({
 
       // Execute upstream call
       try {
+        if (isE2BRun) {
+          const e2bKey = resolveManagedCredential("e2b", "E2B_API_KEY", process.env);
+          if (!e2bKey) {
+            return jsonResponse({ success: false, provider, action, error: "E2B is not configured" }, 503);
+          }
+          const result = await executeE2BCode(e2bKey, params);
+          const latencyMs = Date.now() - startTime;
+          if (result.ok) {
+            await recordFirstSuccessfulGatewayCall(ctx, {
+              workspaceId,
+              path: "/v1/execute",
+              authMethod,
+              provider,
+              action,
+            });
+          }
+          return jsonResponse({
+            success: result.ok,
+            provider,
+            action,
+            data: result.data,
+            _apiclaw: { latencyMs, route: routeDetail, gateway: true },
+          }, result.status);
+        }
+
         const fetchOpts: RequestInit = { method: req.method, headers: req.headers };
         if (req.body) fetchOpts.body = req.body;
 
