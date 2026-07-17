@@ -126,7 +126,19 @@ function loadApis(): ApiEntry[] {
     try {
       const raw = fs.readFileSync(p, "utf-8");
       const data = JSON.parse(raw);
-      const all: ApiEntry[] = data.apis || [];
+      const all: ApiEntry[] = [...(data.apis || [])];
+      if (!all.some((entry) => entry.name.toLowerCase().trim() === "e2b")) {
+        all.push({
+          name: "E2B",
+          description: "Secure code sandboxes for AI agents",
+          category: "AI & ML",
+          baseUrl: "https://api.e2b.app",
+          docsUrl: "https://e2b.dev/docs",
+          auth: "managed",
+          pricing: "freemium",
+          callable: true,
+        });
+      }
 
       const enriched = all
         .filter((a) => !isInternalCatalogEntry(a))
