@@ -26,6 +26,7 @@ import { logAPICall } from './mcp-analytics.js';
 import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
 import { CANON_STATS } from './canon-stats.js';
 import { FREE_MANAGED_CALLS_PER_WEEK, nextWeeklyResetUtc } from './product-truth.js';
+import { isInternalOnlyProvider } from './provider-boundaries.js';
 import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
@@ -1838,6 +1839,19 @@ Docs: https://apiclaw.cloud
         const chain = args?.chain as ChainStepUnion[] | undefined;
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
+
+        if (isInternalOnlyProvider(provider)) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                error: 'Provider is not available through the public APIClaw runtime.',
+              }, null, 2),
+            }],
+            isError: true,
+          };
+        }
 
         // Track AI backend if provided
         if (aiBackend && workspaceContext?.sessionToken) {

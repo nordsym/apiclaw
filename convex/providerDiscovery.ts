@@ -10,6 +10,7 @@
  * keys, no providerDirectCall fields.
  */
 import { query } from "./_generated/server";
+import { isInternalProviderReference, isPubliclyAvailableManagedProvider } from "./providerBoundaries";
 
 export const listForDiscovery = query({
   args: {},
@@ -23,7 +24,10 @@ export const listForDiscovery = query({
     // Open APIs live in apis.json and are scanned locally; including
     // them here would duplicate.
     const managed = rows.filter(
-      (r) => r.authType === "managed" && r.status === "active",
+      (r) => r.authType === "managed" &&
+        r.status === "active" &&
+        isPubliclyAvailableManagedProvider(r.name) &&
+        ![r.name, r.baseUrl, r.docsUrl].some(isInternalProviderReference),
     );
 
     return managed.map((r) => ({

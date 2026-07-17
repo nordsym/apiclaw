@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { isInternalCatalogEntry, isUnavailableManagedBrand } from "@/lib/provider-boundaries";
 
 interface ApiEntry {
   name: string;
@@ -34,9 +35,6 @@ interface VerificationStatus {
   by_name_lower: Record<string, VerificationEntry>;
   by_host?: Record<string, VerificationEntry>;
 }
-
-const CANON_DISCOVERABLE_APIS = 26_701;
-const CANON_CALLABLE_APIS = 2_906;
 
 // Canon managed-provider brand names (lowercase). Must stay in sync with
 // scripts/clean-registry-flags.mjs. APIClaw owns the keys for these and the
@@ -81,11 +79,6 @@ function hostFromUrl(u: string): string | null {
 
 let cachedApis: ApiEntry[] | null = null;
 let cachedVerification: VerificationStatus | null = null;
-
-// Providers that are reserved for APIClaw / NordSym internal infrastructure
-// (booking confirmations, magic links, OTP). They must not appear in the
-// public catalog and are blocked at the gateway for non-internal callers.
-const INTERNAL_ONLY_PROVIDERS = new Set(["twilio", "46elks", "resend"]);
 
 function loadVerification(): VerificationStatus | null {
   if (cachedVerification) return cachedVerification;
@@ -136,12 +129,13 @@ function loadApis(): ApiEntry[] {
       const all: ApiEntry[] = data.apis || [];
 
       const enriched = all
-        .filter((a) => !INTERNAL_ONLY_PROVIDERS.has((a.name || "").toLowerCase()))
+        .filter((a) => !isInternalCatalogEntry(a))
         .map((a): ApiEntry => {
           const nameLower = (a.name || "").toLowerCase().trim();
           const isManagedByAuth = (a.auth || "").toLowerCase() === "managed";
           const isManagedByName = MANAGED_BRAND_NAMES.has(nameLower);
-          const isManaged = isManagedByAuth || isManagedByName;
+          const isUnavailableManaged = isUnavailableManagedBrand(nameLower);
+          const isManaged = (isManagedByAuth || isManagedByName) && !isUnavailableManaged;
 
           // Verification join: try name first, then host fallback.
           let v: VerificationEntry | undefined =
@@ -157,7 +151,11 @@ function loadApis(): ApiEntry[] {
           let verified = false;
           let callable = a.callable === true;
 
-          if (isManaged) {
+          if (isUnavailableManaged) {
+            tier = "auth";
+            verified = false;
+            callable = false;
+          } else if (isManaged) {
             tier = "managed";
             verified = true;
             callable = true;
@@ -240,10 +238,7 @@ export async function GET(req: NextRequest) {
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  const total =
-    !query && !category && !tierFilter && !callableOnly
-      ? CANON_DISCOVERABLE_APIS
-      : filtered.length;
+  const total = filtered.length;
   const offset = (page - 1) * limit;
   const items = filtered.slice(offset, offset + limit);
   const hasMore = offset + limit < total;
@@ -259,11 +254,11 @@ export async function GET(req: NextRequest) {
     if (a.verified) categories[a.category].verified += 1;
   }
 
-  const totalCallable = CANON_CALLABLE_APIS;
+  const totalCallable = apis.filter((api) => api.callable).length;
   return NextResponse.json({
     items,
     total,
-    totalDiscoverable: CANON_DISCOVERABLE_APIS,
+    totalDiscoverable: apis.length,
     page,
     limit,
     hasMore,

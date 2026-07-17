@@ -6,6 +6,11 @@ import { resolveDirectModelRoute } from "./modelRouting";
 import { resolveManagedCredential } from "./managedCredentials";
 import { resolveFrontierModelCost } from "./modelPricing";
 import {
+  INTERNAL_ONLY_PROVIDER_IDS,
+  isInternalProviderReference,
+  isPubliclyAvailableManagedProvider,
+} from "./providerBoundaries";
+import {
   createCheckoutSession,
   createPortalSession,
   handleStripeWebhook,
@@ -1074,18 +1079,18 @@ async function resolveWorkspaceFromRequest(
 // internal infrastructure (booking confirmations, magic-link emails, OTP) and
 // only reachable via X-APIClaw-Internal server-to-server auth, never through
 // a workspace key, session, or anonymous call.
-const INTERNAL_ONLY_PROVIDERS = new Set(["twilio", "46elks", "resend"]);
+const INTERNAL_ONLY_PROVIDERS = new Set<string>(INTERNAL_ONLY_PROVIDER_IDS);
 
-function internalOnlyResponse(provider: string) {
+function internalOnlyResponse(_provider: string) {
   return jsonResponse(
     {
       error: {
-        code: "internal_only",
-        message: `Provider "${provider}" is reserved for APIClaw internal infrastructure and not callable through the public gateway.`,
-        type: "forbidden",
+        code: "provider_not_available",
+        message: "Provider is not available through the public APIClaw runtime.",
+        type: "not_found",
       },
     },
-    403
+    404
   );
 }
 
@@ -1344,6 +1349,7 @@ http.route({
       const catalogData = await catalogRes.json() as {
         items: Array<{ name: string; description: string; category: string; baseUrl: string; docsUrl: string; auth: string; pricing: string; callable?: boolean }>;
         total: number;
+        totalDiscoverable: number;
         page: number;
         limit: number;
         hasMore: boolean;
@@ -1352,8 +1358,8 @@ http.route({
       };
 
       // Strip internal-infrastructure providers from public discovery.
-      const filteredApis = (catalogData.items || []).filter(
-        (item) => !INTERNAL_ONLY_PROVIDERS.has((item.name || "").toLowerCase()),
+      const filteredApis = (catalogData.items || []).filter((item) =>
+        ![item.name, item.baseUrl, item.docsUrl].some(isInternalProviderReference)
       );
 
       // Inbound discovery log to provider-owner workspaces (parity with MCP src/index.ts:1499).
@@ -1402,11 +1408,11 @@ http.route({
         limit: catalogData.limit,
         hasMore: catalogData.hasMore,
         categories: catalogData.categories,
-        totalDiscoverable: CANON_DISCOVERABLE_APIS,
-        totalCallable: CANON_CALLABLE_APIS,
+        totalDiscoverable: catalogData.totalDiscoverable,
+        totalCallable: catalogData.totalCallable,
         _meta: {
-          discoverable: `${CANON_DISCOVERABLE_APIS.toLocaleString("en-US")}+ discoverable APIs`,
-          callable: `${CANON_CALLABLE_APIS.toLocaleString("en-US")}+ callable APIs`,
+          discoverable: `${catalogData.totalDiscoverable.toLocaleString("en-US")} discoverable APIs`,
+          callable: `${catalogData.totalCallable.toLocaleString("en-US")} callable APIs`,
           discoveryRequiresSignup: true,
           discoveryCost: "free",
           docs: "https://apiclaw.cloud/docs",
@@ -1433,6 +1439,7 @@ http.route({
       const userAgent = request.headers.get("User-Agent");
 
       const results = Object.entries(PROVIDERS)
+        .filter(([id]) => isPubliclyAvailableManagedProvider(id))
         .filter(([id, provider]) => {
           if (!query) return true;
           return (
@@ -4290,7 +4297,7 @@ http.route({
     // providers (Twilio/46elks/Resend) only accept X-APIClaw-Internal auth.
     // /v1/execute was missing this check, unlike its sibling routes.
     if (
-      INTERNAL_ONLY_PROVIDERS.has(String(provider).toLowerCase()) &&
+      isInternalProviderReference(String(provider)) &&
       authMethod !== "internal"
     ) {
       return internalOnlyResponse(provider);
@@ -5482,7 +5489,7 @@ http.route({
         by_via: stats.byVia,
         last_refreshed_at: stats.lastSeenAt ? new Date(stats.lastSeenAt).toISOString() : null,
         note: "Live model inventory refreshed every 6h from upstream provider /models endpoints. Use each entry's endpoint field. Catalog presence proves upstream discovery, while successful execution also requires a healthy configured route and provider entitlement.",
-        non_llm_apis: Object.keys(PROVIDERS).length + " managed providers (SMS, email, search, TTS, embeddings, code execution, scraping, and more)",
+        non_llm_apis: Object.keys(PROVIDERS).filter(isPubliclyAvailableManagedProvider).length + " public managed providers (search, TTS, embeddings, code execution, scraping, and more)",
       },
     });
   }),
@@ -5624,7 +5631,7 @@ http.route({
 
     // Internal-only provider gate. Same set as /proxy/* routes.
     if (
-      INTERNAL_ONLY_PROVIDERS.has(apiName.toLowerCase()) &&
+      isInternalProviderReference(apiName) &&
       (auth as any).authMethod !== "internal"
     ) {
       return internalOnlyResponse(apiName);

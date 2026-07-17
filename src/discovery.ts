@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { getConnectedProviders } from './execute.js';
 import { openAPIs, isOpenAPI } from './open-apis.js';
+import { isInternalProviderReference, isUnavailableManagedProvider } from './provider-boundaries.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,7 +17,13 @@ function loadLocalRegistry(): APIProvider[] {
     const apisData = JSON.parse(
       readFileSync(join(__dirname, 'registry', 'apis.json'), 'utf-8')
     ) as { apis?: APIProvider[] };
-    return Array.isArray(apisData.apis) ? apisData.apis : [];
+    return Array.isArray(apisData.apis)
+      ? apisData.apis
+        .filter((entry) => !isInternalProviderReference(entry))
+        .map((entry) => isUnavailableManagedProvider(entry.name)
+          ? { ...entry, callable: false }
+          : entry)
+      : [];
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code !== 'ENOENT') throw error;
@@ -151,7 +158,14 @@ async function refreshManagedProvidersCache(): Promise<void> {
       value?: ManagedProviderEntry[];
     };
     if (!Array.isArray(payload.value)) return;
-    managedProvidersCache = payload.value;
+    managedProvidersCache = payload.value.filter((entry) =>
+      !isUnavailableManagedProvider(entry.providerName) &&
+      !isInternalProviderReference({
+        name: entry.providerName,
+        baseUrl: entry.baseUrl,
+        docsUrl: entry.docsUrl,
+      })
+    );
     managedProvidersFetchedAt = Date.now();
   } catch {
     // Network failure: keep prior cache. Discovery still works against
@@ -677,7 +691,9 @@ export function getAPIDetails(
   const { compact = false } = options;
   
   // Check if it's a managed provider (hardcoded handlers)
-  const directSpec = MANAGED_PROVIDER_SPECS[apiId];
+  const directSpec = isUnavailableManagedProvider(apiId)
+    ? undefined
+    : MANAGED_PROVIDER_SPECS[apiId];
   if (directSpec) {
     if (compact) {
       // Minified format: ~60% smaller

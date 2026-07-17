@@ -5,6 +5,7 @@
 import { getCredentials } from './credentials.js';
 import { callProxy, PROXY_PROVIDERS } from './proxy.js';
 import { executeDynamicAction, hasDynamicConfig, listDynamicActions } from './execute-dynamic.js';
+import { filterPublicConnectedProviders, isInternalOnlyProvider } from './provider-boundaries.js';
 
 // Re-export chain execution
 export { executeChain } from './chainExecutor.js';
@@ -2240,11 +2241,13 @@ const handlers: Record<string, Record<string, (params: any, creds: any) => Promi
 
 // Get available actions for a provider (static handlers only)
 export function getProviderActions(providerId: string): string[] {
+  if (isInternalOnlyProvider(providerId)) return [];
   return Object.keys(handlers[providerId] || {});
 }
 
 // Get available actions for a provider (includes dynamic providers)
 export async function getProviderActionsAsync(providerId: string): Promise<string[]> {
+  if (isInternalOnlyProvider(providerId)) return [];
   // First check static handlers
   const staticActions = Object.keys(handlers[providerId] || {});
   if (staticActions.length > 0) {
@@ -2261,7 +2264,7 @@ const BLOCKED_ACTIONS = ['verify_number', 'world_news', 'image_crop', 'form_subm
 const RATE_LIMITED_ACTIONS = ['pdf_generate'];
 
 export function getConnectedProviders(): { provider: string; actions: string[]; blocked?: string[]; rate_limited?: string[] }[] {
-  return Object.entries(handlers).map(([provider, actions]) => {
+  const connected = Object.entries(handlers).map(([provider, actions]) => {
     const allActions = Object.keys(actions);
     if (provider === 'apilayer') {
       const live = allActions.filter(a => !BLOCKED_ACTIONS.includes(a) && !RATE_LIMITED_ACTIONS.includes(a));
@@ -2276,6 +2279,7 @@ export function getConnectedProviders(): { provider: string; actions: string[]; 
     }
     return { provider, actions: allActions };
   });
+  return filterPublicConnectedProviders(connected);
 }
 
 // Execute an API call
@@ -2286,6 +2290,14 @@ export async function executeAPICall(
   userId?: string,
   customerKey?: string
 ): Promise<ExecuteResult> {
+  if (isInternalOnlyProvider(providerId)) {
+    return createErrorResult(
+      providerId,
+      action,
+      "Provider is not available through the public APIClaw runtime.",
+      ERROR_CODES.UNKNOWN_PROVIDER,
+    );
+  }
   // Check for dynamic (self-service) provider config first
   if (userId) {
     const isDynamic = await hasDynamicConfig(providerId);
