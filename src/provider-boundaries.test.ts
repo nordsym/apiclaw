@@ -26,10 +26,11 @@ assert.deepEqual(
   [
     { provider: "brave_search", actions: ["search"] },
     { provider: "replicate", actions: ["run"] },
+    { provider: "assemblyai", actions: ["transcribe"] },
   ],
 );
 
-assert.equal(isUnavailableManagedProvider("AssemblyAI"), true);
+assert.equal(isUnavailableManagedProvider("AssemblyAI"), false);
 assert.equal(isUnavailableManagedProvider("Together AI"), true);
 assert.equal(isUnavailableManagedProvider("Brave Search"), false);
 
