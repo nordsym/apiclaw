@@ -45,7 +45,7 @@ npx @nordsym/apiclaw auth login
 
 Adds APIClaw as an MCP server in Claude Desktop, Cursor, Windsurf, OpenClaw, or any MCP-compatible agent. The auth flow opens the browser, signs you in via Google one-tap, and writes `~/.apiclaw.toml`. Free tier: 50 managed calls per week. Pay-as-you-go beyond that at API cost + 15%.
 
-> Headless server or SSH session? `npx @nordsym/apiclaw login --email-fallback` runs the legacy magic-link flow.
+> Headless server or SSH session? Open the browser sign-in URL on a device where you can complete ownership verification.
 
 ---
 

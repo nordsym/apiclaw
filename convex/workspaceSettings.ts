@@ -5,10 +5,17 @@ import { v } from "convex/values";
 // QUERIES
 // ============================================
 
-/** Get workspace settings (returns defaults if none saved) */
+/** Get settings for the authenticated workspace (returns defaults if none saved). */
 export const get = query({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
+
+    const workspaceId = session.workspaceId;
     const settings = await ctx.db
       .query("workspaceSettings")
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
@@ -80,9 +87,9 @@ export const upsert = mutation({
   args: {
     token: v.string(),
     routingMode: v.optional(v.string()),
-    defaultModel: v.optional(v.string()),
-    maxPricePerMTokens: v.optional(v.float64()),
-    monthlyBudgetLimit: v.optional(v.float64()),
+    defaultModel: v.optional(v.union(v.string(), v.null())),
+    maxPricePerMTokens: v.optional(v.union(v.float64(), v.null())),
+    monthlyBudgetLimit: v.optional(v.union(v.float64(), v.null())),
     preferredProviders: v.optional(v.array(v.string())),
     blockedProviders: v.optional(v.array(v.string())),
     allowOpenRouterFallback: v.optional(v.boolean()),
@@ -102,7 +109,7 @@ export const upsert = mutation({
     const now = Date.now();
 
     // Validate routingMode
-    const validModes = ["best_price", "highest_quality", "fastest", "balanced"];
+    const validModes = ["best_price", "highest_quality", "fastest", "balanced", "advisor"];
     if (args.routingMode && !validModes.includes(args.routingMode)) {
       throw new Error(`Invalid routingMode. Must be one of: ${validModes.join(", ")}`);
     }
@@ -115,9 +122,9 @@ export const upsert = mutation({
 
     const updates: Record<string, unknown> = { updatedAt: now };
     if (args.routingMode !== undefined) updates.routingMode = args.routingMode;
-    if (args.defaultModel !== undefined) updates.defaultModel = args.defaultModel;
-    if (args.maxPricePerMTokens !== undefined) updates.maxPricePerMTokens = args.maxPricePerMTokens;
-    if (args.monthlyBudgetLimit !== undefined) updates.monthlyBudgetLimit = args.monthlyBudgetLimit;
+    if (args.defaultModel !== undefined) updates.defaultModel = args.defaultModel ?? undefined;
+    if (args.maxPricePerMTokens !== undefined) updates.maxPricePerMTokens = args.maxPricePerMTokens ?? undefined;
+    if (args.monthlyBudgetLimit !== undefined) updates.monthlyBudgetLimit = args.monthlyBudgetLimit ?? undefined;
     if (args.preferredProviders !== undefined) updates.preferredProviders = args.preferredProviders;
     if (args.blockedProviders !== undefined) updates.blockedProviders = args.blockedProviders;
     if (args.allowOpenRouterFallback !== undefined) updates.allowOpenRouterFallback = args.allowOpenRouterFallback;
@@ -130,9 +137,9 @@ export const upsert = mutation({
     return await ctx.db.insert("workspaceSettings", {
       workspaceId,
       routingMode: args.routingMode || "balanced",
-      defaultModel: args.defaultModel,
-      maxPricePerMTokens: args.maxPricePerMTokens,
-      monthlyBudgetLimit: args.monthlyBudgetLimit,
+      defaultModel: args.defaultModel ?? undefined,
+      maxPricePerMTokens: args.maxPricePerMTokens ?? undefined,
+      monthlyBudgetLimit: args.monthlyBudgetLimit ?? undefined,
       preferredProviders: args.preferredProviders,
       blockedProviders: args.blockedProviders,
       allowOpenRouterFallback: args.allowOpenRouterFallback ?? true,

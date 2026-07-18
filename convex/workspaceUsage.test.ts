@@ -31,4 +31,15 @@ assert.equal(paid.usageLimit, -1);
 assert.equal(paid.usageRemaining, -1);
 assert.equal(paid.usagePercentage, 0);
 
+for (const tier of ["founder", "partner", "enterprise"]) {
+  const unlimited = getWorkspaceUsageDisplay({
+    tier,
+    weeklyUsageCount: 680,
+    lastWeeklyResetAt: now,
+  }, now);
+  assert.equal(unlimited.usageLimit, -1, `${tier} must be unlimited`);
+  assert.equal(unlimited.usageRemaining, -1, `${tier} must never show negative remaining`);
+  assert.equal(unlimited.usagePercentage, 0, `${tier} must never show negative usage percent`);
+}
+
 console.log("workspace quota display uses the same weekly state as enforcement");

@@ -22,7 +22,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "start:http": "tsx src/http-server-minimal.ts",
-    "test": "tsx src/test.ts && tsx src/product-truth.test.ts && tsx src/provider-boundaries.test.ts && tsx landing/src/lib/provider-boundaries.test.ts && tsx convex/providerBoundaries.test.ts && tsx convex/modelRouting.test.ts && tsx convex/modelCatalog.test.ts && tsx convex/managedCredentials.test.ts && tsx convex/modelPricing.test.ts",
+    "test": "tsx src/test.ts && tsx src/product-truth.test.ts && tsx src/trust-floor.test.ts && tsx src/provider-boundaries.test.ts && tsx landing/src/lib/provider-boundaries.test.ts && tsx landing/src/lib/workspace-truth.test.ts && tsx convex/providerBoundaries.test.ts && tsx convex/workspaceUsage.test.ts && tsx convex/modelRouting.test.ts && tsx convex/modelCatalog.test.ts && tsx convex/managedCredentials.test.ts && tsx convex/modelPricing.test.ts",
     "audit:managed-providers": "node scripts/audit-managed-providers.mjs",
     "test:e2e": "tsx src/test.ts",
     "webhook": "tsx src/webhook.ts",

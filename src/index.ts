@@ -91,6 +91,7 @@ type IncrementUsageResult = {
 let workspaceContext: WorkspaceContext | null = null;
 let currentAgentId: string | null = null; // Agent ID from agents table (set on startup)
 let pendingRegistrationEmail: string | null = null; // Email waiting for OTP verification
+const legacyAuthRetired = (): boolean => true;
 
 // Anonymous rate limit tracking (in-memory, per machine fingerprint)
 interface AnonymousRateLimitState {
@@ -497,8 +498,8 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           action: 'agent_auth_required',
           command: 'npx @nordsym/apiclaw auth login',
           estimated_seconds: 15,
-          fallback: 'If no browser available (SSH/headless): npx @nordsym/apiclaw auth login --email-fallback',
-          legacy_action: 'register_owner ({ email: "..." }) is still supported but slower (inbox round-trip).',
+          fallback: 'Complete browser auth on a device that can open the sign-in URL.',
+          legacy_action: 'register_owner is retired. Use the browser auth command above.',
           free_tier: 'Free managed calls are included after signup. Continue beyond the free tier at API cost + 15%.',
           first_call_prompt: FIRST_CALL_PROMPT,
         }, null, 2),
@@ -525,7 +526,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
         action: 'agent_auth_required',
         command: 'npx @nordsym/apiclaw auth login',
         estimated_seconds: 15,
-        fallback: 'register_owner({ email: "..." }) — legacy email magic-link flow, still works.',
+        fallback: 'Browser auth is the supported ownership-verification path.',
         first_call_prompt: FIRST_CALL_PROMPT,
       }, null, 2),
       isAnonymous: true,
@@ -1011,7 +1012,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace; if not authenticated, the response will return action="agent_auth_required" with the CLI command to run (npx @nordsym/apiclaw auth login). The legacy register_owner / verify_code flow still works as a fallback.
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace; if not authenticated, the response will return action="agent_auth_required" with the CLI command to run (npx @nordsym/apiclaw auth login).
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -1204,7 +1205,7 @@ Example chain:
   // ============================================
   {
     name: 'register_owner',
-    description: 'LEGACY auth path (kept for back-compat). The canonical agent-native flow is `npx @nordsym/apiclaw auth login` — when a tool returns action="agent_auth_required", run that CLI command instead of this tool. register_owner sends a 6-digit code to the email and requires the user to paste it back via verify_code.',
+    description: 'Retired legacy auth alias. Returns the canonical `npx @nordsym/apiclaw auth login` browser-auth command and never creates a session.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1218,7 +1219,7 @@ Example chain:
   },
   {
     name: 'verify_code',
-    description: 'Verify the 6-digit code sent to your email after register_owner. This completes registration and activates your workspace. Ask the user to check their email and paste the code.',
+    description: 'Retired legacy verification alias. Use `npx @nordsym/apiclaw auth login` to verify ownership securely.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -2004,7 +2005,7 @@ Docs: https://apiclaw.cloud
               text: JSON.stringify({
                 status: 'error',
                 error: access.error,
-                hint: 'Run `npx @nordsym/apiclaw auth login` to authenticate your workspace. (register_owner still works as a fallback.)',
+                hint: 'Run `npx @nordsym/apiclaw auth login` to authenticate your workspace.',
               }, null, 2)
             }],
             isError: true
@@ -2568,6 +2569,20 @@ Docs: https://apiclaw.cloud
       // ============================================
       
       case 'register_owner': {
+        if (legacyAuthRetired()) return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'agent_auth_required',
+              action: 'legacy_auth_retired',
+              message: 'Email-only registration has been retired because it did not provide a safe ownership proof.',
+              command: 'npx @nordsym/apiclaw auth login',
+              next_step: 'Run the command in the user terminal, complete browser sign-in, then retry the API call.',
+            }, null, 2),
+          }],
+          isError: true,
+        };
+
         const email = args?.email as string;
 
         if (!email || !email.includes('@')) {
@@ -2732,6 +2747,19 @@ Docs: https://apiclaw.cloud
       }
 
       case 'verify_code': {
+        if (legacyAuthRetired()) return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'agent_auth_required',
+              action: 'legacy_auth_retired',
+              message: 'Legacy email codes are no longer accepted.',
+              command: 'npx @nordsym/apiclaw auth login',
+            }, null, 2),
+          }],
+          isError: true,
+        };
+
         const email = (args?.email as string) || pendingRegistrationEmail;
         const code = args?.code as string;
 
@@ -2954,6 +2982,18 @@ Docs: https://apiclaw.cloud
       }
       
       case 'remind_owner': {
+        if (legacyAuthRetired()) return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              status: 'agent_auth_required',
+              action: 'legacy_auth_retired',
+              command: 'npx @nordsym/apiclaw auth login',
+            }, null, 2),
+          }],
+          isError: true,
+        };
+
         const session = readSession();
         
         if (!session) {

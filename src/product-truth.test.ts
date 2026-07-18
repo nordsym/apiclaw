@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { FREE_MANAGED_CALLS_PER_WEEK, nextWeeklyResetUtc } from "./product-truth.js";
 
 assert.equal(FREE_MANAGED_CALLS_PER_WEEK, 50);
@@ -41,5 +41,18 @@ for (const file of activeTruthSurfaces) {
 const planCopy = readFileSync("landing/src/lib/plans.ts", "utf8");
 assert.match(planCopy, /calls: "50"/);
 assert.match(planCopy, /callsSub: "managed calls per week"/);
+
+const workspacePage = [
+  readFileSync("landing/src/app/workspace/page.tsx", "utf8"),
+  readFileSync("landing/src/components/WorkspaceCatalog.tsx", "utf8"),
+  readFileSync("landing/src/lib/workspace-truth.ts", "utf8"),
+].join("\n");
+for (const label of ["Home", "Catalog & Test", "Connections", "Activity", "Billing", "Settings"]) {
+  assert.match(workspacePage, new RegExp(`\\b${label.replace("&", "\\&")}\\b`), `workspace is missing ${label}`);
+}
+assert.doesNotMatch(workspacePage, /Together(?: AI)?/, "retired provider must not appear in workspace UI");
+assert.doesNotMatch(workspacePage, /workspaces:setPassword|Change Password/, "legacy password UI must not be reachable");
+assert.doesNotMatch(readFileSync("convex/workspaces.ts", "utf8"), /export const setPassword/, "legacy password mutation must not be exported");
+assert.equal(existsSync("landing/public/dev-login.html"), false, "public dev login artifact must not ship");
 
 console.log("product truth: public copy matches the enforced 50 managed calls per week");

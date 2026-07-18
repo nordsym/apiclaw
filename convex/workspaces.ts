@@ -24,8 +24,8 @@ function generateOTP(): string {
   return Array.from(bytes, (b) => digits[b % digits.length]).join("");
 }
 
-// Create OTP code and return it (MCP server sends the email)
-export const createOTP = mutation({
+// Legacy OTP primitives are internal only. Canonical auth is Clerk browser auth.
+export const createOTP = internalMutation({
   args: {
     email: v.string(),
     fingerprint: v.optional(v.string()),
@@ -62,7 +62,7 @@ export const createOTP = mutation({
 });
 
 // Verify OTP code, create/activate workspace, return session
-export const verifyOTP = mutation({
+export const verifyOTP = internalMutation({
   args: {
     email: v.string(),
     code: v.string(),
@@ -189,7 +189,7 @@ export const verifyOTP = mutation({
 });
 
 // Increment failed OTP attempt counter
-export const incrementOTPAttempt = mutation({
+export const incrementOTPAttempt = internalMutation({
   args: {
     email: v.string(),
     code: v.string(),
@@ -213,7 +213,7 @@ export const incrementOTPAttempt = mutation({
 // ============================================
 
 // Create magic link for workspace email auth
-export const createMagicLink = mutation({
+export const createMagicLink = internalMutation({
   args: { 
     email: v.string(),
     fingerprint: v.optional(v.string()),
@@ -875,7 +875,7 @@ export const incrementUsage = mutation({
     const now = Date.now();
 
     // Check if paid tier (unlimited usage)
-    const isPaid = ["pro", "scale", "usage_based", "partner", "founder"].includes(workspace.tier);
+    const isPaid = ["pro", "scale", "usage_based", "partner", "founder", "enterprise"].includes(workspace.tier);
 
     const quota = getQuotaState(workspace, amount);
     if (!quota.allowed) {
@@ -916,7 +916,7 @@ export const incrementUsage = mutation({
       message: string;
       upgradeUrl: string;
     } | null = null;
-    if (!isPaid && workspace.tier !== "enterprise") {
+    if (!isPaid) {
       const pct = (newWeeklyCount / FREE_WEEKLY_LIMIT) * 100;
       if (pct >= 80) {
         quotaWarning = {
@@ -1036,7 +1036,7 @@ export const verifySession = query({
 });
 
 // Get workspace by email (for HTTP API)
-export const getByEmail = query({
+export const getByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const workspace = await ctx.db
@@ -1079,7 +1079,7 @@ export const touchSession = mutation({
 // ============================================
 
 // Create a new workspace (called from MCP register_owner)
-export const createWorkspace = mutation({
+export const createWorkspace = internalMutation({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const normalizedEmail = email.toLowerCase().trim();
@@ -1141,39 +1141,8 @@ export const updateWorkspaceName = mutation({
   },
 });
 
-// Set or update password
-export const setPassword = mutation({
-  args: {
-    token: v.string(),
-    password: v.string(),
-  },
-  handler: async (ctx, { token, password }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
-    if (!session) throw new Error("Invalid session");
-
-    if (password.length < 8) throw new Error("Password must be at least 8 characters");
-
-    // Simple hash using built-in crypto
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password + "apiclaw-salt-v1");
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-
-    await ctx.db.patch(session.workspaceId, {
-      passwordHash: hashHex,
-      updatedAt: Date.now(),
-    });
-
-    return { success: true };
-  },
-});
-
 // Create agent session for workspace (called from MCP after verification)
-export const createAgentSession = mutation({
+export const createAgentSession = internalMutation({
   args: { 
     workspaceId: v.id("workspaces"),
     fingerprint: v.optional(v.string()),

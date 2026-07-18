@@ -240,7 +240,7 @@ export function InstallSection() {
             Same auth across MCP, CLI, HTTP gateway, and Remote MCP. Browser opens, one tap, ~10 seconds.
           </p>
           <p className="text-[11px] text-text-muted mt-2">
-            On a headless server or SSH? Add <code className="text-accent">--email-fallback</code> for the magic-link flow.
+            On a headless server or SSH session, open the sign-in URL on a device where you can verify ownership.
           </p>
         </div>
       </div>

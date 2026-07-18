@@ -23,6 +23,7 @@ const http = httpRouter();
 
 const CANON_DISCOVERABLE_APIS = 26_701;
 const CANON_CALLABLE_APIS = 2_906;
+const legacyMagicLinkRetired = (): boolean => true;
 
 // Provider catalog - runtime provider capabilities and credential handles.
 interface ProviderMeta {
@@ -2664,6 +2665,12 @@ http.route({
   path: "/workspace/magic-link",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
+    if (legacyMagicLinkRetired()) return jsonResponse({
+      error: "legacy_auth_retired",
+      message: "Use APIClaw browser auth to verify workspace ownership.",
+      command: "npx @nordsym/apiclaw auth login",
+    }, 410);
+
     try {
       const body = await request.json();
       const { email, fingerprint } = body;
@@ -2673,7 +2680,7 @@ http.route({
       }
 
       // Create magic link
-      const result = await ctx.runMutation(api.workspaces.createMagicLink, {
+      const result = await ctx.runMutation(internal.workspaces.createMagicLink, {
         email: email.toLowerCase(),
         fingerprint,
       });
@@ -2794,6 +2801,9 @@ http.route({
   path: "/workspace/by-email",
   method: "GET",
   handler: httpAction(async (ctx, request) => {
+    if (legacyMagicLinkRetired()) {
+      return jsonResponse({ error: "legacy_workspace_lookup_retired" }, 410);
+    }
     const url = new URL(request.url);
     const email = url.searchParams.get("email");
 
@@ -2801,7 +2811,7 @@ http.route({
       return jsonResponse({ error: "email required" }, 400);
     }
 
-    const result = await ctx.runQuery(api.workspaces.getByEmail, { email });
+    const result = await ctx.runQuery(internal.workspaces.getByEmail, { email });
     
     if (!result) {
       return jsonResponse({ exists: false });
@@ -4580,6 +4590,10 @@ http.route({
             data: result.data,
             _apiclaw: { latencyMs, route: routeDetail, gateway: true },
           }, result.status);
+        }
+
+        if (!req) {
+          return jsonResponse({ success: false, provider, action, error: "Managed request could not be built" }, 500);
         }
 
         const fetchOpts: RequestInit = { method: req.method, headers: req.headers };

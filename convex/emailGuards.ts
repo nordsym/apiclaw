@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 
 /**
  * Email send-time guards.
@@ -78,7 +78,7 @@ export const assertEmailAllowed = internalAction({
     if (!sync.allowed) return sync;
 
     // Tier check via workspace lookup by email.
-    const workspace = (await ctx.runQuery(api.workspaces.getByEmail, {
+    const workspace = (await ctx.runQuery(internal.workspaces.getByEmail, {
       email: args.email,
     })) as { tier?: string } | null;
     if (workspace?.tier && NO_EMAIL_TIERS.has(workspace.tier)) {

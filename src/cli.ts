@@ -79,6 +79,13 @@ async function validateSession(): Promise<boolean> {
 }
 
 async function registerOwner(email: string): Promise<void> {
+  const legacyAuthRetired: boolean = true;
+  if (legacyAuthRetired) {
+    void email;
+    error("Legacy email registration is retired. Run: npx @nordsym/apiclaw auth login");
+    return;
+  }
+
   info(`Sending magic link to ${email}...`);
   
   try {
@@ -243,7 +250,7 @@ function showHelp(): void {
 ${colors.bright}🦞 APIClaw CLI${colors.reset}
 
 ${colors.cyan}Commands:${colors.reset}
-  register <email>      Send magic link to authenticate
+  register <email>      Retired alias. Use auth login
   status                Check authentication status
   discover <query>      Search for APIs by capability
   list                  Show managed providers

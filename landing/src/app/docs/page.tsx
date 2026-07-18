@@ -205,12 +205,9 @@ export default function DocsPage() {
                   </pre>
                 </div>
                 <div>
-                  <p className="text-sm font-medium mb-2">Headless server or SSH (no browser available):</p>
-                  <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
-                    <code className="text-sm text-[var(--text-primary)]">npx @nordsym/apiclaw auth login --email-fallback</code>
-                  </pre>
-                  <p className="text-xs text-[var(--text-muted)] mt-2">
-                    Uses the legacy email magic-link flow — the link is delivered to your inbox, you click it, the CLI catches the callback over polling.
+                  <p className="text-sm font-medium mb-2">Headless server or SSH:</p>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Run the same login command and open the sign-in URL on a device where you can complete ownership verification.
                   </p>
                 </div>
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] p-4">

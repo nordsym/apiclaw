@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Layers,
@@ -9,16 +9,17 @@ import {
   AlertTriangle,
   CircleSlash,
   Loader2,
+  PlayCircle,
   ExternalLink,
-  Copy,
-  Check,
 } from "lucide-react";
 import {
   useInfiniteCatalog,
   type CatalogItem,
   type FetchPage,
 } from "@/lib/useInfiniteCatalog";
-import { convexQuery } from "@/lib/convex-client";
+
+const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_APICLAW_GATEWAY_URL || "https://api.apiclaw.cloud";
 
 type SectionId = "discover" | "callable";
 
@@ -49,56 +50,61 @@ const fetchFromCatalogApi: FetchPage = async ({
   };
 };
 
-// ── Health enrichment for callable section ───────────────────────────────
-//
-// /api/catalog gives names + callable flag. Health (circuit-breaker state)
-// lives in Convex providerAPIs. We fetch all health entries once and merge
-// by name. Cheap because callable is ~1,650 rows.
+const fetchManagedProviders: FetchPage = async ({ page, pageSize, query, category, signal }) => {
+  const response = await fetch(`${GATEWAY_URL}/api/discover`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query: "" }),
+    signal,
+  });
+  if (!response.ok) throw new Error(`Gateway catalog ${response.status}`);
+  const data = await response.json() as {
+    providers?: Array<{ providerId: string; name: string; description: string; category: string; pricing?: string }>;
+  };
+  const normalizedQuery = query.trim().toLowerCase();
+  const filtered = (data.providers || [])
+    .filter((provider) => !normalizedQuery || [provider.providerId, provider.name, provider.description].some((value) => value.toLowerCase().includes(normalizedQuery)))
+    .filter((provider) => !category || provider.category === category)
+    .map((provider) => ({
+      name: provider.name,
+      description: provider.description,
+      category: provider.category,
+      baseUrl: provider.providerId,
+      auth: "managed",
+      pricing: provider.pricing,
+      callable: true,
+    }));
+  const offset = (page - 1) * pageSize;
+  return {
+    items: filtered.slice(offset, offset + pageSize),
+    total: filtered.length,
+    hasMore: offset + pageSize < filtered.length,
+  };
+};
+
+// Health is shown only when the source row contains a measured status.
 
 type HealthMap = Record<string, "healthy" | "degraded" | "down" | "unclassified" | "unknown">;
 
-async function fetchHealth(): Promise<HealthMap> {
-  try {
-    // searchDiscovery returns callable rows with healthStatus. Pull up to the
-    // current callable count (~1,650). One round trip, cheap on Convex.
-    const map: HealthMap = {};
-    let offset = 0;
-    const limit = 200;
-    for (let i = 0; i < 12; i++) {
-      const res = await convexQuery<{
-        results: Array<{ name: string; healthStatus?: string }>;
-        total: number;
-      }>("pipelineAlign:searchDiscovery", {
-        callableOnly: true,
-        limit,
-        offset,
-      });
-      for (const row of res.results) {
-        const status = (row.healthStatus ?? "unknown") as HealthMap[string];
-        map[row.name.toLowerCase()] = status;
-      }
-      if (res.results.length < limit) break;
-      offset += limit;
-      if (offset >= res.total) break;
-    }
-    return map;
-  } catch {
-    return {};
-  }
-}
-
 // ── Component ────────────────────────────────────────────────────────────
 
-export function WorkspaceCatalog() {
+export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | null }) {
   const [section, setSection] = useState<SectionId>("discover");
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query.trim()), 250);
+    return () => clearTimeout(id);
+  }, [query]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">API Catalog</h2>
+        <h2 className="text-2xl font-bold">Catalog & Test</h2>
         <p className="text-[var(--text-muted)] mt-1">
-          Two views, one registry. Discover what&apos;s indexed. Callable shows
-          what your agent can hit right now, with live gateway health.
+          Discover indexed APIs or inspect the canonical public providers wired to the managed gateway.
         </p>
       </div>
 
@@ -106,7 +112,7 @@ export function WorkspaceCatalog() {
         <SectionCard
           id="discover"
           active={section === "discover"}
-          onClick={() => setSection("discover")}
+          onClick={() => { setSection("discover"); setCategory(""); }}
           title="Discover"
           subtitle="Every API in the registry"
           accent="blue"
@@ -116,20 +122,84 @@ export function WorkspaceCatalog() {
         <SectionCard
           id="callable"
           active={section === "callable"}
-          onClick={() => setSection("callable")}
-          title="Callable"
-          subtitle="What your agent can hit right now"
+          onClick={() => { setSection("callable"); setCategory(""); }}
+          title="Managed Gateway"
+          subtitle="Canonical public provider routes"
           accent="green"
           icon={<Sparkles className="w-5 h-5" />}
-          hint="call_api(provider, action, params)"
+          hint="/v1/execute"
         />
       </div>
 
+      <TestCallPanel sessionToken={sessionToken} />
+
       {section === "discover" ? (
-        <DiscoverSection />
+        <DiscoverSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} />
       ) : (
-        <CallableSection />
+        <CallableSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} />
       )}
+    </div>
+  );
+}
+
+function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
+  const [query, setQuery] = useState("APIClaw agent infrastructure");
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const runTest = async () => {
+    if (!sessionToken || !query.trim()) return;
+    setRunning(true);
+    setResult(null);
+    try {
+      const response = await fetch(`${GATEWAY_URL}/v1/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-APIClaw-Session": sessionToken,
+        },
+        body: JSON.stringify({
+          provider: "brave_search",
+          action: "search",
+          params: { query: query.trim(), count: 3 },
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error || data.success === false) {
+        const message = data?.error?.message || data?.error || "The managed call failed.";
+        throw new Error(typeof message === "string" ? message : "The managed call failed.");
+      }
+      const count = data?.data?.web?.results?.length ?? data?.web?.results?.length ?? data?.result?.web?.results?.length ?? 0;
+      setResult({ ok: true, message: `Managed call succeeded${count ? ` with ${count} results` : ""}. Open Activity to inspect the log.` });
+    } catch (error) {
+      setResult({ ok: false, message: error instanceof Error ? error.message : "The managed call failed." });
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5">
+      <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <PlayCircle className="w-5 h-5 text-[#ef4444]" />
+            <h3 className="font-semibold">Run a real managed call</h3>
+          </div>
+          <p className="text-sm text-[var(--text-muted)] mb-3">Test the golden path with Brave Search. This uses one managed call and writes a real Activity log.</p>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="What should the agent search for?"
+            className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/40"
+          />
+        </div>
+        <button type="button" onClick={runTest} disabled={!sessionToken || running || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] disabled:opacity-50 transition">
+          {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
+          {running ? "Running..." : "Run test call"}
+        </button>
+      </div>
+      {result && <p role={result.ok ? "status" : "alert"} className={`text-sm mt-3 ${result.ok ? "text-green-500" : "text-red-500"}`}>{result.message}</p>}
     </div>
   );
 }
@@ -179,15 +249,7 @@ function SectionCard({
 
 // ── Discover section: 26k+ APIs, search + category, infinite scroll ─────
 
-function DiscoverSection() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedQuery(query.trim()), 250);
-    return () => clearTimeout(id);
-  }, [query]);
+function DiscoverSection({ query, setQuery, category, setCategory, debouncedQuery }: CatalogSectionProps) {
 
   const { items, total, hasMore, loading, loadingMore, error, sentinelRef } =
     useInfiniteCatalog({
@@ -225,32 +287,25 @@ function DiscoverSection() {
   );
 }
 
-// ── Callable section: ~1,650 rows, with health badges ──────────────────
+// ── Managed gateway section: canonical provider registry ───────────────
 
-function CallableSection() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [healthByName, setHealthByName] = useState<HealthMap>({});
+type CatalogSectionProps = {
+  query: string;
+  setQuery: (value: string) => void;
+  category: string;
+  setCategory: (value: string) => void;
+  debouncedQuery: string;
+};
 
-  useEffect(() => {
-    const id = setTimeout(() => setDebouncedQuery(query.trim()), 250);
-    return () => clearTimeout(id);
-  }, [query]);
-
-  useEffect(() => {
-    fetchHealth().then(setHealthByName);
-    const interval = setInterval(() => fetchHealth().then(setHealthByName), 30_000);
-    return () => clearInterval(interval);
-  }, []);
+function CallableSection({ query, setQuery, category, setCategory, debouncedQuery }: CatalogSectionProps) {
 
   const { items, total, hasMore, loading, loadingMore, error, sentinelRef } =
     useInfiniteCatalog({
-      fetchPage: fetchFromCatalogApi,
+      fetchPage: fetchManagedProviders,
       pageSize: 60,
       query: debouncedQuery,
       category,
-      callableOnly: true,
+      callableOnly: false,
     });
 
   return (
@@ -269,7 +324,7 @@ function CallableSection() {
           {error}
         </div>
       )}
-      <CatalogList items={items} healthByName={healthByName} loading={loading} />
+      <CatalogList items={items} healthByName={null} loading={loading} />
       <Sentinel
         sentinelRef={sentinelRef}
         loadingMore={loadingMore}
@@ -397,20 +452,8 @@ function CatalogRow({
   api: CatalogItem;
   health?: "healthy" | "degraded" | "down" | "unclassified" | "unknown";
 }) {
-  const [copied, setCopied] = useState(false);
   const isManaged = api.auth === "managed";
   const isOpen = api.auth === "none" || api.auth === "open";
-
-  const callSnippet = useMemo(() => {
-    const slug = api.name.toLowerCase().replace(/\s+/g, "_");
-    return `apiclaw call ${slug}/<action> -d '{}'`;
-  }, [api.name]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(callSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   return (
     <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[#ef4444]/30 transition">
@@ -441,18 +484,11 @@ function CatalogRow({
         <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
           {api.description}
         </p>
-        {api.callable && (
+        {api.callable && isManaged && (
           <div className="mt-2 flex items-center gap-2">
             <code className="text-[11px] font-mono text-[var(--text-secondary)] bg-[var(--surface)] border border-[var(--border)] rounded px-2 py-0.5 truncate">
-              {callSnippet}
+              provider: {api.baseUrl} · /v1/execute
             </code>
-            <button
-              onClick={handleCopy}
-              aria-label="Copy call snippet"
-              className="text-[var(--text-muted)] hover:text-[#ef4444] transition shrink-0"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-            </button>
           </div>
         )}
       </div>

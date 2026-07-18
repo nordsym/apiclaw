@@ -94,6 +94,12 @@ import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
+import {
+  getAgentPresence,
+  getWorkspaceNavigation,
+  isUnlimitedWorkspace,
+  type WorkspaceSurfaceId,
+} from "@/lib/workspace-truth";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -174,45 +180,8 @@ interface ProviderAnalytics {
   topActions: { actionName: string; calls: number }[];
 }
 
-type TabType = "overview" | "api-catalog" | "my-agents" | "my-apis" | "api-keys" | "analytics" | "webhooks" | "docs" | "feedback" | "settings" | "billing";
+type TabType = WorkspaceSurfaceId;
 type AnalyticsSubtab = "overview" | "usage" | "logs" | "chains";
-
-// Generate preview analytics data for demo
-function generatePreviewAnalytics(): ProviderAnalytics {
-  const days = [];
-  const baseDate = new Date();
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(baseDate);
-    date.setDate(date.getDate() - i);
-    days.push({
-      date: date.toISOString().split("T")[0],
-      calls: Math.floor(Math.random() * 150) + 50 + Math.floor(i * 3),
-    });
-  }
-  
-  return {
-    totalCalls: 2847,
-    uniqueAgents: 156,
-    avgLatency: 145,
-    successRate: 98.2,
-    isPreview: true,
-    callsByDay: days,
-    topAgents: [
-      { agentId: "agent_claude_prod_7x9k", calls: 847 },
-      { agentId: "agent_cursor_dev_3m2p", calls: 623 },
-      { agentId: "agent_gpt4_main_1n8q", calls: 512 },
-      { agentId: "agent_cline_test_4r7w", calls: 389 },
-      { agentId: "agent_aider_auto_2k5j", calls: 276 },
-      { agentId: "agent_sweep_ci_9p3m", calls: 200 },
-    ],
-    topActions: [
-      { actionName: "generate_image", calls: 1247 },
-      { actionName: "search_web", calls: 892 },
-      { actionName: "transcribe_audio", calls: 456 },
-      { actionName: "scrape_url", calls: 252 },
-    ],
-  };
-}
 
 export default function WorkspacePage() {
   const router = useRouter();
@@ -224,14 +193,25 @@ export default function WorkspacePage() {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   
-  const tabFromUrl = searchParams.get("tab") as TabType | null;
+  const requestedTab = searchParams.get("tab");
+  const legacyTabMap: Record<string, TabType> = {
+    "my-agents": "connections",
+    "api-keys": "connections",
+    integrations: "connections",
+    analytics: "activity",
+    logs: "activity",
+    "my-apis": "provider-console",
+  };
+  const tabFromUrl = (requestedTab && legacyTabMap[requestedTab]) || requestedTab as TabType | null;
   const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
+  const legacyConnectionSection = requestedTab === "api-keys" ? "keys" : requestedTab === "integrations" ? "remote" : "agents";
+  const connectionSectionFromUrl = searchParams.get("section") || legacyConnectionSection;
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "overview");
-  const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "overview");
-  const [analyticsExpanded, setAnalyticsExpanded] = useState(tabFromUrl === "analytics");
+  const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "logs");
+  const [connectionsSection, setConnectionsSection] = useState(connectionSectionFromUrl);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   
@@ -244,7 +224,6 @@ export default function WorkspacePage() {
   // Provider data
   const [providerApis, setProviderApis] = useState<ProviderAPI[]>([]);
   const [approvedApis, setApprovedApis] = useState<ApprovedAPI[]>([]);
-  const [providerAnalytics, setProviderAnalytics] = useState<ProviderAnalytics | null>(null);
   const [providerName, setProviderName] = useState<string | null>(null);
   const [providerId, setProviderId] = useState<string | null>(null);
   const [isProvider, setIsProvider] = useState(false);
@@ -281,17 +260,19 @@ export default function WorkspacePage() {
   }, [searchParams, showToast]);
 
   useEffect(() => {
-    const validTabs: TabType[] = ["overview", "api-catalog", "my-agents", "my-apis", "api-keys", "analytics", "webhooks", "docs", "feedback", "settings", "billing"];
+    const validTabs: TabType[] = ["overview", "api-catalog", "connections", "activity", "billing", "settings", "provider-console"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
-      if (tabFromUrl === "analytics") {
-        setAnalyticsExpanded(true);
+      if (tabFromUrl === "connections" && ["agents", "keys", "remote"].includes(connectionSectionFromUrl)) {
+        setConnectionsSection(connectionSectionFromUrl);
+      }
+      if (tabFromUrl === "activity") {
         if (subFromUrl && ["overview", "usage", "logs", "chains"].includes(subFromUrl)) {
           setAnalyticsSubtab(subFromUrl);
         }
       }
     }
-  }, [tabFromUrl, subFromUrl]);
+  }, [tabFromUrl, subFromUrl, connectionSectionFromUrl]);
 
   const fetchWorkspaceData = useCallback(async (token: string) => {
     try {
@@ -375,66 +356,41 @@ export default function WorkspacePage() {
     }
   }, []);
 
-  const fetchProviderData = useCallback(async (_workspaceId?: string, email?: string) => {
-    if (!email) {
+  const fetchProviderData = useCallback(async (token?: string) => {
+    if (!token) {
       setIsProvider(false);
       return;
     }
     try {
-      const resolvedEmail = email;
-      let apis: ProviderAPI[] = [];
-      if (resolvedEmail) {
-        const provRes = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ path: "providers:getProviderByEmail", args: { email: resolvedEmail } }),
-        });
-        const provData = await provRes.json();
-        const provider = provData.value || provData;
-        if (provider?._id) {
-          setProviderId(provider._id);
-          const legacyRes = await fetch(`${CONVEX_URL}/api/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ path: "providers:getProviderAPIsWithStatus", args: { providerId: provider._id } }),
-          });
-          const legacyData = await legacyRes.json();
-          const all = legacyData.value || legacyData || [];
-          // Deduplicate by name
-          const seen = new Set<string>();
-          apis = (Array.isArray(all) ? all : []).filter((a: ProviderAPI) => {
-            if (seen.has(a.name)) return false;
-            seen.add(a.name);
-            return true;
-          });
-        }
-      }
-      if (apis.length > 0) {
-        setProviderApis(apis);
+      const response = await fetch(`${CONVEX_URL}/api/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: "providers:getWorkspaceProviderConsole", args: { token } }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.status === "error") throw new Error(data.errorMessage || "Provider console unavailable");
+      const result = data.value || data;
+      const provider = result.provider;
+      const seen = new Set<string>();
+      const apis = (Array.isArray(result.apis) ? result.apis : []).filter((api: ProviderAPI) => {
+        const key = api.name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      setProviderApis(apis);
+      if (provider?.id) {
+        setProviderId(provider.id);
+        setProviderName(provider.name || null);
         setIsProvider(true);
-      }
-      // Analytics — live data as calls come in
-      try {
-        const analyticsRes = await fetch(`${CONVEX_URL}/api/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: "providers:getAnalytics",
-            args: { workspaceId: _workspaceId },
-          }),
-        });
-        const analyticsData = await analyticsRes.json();
-        const analytics = analyticsData.value || analyticsData;
-        if (analytics && typeof analytics === "object" && !analytics.status) {
-          setProviderAnalytics(analytics);
-        } else {
-          setProviderAnalytics(null);
-        }
-      } catch {
-        setProviderAnalytics(null);
+      } else {
+        setProviderId(null);
+        setProviderName(null);
+        setIsProvider(false);
       }
     } catch (err) {
       console.error("Fetch provider error:", err);
+      setIsProvider(false);
     }
   }, []);
 
@@ -461,17 +417,7 @@ export default function WorkspacePage() {
         if (token) {
           setSessionToken(token);
           await fetchWorkspaceData(token);
-          // Fetch provider APIs — get email directly from dashboard (no extra round-trip needed)
-          try {
-            const dashRes = await fetch(`${CONVEX_URL}/api/query`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ path: "workspaces:getWorkspaceDashboard", args: { token } }),
-            });
-            const dashData = await dashRes.json();
-            const email = (dashData.value || dashData)?.workspace?.email;
-            if (email) await fetchProviderData(undefined, email);
-          } catch { /* ignore — provider APIs not critical for workspace load */ }
+          await fetchProviderData(token);
         }
 
         // Fetch all approved APIs for the catalog
@@ -551,13 +497,12 @@ export default function WorkspacePage() {
     init();
   }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs, signInPath]);
 
-  // Reactively load provider APIs when workspace email becomes available
   useEffect(() => {
-    if (workspace?.email) {
-      fetchProviderData(undefined, workspace.email);
+    if (!isLoading && activeTab === "provider-console" && !isProvider) {
+      setActiveTab("overview");
+      router.replace("/workspace?tab=overview");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace?.email]);
+  }, [activeTab, isLoading, isProvider, router]);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -595,8 +540,7 @@ export default function WorkspacePage() {
     try {
       if (sessionToken) {
         await fetchWorkspaceData(sessionToken);
-        const email = workspace?.email;
-        if (email) await fetchProviderData(undefined, email);
+        await fetchProviderData(sessionToken);
       }
       await fetchApprovedAPIs();
     } catch (err) {
@@ -640,46 +584,19 @@ export default function WorkspacePage() {
     }
   };
 
-  // Main navigation tabs
-  const mainTabs = [
-    { id: "overview" as TabType, label: "Overview", icon: Home },
-    { id: "api-catalog" as TabType, label: "API Catalog", icon: Zap },
-    { id: "my-agents" as TabType, label: "My Agents", icon: Users },
-    { id: "my-apis" as TabType, label: "My APIs", icon: Terminal },
-    { id: "api-keys" as TabType, label: "API Keys", icon: Key },
-    { id: "analytics" as TabType, label: "Analytics", icon: BarChart3, hasDropdown: true },
-    { id: "webhooks" as TabType, label: "Notifications", icon: Bell },
-  ];
-
-  // Secondary navigation tabs
-  const secondaryTabs = [
-    { id: "integrations" as TabType, label: "Integrations", icon: Layers, href: "/workspace/integrations" },
-    { id: "docs" as TabType, label: "Docs", icon: BookOpen },
-    { id: "feedback" as TabType, label: "Feedback", icon: MessageSquare },
-  ];
-
-  // Bottom navigation tabs (before theme/logout)
-  const bottomTabs = [
-    { id: "billing" as TabType, label: "Billing", icon: CreditCard },
-    { id: "settings" as TabType, label: "Settings", icon: Settings },
-  ];
-
-  // All tabs for lookup
-  const tabs = [...mainTabs, ...secondaryTabs, ...bottomTabs, { id: "billing" as TabType, label: "Billing", icon: CreditCard }];
-
-  // Get display name for current tab
-  const getTabLabel = () => {
-    if (activeTab === "analytics") {
-      const subLabels: Record<AnalyticsSubtab, string> = {
-        overview: "Agent Analytics",
-        usage: "API Analytics",
-        logs: "Logs",
-        chains: "Chain Traces",
-      };
-      return subLabels[analyticsSubtab] || "Analytics";
-    }
-    return tabs.find(t => t.id === activeTab)?.label || "Workspace";
+  const iconBySurface: Record<TabType, typeof Home> = {
+    overview: Home,
+    "api-catalog": ScanSearch,
+    connections: Layers,
+    activity: Activity,
+    billing: CreditCard,
+    settings: Settings,
+    "provider-console": Terminal,
   };
+  const tabs = getWorkspaceNavigation({ isProvider }).map((item) => ({
+    ...item,
+    icon: iconBySurface[item.id],
+  }));
 
   if (isLoading) {
     return (
@@ -799,168 +716,21 @@ export default function WorkspacePage() {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {/* Main tabs */}
-            {mainTabs.map((tab) => {
-              // Special handling for Analytics with dropdown
-              if (tab.id === "analytics") {
-                return (
-                  <div key={tab.id}>
-                    <button
-                      onClick={() => {
-                        setAnalyticsExpanded(!analyticsExpanded);
-                        if (!analyticsExpanded) {
-                          setActiveTab("analytics");
-                          setAnalyticsSubtab("overview");
-                          router.push(`/workspace?tab=analytics&sub=overview`);
-                        }
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition ${
-                        activeTab === "analytics"
-                          ? "bg-[#ef4444] text-white"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <tab.icon className="w-5 h-5" />
-                        <span>{tab.label}</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${analyticsExpanded ? "rotate-180" : ""}`} />
-                    </button>
-                    {/* Dropdown submenu */}
-                    {analyticsExpanded && (
-                      <div className="ml-4 mt-1 space-y-1">
-                        <button
-                          onClick={() => {
-                            setActiveTab("analytics");
-                            setAnalyticsSubtab("overview");
-                            setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=overview`);
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "overview"
-                              ? "bg-[#ef4444]/20 text-[#ef4444]"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          <BarChart3 className="w-4 h-4" />
-                          <span>Agent Analytics</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab("analytics");
-                            setAnalyticsSubtab("usage");
-                            setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=usage`);
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "usage"
-                              ? "bg-[#ef4444]/20 text-[#ef4444]"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          <TrendingUp className="w-4 h-4" />
-                          <span>API Analytics</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab("analytics");
-                            setAnalyticsSubtab("chains");
-                            setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=chains`);
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "chains"
-                              ? "bg-[#ef4444]/20 text-[#ef4444]"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          <LinkIcon className="w-4 h-4" />
-                          <span>Chains</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setActiveTab("analytics");
-                            setAnalyticsSubtab("logs");
-                            setSidebarOpen(false);
-                            router.push(`/workspace?tab=analytics&sub=logs`);
-                          }}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
-                            activeTab === "analytics" && analyticsSubtab === "logs"
-                              ? "bg-[#ef4444]/20 text-[#ef4444]"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          <ScrollText className="w-4 h-4" />
-                          <span>Logs</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-              
-              // Regular tab button
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setSidebarOpen(false);
-                    router.push(`/workspace?tab=${tab.id}`);
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    activeTab === tab.id
-                      ? "bg-[#ef4444] text-white"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-
-            {/* Separator */}
-            <div className="border-t border-[var(--border)] my-3" />
-
-            {/* Secondary tabs */}
-            {secondaryTabs.map((tab) => {
-              const isExternal = "href" in tab && typeof tab.href === "string";
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setSidebarOpen(false);
-                    if (isExternal) {
-                      router.push(tab.href as string);
-                      return;
-                    }
-                    setActiveTab(tab.id);
-                    router.push(`/workspace?tab=${tab.id}`);
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-                    !isExternal && activeTab === tab.id
-                      ? "bg-[#ef4444] text-white"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-
-            {/* Separator */}
-            <div className="border-t border-[var(--border)] my-3" />
-
-            {/* Bottom tabs (Settings) */}
-            {bottomTabs.map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id);
+                  if (tab.id === "activity") setAnalyticsSubtab("logs");
+                  if (tab.id === "connections") setConnectionsSection("agents");
                   setSidebarOpen(false);
-                  router.push(`/workspace?tab=${tab.id}`);
+                  router.push(
+                    tab.id === "activity"
+                      ? "/workspace?tab=activity&sub=logs"
+                      : tab.id === "connections"
+                        ? "/workspace?tab=connections&section=agents"
+                        : `/workspace?tab=${tab.id}`,
+                  );
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
                   activeTab === tab.id
@@ -972,6 +742,15 @@ export default function WorkspacePage() {
                 <span>{tab.label}</span>
               </button>
             ))}
+            <div className="border-t border-[var(--border)] my-3" />
+            <Link href="/docs" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition">
+              <BookOpen className="w-5 h-5" />
+              <span>Help & Docs</span>
+            </Link>
+            <a href="mailto:hello@apiclaw.cloud?subject=APIClaw%20feedback" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition">
+              <MessageSquare className="w-5 h-5" />
+              <span>Feedback</span>
+            </a>
           </nav>
 
           {/* Bottom section */}
@@ -996,19 +775,6 @@ export default function WorkspacePage() {
 
       {/* Main content */}
       <main className="lg:ml-64 min-h-screen pt-14 lg:pt-0">
-        {/* Desktop header */}
-        <header className="hidden lg:flex items-center justify-between px-8 py-4 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-xl sticky top-0 z-40">
-          <h1 className="text-xl font-bold">{getTabLabel()}</h1>
-          <div className="flex items-center gap-4">
-            {activeTab === "my-apis" && (
-              <button onClick={() => setShowAddApi(true)} className="btn-primary !py-2 !px-4 text-sm flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                List New API
-              </button>
-            )}
-          </div>
-        </header>
-
         {/* Page content */}
         <div className="p-4 lg:p-8">
           {/* Usage warning/exceeded banners */}
@@ -1038,44 +804,52 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "api-catalog" && (
-            <WorkspaceCatalog />
+            <WorkspaceCatalog sessionToken={sessionToken} />
           )}
-          {activeTab === "my-agents" && (
-            <AgentsTab agents={agents} onRevoke={handleRevokeAgent} onRename={handleRenameAgent} workspaceEmail={workspace?.email} sessionToken={sessionToken || undefined} isProvider={isProvider} />
+          {activeTab === "connections" && (
+            <ConnectionsTab
+              agents={agents}
+              onRevoke={handleRevokeAgent}
+              onRename={handleRenameAgent}
+              workspaceEmail={workspace?.email}
+              sessionToken={sessionToken}
+              isProvider={isProvider}
+              section={connectionsSection}
+              onSectionChange={(next) => {
+                setConnectionsSection(next);
+                router.push(`/workspace?tab=connections&section=${next}`);
+              }}
+            />
           )}
-          {activeTab === "my-apis" && (
-            <MyAPIsTab apis={providerApis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} providerId={providerId} />
-          )}
-          {activeTab === "api-keys" && (
-            <APIKeysTab sessionToken={sessionToken} />
-          )}
-          {activeTab === "analytics" && (
-            <AnalyticsTab
-              apis={providerApis} 
-              analytics={providerAnalytics} 
+          {activeTab === "activity" && (
+            <ActivityTab
               workspace={workspace}
               agents={agents}
               usage={usage}
               activeSubtab={analyticsSubtab}
-              setActiveSubtab={setAnalyticsSubtab}
+              setActiveSubtab={(next) => {
+                setAnalyticsSubtab(next);
+                router.push(`/workspace?tab=activity&sub=${next}`);
+              }}
               sessionToken={sessionToken}
-              isProvider={isProvider}
             />
-          )}
-          {activeTab === "webhooks" && (
-            <WebhooksTab sessionToken={sessionToken} />
           )}
           {activeTab === "billing" && (
             <BillingTab workspace={workspace} sessionToken={sessionToken} />
           )}
-          {activeTab === "docs" && (
-            <DocsTab />
-          )}
-          {activeTab === "feedback" && (
-            <FeedbackTab />
-          )}
           {activeTab === "settings" && (
             <SettingsTab workspace={workspace} sessionToken={sessionToken} onWorkspaceUpdate={(patch) => setWorkspace(prev => prev ? { ...prev, ...patch } : prev)} />
+          )}
+          {activeTab === "provider-console" && isProvider && (
+            <ProviderConsoleTab
+              apis={providerApis}
+              workspace={workspace}
+              usage={usage}
+              sessionToken={sessionToken}
+              providerId={providerId}
+              showAddApi={showAddApi}
+              setShowAddApi={setShowAddApi}
+            />
           )}
         </div>
       </main>
@@ -1086,6 +860,199 @@ export default function WorkspacePage() {
 // ============================================
 // OVERVIEW TAB
 // ============================================
+
+function SurfaceTabs({
+  items,
+  active,
+  onChange,
+}: {
+  items: Array<{ id: string; label: string; icon: typeof Home }>;
+  active: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 p-1 bg-[var(--surface)] rounded-xl w-fit max-w-full overflow-x-auto">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={active === item.id}
+          onClick={() => onChange(item.id)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+            active === item.id
+              ? "bg-[#ef4444] text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <item.icon className="w-4 h-4" />
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ConnectionsTab({
+  agents,
+  onRevoke,
+  onRename,
+  workspaceEmail,
+  sessionToken,
+  isProvider,
+  section,
+  onSectionChange,
+}: {
+  agents: Agent[];
+  onRevoke: (id: string) => void;
+  onRename: (id: string, name: string) => void;
+  workspaceEmail?: string;
+  sessionToken: string | null;
+  isProvider: boolean;
+  section: string;
+  onSectionChange: (section: string) => void;
+}) {
+  const sections = [
+    { id: "agents", label: "Agents", icon: Bot },
+    { id: "keys", label: "API Keys", icon: Key },
+    { id: "remote", label: "Remote MCP", icon: Globe },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Connections</h2>
+        <p className="text-[var(--text-muted)] mt-1">Connect agents and tools to this workspace with one shared identity.</p>
+      </div>
+      <SurfaceTabs items={sections} active={section} onChange={onSectionChange} />
+      {section === "agents" && (
+        <AgentsTab agents={agents} onRevoke={onRevoke} onRename={onRename} workspaceEmail={workspaceEmail} sessionToken={sessionToken || undefined} isProvider={isProvider} />
+      )}
+      {section === "keys" && <APIKeysTab sessionToken={sessionToken} />}
+      {section === "remote" && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-xl bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center shrink-0"><Globe className="w-5 h-5" /></div>
+            <div className="flex-1">
+              <h3 className="font-semibold">Remote MCP and integrations</h3>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Use APIClaw from hosted agents, automations, or any MCP client without exposing provider credentials.</p>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <Link href="/workspace/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+                  Configure Remote MCP <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/docs" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-medium hover:border-[#ef4444]/40 transition">
+                  Read setup docs <ExternalLink className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActivityTab({
+  workspace,
+  agents,
+  usage,
+  activeSubtab,
+  setActiveSubtab,
+  sessionToken,
+}: {
+  workspace: Workspace | null;
+  agents: Agent[];
+  usage: UsageData | null;
+  activeSubtab: AnalyticsSubtab;
+  setActiveSubtab: (tab: AnalyticsSubtab) => void;
+  sessionToken: string | null;
+}) {
+  const router = useRouter();
+  const [hasChains, setHasChains] = useState(false);
+
+  useEffect(() => {
+    if (!sessionToken) return;
+    fetch(`${CONVEX_URL}/api/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: "chains:getChainStatsAuth", args: { token: sessionToken } }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const result = data.value || data;
+        setHasChains((result?.total || 0) > 0);
+      })
+      .catch(() => setHasChains(false));
+  }, [sessionToken]);
+
+  useEffect(() => {
+    if (activeSubtab === "usage") setActiveSubtab("overview");
+    if (activeSubtab === "chains" && !hasChains) setActiveSubtab("logs");
+  }, [activeSubtab, hasChains, setActiveSubtab]);
+
+  const tabs = [
+    { id: "logs", label: "Logs", icon: ScrollText },
+    { id: "overview", label: "Usage", icon: BarChart3 },
+    ...(hasChains ? [{ id: "chains", label: "Chains", icon: LinkIcon }] : []),
+  ];
+
+  const changeTab = (id: string) => {
+    const next = id as AnalyticsSubtab;
+    setActiveSubtab(next);
+    router.push(`/workspace?tab=activity&sub=${next}`);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Activity</h2>
+        <p className="text-[var(--text-muted)] mt-1">Every discovery and managed call from this workspace, with the latest events first.</p>
+      </div>
+      <SurfaceTabs items={tabs} active={activeSubtab} onChange={changeTab} />
+      {activeSubtab === "logs" && <LogsTab sessionToken={sessionToken} />}
+      {activeSubtab === "overview" && <AnalyticsOverviewTab apis={[]} analytics={null} workspace={workspace} agents={agents} usage={usage} sessionToken={sessionToken} />}
+      {activeSubtab === "chains" && hasChains && <ChainsTab sessionToken={sessionToken} isProvider={false} />}
+    </div>
+  );
+}
+
+function ProviderConsoleTab({
+  apis,
+  workspace,
+  usage,
+  sessionToken,
+  providerId,
+  showAddApi,
+  setShowAddApi,
+}: {
+  apis: ProviderAPI[];
+  workspace: Workspace | null;
+  usage: UsageData | null;
+  sessionToken: string | null;
+  providerId: string | null;
+  showAddApi: boolean;
+  setShowAddApi: (show: boolean) => void;
+}) {
+  const [section, setSection] = useState("apis");
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Provider Console</h2>
+        <p className="text-[var(--text-muted)] mt-1">Manage APIs you publish to APIClaw and inspect real inbound agent traffic.</p>
+      </div>
+      <SurfaceTabs
+        items={[
+          { id: "apis", label: "My APIs", icon: Terminal },
+          { id: "analytics", label: "Inbound Analytics", icon: TrendingUp },
+        ]}
+        active={section}
+        onChange={setSection}
+      />
+      {section === "apis" && <MyAPIsTab apis={apis} onAdd={() => setShowAddApi(true)} showAddForm={showAddApi} onCloseForm={() => setShowAddApi(false)} sessionToken={sessionToken} providerId={providerId} />}
+      {section === "analytics" && <UsageTab apis={apis} workspace={workspace} usage={usage} sessionToken={sessionToken} />}
+    </div>
+  );
+}
 
 function OverviewTab({
   workspace,
@@ -1100,27 +1067,50 @@ function OverviewTab({
   approvedApis: ApprovedAPI[];
   setActiveTab: (tab: TabType) => void;
 }) {
-  const isPaid = ["pro", "scale", "usage_based"].includes(workspace?.tier || "");
-  const usagePct = isPaid ? 0 : workspace ? Math.min((workspace.usageCount / (workspace.usageLimit || 50)) * 100, 100) : 0;
+  const router = useRouter();
+  const navigateTo = (tab: TabType) => {
+    setActiveTab(tab);
+    router.push(tab === "activity" ? "/workspace?tab=activity&sub=logs" : `/workspace?tab=${tab}`);
+  };
+  const isPaid = isUnlimitedWorkspace(workspace || {});
+  const usagePct = isPaid ? 0 : workspace ? Math.min((workspace.usageCount / Math.max(workspace.usageLimit, 1)) * 100, 100) : 0;
   return (
     <div className="space-y-6">
+
+      <div className="rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/10 to-transparent p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#ef4444]">Next successful action</p>
+            <h2 className="text-2xl font-bold mt-2">Make one real API call, then inspect exactly what happened.</h2>
+            <p className="text-sm text-[var(--text-muted)] mt-2">The managed test uses your workspace identity, writes a real Activity log, and never exposes an upstream provider key.</p>
+          </div>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <button type="button" onClick={() => navigateTo("api-catalog")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+              Run a test call <PlayCircle className="w-4 h-4" />
+            </button>
+            <button type="button" onClick={() => navigateTo("connections")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] text-sm font-medium hover:border-[#ef4444]/40 transition">
+              Connect a tool <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* ── WORLD 1: AGENT SIDE ─────────────────────────────────── */}
       <div>
         <div className="grid md:grid-cols-3 gap-3">
           {/* Agents card */}
-          <button onClick={() => setActiveTab("my-agents")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+          <button onClick={() => navigateTo("connections")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
             <div className="flex items-center justify-between mb-3">
               <Bot className="w-5 h-5 text-[#ef4444]" />
-              {agents.length > 0 && <span className="flex items-center gap-1.5 text-xs text-green-400"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Connected</span>}
+              {agents.some((agent) => getAgentPresence(agent.lastUsedAt).state === "active") && <span className="flex items-center gap-1.5 text-xs text-green-400"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Active now</span>}
             </div>
             <p className="text-2xl font-bold">{agents.length}</p>
-            <p className="text-sm text-[var(--text-muted)] mt-0.5">{agents.length === 1 ? "agent" : "agents"} connected</p>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">{agents.length === 1 ? "agent" : "agents"} registered</p>
             {agents.length > 0 && (
               <div className="mt-3 space-y-1">
                 {agents.slice(0, 2).map(a => (
                   <p key={a.id} className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--border)] shrink-0" />
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getAgentPresence(a.lastUsedAt).state === "active" ? "bg-green-400" : "bg-[var(--border)]"}`} />
                     {a.isCurrent ? <span className="text-[#ef4444]">{a.fingerprint} (current)</span> : a.fingerprint}
                   </p>
                 ))}
@@ -1130,7 +1120,7 @@ function OverviewTab({
           </button>
 
           {/* Usage meter */}
-          <button onClick={() => setActiveTab("analytics")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+          <button onClick={() => navigateTo("activity")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
             <div className="flex items-center justify-between mb-2">
               <BarChart3 className="w-5 h-5 text-[#ef4444]" />
               <span className={`text-xs px-2 py-0.5 rounded-full ${isPaid || workspace?.tier === "partner" ? "bg-green-500/20 text-green-400" : "bg-[var(--surface)] text-[var(--text-muted)]"}`}>
@@ -1177,7 +1167,7 @@ function OverviewTab({
           </button>
 
           {/* API Catalog access card */}
-          <button onClick={() => setActiveTab("api-catalog")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
+          <button onClick={() => navigateTo("api-catalog")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
             <div className="flex items-center justify-between mb-3">
               <ScanSearch className="w-5 h-5 text-blue-400" />
             </div>
@@ -1212,7 +1202,7 @@ function OverviewTab({
                   <p className="text-xs text-[var(--text-muted)]">Agents can discover and call these via APIClaw</p>
                 </div>
               </div>
-              <button onClick={() => setActiveTab("my-apis")} className="text-sm text-[#ef4444] hover:underline shrink-0">Manage</button>
+              <button onClick={() => navigateTo("provider-console")} className="text-sm text-[#ef4444] hover:underline shrink-0">Manage</button>
             </div>
             <div className="divide-y divide-[var(--border)]">
               {providerApis.slice(0, 5).map(api => (
@@ -1250,7 +1240,7 @@ function OverviewTab({
             <p className="font-medium text-[#ef4444]">Running low on managed call usage</p>
             <p className="text-sm text-[var(--text-muted)] mt-1">Search and discovery always work. Managed API calls need usage credits.</p>
           </div>
-          <button onClick={() => setActiveTab("billing")} className="px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition shrink-0">Upgrade</button>
+          <button onClick={() => navigateTo("billing")} className="px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition shrink-0">Upgrade</button>
         </div>
       )}
     </div>
@@ -1275,7 +1265,6 @@ const DIRECT_CALL_PROVIDERS = [
   { name: "GitHub", apis: 1, desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
   { name: "Mistral", apis: 1, desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
   { name: "Cohere", apis: 1, desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
-  { name: "Together AI", apis: 1, desc: "Open-source model inference", category: "AI & LLM" },
   { name: "Stability AI", apis: 1, desc: "Stable Diffusion image generation", category: "AI & LLM" },
   { name: "AssemblyAI", apis: 1, desc: "Audio transcription and intelligence", category: "Voice & TTS" },
 ];
@@ -1497,7 +1486,6 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
   const [dcSaving, setDcSaving] = useState(false);
   const [dcSaved, setDcSaved] = useState(false);
   const [dcLoading, setDcLoading] = useState(false);
-  const [showMasterKey, setShowMasterKey] = useState(false);
 
   // Actions state
   const [actions, setActions] = useState<{_id: string; name: string; displayName: string; description: string; method: string; path: string; enabled: boolean}[]>([]);
@@ -1513,13 +1501,15 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
   const [testLoading, setTestLoading] = useState(false);
 
   const loadDirectCallConfig = useCallback(async (api: ProviderAPI) => {
+    if (!sessionToken) return;
     setDcLoading(true);
     try {
       const res = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "directCall:getDirectCallConfigByApiId", args: { apiId: api._id } }),
+        body: JSON.stringify({ path: "managedRouting:getOwnerConfigByApiId", args: { token: sessionToken, apiId: api._id } }),
       });
       const data = await res.json();
+      if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Could not load API configuration");
       const config = data.value;
       if (config) {
         setDcConfigId(config._id);
@@ -1529,16 +1519,18 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
         setDcConfig({ baseUrl: "", authType: "bearer", authHeader: "Authorization", authPrefix: "Bearer ", masterApiKey: "", rateLimitPerUser: 60, rateLimitPerDay: 1000, pricePerRequest: 0, status: "draft", allowCustomerKeys: true, requireCustomerKeys: false });
       }
     } catch { /* ignore */ } finally { setDcLoading(false); }
-  }, []);
+  }, [sessionToken]);
 
   const loadActions = useCallback(async (api: ProviderAPI) => {
+    if (!sessionToken) return;
     setActionsLoading(true);
     try {
       const cfgRes = await fetch(`${CONVEX_URL}/api/query`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "directCall:getDirectCallConfigByApiId", args: { apiId: api._id } }),
+        body: JSON.stringify({ path: "managedRouting:getOwnerConfigByApiId", args: { token: sessionToken, apiId: api._id } }),
       });
       const cfgData = await cfgRes.json();
+      if (!cfgRes.ok || cfgData.status === "error") throw new Error(cfgData.errorMessage || "Could not load API actions");
       const config = cfgData.value;
       if (config?._id) {
         const res = await fetch(`${CONVEX_URL}/api/query`, {
@@ -1551,7 +1543,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
         setActions([]);
       }
     } catch { /* ignore */ } finally { setActionsLoading(false); }
-  }, []);
+  }, [sessionToken]);
 
   const handleSelectApi = useCallback((api: ProviderAPI) => {
     setSelectedApi(api);
@@ -1562,13 +1554,18 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
   }, [loadDirectCallConfig, loadActions]);
 
   const saveDcConfig = async () => {
-    if (!selectedApi) return;
+    if (!selectedApi || !sessionToken) return;
     setDcSaving(true);
     try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "directCall:saveConfig", args: { apiId: selectedApi._id, ...dcConfig } }),
+        body: JSON.stringify({
+          path: "managedRouting:saveConfig",
+          args: { token: sessionToken, config: { ...dcConfig, apiId: selectedApi._id, masterApiKey: undefined } },
+        }),
       });
+      const data = await res.json();
+      if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Could not save API configuration");
       setDcSaved(true);
       setTimeout(() => setDcSaved(false), 3000);
       loadDirectCallConfig(selectedApi);
@@ -1576,13 +1573,18 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
   };
 
   const saveAction = async () => {
-    if (!dcConfigId) return;
+    if (!dcConfigId || !sessionToken) return;
     setActionSaving(true);
     try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "directCall:saveAction", args: { directCallId: dcConfigId, ...actionForm } }),
+        body: JSON.stringify({
+          path: "managedRouting:saveAction",
+          args: { token: sessionToken, directCallId: dcConfigId, ...actionForm, params: [], responseMapping: [], enabled: true },
+        }),
       });
+      const data = await res.json();
+      if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Could not save action");
       setActionForm({ name: "", displayName: "", description: "", method: "GET", path: "" });
       setShowAddAction(false);
       if (selectedApi) loadActions(selectedApi);
@@ -1590,11 +1592,14 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
   };
 
   const deleteAction = async (actionId: string) => {
+    if (!sessionToken) return;
     try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
+      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "directCall:deleteAction", args: { actionId } }),
+        body: JSON.stringify({ path: "managedRouting:deleteAction", args: { id: actionId, token: sessionToken } }),
       });
+      const data = await res.json();
+      if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Could not delete action");
       if (selectedApi) loadActions(selectedApi);
     } catch { /* ignore */ }
   };
@@ -1604,19 +1609,13 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
     if (!form.name || !form.description) return;
     setSubmitting(true);
     try {
-      const session = localStorage.getItem("apiclaw_workspace_session");
-      const wsRes = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/query`, {
+      if (!sessionToken) throw new Error("No workspace session");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/mutation`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "workspaces:getSession", args: { token: session || "" } }),
+        body: JSON.stringify({ path: "providers:createForWorkspace", args: { token: sessionToken, ...form } }),
       });
-      const wsData = await wsRes.json();
-      const ws = wsData.value || wsData;
-      const wsId = ws?.workspaceId || ws?.id || ws?._id;
-      if (!wsId) throw new Error("No workspace");
-      await fetch(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/mutation`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "providers:createForWorkspace", args: { workspaceId: wsId, ...form } }),
-      });
+      const data = await res.json();
+      if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Could not list API");
       setSubmitted(true);
       setTimeout(() => { onCloseForm(); window.location.reload(); }, 1500);
     } catch { /* ignore */ } finally { setSubmitting(false); }
@@ -1817,7 +1816,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                   {apiDetailTab === "direct-call" && (
                     dcLoading ? <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-[#ef4444] animate-spin" /></div> : (
                       <div className="space-y-4">
-                        <p className="text-sm text-[var(--text-muted)]">{isManagedByAPIClaw ? "This API is managed by APIClaw. Configuration is handled automatically." : "Configure how agents call this API. The service provider key is stored encrypted and never exposed to agents."}</p>
+                        <p className="text-sm text-[var(--text-muted)]">{isManagedByAPIClaw ? "This API is managed by APIClaw. Configuration is handled automatically." : "Configure the public endpoint and customer-key behavior. Provider credentials are added by APIClaw operations after review and never enter this browser."}</p>
                         {isManagedByAPIClaw && dcConfig.status === "live" && (
                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
                             <Check className="w-4 h-4 text-green-500" />
@@ -1843,20 +1842,10 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                             <input value={dcConfig.authHeader} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, authHeader: e.target.value}))} readOnly={isManagedByAPIClaw} placeholder="apikey" className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`} />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Service Provider Key</label>
-                            {isManagedByAPIClaw ? (
-                              <div className="relative">
-                                <input type="password" readOnly value="managed-by-apiclaw-proxy-key" className="w-full px-3 py-2 pr-24 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono opacity-40 cursor-not-allowed select-none" />
-                                <span className="absolute right-2 top-1.5 text-xs text-[#ef4444] font-semibold bg-[var(--surface)] px-2 py-0.5 rounded border border-[#ef4444]/30">Managed by APIClaw</span>
-                              </div>
-                            ) : (
-                              <div className="relative">
-                                <input type={showMasterKey ? "text" : "password"} value={dcConfig.masterApiKey} onChange={e => setDcConfig(p => ({...p, masterApiKey: e.target.value}))} placeholder={dcConfigId ? "Leave blank to keep existing" : "Paste your service provider key here"} className="w-full px-3 py-2 pr-10 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
-                                <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                                  {showMasterKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                              </div>
-                            )}
+                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Provider Credential</label>
+                            <div className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm text-[var(--text-muted)]">
+                              {isManagedByAPIClaw || dcConfigId ? "Held server-side by APIClaw" : "Added after endpoint review"}
+                            </div>
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Rate Limit / User / Min</label>
@@ -1867,7 +1856,6 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                             <select value={dcConfig.status} onChange={e => !isManagedByAPIClaw && setDcConfig(p => ({...p, status: e.target.value}))} disabled={isManagedByAPIClaw} className={`w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm ${isManagedByAPIClaw ? "opacity-60 cursor-not-allowed" : "focus:outline-none focus:ring-1 focus:ring-[#ef4444]"}`}>
                               <option value="draft">Draft</option>
                               <option value="testing">Testing</option>
-                              <option value="live">Live</option>
                             </select>
                           </div>
                         </div>
@@ -1938,40 +1926,10 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                           <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto mb-4">This API is tested and verified by APIClaw. Agents call it through the MCP proxy — no direct testing needed from the dashboard.</p>
                           <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 font-mono text-[#ef4444]">call_api(&#123; provider: &quot;apilayer&quot;, action: &quot;...&quot; &#125;)</code>
                         </div>
-                      ) : actions.length === 0 ? (
-                        <p className="text-sm text-[var(--text-muted)] py-4 text-center">No actions configured. Add actions in the Actions tab first.</p>
                       ) : (
-                        <>
-                          <div>
-                            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase tracking-wide">Select Action</label>
-                            <select value={testAction} onChange={e => { setTestAction(e.target.value); setTestParams({}); setTestResult(null); }} className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]">
-                              <option value="">— choose —</option>
-                              {actions.map(a => <option key={a._id} value={a._id}>{a.displayName} ({a.method} {a.path})</option>)}
-                            </select>
-                          </div>
-                          {testAction && (
-                            <button onClick={async () => {
-                              setTestLoading(true); setTestResult(null);
-                              try {
-                                const action = actions.find(a => a._id === testAction);
-                                if (!action || !dcConfig.baseUrl) { setTestResult("Configure the Managed API tab first."); return; }
-                                const url = dcConfig.baseUrl.replace(/\/$/, "") + action.path;
-                                const headers: Record<string, string> = { "Content-Type": "application/json" };
-                                if (dcConfig.authType !== "none" && dcConfig.masterApiKey) headers[dcConfig.authHeader] = (dcConfig.authPrefix + dcConfig.masterApiKey).trim();
-                                const res = await fetch(url, { method: action.method, headers });
-                                const body = await res.text();
-                                setTestResult(`HTTP ${res.status}\n${body.substring(0, 2000)}`);
-                              } catch (e: unknown) { setTestResult("Error: " + (e instanceof Error ? e.message : String(e))); }
-                              finally { setTestLoading(false); }
-                            }} disabled={testLoading} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">
-                              {testLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
-                              {testLoading ? "Running..." : "Run Test"}
-                            </button>
-                          )}
-                          {testResult && (
-                            <pre className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap">{testResult}</pre>
-                          )}
-                        </>
+                        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text-muted)]">
+                          Endpoint tests run through APIClaw after configuration review so provider credentials never enter the browser. Use Catalog &amp; Test once the API is approved.
+                        </div>
                       )}
                     </div>
                   )}
@@ -2286,7 +2244,7 @@ function AgentsTab({
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-[#ef4444]" />
             <span className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider">
-              Connected Agents ({connectedAgents.length})
+              Registered Agents ({connectedAgents.length})
             </span>
           </div>
         </div>
@@ -2297,7 +2255,9 @@ function AgentsTab({
           </div>
         ) : connectedAgents.length > 0 ? (
           <div className="space-y-2">
-            {connectedAgents.map((agent) => (
+            {connectedAgents.map((agent) => {
+              const presence = getAgentPresence(agent.lastActiveAt);
+              return (
               <div
                 key={agent.id}
                 className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[#ef4444]/30 transition"
@@ -2315,11 +2275,8 @@ function AgentsTab({
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                        <span className="text-xs text-green-600">Connected</span>
-                      </span>
-                      <span className="text-xs text-[var(--text-muted)]">
-                        Last: {formatRelativeTime(agent.lastActiveAt)}
+                        <span className={`w-1.5 h-1.5 rounded-full ${presence.state === "active" ? "bg-green-500" : presence.state === "recent" ? "bg-yellow-500" : "bg-[var(--border)]"}`} />
+                        <span className={`text-xs ${presence.state === "active" ? "text-green-600" : "text-[var(--text-muted)]"}`}>{presence.label}</span>
                       </span>
                     </div>
                   </div>
@@ -2328,15 +2285,13 @@ function AgentsTab({
                   <span className="text-sm font-semibold text-[var(--text-primary)]">
                     {agent.callCount.toLocaleString()} calls
                   </span>
-                  {(agent.searchCount ?? 0) > 0 && (
-                    <p className="text-xs text-[var(--text-muted)]">{agent.searchCount!.toLocaleString()} searches</p>
-                  )}
                   {agent.aiBackend && (
                     <p className="text-xs text-[var(--text-muted)]">{agent.aiBackend}</p>
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-8">
@@ -3959,21 +3914,10 @@ function UsageTab({
   const hasLiveData = liveAnalytics && liveAnalytics.totalCalls > 0;
   const hasRealData = hasLiveData || (usage && (usage.byProvider.length > 0 || usage.byDay.length > 0));
   
-  // Preview data for empty state (provider perspective - how others use YOUR APIs)
-  const previewByDay = [
-    { date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 8, searches: 3 },
-    { date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 15, searches: 7 },
-    { date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 23, searches: 12 },
-    { date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 19, searches: 8 },
-    { date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 34, searches: 15 },
-    { date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], calls: 28, searches: 11 },
-    { date: new Date().toISOString().split('T')[0], calls: 21, searches: 9 },
-  ];
-  
   const isPreview = !hasRealData;
   const rangeDays = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : timeRange === "90d" ? 90 : 9999;
   const rangeStart = new Date(Date.now() - rangeDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-  const allByDay = hasLiveData ? liveAnalytics!.byDay : hasRealData ? usage!.byDay : previewByDay;
+  const allByDay = hasLiveData ? liveAnalytics!.byDay : hasRealData ? usage!.byDay : [];
   const displayByDay = timeRange === "All" ? allByDay : allByDay.filter(d => d.date >= rangeStart);
   const displayByProvider = hasRealData 
     ? usage!.byProvider.map(p => ({ ...p, searchCount: searchStats?.searchesByProvider[p.provider] || 0 }))
@@ -4010,11 +3954,11 @@ function UsageTab({
         <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-5 flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-[#ef4444]">Preview Mode</p>
+            <p className="font-medium text-[#ef4444]">No inbound traffic yet</p>
             <p className="text-sm text-[var(--text-muted)] mt-1">
               {apis.length === 0
-                ? "This is what your API analytics will look like. List an API on APIClaw and see real traffic data from agents using it."
-                : "This is sample data. Real analytics will appear once agents start using your listed APIs."}
+                ? "List an API to begin collecting real agent discovery and call data."
+                : "Real analytics will appear here when agents start using your listed APIs."}
             </p>
             {apis.length === 0 && (
               <a href="/providers" className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
@@ -4309,8 +4253,9 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<number | undefined>();
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const fetchLogs = useCallback(async (append = false) => {
+  const fetchLogs = useCallback(async (append = false, appendCursor?: number) => {
     if (!sessionToken) return;
     
     if (append) {
@@ -4318,9 +4263,12 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
     } else {
       setIsLoading(true);
     }
+    setLoadError(null);
 
     try {
-      const cursor = append ? nextCursor : undefined;
+      const cursor = append ? appendCursor : undefined;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12_000);
       
       // Fetch API logs
       const logsRes = await fetch(`${CONVEX_URL}/api/query`, {
@@ -4337,9 +4285,13 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             subagentId: agentFilter === "all" ? undefined : agentFilter,
           },
         }),
+        signal: controller.signal,
       });
 
       const logsData = await logsRes.json();
+      if (!logsRes.ok || logsData.status === "error") {
+        throw new Error(logsData.errorMessage || "Activity query failed");
+      }
       const apiResult = logsData.value || logsData;
       const apiLogs: ApiLogEntry[] = (apiResult.logs || []).map((log: any) => ({
         ...log,
@@ -4357,8 +4309,10 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
               path: "searchLogs:getRecent",
               args: { token: sessionToken, limit: 50 },
             }),
+            signal: controller.signal,
           });
           const searchData = await searchRes.json();
+          if (!searchRes.ok || searchData.status === "error") throw new Error(searchData.errorMessage || "Search activity query failed");
           const searchResult = searchData.value || searchData;
           if (Array.isArray(searchResult)) {
             searchLogs = searchResult.map((log: any) => ({
@@ -4386,13 +4340,15 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
       }
       setHasMore(apiResult.hasMore || false);
       setNextCursor(apiResult.nextCursor);
+      clearTimeout(timeout);
     } catch (err) {
       console.error("Error fetching logs:", err);
+      setLoadError(err instanceof DOMException && err.name === "AbortError" ? "Activity took too long to load." : "Could not load activity.");
     } finally {
       setIsLoading(false);
       setLoadingMore(false);
     }
-  }, [sessionToken, statusFilter, providerFilter, agentFilter, nextCursor]);
+  }, [sessionToken, statusFilter, providerFilter, agentFilter]);
 
   const fetchStats = useCallback(async () => {
     if (!sessionToken) return;
@@ -4421,13 +4377,6 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
     fetchLogs();
     fetchStats();
   }, [fetchLogs, fetchStats]);
-
-  // Reset and refetch when filters change
-  useEffect(() => {
-    setNextCursor(undefined);
-    fetchLogs(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, providerFilter]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -4512,7 +4461,14 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
       )}
 
       {/* Logs Table */}
-      {isLoading ? (
+      {loadError ? (
+        <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/5 p-8 text-center">
+          <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />
+          <p className="font-medium text-red-500">{loadError}</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">No data was hidden or replaced with sample activity.</p>
+          <button type="button" onClick={() => fetchLogs(false)} className="mt-4 px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">Retry</button>
+        </div>
+      ) : isLoading ? (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-12 text-center">
           <Loader2 className="w-8 h-8 text-[#ef4444] animate-spin mx-auto mb-4" />
           <p className="text-[var(--text-muted)]">Loading logs...</p>
@@ -4676,7 +4632,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
           {hasMore && (
             <div className="p-4 border-t border-[var(--border)] text-center">
               <button
-                onClick={() => fetchLogs(true)}
+                onClick={() => fetchLogs(true, nextCursor)}
                 disabled={loadingMore}
                 className="px-6 py-2 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-elevated)] transition text-sm font-medium disabled:opacity-50"
               >
@@ -4743,7 +4699,7 @@ function BillingTab({
   sessionToken: string | null;
 }) {
   const currentTier = workspace?.tier || "free";
-  const isPaid = ["pro", "scale", "usage_based"].includes(currentTier);
+  const isPaid = isUnlimitedWorkspace({ tier: currentTier, usageLimit: workspace?.usageLimit });
   const isPartner = currentTier === "partner";
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
@@ -5349,7 +5305,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
             { name: "call_api", desc: "Execute a managed API call" },
             { name: "list_connected", desc: "Show available managed providers" },
             { name: "get_categories", desc: "List all API categories" },
-            { name: "register_owner", desc: "Verify workspace ownership and unlock managed API calls" },
+            { name: "agent_auth_required", desc: "Open secure browser auth and unlock managed API calls" },
           ].map((tool) => (
             <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
               <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
@@ -5362,7 +5318,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
         <h3 className="font-semibold mb-4">Managed Providers (No API Key Needed)</h3>
         <div className="grid gap-2 md:grid-cols-2">
-          {["Brave Search", "OpenRouter LLM", "ElevenLabs TTS", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Together AI", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
+          {["Brave Search", "OpenRouter LLM", "ElevenLabs TTS", "E2B Code", "Deepgram STT", "AssemblyAI", "Stability AI", "Replicate", "Groq", "Mistral", "Cohere", "Serper", "Firecrawl", "GitHub", "APILayer"].map((p) => (
             <div key={p} className="px-3 py-2 rounded-lg bg-[var(--surface)] text-sm">{p}</div>
           ))}
         </div>
@@ -5632,7 +5588,7 @@ function FeedbackTab() {
 const ROUTING_MODES = [
   { id: "balanced", label: "Balanced", desc: "Best mix of cost, speed, and quality" },
   { id: "best_price", label: "Best Price", desc: "Cheapest provider for each model" },
-  { id: "fastest", label: "Fastest", desc: "Lowest latency (Groq, Together)" },
+  { id: "fastest", label: "Fastest", desc: "Lowest latency from healthy direct routes" },
   { id: "highest_quality", label: "Highest Quality", desc: "Premium models via OpenRouter" },
   { id: "advisor", label: "Smart Advisor", desc: "AI picks model per prompt (only when no model is set)" },
 ];
@@ -5650,7 +5606,6 @@ interface CatalogModel {
 const LLM_PROVIDERS = [
   { id: "groq", name: "Groq", desc: "Ultra-fast inference" },
   { id: "mistral", name: "Mistral", desc: "Efficient EU models" },
-  { id: "together", name: "Together AI", desc: "Open-source models" },
   { id: "openrouter", name: "OpenRouter", desc: "800+ models (fallback)" },
 ];
 
@@ -5674,9 +5629,32 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
   // Load settings on mount
   useEffect(() => {
     if (!sessionToken || loaded) return;
-    // We don't have a direct query endpoint, so start with defaults
-    // Settings are loaded fresh each time the gateway handles a request
-    setLoaded(true);
+    let cancelled = false;
+    fetch(`${CONVEX_URL}/api/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: "workspaceSettings:get", args: { token: sessionToken } }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || data.status === "error") throw new Error(data.errorMessage || "Settings unavailable");
+        return data.value || data;
+      })
+      .then((settings) => {
+        if (cancelled) return;
+        setRoutingMode(settings.routingMode || "balanced");
+        setDefaultModel(settings.defaultModel || "");
+        setMaxPrice(settings.maxPricePerMTokens == null ? "" : String(settings.maxPricePerMTokens));
+        setMonthlyBudget(settings.monthlyBudgetLimit == null ? "" : String(settings.monthlyBudgetLimit));
+        setPreferredProviders((settings.preferredProviders || []).filter((provider: string) => provider !== "together"));
+        setBlockedProviders((settings.blockedProviders || []).filter((provider: string) => provider !== "together"));
+        setAllowFallback(settings.allowOpenRouterFallback !== false);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) setSaveStatus("error");
+      });
+    return () => { cancelled = true; };
   }, [sessionToken, loaded]);
 
   // Load model catalog from OpenRouter (proxied + cached by /api/models).
@@ -5690,11 +5668,11 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
   }, [modelCatalogLoaded]);
 
   const saveSettings = async () => {
-    if (!sessionToken) return;
+    if (!sessionToken || !loaded) return;
     setSaving(true);
     setSaveStatus("idle");
     try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
+      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -5702,15 +5680,17 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
           args: {
             token: sessionToken,
             routingMode,
-            defaultModel: defaultModel || undefined,
-            maxPricePerMTokens: maxPrice ? parseFloat(maxPrice) : undefined,
-            monthlyBudgetLimit: monthlyBudget ? parseFloat(monthlyBudget) : undefined,
-            preferredProviders: preferredProviders.length > 0 ? preferredProviders : undefined,
-            blockedProviders: blockedProviders.length > 0 ? blockedProviders : undefined,
+            defaultModel: defaultModel || null,
+            maxPricePerMTokens: maxPrice ? parseFloat(maxPrice) : null,
+            monthlyBudgetLimit: monthlyBudget ? parseFloat(monthlyBudget) : null,
+            preferredProviders,
+            blockedProviders,
             allowOpenRouterFallback: allowFallback,
           },
         }),
       });
+      const result = await response.json();
+      if (!response.ok || result.status === "error") throw new Error(result.errorMessage || "Save failed");
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 3000);
     } catch {
@@ -5944,7 +5924,7 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
           {/* Save Button */}
           <button
             onClick={saveSettings}
-            disabled={saving}
+            disabled={saving || !loaded}
             className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition ${
               saveStatus === "saved"
                 ? "bg-green-500/20 text-green-500 border border-green-500/30"
@@ -5958,7 +5938,9 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
             ) : saveStatus === "saved" ? (
               <><Check className="w-4 h-4" /> Settings Saved</>
             ) : saveStatus === "error" ? (
-              <><AlertCircle className="w-4 h-4" /> Save Failed</>
+              <><AlertCircle className="w-4 h-4" /> {loaded ? "Save Failed" : "Could not load settings"}</>
+            ) : !loaded ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Loading settings...</>
             ) : (
               <><Save className="w-4 h-4" /> Save Gateway Settings</>
             )}
@@ -6101,39 +6083,6 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
 }
 
 function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace: Workspace | null; sessionToken: string | null; onWorkspaceUpdate?: (patch: Partial<Workspace>) => void }) {
-  const [isLoadingPortal, setIsLoadingPortal] = useState(false);
-  const [portalError, setPortalError] = useState<string | null>(null);
-  const router = useRouter();
-
-  // Open Stripe billing portal
-  const openBillingPortal = async () => {
-    if (!sessionToken) return;
-    
-    setIsLoadingPortal(true);
-    setPortalError(null);
-    
-    try {
-      const res = await fetch("/api/billing/portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: sessionToken }),
-      });
-      const data = await res.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setPortalError(data.error || "Failed to open billing portal");
-      }
-    } catch {
-      setPortalError("Failed to open billing portal");
-    } finally {
-      setIsLoadingPortal(false);
-    }
-  };
-
-  const hasStripeCustomer = workspace && (workspace as any).stripeCustomerId;
-
   return (
     <div className="space-y-6">
       <div>
@@ -6152,84 +6101,11 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
             />
           </div>
-          <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-2">Display Name</label>
-            <input
-              type="text"
-              placeholder="Your name"
-              disabled
-              className="w-full px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] opacity-60"
-            />
-          </div>
+          <p className="text-xs text-[var(--text-muted)]">Sign-in and account security are managed by your APIClaw identity provider.</p>
         </div>
       </SettingsSection>
 
       <GatewaySettingsSection sessionToken={sessionToken} />
-
-      <SettingsSection title="Security" icon={Lock}>
-        <div className="space-y-4 pt-4">
-        <div className="p-4 rounded-xl bg-[var(--surface)]">
-            <p className="font-medium mb-1">Change Password</p>
-            <p className="text-sm text-[var(--text-muted)] mb-3">
-              {CLERK_ENABLED
-                ? "Set or update your password for your APIClaw account."
-                : "Set or update your password for workspace sign-in."}
-            </p>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const pw = (form.elements.namedItem("newPassword") as HTMLInputElement).value;
-                const confirm = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
-                if (pw.length < 8) { alert("Password must be at least 8 characters"); return; }
-                if (pw !== confirm) { alert("Passwords do not match"); return; }
-                try {
-                  await fetch(`${CONVEX_URL}/api/mutation`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      path: "workspaces:setPassword",
-                      args: { token: sessionToken, password: pw },
-                    }),
-                  });
-                  form.reset();
-                  alert("Password updated");
-                } catch {
-                  alert("Failed to update password");
-                }
-              }}
-              className="space-y-3"
-            >
-              <input name="newPassword" type="password" placeholder="New password (min 8 chars)" className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
-              <input name="confirmPassword" type="password" placeholder="Confirm password" className="w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
-              <button type="submit" className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">Update Password</button>
-            </form>
-          </div>
-        </div>
-      </SettingsSection>
-
-      <SettingsSection title="Notifications" icon={Bell}>
-        <div className="space-y-4 pt-4">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Email Notifications</p>
-              <p className="text-sm text-[var(--text-muted)]">Usage alerts, updates, and announcements</p>
-            </div>
-            <div className="w-12 h-6 rounded-full bg-[var(--border)] relative opacity-50 cursor-not-allowed">
-              <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 left-0.5 shadow" />
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Usage Threshold Alerts</p>
-              <p className="text-sm text-[var(--text-muted)]">Get notified at 80% and 100% usage</p>
-            </div>
-            <div className="w-12 h-6 rounded-full bg-[var(--border)] relative opacity-50 cursor-not-allowed">
-              <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 left-0.5 shadow" />
-            </div>
-          </div>
-        </div>
-      </SettingsSection>
 
       <SettingsSection title="Workspace" icon={Building}>
         <div className="space-y-4 pt-4">
@@ -6288,85 +6164,6 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
         </div>
       </SettingsSection>
 
-      <TeamSection workspace={workspace} />
-
-      <SettingsSection title="Billing" icon={CreditCard}>
-        <div className="space-y-4 pt-4">
-          {portalError && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              {portalError}
-            </div>
-          )}
-          
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
-            <div>
-              <p className="font-medium">Current Plan</p>
-              <p className="text-sm text-[var(--text-muted)]">
-                {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "scale" ? "Scale" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : "Free Tier"}
-              </p>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              workspace?.tier === "partner"
-                ? "bg-[#ef4444]/20 text-[#ef4444]"
-                : ["pro", "scale", "usage_based"].includes(workspace?.tier || "")
-                ? "bg-green-500/20 text-green-500"
-                : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"
-            }`}>
-              {(workspace?.tier === "partner" || ["pro", "scale", "usage_based"].includes(workspace?.tier || "")) ? "Active" : "Free"}
-            </span>
-          </div>
-
-          {hasStripeCustomer ? (
-            <button
-              onClick={openBillingPortal}
-              disabled={isLoadingPortal}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#ef4444] text-white font-medium hover:bg-[#dc2626] transition disabled:opacity-50"
-            >
-              {isLoadingPortal ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Opening Portal...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4" />
-                  Manage Billing
-                  <ExternalLink className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={() => router.push("/workspace?tab=billing")}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] text-[var(--text-primary)] font-medium hover:bg-[var(--surface)] transition"
-            >
-              <CreditCard className="w-4 h-4" />
-              Add Payment Method
-            </button>
-          )}
-          
-          <p className="text-xs text-[var(--text-muted)] text-center">
-            {hasStripeCustomer 
-              ? "Update card, view invoices, or cancel subscription via Stripe"
-              : "Add a payment method to continue managed calls at API cost + 15%"
-            }
-          </p>
-        </div>
-      </SettingsSection>
-
-      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
-        <h3 className="font-semibold text-red-500 mb-2">Danger Zone</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-4">
-          Irreversible actions. Proceed with caution.
-        </p>
-        <button
-          disabled
-          className="px-4 py-2 rounded-lg bg-red-500/20 text-red-500 font-medium opacity-50 cursor-not-allowed"
-        >
-          Delete Workspace
-        </button>
-      </div>
     </div>
   );
 }

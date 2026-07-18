@@ -26,7 +26,7 @@ export function getHourStart(nowMs = Date.now()): number {
 }
 
 export function isPaidTier(tier: string): boolean {
-  return ["pro", "scale", "usage_based", "partner", "founder"].includes(tier);
+  return ["pro", "scale", "usage_based", "partner", "founder", "enterprise"].includes(tier);
 }
 
 export function getQuotaState(workspace: QuotaWorkspace, amount = 1, nowMs = Date.now()) {
@@ -45,7 +45,7 @@ export function getQuotaState(workspace: QuotaWorkspace, amount = 1, nowMs = Dat
     hourlyCount = 0;
   }
 
-  const meteredFreeTier = !isPaid && workspace.tier !== "enterprise";
+  const meteredFreeTier = !isPaid;
   const weeklyRemaining = isPaid ? -1 : Math.max(0, FREE_WEEKLY_LIMIT - weeklyCount);
   const hourlyRemaining = isPaid ? -1 : Math.max(0, FREE_HOURLY_LIMIT - hourlyCount);
 

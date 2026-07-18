@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 const INTERNAL_OR_NON_CUSTOMER_DOMAINS = new Set([
@@ -34,7 +34,7 @@ function maskEmail(email: string): string {
 }
 
 // Get total user/workspace count
-export const getTotalWorkspaces = query({
+export const getTotalWorkspaces = internalQuery({
   args: {},
   handler: async (ctx) => {
     const workspaces = await ctx.db.query("workspaces").collect();
@@ -68,7 +68,7 @@ export const getTotalWorkspaces = query({
 });
 
 // Workspace truth: separates raw rows from verified customer workspaces.
-export const getWorkspaceTruth = query({
+export const getWorkspaceTruth = internalQuery({
   args: {},
   handler: async (ctx) => {
     const workspaces = await ctx.db.query("workspaces").collect();
@@ -95,7 +95,7 @@ export const getWorkspaceTruth = query({
 });
 
 // List all workspace emails (for inspection)
-export const listWorkspaces = query({
+export const listWorkspaces = internalQuery({
   args: {},
   handler: async (ctx) => {
     const workspaces = await ctx.db.query("workspaces").collect();
@@ -113,7 +113,7 @@ export const listWorkspaces = query({
 
 // Operator snapshot: who is using APIClaw right now?
 // Defaults to external verified workspaces only and masks emails for safe chat use.
-export const getOperatorUsageSnapshot = query({
+export const getOperatorUsageSnapshot = internalQuery({
   args: {
     hoursBack: v.optional(v.number()),
     includeEmail: v.optional(v.boolean()),
@@ -243,7 +243,7 @@ export const markPreAuthWorkspacesUnclaimed = internalMutation({
 });
 
 // Delete workspace by email or empty email ghosts
-export const cleanupWorkspaces = mutation({
+export const cleanupWorkspaces = internalMutation({
   args: {
     deleteEmptyEmail: v.optional(v.boolean()),
     deleteEmail: v.optional(v.string()),
@@ -306,7 +306,7 @@ export const cleanupWorkspaces = mutation({
   },
 });
 
-export const updateProviderEmail = mutation({
+export const updateProviderEmail = internalMutation({
   args: { providerId: v.string(), email: v.string() },
   handler: async (ctx, { providerId, email }) => {
     await ctx.db.patch(providerId as any, { email });
@@ -315,7 +315,7 @@ export const updateProviderEmail = mutation({
 });
 
 // Seed Filestack workspace + 14 days of discovery data
-export const seedFilestackWorkspace = mutation({
+export const seedFilestackWorkspace = internalMutation({
   args: {},
   handler: async (ctx) => {
     // 1. Create or update Filestack workspace
@@ -432,7 +432,7 @@ export const seedFilestackWorkspace = mutation({
 });
 
 // Patch seeded Filestack logs to use a realistic session token
-export const cleanFilestackSeedTokens = mutation({
+export const cleanFilestackSeedTokens = internalMutation({
   args: {},
   handler: async (ctx) => {
     const workspace = await ctx.db
@@ -462,7 +462,7 @@ export const cleanFilestackSeedTokens = mutation({
 });
 
 // Count apiLogs for a specific workspace
-export const countLogsForWorkspace = query({
+export const countLogsForWorkspace = internalQuery({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, { workspaceId }) => {
     const logs = await ctx.db
@@ -475,7 +475,7 @@ export const countLogsForWorkspace = query({
 });
 
 // Remove duplicate Filestack logs — keep only 60 most recent
-export const dedupeFilestackLogs = mutation({
+export const dedupeFilestackLogs = internalMutation({
   args: {},
   handler: async (ctx) => {
     const workspace = await ctx.db
@@ -506,7 +506,7 @@ export const dedupeFilestackLogs = mutation({
  * on a given UTC day. Read-only; supports external monitoring tools that
  * need traffic visibility without holding workspace credentials.
  */
-export const getInboundStatsByEmail = query({
+export const getInboundStatsByEmail = internalQuery({
   args: {
     email: v.string(),
     date: v.string(), // "YYYY-MM-DD" UTC

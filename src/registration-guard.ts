@@ -73,7 +73,7 @@ export function requireVerifiedOwner(
         after_signin:
           "Re-call this tool — the session will be picked up automatically.",
         fallback_for_headless:
-          "npx @nordsym/apiclaw login --email-fallback (magic link to inbox, slower).",
+          "npx @nordsym/apiclaw auth login (secure browser ownership verification).",
         signup_url: "https://apiclaw.cloud/sign-in",
         free_tier: "Free tier included. See https://apiclaw.cloud/pricing.",
         first_call_prompt: FIRST_CALL_PROMPT,

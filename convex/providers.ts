@@ -1,8 +1,8 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Register a new provider and their first API
-export const registerProvider = mutation({
+export const registerProvider = internalMutation({
   args: {
     provider: v.object({
       name: v.string(),
@@ -105,13 +105,54 @@ export const registerProvider = mutation({
 });
 
 // Get provider by email
-export const getProviderByEmail = query({
+export const getProviderByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("providers")
       .withIndex("by_email", (q) => q.eq("email", args.email))
       .first();
+  },
+});
+
+/** Provider-console capability and listings for the authenticated workspace. */
+export const getWorkspaceProviderConsole = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
+
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .first();
+    if (!provider) return { provider: null, apis: [] };
+
+    const apis = await ctx.db
+      .query("providerAPIs")
+      .withIndex("by_providerId", (q) => q.eq("providerId", provider._id))
+      .collect();
+    const apisWithStatus = await Promise.all(
+      apis.map(async (api) => {
+        const directCall = await ctx.db
+          .query("providerDirectCall")
+          .filter((q) => q.eq(q.field("apiId"), api._id))
+          .first();
+        return {
+          ...api,
+          hasDirectCall: !!directCall,
+          directCallStatus: directCall?.status,
+        };
+      }),
+    );
+
+    return {
+      provider: { id: provider._id, name: provider.name, status: provider.status },
+      apis: apisWithStatus,
+    };
   },
 });
 
@@ -275,7 +316,7 @@ export const trackDiscoveryByProvider = mutation({
 });
 
 // Admin: List pending providers
-export const getPendingProviders = query({
+export const getPendingProviders = internalQuery({
   handler: async (ctx) => {
     return await ctx.db
       .query("providers")
@@ -285,7 +326,7 @@ export const getPendingProviders = query({
 });
 
 // Admin: Approve provider
-export const approveProvider = mutation({
+export const approveProvider = internalMutation({
   args: { providerId: v.id("providers") },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.providerId, {
@@ -297,7 +338,7 @@ export const approveProvider = mutation({
 });
 
 // Admin: Reject provider
-export const rejectProvider = mutation({
+export const rejectProvider = internalMutation({
   args: { providerId: v.id("providers") },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.providerId, {
@@ -308,7 +349,7 @@ export const rejectProvider = mutation({
 });
 
 // Get provider stats
-export const getProviderStats = query({
+export const getProviderStats = internalQuery({
   handler: async (ctx) => {
     const providers = await ctx.db.query("providers").collect();
     const apis = await ctx.db.query("providerAPIs").collect();
@@ -330,7 +371,7 @@ export const getProviderStats = query({
 // ============================================
 
 // Create magic link for email auth (unified: writes to workspaceMagicLinks)
-export const createMagicLink = mutation({
+export const createMagicLink = internalMutation({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const token = generateToken();
@@ -348,7 +389,7 @@ export const createMagicLink = mutation({
 });
 
 // Verify magic link and create unified session (workspace + provider)
-export const verifyMagicLink = mutation({
+export const verifyMagicLink = internalMutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const magicLink = await ctx.db
@@ -541,7 +582,7 @@ export const getProviderAPIsWithStatus = query({
 });
 
 // DEBUG: Delete API
-export const debugDeleteAPI = mutation({
+export const debugDeleteAPI = internalMutation({
   args: { apiId: v.string() },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.apiId as any);
@@ -666,7 +707,7 @@ export const deleteAPI = mutation({
 });
 
 // DEBUG: Update provider name
-export const debugUpdateProvider = mutation({
+export const debugUpdateProvider = internalMutation({
   args: { 
     providerId: v.string(),
     name: v.optional(v.string()),
@@ -680,7 +721,7 @@ export const debugUpdateProvider = mutation({
 });
 
 // DEBUG: Add API for provider (seeding)
-export const debugAddAPI = mutation({
+export const debugAddAPI = internalMutation({
   args: {
     providerId: v.string(),
     name: v.string(),
@@ -709,7 +750,7 @@ export const debugAddAPI = mutation({
 });
 
 // DEBUG: Delete provider and all related data
-export const debugDeleteProvider = mutation({
+export const debugDeleteProvider = internalMutation({
   args: { providerId: v.string() },
   handler: async (ctx, args) => {
     const providerId = args.providerId as any;
@@ -739,7 +780,7 @@ export const debugDeleteProvider = mutation({
 });
 
 // DEBUG: List all sessions
-export const debugListSessions = query({
+export const debugListSessions = internalQuery({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("sessions").collect();
@@ -747,7 +788,7 @@ export const debugListSessions = query({
 });
 
 // DEBUG: List all providers
-export const debugListProviders = query({
+export const debugListProviders = internalQuery({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("providers").collect();
@@ -756,24 +797,14 @@ export const debugListProviders = query({
 
 export const getAnalytics = query({
   args: {
-    token: v.optional(v.string()),
-    workspaceId: v.optional(v.string()), // Direct workspace ID (used by /workspace page)
+    token: v.string(),
     period: v.optional(v.string()), // "week", "month", "all"
   },
-  handler: async (ctx, { token, workspaceId: wsIdArg, period = "month" }) => {
+  handler: async (ctx, { token, period = "month" }) => {
     let providerId: any = null;
 
-    // Path 1: Direct workspaceId (from workspace page)
-    if (wsIdArg) {
-      const prov = await ctx.db
-        .query("providers")
-        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", wsIdArg as any))
-        .first();
-      if (prov) providerId = prov._id;
-    }
-
-    // Path 2: Session token lookup (from provider dashboard / API)
-    if (!providerId && token) {
+    // Session token is the only accepted ownership proof.
+    if (token) {
       const agentSession = await ctx.db
         .query("agentSessions")
         .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
@@ -1011,7 +1042,7 @@ export const getEarnings = query({
 // ============================================
 
 // Get all providers (admin only)
-export const getAllProviders = query({
+export const getAllProviders = internalQuery({
   handler: async (ctx) => {
     return await ctx.db
       .query("providers")
@@ -1021,7 +1052,7 @@ export const getAllProviders = query({
 });
 
 // Get all APIs (admin only)
-export const getAllAPIs = query({
+export const getAllAPIs = internalQuery({
   handler: async (ctx) => {
     return await ctx.db
       .query("providerAPIs")
@@ -1041,7 +1072,7 @@ function generateToken(): string {
 }
 
 // Debug: Update API name/description
-export const debugUpdateAPI = mutation({
+export const debugUpdateAPI = internalMutation({
   args: {
     apiId: v.string(),
     name: v.optional(v.string()),
@@ -1066,11 +1097,16 @@ export const debugUpdateAPI = mutation({
 
 // Get all APIs listed by a workspace
 export const getByWorkspaceId = query({
-  args: { workspaceId: v.id("workspaces") },
-  handler: async (ctx, { workspaceId }) => {
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
     return await ctx.db
       .query("providerAPIs")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
   },
 });
@@ -1078,7 +1114,7 @@ export const getByWorkspaceId = query({
 // List a new API directly from a workspace — no provider registration
 export const createForWorkspace = mutation({
   args: {
-    workspaceId: v.id("workspaces"),
+    token: v.string(),
     name: v.string(),
     description: v.string(),
     category: v.string(),
@@ -1088,8 +1124,20 @@ export const createForWorkspace = mutation({
     pricingNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .first();
+    if (!provider) throw new Error("Provider Console is not enabled for this workspace");
+
     const id = await ctx.db.insert("providerAPIs", {
-      workspaceId: args.workspaceId,
+      workspaceId: session.workspaceId,
+      providerId: provider._id,
       name: args.name,
       description: args.description,
       category: args.category,
@@ -1107,10 +1155,15 @@ export const createForWorkspace = mutation({
 
 // Delete an API owned by a workspace
 export const deleteForWorkspace = mutation({
-  args: { apiId: v.id("providerAPIs"), workspaceId: v.id("workspaces") },
-  handler: async (ctx, { apiId, workspaceId }) => {
+  args: { apiId: v.id("providerAPIs"), token: v.string() },
+  handler: async (ctx, { apiId, token }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
     const api = await ctx.db.get(apiId);
-    if (!api || api.workspaceId !== workspaceId) {
+    if (!api || api.workspaceId !== session.workspaceId) {
       throw new Error("Not found or unauthorized");
     }
     await ctx.db.delete(apiId);
@@ -1119,7 +1172,7 @@ export const deleteForWorkspace = mutation({
 });
 
 // Reset all discoveryCount to 0 (admin cleanup)
-export const resetDiscoveryCounts = mutation({
+export const resetDiscoveryCounts = internalMutation({
   args: {},
   handler: async (ctx) => {
     const apis = await ctx.db.query("providerAPIs").collect();

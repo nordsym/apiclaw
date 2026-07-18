@@ -246,7 +246,7 @@ Pricing: free tier of 50 managed calls/week per workspace. Workspace required fo
 
 Auth (agent-native, ~10s, zero inbox):
   npx @nordsym/apiclaw auth login
-Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), writes ~/.apiclaw.toml. The same auth covers MCP, CLI, HTTP, and Remote MCP. If a tool returns action="agent_auth_required", run that exact command. Headless/SSH: add --email-fallback.
+Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), writes ~/.apiclaw.toml. The same auth covers MCP, CLI, HTTP, and Remote MCP. If a tool returns action="agent_auth_required", run that exact command.
 
 When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
 
@@ -900,7 +900,7 @@ Install:
                 </button>
               </div>
               <p className="text-[11px] text-text-muted mt-2.5 leading-relaxed">
-                Works on macOS, Linux, and Windows — same command everywhere Node is installed. Headless / SSH? Add <code className="text-accent">--email-fallback</code>.
+                Works on macOS, Linux, and Windows. On headless systems, open the sign-in URL on a device where you can verify ownership.
               </p>
             </div>
           </div>
@@ -1174,7 +1174,7 @@ Install:
               },
               {
                 q: "How does signup work?",
-                a: `Run \`npx @nordsym/apiclaw auth login\` in your terminal. Your browser opens, you click once via Google or passwordless email (powered by Clerk), and the CLI writes ~/.apiclaw.toml. ~10 seconds, no inbox round-trip. The same auth then works across MCP, CLI, HTTP, and Remote MCP. Headless / SSH? Add --email-fallback for the magic-link flow.`
+                a: `Run \`npx @nordsym/apiclaw auth login\` in your terminal. Your browser opens, you click once via Google or passwordless email (powered by Clerk), and the CLI writes ~/.apiclaw.toml. The same auth then works across MCP, CLI, HTTP, and Remote MCP.`
               },
               {
                 q: "What can I actually call?",

@@ -1,11 +1,41 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 
 function requireAdminSecret(internalSecret: string | undefined) {
   const expected = process.env.APICLAW_INTERNAL_SECRET;
   if (!expected || internalSecret !== expected) {
     throw new Error("unauthorized: admin secret required");
   }
+}
+
+function redactedConfig<T extends { encryptedMasterKey: string }>(config: T) {
+  return {
+    ...config,
+    encryptedMasterKey: "",
+    hasCredential: Boolean(config.encryptedMasterKey),
+  };
+}
+
+function assertSafeProviderBaseUrl(value: string) {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error("Base URL must be a valid URL");
+  }
+  const host = url.hostname.toLowerCase();
+  const blocked =
+    url.protocol !== "https:" ||
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host.endsWith(".local") ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^169\.254\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+  if (blocked) throw new Error("Base URL must be a public HTTPS endpoint");
 }
 
 // ============================================
@@ -89,10 +119,8 @@ export const saveConfig = mutation({
       allowCustomerKeys: v.optional(v.boolean()),
       requireCustomerKeys: v.optional(v.boolean()),
     }),
-    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
-    requireAdminSecret(args.internalSecret);
     // Verify session (unified: agentSessions first, fallback to legacy sessions)
     let providerId: any = null;
 
@@ -122,6 +150,16 @@ export const saveConfig = mutation({
 
     const now = Date.now();
     const { config } = args;
+    assertSafeProviderBaseUrl(config.baseUrl);
+    const requestedStatus = config.status === "testing" ? "testing" : "draft";
+
+    const api = await ctx.db.get(config.apiId as any);
+    if (!api || (api as any).providerId !== providerId) {
+      throw new Error("API not found or unauthorized");
+    }
+    if (config.masterApiKey) {
+      throw new Error("Provider credentials must be configured by APIClaw operations");
+    }
 
     // Check if config already exists for this API
     const existing = await ctx.db
@@ -139,17 +177,13 @@ export const saveConfig = mutation({
         rateLimitPerUser: config.rateLimitPerUser,
         rateLimitPerDay: config.rateLimitPerDay,
         pricePerRequest: config.pricePerRequest,
-        status: config.status,
+        status: requestedStatus,
         allowCustomerKeys: config.allowCustomerKeys ?? true,
         requireCustomerKeys: config.requireCustomerKeys ?? false,
         updatedAt: now,
       };
 
       // Only update master key if provided (not empty)
-      if (config.masterApiKey) {
-        updateData.encryptedMasterKey = config.masterApiKey; // In prod: encrypt this
-      }
-
       await ctx.db.patch(existing._id, updateData);
       return existing._id;
     }
@@ -162,11 +196,11 @@ export const saveConfig = mutation({
       authType: config.authType,
       authHeader: config.authHeader,
       authPrefix: config.authPrefix,
-      encryptedMasterKey: config.masterApiKey || "",
+      encryptedMasterKey: "",
       rateLimitPerUser: config.rateLimitPerUser,
       rateLimitPerDay: config.rateLimitPerDay,
       pricePerRequest: config.pricePerRequest,
-      status: config.status as "draft" | "testing" | "live",
+      status: requestedStatus,
       allowCustomerKeys: config.allowCustomerKeys ?? true,
       requireCustomerKeys: config.requireCustomerKeys ?? false,
       createdAt: now,
@@ -180,6 +214,7 @@ export const saveConfig = mutation({
  */
 export const saveAction = mutation({
   args: {
+    token: v.optional(v.string()),
     id: v.optional(v.id("providerActions")),
     directCallId: v.id("providerDirectCall"),
     name: v.string(),
@@ -200,10 +235,25 @@ export const saveAction = mutation({
       path: v.string(),
     })),
     enabled: v.boolean(),
-    internalSecret: v.string(),
+    internalSecret: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    requireAdminSecret(args.internalSecret);
+    const directCall = await ctx.db.get(args.directCallId);
+    if (!directCall) throw new Error("Managed routing config not found");
+    if (args.token) {
+      const session = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token!))
+        .first();
+      if (!session) throw new Error("Invalid or expired session");
+      const provider = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+        .first();
+      if (!provider || provider._id !== directCall.providerId) throw new Error("Not found or unauthorized");
+    } else {
+      requireAdminSecret(args.internalSecret);
+    }
     const now = Date.now();
 
     if (args.id) {
@@ -245,10 +295,28 @@ export const saveAction = mutation({
 export const deleteAction = mutation({
   args: {
     id: v.id("providerActions"),
-    internalSecret: v.string(),
+    token: v.optional(v.string()),
+    internalSecret: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    requireAdminSecret(args.internalSecret);
+    const action = await ctx.db.get(args.id);
+    if (!action) throw new Error("Action not found");
+    const directCall = await ctx.db.get(action.directCallId);
+    if (!directCall) throw new Error("Managed routing config not found");
+    if (args.token) {
+      const session = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token!))
+        .first();
+      if (!session) throw new Error("Invalid or expired session");
+      const provider = await ctx.db
+        .query("providers")
+        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+        .first();
+      if (!provider || provider._id !== directCall.providerId) throw new Error("Not found or unauthorized");
+    } else {
+      requireAdminSecret(args.internalSecret);
+    }
     await ctx.db.delete(args.id);
     return { success: true };
   },
@@ -390,17 +458,18 @@ export const getDirectCallConfig = query({
     providerId: v.id("providers"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const config = await ctx.db
       .query("providerDirectCall")
       .withIndex("by_providerId", (q) => q.eq("providerId", args.providerId))
       .first();
+    return config ? redactedConfig(config) : null;
   },
 });
 
 /**
  * Get managed routing config by ID
  */
-export const getDirectCallConfigById = query({
+export const getDirectCallConfigById = internalQuery({
   args: {
     id: v.id("providerDirectCall"),
   },
@@ -412,7 +481,7 @@ export const getDirectCallConfigById = query({
 /**
  * Get managed routing config by API ID
  */
-export const getDirectCallConfigByApiId = query({
+export const getDirectCallConfigByApiId = internalQuery({
   args: {
     apiId: v.string(), // Accept string since that's what frontend passes
   },
@@ -421,6 +490,30 @@ export const getDirectCallConfigByApiId = query({
       .query("providerDirectCall")
       .filter((q) => q.eq(q.field("apiId"), args.apiId as any))
       .first();
+  },
+});
+
+/** Provider-owner view. Credentials are never returned to the browser. */
+export const getOwnerConfigByApiId = query({
+  args: { token: v.string(), apiId: v.id("providerAPIs") },
+  handler: async (ctx, { token, apiId }) => {
+    const session = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
+      .first();
+    if (!session) throw new Error("Invalid or expired session");
+    const provider = await ctx.db
+      .query("providers")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .first();
+    if (!provider) throw new Error("Provider Console is not enabled for this workspace");
+    const api = await ctx.db.get(apiId);
+    if (!api || api.providerId !== provider._id) throw new Error("API not found or unauthorized");
+    const config = await ctx.db
+      .query("providerDirectCall")
+      .filter((q) => q.eq(q.field("apiId"), apiId))
+      .first();
+    return config ? redactedConfig(config) : null;
   },
 });
 
@@ -472,7 +565,7 @@ export const getActionById = query({
 /**
  * DEBUG: Get all managed routing configs
  */
-export const getAllConfigs = query({
+export const getAllConfigs = internalQuery({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("providerDirectCall").collect();
@@ -485,17 +578,18 @@ export const getAllConfigs = query({
 export const getLiveConfigs = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const configs = await ctx.db
       .query("providerDirectCall")
       .withIndex("by_status", (q) => q.eq("status", "live"))
       .collect();
+    return configs.map(redactedConfig);
   },
 });
 
 /**
  * Get managed routing config by API ID (for test console)
  */
-export const getConfig = query({
+export const getConfig = internalQuery({
   args: {
     apiId: v.string(),
   },
@@ -545,11 +639,11 @@ export const getByApiSlug = query({
       return null;
     }
     
-    return {
+    return redactedConfig({
       ...config,
       apiName: api.name,
       apiSlug: normalizedSlug,
-    };
+    });
   },
 });
 
@@ -632,6 +726,13 @@ export const testAction = mutation({
         latencyMs: Date.now() - startTime,
       };
     }
+    if (action.directCallId !== config._id) {
+      return {
+        success: false,
+        error: "Action does not belong to this config",
+        latencyMs: Date.now() - startTime,
+      };
+    }
     
     // 4. Get API key (use testKey if provided, else use stored key)
     // Note: For production, encryptedMasterKey would need server-side decryption
@@ -665,6 +766,15 @@ export const testAction = mutation({
     }
     
     // Build full URL
+    try {
+      assertSafeProviderBaseUrl(config.baseUrl);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unsafe provider URL",
+        latencyMs: Date.now() - startTime,
+      };
+    }
     let url = config.baseUrl.replace(/\/$/, "") + path;
     const queryString = new URLSearchParams(queryParams).toString();
     if (queryString) {

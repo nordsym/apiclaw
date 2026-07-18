@@ -876,24 +876,6 @@ export const getWorkspaceAgents = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
-    // Live-count outbound API calls for this workspace
-    const allLogs = await ctx.db
-      .query("apiLogs")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
-      .collect();
-    const outboundCalls = allLogs.filter((l) => l.direction !== "inbound").length;
-
-    // Live-count searches for this workspace
-    const allSearches = await ctx.db
-      .query("searchLogs")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
-      .collect();
-    const totalSearches = allSearches.length;
-
-    // If only one logical agent, give it all the counts.
-    // If multiple agents, distribute evenly (rare edge case — most workspaces have one).
-    const agentCount = agents.length || 1;
-
     return agents.map((a) => ({
       id: a._id,
       fingerprint: a.fingerprint,
@@ -902,8 +884,9 @@ export const getWorkspaceAgents = query({
       hostname: a.fingerprint.split(":")[0],
       aiBackend: a.aiBackend,
       platform: a.platform,
-      callCount: Math.round(outboundCalls / agentCount),
-      searchCount: Math.round(totalSearches / agentCount),
+      // Updated by the authenticated MCP runtime for this exact agent.
+      // Workspace-wide logs must never be divided across agents.
+      callCount: a.callCount,
       firstSeenAt: a.firstSeenAt,
       lastActiveAt: a.lastActiveAt,
     }));
