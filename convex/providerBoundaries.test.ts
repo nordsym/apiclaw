@@ -1,7 +1,9 @@
 #!/usr/bin/env npx tsx
 import assert from "node:assert/strict";
 import {
+  isCustomerExecutableManagedAction,
   isInternalProviderReference,
+  isManagedActionAllowedForTraffic,
   isPubliclyAvailableManagedProvider,
 } from "./providerBoundaries";
 
@@ -13,5 +15,25 @@ assert.equal(isPubliclyAvailableManagedProvider("assemblyai"), true);
 assert.equal(isPubliclyAvailableManagedProvider("replicate"), true);
 assert.equal(isPubliclyAvailableManagedProvider("Together AI"), false);
 assert.equal(isPubliclyAvailableManagedProvider("openai"), true);
+assert.equal(isCustomerExecutableManagedAction("openrouter", "chat"), true);
+assert.equal(isCustomerExecutableManagedAction("openrouter", "chat_completions"), true);
+assert.equal(isCustomerExecutableManagedAction("brave_search", "search"), true);
+assert.equal(isCustomerExecutableManagedAction("github", "get_file"), true);
+assert.equal(isCustomerExecutableManagedAction("nasa", "apod"), true);
+for (const [provider, action] of [
+  ["openai", "chat"],
+  ["anthropic", "messages"],
+  ["replicate", "run"],
+  ["assemblyai", "transcribe"],
+  ["github", "create_issue"],
+] as const) {
+  assert.equal(
+    isCustomerExecutableManagedAction(provider, action),
+    false,
+    `${provider}/${action} must remain inventory-only for customer execution`,
+  );
+}
+assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "internal"), true);
+assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), false);
 
 console.log("convex provider boundaries: internal and unavailable managed providers stay off public discovery");

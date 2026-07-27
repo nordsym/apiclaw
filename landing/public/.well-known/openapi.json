@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "APIClaw API",
-    "description": "The API layer for AI agents. Discover and execute 22,000+ APIs. Search for APIs by describing what you need, get structured documentation, and execute calls through our proxy.",
+    "description": "The control plane for AI agents. Discover 26,619 API definitions, including 689 exact-name source-verified catalog entries. Source verification is not execution. APIClaw inventories 22 managed adapters, with four provider rails customer-executable today.",
     "version": "1.0.0",
     "contact": {
       "name": "NordSym AB",
@@ -152,74 +152,6 @@
         "responses": {
           "200": {
             "description": "LLM completion response"
-          }
-        }
-      }
-    },
-    "/proxy/46elks": {
-      "post": {
-        "operationId": "proxySMS46Elks",
-        "summary": "Send SMS via 46elks",
-        "description": "Send SMS messages to European/Nordic numbers. GDPR compliant.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["to", "message"],
-                "properties": {
-                  "to": {
-                    "type": "string",
-                    "description": "Phone number in E.164 format",
-                    "example": "+46701234567"
-                  },
-                  "message": {
-                    "type": "string",
-                    "description": "SMS message content"
-                  },
-                  "from": {
-                    "type": "string",
-                    "description": "Sender name or number",
-                    "example": "NordSym"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "SMS sent successfully"
-          }
-        }
-      }
-    },
-    "/proxy/resend": {
-      "post": {
-        "operationId": "proxyEmail",
-        "summary": "Send email via Resend",
-        "description": "Send transactional emails via Resend API.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["to", "subject"],
-                "properties": {
-                  "to": { "type": "string" },
-                  "subject": { "type": "string" },
-                  "html": { "type": "string" },
-                  "text": { "type": "string" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Email sent successfully"
           }
         }
       }

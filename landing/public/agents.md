@@ -75,7 +75,10 @@ Auth header:
 
 ```text
 Authorization: Bearer sk-claw-...
+Idempotency-Key: one-unique-id-per-managed-operation
 ```
+
+The idempotency key is mandatory for customer managed calls. Reuse it after an ambiguous network failure.
 
 ### CLI
 
@@ -96,9 +99,10 @@ apiclaw --help
 
 ## Current capabilities
 
-- 26,701 discoverable APIs.
-- 2,906 callable APIs.
-- 49 fully managed directCallConfigs.
+- 26,619 public API definitions are discoverable.
+- 689 current catalog entries map to source-verification evidence by exact name. Source verification is not execution.
+- 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
+- Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only.
 - OpenAI-compatible LLM gateway.
 - Remote MCP validated end to end.
 - Mission runtime with append-only events.
@@ -108,8 +112,10 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 ## Pricing
 
-- Free: 25 calls per month after signup.
-- Paid: pay as you go at API cost plus 15% margin.
+- Free: up to 25 managed calls for the lifetime of the workspace, subject to a $1 total underlying provider-cost cap.
+- Discovery is free after signup.
+- Keyless public execution remains disabled until hardened egress is live.
+- Paid: billing-ready managed actions at API cost plus 15% margin. Actions without an exact cost adapter remain blocked.
 - No anonymous execution.
 - No fixed Pro or Scale subscription should be assumed unless the pricing page says so.
 
@@ -127,8 +133,9 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 - Do not claim “one key for everything” as the primary positioning. The current position is “The Control Plane for AI Agents.”
 - Do not claim free anonymous discovery.
-- Do not claim 50 free calls per month. Current free tier is 25 calls per month.
+- Do not claim a recurring weekly or monthly managed-call allowance. Current free tier is up to 25 lifetime managed calls, subject to the $1 provider-cost cap.
 - Do not claim 30% margin. Current margin is 15%.
+- Do not claim keyless public APIs are proxied. They are discovery-only until hardened egress is live.
 - Do not claim old Pro or Scale pricing tiers unless the live pricing page says so.
 - Do not expose or request API secrets from the user.
 

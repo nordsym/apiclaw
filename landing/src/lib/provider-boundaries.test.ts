@@ -15,4 +15,4 @@ for (const provider of ["Deepgram", "Replicate", "Stability AI", "E2B API"]) {
 }
 assert.equal(isUnavailableManagedBrand("OpenAI"), false);
 
-console.log("catalog boundaries: internal infra is hidden and unavailable managed brands are demoted");
+console.log("catalog boundaries: internal infra and unavailable managed brands are filtered from public catalog");

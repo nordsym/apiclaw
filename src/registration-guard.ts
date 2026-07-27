@@ -23,7 +23,6 @@ export type GuardResult =
 export type GuardReason =
   | "no_session"
   | "not_verified"
-  | "quota_exceeded"
   | "pending_verification";
 
 export const FIRST_CALL_PROMPT =
@@ -36,14 +35,8 @@ export const FREE_CALL_PATHS = new Set<string>([
   "list_connected",
   "list_capabilities",
   "apiclaw_help",
-  "register_owner",
-  "verify_code",
   "check_workspace_status",
-  "remind_owner",
   "get_chain_status",
-  "setup_metered_billing",
-  "get_usage_summary",
-  "estimate_cost",
   "check_balance",
   "get_api_details",
 ]);
@@ -112,21 +105,8 @@ export function requireVerifiedOwner(
     };
   }
 
-  if (workspaceContext.usageRemaining === 0) {
-    return {
-      ok: false,
-      reason: "quota_exceeded",
-      payload: {
-        status: "quota_exceeded",
-        error:
-          workspaceContext.tier === "free"
-            ? "You've hit the free tier limit. Add a payment method to keep going at API cost + 15%: https://apiclaw.cloud/upgrade."
-            : "Quota exceeded.",
-        upgrade_url: "https://apiclaw.cloud/upgrade",
-        action: "add_payment_method",
-      },
-    };
-  }
-
+  // Usage and PAYG entitlement are intentionally not decided from this
+  // process-local snapshot. The gateway owns the atomic quota decision so a
+  // workspace can add a payment method and retry without restarting MCP.
   return { ok: true, ctx: workspaceContext };
 }

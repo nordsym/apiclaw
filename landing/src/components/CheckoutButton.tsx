@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CreditCard, Loader2, ChevronRight, AlertCircle, Zap } from "lucide-react";
+import { FREE_MANAGED_PROVIDER_COST_CAP_USD } from "@apiclaw/product-truth";
 
 interface CheckoutButtonProps {
   sessionToken: string;
@@ -129,7 +130,7 @@ export function UsageWarningBanner({
             <h3 className="font-semibold text-yellow-500">Running Low on API Calls</h3>
             <p className="text-sm text-[var(--text-muted)]">
               You&apos;ve used {usageCount.toLocaleString()} of {usageLimit.toLocaleString()} calls ({usagePercentage.toFixed(0)}%).
-              Add a payment method to continue using APIs without interruption.
+              Add a payment method to continue billing-ready managed actions after the free allowance.
             </p>
           </div>
         </div>
@@ -166,10 +167,10 @@ export function UsageExceededBanner({
           <div>
             <h3 className="font-bold text-lg text-[#ef4444]">API Limit Reached</h3>
             <p className="text-sm text-[var(--text-muted)] mb-1">
-              You&apos;ve used all {usageLimit.toLocaleString()} free managed calls this week.
+              Your free managed allowance is exhausted. It covers up to {usageLimit.toLocaleString()} lifetime calls and ${FREE_MANAGED_PROVIDER_COST_CAP_USD} in total underlying provider cost.
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
-              Add a payment method to continue at the underlying API cost plus 15%.
+              Add a payment method to continue billing-ready actions at the underlying API cost plus 15%.
             </p>
           </div>
         </div>
@@ -179,7 +180,7 @@ export function UsageExceededBanner({
           className="flex-shrink-0"
         >
           <Zap className="w-5 h-5" />
-          Continue Using APIs
+          Enable PAYG
           <ChevronRight className="w-4 h-4" />
         </CheckoutButton>
       </div>

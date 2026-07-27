@@ -14,12 +14,22 @@ import { useState, useEffect, useRef } from "react";
 import { HeroDoorsPreview } from "@/components/HeroDoorsPreview";
 import { AITestimonials } from "@/components/AITestimonials";
 import { VideoDemo } from "@/components/VideoDemo";
+import { getWorkspaceSessionToken } from "@/lib/workspace-session";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  MANAGED_PROVIDER_ADAPTER_COUNT,
+  MANAGED_PROVIDER_ADAPTERS,
+  PAYG_MARGIN_RATE,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+} from "@apiclaw/product-truth";
 
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 
 const stats = [
-  { number: `${statsData.apiCount.toLocaleString()}+`, label: "Discoverable APIs", live: true },
-  { number: `${statsData.callableCount.toLocaleString()}+`, label: "Callable APIs", live: true },
+  { number: statsData.apiCount.toLocaleString(), label: "Discoverable APIs", live: true },
+  { number: statsData.sourceVerifiedCount.toLocaleString(), label: "Exact-name source-verified", live: true },
   { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "12,200+"), label: "Installs", live: true },
 ];
 
@@ -52,7 +62,7 @@ const howItWorks = [
   {
     step: "2",
     title: "APIClaw Matches",
-    description: `We search ${statsData.apiCount.toLocaleString()}+ APIs and return ranked options with full metadata.`,
+    description: `We search ${statsData.apiCount.toLocaleString()} APIs and return ranked options with full metadata.`,
     icon: Database,
     codeJsx: (
       <>
@@ -190,33 +200,13 @@ export default function Home() {
   const [showProvidersModal, setShowProvidersModal] = useState(false);
   const [showManagedModal, setShowManagedModal] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
-  const [showOpenApisModal, setShowOpenApisModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const mainRef = useRef<HTMLElement | null>(null);
 
-  const managedProviders: Array<{ name: string; desc: string; category: string; featured?: boolean; apis?: number }> = [
-    // Multi-API providers (top)
-    { name: "APILayer", desc: "Exchange rates, stocks, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping", category: "Multi-API", apis: 22 },
-    { name: "Replicate", desc: "Whisper, Stable Diffusion, Flux, Luma, 1000+ ML models", category: "Multi-API", apis: 1000 },
-    { name: "OpenRouter", desc: "GPT-4, Claude, Llama, Gemini, 100+ LLMs", category: "Multi-API", apis: 100 },
-    // Single-purpose
-    { name: "ElevenLabs", desc: "Text-to-speech in 29 languages", category: "Voice & TTS" },
-    { name: "Groq", desc: "Ultra-fast LLM inference", category: "AI & LLM" },
-    { name: "Deepgram", desc: "Speech-to-text transcription", category: "Voice & TTS" },
-    { name: "Firecrawl", desc: "Web scraping to LLM-ready markdown", category: "Search" },
-    { name: "Brave Search", desc: "Privacy-focused web search", category: "Search" },
-    { name: "Serper", desc: "Google search API for AI", category: "Search" },
-    { name: "E2B", desc: "Secure cloud sandboxes for code execution", category: "Code Execution" },
-    { name: "GitHub", desc: "Repos, issues, PRs, and more", category: "Developer Tools" },
-    { name: "Mistral", desc: "Open-weight LLMs from Mistral AI", category: "AI & LLM" },
-    { name: "Cohere", desc: "Enterprise NLP and embeddings", category: "AI & LLM" },
-    { name: "Together AI", desc: "Open-source model inference", category: "AI & LLM" },
-    { name: "Stability AI", desc: "Stable Diffusion image generation", category: "AI & LLM" },
-    { name: "AssemblyAI", desc: "Audio transcription and intelligence", category: "Voice & TTS" },
-  ];
+  const managedProviders = MANAGED_PROVIDER_ADAPTERS;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText('curl -fsSL https://apiclaw.cloud/install.sh | bash');
@@ -226,9 +216,11 @@ export default function Home() {
 
   const copyContextToClipboard = () => {
     const total = statsData.apiCount.toLocaleString();
-    const callable = statsData.callableCount.toLocaleString();
+    const sourceVerified = statsData.sourceVerifiedCount.toLocaleString();
     const installs = statsData.npmDownloads.toLocaleString();
-    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total}+ discoverable APIs, ${callable}+ empirically callable, and ~${installs} agent installs.
+    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total} discoverable APIs and ${sourceVerified} current catalog entries matched to source-verification evidence by exact name, with ~${installs} agent installs. Source verification is not execution.
+
+Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried. ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Adapter inventory is not an execution promise.
 
 Four doors, one control plane:
 1. Install: local MCP for Claude Desktop and other local clients.
@@ -238,11 +230,11 @@ Four doors, one control plane:
 
 Same auth, same logs, same workspace across all four.
 
-Agent surface (19 tools): discover_apis, get_api_details, list_categories, list_connected, list_capabilities, list_models, call_api, capability, check_balance, estimate_cost, get_usage_summary, check_workspace_status, get_chain_status, resume_chain, start_mission, mission_status, list_missions, list_mission_templates, apiclaw_help.
+Remote MCP surface (14 tools): apiclaw_help, discover_apis, get_api_details, list_categories, list_connected, list_models, call_api, check_balance, check_workspace_status, list_mission_templates, discover_missions, start_mission, mission_status, list_missions.
 
 Mission templates orchestrate multi-step work with built-in observability and cost tracking. Drop in a mission template to generate a structured PRD; more land regularly.
 
-Pricing: free tier of 50 managed calls/week per workspace. Workspace required for every door, including discovery. Beyond the free tier: pay-as-you-go at underlying provider cost plus 15%, billed via Stripe. No commitment.
+Pricing: ${FREE_MANAGED_CALLS_LIFETIME} managed calls for the lifetime of each workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free after signup. Beyond the free tier, billing-ready managed actions use pay-as-you-go at underlying provider cost plus ${PAYG_MARGIN_PERCENT}%, billed via Stripe. Actions without an exact billing adapter remain blocked. No commitment.
 
 Auth (agent-native, ~10s, zero inbox):
   npx @nordsym/apiclaw auth login
@@ -324,10 +316,8 @@ Install:
     setIsDark(prefersDark);
     document.documentElement.classList.toggle('dark', prefersDark);
     
-    // Check if logged in
-    const workspaceSession = localStorage.getItem('apiclaw_workspace_session');
-    const providerSession = localStorage.getItem('apiclaw_session');
-    setIsLoggedIn(!!(workspaceSession || providerSession));
+    // Resolve the workspace from the HttpOnly cookie, never a persisted bearer.
+    void getWorkspaceSessionToken().then((token) => setIsLoggedIn(Boolean(token)));
   }, []);
 
   useEffect(() => {
@@ -584,7 +574,7 @@ Install:
                   className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium text-text-secondary border border-border hover:border-text-muted hover:text-text-primary transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  {statsData.apiCount.toLocaleString()} APIs · {statsData.callableCount.toLocaleString()} callable · live
+                  {statsData.apiCount.toLocaleString()} APIs · {statsData.sourceVerifiedCount.toLocaleString()} exact-name source-verified · live
                 </button>
               </div>
 
@@ -595,7 +585,7 @@ Install:
               </h1>
 
               <p className="text-lg sm:text-xl text-text-secondary mb-9 sm:mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Terminal-native execution, parallel missions, and real observability across every model and every API. One runtime, four entry points, one workspace.
+                Terminal-native execution, parallel missions, and real observability across supported models and a live API registry. One runtime, four entry points, one workspace.
               </p>
 
               {/* Primary CTAs */}
@@ -722,32 +712,27 @@ Install:
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowManagedModal(false)}>
           <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">Managed API Providers</h3>
+              <h3 className="text-xl font-bold">Managed adapter inventory</h3>
               <button onClick={() => setShowManagedModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-text-muted mb-4">These APIs work through APIClaw's proxy. Your agent calls them without needing API keys.</p>
+            <p className="text-text-muted mb-4">{MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried. {PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now. Inventory is not an execution promise.</p>
             <div className="space-y-3">
-              {managedProviders.map((provider, i) => (
-                <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                  provider.featured
-                    ? 'bg-gradient-to-r from-accent/5 to-purple-500/5 border-accent/30 hover:border-accent/50 hover:shadow-[0_0_20px_rgba(0,212,255,0.08)]'
-                    : provider.apis
-                    ? 'bg-surface border-border/80'
+              {managedProviders.map((provider) => (
+                <div key={provider.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                  provider.customerExecutableActions.length > 0
+                    ? 'bg-gradient-to-r from-accent/5 to-emerald-500/5 border-accent/30 hover:border-accent/50'
                     : 'bg-surface border-border'
                 }`}>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{provider.name}</span>
-                      {provider.featured && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-accent/20 text-accent">Partner</span>
-                      )}
-                      {provider.apis && (
-                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">{provider.apis >= 1000 ? `${Math.floor(provider.apis/1000)}k+` : `${provider.apis}`} APIs</span>
+                      {provider.customerExecutableActions.length > 0 && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-500">Customer-executable</span>
                       )}
                     </div>
-                    <div className="text-sm text-text-muted">{provider.desc}</div>
+                    <div className="text-sm text-text-muted">{provider.description}</div>
                   </div>
                   <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent flex-shrink-0 ml-3">{provider.category}</span>
                 </div>
@@ -782,39 +767,13 @@ Install:
         </div>
       )}
 
-      {/* Open APIs Modal */}
-      {showOpenApisModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowOpenApisModal(false)}>
-          <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">📖 Open APIs</h3>
-              <button onClick={() => setShowOpenApisModal(false)} className="p-2 hover:bg-surface rounded-lg transition">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-text-muted mb-4">{statsData.openApiCount.toLocaleString()} APIs with full OpenAPI/Swagger specs, ready for instant integration.</p>
-            <div className="space-y-2">
-              {Object.entries(statsData.categoryBreakdown || {})
-                .sort(([,a], [,b]) => (b as number) - (a as number))
-                .map(([category, count], i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
-                  <div className="font-medium">{category}</div>
-                  <span className="text-sm px-3 py-1 rounded-full bg-green-500/20 text-green-400">{Math.round((count as number) * 0.07).toLocaleString()} Open</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-text-muted mt-4">Open APIs have machine-readable specs, so your agent can integrate without reading docs.</p>
-          </div>
-        </div>
-      )}
-
       {/* How It Works — The Control Plane */}
       <section id="how-it-works" className="py-24 px-6 relative">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12 max-w-2xl">
             <span className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-medium">The Control Plane</span>
             <h2 className="text-3xl md:text-[2.75rem] font-semibold mt-4 tracking-[-0.02em] leading-[1.1]">
-              One runtime. Four doors. Every model.
+              One runtime. Four doors. Supported models.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg mt-4 leading-relaxed">
               Discovery, execution, missions, and observability behind a single workspace. Same auth, same logs, every entry point.
@@ -825,7 +784,7 @@ Install:
           <div className="rounded-2xl border border-border bg-surface-elevated overflow-hidden mb-8">
             <div className="grid md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-border-subtle">
               {[
-                { n: "01", t: "Discover", d: "26,701+ discoverable APIs. Search by capability."},
+                { n: "01", t: "Discover", d: `${statsData.apiCount.toLocaleString()} discoverable APIs. Search by capability.`},
                 { n: "02", t: "Route", d: "Auto-pick the best provider. Keys stay server-side." },
                 { n: "03", t: "Execute", d: "Single calls or full multi-step missions." },
                 { n: "04", t: "Observe", d: "Audit log, cost, latency tagged per call." },
@@ -918,14 +877,14 @@ Install:
               The runtime your agent actually wants.
             </h2>
             <p className="text-text-secondary text-base sm:text-lg leading-relaxed">
-              {statsData.apiCount.toLocaleString()} discoverable APIs, {statsData.callableCount.toLocaleString()} callable APIs, every model, missions, and observability. The four primitives every serious agent stack ends up writing. Pre-wired here.
+              {statsData.apiCount.toLocaleString()} discoverable API definitions, {statsData.sourceVerifiedCount.toLocaleString()} exact-name source-verified catalog entries, {MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters, and {PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} customer-executable provider rails. Source verification is not execution.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
             {[
-              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: `${statsData.apiCount.toLocaleString()} discoverable / ${statsData.callableCount.toLocaleString()} callable`, d: "Search by capability. Auth, pricing, latency on every result." },
-              { icon: <Cpu className="w-4 h-4" />, tag: "Every model", t: "All providers", d: "Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter." },
+              { icon: <Search className="w-4 h-4" />, tag: "Discover", t: `${statsData.apiCount.toLocaleString()} discoverable / ${statsData.sourceVerifiedCount.toLocaleString()} source-verified`, d: "Search by capability. Execution readiness is explicit on every result." },
+              { icon: <Cpu className="w-4 h-4" />, tag: "Model routing", t: "Available providers", d: "Use live runtime output to confirm current model and provider readiness." },
               { icon: <Layers className="w-4 h-4" />, tag: "Missions", t: "Orchestration", d: "Multi-step runs with audit log, cost tags, parallel-ready execution." },
               { icon: <Activity className="w-4 h-4" />, tag: "Observe", t: "Per-call audit", d: "Workspace, provider, latency, cost on every tool call. Replayable." },
             ].map((b) => (
@@ -952,16 +911,13 @@ Install:
                 </span>
               </div>
               <pre className="p-5 font-mono text-[12.5px] leading-[1.65] text-text-secondary overflow-x-auto flex-1">
-{`[14:32:01] discover_apis  → "transcribe spanish audio"
-[14:32:01] matched         · deepgram, assemblyai, openai/whisper
-[14:32:01] capability      → "transcribe" (auto-route)
-[14:32:02] call_api        → deepgram/listen  ✓  342ms  $0.0024
-[14:32:02] start_mission   → translate-and-summarize
-[14:32:03]   step 1/3      → call_api anthropic/claude   ✓
-[14:32:04]   step 2/3      → call_api openrouter/auto    ✓
-[14:32:04]   step 3/3      → call_api elevenlabs/tts     ✓
-[14:32:05] mission         → completed   2.41s   $0.018
-[14:32:05] audit           → workspace ws_kx9 · 12 tools · 5 providers`}
+{`[14:32:01] discover_apis  → "agent infrastructure news"
+[14:32:01] matched         · brave_search, github, openrouter
+[14:32:02] call_api        → brave_search/search   ✓
+[14:32:03] call_api        → github/search_repos   ✓
+[14:32:04] call_api        → nasa/apod             ✓
+[14:32:05] chat            → openrouter/chat       ✓
+[14:32:05] audit           → workspace ws_kx9 · 4 calls · 4 providers`}
               </pre>
             </div>
 
@@ -972,7 +928,7 @@ Install:
                   Already powering live agent runtimes.
                 </h3>
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Drop APIClaw behind your runtime. Point your client at <code className="font-mono text-[13px]">api.apiclaw.cloud</code> with one bearer. Every model, every API, every observability primitive your end users will see, on day one.
+                  Drop APIClaw behind your runtime. Point your client at <code className="font-mono text-[13px]">api.apiclaw.cloud</code> with one bearer. Give users one authenticated path to supported models, managed execution, and API discovery.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -1043,7 +999,7 @@ Install:
                 {[
                   { n: "01", t: "Submit your spec", d: "OpenAPI 3, Swagger, or a raw base URL. We normalise it." },
                   { n: "02", t: "Approve the listing", d: "Review the auto-generated capability tags and pricing model." },
-                  { n: "03", t: "Go live", d: "Your API is searchable by 26,701+ discoverable APIs within minutes." },
+                  { n: "03", t: "Go live", d: `Your API joins a registry of ${statsData.apiCount.toLocaleString()} discoverable definitions.` },
                   { n: "04", t: "Optional: become managed", d: "Hand us the credential. We hold custody, agents call your API without keys, commercial terms agreed per partner." },
                 ].map((step) => (
                   <li key={step.n} className="group flex items-start gap-4 rounded-xl p-3 -mx-3 transition-all duration-300 hover:bg-surface/60 hover:translate-x-0.5">
@@ -1077,8 +1033,8 @@ Install:
               Simple pricing. Start free.
             </h2>
             <p className="text-text-secondary text-lg mt-4">
-              50 free managed calls per week, any provider. Discovery is always free, unmetered.<br />
-              Past the free tier: API cost plus 15%, no commitment.
+              {FREE_MANAGED_CALLS_LIFETIME} free managed calls for the lifetime of your workspace, up to ${FREE_MANAGED_PROVIDER_COST_CAP_USD} in total provider cost.<br />
+              Discovery stays free. Billing-ready managed actions then use provider cost plus {PAYG_MARGIN_PERCENT}%.
             </p>
           </div>
 
@@ -1166,7 +1122,7 @@ Install:
             {[
               {
                 q: "What is APIClaw?",
-                a: `The Control Plane for AI Agents. One runtime, four entry points, every model and every API behind a single workspace.`
+                a: `The Control Plane for AI Agents. One runtime and four entry points for supported model routing, managed execution, API discovery, and observability behind a single workspace.`
               },
               {
                 q: "How does my agent connect?",
@@ -1178,7 +1134,7 @@ Install:
               },
               {
                 q: "What can I actually call?",
-                a: `${statsData.apiCount.toLocaleString()} discoverable APIs. ${statsData.callableCount.toLocaleString()} callable. Every major LLM (Anthropic, xAI Grok, Groq, Mistral, Together, Cohere, OpenAI, OpenRouter) plus voice, search, scraping, payments, and the long tail of public REST APIs.`
+                a: `${statsData.apiCount.toLocaleString()} discoverable API definitions, including ${statsData.sourceVerifiedCount.toLocaleString()} current catalog entries mapped to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters; ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Keyless registry entries remain discovery-only until hardened egress is live.`
               },
               {
                 q: "What are missions?",
@@ -1190,11 +1146,11 @@ Install:
               },
               {
                 q: "What does it cost?",
-                a: `Free tier: 50 managed calls per week after email signup. Past that: underlying provider cost plus 15%, billed via Stripe. No commitment.`
+                a: `Free tier: ${FREE_MANAGED_CALLS_LIFETIME} managed calls for the lifetime of the workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. Past that, billing-ready managed actions use provider cost plus ${PAYG_MARGIN_PERCENT}%, billed via Stripe. Actions without an exact billing adapter remain blocked. No commitment.`
               },
               {
                 q: "Do I have to sign up?",
-                a: `Yes — a free workspace is required for every door, including discovery. The signup IS the auth flow: \`apiclaw auth login\` creates the workspace on first sign-in. Free tier: 50 managed calls/week.`
+                a: `Yes. A free workspace is required for every door, including discovery. The signup is the auth flow: \`apiclaw auth login\` creates the workspace on first sign-in. Discovery is free. Managed calls include a ${FREE_MANAGED_CALLS_LIFETIME}-call lifetime allowance, subject to the $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider-cost cap.`
               },
               {
                 q: "I'm building my own agent runtime. Why APIClaw?",
@@ -1296,7 +1252,7 @@ Install:
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                   <Zap className="w-5 h-5 text-accent" />
-                  Managed Providers
+                  Managed adapter inventory
                 </h3>
                 <button 
                   onClick={() => setShowProvidersModal(false)}
@@ -1305,7 +1261,7 @@ Install:
                   <span className="text-xl">×</span>
                 </button>
               </div>
-              <p className="text-sm text-text-muted mt-1">No API keys needed. APIClaw handles auth and billing.</p>
+              <p className="text-sm text-text-muted mt-1">{MANAGED_PROVIDER_ADAPTER_COUNT} adapters inventoried. {PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now.</p>
             </div>
             
             <div className="p-4 max-h-[40vh] overflow-y-auto">
@@ -1313,7 +1269,10 @@ Install:
                 {managedProviders.map((provider, i) => (
                   <div key={i} className="p-3 rounded-xl bg-surface border border-border">
                     <div className="font-medium text-sm">{provider.name}</div>
-                    <div className="text-xs text-text-muted">{provider.desc}</div>
+                    <div className="text-xs text-text-muted">{provider.description}</div>
+                    <div className={`text-[10px] mt-2 font-medium ${provider.customerExecutableActions.length > 0 ? "text-emerald-500" : "text-text-muted"}`}>
+                      {provider.customerExecutableActions.length > 0 ? "Customer-executable" : "Adapter inventory"}
+                    </div>
                   </div>
                 ))}
               </div>

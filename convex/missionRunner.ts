@@ -25,6 +25,19 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { Step, StepResult } from "./missionPrimitives";
 import { resolveBindings, getAllowedEnv } from "./missionPrimitives";
+import {
+  estimateInputTokens,
+  estimateManagedProviderCostUsd,
+  hasBillingGradeManagedCost,
+  providerReportedUsageCostUsd,
+  resolveManagedResponseCost,
+  verifiedFixedManagedProviderCostUsd,
+} from "./managedCostPolicy";
+import { decorateOpenRouterRequest } from "./openRouterAttribution";
+import {
+  deriveRequestFingerprint,
+  normalizeMaxOutputTokens,
+} from "./httpTrust";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Primitive handlers
@@ -37,6 +50,7 @@ import { resolveBindings, getAllowedEnv } from "./missionPrimitives";
 type PrimitiveCtx = {
   missionId: Id<"missions">;
   workspaceId: Id<"workspaces">;
+  trafficClass?: "customer" | "internal";
 };
 
 type PrimitiveArgs = {
@@ -49,109 +63,176 @@ type PrimitiveArgs = {
   inputs: any;
 };
 
+const MAX_MISSION_PROVIDER_INPUT_BYTES = 64 * 1024;
+const MAX_MISSION_PROVIDER_RESPONSE_BYTES = 2 * 1024 * 1024;
+const MANAGED_MISSION_PROVIDER_ORIGINS: Record<string, string> = {
+  brave_search: "https://api.search.brave.com",
+  genprd: "https://genprd.se",
+};
+const MANAGED_MISSION_PROVIDER_ALIASES: Record<string, string[]> = {
+  brave_search: ["brave_search", "brave_software"],
+};
+
+type ManagedCostSource =
+  | "provider_response"
+  | "token_price_table"
+  | "fixed_price_policy"
+  | "reservation"
+  | "zero_cost";
+
+function finalizedCustomerChargeUsd(value: unknown): number {
+  const micros = (value as { customerChargeMicros?: unknown } | null)?.customerChargeMicros;
+  return typeof micros === "number" &&
+      Number.isSafeInteger(micros) &&
+      micros >= 0
+    ? micros / 1_000_000
+    : 0;
+}
+
+class MissionResponseTooLargeError extends RangeError {}
+
+function canonicalProviderId(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+export function resolveMissionProviderById<T extends { name: string }>(
+  providers: T[],
+  requestedProviderId: string,
+): T | undefined {
+  const providerId = canonicalProviderId(requestedProviderId);
+  const acceptedNames = new Set(
+    MANAGED_MISSION_PROVIDER_ALIASES[providerId] ?? [providerId],
+  );
+  return providers.find((provider) => acceptedNames.has(canonicalProviderId(provider.name)));
+}
+
+type MissionProviderAction = {
+  name: string;
+  method: string;
+  path: string;
+  params: Array<{ name: string; in: string }>;
+  requiresConfirmation: boolean;
+};
+
+export function resolveMissionProviderAction(
+  requestedProviderId: string,
+  requestedActionName: string,
+  registeredAction: {
+    name: string;
+    method: string;
+    path: string;
+    params?: unknown;
+    requiresConfirmation?: boolean;
+    enabled?: boolean;
+  } | null,
+): MissionProviderAction | null {
+  if (registeredAction) {
+    if (!registeredAction.enabled) return null;
+    return {
+      name: registeredAction.name,
+      method: registeredAction.method,
+      path: registeredAction.path,
+      params: Array.isArray(registeredAction.params)
+        ? registeredAction.params as Array<{ name: string; in: string }>
+        : [],
+      requiresConfirmation: registeredAction.requiresConfirmation ?? false,
+    };
+  }
+
+  if (
+    canonicalProviderId(requestedProviderId) === "brave_search" &&
+    requestedActionName === "search"
+  ) {
+    return {
+      name: "search",
+      method: "GET",
+      path: "/res/v1/web/search",
+      params: [
+        { name: "query", in: "query" },
+        { name: "q", in: "query" },
+        { name: "count", in: "query" },
+        { name: "offset", in: "query" },
+        { name: "safesearch", in: "query" },
+        { name: "freshness", in: "query" },
+      ],
+      requiresConfirmation: false,
+    };
+  }
+
+  return null;
+}
+
+async function readMissionResponseTextCapped(response: Response): Promise<string> {
+  const declaredHeader = response.headers.get("content-length");
+  if (declaredHeader !== null) {
+    const declaredLength = Number(declaredHeader);
+    if (
+      Number.isFinite(declaredLength) &&
+      declaredLength > MAX_MISSION_PROVIDER_RESPONSE_BYTES
+    ) {
+      throw new MissionResponseTooLargeError("mission_provider_response_too_large");
+    }
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_MISSION_PROVIDER_RESPONSE_BYTES) {
+        await reader.cancel("mission_provider_response_too_large");
+        throw new MissionResponseTooLargeError("mission_provider_response_too_large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      // The stream may already be canceled and unlocked.
+    }
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
   const { config, inputs } = args;
   const source: string = config?.source ?? "http";
-  const startedAt = Date.now();
 
   if (source === "http") {
-    const url: string | undefined = inputs?.url;
-    if (!url || typeof url !== "string") {
-      return {
-        ok: false,
-        error: "fetch_http:missing_url",
-        costUsd: 0,
-        latencyMs: 0,
-      };
-    }
-    const method: string = (inputs?.method ?? config?.method ?? "GET").toUpperCase();
-    const userHeaders: Record<string, string> = inputs?.headers ?? {};
-    const body = inputs?.body;
-    const expect: "json" | "text" = config?.expect ?? "json";
-
-    const headers: Record<string, string> = { ...userHeaders };
-    let bodyText: string | undefined;
-    if (method !== "GET" && body != null) {
-      if (typeof body === "string") {
-        bodyText = body;
-      } else {
-        bodyText = JSON.stringify(body);
-        if (!headers["Content-Type"]) headers["Content-Type"] = "application/json";
-      }
-    }
-
-    // Derive the apiLogs provider tag early so error paths can attribute too.
-    let attributedProvider = config?.attributeAs as string | undefined;
-    if (!attributedProvider) {
-      try {
-        attributedProvider = new URL(url).hostname.replace(/^www\./, "");
-      } catch {
-        attributedProvider = "external_http";
-      }
-    }
-    const fetchApiLog = { provider: attributedProvider, action: "fetch" };
-
-    let res: Response;
-    try {
-      res = await fetch(url, { method, headers, body: bodyText });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "fetch_failed";
-      return {
-        ok: false,
-        error: `fetch_http_network:${msg}`,
-        costUsd: 0,
-        latencyMs: Date.now() - startedAt,
-        apiLog: fetchApiLog,
-      };
-    }
-    const latency = Date.now() - startedAt;
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      return {
-        ok: false,
-        error: `fetch_http_${res.status}:${txt.slice(0, 200)}`,
-        costUsd: 0,
-        latencyMs: latency,
-        meta: { status: res.status },
-        apiLog: fetchApiLog,
-      };
-    }
-
-    let output: unknown;
-    try {
-      output = expect === "text" ? await res.text() : await res.json();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "parse_failed";
-      return {
-        ok: false,
-        error: `fetch_http_parse:${expect}:${msg}`,
-        costUsd: 0,
-        latencyMs: latency,
-        meta: { status: res.status },
-        apiLog: fetchApiLog,
-      };
-    }
-
     return {
-      ok: true,
-      output,
+      ok: false,
+      error: "fetch_http:disabled_use_registered_provider_action",
       costUsd: 0,
-      latencyMs: latency,
-      meta: { status: res.status },
-      apiLog: fetchApiLog,
+      latencyMs: 0,
     };
   }
 
   if (source === "providerAction") {
-    // Hook for the managed-provider routing path. Implemented when the
-    // existing call_api gateway adapter is brought into the runner.
-    return {
-      ok: false,
-      error: "fetch_providerAction:not_implemented",
-      costUsd: 0,
-      latencyMs: 0,
-    };
+    return runExecute({
+      ...args,
+      config: {
+        providerId: config?.providerId,
+        actionName: config?.actionName,
+      },
+      inputs,
+    });
   }
 
   return {
@@ -162,23 +243,6 @@ async function runFetch(args: PrimitiveArgs): Promise<StepResult> {
   };
 }
 
-// Pricing per million tokens. Defaults to Sonnet numbers if the model
-// slug isn't listed. Source of truth long-term: modelCatalog. Inlined
-// for spike 2 so transform is self-contained.
-const TRANSFORM_PRICING: Record<string, { input: number; output: number }> = {
-  "anthropic/claude-sonnet-4-5": { input: 3, output: 15 },
-  "anthropic/claude-sonnet-4-6": { input: 3, output: 15 },
-  "anthropic/claude-opus-4-7": { input: 15, output: 75 },
-  "anthropic/claude-haiku-4-5": { input: 0.8, output: 4 },
-  "openai/gpt-4o": { input: 2.5, output: 10 },
-  "openai/gpt-4o-mini": { input: 0.15, output: 0.6 },
-};
-
-function estimateTransformCost(model: string, inTok: number, outTok: number): number {
-  const p = TRANSFORM_PRICING[model] ?? { input: 3, output: 15 };
-  return (inTok * p.input + outTok * p.output) / 1_000_000;
-}
-
 async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
   const { config, inputs } = args;
   const model: string = config?.model ?? "anthropic/claude-sonnet-4-5";
@@ -186,7 +250,18 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
   const userPromptTemplate: string = config?.userPromptTemplate ?? "";
   const outputSchema = config?.outputSchema;
   const temperature: number = config?.temperature ?? 0.4;
-  const maxTokens: number | undefined = config?.maxTokens;
+  let maxTokens: number;
+  try {
+    maxTokens = normalizeMaxOutputTokens(config?.maxTokens, 2_000);
+  } catch (e) {
+    return {
+      ok: false,
+      error: `transform:invalid_max_tokens:${e instanceof Error ? e.message : "invalid"}`,
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+    };
+  }
 
   // userPromptTemplate is template-author copy; bind it against the
   // step's runtime inputs. Bindings use the same {{path}} syntax as
@@ -194,6 +269,16 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
   const promptBindingContext = { input: inputs };
   const userPrompt = resolveBindings(userPromptTemplate, promptBindingContext);
   const userText = typeof userPrompt === "string" ? userPrompt : JSON.stringify(userPrompt);
+
+  if (!args.convexCtx) {
+    return {
+      ok: false,
+      error: "transform:convex_ctx_missing",
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+    };
+  }
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -214,7 +299,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
     ],
     temperature,
   };
-  if (maxTokens) body.max_tokens = maxTokens;
+  body.max_tokens = maxTokens;
 
   // Strict structured output when the template author declared a schema.
   // OpenRouter forwards json_schema to providers that support it natively
@@ -231,10 +316,38 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
     };
   }
 
-  const startedAt = Date.now();
-  let res: Response;
+  const pseudonymSecret = process.env.APICLAW_PSEUDONYM_SECRET;
+  if (!pseudonymSecret) {
+    return {
+      ok: false,
+      error: "transform:pseudonym_secret_missing",
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+    };
+  }
+
+  let requestBody: string;
+  let requestFingerprint: string;
+  let meteredRequestBody: Record<string, unknown>;
+  let preparedRequest: Request;
   try {
-    res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const attributedBody = await decorateOpenRouterRequest(
+      body,
+      String(args.ctx.workspaceId),
+      pseudonymSecret,
+    );
+    meteredRequestBody = attributedBody;
+    requestBody = JSON.stringify(attributedBody);
+    requestFingerprint = await deriveRequestFingerprint({
+      method: "POST",
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      body: attributedBody,
+    });
+    // Construct and validate the full credentialed request before reserving a
+    // customer call. Invalid local headers/configuration therefore cannot burn
+    // activation allowance without any possibility of upstream dispatch.
+    preparedRequest = new Request("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -242,10 +355,81 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
         "HTTP-Referer": "https://apiclaw.cloud",
         "X-Title": "APIClaw Mission Runner",
       },
-      body: JSON.stringify(body),
+      body: requestBody,
     });
   } catch (e) {
+    const msg = e instanceof Error ? e.message : "request_prepare_failed";
+    return {
+      ok: false,
+      error: `transform:request_prepare:${msg}`,
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+    };
+  }
+
+  const reservationUsd = estimateManagedProviderCostUsd({
+    provider: "openrouter",
+    action: "chat",
+    model,
+    estimatedInputTokens: estimateInputTokens(meteredRequestBody),
+    maxOutputTokens: maxTokens,
+  });
+  const authorization = await args.convexCtx.runMutation(
+    (internal as any).managedUsage.authorizeManagedCall,
+    {
+      workspaceId: args.ctx.workspaceId,
+      requestId: crypto.randomUUID(),
+      requestFingerprint,
+      provider: "openrouter",
+      // All customer mission LLM primitives use the canonical public
+      // OpenRouter chat rail. Primitive kind remains in path/apiLog metadata.
+      action: "chat",
+      model,
+      path: `/missions/${String(args.ctx.missionId)}/transform`,
+      estimatedProviderCostUsd: reservationUsd,
+      billingGradeCost: true,
+      trafficClass: args.ctx.trafficClass,
+    },
+  );
+  if (!authorization?.allowed) {
+    return {
+      ok: false,
+      error: `managed_usage_blocked:${authorization?.reason || "unknown"}`,
+      costUsd: 0,
+      latencyMs: 0,
+      model,
+      meta: { managedUsage: authorization?.reason || "blocked" },
+    };
+  }
+
+  const finalize = async (
+    success: boolean,
+    providerCostUsd: number | undefined,
+    details: {
+      inputTokens?: number;
+      outputTokens?: number;
+      upstreamRequestId?: string;
+      costSource: ManagedCostSource;
+    },
+  ) => {
+    return await args.convexCtx.runMutation((internal as any).managedUsage.finalizeManagedCall, {
+      ledgerId: authorization.ledgerId,
+      success,
+      provider: "openrouter",
+      model,
+      ...(providerCostUsd === undefined ? {} : { providerCostUsd }),
+      ...details,
+    });
+  };
+
+  const startedAt = Date.now();
+  let res: Response;
+  try {
+    res = await fetch(preparedRequest, { signal: AbortSignal.timeout(60_000) });
+  } catch (e) {
     const msg = e instanceof Error ? e.message : "fetch_failed";
+    await finalize(true, undefined, { costSource: "reservation" });
     return {
       ok: false,
       error: `openrouter_network:${msg}`,
@@ -258,7 +442,8 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
   const latency = Date.now() - startedAt;
 
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
+    const txt = await readMissionResponseTextCapped(res).catch(() => "");
+    await finalize(false, 0, { costSource: "zero_cost" });
     return {
       ok: false,
       error: `openrouter_${res.status}: ${txt.slice(0, 200)}`,
@@ -269,16 +454,90 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
     };
   }
 
-  const json = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-    usage?: { prompt_tokens?: number; completion_tokens?: number };
+  let json: {
+    id?: string;
+    choices?: Array<{ message?: { content?: string } }>;
+    usage?: { prompt_tokens?: unknown; completion_tokens?: unknown; cost?: unknown };
     model?: string;
   };
+  try {
+    const responseText = await readMissionResponseTextCapped(res);
+    json = JSON.parse(responseText) as typeof json;
+  } catch (e) {
+    await finalize(true, undefined, { costSource: "reservation" });
+    return {
+      ok: false,
+      error: e instanceof MissionResponseTooLargeError
+        ? "openrouter_response_too_large"
+        : `openrouter_parse:${e instanceof Error ? e.message : "invalid_json"}`,
+      costUsd: 0,
+      latencyMs: latency,
+      model,
+      apiLog: { provider: "openrouter", action: "transform" },
+    };
+  }
 
   const content = json.choices?.[0]?.message?.content ?? "";
-  const inTok = json.usage?.prompt_tokens ?? 0;
-  const outTok = json.usage?.completion_tokens ?? 0;
-  const cost = estimateTransformCost(model, inTok, outTok);
+  const inTok = typeof json.usage?.prompt_tokens === "number" &&
+    Number.isFinite(json.usage.prompt_tokens) && json.usage.prompt_tokens >= 0
+    ? json.usage.prompt_tokens
+    : 0;
+  const outTok = typeof json.usage?.completion_tokens === "number" &&
+    Number.isFinite(json.usage.completion_tokens) && json.usage.completion_tokens >= 0
+    ? json.usage.completion_tokens
+    : 0;
+  const costDecision = resolveManagedResponseCost({
+    provider: "openrouter",
+    responseOk: true,
+    providerReportedCostUsd: providerReportedUsageCostUsd(json.usage),
+  });
+  if (
+    costDecision.costSource !== "provider_response" ||
+    costDecision.providerCostUsd === undefined
+  ) {
+    await finalize(true, undefined, {
+      inputTokens: inTok,
+      outputTokens: outTok,
+      upstreamRequestId: json.id,
+      costSource: "reservation",
+    });
+    return {
+      ok: false,
+      error: "openrouter_exact_cost_missing",
+      costUsd: 0,
+      latencyMs: latency,
+      model: json.model ?? model,
+      meta: { tokens: { input: inTok, output: outTok } },
+      apiLog: { provider: "openrouter", action: "transform" },
+    };
+  }
+  const cost = costDecision.providerCostUsd;
+  const reservedCostMicros = Math.round((reservationUsd ?? 0) * 1_000_000);
+  const exactCostMicros = Math.round(cost * 1_000_000);
+  if (exactCostMicros > reservedCostMicros) {
+    await finalize(true, cost, {
+      inputTokens: inTok,
+      outputTokens: outTok,
+      upstreamRequestId: json.id,
+      costSource: "provider_response",
+    });
+    return {
+      ok: false,
+      error: "openrouter_exact_cost_exceeds_reservation",
+      costUsd: 0,
+      latencyMs: latency,
+      model: json.model ?? model,
+      meta: { tokens: { input: inTok, output: outTok } },
+      apiLog: { provider: "openrouter", action: "transform" },
+    };
+  }
+  const finalization = await finalize(true, cost, {
+    inputTokens: inTok,
+    outputTokens: outTok,
+    upstreamRequestId: json.id,
+    costSource: "provider_response",
+  });
+  const chargedCostUsd = finalizedCustomerChargeUsd(finalization);
 
   // If a schema was requested, parse the returned JSON. Parse failure is
   // a primitive-level failure so the template author finds out immediately
@@ -292,6 +551,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
         ok: false,
         error: "structured_output_parse_failed",
         costUsd: cost,
+        chargedCostUsd,
         latencyMs: latency,
         model: json.model ?? model,
         meta: {
@@ -310,6 +570,7 @@ async function runTransform(args: PrimitiveArgs): Promise<StepResult> {
     ok: true,
     output,
     costUsd: cost,
+    chargedCostUsd,
     latencyMs: latency,
     model: json.model ?? model,
     meta: { tokens: { input: inTok, output: outTok } },
@@ -340,6 +601,7 @@ async function runDecide(args: PrimitiveArgs): Promise<StepResult> {
   // chosen value as `result.output` directly rather than the wrapper.
   const judge = await runTransform({
     ctx: args.ctx,
+    convexCtx: args.convexCtx,
     config: {
       model,
       systemPrompt:
@@ -364,6 +626,7 @@ async function runDecide(args: PrimitiveArgs): Promise<StepResult> {
       ok: false,
       error: judge.error ?? "decide_classifier_failed",
       costUsd: judge.costUsd,
+      chargedCostUsd: judge.chargedCostUsd,
       latencyMs: judge.latencyMs,
       model: judge.model,
       meta: judge.meta,
@@ -379,6 +642,7 @@ async function runDecide(args: PrimitiveArgs): Promise<StepResult> {
       ok: false,
       error: `decide:choice_not_in_enum:${verdict.choice}`,
       costUsd: judge.costUsd,
+      chargedCostUsd: judge.chargedCostUsd,
       latencyMs: judge.latencyMs,
       model: judge.model,
       meta: judge.meta,
@@ -390,6 +654,7 @@ async function runDecide(args: PrimitiveArgs): Promise<StepResult> {
     ok: true,
     output: verdict.choice,                  // surface raw string so branchOn matches it
     costUsd: judge.costUsd,
+    chargedCostUsd: judge.chargedCostUsd,
     latencyMs: judge.latencyMs,
     model: judge.model,
     meta: { ...(judge.meta ?? {}), choices },
@@ -486,6 +751,7 @@ async function runValidate(args: PrimitiveArgs): Promise<StepResult> {
 
     const judge = await runTransform({
       ctx: args.ctx,
+      convexCtx: args.convexCtx,
       config: {
         model,
         systemPrompt:
@@ -512,6 +778,7 @@ async function runValidate(args: PrimitiveArgs): Promise<StepResult> {
         ok: false,
         error: judge.error ?? "validate_llm_judge_failed",
         costUsd: judge.costUsd,
+        chargedCostUsd: judge.chargedCostUsd,
         latencyMs: judge.latencyMs,
         model: judge.model,
         meta: judge.meta,
@@ -524,6 +791,7 @@ async function runValidate(args: PrimitiveArgs): Promise<StepResult> {
       output: verdict,
       failures: verdict.failures && verdict.failures.length > 0 ? verdict.failures : undefined,
       costUsd: judge.costUsd,
+      chargedCostUsd: judge.chargedCostUsd,
       latencyMs: judge.latencyMs,
       model: judge.model,
       meta: judge.meta,
@@ -726,9 +994,7 @@ export const lookupManagedAction = internalQuery({
     // Find the provider row by name. Convex doesn't store the provider
     // slug separately from "name" so we match case-insensitive.
     const allProviders = await ctx.db.query("providers").collect();
-    const provider = allProviders.find(
-      (p) => p.name.toLowerCase() === providerName.toLowerCase(),
-    );
+    const provider = resolveMissionProviderById(allProviders, providerName);
     if (!provider) return null;
 
     const dc = await ctx.db
@@ -737,13 +1003,18 @@ export const lookupManagedAction = internalQuery({
       .first();
     if (!dc || dc.status !== "live") return null;
 
-    const action = await ctx.db
+    const registeredAction = await ctx.db
       .query("providerActions")
       .withIndex("by_directCallId_name", (q) =>
         q.eq("directCallId", dc._id).eq("name", actionName),
       )
       .first();
-    if (!action || !action.enabled) return null;
+    const action = resolveMissionProviderAction(
+      providerName,
+      actionName,
+      registeredAction,
+    );
+    if (!action) return null;
 
     return {
       providerName: provider.name,
@@ -752,23 +1023,18 @@ export const lookupManagedAction = internalQuery({
       authHeader: dc.authHeader,
       authPrefix: dc.authPrefix,
       encryptedMasterKey: dc.encryptedMasterKey,
-      action: {
-        name: action.name,
-        method: action.method,
-        path: action.path,
-        params: action.params,
-        requiresConfirmation: action.requiresConfirmation ?? false,
-      },
+      action,
     };
   },
 });
 
 async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
   const { config, inputs } = args;
-  const providerName: string = config?.providerId ?? "";
+  const requestedProviderName: string = config?.providerId ?? "";
   const actionName: string = config?.actionName ?? "";
+  const providerId = canonicalProviderId(requestedProviderName);
 
-  if (!providerName || !actionName) {
+  if (!providerId || !actionName) {
     return {
       ok: false,
       error: "execute:missing_providerId_or_actionName",
@@ -776,10 +1042,6 @@ async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
       latencyMs: 0,
     };
   }
-
-  // Look up routing config + action shape. Requires the Convex action
-  // context — runV2 passes its own ctx through; smoke harness wires
-  // its action ctx in directly.
   if (!args.convexCtx) {
     return {
       ok: false,
@@ -788,24 +1050,27 @@ async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
       latencyMs: 0,
     };
   }
+
+  const apiLog = { provider: providerId, action: actionName };
   const cfg = await args.convexCtx.runQuery(
     internal.missionRunner.lookupManagedAction,
-    { providerName, actionName },
+    { providerName: requestedProviderName, actionName },
   );
   if (!cfg) {
     return {
       ok: false,
-      error: `execute:managed_action_not_found:${providerName}.${actionName}`,
+      error: `execute:managed_action_not_found:${providerId}.${actionName}`,
       costUsd: 0,
       latencyMs: 0,
     };
   }
 
-  // Decrypt the master key. Surfaces APICLAW_KEY_ENCRYPTION_SECRET_missing
-  // as a clear error so deploy ops know what's needed in Convex env.
   let plainKey: string;
   try {
-    plainKey = await decryptManagedKey(cfg.encryptedMasterKey);
+    const environmentKey = providerId === "brave_search"
+      ? process.env.BRAVE_API_KEY
+      : undefined;
+    plainKey = environmentKey || await decryptManagedKey(cfg.encryptedMasterKey);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "decrypt_failed";
     return {
@@ -813,127 +1078,251 @@ async function runExecute(args: PrimitiveArgs): Promise<StepResult> {
       error: `execute:decrypt:${msg}`,
       costUsd: 0,
       latencyMs: 0,
-      apiLog: { provider: providerName, action: actionName },
+      apiLog,
     };
   }
 
-  // Inputs are the resolved per-step bindings from the template. Pull out
-  // path params first so they don't double up in the body.
   const inputParams: Record<string, unknown> =
-    inputs && typeof inputs === "object" ? (inputs as Record<string, unknown>) : {};
+    inputs && typeof inputs === "object" ? inputs as Record<string, unknown> : {};
+  let serializedInputs: string;
+  try {
+    serializedInputs = JSON.stringify(inputParams);
+  } catch (e) {
+    return {
+      ok: false,
+      error: `execute:inputs_not_serializable:${e instanceof Error ? e.message : "invalid"}`,
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog,
+    };
+  }
+  if (new TextEncoder().encode(serializedInputs).byteLength > MAX_MISSION_PROVIDER_INPUT_BYTES) {
+    return {
+      ok: false,
+      error: "execute:input_too_large",
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog,
+    };
+  }
+
   const { path: substitutedPath, consumed } = substitutePathParams(
     cfg.action.path,
     inputParams,
   );
-
-  // Split remaining params by `in: body | query | path` declared on the
-  // action's param list. Unknown keys default to body for POST/PUT/PATCH
-  // and query for GET.
   const paramSpec: Array<{ name: string; in: string }> = Array.isArray(cfg.action.params)
     ? cfg.action.params
     : [];
-  const paramByName = new Map(paramSpec.map((p) => [p.name, p.in]));
-
+  const paramByName = new Map(paramSpec.map((param) => [param.name, param.in]));
   const queryParams: Record<string, string> = {};
   const bodyParams: Record<string, unknown> = {};
   const method = (cfg.action.method ?? "POST").toUpperCase();
 
   for (const [name, value] of Object.entries(inputParams)) {
     if (consumed.has(name)) continue;
-    const declared = paramByName.get(name);
-    const defaultBucket = method === "GET" ? "query" : "body";
-    const bucket = declared ?? defaultBucket;
+    const bucket = paramByName.get(name) ?? (method === "GET" ? "query" : "body");
     if (bucket === "query") {
-      if (value != null) queryParams[name] = String(value);
+      if (value != null) {
+        const upstreamName = providerId === "brave_search" &&
+          actionName === "search" && name === "query"
+          ? "q"
+          : name;
+        queryParams[upstreamName] = String(value);
+      }
     } else {
       bodyParams[name] = value;
     }
   }
 
-  // Build URL.
   let url: URL;
   try {
-    url = new URL(
-      substitutedPath.startsWith("/") ? substitutedPath.slice(1) : substitutedPath,
-      cfg.baseUrl.endsWith("/") ? cfg.baseUrl : cfg.baseUrl + "/",
-    );
-  } catch (e) {
+    url = substitutedPath.startsWith("/")
+      ? new URL(substitutedPath, cfg.baseUrl)
+      : new URL(
+          substitutedPath,
+          cfg.baseUrl.endsWith("/") ? cfg.baseUrl : `${cfg.baseUrl}/`,
+        );
+  } catch {
     return {
       ok: false,
       error: `execute:bad_url:${cfg.baseUrl}${substitutedPath}`,
       costUsd: 0,
       latencyMs: 0,
-      apiLog: { provider: providerName, action: actionName },
+      apiLog,
     };
   }
-  for (const [k, v] of Object.entries(queryParams)) url.searchParams.set(k, v);
+  const expectedOrigin = MANAGED_MISSION_PROVIDER_ORIGINS[providerId];
+  if (!expectedOrigin || url.origin !== expectedOrigin) {
+    return {
+      ok: false,
+      error: "execute:provider_origin_not_approved",
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog,
+    };
+  }
+  for (const [name, value] of Object.entries(queryParams)) {
+    url.searchParams.set(name, value);
+  }
 
-  // Auth header.
+  const hasRequestBody = method !== "GET" && method !== "DELETE";
+  const authHeader = cfg.authHeader || (providerId === "brave_search"
+    ? "X-Subscription-Token"
+    : "Authorization");
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    [cfg.authHeader]: `${cfg.authPrefix}${plainKey}`,
+    [authHeader]: `${cfg.authPrefix ?? ""}${plainKey}`,
   };
+  let requestBody: string | undefined;
+  let requestFingerprint: string;
+  let preparedRequest: Request;
+  try {
+    requestBody = hasRequestBody ? JSON.stringify(bodyParams) : undefined;
+    requestFingerprint = await deriveRequestFingerprint({
+      provider: providerId,
+      action: actionName,
+      method,
+      url: url.toString(),
+      body: hasRequestBody ? bodyParams : null,
+    });
+    preparedRequest = new Request(url, {
+      method,
+      headers,
+      redirect: "error",
+      body: requestBody,
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      error: `execute:request_prepare:${e instanceof Error ? e.message : "invalid"}`,
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog,
+    };
+  }
+
+  const reservationUsd = estimateManagedProviderCostUsd({
+    provider: providerId,
+    action: actionName,
+    estimatedInputTokens: estimateInputTokens(inputParams),
+  });
+  const fixedProviderCostUsd = verifiedFixedManagedProviderCostUsd({
+    provider: providerId,
+    action: actionName,
+  });
+  const authorization = await args.convexCtx.runMutation(
+    (internal as any).managedUsage.authorizeManagedCall,
+    {
+      workspaceId: args.ctx.workspaceId,
+      requestId: crypto.randomUUID(),
+      requestFingerprint,
+      provider: providerId,
+      action: actionName,
+      path: `/missions/${String(args.ctx.missionId)}/execute`,
+      estimatedProviderCostUsd: reservationUsd,
+      billingGradeCost: hasBillingGradeManagedCost({ provider: providerId, action: actionName }),
+      trafficClass: args.ctx.trafficClass,
+    },
+  );
+  if (!authorization?.allowed) {
+    return {
+      ok: false,
+      error: `managed_usage_blocked:${authorization?.reason || "unknown"}`,
+      costUsd: 0,
+      latencyMs: 0,
+      apiLog,
+      meta: { managedUsage: authorization?.reason || "blocked" },
+    };
+  }
+
+  const finalize = async (details: {
+    success: boolean;
+    providerCostUsd?: number;
+    costSource: ManagedCostSource;
+  }) => {
+    return await args.convexCtx.runMutation((internal as any).managedUsage.finalizeManagedCall, {
+      ledgerId: authorization.ledgerId,
+      provider: providerId,
+      ...details,
+    });
+  };
+  const successfulCost = resolveManagedResponseCost({
+    provider: providerId,
+    responseOk: true,
+    fixedProviderCostUsd,
+  });
+  const realizedCostUsd = successfulCost.providerCostUsd ?? 0;
+  const finalizeSuccessfulResponse = async () => finalize({
+    success: true,
+    providerCostUsd: successfulCost.providerCostUsd,
+    costSource: successfulCost.costSource,
+  });
 
   const startedAt = Date.now();
   let res: Response;
   try {
-    res = await fetch(url.toString(), {
-      method,
-      headers,
-      body:
-        method === "GET" || method === "DELETE"
-          ? undefined
-          : JSON.stringify(bodyParams),
-    });
+    res = await fetch(preparedRequest, { signal: AbortSignal.timeout(60_000) });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "fetch_failed";
+    await finalize({ success: true, costSource: "reservation" });
     return {
       ok: false,
-      error: `execute:network:${msg}`,
+      error: `execute:network:${e instanceof Error ? e.message : "fetch_failed"}`,
       costUsd: 0,
       latencyMs: Date.now() - startedAt,
-      apiLog: { provider: providerName, action: actionName },
+      apiLog,
     };
   }
   const latency = Date.now() - startedAt;
 
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
+    const responseText = await readMissionResponseTextCapped(res).catch(() => "");
+    await finalize({ success: false, providerCostUsd: 0, costSource: "zero_cost" });
     return {
       ok: false,
-      error: `execute_${res.status}:${txt.slice(0, 200)}`,
+      error: `execute_${res.status}:${responseText.slice(0, 200)}`,
       costUsd: 0,
       latencyMs: latency,
       meta: { status: res.status },
-      apiLog: { provider: providerName, action: actionName },
+      apiLog,
     };
   }
 
   let output: unknown;
   try {
-    const ct = res.headers.get("content-type") ?? "";
-    output = ct.includes("application/json") ? await res.json() : await res.text();
+    const responseText = await readMissionResponseTextCapped(res);
+    const contentType = res.headers.get("content-type") ?? "";
+    output = contentType.includes("application/json")
+      ? JSON.parse(responseText)
+      : responseText;
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "parse_failed";
+    const finalization = await finalizeSuccessfulResponse();
     return {
       ok: false,
-      error: `execute_parse:${msg}`,
-      costUsd: 0,
+      error: e instanceof MissionResponseTooLargeError
+        ? "execute:response_too_large"
+        : `execute_parse:${e instanceof Error ? e.message : "parse_failed"}`,
+      costUsd: realizedCostUsd,
+      chargedCostUsd: finalizedCustomerChargeUsd(finalization),
       latencyMs: latency,
       meta: { status: res.status },
-      apiLog: { provider: providerName, action: actionName },
+      apiLog,
     };
   }
 
+  const finalization = await finalizeSuccessfulResponse();
   return {
     ok: true,
     output,
-    costUsd: 0,
+    costUsd: realizedCostUsd,
+    chargedCostUsd: finalizedCustomerChargeUsd(finalization),
     latencyMs: latency,
     meta: { status: res.status },
-    apiLog: { provider: providerName, action: actionName },
+    apiLog,
   };
 }
+
+export const runTransformForTest = runTransform;
+export const runExecuteForTest = runExecute;
 
 const PRIMITIVE_HANDLERS: Record<
   string,
@@ -945,16 +1334,6 @@ const PRIMITIVE_HANDLERS: Record<
   validate: runValidate,
   execute: runExecute,
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Margin helper — duplicated from missions.ts to keep the runner self-contained.
-// 15% margin on external workspaces; 0% on NordSym workspaces.
-// ─────────────────────────────────────────────────────────────────────────────
-
-function applyMargin(underlyingUsd: number, isInternal: boolean): number {
-  if (isInternal) return 0;
-  return Math.round(underlyingUsd * 1.15 * 1_000_000) / 1_000_000;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal queries + mutations the executor relies on
@@ -1117,10 +1496,10 @@ export const markFailed = internalMutation({
 // Template seed: prd-generation
 //
 // First template that exercises the full v2 path:
-//   fetch (POST to genprd.se) → validate (rules check on returned PRD)
+//   registered GenPRD provider action -> validate (rules check on returned PRD)
 //
-// The fetch step's Authorization header pulls from {{env.GENPRD_API_KEY}}
-// so the template itself stays secret-free. Idempotent via slug + version.
+// Provider credentials stay behind the managed-action boundary. Idempotent via
+// slug + version.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const seedPRDTemplate = internalMutation({
@@ -1137,7 +1516,8 @@ export const seedPRDTemplate = internalMutation({
       slug: "prd-generation",
       version: 1,
       ownerWorkspaceId: ownerWs._id,
-      visibility: "public" as const,
+      // Internal until GenPRD exposes a verified exact/fixed cost contract.
+      visibility: "private" as const,
       title: "Generate PRD",
       description:
         "Generate a structured Markdown PRD via genprd.se with a rule-based quality gate.",
@@ -1174,18 +1554,18 @@ export const seedPRDTemplate = internalMutation({
           id: "generate",
           kind: "fetch",
           inputs: {
-            url: "https://genprd.se/api/generate",
-            method: "POST",
-            headers: { "X-GenPRD-Key": "{{env.GENPRD_API_KEY}}" },
-            body: {
-              topic: "{{params.topic}}",
-              audience: "{{params.audience}}",
-              constraints: "{{params.constraints}}",
-              model: "{{params.model}}",
-              format: "{{params.format}}",
-            },
+            topic: "{{params.topic}}",
+            audience: "{{params.audience}}",
+            constraints: "{{params.constraints}}",
+            model: "{{params.model}}",
+            format: "{{params.format}}",
           },
-          config: { source: "http", method: "POST", expect: "json", attributeAs: "genprd" },
+          config: {
+            source: "providerAction",
+            providerId: "GenPRD",
+            actionName: "generate_prd",
+            attributeAs: "genprd",
+          },
         },
         {
           id: "qualityCheck",
@@ -1326,12 +1706,13 @@ export const smokeExecute = internalAction({
 
 export const smokeTransform = internalAction({
   args: { topic: v.string() },
-  handler: async (_ctx, { topic }): Promise<StepResult> => {
+  handler: async (ctx, { topic }): Promise<StepResult> => {
     return await runTransform({
       ctx: {
         missionId: "smoke" as unknown as Id<"missions">,
         workspaceId: "smoke" as unknown as Id<"workspaces">,
       },
+      convexCtx: ctx,
       config: {
         model: "anthropic/claude-haiku-4-5",
         systemPrompt:
@@ -1404,6 +1785,7 @@ export const runV2 = internalAction({
     };
 
     let underlyingCost = 0;
+    let chargedCost = 0;
     let needsRevision = false;
     const skipSet = new Set<string>();
     const steps = (template.steps as Step[]) ?? [];
@@ -1428,18 +1810,17 @@ export const runV2 = internalAction({
           label: `unknown primitive ${step.kind} (step ${step.id})`,
           data: { stepId: step.id, kind: step.kind },
         });
-        const charged = applyMargin(underlyingCost, mission.isInternal);
         await ctx.runMutation(internal.missionRunner.markFailed, {
           missionId,
           error: `unknown_primitive:${step.kind}`,
           underlyingCostUsd: underlyingCost,
-          chargedCostUsd: charged,
+          chargedCostUsd: chargedCost,
         });
         return {
           ok: false,
           status: "failed",
           underlyingCostUsd: underlyingCost,
-          chargedCostUsd: charged,
+          chargedCostUsd: chargedCost,
           error: `unknown_primitive:${step.kind}`,
         };
       }
@@ -1450,7 +1831,11 @@ export const runV2 = internalAction({
       const resolvedInputs = resolveBindings(step.inputs, bindCtx);
 
       const result: StepResult = await handler({
-        ctx: { missionId, workspaceId: mission.workspaceId },
+        ctx: {
+          missionId,
+          workspaceId: mission.workspaceId,
+          trafficClass: mission.isInternal ? "internal" : "customer",
+        },
         convexCtx: ctx,
         config: step.config,
         inputs: resolvedInputs,
@@ -1464,6 +1849,7 @@ export const runV2 = internalAction({
         failures: result.failures,
       };
       underlyingCost += result.costUsd;
+      chargedCost += result.chargedCostUsd ?? 0;
 
       await ctx.runMutation(internal.missions.recordEvent, {
         missionId,
@@ -1531,18 +1917,17 @@ export const runV2 = internalAction({
         mission.budgetUsd != null &&
         underlyingCost > mission.budgetUsd
       ) {
-        const charged = applyMargin(underlyingCost, mission.isInternal);
         await ctx.runMutation(internal.missionRunner.markFailed, {
           missionId,
           error: "budget_exceeded",
           underlyingCostUsd: underlyingCost,
-          chargedCostUsd: charged,
+          chargedCostUsd: chargedCost,
         });
         return {
           ok: false,
           status: "failed",
           underlyingCostUsd: underlyingCost,
-          chargedCostUsd: charged,
+          chargedCostUsd: chargedCost,
           error: "budget_exceeded",
         };
       }
@@ -1555,18 +1940,17 @@ export const runV2 = internalAction({
       } else if (!result.ok) {
         const policy = step.onFail ?? "halt";
         if (policy === "halt") {
-          const charged = applyMargin(underlyingCost, mission.isInternal);
           await ctx.runMutation(internal.missionRunner.markFailed, {
             missionId,
             error: result.error ?? `step_failed:${step.id}`,
             underlyingCostUsd: underlyingCost,
-            chargedCostUsd: charged,
+            chargedCostUsd: chargedCost,
           });
           return {
             ok: false,
             status: "failed",
             underlyingCostUsd: underlyingCost,
-            chargedCostUsd: charged,
+            chargedCostUsd: chargedCost,
             error: result.error ?? `step_failed:${step.id}`,
           };
         }
@@ -1612,7 +1996,6 @@ export const runV2 = internalAction({
         ? state.steps[finalStepId].output
         : state.steps;
 
-    const charged = applyMargin(underlyingCost, mission.isInternal);
     const finalStatus = needsRevision ? "needs_revision" : "completed";
 
     await ctx.runMutation(internal.missionRunner.markComplete, {
@@ -1620,14 +2003,14 @@ export const runV2 = internalAction({
       status: finalStatus,
       result: finalResult,
       underlyingCostUsd: underlyingCost,
-      chargedCostUsd: charged,
+      chargedCostUsd: chargedCost,
     });
 
     return {
       ok: true,
       status: finalStatus,
       underlyingCostUsd: underlyingCost,
-      chargedCostUsd: charged,
+      chargedCostUsd: chargedCost,
     };
   },
 });

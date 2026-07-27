@@ -3,18 +3,19 @@
  * GET /api/health
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequestLike, VercelResponseLike } from './vercel-types.js';
 
 export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
+  _req: VercelRequestLike,
+  res: VercelResponseLike
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store');
   
   return res.status(200).json({
     status: 'ok',
-    service: 'apiclaw-http-api',
-    version: '2.0.0',
+    service: 'apiclaw-gateway',
+    version: '2.8.7',
     timestamp: new Date().toISOString(),
   });
 }

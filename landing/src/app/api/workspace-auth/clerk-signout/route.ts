@@ -5,6 +5,7 @@
  * and forwards to a client page that clears localStorage too.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { safeAuthContinuation } from "@/lib/auth-continuation";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -15,20 +16,39 @@ async function handler(req: NextRequest): Promise<NextResponse> {
 
   if (sessionToken) {
     try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
+      const logoutResponse = await fetch(`${CONVEX_URL}/api/mutation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           path: "workspaces:logout",
           args: { token: sessionToken },
         }),
+        cache: "no-store",
       });
+      const envelope = await logoutResponse.json().catch(() => null);
+      const result = envelope?.value || envelope;
+      if (!logoutResponse.ok || result?.success !== true) {
+        return NextResponse.json(
+          { success: false, error: "logout_unavailable" },
+          {
+            status: 503,
+            headers: { "Cache-Control": "no-store, private", "Retry-After": "5" },
+          },
+        );
+      }
     } catch (err) {
       console.error("clerk-signout: convex logout failed", err);
+      return NextResponse.json(
+        { success: false, error: "logout_unavailable" },
+        {
+          status: 503,
+          headers: { "Cache-Control": "no-store, private", "Retry-After": "5" },
+        },
+      );
     }
   }
 
-  const next = req.nextUrl.searchParams.get("next") || "/sign-in";
+  const next = safeAuthContinuation(req.nextUrl.searchParams.get("next"), "/sign-in");
   const callback = new URL("/auth/clerk-signout-callback", req.url);
   callback.searchParams.set("next", next);
 

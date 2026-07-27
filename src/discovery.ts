@@ -19,10 +19,21 @@ function loadLocalRegistry(): APIProvider[] {
     ) as { apis?: APIProvider[] };
     return Array.isArray(apisData.apis)
       ? apisData.apis
-        .filter((entry) => !isInternalProviderReference(entry))
-        .map((entry) => isUnavailableManagedProvider(entry.name)
-          ? { ...entry, callable: false }
-          : entry)
+        .filter((entry) =>
+          !isInternalProviderReference(entry) &&
+          ![
+            entry.id,
+            entry.name,
+            entry.base_url,
+            entry.docs_url,
+            (entry as APIProvider & { baseUrl?: string }).baseUrl,
+            (entry as APIProvider & { docsUrl?: string }).docsUrl,
+          ].some((value) => isUnavailableManagedProvider(value))
+        )
+        // The registry records whether the upstream API responded during
+        // verification, not whether APIClaw can safely proxy it today. Local
+        // registry entries remain discovery-only until hardened egress is live.
+        .map((entry) => ({ ...entry, callable: false }))
       : [];
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
@@ -489,7 +500,7 @@ const MANAGED_PROVIDER_SPECS: Record<string, {
  *
  * `callableOnly` defaults to true: agents asking "what API does X" almost
  * always want something they can actually run through APIClaw right now.
- * Pass `callableOnly: false` to also see the 23k discoverable-only registry
+ * Pass `callableOnly: false` to also see the discoverable-only registry
  * entries (useful for integration scoping, not for action).
  */
 export function discoverAPIs(

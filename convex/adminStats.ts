@@ -1,5 +1,7 @@
 import { internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { getWorkspaceUsageDisplay } from "./workspaces";
+import { FREE_MANAGED_PROVIDER_COST_CAP_USD } from "../src/product-truth";
 
 const INTERNAL_OR_NON_CUSTOMER_DOMAINS = new Set([
   "nordsym.com",
@@ -149,19 +151,20 @@ export const getOperatorUsageSnapshot = internalQuery({
         byAction[actionKey] = (byAction[actionKey] || 0) + 1;
       }
 
-      const weeklyLimit = workspace.weeklyUsageLimit || workspace.usageLimit || 50;
-      const weeklyUsed = workspace.weeklyUsageCount || 0;
-      const weeklyRemaining = weeklyLimit > 0 ? Math.max(0, weeklyLimit - weeklyUsed) : -1;
-      const weeklyPct = weeklyLimit > 0 ? Math.round((weeklyUsed / weeklyLimit) * 100) : 0;
-      const usageLimit = workspace.usageLimit || 50;
-      const usageCount = workspace.usageCount || 0;
-      const usageRemaining = usageLimit > 0 ? Math.max(0, usageLimit - usageCount) : -1;
-      const usagePct = usageLimit > 0 ? Math.round((usageCount / usageLimit) * 100) : 0;
-      const highestQuotaPct = Math.max(weeklyPct, usagePct);
+      const usage = getWorkspaceUsageDisplay(workspace);
+      const usageLimit = usage.usageLimit;
+      const usageCount = usage.usageCount;
+      const usageRemaining = usage.usageRemaining;
+      const usagePct = usageLimit > 0 ? Math.round(usage.usagePercentage) : 0;
+      const activationProviderCostUsd = (workspace.activationProviderCostMicros ?? 0) / 1_000_000;
+      const providerCostPct = Math.round(
+        (activationProviderCostUsd / FREE_MANAGED_PROVIDER_COST_CAP_USD) * 100,
+      );
+      const highestQuotaPct = usageLimit === -1 ? 0 : Math.max(usagePct, providerCostPct);
       const quotaRisk =
-        workspace.tier === "free" && highestQuotaPct >= 100
+        usageLimit !== -1 && highestQuotaPct >= 100
           ? "at_cap"
-          : workspace.tier === "free" && highestQuotaPct >= 80
+          : usageLimit !== -1 && highestQuotaPct >= 80
             ? "near_cap"
             : "normal";
 
@@ -179,10 +182,19 @@ export const getOperatorUsageSnapshot = internalQuery({
         usageLimit,
         usageRemaining,
         usagePct,
-        weeklyUsageCount: weeklyUsed,
-        weeklyUsageLimit: weeklyLimit,
-        weeklyRemaining,
-        weeklyPct,
+        activationProviderCostUsd,
+        activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
+        activationProviderCostRemainingUsd: Math.max(
+          0,
+          FREE_MANAGED_PROVIDER_COST_CAP_USD - activationProviderCostUsd,
+        ),
+        providerCostPct,
+        // Deprecated aliases for older operator clients. They now reflect the
+        // lifetime allowance and never imply a weekly reset.
+        weeklyUsageCount: usageCount,
+        weeklyUsageLimit: usageLimit,
+        weeklyRemaining: usageRemaining,
+        weeklyPct: usagePct,
         quotaRisk,
         monthlySpendCents: workspace.monthlySpendCents || 0,
         lastActiveAt: Math.max(workspace.lastActiveAt || 0, lastLogAt),

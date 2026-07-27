@@ -36,12 +36,14 @@ async function claimAuthId(
   email: string
 ): Promise<ClaimResult> {
   try {
+    const internalSecret = process.env.APICLAW_INTERNAL_SECRET;
+    if (!internalSecret) return { success: false, error: "server_not_configured" };
     const res = await fetch(`${CONVEX_URL}/api/mutation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         path: "cliAuth:claim",
-        args: { authId, clerkUserId, email },
+        args: { authId, clerkUserId, email, internalSecret },
       }),
       // Convex needs no caching; this is a one-shot mutation
       cache: "no-store",
@@ -100,9 +102,13 @@ export default async function CliAuthPage({
 
   // Signed in → fetch email + claim
   const user = await currentUser();
-  const email =
-    user?.primaryEmailAddress?.emailAddress ||
-    user?.emailAddresses?.[0]?.emailAddress;
+  const verifiedPrimary = user?.primaryEmailAddress?.verification?.status === "verified"
+    ? user.primaryEmailAddress.emailAddress
+    : undefined;
+  const verifiedFallback = user?.emailAddresses?.find(
+    (address) => address.verification?.status === "verified",
+  )?.emailAddress;
+  const email = verifiedPrimary || verifiedFallback;
 
   if (!email) {
     return <ErrorView title="No email on Clerk account" message="Your Clerk session has no email attached. Re-sign-in with an email-bearing provider." />;

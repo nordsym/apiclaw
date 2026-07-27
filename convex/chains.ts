@@ -1,7 +1,8 @@
 import { v } from "convex/values";
-import { mutation, query, action, internalMutation, internalAction } from "./_generated/server";
+import { mutation, query, internalMutation, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // TYPES
@@ -54,10 +55,7 @@ export const getChainExecutions = query({
   },
   handler: async (ctx, args) => {
     // Validate session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -119,10 +117,7 @@ export const getChainTraceAuth = query({
   },
   handler: async (ctx, args) => {
     // Validate session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -196,10 +191,7 @@ export const resumeChainAuth = mutation({
   },
   handler: async (ctx, args) => {
     // Validate session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -234,10 +226,7 @@ export const getChainStatsAuth = query({
   },
   handler: async (ctx, args) => {
     // Validate session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -354,147 +343,6 @@ export const createChainInternal = internalMutation({
         });
       }
     }
-
-    return chainId;
-  },
-});
-
-/**
- * Create a new chain execution record (public API)
- */
-export const createChain = mutation({
-  args: {
-    workspaceId: v.id("workspaces"),
-    steps: v.array(v.any()),
-    continueOnError: v.optional(v.boolean()),
-    timeout: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now();
-
-    // Validate steps
-    for (let i = 0; i < args.steps.length; i++) {
-      const step = args.steps[i] as ChainStep;
-      
-      if (step.parallel) {
-        for (const pStep of step.parallel) {
-          if (!pStep.id || !pStep.provider || !pStep.action) {
-            throw new Error(`Parallel step at index ${i} missing required fields (id, provider, action)`);
-          }
-        }
-      } else if (!step.id || !step.provider || !step.action) {
-        throw new Error(`Step at index ${i} missing required fields (id, provider, action)`);
-      }
-    }
-
-    const chainId = await ctx.db.insert("chains", {
-      workspaceId: args.workspaceId,
-      steps: args.steps,
-      status: "pending",
-      currentStep: 0,
-      results: {},
-      continueOnError: args.continueOnError ?? false,
-      timeout: args.timeout,
-      totalCostCents: 0,
-      totalLatencyMs: 0,
-      createdAt: now,
-    });
-
-    // Create execution records
-    for (let i = 0; i < args.steps.length; i++) {
-      const step = args.steps[i] as ChainStep;
-      
-      if (step.parallel) {
-        const parallelGroup = `parallel_${i}_${Date.now()}`;
-        for (const pStep of step.parallel) {
-          await ctx.db.insert("chainExecutions", {
-            chainId,
-            stepId: pStep.id,
-            stepIndex: i,
-            status: "pending",
-            parallelGroup,
-            createdAt: now,
-          });
-        }
-      } else {
-        await ctx.db.insert("chainExecutions", {
-          chainId,
-          stepId: step.id,
-          stepIndex: i,
-          status: "pending",
-          createdAt: now,
-        });
-      }
-    }
-
-    return chainId;
-  },
-});
-
-/**
- * Create chain from template
- */
-export const createChainFromTemplate = mutation({
-  args: {
-    workspaceId: v.id("workspaces"),
-    templateName: v.string(),
-    inputs: v.optional(v.any()),
-  },
-  handler: async (ctx, args) => {
-    const template = await ctx.db
-      .query("chainTemplates")
-      .withIndex("by_name", (q) => 
-        q.eq("workspaceId", args.workspaceId).eq("name", args.templateName)
-      )
-      .first();
-
-    if (!template) {
-      throw new Error(`Template '${args.templateName}' not found`);
-    }
-
-    const now = Date.now();
-
-    const chainId = await ctx.db.insert("chains", {
-      workspaceId: args.workspaceId,
-      steps: template.chain,
-      status: "pending",
-      currentStep: 0,
-      results: {},
-      totalCostCents: 0,
-      totalLatencyMs: 0,
-      createdAt: now,
-    });
-
-    for (let i = 0; i < template.chain.length; i++) {
-      const step = template.chain[i] as ChainStep;
-      
-      if (step.parallel) {
-        const parallelGroup = `parallel_${i}_${Date.now()}`;
-        for (const pStep of step.parallel) {
-          await ctx.db.insert("chainExecutions", {
-            chainId,
-            stepId: pStep.id,
-            stepIndex: i,
-            status: "pending",
-            parallelGroup,
-            createdAt: now,
-          });
-        }
-      } else {
-        await ctx.db.insert("chainExecutions", {
-          chainId,
-          stepId: step.id,
-          stepIndex: i,
-          status: "pending",
-          createdAt: now,
-        });
-      }
-    }
-
-    await ctx.db.patch(template._id, {
-      useCount: (template.useCount || 0) + 1,
-      lastUsedAt: now,
-    });
 
     return chainId;
   },
@@ -689,63 +537,6 @@ export const failChain = internalMutation({
 });
 
 /**
- * Resume chain from failed step (public mutation)
- */
-export const resumeChain = mutation({
-  args: {
-    resumeToken: v.string(),
-    overrides: v.optional(v.any()),
-  },
-  handler: async (ctx, args) => {
-    const chain = await ctx.db
-      .query("chains")
-      .withIndex("by_resumeToken", (q) => q.eq("resumeToken", args.resumeToken))
-      .first();
-
-    if (!chain) {
-      throw new Error("Invalid or expired resume token");
-    }
-
-    if (!chain.canResume) {
-      throw new Error("Chain cannot be resumed");
-    }
-
-    const executions = await ctx.db
-      .query("chainExecutions")
-      .withIndex("by_chainId_stepIndex", (q) => 
-        q.eq("chainId", chain._id).eq("stepIndex", chain.currentStep)
-      )
-      .collect();
-
-    for (const exec of executions) {
-      if (exec.status === "failed") {
-        await ctx.db.patch(exec._id, {
-          status: "pending",
-          error: undefined,
-          startedAt: undefined,
-          completedAt: undefined,
-        });
-      }
-    }
-
-    await ctx.db.patch(chain._id, {
-      status: "pending",
-      error: undefined,
-      resumeToken: undefined,
-      canResume: false,
-    });
-
-    return {
-      chainId: chain._id,
-      resumeFromStep: chain.currentStep,
-      steps: chain.steps,
-      results: chain.results,
-      overrides: args.overrides,
-    };
-  },
-});
-
-/**
  * Mark chain as completed
  */
 export const completeChain = internalMutation({
@@ -776,282 +567,15 @@ export const completeChain = internalMutation({
   },
 });
 
-/**
- * Pause chain execution
- */
-export const pauseChain = mutation({
-  args: {
-    chainId: v.id("chains"),
-  },
-  handler: async (ctx, args) => {
-    const chain = await ctx.db.get(args.chainId);
-    if (!chain) {
-      throw new Error("Chain not found");
-    }
-
-    if (chain.status !== "running") {
-      throw new Error("Can only pause running chains");
-    }
-
-    const resumeToken = generateResumeToken(args.chainId, chain.currentStep);
-
-    await ctx.db.patch(args.chainId, {
-      status: "paused",
-      resumeToken,
-      canResume: true,
-    });
-
-    return { resumeToken };
-  },
-});
-
-// ============================================
-// CHAIN TEMPLATE MUTATIONS
-// ============================================
-
-export const saveChainTemplate = mutation({
-  args: {
-    id: v.optional(v.id("chainTemplates")),
-    workspaceId: v.id("workspaces"),
-    name: v.string(),
-    description: v.optional(v.string()),
-    inputs: v.optional(v.any()),
-    chain: v.array(v.any()),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now();
-
-    if (args.id) {
-      await ctx.db.patch(args.id, {
-        name: args.name,
-        description: args.description,
-        inputs: args.inputs,
-        chain: args.chain,
-        updatedAt: now,
-      });
-      return args.id;
-    }
-
-    return await ctx.db.insert("chainTemplates", {
-      workspaceId: args.workspaceId,
-      name: args.name,
-      description: args.description,
-      inputs: args.inputs,
-      chain: args.chain,
-      useCount: 0,
-      createdAt: now,
-      updatedAt: now,
-    });
-  },
-});
-
-export const deleteChainTemplate = mutation({
-  args: {
-    id: v.id("chainTemplates"),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.delete(args.id);
-    return { success: true };
-  },
-});
-
-// ============================================
-// QUERIES
-// ============================================
-
-export const getChain = query({
-  args: {
-    chainId: v.id("chains"),
-  },
-  handler: async (ctx, args) => {
-    const chain = await ctx.db.get(args.chainId);
-    if (!chain) {
-      return null;
-    }
-
-    return {
-      id: chain._id,
-      status: chain.status,
-      currentStep: chain.currentStep,
-      totalSteps: chain.steps.length,
-      results: chain.results,
-      error: chain.error,
-      canResume: chain.canResume,
-      resumeToken: chain.resumeToken,
-      totalCostCents: chain.totalCostCents,
-      totalLatencyMs: chain.totalLatencyMs,
-      createdAt: chain.createdAt,
-      startedAt: chain.startedAt,
-      completedAt: chain.completedAt,
-    };
-  },
-});
-
-export const getChainTrace = query({
-  args: {
-    chainId: v.id("chains"),
-  },
-  handler: async (ctx, args) => {
-    const chain = await ctx.db.get(args.chainId);
-    if (!chain) {
-      return null;
-    }
-
-    const executions = await ctx.db
-      .query("chainExecutions")
-      .withIndex("by_chainId", (q) => q.eq("chainId", args.chainId))
-      .collect();
-
-    executions.sort((a, b) => a.stepIndex - b.stepIndex);
-
-    const trace = executions.map((exec) => ({
-      stepId: exec.stepId,
-      stepIndex: exec.stepIndex,
-      status: exec.status,
-      parallelGroup: exec.parallelGroup,
-      input: exec.input,
-      output: exec.output,
-      latencyMs: exec.latencyMs,
-      costCents: exec.costCents,
-      error: exec.error,
-      startedAt: exec.startedAt,
-      completedAt: exec.completedAt,
-    }));
-
-    const completedSteps = executions.filter((e) => e.status === "completed");
-    const tokensSaved = completedSteps.length > 1 ? (completedSteps.length - 1) * 400 : 0;
-
-    return {
-      chainId: chain._id,
-      workspaceId: chain.workspaceId,
-      status: chain.status,
-      steps: chain.steps,
-      currentStep: chain.currentStep,
-      results: chain.results,
-      error: chain.error,
-      trace,
-      totalCostCents: chain.totalCostCents,
-      totalLatencyMs: chain.totalLatencyMs,
-      tokensSaved,
-      canResume: chain.canResume,
-      resumeToken: chain.resumeToken,
-      createdAt: chain.createdAt,
-      startedAt: chain.startedAt,
-      completedAt: chain.completedAt,
-    };
-  },
-});
-
-export const listChains = query({
-  args: {
-    workspaceId: v.id("workspaces"),
-    status: v.optional(v.string()),
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const limit = args.limit ?? 50;
-
-    const chains = await ctx.db
-      .query("chains")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
-      .order("desc")
-      .take(limit);
-
-    let filtered = chains;
-    if (args.status && args.status !== "all") {
-      filtered = chains.filter((c) => c.status === args.status);
-    }
-
-    return filtered.map((chain) => ({
-      id: chain._id,
-      status: chain.status,
-      stepsCount: chain.steps.length,
-      currentStep: chain.currentStep,
-      totalCostCents: chain.totalCostCents,
-      totalLatencyMs: chain.totalLatencyMs,
-      error: chain.error,
-      canResume: chain.canResume,
-      createdAt: chain.createdAt,
-      completedAt: chain.completedAt,
-    }));
-  },
-});
-
-export const listChainTemplates = query({
-  args: {
-    workspaceId: v.id("workspaces"),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("chainTemplates")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
-      .collect();
-  },
-});
-
-export const getChainTemplate = query({
-  args: {
-    workspaceId: v.id("workspaces"),
-    name: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("chainTemplates")
-      .withIndex("by_name", (q) => 
-        q.eq("workspaceId", args.workspaceId).eq("name", args.name)
-      )
-      .first();
-  },
-});
-
-export const getChainStats = query({
-  args: {
-    workspaceId: v.id("workspaces"),
-  },
-  handler: async (ctx, args) => {
-    const chains = await ctx.db
-      .query("chains")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
-      .collect();
-
-    const total = chains.length;
-    const completed = chains.filter((c) => c.status === "completed").length;
-    const failed = chains.filter((c) => c.status === "failed").length;
-    const running = chains.filter((c) => c.status === "running").length;
-    const paused = chains.filter((c) => c.status === "paused").length;
-
-    const totalCostCents = chains.reduce((acc, c) => acc + (c.totalCostCents || 0), 0);
-    const totalLatencyMs = chains.reduce((acc, c) => acc + (c.totalLatencyMs || 0), 0);
-
-    const allExecutions = await Promise.all(
-      chains.map((c) =>
-        ctx.db
-          .query("chainExecutions")
-          .withIndex("by_chainId", (q) => q.eq("chainId", c._id))
-          .collect()
-      )
-    );
-    const totalSteps = allExecutions.flat().length;
-
-    return {
-      total,
-      completed,
-      failed,
-      running,
-      paused,
-      totalCostCents,
-      totalLatencyMs,
-      totalSteps,
-      successRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-    };
-  },
-});
-
 // ============================================
 // ACTIONS (Orchestration Logic)
 // ============================================
 
-export const runChain = action({
+/**
+ * Legacy chain orchestration is internal-only. Customer execution uses the
+ * authenticated mission/gateway rails, which enforce metering and ownership.
+ */
+export const runChain = internalAction({
   args: {
     workspaceId: v.id("workspaces"),
     steps: v.array(v.any()),
@@ -1257,10 +781,7 @@ export const getInboundAPIActivity = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
     if (!session) return { error: "Invalid session" };
 
     const workspace = await ctx.db.get(session.workspaceId);

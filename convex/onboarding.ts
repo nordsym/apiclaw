@@ -1,12 +1,10 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // Resolve sessionToken → workspaceId, shared by all handlers below.
 async function workspaceFromToken(ctx: any, token: string) {
-  const session = await ctx.db
-    .query("agentSessions")
-    .withIndex("by_sessionToken", (q: any) => q.eq("sessionToken", token))
-    .first();
+  const session = await findUsableAgentSession(ctx.db, token);
   if (!session) return null;
   const ws = await ctx.db.get(session.workspaceId);
   return ws || null;

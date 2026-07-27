@@ -150,6 +150,10 @@ export interface StepResult {
   ok: boolean;
   output?: unknown;
   costUsd: number;
+  // Customer charge returned by the managed ledger finalizer. Activation,
+  // contract, and internal calls are zero; PAYG is the exact metered charge.
+  // The mission runner must aggregate this value instead of re-pricing calls.
+  chargedCostUsd?: number;
   latencyMs: number;
   model?: string;                     // present for transform / decide / validate-llm
   failures?: string[];                // present when validate returns ok=false
@@ -180,9 +184,7 @@ export interface StepResult {
 // any template can pull, so adding to it grants ambient access to every
 // future template author. Workspace-scoped secrets land in their own
 // table when that lifts off the backlog.
-const ENV_BINDING_ALLOWLIST = new Set<string>([
-  "GENPRD_API_KEY",
-]);
+const ENV_BINDING_ALLOWLIST = new Set<string>();
 
 export function getAllowedEnv(): Record<string, string> {
   const out: Record<string, string> = {};

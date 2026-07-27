@@ -16,7 +16,6 @@ export type FunnelEventName =
   | "cli_browser_callback_success"
   | "register_owner"
   | "verify_code"
-  | "first_call_api_success"
   // Diagnostics
   | "cli_browser_callback_failed"
   | "register_owner_failed"
@@ -122,7 +121,6 @@ export interface EmitArgs {
   event: FunnelEventName;
   workspaceId?: string;
   fingerprint?: string;
-  sessionToken?: string;
   email?: string;
   mcpClient?: string;
   platform?: string;
@@ -146,7 +144,6 @@ export function emitFunnelEvent(args: EmitArgs): void {
       classification,
       workspaceId: args.workspaceId,
       fingerprint: args.fingerprint,
-      sessionToken: args.sessionToken,
       email: args.email,
       userAgent: `apiclaw-mcp/${args.version || "unknown"}`,
       mcpClient: args.mcpClient,

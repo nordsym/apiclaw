@@ -12,20 +12,20 @@ export type WorkspaceNavigationItem = {
   label: string;
 };
 
-const UNLIMITED_TIERS = new Set([
-  "pro",
-  "scale",
-  "usage_based",
+const UNCONDITIONAL_UNLIMITED_TIERS = new Set([
   "partner",
   "founder",
-  "enterprise",
 ]);
 
 export function isUnlimitedWorkspace(workspace: {
   tier?: string | null;
   usageLimit?: number | null;
+  paygActive?: boolean | null;
 }): boolean {
-  return workspace.usageLimit === -1 || UNLIMITED_TIERS.has(workspace.tier ?? "");
+  const tier = workspace.tier ?? "";
+  if (UNCONDITIONAL_UNLIMITED_TIERS.has(tier)) return true;
+  if (tier === "usage_based") return workspace.paygActive === true;
+  return workspace.usageLimit === -1;
 }
 
 export function getAgentPresence(lastActiveAt: number, now = Date.now()): {

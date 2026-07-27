@@ -1,5 +1,6 @@
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 /**
  * Public mutation called by MCP server (path: searchLogs:log)
@@ -14,10 +15,7 @@ export const log = mutation({
     subagentId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
     if (!session) return { success: false };
 
     await ctx.db.insert("searchLogs", {
@@ -43,10 +41,7 @@ export const getRecent = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { token, limit = 50 }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) return [];
 
     const logs = await ctx.db
@@ -86,10 +81,7 @@ export const logSearch = internalMutation({
     if (args.sessionToken) {
       try {
         const token = args.sessionToken;
-        const session = await ctx.db
-          .query("agentSessions")
-          .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-          .first();
+        const session = await findUsableAgentSession(ctx.db, token);
         if (session) {
           workspaceId = session.workspaceId;
           // No agentId in agentSessions, subagentId stays undefined
@@ -118,7 +110,7 @@ export const logSearch = internalMutation({
 });
 
 // Get top search queries (for analytics)
-export const getTopQueries = query({
+export const getTopQueries = internalQuery({
   args: {
     limit: v.optional(v.number()),
     since: v.optional(v.number()), // timestamp
@@ -179,10 +171,7 @@ export const getStats = query({
   handler: async (ctx, { token, hoursBack }) => {
     // Try agentSessions first (MCP agent tokens)
     let workspaceId: any = null;
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, token);
     if (agentSession) {
       workspaceId = agentSession.workspaceId;
     } else {
@@ -223,7 +212,7 @@ export const getStats = query({
 });
 
 // Get searches with no results (API gaps)
-export const getZeroResultQueries = query({
+export const getZeroResultQueries = internalQuery({
   args: {
     limit: v.optional(v.number()),
     since: v.optional(v.number()),

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalQuery, mutation, query } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 function requireAdminSecret(internalSecret: string | undefined) {
   const expected = process.env.APICLAW_INTERNAL_SECRET;
@@ -14,6 +15,13 @@ function redactedConfig<T extends { encryptedMasterKey: string }>(config: T) {
     encryptedMasterKey: "",
     hasCredential: Boolean(config.encryptedMasterKey),
   };
+}
+
+export function providerActionBelongsToConfig(
+  action: { directCallId: unknown } | null,
+  directCallId: unknown,
+): boolean {
+  return Boolean(action && action.directCallId === directCallId);
 }
 
 function assertSafeProviderBaseUrl(value: string) {
@@ -124,10 +132,7 @@ export const saveConfig = mutation({
     // Verify session (unified: agentSessions first, fallback to legacy sessions)
     let providerId: any = null;
 
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, args.token);
 
     if (agentSession) {
       const provider = await ctx.db
@@ -241,10 +246,7 @@ export const saveAction = mutation({
     const directCall = await ctx.db.get(args.directCallId);
     if (!directCall) throw new Error("Managed routing config not found");
     if (args.token) {
-      const session = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token!))
-        .first();
+      const session = await findUsableAgentSession(ctx.db, args.token!);
       if (!session) throw new Error("Invalid or expired session");
       const provider = await ctx.db
         .query("providers")
@@ -257,6 +259,10 @@ export const saveAction = mutation({
     const now = Date.now();
 
     if (args.id) {
+      const existingAction = await ctx.db.get(args.id);
+      if (!providerActionBelongsToConfig(existingAction, args.directCallId)) {
+        throw new Error("Action not found or unauthorized");
+      }
       // Update existing
       await ctx.db.patch(args.id, {
         name: args.name,
@@ -304,10 +310,7 @@ export const deleteAction = mutation({
     const directCall = await ctx.db.get(action.directCallId);
     if (!directCall) throw new Error("Managed routing config not found");
     if (args.token) {
-      const session = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token!))
-        .first();
+      const session = await findUsableAgentSession(ctx.db, args.token!);
       if (!session) throw new Error("Invalid or expired session");
       const provider = await ctx.db
         .query("providers")
@@ -497,10 +500,7 @@ export const getDirectCallConfigByApiId = internalQuery({
 export const getOwnerConfigByApiId = query({
   args: { token: v.string(), apiId: v.id("providerAPIs") },
   handler: async (ctx, { token, apiId }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) throw new Error("Invalid or expired session");
     const provider = await ctx.db
       .query("providers")
@@ -669,10 +669,7 @@ export const testAction = mutation({
     // 1. Verify provider session (unified: agentSessions first, fallback to legacy)
     let sessionProviderId: any = null;
 
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, args.token);
 
     if (agentSession) {
       const provider = await ctx.db
@@ -734,109 +731,16 @@ export const testAction = mutation({
       };
     }
     
-    // 4. Get API key (use testKey if provided, else use stored key)
-    // Note: For production, encryptedMasterKey would need server-side decryption
-    // For V1 test console, we use testKey directly
-    const apiKey = args.testKey || config.encryptedMasterKey;
-    if (!apiKey) {
-      return {
-        success: false,
-        error: "No API key provided. Add a test key or configure master key.",
-        latencyMs: Date.now() - startTime,
-      };
-    }
-    
-    // 5. Build URL with path params
-    let path = action.path;
-    const queryParams: Record<string, string> = {};
-    const bodyParams: Record<string, unknown> = {};
-    
-    for (const paramDef of action.params) {
-      const value = args.params[paramDef.name];
-      if (value === undefined || value === "") continue;
-      
-      if (paramDef.in === "path") {
-        // Replace {paramName} in path
-        path = path.replace(`{${paramDef.name}}`, String(value));
-      } else if (paramDef.in === "query") {
-        queryParams[paramDef.name] = String(value);
-      } else if (paramDef.in === "body") {
-        bodyParams[paramDef.name] = value;
-      }
-    }
-    
-    // Build full URL
-    try {
-      assertSafeProviderBaseUrl(config.baseUrl);
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unsafe provider URL",
-        latencyMs: Date.now() - startTime,
-      };
-    }
-    let url = config.baseUrl.replace(/\/$/, "") + path;
-    const queryString = new URLSearchParams(queryParams).toString();
-    if (queryString) {
-      url += (url.includes("?") ? "&" : "?") + queryString;
-    }
-    
-    // 6. Build headers with auth
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
+    // Convex mutations cannot perform external fetches, and turning this into
+    // an action would expose provider-supplied destinations and credentials to
+    // an unhardened egress path. Keep the console fail-closed until calls run
+    // through the same host allowlist, redirect checks, limits, and audit
+    // ledger as the managed gateway.
+    return {
+      success: false,
+      error: "Provider test calls are disabled until hardened managed egress is available.",
+      code: "provider_test_disabled_pending_hardened_egress",
+      latencyMs: Date.now() - startTime,
     };
-    
-    // Add auth header
-    if (config.authType !== "none" && apiKey) {
-      const authValue = config.authPrefix 
-        ? `${config.authPrefix}${apiKey}` 
-        : apiKey;
-      headers[config.authHeader] = authValue;
-    }
-    
-    // 7. Build fetch options
-    const fetchOptions: RequestInit = {
-      method: action.method,
-      headers,
-    };
-    
-    // Add body for non-GET requests
-    if (action.method !== "GET" && Object.keys(bodyParams).length > 0) {
-      fetchOptions.body = JSON.stringify(bodyParams);
-    }
-    
-    // 8. Execute request
-    try {
-      const response = await fetch(url, fetchOptions);
-      const latencyMs = Date.now() - startTime;
-      
-      // Try to parse response as JSON, fallback to text
-      let data: unknown;
-      const contentType = response.headers.get("content-type") || "";
-      
-      if (contentType.includes("application/json")) {
-        try {
-          data = await response.json();
-        } catch {
-          data = await response.text();
-        }
-      } else {
-        data = await response.text();
-      }
-      
-      return {
-        success: response.ok,
-        status: response.status,
-        data,
-        latencyMs,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Request failed",
-        latencyMs: Date.now() - startTime,
-      };
-    }
   },
 });

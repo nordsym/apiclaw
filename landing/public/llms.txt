@@ -21,13 +21,17 @@ APIClaw provides unified API access for AI agents across four doors: local MCP i
 ## Current canon
 
 - Positioning: The Control Plane for AI Agents
-- Discoverable APIs: 26,701
-- Callable APIs: 2,906
-- Fully managed directCallConfigs: 49
+- Discoverable APIs: 26,619
+- Exact-name source-verified catalog entries: 689
+- Managed provider adapter inventory: 22
+- Customer-executable provider rails: 4
 - npm package: @nordsym/apiclaw
-- Free tier: 25 calls per month after signup
-- Paid tier: pay as you go at API cost plus 15% margin
+- Free tier: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap
+- Discovery: free after signup
+- Keyless public execution: discovery-only until hardened egress is live
+- Paid tier: billing-ready managed actions at API cost plus 15% margin
 - Auth: free email signup required for discovery and execution
+- Source verification is discovery evidence, not execution readiness
 - Source of truth for API counts: live `/api/catalog` response
 
 ## Four doors
@@ -83,7 +87,7 @@ https://apiclaw.cloud/.well-known/oauth-protected-resource
 
 ### Discover APIs
 
-Use `discover_apis(query)` or `POST /v1/discover` to search the live API registry by capability. Set `callable_only=true` when the agent needs APIs that APIClaw has verified as executable.
+Use `discover_apis(query)` or `POST /v1/discover` to search the live API registry by capability. Set `callable_only=true` when the agent needs a managed route APIClaw can execute now. Source-verified public definitions remain discovery-only until hardened egress is live.
 
 ### Read API details
 
@@ -91,11 +95,11 @@ Use `get_api_details` to inspect specs, pricing, auth needs, and suggested call 
 
 ### Execute APIs
 
-Use `call_api` or `POST /v1/execute` to run API calls through APIClaw. APIClaw handles managed credentials where available and logs execution metadata.
+Use `call_api` or `POST /v1/execute` to run API calls through APIClaw. APIClaw handles managed credentials where available and logs execution metadata. HTTP managed calls require one `Idempotency-Key` per logical operation, reused after an ambiguous network failure.
 
 ### Route LLM calls
 
-Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, Together, DeepInfra, and others.
+Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, DeepInfra, and others.
 
 ### Run missions
 
@@ -105,16 +109,20 @@ Use mission templates and mission events for typed orchestrations such as PRD ge
 
 Responses include `_apiclaw` metadata where applicable: provider, route, latency, cost, auth mode, credential source, and notices such as quota warnings.
 
-## Managed provider examples
+## Managed provider boundary
 
-OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, Together, DeepInfra, Replicate, ElevenLabs, Deepgram, AssemblyAI, Brave Search, Serper, Firecrawl, E2B, GitHub, APILayer, NASA, Filestack.
+- APIClaw inventories 22 managed provider adapters. Inventory means server-side adapter support, not customer execution.
+- Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, and NASA read-only actions.
+- Remaining managed adapters stay unavailable to customer traffic until their trust and billing contracts are exact.
 
 Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.
 
 ## Pricing
 
-- Free: 25 calls per month across the platform after signup.
-- Pay as you go: unlimited usage at underlying API cost plus 15% margin.
+- Free: up to 25 managed calls for the lifetime of the workspace, subject to a $1 total underlying provider-cost cap.
+- Discovery is free after signup.
+- Keyless public execution remains disabled until hardened egress is live.
+- Pay as you go: billing-ready managed usage at underlying provider cost plus 15% margin. Actions without an exact cost adapter remain blocked.
 - Discovery is signup-gated and part of the same workspace model.
 - Workspace billing and usage are visible at https://apiclaw.cloud/workspace.
 

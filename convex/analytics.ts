@@ -1,5 +1,6 @@
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // Log an analytics event
 export const log = mutation({
@@ -20,7 +21,7 @@ export const log = mutation({
 });
 
 // Get stats for dashboard
-export const getStats = query({
+export const getStats = internalQuery({
   args: {
     hoursBack: v.optional(v.number()),
   },
@@ -75,7 +76,7 @@ export const getStats = query({
 });
 
 // Get recent events for live feed
-export const getRecent = query({
+export const getRecent = internalQuery({
   args: {
     limit: v.optional(v.number()),
   },
@@ -101,10 +102,7 @@ export const getProviderBreakdown = query({
     const since = Date.now() - periodDays * 24 * 3600000;
 
     // Verify session and get workspace
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return null;

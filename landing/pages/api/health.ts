@@ -10,11 +10,12 @@ export default async function handler(
   res: NextApiResponse
 ) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store');
   
   return res.status(200).json({
     status: 'ok',
-    service: 'apiclaw-http-api',
-    version: '2.0.0',
+    service: 'apiclaw-gateway',
+    version: '2.8.7',
     timestamp: new Date().toISOString(),
   });
 }

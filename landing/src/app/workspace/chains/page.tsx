@@ -24,6 +24,10 @@ import {
 } from "lucide-react";
 import { ChainTrace } from "@/components/ChainTrace";
 import { ChainStepDetail } from "@/components/ChainStepDetail";
+import {
+  getWorkspaceSessionToken,
+  subscribeWorkspaceSessionToken,
+} from "@/lib/workspace-session";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
@@ -193,9 +197,14 @@ export default function ChainsPage() {
     navigator.clipboard.writeText(chainId);
   };
 
+  useEffect(() => subscribeWorkspaceSessionToken((token) => {
+    setSessionToken(token);
+    if (!token) router.push("/sign-in");
+  }), [router]);
+
   useEffect(() => {
     const init = async () => {
-      const token = localStorage.getItem("apiclaw_workspace_session");
+      const token = await getWorkspaceSessionToken();
       if (!token) {
         router.push("/sign-in");
         return;

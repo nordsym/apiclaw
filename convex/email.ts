@@ -1,5 +1,10 @@
 import { v } from "convex/values";
-import { action, internalAction } from "./_generated/server";
+import { internalAction } from "./_generated/server";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from "../src/product-truth";
 
 // ============================================
 // EMAIL TEMPLATES
@@ -7,6 +12,8 @@ import { action, internalAction } from "./_generated/server";
 
 const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
 const APP_URL = "https://apiclaw.cloud";
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
+const FREE_MANAGED_ALLOWANCE_COPY = `${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap`;
 
 // Base email wrapper - using string concat for Convex compatibility
 function wrapEmail(content: string): string {
@@ -66,7 +73,7 @@ function magicLinkEmailTemplate(verifyUrl: string): string {
   html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
   html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
   html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 managed calls per week. This link expires in 1 hour.</p>";
+  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
   html += "</td></tr></table>";
   html += "</td></tr></table></body></html>";
   return html;
@@ -108,13 +115,13 @@ function limitReachedEmailTemplate(upgradeUrl: string): string {
     </h2>
 
     <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #525252; text-align: center;">
-      Your AI agent has reached the free tier limit. Add a payment method to keep going with pay-as-you-go, no subscription.
+      Your AI agent has reached the free tier limit. Add a payment method to continue billing-ready managed actions with pay-as-you-go, no fixed subscription fee.
     </p>
 
     <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
       <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #0a0a0a;">Pay as you go</p>
       <ul style="margin: 0; padding: 0 0 0 20px; font-size: 14px; color: #525252; line-height: 1.8;">
-        <li>Underlying API cost + 15% margin (market standard)</li>
+        <li>Underlying provider cost + ${PAYG_MARGIN_PERCENT}% margin</li>
         <li>No monthly fee, no commitment</li>
         <li>Usage-based billing via Stripe, transparent per-call cost</li>
       </ul>
@@ -188,7 +195,7 @@ function invoicePaidEmailTemplate(args: {
     ${buttons.length ? `<div style="text-align: center; padding: 8px 0 24px;">${buttons.join("")}</div>` : ""}
 
     <p style="margin: 0; font-size: 13px; color: #737373; text-align: center;">
-      Pay-as-you-go billing: provider cost + 15% margin. Questions? Reply to this email.
+      Pay-as-you-go billing: provider cost + ${PAYG_MARGIN_PERCENT}% margin. Questions? Reply to this email.
     </p>
   `);
 }
@@ -200,7 +207,7 @@ function invoicePaidEmailTemplate(args: {
 /**
  * Send magic link email
  */
-export const sendMagicLinkEmail = action({
+export const sendMagicLinkEmail = internalAction({
   args: {
     email: v.string(),
     token: v.string(),
@@ -224,13 +231,13 @@ export const sendMagicLinkEmail = action({
     html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
     html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
     html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: 50 managed calls per week. This link expires in 1 hour.</p>";
+    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
     html += "</td></tr></table>";
     html += "</td></tr></table></body></html>";
     
     var textContent = "APIClaw - An AI Agent Wants to Connect\n\n";
     textContent += "Click the link: " + verifyUrl + "\n\n";
-    textContent += "Free tier: 50 managed calls per week. Expires in 1 hour.";
+    textContent += "Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. Expires in 1 hour.";
     
     var response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -259,7 +266,7 @@ export const sendMagicLinkEmail = action({
 /**
  * Send reminder email
  */
-export const sendReminderEmail = action({
+export const sendReminderEmail = internalAction({
   args: {
     email: v.string(),
     token: v.string(),
@@ -299,7 +306,7 @@ export const sendReminderEmail = action({
 /**
  * Send invoice paid email — branded receipt with hosted invoice + PDF link
  */
-export const sendInvoicePaidEmail = action({
+export const sendInvoicePaidEmail = internalAction({
   args: {
     email: v.string(),
     amountPaidCents: v.number(),
@@ -370,7 +377,7 @@ export const sendInvoicePaidEmail = action({
 /**
  * Send limit reached email
  */
-export const sendLimitReachedEmail = action({
+export const sendLimitReachedEmail = internalAction({
   args: {
     email: v.string(),
   },

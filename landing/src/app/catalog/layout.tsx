@@ -5,10 +5,10 @@ const categoryCount = Object.keys(statsData.categoryBreakdown).length;
 
 export const metadata: Metadata = {
   title: "API Catalog | APIClaw",
-  description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.callableCount.toLocaleString()}+ callable instantly through MCP or API key. Search, filter, discover.`,
+  description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.sourceVerifiedCount.toLocaleString()}+ source-verified definitions, with managed execution readiness shown separately.`,
   openGraph: {
     title: "API Catalog | APIClaw",
-    description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.callableCount.toLocaleString()}+ callable instantly.`,
+    description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.sourceVerifiedCount.toLocaleString()}+ source-verified definitions.`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "API Catalog | APIClaw",
-    description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.callableCount.toLocaleString()}+ callable instantly through MCP or API key.`,
+    description: `Browse ${statsData.apiCount.toLocaleString()}+ APIs across ${categoryCount} categories. ${statsData.sourceVerifiedCount.toLocaleString()}+ source-verified definitions, with managed execution readiness shown separately.`,
     images: ["/api/og/catalog"],
     creator: "@nordsym",
   },

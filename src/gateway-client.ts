@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { emitFunnelEvent } from './funnel-client.js';
+import { randomUUID } from 'crypto';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,6 +20,18 @@ export interface GatewayResponse {
   action: string;
   data?: any;
   error?: string;
+  /** Stable machine-readable gateway error code. */
+  code?: string;
+  /** Gateway request identity when one was assigned. */
+  requestId?: string;
+  /**
+   * Present when the client cannot know whether the gateway accepted the
+   * operation. Callers must retain this key and must not create a new one for
+   * the same logical operation.
+   */
+  idempotencyKey?: string;
+  outcomeUnknown?: boolean;
+  retryable?: boolean;
   cost?: number;
   /**
    * Set when the gateway rejected the call because the workspace was missing
@@ -44,8 +56,10 @@ export interface GatewayResponse {
 
 export interface GatewayExecuteOptions {
   workspaceId?: string;
+  sessionToken?: string;
   stream?: boolean;
   routeOverride?: string;
+  idempotencyKey?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,13 +88,12 @@ function resolveInternalSecret(): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Returns true if gateway routing is enabled.
- * Default: enabled. Set APICLAW_USE_GATEWAY=false to disable.
+ * Managed execution always uses the billing gateway. A local environment
+ * switch previously allowed direct provider calls that bypassed the atomic
+ * allowance and cost ledger, so managed routing is no longer optional.
  */
 export function isGatewayEnabled(): boolean {
-  const flag = process.env.APICLAW_USE_GATEWAY;
-  if (flag === undefined || flag === '') return true; // default on
-  return flag.toLowerCase() !== 'false';
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -109,50 +122,39 @@ export class GatewayClient {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-APIClaw-Internal': this.internalSecret,
     };
 
-    if (options?.workspaceId) {
+    if (options?.sessionToken) {
+      headers['X-APIClaw-Session'] = options.sessionToken;
+    } else if (this.internalSecret) {
+      headers['X-APIClaw-Internal'] = this.internalSecret;
+    }
+    if (options?.workspaceId && this.internalSecret && !options.sessionToken) {
       headers['X-APIClaw-Workspace'] = options.workspaceId;
     }
     if (options?.routeOverride) {
       headers['X-APIClaw-Route'] = options.routeOverride;
     }
+    // One key identifies one logical managed operation. We never retry an
+    // ambiguous transport failure here: the first request may already have
+    // reached the gateway, and the gateway does not retain provider response
+    // bodies for safe replay.
+    const idempotencyKey = options?.idempotencyKey ?? `apiclaw-${randomUUID()}`;
+    headers['Idempotency-Key'] = idempotencyKey;
 
     const body = JSON.stringify({ provider, action, params });
-
-    // First attempt
-    let response = await this.doFetch(url, headers, body);
-    let firstStatus: number | null = response?.status ?? null;
-
-    // Retry once on network error OR 5xx
-    if (!response || response.status >= 500) {
-      const reason = !response ? 'fetch_fail' : `5xx:${response.status}`;
-      emitFunnelEvent({
-        event: 'gateway_retry',
-        workspaceId: options?.workspaceId,
-        version: process.env.npm_package_version || 'unknown',
-        props: { attempt: 2, reason, provider, action },
-      });
-      // If first response was a 5xx, drain it before retry
-      if (response && response.status >= 500) {
-        try { await response.text(); } catch { /* ignore */ }
-      }
-      response = await this.doFetch(url, headers, body);
-    }
+    const response = await this.doFetch(url, headers, body);
 
     if (!response) {
-      emitFunnelEvent({
-        event: 'gateway_retry',
-        workspaceId: options?.workspaceId,
-        version: process.env.npm_package_version || 'unknown',
-        props: { attempt: 2, reason: 'retry_exhausted', provider, action, firstStatus },
-      });
       return {
         success: false,
         provider,
         action,
-        error: 'Gateway unreachable after retry',
+        code: 'outcome_unknown',
+        outcomeUnknown: true,
+        retryable: false,
+        idempotencyKey,
+        error: `The gateway response was lost. This operation may already have been accepted. Do not submit it again. Do not rerun it with a new key. Retain operation key ${idempotencyKey} for reconciliation.`,
       };
     }
 
@@ -163,6 +165,24 @@ export class GatewayClient {
         // Surface workspace-required errors structurally so the MCP server can
         // print a friendly signup banner instead of dumping raw JSON.
         const errObj = json?.error;
+        const errorCode = typeof errObj?.code === "string"
+          ? errObj.code
+          : typeof json?.code === "string"
+            ? json.code
+            : undefined;
+        const explicitRetryable = typeof errObj?.retryable === "boolean"
+          ? errObj.retryable
+          : typeof json?.retryable === "boolean"
+            ? json.retryable
+            : undefined;
+        const explicitTerminalFailure = explicitRetryable === false &&
+          errorCode !== "outcome_unknown" &&
+          errorCode !== "idempotency_conflict";
+        const outcomeUnknown =
+          errorCode === "outcome_unknown" ||
+          errorCode === "idempotency_conflict" ||
+          (response.status >= 500 && !explicitTerminalFailure);
+        const operationLocked = outcomeUnknown || explicitTerminalFailure;
         const isAuthError =
           response.status === 401 &&
           errObj &&
@@ -172,6 +192,16 @@ export class GatewayClient {
           success: false,
           provider: json.provider || provider,
           action: json.action || action,
+          code: errorCode,
+          requestId:
+            typeof errObj?.requestId === "string"
+              ? errObj.requestId
+              : typeof json?.requestId === "string"
+                ? json.requestId
+                : undefined,
+          idempotencyKey: operationLocked ? idempotencyKey : undefined,
+          outcomeUnknown: outcomeUnknown ? true : undefined,
+          retryable: operationLocked ? false : explicitRetryable,
           error:
             typeof errObj === "string"
               ? errObj
@@ -211,7 +241,11 @@ export class GatewayClient {
         success: false,
         provider,
         action,
-        error: `Gateway response parse error: ${e.message}`,
+        code: 'outcome_unknown',
+        outcomeUnknown: true,
+        retryable: false,
+        idempotencyKey,
+        error: `The gateway returned an unreadable response after accepting the request. Do not submit it again. Do not rerun it with a new key. Retain operation key ${idempotencyKey} for reconciliation.`,
       };
     }
   }
@@ -224,21 +258,19 @@ export class GatewayClient {
     headers: Record<string, string>,
     body: string,
   ): Promise<Response | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), GATEWAY_TIMEOUT_MS);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), GATEWAY_TIMEOUT_MS);
-
-      const response = await fetch(url, {
+      return await fetch(url, {
         method: 'POST',
         headers,
         body,
         signal: controller.signal,
       });
-
-      clearTimeout(timer);
-      return response;
     } catch {
       return null;
+    } finally {
+      clearTimeout(timer);
     }
   }
 }

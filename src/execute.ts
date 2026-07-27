@@ -5,7 +5,8 @@
 import { getCredentials } from './credentials.js';
 import { callProxy, PROXY_PROVIDERS } from './proxy.js';
 import { executeDynamicAction, hasDynamicConfig, listDynamicActions } from './execute-dynamic.js';
-import { filterPublicConnectedProviders, isInternalOnlyProvider } from './provider-boundaries.js';
+import { isInternalOnlyProvider } from './provider-boundaries.js';
+import { PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS } from './product-truth.js';
 
 // Re-export chain execution
 export { executeChain } from './chainExecutor.js';
@@ -2258,28 +2259,13 @@ export async function getProviderActionsAsync(providerId: string): Promise<strin
   return listDynamicActions(providerId);
 }
 
-// Get all connected providers with their actions (static handlers only)
-// APILayer actions blocked by subscription tier
-const BLOCKED_ACTIONS = ['verify_number', 'world_news', 'image_crop', 'form_submit'];
-const RATE_LIMITED_ACTIONS = ['pdf_generate'];
-
-export function getConnectedProviders(): { provider: string; actions: string[]; blocked?: string[]; rate_limited?: string[] }[] {
-  const connected = Object.entries(handlers).map(([provider, actions]) => {
-    const allActions = Object.keys(actions);
-    if (provider === 'apilayer') {
-      const live = allActions.filter(a => !BLOCKED_ACTIONS.includes(a) && !RATE_LIMITED_ACTIONS.includes(a));
-      const blocked = allActions.filter(a => BLOCKED_ACTIONS.includes(a));
-      const rateLimited = allActions.filter(a => RATE_LIMITED_ACTIONS.includes(a));
-      return {
-        provider,
-        actions: live,
-        ...(blocked.length > 0 ? { blocked } : {}),
-        ...(rateLimited.length > 0 ? { rate_limited: rateLimited } : {}),
-      };
-    }
-    return { provider, actions: allActions };
-  });
-  return filterPublicConnectedProviders(connected);
+// Customer-callable providers and actions. Credentialed adapters that do not
+// yet have billing-grade cost truth deliberately stay out of this response.
+export function getConnectedProviders(): { provider: string; actions: string[] }[] {
+  return PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map((provider) => ({
+    provider: provider.id,
+    actions: [...provider.customerExecutableActions],
+  }));
 }
 
 // Execute an API call
@@ -2298,11 +2284,17 @@ export async function executeAPICall(
       ERROR_CODES.UNKNOWN_PROVIDER,
     );
   }
+  return createErrorResult(
+    providerId,
+    action,
+    "Direct managed execution is retired. Use the APIClaw gateway so quota, attribution, and billing are enforced.",
+    ERROR_CODES.FORBIDDEN,
+  );
   // Check for dynamic (self-service) provider config first
   if (userId) {
     const isDynamic = await hasDynamicConfig(providerId);
     if (isDynamic) {
-      const dynamicResult = await executeDynamicAction(providerId, action, params, userId, customerKey);
+      const dynamicResult = await executeDynamicAction(providerId, action, params, userId!, customerKey);
       return normalizeResponse(dynamicResult);
     }
   }

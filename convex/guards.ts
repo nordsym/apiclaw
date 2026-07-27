@@ -8,6 +8,7 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 export type VerifiedOwner = {
   ok: true;
@@ -48,10 +49,7 @@ export async function resolveVerifiedOwner(
     };
   }
 
-  const session = await ctx.db
-    .query("agentSessions")
-    .withIndex("by_sessionToken", (q: any) => q.eq("sessionToken", sessionToken))
-    .first();
+  const session = await findUsableAgentSession(ctx.db, sessionToken);
 
   if (!session) {
     return { ok: false, reason: "session_invalid", message: "Session not found or expired." };

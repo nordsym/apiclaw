@@ -11,9 +11,21 @@
  * workspaces pay underlying compute + 15%.
  */
 import { v } from "convex/values";
-import { mutation, query, action, internalAction, internalMutation } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
+import {
+  query,
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import {
+  estimateManagedProviderCostUsd,
+  hasBillingGradeManagedCost,
+} from "./managedCostPolicy";
+import { normalizeMaxOutputTokens } from "./httpTrust";
+import { isCustomerExecutableManagedAction } from "./providerBoundaries";
 
 // ============================================
 // MISSION TEMPLATES
@@ -41,6 +53,50 @@ const TEMPLATE_REGISTRY: Record<
 const TEMPLATE_SLUG_ALIASES: Record<string, string> = {
   genprd: "prd-generation",
 };
+
+export function isCustomerRunnableMissionTemplate(stepsValue: unknown): boolean {
+  if (!Array.isArray(stepsValue)) return false;
+  return stepsValue.every((stepValue) => {
+    const step = stepValue as {
+      kind?: unknown;
+      config?: Record<string, unknown>;
+    };
+    const config = step.config ?? {};
+
+    if (step.kind === "fetch" || step.kind === "execute") {
+      if (step.kind === "fetch" && config.source !== "providerAction") return false;
+      const provider = typeof config.providerId === "string" ? config.providerId : "";
+      const action = typeof config.actionName === "string" ? config.actionName : "";
+      return provider.length > 0 &&
+        action.length > 0 &&
+        isCustomerExecutableManagedAction(provider, action) &&
+        hasBillingGradeManagedCost({ provider, action }) &&
+        estimateManagedProviderCostUsd({ provider, action }) !== undefined;
+    }
+
+    if (step.kind === "transform" || step.kind === "decide" ||
+        (step.kind === "validate" && config.mode === "llm")) {
+      const model = typeof config.model === "string"
+        ? config.model
+        : "anthropic/claude-haiku-4-5";
+      let maxOutputTokens: number;
+      try {
+        maxOutputTokens = normalizeMaxOutputTokens(config.maxTokens, 2_000);
+      } catch {
+        return false;
+      }
+      return estimateManagedProviderCostUsd({
+        provider: "openrouter",
+        action: "chat",
+        model,
+        estimatedInputTokens: 0,
+        maxOutputTokens,
+      }) !== undefined && isCustomerExecutableManagedAction("openrouter", "chat");
+    }
+
+    return step.kind === "validate" && config.mode === "rules";
+  });
+}
 
 // ============================================
 // DISCOVER MISSIONS
@@ -72,7 +128,8 @@ export const discover = query({
       )
       .collect();
 
-    const candidates = [...publicRows, ...marketplaceRows];
+    const candidates = [...publicRows, ...marketplaceRows]
+      .filter((row) => isCustomerRunnableMissionTemplate(row.steps));
 
     const healthRows = await ctx.db.query("providerHealth").collect();
     const healthMap = new Map(healthRows.map((h) => [h.providerId, h]));
@@ -185,14 +242,16 @@ export const listTemplates = query({
       )
       .collect();
 
-    const v2 = v2Rows.map((row) => ({
+    const v2 = v2Rows
+      .filter((row) => isCustomerRunnableMissionTemplate(row.steps))
+      .map((row) => ({
       id: row.slug,
       version: row.version,
       runtime: "v2" as const,
       title: row.title,
       description: row.description,
       paramSchema: row.inputSchema,
-    }));
+      }));
 
     return [...legacy, ...v2];
   },
@@ -210,20 +269,25 @@ function isInternalEmail(email: string | undefined | null): boolean {
   return Boolean(domain && INTERNAL_DOMAINS.includes(domain));
 }
 
-function applyMargin(underlyingUsd: number, isInternal: boolean): number {
-  if (isInternal) return 0;
-  return Math.round(underlyingUsd * 1.15 * 1_000_000) / 1_000_000;
+export function classifyMissionReplay(
+  existing: { requestFingerprint?: string } | null,
+  requestFingerprint: string,
+): "create" | "replay" | "conflict" {
+  if (!existing) return "create";
+  return existing.requestFingerprint === requestFingerprint ? "replay" : "conflict";
 }
 
 // ============================================
 // CREATE / READ
 // ============================================
 
-export const createMission = mutation({
+export const createMission = internalMutation({
   args: {
     sessionToken: v.optional(v.string()),
     apiKeyHash: v.optional(v.string()), // pre-resolved when invoked from /mcp or /v1
     workspaceIdOverride: v.optional(v.id("workspaces")),
+    requestId: v.string(),
+    requestFingerprint: v.string(),
     template: v.string(),
     templateVersion: v.optional(v.number()), // when set, runs through v2 missionRunner
     params: v.any(),
@@ -241,7 +305,7 @@ export const createMission = mutation({
     // Resolve the template definition from either path so we fail-fast on
     // an unknown slug before inserting a mission row.
     let legacyTmpl: { title: string } | null = TEMPLATE_REGISTRY[args.template] ?? null;
-    let v2Tmpl: { title: string; version: number } | null = null;
+    let v2Tmpl: { title: string; version: number; customerRunnable: boolean } | null = null;
 
     if (args.templateVersion != null) {
       const row = await ctx.db
@@ -253,7 +317,11 @@ export const createMission = mutation({
       if (!row || !row.enabled) {
         throw new Error(`unknown_template: ${args.template}@v${args.templateVersion}`);
       }
-      v2Tmpl = { title: row.title, version: row.version };
+      v2Tmpl = {
+        title: row.title,
+        version: row.version,
+        customerRunnable: isCustomerRunnableMissionTemplate(row.steps),
+      };
     } else if (!legacyTmpl) {
       // Caller did not pin a version. Try v2 latest before bailing.
       const latest = await ctx.db
@@ -266,15 +334,16 @@ export const createMission = mutation({
         throw new Error(`unknown_template: ${args.template}`);
       }
       const picked = latest.sort((a, b) => b.version - a.version)[0];
-      v2Tmpl = { title: picked.title, version: picked.version };
+      v2Tmpl = {
+        title: picked.title,
+        version: picked.version,
+        customerRunnable: isCustomerRunnableMissionTemplate(picked.steps),
+      };
     }
 
     let workspaceId: Id<"workspaces"> | null = args.workspaceIdOverride ?? null;
     if (!workspaceId && args.sessionToken) {
-      const session = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken!))
-        .first();
+      const session = await findUsableAgentSession(ctx.db, args.sessionToken!);
       if (!session) throw new Error("invalid_session");
       workspaceId = session.workspaceId;
     }
@@ -284,13 +353,39 @@ export const createMission = mutation({
     if (!ws) throw new Error("workspace_not_found");
     if (ws.status !== "active") throw new Error("workspace_inactive");
 
+    const existingMission = await ctx.db
+      .query("missions")
+      .withIndex("by_workspaceId_requestId", (q) =>
+        q.eq("workspaceId", workspaceId!).eq("requestId", args.requestId),
+      )
+      .unique();
+    const replayDecision = classifyMissionReplay(existingMission, args.requestFingerprint);
+    if (replayDecision !== "create") {
+      if (replayDecision === "conflict") {
+        throw new Error("idempotency_conflict: mission key reused with different input");
+      }
+      if (!existingMission) throw new Error("idempotency_state_invalid");
+      return {
+        missionId: existingMission._id,
+        status: existingMission.status,
+        isInternal: existingMission.isInternal,
+        templateVersion: existingMission.templateVersion,
+        duplicate: true,
+      };
+    }
+
     const summary =
       args.title ?? deriveTitle(args.template, args.params, v2Tmpl?.title);
     const isInternal = isInternalEmail(ws.email);
+    if (!isInternal && v2Tmpl && !v2Tmpl.customerRunnable) {
+      throw new Error(`template_not_customer_runnable: ${args.template}`);
+    }
     const resolvedVersion = v2Tmpl?.version;
 
     const missionId = await ctx.db.insert("missions", {
       workspaceId,
+      requestId: args.requestId,
+      requestFingerprint: args.requestFingerprint,
       template: args.template,
       templateVersion: resolvedVersion,
       title: summary,
@@ -315,7 +410,18 @@ export const createMission = mutation({
       timestamp: Date.now(),
     });
 
-    return { missionId, status: "queued", isInternal, templateVersion: resolvedVersion };
+    // Scheduling is part of the same serialized mutation as idempotent
+    // creation. A lost HTTP response can therefore neither duplicate work nor
+    // strand a queued mission before execution is scheduled.
+    await ctx.scheduler.runAfter(0, internal.missions.runMission, { missionId });
+
+    return {
+      missionId,
+      status: "queued",
+      isInternal,
+      templateVersion: resolvedVersion,
+      duplicate: false,
+    };
   },
 });
 
@@ -331,7 +437,7 @@ function deriveTitle(
   return TEMPLATE_REGISTRY[template]?.title ?? v2Title ?? template;
 }
 
-export const getMission = query({
+export const getMission = internalQuery({
   args: { missionId: v.id("missions") },
   handler: async (ctx, args) => {
     const mission = await ctx.db.get(args.missionId);
@@ -344,7 +450,7 @@ export const getMission = query({
   },
 });
 
-export const listForWorkspace = query({
+export const listForWorkspace = internalQuery({
   args: { workspaceId: v.id("workspaces"), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = Math.min(args.limit ?? 50, 200);
@@ -357,13 +463,10 @@ export const listForWorkspace = query({
   },
 });
 
-export const listForSession = query({
+export const listForSession = internalQuery({
   args: { sessionToken: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
     if (!session) return [];
     const limit = Math.min(args.limit ?? 50, 200);
     const rows = await ctx.db
@@ -415,6 +518,7 @@ export const setStatus = internalMutation({
     result: v.optional(v.any()),
     error: v.optional(v.string()),
     underlyingCostUsd: v.optional(v.float64()),
+    chargedCostUsd: v.optional(v.float64()),
   },
   handler: async (ctx, args) => {
     const mission = await ctx.db.get(args.missionId);
@@ -428,16 +532,16 @@ export const setStatus = internalMutation({
     if (args.error !== undefined) patch.error = args.error;
     if (args.underlyingCostUsd !== undefined) {
       patch.underlyingCostUsd = args.underlyingCostUsd;
-      patch.chargedCostUsd = applyMargin(args.underlyingCostUsd, mission.isInternal);
     }
+    if (args.chargedCostUsd !== undefined) patch.chargedCostUsd = args.chargedCostUsd;
     await ctx.db.patch(args.missionId, patch);
   },
 });
 
-export const runMission = action({
+export const runMission = internalAction({
   args: { missionId: v.id("missions") },
   handler: async (ctx, args): Promise<{ ok: boolean; result?: unknown; error?: string }> => {
-    const data = await ctx.runQuery(api.missions.getMission, { missionId: args.missionId });
+    const data = await ctx.runQuery(internal.missions.getMission, { missionId: args.missionId });
     if (!data || !data.mission) return { ok: false, error: "mission_not_found" };
     const m = data.mission;
     if (m.status !== "queued") return { ok: false, error: `not_queued: ${m.status}` };
@@ -489,13 +593,10 @@ export const runMission = action({
 // CANCEL
 // ============================================
 
-export const cancelMission = mutation({
+export const cancelMission = internalMutation({
   args: { sessionToken: v.string(), missionId: v.id("missions") },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
     if (!session) throw new Error("invalid_session");
     const mission = await ctx.db.get(args.missionId);
     if (!mission || mission.workspaceId !== session.workspaceId) throw new Error("not_found");

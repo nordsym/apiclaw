@@ -18,8 +18,12 @@
 
 import { v } from "convex/values";
 import { mutation, action, internalMutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { recordWorkspaceAuthenticated } from "./funnel";
+import { FREE_MANAGED_CALLS_LIFETIME } from "../src/product-truth";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 const AUTHID_LENGTH = 32;
 const CODE_LENGTH = 48;
@@ -55,6 +59,11 @@ function getKeyPrefix(key: string): string {
 }
 
 const APP_URL_DEFAULT = "https://apiclaw.cloud";
+
+function requireServerBridgeSecret(value: string): void {
+  const expected = process.env.APICLAW_INTERNAL_SECRET;
+  if (!expected || value !== expected) throw new Error("unauthorized_cli_auth_claim");
+}
 
 /**
  * Phase 1: CLI starts the flow. Returns the URL to open in the browser.
@@ -106,8 +115,12 @@ export const claim = mutation({
     authId: v.string(),
     clerkUserId: v.string(),
     email: v.string(),
+    internalSecret: v.string(),
   },
   handler: async (ctx, args) => {
+    // Clerk identity is verified by the APIClaw Next.js server component. A
+    // direct Convex caller must never be able to self-assert another email.
+    requireServerBridgeSecret(args.internalSecret);
     const row = await ctx.db
       .query("cliAuthCodes")
       .withIndex("by_authId", (q) => q.eq("authId", args.authId))
@@ -160,6 +173,8 @@ export const exchange = action({
     code: v.string(),
     codeVerifier: v.string(),
     fingerprint: v.optional(v.string()),
+    previousSessionToken: v.optional(v.string()),
+    previousApiKey: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -199,10 +214,143 @@ export const exchange = action({
         code: args.code,
         challenge: b64,
         fingerprint: args.fingerprint,
+        previousSessionToken: args.previousSessionToken,
+        previousApiKey: args.previousApiKey,
       }
     );
     return result;
   },
+});
+
+type CliLogoutResult =
+  | { success: true; revokedApiKey: boolean }
+  | { success: false; error: "invalid_session" | "api_key_mismatch" };
+
+type ResolvedCliCredentials = {
+  session: Doc<"agentSessions"> | null;
+  apiKeyDoc: Doc<"workspaceApiKeys"> | null;
+};
+
+type PreviousCliCredentialsResult =
+  | ({ ok: true } & ResolvedCliCredentials)
+  | { ok: false; error: "previous_credentials_mismatch" };
+
+/**
+ * Resolve the credentials being replaced by `auth login --force`. Missing or
+ * already-revoked credentials are safe to ignore, while two live credentials
+ * that belong to different workspaces indicate a corrupted local config.
+ */
+export async function resolvePreviousCliCredentials(
+  db: MutationCtx["db"],
+  args: { sessionToken?: string; apiKey?: string },
+): Promise<PreviousCliCredentialsResult> {
+  const session = args.sessionToken
+    ? await findUsableAgentSession(db, args.sessionToken, { audience: "durable" })
+    : null;
+
+  let apiKeyDoc: Doc<"workspaceApiKeys"> | null = null;
+  if (args.apiKey) {
+    const keyHash = await hashKey(args.apiKey);
+    const candidate = await db
+      .query("workspaceApiKeys")
+      .withIndex("by_keyHash", (q) => q.eq("keyHash", keyHash))
+      .first();
+    if (candidate && candidate.revokedAt === undefined) apiKeyDoc = candidate;
+  }
+
+  if (session && apiKeyDoc && session.workspaceId !== apiKeyDoc.workspaceId) {
+    return { ok: false, error: "previous_credentials_mismatch" };
+  }
+  return { ok: true, session, apiKeyDoc };
+}
+
+/** Revoke a resolved prior credential set, optionally rotating its owner row in place. */
+export async function revokeResolvedCliCredentials(
+  db: MutationCtx["db"],
+  credentials: ResolvedCliCredentials,
+  preserveSessionId?: Doc<"agentSessions">["_id"],
+): Promise<void> {
+  if (credentials.apiKeyDoc) {
+    await db.patch(credentials.apiKeyDoc._id, { revokedAt: Date.now() });
+  }
+  if (!credentials.session) return;
+
+  const browserChildren = await db
+    .query("agentSessions")
+    .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", credentials.session!._id))
+    .collect();
+  for (const child of browserChildren) {
+    await db.delete(child._id);
+  }
+  if (credentials.session._id !== preserveSessionId) {
+    await db.delete(credentials.session._id);
+  }
+}
+
+/**
+ * Revoke the durable CLI session, all browser children minted from it, and
+ * the exact API key held by this CLI. Convex mutations are transactional, so
+ * a failed ownership check leaves every credential usable for a safe retry.
+ */
+export async function revokeCliCredentials(
+  db: MutationCtx["db"],
+  args: { sessionToken: string; apiKey?: string },
+): Promise<CliLogoutResult> {
+  const session = await findUsableAgentSession(db, args.sessionToken, {
+    audience: "durable",
+  });
+  if (!session) return { success: false, error: "invalid_session" };
+
+  let apiKeyDoc = null;
+  if (args.apiKey) {
+    const keyHash = await hashKey(args.apiKey);
+    apiKeyDoc = await db
+      .query("workspaceApiKeys")
+      .withIndex("by_keyHash", (q) => q.eq("keyHash", keyHash))
+      .first();
+    if (
+      !apiKeyDoc ||
+      apiKeyDoc.workspaceId !== session.workspaceId ||
+      apiKeyDoc.revokedAt !== undefined
+    ) {
+      return { success: false, error: "api_key_mismatch" };
+    }
+  }
+
+  const browserChildren = await db
+    .query("agentSessions")
+    .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", session._id))
+    .collect();
+
+  if (apiKeyDoc) {
+    await db.patch(apiKeyDoc._id, { revokedAt: Date.now() });
+  }
+  for (const child of browserChildren) {
+    await db.delete(child._id);
+  }
+  await db.delete(session._id);
+
+  return { success: true, revokedApiKey: apiKeyDoc !== null };
+}
+
+/**
+ * Server-backed CLI logout. Local credentials are cleared only after this
+ * mutation confirms that their remote bearer credentials were revoked.
+ */
+export const logout = mutation({
+  args: {
+    sessionToken: v.string(),
+    apiKey: v.optional(v.string()),
+  },
+  returns: v.union(
+    v.object({ success: v.literal(true), revokedApiKey: v.boolean() }),
+    v.object({
+      success: v.literal(false),
+      error: v.union(v.literal("invalid_session"), v.literal("api_key_mismatch")),
+    }),
+  ),
+  handler: async (ctx, args): Promise<CliLogoutResult> =>
+    revokeCliCredentials(ctx.db, args),
 });
 
 /**
@@ -214,6 +362,8 @@ export const _exchangeVerified = internalMutation({
     code: v.string(),
     challenge: v.string(),
     fingerprint: v.optional(v.string()),
+    previousSessionToken: v.optional(v.string()),
+    previousApiKey: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -271,6 +421,20 @@ export const _exchangeVerified = internalMutation({
     const clerkUserId = row.clerkUserId || "";
     const fingerprint = args.fingerprint || row.fingerprint;
 
+    // A force login rotates the credentials currently stored on this machine
+    // in the same transaction that issues their replacements. Validate before
+    // consuming the one-time code or creating any new remote credential.
+    const previous = args.previousSessionToken || args.previousApiKey
+      ? await resolvePreviousCliCredentials(ctx.db, {
+          sessionToken: args.previousSessionToken,
+          apiKey: args.previousApiKey,
+        })
+      : null;
+    if (previous && previous.ok === false) {
+      await emitFailure(previous.error);
+      return { success: false, error: previous.error };
+    }
+
     // Mark exchanged immediately so the code can't be reused.
     await ctx.db.patch(row._id, {
       status: "exchanged",
@@ -301,9 +465,12 @@ export const _exchangeVerified = internalMutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50,
+        usageLimit: FREE_MANAGED_CALLS_LIFETIME,
+        managedUsageCount: 0,
+        activationManagedCallCount: 0,
+        activationProviderCostMicros: 0,
         weeklyUsageCount: 0,
-        weeklyUsageLimit: 50,
+        weeklyUsageLimit: FREE_MANAGED_CALLS_LIFETIME,
         hourlyUsageCount: 0,
         referralCode: newReferralCode || `CLAW-NEW${Date.now() % 100000}`,
         createdAt: Date.now(),
@@ -316,21 +483,46 @@ export const _exchangeVerified = internalMutation({
     // Session — reuse existing for same fingerprint, else create
     const sessionToken = randomString(SESSION_LENGTH);
     const fp = fingerprint || (clerkUserId ? `clerk:${clerkUserId}` : `cli:${Date.now()}`);
-    const existingSession = await ctx.db
+    let existingSession = await ctx.db
       .query("agentSessions")
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace!._id))
       .filter((q) => q.eq(q.field("fingerprint"), fp))
       .first();
 
+    // Prefer rotating the exact prior owner row when the user authenticated
+    // back into the same workspace on the same machine.
+    if (
+      previous?.ok &&
+      previous.session?.workspaceId === workspace._id &&
+      previous.session.fingerprint === fp
+    ) {
+      existingSession = previous.session;
+    }
+
+    if (previous?.ok) {
+      await revokeResolvedCliCredentials(ctx.db, previous, existingSession?._id);
+    }
+
     if (existingSession) {
+      const browserChildren = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", existingSession._id))
+        .collect();
+      for (const child of browserChildren) {
+        await ctx.db.delete(child._id);
+      }
       await ctx.db.patch(existingSession._id, {
         sessionToken,
+        sessionKind: "owner",
+        parentSessionId: undefined,
+        expiresAt: undefined,
         lastUsedAt: Date.now(),
       });
     } else {
       await ctx.db.insert("agentSessions", {
         workspaceId: workspace._id,
         sessionToken,
+        sessionKind: "owner",
         fingerprint: fp,
         lastUsedAt: Date.now(),
         createdAt: Date.now(),
@@ -359,6 +551,16 @@ export const _exchangeVerified = internalMutation({
       });
     } catch {
       // Never block authentication on telemetry.
+    }
+
+    if (isNew) {
+      await ctx.scheduler.runAfter(0, internal.inbound.notifySignup, {
+        email,
+        workspaceId: workspace._id,
+        tier: workspace.tier,
+        isNewUser: true,
+        timestamp: Date.now(),
+      });
     }
 
     // Preserve the legacy auth event for historical reporting.

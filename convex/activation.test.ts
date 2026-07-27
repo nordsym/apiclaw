@@ -40,6 +40,7 @@ const first = fakeCtx({
     _id: "ws1",
     email: "user@example.com",
     status: "active",
+    usageCount: 1,
   },
 });
 const firstResult = await recordFirstCallApiSuccessInTransaction(
@@ -53,7 +54,11 @@ const firstResult = await recordFirstCallApiSuccessInTransaction(
   },
   1234
 );
-assert.deepEqual(firstResult, { id: "event-new", deduped: false });
+assert.deepEqual(firstResult, {
+  id: "event-new",
+  deduped: false,
+  event: "first_call_api_success",
+});
 assert.equal(first.inserted.length, 1);
 assert.deepEqual(first.inserted[0], {
   table: "funnelEvents",
@@ -69,12 +74,21 @@ assert.deepEqual(first.inserted[0], {
       provider: "brave_search",
       action: "search",
       recorded_by: "gateway",
+      prior_managed_calls: 0,
     },
     timestamp: 1234,
   },
 });
 
-const duplicate = fakeCtx({ existing: { _id: "event-existing" } });
+const duplicate = fakeCtx({
+  workspace: {
+    _id: "ws1",
+    email: "user@example.com",
+    status: "active",
+    usageCount: 1,
+  },
+  existing: { _id: "event-existing" },
+});
 const duplicateResult = await recordFirstCallApiSuccessInTransaction(
   duplicate.ctx,
   {
@@ -85,6 +99,35 @@ const duplicateResult = await recordFirstCallApiSuccessInTransaction(
 );
 assert.deepEqual(duplicateResult, { id: "event-existing", deduped: true });
 assert.equal(duplicate.inserted.length, 0);
+
+const reactivated = fakeCtx({
+  workspace: {
+    _id: "ws3",
+    email: "returning@example.com",
+    status: "active",
+    managedUsageCount: 8,
+    usageCount: 12,
+  },
+});
+const reactivatedResult = await recordFirstCallApiSuccessInTransaction(
+  reactivated.ctx,
+  {
+    workspaceId: "ws3" as any,
+    path: "/v1/chat/completions",
+    authMethod: "api-key",
+    provider: "openrouter",
+    action: "chat_completions",
+  },
+  5678
+);
+assert.deepEqual(reactivatedResult, {
+  id: "event-new",
+  deduped: false,
+  event: "workspace_reactivated",
+});
+assert.equal(reactivated.inserted[0].value.event, "workspace_reactivated");
+assert.equal(reactivated.inserted[0].value.dedupeKey, "reactivation:ws3");
+assert.equal(reactivated.inserted[0].value.props.prior_managed_calls, 7);
 
 const inactive = fakeCtx({
   workspace: { _id: "ws2", email: "user@example.com", status: "unclaimed" },

@@ -1,8 +1,22 @@
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { FREE_HOURLY_LIMIT, FREE_WEEKLY_LIMIT, getHourStart, getQuotaState, getWeekStart } from "./quota";
+import { FREE_LIFETIME_LIMIT, getQuotaState } from "./quota";
 import { recordWorkspaceAuthenticated } from "./funnel";
+import { hasActivePaygEntitlement } from "./managedUsagePolicy";
+import {
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+} from "../src/product-truth";
+import {
+  BROWSER_SESSION_TTL_MS,
+  canMintBrowserSession,
+  findAgentSessionByToken,
+  findUsableAgentSession,
+  isBrowserSession,
+  isSessionExpired,
+  isSessionUsable,
+  shouldDeleteBrowserSession,
+} from "./sessionSecurity";
 
 // Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
 // Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
@@ -128,9 +142,11 @@ export const verifyOTP = internalMutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50,
+        usageLimit: FREE_LIFETIME_LIMIT,
+        managedUsageCount: 0,
+        activationProviderCostMicros: 0,
         weeklyUsageCount: 0,
-        weeklyUsageLimit: 50,
+        weeklyUsageLimit: FREE_LIFETIME_LIMIT,
         lastWeeklyResetAt: Date.now(),
         hourlyUsageCount: 0,
         lastHourlyResetAt: Date.now(),
@@ -154,6 +170,7 @@ export const verifyOTP = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId: workspace._id,
       sessionToken,
+      sessionKind: "owner",
       fingerprint: fingerprint || "unknown",
       lastUsedAt: Date.now(),
       createdAt: Date.now(),
@@ -300,9 +317,11 @@ export const verifyMagicLink = mutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50, // 50 calls/week for free tier
+        usageLimit: FREE_LIFETIME_LIMIT,
+        managedUsageCount: 0,
+        activationProviderCostMicros: 0,
         weeklyUsageCount: 0,
-        weeklyUsageLimit: 50, // Monthly limit (field name is legacy)
+        weeklyUsageLimit: FREE_LIFETIME_LIMIT, // Legacy compatibility only; never resets allowance.
         hourlyUsageCount: 0,
         referralCode: newReferralCode!,
         createdAt: Date.now(),
@@ -343,14 +362,25 @@ export const verifyMagicLink = mutation({
 
     if (existingSession) {
       // Refresh existing session instead of creating duplicate
+      const browserChildren = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", existingSession._id))
+        .collect();
+      for (const child of browserChildren) {
+        await ctx.db.delete(child._id);
+      }
       await ctx.db.patch(existingSession._id, {
         sessionToken,
+        sessionKind: "owner",
+        parentSessionId: undefined,
+        expiresAt: undefined,
         lastUsedAt: Date.now(),
       });
     } else {
       await ctx.db.insert("agentSessions", {
         workspaceId: workspace!._id,
         sessionToken,
+        sessionKind: "owner",
         fingerprint: userFingerprint2 || undefined,
         lastUsedAt: Date.now(),
         createdAt: Date.now(),
@@ -429,16 +459,102 @@ export const verifyMagicLink = mutation({
   },
 });
 
+// Delete a browser child only when the scheduled job still refers to the
+// exact token it was created for. The expected-token check makes cleanup safe
+// if a future implementation rotates a token in place.
+export const deleteBrowserSessionIfTokenMatches = internalMutation({
+  args: {
+    sessionId: v.id("agentSessions"),
+    expectedToken: v.string(),
+  },
+  handler: async (ctx, { sessionId, expectedToken }) => {
+    const session = await ctx.db.get(sessionId);
+    const now = Date.now();
+    if (
+      session &&
+      isBrowserSession(session) &&
+      session.sessionToken === expectedToken &&
+      session.expiresAt !== undefined &&
+      session.expiresAt > now
+    ) {
+      // Defensive against clock skew or an unexpectedly early scheduler run.
+      await ctx.scheduler.runAt(
+        session.expiresAt,
+        internal.workspaces.deleteBrowserSessionIfTokenMatches,
+        { sessionId, expectedToken },
+      );
+      return { deleted: false, rescheduled: true };
+    }
+    if (!shouldDeleteBrowserSession(session, expectedToken)) {
+      return { deleted: false };
+    }
+
+    await ctx.db.delete(sessionId);
+    return { deleted: true };
+  },
+});
+
+// Exchange a durable owner session for a short-lived browser-only child. The
+// owner bearer remains server-side in the HttpOnly cookie. Each bootstrap and
+// refresh mints a new child, while the prior child remains valid only until
+// its own scheduled expiry to avoid a refresh race in the open page.
+export const mintBrowserSession = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const now = Date.now();
+    const parent = await findUsableAgentSession(ctx.db, token, { audience: "durable", now });
+
+    if (!parent || !canMintBrowserSession(parent, now)) {
+      return { success: false as const, error: "invalid_owner_session" };
+    }
+
+    const workspace = await ctx.db.get(parent.workspaceId);
+    if (!workspace || workspace.status !== "active") {
+      return { success: false as const, error: "workspace_inactive" };
+    }
+
+    const browserToken = `apiclaw_browser_${generateToken()}`;
+    const expiresAt = now + BROWSER_SESSION_TTL_MS;
+    const sessionId = await ctx.db.insert("agentSessions", {
+      workspaceId: parent.workspaceId,
+      sessionToken: browserToken,
+      sessionKind: "browser",
+      parentSessionId: parent._id,
+      expiresAt,
+      lastUsedAt: now,
+      createdAt: now,
+    });
+
+    await ctx.scheduler.runAt(
+      expiresAt,
+      internal.workspaces.deleteBrowserSessionIfTokenMatches,
+      { sessionId, expectedToken: browserToken },
+    );
+
+    const usage = getWorkspaceUsageDisplay(workspace);
+    return {
+      success: true as const,
+      browserToken,
+      expiresAt,
+      session: {
+        workspaceId: workspace._id,
+        email: workspace.email,
+        tier: workspace.tier,
+        status: workspace.status,
+        usageCount: usage.usageCount,
+        usageLimit: usage.usageLimit,
+      },
+    };
+  },
+});
+
 // Get session from token
 export const getSession = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return null;
     }
 
@@ -467,12 +583,9 @@ export const getWorkspaceDashboard = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return null;
     }
 
@@ -515,8 +628,8 @@ export const getWorkspaceDashboard = query({
       agentSessions.some(s => p.agentId === s.sessionToken)
     );
 
-    // Customer-facing quota display must use the same weekly state as the
-    // pre-call enforcement gate. Lifetime usage remains stored separately.
+    // Customer-facing quota display uses the same lifetime state as the
+    // atomic managed-call authorization gate.
     const usage = getWorkspaceUsageDisplay(workspace);
 
     // Budget status (PRD 2.6)
@@ -539,6 +652,8 @@ export const getWorkspaceDashboard = query({
         usageRemaining: usage.usageRemaining,
         usagePercentage: usage.usagePercentage,
         stripeCustomerId: workspace.stripeCustomerId,
+        stripeSubscriptionStatus: workspace.stripeSubscriptionStatus,
+        paygActive: hasActivePaygEntitlement(workspace),
         createdAt: workspace.createdAt,
         mainAgentName: workspace.mainAgentName,
         mainAgentId: workspace.mainAgentId,
@@ -574,12 +689,9 @@ function getMonthStartForBudget(): number {
 export const getConnectedAgents = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return [];
     }
 
@@ -588,7 +700,7 @@ export const getConnectedAgents = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
-    return agentSessions.map((s) => ({
+    return agentSessions.filter((s) => !isBrowserSession(s)).map((s) => ({
       id: s._id,
       fingerprint: s.fingerprint || "Unknown",
       customName: s.customName || null,
@@ -601,16 +713,26 @@ export const getConnectedAgents = query({
 });
 
 // Admin: Delete session by ID (for cleanup)
-export const adminDeleteSession = mutation({
+export const adminDeleteSession = internalMutation({
   args: { sessionId: v.id("agentSessions") },
   handler: async (ctx, { sessionId }) => {
+    const session = await ctx.db.get(sessionId);
+    if (session && !isBrowserSession(session)) {
+      const childSessions = await ctx.db
+        .query("agentSessions")
+        .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", sessionId))
+        .collect();
+      for (const child of childSessions) {
+        await ctx.db.delete(child._id);
+      }
+    }
     await ctx.db.delete(sessionId);
     return { success: true };
   },
 });
 
 // Debug: Get sessions by workspace email
-export const getSessionsByEmail = query({
+export const getSessionsByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const workspace = await ctx.db
@@ -630,7 +752,7 @@ export const getSessionsByEmail = query({
     return {
       workspaceId: workspace._id,
       email: workspace.email,
-      sessions: sessions.map(s => ({
+      sessions: sessions.filter((s) => !isBrowserSession(s)).map(s => ({
         id: s._id,
         fingerprint: s.fingerprint,
         createdAt: s.createdAt,
@@ -649,18 +771,19 @@ export const renameAgent = mutation({
   },
   handler: async (ctx, { token, sessionId, name }) => {
     // Verify the requesting session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       throw new Error("Invalid session");
     }
 
     // Get the session to rename
     const targetSession = await ctx.db.get(sessionId);
-    if (!targetSession || targetSession.workspaceId !== session.workspaceId) {
+    if (
+      !targetSession ||
+      isBrowserSession(targetSession) ||
+      targetSession.workspaceId !== session.workspaceId
+    ) {
       throw new Error("Session not found or access denied");
     }
 
@@ -675,12 +798,9 @@ export const renameAgent = mutation({
 export const getUsageBreakdown = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return { byProvider: [], byDay: [], total: 0 };
     }
 
@@ -749,18 +869,15 @@ export const revokeAgentSession = mutation({
   },
   handler: async (ctx, { token, sessionId }) => {
     // Verify the requesting session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       throw new Error("Unauthorized");
     }
 
     // Get the session to revoke
     const targetSession = await ctx.db.get(sessionId);
-    if (!targetSession) {
+    if (!targetSession || isBrowserSession(targetSession)) {
       throw new Error("Session not found");
     }
 
@@ -774,7 +891,15 @@ export const revokeAgentSession = mutation({
       throw new Error("Cannot revoke current session");
     }
 
-    // Delete the session
+    const childSessions = await ctx.db
+      .query("agentSessions")
+      .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", targetSession._id))
+      .collect();
+    for (const child of childSessions) {
+      await ctx.db.delete(child._id);
+    }
+
+    // Delete the durable session after its browser children.
     await ctx.db.delete(sessionId);
 
     return { success: true };
@@ -785,12 +910,18 @@ export const revokeAgentSession = mutation({
 export const logout = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findAgentSessionByToken(ctx.db, token);
 
     if (session) {
+      if (!isBrowserSession(session)) {
+        const childSessions = await ctx.db
+          .query("agentSessions")
+          .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", session._id))
+          .collect();
+        for (const child of childSessions) {
+          await ctx.db.delete(child._id);
+        }
+      }
       await ctx.db.delete(session._id);
     }
 
@@ -828,195 +959,13 @@ export const updateTier = mutation({
   },
 });
 
-// Increment usage count
-
-export const checkCallQuota = query({
-  args: {
-    workspaceId: v.id("workspaces"),
-    amount: v.optional(v.number()),
-  },
-  handler: async (ctx, { workspaceId, amount = 1 }) => {
-    const workspace = await ctx.db.get(workspaceId);
-    if (!workspace) {
-      return {
-        allowed: false,
-        reason: "workspace_not_found",
-        message: "Workspace not found",
-      };
-    }
-    if (workspace.status !== "active") {
-      return {
-        allowed: false,
-        reason: "workspace_inactive",
-        message: `Workspace status is ${workspace.status}`,
-      };
-    }
-
-    return {
-      workspaceId,
-      tier: workspace.tier,
-      usageCount: workspace.usageCount || 0,
-      ...getQuotaState(workspace, amount),
-    };
-  },
-});
-
-export const incrementUsage = mutation({
-  args: {
-    workspaceId: v.id("workspaces"),
-    amount: v.optional(v.number()),
-  },
-  handler: async (ctx, { workspaceId, amount = 1 }) => {
-    const workspace = await ctx.db.get(workspaceId);
-    if (!workspace) {
-      throw new Error("Workspace not found");
-    }
-
-    const now = Date.now();
-
-    // Check if paid tier (unlimited usage)
-    const isPaid = ["pro", "scale", "usage_based", "partner", "founder", "enterprise"].includes(workspace.tier);
-
-    const quota = getQuotaState(workspace, amount);
-    if (!quota.allowed) {
-      throw new Error(quota.message || quota.reason || "quota_exceeded");
-    }
-
-    const weekStart = getWeekStart();
-    const hourStart = getHourStart();
-    const weeklyCount = quota.weeklyCount;
-    const hourlyCount = quota.hourlyCount;
-    const newTotalCount = workspace.usageCount + amount;
-    const newWeeklyCount = weeklyCount + amount;
-    const newHourlyCount = hourlyCount + amount;
-
-    await ctx.db.patch(workspaceId, {
-      usageCount: newTotalCount,
-      weeklyUsageCount: newWeeklyCount,
-      hourlyUsageCount: newHourlyCount,
-      lastWeeklyResetAt: weekStart,
-      lastHourlyResetAt: hourStart,
-      updatedAt: now,
-    });
-
-    // Calculate remaining for free tier
-    const weeklyRemaining = isPaid ? -1 : Math.max(0, FREE_WEEKLY_LIMIT - newWeeklyCount);
-    const hourlyRemaining = isPaid ? -1 : Math.max(0, FREE_HOURLY_LIMIT - newHourlyCount);
-
-    // A-17 — pre-flight quota warning at 80% of the weekly free tier.
-    // Surfaces a _notice payload that callers can lift into the response
-    // body so agents see a soft nudge to upgrade BEFORE the hard quota_hit.
-    let quotaWarning: {
-      type: "quota_warning_80pct";
-      tier: string;
-      usedThisWeek: number;
-      weeklyLimit: number;
-      remaining: number;
-      pct: number;
-      message: string;
-      upgradeUrl: string;
-    } | null = null;
-    if (!isPaid) {
-      const pct = (newWeeklyCount / FREE_WEEKLY_LIMIT) * 100;
-      if (pct >= 80) {
-        quotaWarning = {
-          type: "quota_warning_80pct",
-          tier: workspace.tier,
-          usedThisWeek: newWeeklyCount,
-          weeklyLimit: FREE_WEEKLY_LIMIT,
-          remaining: weeklyRemaining,
-          pct: Math.round(pct),
-          message: `You're at ${Math.round(pct)}% of the free tier (${newWeeklyCount}/${FREE_WEEKLY_LIMIT} this week, ${weeklyRemaining} left). Keep going at API cost + 15% with pay-as-you-go: https://apiclaw.cloud/upgrade`,
-          upgradeUrl: "https://apiclaw.cloud/upgrade",
-        };
-      }
-    }
-
-    return {
-      success: true,
-      usageCount: newTotalCount,
-      usageLimit: isPaid ? -1 : FREE_WEEKLY_LIMIT,
-      usageRemaining: weeklyRemaining,
-      weeklyUsageCount: newWeeklyCount,
-      weeklyRemaining,
-      hourlyRemaining,
-      isPaid,
-      quotaWarning,
-    };
-  },
-});
-
-// ============================================
-// POLLING & VERIFICATION ENDPOINTS (for HTTP API)
-// ============================================
-
-// Poll magic link status (for agents to check if user clicked)
-export const pollMagicLink = query({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
-    const magicLink = await ctx.db
-      .query("workspaceMagicLinks")
-      .withIndex("by_token", (q) => q.eq("token", token))
-      .first();
-
-    if (!magicLink) {
-      return { status: "not_found" };
-    }
-
-    const now = Date.now();
-
-    if (magicLink.usedAt) {
-      // Get the workspace and session
-      const workspace = await ctx.db
-        .query("workspaces")
-        .withIndex("by_email", (q) => q.eq("email", magicLink.email))
-        .first();
-
-      // Get the latest session for this workspace
-      const session = workspace
-        ? await ctx.db
-            .query("agentSessions")
-            .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace._id))
-            .order("desc")
-            .first()
-        : null;
-
-      return {
-        status: "verified",
-        workspace: workspace
-          ? {
-              id: workspace._id,
-              email: workspace.email,
-              tier: workspace.tier,
-              usageCount: workspace.usageCount,
-              usageLimit: workspace.usageLimit,
-            }
-          : null,
-        sessionToken: session?.sessionToken,
-      };
-    }
-
-    if (magicLink.expiresAt < now) {
-      return { status: "expired" };
-    }
-
-    return {
-      status: "pending",
-      expiresAt: magicLink.expiresAt,
-    };
-  },
-});
-
 // Verify session token (for HTTP API)
 export const verifySession = query({
   args: { sessionToken: v.string() },
   handler: async (ctx, { sessionToken }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, sessionToken);
 
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return null;
     }
 
@@ -1063,12 +1012,9 @@ export const getByEmail = internalQuery({
 export const touchSession = mutation({
   args: { sessionToken: v.string() },
   handler: async (ctx, { sessionToken }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, sessionToken, { audience: "durable" });
 
-    if (session) {
+    if (isSessionUsable(session)) {
       await ctx.db.patch(session._id, { lastUsedAt: Date.now() });
     }
   },
@@ -1105,7 +1051,9 @@ export const createWorkspace = internalMutation({
       status: "pending",
       tier: "free",
       usageCount: 0,
-      usageLimit: 50, // Free tier limit
+      usageLimit: FREE_LIFETIME_LIMIT,
+      managedUsageCount: 0,
+      activationProviderCostMicros: 0,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -1121,11 +1069,8 @@ export const updateWorkspaceName = mutation({
     name: v.string(),
   },
   handler: async (ctx, { token, name }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
-    if (!session) throw new Error("Invalid session");
+    const session = await findUsableAgentSession(ctx.db, token);
+    if (!isSessionUsable(session)) throw new Error("Invalid session");
 
     const trimmed = name.trim();
     if (trimmed.length < 1 || trimmed.length > 100) {
@@ -1162,6 +1107,7 @@ export const createAgentSession = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId,
       sessionToken,
+      sessionKind: "owner",
       fingerprint,
       lastUsedAt: Date.now(),
       createdAt: Date.now(),
@@ -1188,12 +1134,9 @@ export const getWorkspaceStatus = query({
     sessionToken: v.string(),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken, { audience: "durable" });
     
-    if (!session) {
+    if (!isSessionUsable(session)) {
       return { authenticated: false };
     }
     
@@ -1212,6 +1155,11 @@ export const getWorkspaceStatus = query({
       usageCount: usage.usageCount,
       usageLimit: usage.usageLimit,
       usageRemaining: usage.usageRemaining,
+      managedUsageCount: workspace.managedUsageCount ?? workspace.usageCount ?? 0,
+      managedUsageLimit: usage.usageLimit,
+      activationProviderCostUsd: (workspace.activationProviderCostMicros ?? 0) / 1_000_000,
+      activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
+      paygActive: hasActivePaygEntitlement(workspace),
       hasStripe: !!workspace.stripeCustomerId,
       createdAt: workspace.createdAt,
     };
@@ -1253,6 +1201,7 @@ export const adminCreateSession = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId,
       sessionToken,
+      sessionKind: "owner",
       fingerprint: "hivr-bees",
       lastUsedAt: Date.now(),
       createdAt: Date.now(),
@@ -1392,9 +1341,11 @@ export const getOrCreateForClerk = mutation({
         status: "active",
         tier: "free",
         usageCount: 0,
-        usageLimit: 50,
+        usageLimit: FREE_LIFETIME_LIMIT,
+        managedUsageCount: 0,
+        activationProviderCostMicros: 0,
         weeklyUsageCount: 0,
-        weeklyUsageLimit: 50,
+        weeklyUsageLimit: FREE_LIFETIME_LIMIT,
         hourlyUsageCount: 0,
         referralCode: newReferralCode!,
         createdAt: Date.now(),
@@ -1408,25 +1359,44 @@ export const getOrCreateForClerk = mutation({
     }
 
     const sessionToken = generateToken();
-
-    const existingSession = fingerprint
-      ? await ctx.db
-          .query("agentSessions")
-          .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace!._id))
-          .filter((q) => q.eq(q.field("fingerprint"), fingerprint))
-          .first()
-      : null;
+    const sessionFingerprint = fingerprint?.trim() || `clerk:${clerkUserId}`;
+    const matchingOwnerSessions = (await ctx.db
+      .query("agentSessions")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspace!._id))
+      .collect())
+      .filter((session) =>
+        !isBrowserSession(session) && session.fingerprint === sessionFingerprint
+      )
+      .sort((a, b) => a.createdAt - b.createdAt);
+    const [existingSession, ...duplicateOwnerSessions] = matchingOwnerSessions;
 
     if (existingSession) {
+      for (const ownerSession of matchingOwnerSessions) {
+        const browserChildren = await ctx.db
+          .query("agentSessions")
+          .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", ownerSession._id))
+          .collect();
+        for (const child of browserChildren) {
+          await ctx.db.delete(child._id);
+        }
+      }
+      for (const duplicate of duplicateOwnerSessions) {
+        await ctx.db.delete(duplicate._id);
+      }
       await ctx.db.patch(existingSession._id, {
         sessionToken,
+        sessionKind: "owner",
+        parentSessionId: undefined,
+        expiresAt: undefined,
+        fingerprint: sessionFingerprint,
         lastUsedAt: Date.now(),
       });
     } else {
       await ctx.db.insert("agentSessions", {
         workspaceId: workspace._id,
         sessionToken,
-        fingerprint: fingerprint || `clerk:${clerkUserId}`,
+        sessionKind: "owner",
+        fingerprint: sessionFingerprint,
         lastUsedAt: Date.now(),
         createdAt: Date.now(),
       });
@@ -1437,7 +1407,7 @@ export const getOrCreateForClerk = mutation({
         workspaceId: workspace._id,
         email: workspace.email,
         authMethod: "clerk_web",
-        fingerprint: fingerprint || `clerk:${clerkUserId}`,
+        fingerprint: sessionFingerprint,
         isNew: isNewUser,
         tier: workspace.tier,
       });
@@ -1470,15 +1440,29 @@ export const getOrCreateForClerk = mutation({
 });
 export function getWorkspaceUsageDisplay(workspace: {
   tier: string;
+  billingPlan?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripeSubscriptionStatus?: string;
+  hasPaymentMethod?: boolean;
+  hasCardAttached?: boolean;
+  paygMeterReadyAt?: number;
+  paygMeterPriceId?: string;
+  paygMeterId?: string;
+  paygMeterEventName?: string;
+  usageCount?: number;
+  managedUsageCount?: number;
+  activationManagedCallCount?: number;
+  activationProviderCostMicros?: number;
   weeklyUsageCount?: number;
   hourlyUsageCount?: number;
   lastWeeklyResetAt?: number;
   lastHourlyResetAt?: number;
 }, nowMs = Date.now()) {
-  const quota = getQuotaState(workspace, 0, nowMs);
-  const usageCount = quota.weeklyCount;
-  const usageLimit = quota.weeklyLimit;
-  const usageRemaining = quota.weeklyRemaining;
+  const quota = getQuotaState(workspace, 1, nowMs);
+  const usageCount = quota.lifetimeCount;
+  const usageLimit = quota.lifetimeLimit;
+  const usageRemaining = usageLimit === -1 ? -1 : Math.max(0, usageLimit - usageCount);
   const usagePercentage = usageLimit === -1 ? 0 : (usageCount / usageLimit) * 100;
   return { usageCount, usageLimit, usageRemaining, usagePercentage };
 }

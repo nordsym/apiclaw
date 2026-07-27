@@ -50,6 +50,12 @@ export default defineSchema({
     tier: v.string(), // "free" | "pro" | "scale" | "usage_based" | "enterprise" | "partner"
     usageCount: v.number(), // total API calls made (lifetime)
     usageLimit: v.number(), // max API calls for tier
+    // Canonical managed-usage counters. Unlike the legacy weekly fields below,
+    // these never reset. Existing workspaces fall back to usageCount until their
+    // first M-5 authorization writes managedUsageCount.
+    managedUsageCount: v.optional(v.number()),
+    activationManagedCallCount: v.optional(v.number()),
+    activationProviderCostMicros: v.optional(v.number()),
     // Weekly usage (resets every Monday 00:00 UTC)
     weeklyUsageCount: v.optional(v.number()), // calls this week
     weeklyUsageLimit: v.optional(v.number()), // 50 for free, unlimited for paid tiers
@@ -70,6 +76,12 @@ export default defineSchema({
     stripeSubscriptionId: v.optional(v.string()),
     stripeSubscriptionStatus: v.optional(v.string()), // "active" | "trialing" | "past_due" | "canceled" | "incomplete"
     billingPlan: v.optional(v.string()), // "free" | "usage_based" | "starter" | "pro" | "scale"
+    paygMeterReadyAt: v.optional(v.number()),
+    paygMeterPriceId: v.optional(v.string()),
+    paygMeterId: v.optional(v.string()),
+    paygMeterEventName: v.optional(v.string()),
+    paygActivationId: v.optional(v.string()),
+    paygActivationStartedAt: v.optional(v.number()),
     creditBalance: v.optional(v.number()), // prepaid credits in cents
     lastBillingDate: v.optional(v.number()),
     // Payment method fields
@@ -97,6 +109,10 @@ export default defineSchema({
     // A-15 post-auth welcome - set after successful delivery so the shared
     // nurture ledger and fast welcome path never send a second welcome.
     postVerifyNudgeSentAt: v.optional(v.number()),
+    // Independent sticky circuit for provider-cost integrity anomalies. This
+    // cannot be cleared by ordinary Stripe lifecycle or payment-method events.
+    managedCostHoldAt: v.optional(v.number()),
+    managedCostHoldReason: v.optional(v.string()),
     // Internal-only activation watchdog marker. Set after the operator alert
     // is accepted by Inbound Net so a stalled signup is reported once.
     activationStalledAlertSentAt: v.optional(v.number()),
@@ -148,6 +164,76 @@ export default defineSchema({
     .index("by_workspaceId_date", ["workspaceId", "date"])
     .index("by_reportedToStripe", ["reportedToStripe"]),
 
+  // One immutable billing identity per managed upstream attempt. This is the
+  // reconciliation source for provider spend and Stripe metering; daily
+  // usageRecords remain a legacy reporting aggregate only.
+  managedCallLedger: defineTable({
+    workspaceId: v.id("workspaces"),
+    requestId: v.string(),
+    requestFingerprint: v.optional(v.string()),
+    provider: v.string(),
+    action: v.string(),
+    model: v.optional(v.string()),
+    path: v.string(),
+    trafficClass: v.union(v.literal("customer"), v.literal("internal")),
+    billingClass: v.union(
+      v.literal("activation"),
+      v.literal("payg"),
+      v.literal("internal"),
+      v.literal("contract")
+    ),
+    status: v.union(
+      v.literal("authorized"),
+      v.literal("succeeded"),
+      v.literal("failed")
+    ),
+    reservedProviderCostMicros: v.number(),
+    // Immutable-at-authorization PAYG billing context. Metering must never
+    // reconstruct a historical charge from mutable workspace configuration.
+    stripeCustomerIdSnapshot: v.optional(v.string()),
+    stripeSubscriptionIdSnapshot: v.optional(v.string()),
+    stripePriceIdSnapshot: v.optional(v.string()),
+    stripeMeterIdSnapshot: v.optional(v.string()),
+    stripeMeterEventNameSnapshot: v.optional(v.string()),
+    providerCostMicros: v.optional(v.number()),
+    // Raw provider-reported cost retained when it exceeded the authorized
+    // reservation. It is evidence for reconciliation, never automatic billing.
+    reportedProviderCostMicros: v.optional(v.number()),
+    customerChargeMicros: v.optional(v.number()),
+    marginMicros: v.optional(v.number()),
+    costSource: v.optional(v.union(
+      v.literal("provider_response"),
+      v.literal("token_price_table"),
+      v.literal("fixed_price_policy"),
+      v.literal("reservation"),
+      v.literal("zero_cost")
+    )),
+    billingException: v.optional(v.string()),
+    inputTokens: v.optional(v.number()),
+    outputTokens: v.optional(v.number()),
+    upstreamRequestId: v.optional(v.string()),
+    stripeStatus: v.union(
+      v.literal("not_applicable"),
+      v.literal("pending"),
+      v.literal("claiming"),
+      v.literal("reported")
+    ),
+    stripeMeterEventIdentifier: v.optional(v.string()),
+    stripeClaimedAt: v.optional(v.number()),
+    stripeReportedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    completedAt: v.optional(v.number()),
+    authorizationLeaseExpiresAt: v.optional(v.number()),
+    reconciliationRequiredAt: v.optional(v.number()),
+  })
+    .index("by_requestId", ["requestId"])
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"])
+    .index("by_createdAt", ["createdAt"])
+    .index("by_status", ["status"])
+    .index("by_stripeStatus", ["stripeStatus"]),
+
   // Workspace API Keys (persistent keys for programmatic access)
   workspaceApiKeys: defineTable({
     workspaceId: v.id("workspaces"),
@@ -166,13 +252,20 @@ export default defineSchema({
   agentSessions: defineTable({
     workspaceId: v.id("workspaces"),
     sessionToken: v.string(),
+    // Existing rows without sessionKind are durable owner/agent sessions.
+    // Browser sessions are short-lived children minted from an owner session
+    // and must always carry both parentSessionId and expiresAt.
+    sessionKind: v.optional(v.union(v.literal("owner"), v.literal("browser"))),
+    parentSessionId: v.optional(v.id("agentSessions")),
+    expiresAt: v.optional(v.number()),
     fingerprint: v.optional(v.string()), // machine fingerprint
     customName: v.optional(v.string()), // user-defined name
     lastUsedAt: v.number(),
     createdAt: v.number(),
   })
     .index("by_sessionToken", ["sessionToken"])
-    .index("by_workspaceId", ["workspaceId"]),
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_parentSessionId", ["parentSessionId"]),
 
   // Agents — one per unique (fingerprint, mcpClient) pair
   // An agent = an MCP client installation, NOT a login session
@@ -449,10 +542,9 @@ export default defineSchema({
     .index("by_token", ["token"])
     .index("by_email", ["email"]),
 
-  // Device-auth codes for the MCP install path. The npm package generates
-  // a code on first call_api when no session exists, opens
-  // /workspace?link=<code> in the user's browser, and polls until the page
-  // attaches a workspace session token. No keys are pasted anywhere.
+  // Retained only so historical device-link rows remain readable during the
+  // retirement window. Public start/poll/complete handlers no longer issue or
+  // reveal workspace bearers. CLI loopback auth is canonical.
   deviceAuthCodes: defineTable({
     code: v.string(),                     // short opaque token in the URL
     fingerprint: v.optional(v.string()),  // device fingerprint that started the request
@@ -514,6 +606,8 @@ export default defineSchema({
     classification: v.string(), // "human" | "ci" | "bot" | "internal"
     workspaceId: v.optional(v.id("workspaces")),
     fingerprint: v.optional(v.string()),
+    // Deprecated security-migration field. No new write path accepts it.
+    // Remove after funnel:scrubStoredSessionTokens has run in production.
     sessionToken: v.optional(v.string()),
     email: v.optional(v.string()),
     userAgent: v.optional(v.string()),
@@ -1074,6 +1168,8 @@ export default defineSchema({
   // Architecturally ready for parallel sub-tasks; v1 runs sequentially.
   missions: defineTable({
     workspaceId: v.id("workspaces"),
+    requestId: v.optional(v.string()),
+    requestFingerprint: v.optional(v.string()),
     template: v.string(),                  // template slug. v1 templates resolve via TEMPLATE_REGISTRY; v2 via missionTemplates table.
     templateVersion: v.optional(v.number()), // pinned version for v2 template-driven missions. omit for legacy v1.
     title: v.string(),                     // human-readable summary
@@ -1087,7 +1183,7 @@ export default defineSchema({
     parentMissionId: v.optional(v.id("missions")), // parallel sub-mission support
     budgetUsd: v.optional(v.float64()),    // halt + alert if costUsd exceeds this
     underlyingCostUsd: v.optional(v.float64()),    // raw API cost (for billing)
-    chargedCostUsd: v.optional(v.float64()),       // underlying + 15% (0 for internal workspaces)
+    chargedCostUsd: v.optional(v.float64()),       // exact customer charge aggregated from managed ledger finalizations
     isInternal: v.boolean(),               // true = NordSym workspace, no margin charged
     createdAt: v.number(),
     startedAt: v.optional(v.number()),
@@ -1096,6 +1192,7 @@ export default defineSchema({
     .index("by_workspaceId", ["workspaceId"])
     .index("by_status", ["status"])
     .index("by_template", ["template"])
+    .index("by_workspaceId_requestId", ["workspaceId", "requestId"])
     .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"]),
 
   // Per-mission audit log. Real observability, not magic. Every step a
@@ -1192,4 +1289,20 @@ export default defineSchema({
     .index("by_via", ["via"])
     .index("by_endpoint", ["endpoint"])
     .index("by_lastSeenAt", ["lastSeenAt"]),
+
+  // Stripe webhook delivery ledger. Payloads are intentionally not stored.
+  // The Stripe event ID is enough to provide replay and concurrency safety.
+  stripeWebhookEvents: defineTable({
+    eventId: v.string(),
+    eventType: v.string(),
+    status: v.union(v.literal("processing"), v.literal("succeeded"), v.literal("failed")),
+    attempts: v.number(),
+    receivedAt: v.number(),
+    processingStartedAt: v.number(),
+    completedAt: v.optional(v.number()),
+    lastError: v.optional(v.string()),
+    updatedAt: v.number(),
+  })
+    .index("by_eventId", ["eventId"])
+    .index("by_status", ["status"]),
 });

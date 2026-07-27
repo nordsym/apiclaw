@@ -31,7 +31,20 @@ export async function recordFirstCallApiSuccessInTransaction(
   args: FirstCallSource,
   now = Date.now()
 ) {
-  const dedupeKey = `first_call:${args.workspaceId}`;
+  const workspace = await ctx.db.get(args.workspaceId);
+  if (!workspace || workspace.status !== "active") {
+    return { id: null, deduped: false, skipped: "workspace_not_active" as const };
+  }
+
+  // Authorization reserves and increments the managed call before the
+  // successful response is recorded. A count of one is therefore a genuine
+  // first managed call. Legacy workspaces with earlier usage must be reported
+  // as reactivated instead of inflating the activation funnel.
+  const managedCalls = workspace.managedUsageCount ?? workspace.usageCount ?? 0;
+  const event = managedCalls <= 1
+    ? "first_call_api_success"
+    : "workspace_reactivated";
+  const dedupeKey = `${event === "first_call_api_success" ? "first_call" : "reactivation"}:${args.workspaceId}`;
   const existing = await ctx.db
     .query("funnelEvents")
     .withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", dedupeKey))
@@ -41,13 +54,8 @@ export async function recordFirstCallApiSuccessInTransaction(
     return { id: existing._id, deduped: true };
   }
 
-  const workspace = await ctx.db.get(args.workspaceId);
-  if (!workspace || workspace.status !== "active") {
-    return { id: null, deduped: false, skipped: "workspace_not_active" as const };
-  }
-
   const id = await ctx.db.insert("funnelEvents", {
-    event: "first_call_api_success",
+    event,
     classification: classifyFirstCall(workspace.email),
     workspaceId: args.workspaceId,
     email: workspace.email,
@@ -58,11 +66,12 @@ export async function recordFirstCallApiSuccessInTransaction(
       provider: args.provider,
       action: args.action,
       recorded_by: "gateway",
+      prior_managed_calls: Math.max(0, managedCalls - 1),
     },
     timestamp: now,
   });
 
-  return { id, deduped: false };
+  return { id, deduped: false, event };
 }
 
 export const recordFirstCallApiSuccess = internalMutation({

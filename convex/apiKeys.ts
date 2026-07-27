@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalQuery } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // WORKSPACE API KEYS
@@ -55,10 +56,7 @@ export const generateKey = mutation({
   },
   handler: async (ctx, args) => {
     // Auth via agentSession
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token, { audience: "durable" });
 
     if (!session) {
       throw new Error("Invalid session");
@@ -115,10 +113,7 @@ export const listKeys = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { keys: [] };
@@ -154,10 +149,7 @@ export const revokeKey = mutation({
     keyId: v.id("workspaceApiKeys"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session");

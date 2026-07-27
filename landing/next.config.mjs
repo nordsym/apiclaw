@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  webpack(config) {
+    config.resolve.alias['@apiclaw/product-truth'] = new URL('../src/product-truth.ts', import.meta.url).pathname;
+    return config;
+  },
   async redirects() {
     return [
       // /docs is a public page; no redirect to /workspace.

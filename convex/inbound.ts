@@ -2,6 +2,7 @@ import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 
 const N8N_INBOUND = "https://nordsym.app.n8n.cloud/webhook/inbound/apiclaw";
+const INBOUND_SECRET_HEADER = "X-APIClaw-Webhook-Secret";
 
 export type InboundEventPayload = {
   source: "apiclaw";
@@ -18,11 +19,20 @@ export type InboundEventPayload = {
 export async function deliverInboundEvent(
   payload: InboundEventPayload,
   fetcher: typeof fetch = fetch,
+  webhookSecret = process.env.APICLAW_INBOUND_WEBHOOK_SECRET,
 ) {
+  if (!webhookSecret) {
+    console.error("[inbound] APICLAW_INBOUND_WEBHOOK_SECRET is not configured");
+    return { delivered: false, status: 0 };
+  }
+
   try {
     const response = await fetcher(N8N_INBOUND, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        [INBOUND_SECRET_HEADER]: webhookSecret,
+      },
       body: JSON.stringify(payload),
     });
 

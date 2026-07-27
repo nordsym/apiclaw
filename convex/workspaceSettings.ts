@@ -1,5 +1,6 @@
 import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // QUERIES
@@ -9,10 +10,7 @@ import { v } from "convex/values";
 export const get = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) throw new Error("Invalid or expired session");
 
     const workspaceId = session.workspaceId;
@@ -96,10 +94,7 @@ export const upsert = mutation({
   },
   handler: async (ctx, args) => {
     // Resolve workspace from session token
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid or expired session");

@@ -4,13 +4,23 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { checkEmailAllowedSync } from "./emailGuards";
+import {
+  nurtureUnsubscribeUrl,
+  welcomeDeliveryIdempotencyKey,
+} from "./nurtureDeliveryKeys";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from "../src/product-truth";
 
 /**
  * A-15 - Post-verify onboarding nudge.
  *
  * If a workspace authenticated more than 10 minutes ago, send one welcome
- * email. The copy adapts based on whether first_call_api_success already
- * fired. The successful send is also recorded as the nurture "welcome"
+ * email. The payload is stable per workspace so Resend idempotency remains
+ * valid even if activation state changes during a retry. The successful send
+ * is also recorded as the nurture "welcome"
  * email so the daily lifecycle sender cannot send a duplicate welcome and
  * its 72-hour spacing and three-email cap apply to the whole sequence.
  *
@@ -19,6 +29,7 @@ import { checkEmailAllowedSync } from "./emailGuards";
  */
 
 const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const NUDGE_AGE_MIN_MS = 10 * 60 * 1000;    // wait at least 10min after verify
 const NUDGE_AGE_MAX_MS = 24 * 60 * 60 * 1000; // give up after 24h
 
@@ -36,10 +47,8 @@ type WelcomeRunResult = {
   reason?: string;
 };
 
-export function renderWelcomeHtml(activated: boolean): string {
-  const intro = activated
-    ? "Your first APIClaw call is through. Your workspace, gateway, and usage tracking are live. Keep this prompt for the next useful run:"
-    : "You signed in but haven't made an API call yet. Paste this into your agent right now. It takes about ten seconds:";
+export function renderWelcomeHtml(_activated: boolean, unsubscribeUrl: string): string {
+  const intro = "Your workspace, gateway, and usage tracking are live. Paste this into your agent for a useful first run:";
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:32px;background:#0A0A0A;color:#FAFAFA;font-family:Inter,system-ui,sans-serif">
@@ -48,12 +57,12 @@ export function renderWelcomeHtml(activated: boolean): string {
   <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">${intro}</p>
 
   <div style="background:#141414;border:1px solid #262626;border-radius:12px;padding:20px;margin-bottom:24px">
-    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw's managed Brave Search adapter with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
   </div>
 
-  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes 50 managed calls per week. Pay-as-you-go continues at API cost + 15% when the allowance is exhausted.</p>
+  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes up to ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. Billing-ready actions can continue at provider cost + ${PAYG_MARGIN_PERCENT}% when the allowance is exhausted.</p>
 
-  <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Need help? Open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.</p>
+  <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Need help? Open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.<br/><a href="${unsubscribeUrl}" style="color:#737373">Unsubscribe from lifecycle email</a>.</p>
 </div>
 </body></html>`;
 }
@@ -65,6 +74,11 @@ export const sendPostVerifyNudges = internalAction({
     if (!apiKey) {
       console.error("[postVerifyNudge] RESEND_API_KEY not set");
       return { sent: 0, reason: "missing_api_key" };
+    }
+    const unsubscribeSecret = process.env.APICLAW_PSEUDONYM_SECRET;
+    if (!unsubscribeSecret) {
+      console.error("[postVerifyNudge] unsubscribe signing secret not set");
+      return { sent: 0, reason: "missing_unsubscribe_secret" };
     }
 
     const now = Date.now();
@@ -93,17 +107,23 @@ export const sendPostVerifyNudges = internalAction({
         continue;
       }
 
+      const unsubscribeUrl = await nurtureUnsubscribeUrl(String(w._id), unsubscribeSecret);
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          "Idempotency-Key": welcomeDeliveryIdempotencyKey(String(w._id)),
         },
         body: JSON.stringify({
           from: EMAIL_FROM,
           to: w.email,
           subject: "Your APIClaw workspace is ready - try this prompt",
-          html: renderWelcomeHtml(w.activated),
+          html: renderWelcomeHtml(w.activated, unsubscribeUrl),
+          headers: {
+            "List-Unsubscribe": `<${unsubscribeUrl}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          },
         }),
       });
 
@@ -119,10 +139,16 @@ export const sendPostVerifyNudges = internalAction({
         continue;
       }
 
-      await ctx.runMutation(internal.postVerifyNudge.markSent, {
+      const mark = await ctx.runMutation(internal.postVerifyNudge.markSent, {
         workspaceId: w._id,
-      });
-      sent++;
+      }) as { success: boolean; alreadyMarked?: boolean; reason?: string };
+      if (mark.success && !mark.alreadyMarked) {
+        sent++;
+      } else {
+        skipped++;
+        const reason = mark.alreadyMarked ? "already_marked" : mark.reason || "mark_failed";
+        skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+      }
     }
 
     return { sent, skipped, skipReasons, candidates: candidates.length };
@@ -172,7 +198,7 @@ export const findCandidates = internalQuery({
         .withIndex("by_workspaceId", (q) => q.eq("workspaceId", wsId))
         .first();
       if (nurture?.unsubscribed) continue;
-      if (nurture?.stage === "partner-locked") continue;
+      if (nurture?.stage === "partner-locked" || nurture?.stage === "excluded") continue;
       if (nurture?.lastEmailKind === "welcome") continue;
 
       // Activation changes the welcome copy but never suppresses the welcome.
@@ -196,17 +222,28 @@ export async function markPostAuthWelcomeInTransaction(
   const workspace = await ctx.db.get(workspaceId);
   if (!workspace) return { success: false, reason: "workspace_not_found" as const };
 
-  await ctx.db.patch(workspaceId, { postVerifyNudgeSentAt: now });
-
   const existing = await ctx.db
     .query("nurture")
     .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
     .first();
 
+  if (workspace.postVerifyNudgeSentAt || existing?.lastEmailKind === "welcome") {
+    return {
+      success: true,
+      alreadyMarked: true,
+      nurtureId: existing?._id,
+      inserted: false,
+    };
+  }
+  if (existing?.unsubscribed || existing?.stage === "partner-locked" || existing?.stage === "excluded") {
+    return { success: false, reason: "nurture_excluded" as const };
+  }
+
+  await ctx.db.patch(workspaceId, { postVerifyNudgeSentAt: now });
+
   if (existing) {
     await ctx.db.patch(existing._id, {
       email: workspace.email || existing.email,
-      stage: existing.stage === "excluded" ? "new" : existing.stage,
       emailsSent: existing.emailsSent + 1,
       lastEmailSentAt: now,
       lastEmailKind: "welcome",

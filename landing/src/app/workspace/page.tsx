@@ -100,6 +100,14 @@ import {
   isUnlimitedWorkspace,
   type WorkspaceSurfaceId,
 } from "@/lib/workspace-truth";
+import {
+  getWorkspaceSessionToken,
+  subscribeWorkspaceSessionToken,
+} from "@/lib/workspace-session";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+} from "@apiclaw/product-truth";
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -114,6 +122,9 @@ interface Workspace {
   usageLimit: number;
   usageRemaining: number;
   usagePercentage: number;
+  stripeCustomerId?: string;
+  stripeSubscriptionStatus?: string;
+  paygActive?: boolean;
   createdAt: number;
 }
 
@@ -232,32 +243,78 @@ export default function WorkspacePage() {
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
 
-  // Handle billing and portal return params
+  // Treat the Stripe return as pending until the owner-scoped workspace state
+  // confirms an active subscription, attached card, and exact meter contract.
   useEffect(() => {
     const billingParam = searchParams.get("billing");
     const portalParam = searchParams.get("portal");
-    
-    if (billingParam === "success") {
-      showToast("Payment method added. Managed calls now continue at API cost + 15%.", "success");
-      // Clean up URL
+
+    const cleanReturnParam = (name: "billing" | "portal") => {
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("billing");
+      newUrl.searchParams.delete(name);
       window.history.replaceState({}, "", newUrl.toString());
+    };
+
+    if (billingParam === "success") {
+      if (!sessionToken) return;
+
+      let active = true;
+      let attempts = 0;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      showToast("Payment method received. Verifying PAYG billing before activation.", "info");
+
+      const pollBillingReadiness = async () => {
+        attempts += 1;
+        try {
+          const response = await fetch(`${CONVEX_URL}/api/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: "workspaces:getWorkspaceDashboard",
+              args: { token: sessionToken },
+            }),
+            cache: "no-store",
+          });
+          const payload = await response.json();
+          const dashboard = payload.value || payload;
+          if (!active) return;
+          if (dashboard?.workspace) setWorkspace(dashboard.workspace);
+          if (dashboard?.workspace?.paygActive === true) {
+            showToast("PAYG verified. Billing-ready managed calls can now continue at provider cost + 15%.", "success");
+            cleanReturnParam("billing");
+            return;
+          }
+        } catch {
+          // Keep the workspace fail-closed and retry the owner-scoped read.
+        }
+
+        if (active && attempts < 15) {
+          timer = setTimeout(pollBillingReadiness, 2_000);
+          return;
+        }
+
+        if (active) {
+          showToast("Payment method saved. PAYG is still pending verification, so managed billing remains off.", "info");
+          cleanReturnParam("billing");
+        }
+      };
+
+      void pollBillingReadiness();
+      return () => {
+        active = false;
+        if (timer) clearTimeout(timer);
+      };
     } else if (billingParam === "cancel") {
       showToast("Checkout cancelled. You can try again anytime.", "info");
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("billing");
-      window.history.replaceState({}, "", newUrl.toString());
+      cleanReturnParam("billing");
     }
-    
+
     // Handle portal return
     if (portalParam === "success") {
-      showToast("Billing settings updated successfully.", "success");
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("portal");
-      window.history.replaceState({}, "", newUrl.toString());
+      showToast("Billing settings received. Entitlement remains fail-closed until Stripe confirms it.", "info");
+      cleanReturnParam("portal");
     }
-  }, [searchParams, showToast]);
+  }, [searchParams, sessionToken, showToast]);
 
   useEffect(() => {
     const validTabs: TabType[] = ["overview", "api-catalog", "connections", "activity", "billing", "settings", "provider-console"];
@@ -292,6 +349,7 @@ export default function WorkspacePage() {
         // Guard: anonymous workspace (no email) means the browser session is stale — force re-login
         if (!dashboard.workspace.email) {
           localStorage.removeItem("apiclaw_workspace_session");
+          await fetch("/api/workspace-auth/session", { method: "DELETE" });
           router.push(signInPath);
           return;
         }
@@ -394,26 +452,23 @@ export default function WorkspacePage() {
     }
   }, []);
 
-  // Device-auth link state (MCP install bridge). When the user lands on
-  // /workspace?link=<code>, the npm package opened this URL after a 401 on
-  // call_api. We capture the code, persist it across the login redirect,
-  // then call deviceAuth:complete once we have a session.
-  const [deviceLinkStatus, setDeviceLinkStatus] = useState<
-    "idle" | "linking" | "linked" | "error"
-  >("idle");
-  const [deviceLinkError, setDeviceLinkError] = useState<string | null>(null);
+  useEffect(() => {
+    // Keep the in-memory browser child current. The durable owner bearer
+    // remains inaccessible in the HttpOnly cookie.
+    return subscribeWorkspaceSessionToken((token) => {
+      setSessionToken(token);
+      if (!token) router.push(signInPath);
+    });
+  }, [router, signInPath]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Capture device-link code from URL before any redirects.
-        const linkCode = searchParams.get("link");
-        if (linkCode) {
-          localStorage.setItem("apiclaw_pending_link", linkCode);
-        }
+        // Exchange the HttpOnly owner cookie for a short-lived browser child.
+        // Keep the child in memory only. Migrate and remove any legacy
+        // localStorage owner token so existing signed-in users are not stranded.
+        const token = await getWorkspaceSessionToken();
 
-        // Check workspace session
-        const token = localStorage.getItem("apiclaw_workspace_session");
         if (token) {
           setSessionToken(token);
           await fetchWorkspaceData(token);
@@ -423,61 +478,10 @@ export default function WorkspacePage() {
         // Fetch all approved APIs for the catalog
         await fetchApprovedAPIs();
 
-        // If no session, redirect to sign-in. Preserve any pending device-link
-        // code via localStorage; /sign-in → /workspace will pick it up.
+        // If no verified session exists, enter the canonical Clerk flow.
         if (!token) {
-          const pending = localStorage.getItem("apiclaw_pending_link");
-          router.push(pending ? `${signInPath}?link=${pending}` : signInPath);
+          router.push(signInPath);
           return;
-        }
-
-        // Have a session. If a device-link code is pending, attach this
-        // workspace to it so the MCP server's poll completes.
-        const pendingLink = localStorage.getItem("apiclaw_pending_link");
-        if (pendingLink) {
-          setDeviceLinkStatus("linking");
-          try {
-            const dashRes = await fetch(`${CONVEX_URL}/api/query`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                path: "workspaces:getWorkspaceDashboard",
-                args: { token },
-              }),
-            });
-            const dashJson = await dashRes.json();
-            const dash = dashJson.value || dashJson;
-            const workspaceId = dash?.workspace?._id;
-            const email = dash?.workspace?.email;
-            if (!workspaceId) throw new Error("No workspace on this session.");
-            const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                path: "deviceAuth:complete",
-                args: {
-                  code: pendingLink,
-                  sessionToken: token,
-                  workspaceId,
-                  email,
-                },
-              }),
-            });
-            const body = await res.json();
-            if (body.status === "error") {
-              throw new Error(body.errorMessage || "Linking failed.");
-            }
-            localStorage.removeItem("apiclaw_pending_link");
-            setDeviceLinkStatus("linked");
-            // Strip ?link from the URL bar so refresh doesn't re-link.
-            const url = new URL(window.location.href);
-            url.searchParams.delete("link");
-            window.history.replaceState({}, "", url.toString());
-          } catch (e: any) {
-            setDeviceLinkStatus("error");
-            setDeviceLinkError(e?.message || "Failed to link device.");
-            localStorage.removeItem("apiclaw_pending_link");
-          }
         }
 
         setIsLoading(false);
@@ -513,25 +517,27 @@ export default function WorkspacePage() {
 
   const handleLogout = async () => {
     try {
+      // Revoke the APIClaw bearer and clear its cookie before ending Clerk.
+      const logoutResponse = await fetch("/api/workspace-auth/session", { method: "DELETE" });
+      if (!logoutResponse.ok) {
+        throw new Error("APIClaw session revocation failed");
+      }
+      localStorage.removeItem("apiclaw_workspace_session");
+
       // If Clerk is enabled, route through its sign-out flow so afterSignOutUrl
-      // (configured on <ClerkProvider>) can also invalidate the apiclaw session.
-      // Otherwise fall back to the legacy magic-link sign-out.
+      // (configured on <ClerkProvider>) also clears the identity session.
       if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-        try {
-          localStorage.removeItem("apiclaw_workspace_session");
-        } catch {}
         const clerk = (window as unknown as { Clerk?: { signOut: (opts: { redirectUrl: string }) => Promise<void> } }).Clerk;
         if (clerk?.signOut) {
           await clerk.signOut({ redirectUrl: "/sign-in" });
           return;
         }
-        // Clerk not loaded — fall through to legacy path
+        // Clerk not loaded. The APIClaw session is already revoked.
       }
-      await fetch("/api/workspace-auth/session", { method: "DELETE" });
-      localStorage.removeItem("apiclaw_workspace_session");
       router.push(signInPath);
     } catch (err) {
       console.error("Logout error:", err);
+      setError("Could not sign out safely. Your APIClaw session is still active, so please try again.");
     }
   };
 
@@ -639,23 +645,6 @@ export default function WorkspacePage() {
       {/* Toast notification */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
-      )}
-      {/* Device-auth link banner. Visible only when the MCP install path
-          drove the user here via /workspace?link=CODE. */}
-      {deviceLinkStatus === "linked" && (
-        <div className="fixed top-0 inset-x-0 z-[60] bg-green-500 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
-          ✓ APIClaw is linked. You can close this tab and return to your AI client.
-        </div>
-      )}
-      {deviceLinkStatus === "linking" && (
-        <div className="fixed top-0 inset-x-0 z-[60] bg-[#ef4444] text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
-          Linking your APIClaw extension…
-        </div>
-      )}
-      {deviceLinkStatus === "error" && deviceLinkError && (
-        <div className="fixed top-0 inset-x-0 z-[60] bg-red-600 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
-          Could not link your extension: {deviceLinkError}. Restart from your AI client.
-        </div>
       )}
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 w-full z-50 bg-[var(--background)]/90 backdrop-blur-xl border-b border-[var(--border)]">
@@ -1157,7 +1146,7 @@ function OverviewTab({
               <div className="min-w-0">
                 <p className="text-2xl font-bold">{workspace?.usageCount.toLocaleString() || "0"}</p>
                 <p className="text-sm text-[var(--text-muted)]">
-                  {isPaid ? "calls this week" : `of ${workspace?.usageLimit || 50} this week`}
+                  {isPaid ? "managed calls total" : `of ${workspace?.usageLimit || FREE_MANAGED_CALLS_LIFETIME} lifetime`}
                 </p>
                 {!isPaid && workspace && (
                   <p className="text-xs text-[var(--text-muted)] mt-1">{workspace.usageRemaining} remaining</p>
@@ -1413,8 +1402,8 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
       {activeSection === "open-api" && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
-            <h3 className="font-semibold mb-2 flex items-center gap-2"><FileCode2 className="w-4 h-4 text-purple-400" />1,636 Open APIs — No API Key Required</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-2">These APIs require no authentication. Your agent discovers them via <code className="text-purple-400">discover_apis()</code> and calls them directly through APIClaw.</p>
+            <h3 className="font-semibold mb-2 flex items-center gap-2"><FileCode2 className="w-4 h-4 text-purple-400" />1,636 Keyless API Definitions</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-2">These upstream APIs advertise no authentication requirement. Your agent can discover them via <code className="text-purple-400">discover_apis()</code>. Generic APIClaw proxy execution remains disabled until hardened egress is live.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {[
@@ -1442,7 +1431,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
           <div className="rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] p-4 flex items-center justify-between">
             <div>
               <p className="font-medium">Total Open APIs</p>
-              <p className="text-sm text-[var(--text-muted)]">All callable through APIClaw without any API key setup.</p>
+              <p className="text-sm text-[var(--text-muted)]">Source-verified for discovery. Managed execution readiness is shown separately.</p>
             </div>
             <p className="text-2xl font-bold text-purple-400">1,636</p>
           </div>
@@ -1715,9 +1704,9 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
             <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
           </div>
           <h3 className="font-semibold text-lg mb-1">Open API</h3>
-          <p className="text-[#ef4444] text-sm font-medium mb-3">Indexed & callable</p>
+          <p className="text-[#ef4444] text-sm font-medium mb-3">Indexed and discoverable</p>
           <p className="text-sm text-[var(--text-muted)] mb-4">
-            Provide your public OpenAPI spec. APIClaw indexes it so agents can discover and call your endpoint through the platform.
+            Provide your public OpenAPI spec. APIClaw indexes it so agents can discover the endpoint. Execution is enabled only after a managed adapter passes the trust floor.
           </p>
           <div className="flex items-center justify-end">
             <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[#ef4444] group-hover:translate-x-1 transition" />
@@ -1923,7 +1912,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                             <Check className="w-6 h-6 text-green-500" />
                           </div>
                           <p className="font-medium mb-1">Managed by APIClaw</p>
-                          <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto mb-4">This API is tested and verified by APIClaw. Agents call it through the MCP proxy — no direct testing needed from the dashboard.</p>
+                          <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto mb-4">A managed adapter is configured for this provider. Runtime readiness and billing support are checked again before every call.</p>
                           <code className="text-xs bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 font-mono text-[#ef4444]">call_api(&#123; provider: &quot;apilayer&quot;, action: &quot;...&quot; &#125;)</code>
                         </div>
                       ) : (
@@ -4699,47 +4688,76 @@ function BillingTab({
   sessionToken: string | null;
 }) {
   const currentTier = workspace?.tier || "free";
-  const isPaid = isUnlimitedWorkspace({ tier: currentTier, usageLimit: workspace?.usageLimit });
+  const isPaid = isUnlimitedWorkspace(workspace || {});
   const isPartner = currentTier === "partner";
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-
-  const handleUpgrade = async () => {
-    setCheckoutLoading(true);
-    try {
-      const token = sessionToken;
-      if (!token) {
-        window.location.href = "/sign-in";
-        return;
-      }
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      // fallback
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+  const paygNeedsRecovery = currentTier === "usage_based" && workspace?.paygActive !== true;
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalError, setPortalError] = useState<string | null>(null);
 
   const plans = PLANS.map((p) => ({
     ...p,
-    cta: currentTier === p.id ? "Current plan" : p.ctaLoggedIn,
-    ctaDisabled: currentTier === p.id,
+    cta: currentTier === p.id && !paygNeedsRecovery ? "Current plan" : p.ctaLoggedIn,
   }));
+
+  const openBillingPortal = async () => {
+    if (!sessionToken) {
+      setPortalError("Sign in again to manage billing.");
+      return;
+    }
+    setPortalLoading(true);
+    setPortalError(null);
+    try {
+      const response = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: sessionToken }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Failed to open billing settings");
+      }
+      window.location.href = data.url;
+    } catch (error) {
+      setPortalError(error instanceof Error ? error.message : "Failed to open billing settings");
+      setPortalLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold">Billing</h2>
-        <p className="text-[var(--text-muted)] mt-1">Simple, transparent pricing. API cost + 15%.</p>
+        <p className="text-[var(--text-muted)] mt-1">Exact billing for supported actions. API cost + 15%.</p>
       </div>
+
+      {paygNeedsRecovery && (
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-amber-300">PAYG needs billing attention</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              Managed PAYG calls are paused until Stripe confirms an active subscription, payment method, and exact meter.
+            </p>
+          </div>
+          {workspace?.stripeCustomerId ? (
+            <button
+              type="button"
+              onClick={openBillingPortal}
+              disabled={portalLoading}
+              className="px-4 py-2.5 rounded-xl bg-amber-400 text-black text-sm font-semibold disabled:opacity-60"
+            >
+              {portalLoading ? "Opening..." : "Manage billing"}
+            </button>
+          ) : (
+            <a href="/book" className="px-4 py-2.5 rounded-xl border border-amber-400/50 text-amber-300 text-sm font-semibold text-center">
+              Contact support
+            </a>
+          )}
+        </div>
+      )}
+
+      {portalError && <p className="text-sm text-red-400">{portalError}</p>}
 
       {/* Current plan summary */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 flex items-center justify-between">
@@ -4748,11 +4766,14 @@ function BillingTab({
           <p className="text-xl font-bold capitalize mt-0.5">
             {isPartner ? "Partner" : currentTier === "usage_based" ? "Pay as you go" : currentTier}
           </p>
+          {paygNeedsRecovery && (
+            <p className="text-xs text-amber-400 mt-1">Paused: {workspace?.stripeSubscriptionStatus || "verification pending"}</p>
+          )}
         </div>
         <div className="text-right">
-          <p className="text-sm text-[var(--text-muted)]">Managed API usage this week</p>
+          <p className="text-sm text-[var(--text-muted)]">Managed API usage</p>
           <p className="text-xl font-bold mt-0.5">
-            {isPaid || isPartner ? `${workspace?.usageCount || 0} calls` : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || 50}`}
+            {isPaid || isPartner ? `${workspace?.usageCount || 0} calls` : `${workspace?.usageCount || 0} / ${workspace?.usageLimit || FREE_MANAGED_CALLS_LIFETIME} lifetime`}
           </p>
         </div>
       </div>
@@ -4760,7 +4781,10 @@ function BillingTab({
       {/* Plans grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
         {plans.map(plan => {
-          const isCurrentPlan = currentTier === plan.id || (isPartner && plan.id === "free");
+          const isPaygPlan = plan.id === "usage_based";
+          const isCurrentPlan = isPaygPlan
+            ? currentTier === "usage_based" && workspace?.paygActive === true
+            : currentTier === plan.id || (isPartner && plan.id === "free");
           return (
             <div key={plan.id} className={`rounded-2xl border p-6 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
               {plan.highlight && (
@@ -4781,24 +4805,39 @@ function BillingTab({
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => {
-                  if (isCurrentPlan) return;
-                  if (plan.id === "usage_based") {
-                    handleUpgrade();
-                  }
-                }}
-                disabled={isCurrentPlan || (plan.id === "usage_based" && checkoutLoading)}
-                className={`w-full py-2.5 rounded-xl text-sm font-semibold transition ${
-                  isCurrentPlan
-                    ? "bg-[var(--surface)] text-[var(--text-muted)] cursor-default"
-                    : plan.highlight
-                    ? "bg-[#ef4444] text-white hover:bg-[#dc2626]"
-                    : "border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface)]"
-                }`}
-              >
-                {isCurrentPlan ? "Current plan" : checkoutLoading && plan.id === "usage_based" ? "Opening Stripe..." : plan.cta}
-              </button>
+              {isCurrentPlan ? (
+                <button
+                  disabled
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold bg-[var(--surface)] text-[var(--text-muted)] cursor-default"
+                >
+                  Current plan
+                </button>
+              ) : isPaygPlan && paygNeedsRecovery && workspace?.stripeCustomerId ? (
+                <button
+                  type="button"
+                  onClick={openBillingPortal}
+                  disabled={portalLoading}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold bg-amber-400 text-black disabled:opacity-60"
+                >
+                  {portalLoading ? "Opening..." : "Manage billing"}
+                </button>
+              ) : isPaygPlan && currentTier === "free" ? (
+                <CheckoutButton
+                  sessionToken={sessionToken || ""}
+                  variant="primary"
+                  className="w-full [&>button]:w-full [&>button]:py-2.5"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  {plan.cta}
+                </CheckoutButton>
+              ) : (
+                <button
+                  disabled
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+                >
+                  Contact support to change plan
+                </button>
+              )}
             </div>
           );
         })}
@@ -4806,7 +4845,7 @@ function BillingTab({
 
       {/* Fine print */}
       <p className="text-xs text-center text-[var(--text-muted)]">
-        Search and Open API access stay unmetered. Managed API calls are billed at API cost + 15%.
+        Discovery stays free. The free workspace includes up to {FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls and ${FREE_MANAGED_PROVIDER_COST_CAP_USD} in total underlying provider cost. PAYG continues only for actions with an exact billing adapter.
       </p>
 
       <p className="text-xs text-center text-[var(--text-muted)]">
@@ -4865,19 +4904,20 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
     setGenerating(true);
     setError(null);
     try {
-      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+      const res = await fetch("/api/workspace/api-keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "apiKeys:generateKey", args: { token: sessionToken, name: newKeyName.trim() } }),
+        credentials: "same-origin",
+        body: JSON.stringify({ name: newKeyName.trim() }),
       });
       const data = await res.json();
-      if (data.value?.key) {
-        setShowNewKey({ key: data.value.key, name: data.value.name });
+      if (res.ok && data.key) {
+        setShowNewKey({ key: data.key, name: data.name });
         setNewKeyName("");
         setShowCreateForm(false);
         fetchKeys();
       } else {
-        setError(data.value?.error || data.error?.message || "Failed to generate key");
+        setError(data.error || "Failed to generate key");
       }
     } catch (err: any) {
       setError(err.message || "Failed to generate key");
@@ -5129,8 +5169,10 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
           {/* curl example */}
           <p className="text-xs text-[var(--text-muted)] mb-2">Works with any tool that speaks OpenAI:</p>
           <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 text-xs font-mono overflow-x-auto">
-{`curl https://api.apiclaw.cloud/v1/chat/completions \\
+{`IDEMPOTENCY_KEY="\${IDEMPOTENCY_KEY:-$(uuidgen)}"
+curl https://api.apiclaw.cloud/v1/chat/completions \\
   -H "Authorization: Bearer ${keys[0]?.keyPrefix || "sk-claw-..."}" \\
+  -H "Idempotency-Key: $IDEMPOTENCY_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "apiclaw/openai/gpt-5.4-20260305",
@@ -5150,7 +5192,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
                 { name: "Hermes", desc: "AI agent runtime" },
                 { name: "Continue", desc: "IDE assistant" },
                 { name: "Custom agents", desc: "Any HTTP client" },
-                { name: "800+ models", desc: "One key, all providers" },
+                { name: "Model routing", desc: "One key, supported providers" },
               ].map((tool) => (
                 <div key={tool.name} className="rounded-lg bg-[var(--surface)] border border-[var(--border)] px-3 py-2">
                   <p className="text-xs font-medium">{tool.name}</p>
@@ -5161,7 +5203,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
           </div>
 
           <p className="text-xs text-[var(--text-muted)] mt-4">
-            APIClaw gives you access to hundreds of LLMs and APIs through a single key. Use it anywhere you would use an OpenAI API key.
+            APIClaw gives you one OpenAI-compatible endpoint for supported model routes. Live provider readiness is authoritative.
           </p>
         </div>
       )}
@@ -5182,7 +5224,7 @@ function WebhooksTab({ sessionToken }: { sessionToken: string | null }) {
     {
       id: "usage.threshold.80",
       label: "Usage at 80%",
-      description: "Email when 80% of your weekly managed call quota is used.",
+      description: "Email when 80% of your lifetime managed call allowance is used.",
       icon: AlertCircle,
       color: "text-yellow-400",
     },
@@ -5335,251 +5377,6 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
     </div>
   );
 }
-
-// ============================================
-// FEEDBACK TAB
-// ============================================
-
-interface FeedbackItem {
-  _id: string;
-  workspaceId: string;
-  type: "bug" | "feature" | "general";
-  content: string;
-  votes: number;
-  votedBy: string[];
-  status: "new" | "reviewing" | "planned" | "shipped";
-  createdAt: number;
-  hasVoted: boolean;
-  isOwn: boolean;
-}
-
-function FeedbackTab() {
-  const [content, setContent] = useState("");
-  const [feedbackType, setFeedbackType] = useState<"bug" | "feature" | "general">("feature");
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState<"all" | "bug" | "feature" | "general">("all");
-  const [sortBy, setSortBy] = useState<"votes" | "recent">("votes");
-  const [votingId, setVotingId] = useState<string | null>(null);
-
-  const sessionToken = typeof window !== "undefined" ? localStorage.getItem("apiclaw_workspace_session") : null;
-
-  useEffect(() => {
-    if (sessionToken) {
-      fetchFeedback();
-    }
-  }, [sessionToken, filterType, sortBy]);
-
-  const fetchFeedback = async () => {
-    if (!sessionToken) return;
-    
-    try {
-      const response = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "feedback:getFeedback",
-          args: {
-            token: sessionToken,
-            filterType: filterType === "all" ? undefined : filterType,
-            sortBy,
-          },
-        }),
-      });
-
-      const data = await response.json();
-      const result = data.value || data;
-      
-      if (result.feedback) {
-        setFeedbackList(result.feedback);
-      }
-    } catch (err) {
-      console.error("Failed to fetch feedback:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim() || !sessionToken) return;
-
-    setSubmitting(true);
-    try {
-      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "feedback:submitFeedback",
-          args: {
-            token: sessionToken,
-            type: feedbackType,
-            content: content.trim(),
-          },
-        }),
-      });
-
-      const data = await response.json();
-      if (data.value?.success || data.success) {
-        setSubmitted(true);
-        setContent("");
-        setTimeout(() => setSubmitted(false), 3000);
-        fetchFeedback();
-      }
-    } catch (err) {
-      console.error("Failed to submit feedback:", err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleVote = async (feedbackId: string, direction: "up" | "down") => {
-    if (!sessionToken || votingId) return;
-
-    setVotingId(feedbackId);
-    try {
-      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "feedback:voteFeedback",
-          args: {
-            token: sessionToken,
-            feedbackId,
-            direction,
-          },
-        }),
-      });
-
-      const data = await response.json();
-      const result = data.value || data;
-      
-      if (result.success) {
-        setFeedbackList((prev) =>
-          prev.map((f) =>
-            f._id === feedbackId
-              ? { ...f, votes: result.votes, hasVoted: result.hasVoted }
-              : f
-          )
-        );
-      }
-    } catch (err) {
-      console.error("Failed to vote:", err);
-    } finally {
-      setVotingId(null);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "new": return "bg-gray-500/20 text-gray-400";
-      case "reviewing": return "bg-yellow-500/20 text-yellow-500";
-      case "planned": return "bg-blue-500/20 text-blue-500";
-      case "shipped": return "bg-green-500/20 text-green-500";
-      default: return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case "bug": return "bg-red-500/20 text-red-500";
-      case "feature": return "bg-purple-500/20 text-purple-500";
-      case "general": return "bg-gray-500/20 text-gray-400";
-      default: return "bg-gray-500/20 text-gray-400";
-    }
-  };
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Feedback</h2>
-        <p className="text-[var(--text-muted)]">Your feedback helps us improve APIClaw.</p>
-      </div>
-
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
-        <h3 className="font-semibold mb-4">Share Your Feedback</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-2">Type</label>
-            <div className="flex flex-wrap gap-2">
-              {(["bug", "feature", "general"] as const).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setFeedbackType(type)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
-                    feedbackType === type
-                      ? type === "bug"
-                        ? "bg-red-500 text-white"
-                        : type === "feature"
-                        ? "bg-purple-500 text-white"
-                        : "bg-gray-500 text-white"
-                      : "bg-[var(--surface)] text-[var(--text-muted)] hover:bg-[var(--background)]"
-                  }`}
-                >
-                  {type === "bug" ? <><Bug className="w-4 h-4 inline mr-1" /> Bug</> : type === "feature" ? <><Sparkles className="w-4 h-4 inline mr-1" /> Feature</> : <><MessageCircle className="w-4 h-4 inline mr-1" /> General</>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-2">Your Feedback</label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={
-                feedbackType === "bug"
-                  ? "Describe the bug you encountered..."
-                  : feedbackType === "feature"
-                  ? "Describe the feature you'd like to see..."
-                  : "Tell us what you think..."
-              }
-              className="w-full h-32 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#ef4444]/50 resize-none"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[var(--text-muted)]">
-              We read every piece of feedback.
-            </p>
-            <button
-              type="submit"
-              disabled={!content.trim() || submitting || submitted}
-              className="px-6 py-2 bg-[#ef4444] text-white rounded-lg font-medium hover:bg-[#dc2626] transition disabled:opacity-50 flex items-center gap-2"
-            >
-              {submitted ? (
-                <><Check className="w-4 h-4" /> Sent!</>
-              ) : submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</>
-              ) : (
-                <><Send className="w-4 h-4" /> Submit</>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ============================================
-// SETTINGS TAB
-// ============================================
 
 // ==============================================
 // GATEWAY SETTINGS SECTION

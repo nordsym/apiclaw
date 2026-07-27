@@ -3,11 +3,12 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { safeAuthContinuation } from "@/lib/auth-continuation";
 
 function CallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params?.get("next") || "/sign-in";
+  const next = safeAuthContinuation(params?.get("next"), "/sign-in");
 
   useEffect(() => {
     try {

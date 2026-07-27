@@ -12,6 +12,7 @@
 
 import { createRequire } from 'module';
 import type { OpenAPIConfig, OpenAPIAction } from './open-apis.js';
+import { CANON_STATS } from './canon-stats.js';
 
 const require = createRequire(import.meta.url);
 
@@ -63,12 +64,12 @@ function loadArtifact(): GeneratedArtifact {
   } catch {
     // Registry artifact intentionally excluded from npm tarball as of 2.8.3
     // (saved ~150MB). Local discover_apis returns managed providers only;
-    // for the full 26,704-API catalog, agents should call /v1/discover via
+    // for the full canonical catalog, agents should call /v1/discover via
     // the HTTP gateway at api.apiclaw.cloud.
     console.warn(
       '[APIClaw] Local generated-providers registry not bundled. ' +
       'discover_apis returns managed providers only. ' +
-      'Use https://api.apiclaw.cloud/v1/discover for full 26,704-API search.'
+      `Use https://api.apiclaw.cloud/v1/discover for full ${CANON_STATS.discoverable.toLocaleString('en-US')}-API search.`
     );
     cachedArtifact = {
       version: 1,

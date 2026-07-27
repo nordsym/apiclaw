@@ -52,23 +52,18 @@ export const CANONICAL_MCP_TOOLS = [
   },
   {
     name: "list_connected",
-    description: "List all managed providers ready for instant calls (no key required).",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "list_capabilities",
-    description: "List capability shortcuts (e.g. 'currency_convert', 'web_search', 'tts') that route to the best provider automatically.",
+    description: "List managed provider adapters ready for execution. Provider keys stay server-side with APIClaw.",
     inputSchema: { type: "object", properties: {} },
   },
   // ----- MODELS -----
   {
     name: "list_models",
     description:
-      "List every LLM the workspace can call through APIClaw — Anthropic, OpenAI, xAI/Grok, Groq, Mistral, Together, Cohere, Replicate, OpenRouter (800+ more), and any provider routed via the unified gateway. Returns OpenAI-compatible model objects.",
+      "List the live APIClaw model catalog. Entries identify the model owner, serving source, and compatible gateway endpoint. Catalog presence does not prove execution readiness.",
     inputSchema: {
       type: "object",
       properties: {
-        provider: { type: "string", description: "Optional: filter to one provider (anthropic, openai, xai, groq, mistral, together, openrouter, …)" },
+        provider: { type: "string", description: "Optional: filter to one provider (anthropic, openai, xai, groq, mistral, openrouter, etc.)" },
       },
     },
   },
@@ -76,77 +71,28 @@ export const CANONICAL_MCP_TOOLS = [
   {
     name: "call_api",
     description:
-      "Execute a callable API through APIClaw's gateway. Auth is handled automatically for managed providers.",
+      "Execute a managed provider action through APIClaw's gateway. Provider auth stays server-side.",
     inputSchema: {
       type: "object",
       properties: {
-        api: { type: "string", description: "API or provider name" },
-        path: { type: "string", description: "API path (e.g., /v1/messages)", default: "/" },
-        method: { type: "string", enum: ["GET", "POST", "PUT", "PATCH", "DELETE"], default: "GET" },
-        params: { type: "object", description: "Query string parameters" },
-        body: { description: "Request body for POST/PUT/PATCH" },
+        provider: { type: "string", description: "Managed provider ID (e.g., brave_search, openrouter, github, nasa)" },
+        action: { type: "string", description: "Provider action (e.g., search, chat, search_repos)" },
+        params: { type: "object", description: "Parameters for the selected provider action" },
+        idempotency_key: { type: "string", description: "Required caller-owned operation key. Keep it with the result. If the outcome is ambiguous, do not submit the operation again; retain this key and the request ID for reconciliation." },
       },
-      required: ["api"],
-    },
-  },
-  {
-    name: "capability",
-    description:
-      "Run a job-to-be-done by capability name (currency_convert, web_search, tts, transcribe, scrape, etc.). APIClaw picks the best managed provider.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        capability: { type: "string", description: "Capability name (use list_capabilities to see options)" },
-        params: { type: "object", description: "Capability-specific parameters" },
-      },
-      required: ["capability"],
+      required: ["provider", "action", "idempotency_key"],
     },
   },
   // ----- BILLING / OBSERVABILITY -----
   {
     name: "check_balance",
-    description: "Check workspace balance, tier, and remaining calls in this billing period.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "estimate_cost",
-    description: "Estimate the cost of a given number of API calls for the current workspace.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        call_count: { type: "number", description: "Number of API calls to estimate" },
-      },
-      required: ["call_count"],
-    },
-  },
-  {
-    name: "get_usage_summary",
-    description: "Summary of recent workspace usage (calls, providers, cost) for the current billing period.",
+    description: "Check workspace tier, lifetime activation allowance, and verified PAYG status.",
     inputSchema: { type: "object", properties: {} },
   },
   {
     name: "check_workspace_status",
     description: "Health check for the current workspace (auth state, tier, gating, blockers).",
     inputSchema: { type: "object", properties: {} },
-  },
-  // ----- CHAINS -----
-  {
-    name: "get_chain_status",
-    description: "Check the status of an async chain execution (returned from call_api with async: true).",
-    inputSchema: {
-      type: "object",
-      properties: { chain_id: { type: "string", description: "Chain ID returned from async execution" } },
-      required: ["chain_id"],
-    },
-  },
-  {
-    name: "resume_chain",
-    description: "Resume a paused or partially-executed chain by id.",
-    inputSchema: {
-      type: "object",
-      properties: { chain_id: { type: "string", description: "Chain ID to resume" } },
-      required: ["chain_id"],
-    },
   },
   // ----- CONTROL PLANE — MISSIONS -----
   {
@@ -164,8 +110,9 @@ export const CANONICAL_MCP_TOOLS = [
         template: { type: "string", description: "Template slug — call list_mission_templates to see what is available." },
         template_version: { type: "number", description: "Optional pinned version for data-driven (v2) templates. Omit to use latest enabled." },
         params: { type: "object", description: "Template-specific parameters" },
+        idempotency_key: { type: "string", description: "Required caller-owned mission operation key. If the outcome is ambiguous, do not submit again; retain this key and the request ID for reconciliation." },
       },
-      required: ["template"],
+      required: ["template", "idempotency_key"],
     },
   },
   {
@@ -209,11 +156,187 @@ export const CANONICAL_MCP_TOOLS = [
 
 type DispatchContext = { bearer: string };
 
+export const MCP_UPSTREAM_RESPONSE_MAX_BYTES = 512 * 1024;
+export const MCP_UPSTREAM_TIMEOUT_MS = 30_000;
+
+export class McpUpstreamResponseError extends Error {
+  constructor(message: string, readonly code: "response_too_large" | "invalid_response") {
+    super(message);
+    this.name = "McpUpstreamResponseError";
+  }
+}
+
+export class McpGatewayOutcomeUnknownError extends Error {
+  readonly code = "outcome_unknown";
+
+  constructor(
+    readonly idempotencyKey: string,
+    readonly path: string,
+    readonly requestId?: string,
+    readonly gatewayCode = "outcome_unknown",
+  ) {
+    super(
+      `The gateway response was lost for ${path}. The operation may already have been accepted. ` +
+      `Do not retry it with a new key. Check Activity using idempotency key ${idempotencyKey}.`,
+    );
+    this.name = "McpGatewayOutcomeUnknownError";
+  }
+}
+
+export class McpGatewayNonRetryableError extends Error {
+  readonly outcomeUnknown = false;
+
+  constructor(
+    readonly code: string,
+    readonly idempotencyKey: string,
+    readonly path: string,
+    readonly requestId?: string,
+    message = "The gateway rejected this operation as non-retryable.",
+  ) {
+    super(`${message} Do not submit it again with a new key. Operation key: ${idempotencyKey}.`);
+    this.name = "McpGatewayNonRetryableError";
+  }
+}
+
+/**
+ * Read a gateway response without ever materializing more than the configured
+ * byte cap. Content-Length is an early rejection only; the stream count is the
+ * authority, so missing and falsely small declarations cannot bypass the cap.
+ */
+export async function readGatewayResponseTextCapped(
+  response: Pick<Response, "headers" | "body">,
+  maxBytes = MCP_UPSTREAM_RESPONSE_MAX_BYTES,
+): Promise<string> {
+  const declaredRaw = response.headers.get("content-length");
+  if (declaredRaw !== null && /^\d+$/.test(declaredRaw)) {
+    const declared = Number(declaredRaw);
+    if (!Number.isSafeInteger(declared) || declared > maxBytes) {
+      throw new McpUpstreamResponseError(
+        "Gateway response exceeds the remote MCP upstream limit",
+        "response_too_large",
+      );
+    }
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        try { await reader.cancel(); } catch { /* already closing */ }
+        throw new McpUpstreamResponseError(
+          "Gateway response exceeds the remote MCP upstream limit",
+          "response_too_large",
+        );
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new McpUpstreamResponseError(
+      "Gateway response is not valid UTF-8",
+      "invalid_response",
+    );
+  }
+}
+
+type BestEffortBudgetOptions = {
+  maxCalls: number;
+  windowMs: number;
+  maxConcurrent: number;
+  maxTrackedKeys: number;
+};
+
+type BestEffortBudgetLease =
+  | { ok: true; release: () => void }
+  | { ok: false; reason: "rate_limit" | "concurrency_limit" | "capacity_limit" };
+
+/**
+ * Instance-local defense in depth for the Vercel route. This deliberately does
+ * not claim distributed enforcement: managed execution still relies on the
+ * Convex gateway's authoritative auth, quota, cost, and idempotency gates.
+ */
+export function createBestEffortMcpToolBudget(
+  options: BestEffortBudgetOptions,
+): { acquire: (key: string, now?: number) => BestEffortBudgetLease } {
+  type Bucket = {
+    windowStartedAt: number;
+    calls: number;
+    inFlight: number;
+    lastSeenAt: number;
+  };
+  const buckets = new Map<string, Bucket>();
+
+  function prune(now: number) {
+    buckets.forEach((bucket, key) => {
+      if (bucket.inFlight === 0 && now - bucket.lastSeenAt >= options.windowMs) {
+        buckets.delete(key);
+      }
+    });
+  }
+
+  return {
+    acquire(key: string, now = Date.now()): BestEffortBudgetLease {
+      let bucket = buckets.get(key);
+      if (!bucket) {
+        if (buckets.size >= options.maxTrackedKeys) prune(now);
+        if (buckets.size >= options.maxTrackedKeys) {
+          return { ok: false, reason: "capacity_limit" };
+        }
+        bucket = { windowStartedAt: now, calls: 0, inFlight: 0, lastSeenAt: now };
+        buckets.set(key, bucket);
+      }
+
+      if (now - bucket.windowStartedAt >= options.windowMs) {
+        bucket.windowStartedAt = now;
+        bucket.calls = 0;
+      }
+      bucket.lastSeenAt = now;
+      if (bucket.calls >= options.maxCalls) {
+        return { ok: false, reason: "rate_limit" };
+      }
+      if (bucket.inFlight >= options.maxConcurrent) {
+        return { ok: false, reason: "concurrency_limit" };
+      }
+
+      bucket.calls += 1;
+      bucket.inFlight += 1;
+      let released = false;
+      return {
+        ok: true,
+        release: () => {
+          if (released) return;
+          released = true;
+          bucket!.inFlight = Math.max(0, bucket!.inFlight - 1);
+        },
+      };
+    },
+  };
+}
+
 async function callGateway<T = unknown>(
   path: string,
   method: "GET" | "POST",
   ctx: DispatchContext,
-  body?: unknown
+  body?: unknown,
+  options: { idempotencyKey?: string } = {},
 ): Promise<T> {
   const init: RequestInit = {
     method,
@@ -221,14 +344,82 @@ async function callGateway<T = unknown>(
       "Content-Type": "application/json",
       Authorization: `Bearer ${ctx.bearer}`,
       "X-APIClaw-Source": "remote-mcp",
+      ...(options.idempotencyKey ? { "Idempotency-Key": options.idempotencyKey } : {}),
     },
   };
   if (method === "POST") init.body = JSON.stringify(body ?? {});
-  const res = await fetch(`${SITE_URL}${path}`, init);
-  const text = await res.text();
+  let res: Response;
+  try {
+    res = await fetch(`${SITE_URL}${path}`, {
+      ...init,
+      signal: AbortSignal.timeout(MCP_UPSTREAM_TIMEOUT_MS),
+    });
+  } catch (error) {
+    if (options.idempotencyKey) {
+      throw new McpGatewayOutcomeUnknownError(options.idempotencyKey, path);
+    }
+    throw error;
+  }
+  let text: string;
+  try {
+    text = await readGatewayResponseTextCapped(res);
+  } catch (error) {
+    if (options.idempotencyKey) {
+      throw new McpGatewayOutcomeUnknownError(
+        options.idempotencyKey,
+        path,
+        res.headers.get("X-APIClaw-Request-Id") ?? undefined,
+        error instanceof McpUpstreamResponseError ? error.code : "outcome_unknown",
+      );
+    }
+    throw error;
+  }
   let parsed: unknown = text;
-  try { parsed = JSON.parse(text); } catch { /* keep as text */ }
+  let parsedJson = true;
+  try { parsed = JSON.parse(text); } catch { parsedJson = false; }
+  if (!parsedJson && options.idempotencyKey) {
+    throw new McpGatewayOutcomeUnknownError(options.idempotencyKey, path);
+  }
   if (!res.ok) {
+    const payload = typeof parsed === "object" && parsed !== null
+      ? parsed as { code?: unknown; requestId?: unknown; retryable?: unknown; error?: { code?: unknown; requestId?: unknown; retryable?: unknown } }
+      : undefined;
+    const errorCode = typeof payload?.error?.code === "string"
+      ? payload.error.code
+      : typeof payload?.code === "string"
+        ? payload.code
+        : undefined;
+    const retryable = typeof payload?.error?.retryable === "boolean"
+      ? payload.error.retryable
+      : typeof payload?.retryable === "boolean"
+        ? payload.retryable
+        : undefined;
+    const explicitTerminalFailure = retryable === false &&
+      errorCode !== "outcome_unknown" &&
+      errorCode !== "idempotency_conflict";
+    const outcomeUnknown = errorCode === "idempotency_conflict" ||
+      errorCode === "outcome_unknown" ||
+      (res.status >= 500 && !explicitTerminalFailure);
+    if (options.idempotencyKey && (outcomeUnknown || explicitTerminalFailure)) {
+      const requestId = typeof payload?.error?.requestId === "string"
+        ? payload.error.requestId
+        : typeof payload?.requestId === "string"
+          ? payload.requestId
+          : undefined;
+      if (outcomeUnknown) {
+        throw new McpGatewayOutcomeUnknownError(options.idempotencyKey, path, requestId, errorCode);
+      }
+      const message = typeof (parsed as any)?.error?.message === "string"
+        ? (parsed as any).error.message
+        : "The gateway rejected this operation as non-retryable.";
+      throw new McpGatewayNonRetryableError(
+        errorCode || "non_retryable_gateway_error",
+        options.idempotencyKey,
+        path,
+        requestId,
+        message,
+      );
+    }
     throw new Error(typeof parsed === "string" ? parsed : JSON.stringify(parsed));
   }
   return parsed as T;
@@ -251,14 +442,7 @@ export async function dispatchCanonicalTool(
     // Models
     case "list_models": {
       const q = args.provider ? `?provider=${encodeURIComponent(String(args.provider))}` : "";
-      const res = await fetch(`${SITE_URL}/v1/models${q}`, {
-        headers: {
-          Authorization: `Bearer ${ctx.bearer}`,
-          "X-APIClaw-Source": "remote-mcp",
-        },
-      });
-      const text = await res.text();
-      try { return JSON.parse(text); } catch { return text; }
+      return callGateway(`/v1/models${q}`, "GET", ctx);
     }
 
     // Discovery
@@ -274,58 +458,48 @@ export async function dispatchCanonicalTool(
     case "list_categories":
       return callGateway("/v1/discover", "POST", ctx, { query: "", limit: 1 });
     case "list_connected":
-      return callGateway("/api/balance", "POST", ctx);
-    case "list_capabilities":
-      return callGateway("/v1/execute", "POST", ctx, { capability: "__list__" });
-
+      return callGateway("/v1/discover", "POST", ctx, {
+        query: "",
+        tier: "managed",
+        callable_only: true,
+        limit: 100,
+      });
     // Execution
-    case "call_api":
-      return callGateway("/v1/call", "POST", ctx, {
-        api: args.api,
-        path: args.path ?? "/",
-        method: args.method ?? "GET",
-        params: args.params,
-        body: args.body,
-      });
-    case "capability":
+    case "call_api": {
+      const provider = typeof args.provider === "string" ? args.provider.trim() : "";
+      const action = typeof args.action === "string" ? args.action.trim() : "";
+      if (!provider) throw new Error("provider is required");
+      if (!action) throw new Error("action is required");
+      const idempotencyKey = typeof args.idempotency_key === "string"
+        ? args.idempotency_key.trim()
+        : "";
+      if (!idempotencyKey) throw new Error("idempotency_key is required for managed execution");
       return callGateway("/v1/execute", "POST", ctx, {
-        capability: args.capability,
+        provider,
+        action,
         params: args.params ?? {},
-      });
-
+      }, { idempotencyKey });
+    }
     // Billing / observability
     case "check_balance":
-    case "get_usage_summary":
+      return callGateway("/api/balance", "POST", ctx);
     case "check_workspace_status":
       return callGateway("/api/balance", "POST", ctx);
-    case "estimate_cost":
-      return {
-        call_count: args.call_count,
-        note: "Estimate is best-checked via current workspace tier on /api/balance and per-provider cost in /v1/discover.",
-        balance_url: "/api/balance",
-      };
-
-    // Chains
-    case "get_chain_status":
-      return callGateway(`/v1/call`, "POST", ctx, {
-        api: "__chain_status__",
-        params: { chain_id: args.chain_id },
-      });
-    case "resume_chain":
-      return callGateway(`/v1/call`, "POST", ctx, {
-        api: "__chain_resume__",
-        params: { chain_id: args.chain_id },
-      });
 
     // Missions
     case "list_mission_templates":
       return callGateway("/v1/missions/templates", "GET", ctx);
-    case "start_mission":
+    case "start_mission": {
+      const idempotencyKey = typeof args.idempotency_key === "string"
+        ? args.idempotency_key.trim()
+        : "";
+      if (!idempotencyKey) throw new Error("idempotency_key is required to start a mission");
       return callGateway("/v1/missions/start", "POST", ctx, {
         template: args.template,
         templateVersion: typeof args.template_version === "number" ? args.template_version : undefined,
         params: args.params ?? {},
-      });
+      }, { idempotencyKey });
+    }
     case "mission_status":
       return callGateway(`/v1/missions/${encodeURIComponent(String(args.mission_id))}`, "GET", ctx);
     case "list_missions":

@@ -3,6 +3,14 @@
  * Used by both BillingTab (workspace) and the landing page pricing section.
  */
 
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from "@apiclaw/product-truth";
+
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
+
 export interface Plan {
   id: string;
   name: string;
@@ -24,12 +32,12 @@ export const PLANS: Plan[] = [
     name: "Free",
     price: "$0",
     period: "forever",
-    calls: "50",
-    callsSub: "managed calls per week",
+    calls: String(FREE_MANAGED_CALLS_LIFETIME),
+    callsSub: "managed calls for the lifetime of the workspace",
     features: [
       "Email signup required, no card",
-      "All callable APIs count equally",
-      "Search and discover always free, unmetered",
+      `Up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider cost`,
+      "Discovery is free",
       "1 workspace",
     ],
     cta: "Get Started",
@@ -44,11 +52,12 @@ export const PLANS: Plan[] = [
     price: "Usage",
     period: "based",
     calls: "Continue",
-    callsSub: "after the free tier",
+    callsSub: "for billing-ready actions after the free tier",
     features: [
       "Everything in Free",
-      "Managed calls continue after the free tier",
-      "API cost + 15%, transparent margin",
+      "Billing-ready managed actions continue after the free tier",
+      `Provider cost + ${PAYG_MARGIN_PERCENT}%, transparent margin`,
+      "Unsupported variable-cost actions stay blocked until exactly billable",
       "No commitment, cancel anytime",
     ],
     cta: "Add Payment Method",

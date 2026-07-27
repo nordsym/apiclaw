@@ -4,7 +4,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Layers,
@@ -17,6 +17,10 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
+import {
+  getWorkspaceSessionToken,
+  subscribeWorkspaceSessionToken,
+} from "@/lib/workspace-session";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -103,15 +107,6 @@ async function convexMutate<T>(path: string, args: Record<string, unknown>): Pro
   return (json?.value ?? json) as T;
 }
 
-function getSessionToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return (
-    window.localStorage.getItem("apiclaw_workspace_session") ||
-    window.localStorage.getItem("apiclaw_session_token") ||
-    null
-  );
-}
-
 export default function IntegrationsPage() {
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +123,7 @@ export default function IntegrationsPage() {
   const [busy, setBusy] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const sessionToken = useMemo(() => getSessionToken(), []);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const selected = PRESETS.find((p) => p.key === preset) ?? PRESETS[0];
 
   useEffect(() => {
@@ -137,8 +132,8 @@ export default function IntegrationsPage() {
     else setCustomName("");
   }, [preset, selected]);
 
-  const refresh = async () => {
-    if (!sessionToken) {
+  const refresh = async (token = sessionToken) => {
+    if (!token) {
       setError("Not signed in. Refresh the page.");
       setLoading(false);
       return;
@@ -146,7 +141,7 @@ export default function IntegrationsPage() {
     setLoading(true);
     setError(null);
     try {
-      const list = await convexQuery<Connector[]>("mcpOAuth:listConnectors", { sessionToken });
+      const list = await convexQuery<Connector[]>("mcpOAuth:listConnectors", { sessionToken: token });
       setConnectors(list);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load connectors.");
@@ -155,8 +150,16 @@ export default function IntegrationsPage() {
     }
   };
 
+  useEffect(() => subscribeWorkspaceSessionToken((token) => {
+    setSessionToken(token);
+    if (!token) setError("Session expired. Sign in again.");
+  }), []);
+
   useEffect(() => {
-    refresh();
+    void getWorkspaceSessionToken().then((token) => {
+      setSessionToken(token);
+      void refresh(token);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -177,16 +180,20 @@ export default function IntegrationsPage() {
     setBusy(true);
     setError(null);
     try {
-      const result = await convexMutate<{
+      const response = await fetch("/api/workspace/connectors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ name, redirectUris: uris }),
+      });
+      const result = await response.json() as {
         client_id: string;
         client_secret: string;
         name: string;
         redirect_uris: string[];
-      }>("mcpOAuth:createDashboardConnector", {
-        sessionToken,
-        name,
-        redirectUris: uris,
-      });
+        error?: string;
+      };
+      if (!response.ok) throw new Error(result.error || "Failed to generate connector.");
       setIssued({
         name: result.name,
         clientId: result.client_id,

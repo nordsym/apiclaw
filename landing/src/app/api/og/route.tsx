@@ -62,7 +62,7 @@ export async function GET() {
           }}
         >
           <span>{statsData.apiCount.toLocaleString()}+ Indexed APIs</span>
-          <span>{statsData.callableCount.toLocaleString()}+ Callable APIs</span>
+          <span>{statsData.sourceVerifiedCount.toLocaleString()}+ Source-verified</span>
           <span style={{ marginTop: 6, color: '#c7c7c7', fontSize: 22 }}>MCP, CLI, HTTP</span>
         </div>
         <div

@@ -6,6 +6,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { parseSafeOAuthRedirectUri } from "@/lib/oauth-redirect";
 import {
   ShieldCheck,
   ArrowRight,
@@ -65,20 +66,17 @@ function AuthorizeInner() {
   const state = params?.get("state") ?? "";
   const codeChallenge = params?.get("code_challenge") ?? "";
   const codeChallengeMethod = params?.get("code_challenge_method") ?? "S256";
-  const requestedScope = params?.get("scope") ?? "mcp";
+  const requestedScope = params?.get("scope") ?? null;
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [client, setClient] = useState<ClientMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showFull, setShowFull] = useState(false);
+  const reviewScope = requestedScope ?? client?.scope ?? "";
 
   const errorRedirect = useMemo(() => {
     if (!redirectUri) return null;
-    try {
-      return new URL(redirectUri);
-    } catch {
-      return null;
-    }
+    return parseSafeOAuthRedirectUri(redirectUri);
   }, [redirectUri]);
 
   const redirectHost = useMemo(() => {
@@ -152,7 +150,7 @@ function AuthorizeInner() {
           client_id: clientId,
           redirect_uri: redirectUri,
           state,
-          scope: requestedScope,
+          ...(requestedScope === null ? {} : { scope: requestedScope }),
           code_challenge: codeChallenge,
           code_challenge_method: "S256",
         }),
@@ -163,8 +161,14 @@ function AuthorizeInner() {
         setPhase("error");
         return;
       }
+      const target = parseSafeOAuthRedirectUri(String(data.redirect));
+      if (!target) {
+        setError("The client returned an unsafe redirect URI.");
+        setPhase("error");
+        return;
+      }
       setPhase("redirecting");
-      window.location.href = data.redirect;
+      window.location.assign(target.toString());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Authorization failed.");
       setPhase("error");
@@ -175,7 +179,7 @@ function AuthorizeInner() {
     if (errorRedirect) {
       errorRedirect.searchParams.set("error", "access_denied");
       if (state) errorRedirect.searchParams.set("state", state);
-      window.location.href = errorRedirect.toString();
+      window.location.assign(errorRedirect.toString());
     } else {
       router.push("/workspace/integrations");
     }
@@ -271,7 +275,7 @@ function AuthorizeInner() {
                     </div>
                     <div className="flex justify-between gap-2">
                       <span className="text-[var(--text-muted)]">scope</span>
-                      <span className="truncate text-[var(--text-secondary)]">{requestedScope}</span>
+                      <span className="truncate text-[var(--text-secondary)]">{reviewScope}</span>
                     </div>
                   </div>
                 )}
@@ -283,7 +287,7 @@ function AuthorizeInner() {
                   This will let it
                 </p>
                 <ul className="space-y-2">
-                  {requestedScope.split(/\s+/).filter(Boolean).map((s) => (
+                  {reviewScope.split(/\s+/).filter(Boolean).map((s) => (
                     <li key={s} className="flex items-start gap-2.5 text-sm">
                       <Sparkles className="w-3.5 h-3.5 text-[#ef4444] mt-1 flex-shrink-0" />
                       <span className="text-[var(--text-secondary)]">

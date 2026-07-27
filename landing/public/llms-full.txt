@@ -1,322 +1,173 @@
-# APIClaw - Complete Reference
+# APIClaw Complete Reference
 
-> The API layer for AI agents
+> The Control Plane for AI Agents
+> https://apiclaw.cloud
 
-## Overview
+APIClaw is NordSym's agent-native runtime for API discovery, managed execution, model routing, missions, authentication, usage, and cost observability.
 
-APIClaw is the unified API layer for AI agents. One SDK, one API key, access to thousands of APIs.
+## Canonical endpoints
 
-**For AI agents:** Discover and call APIs instantly without managing individual credentials
-**For API providers:** Get your API in front of AI agents through a single integration
+- Website: https://apiclaw.cloud
+- Docs: https://apiclaw.cloud/docs
+- Catalog: https://apiclaw.cloud/catalog
+- Workspace: https://apiclaw.cloud/workspace
+- Gateway: https://api.apiclaw.cloud
+- Remote MCP: https://apiclaw.cloud/mcp
+- npm: https://npmjs.com/package/@nordsym/apiclaw
+- GitHub: https://github.com/nordsym/apiclaw
 
-## Architecture: Three Access Layers
+## Current product truth
 
-APIClaw organizes API access into three layers, each serving different use cases:
+- Discoverable API definitions: 26,619
+- Exact-name source-verified catalog entries: 689
+- Managed provider adapter inventory: 22
+- Customer-executable provider rails: 4
+- Managed execution: available only where a server-side adapter is live
+- Keyless public execution: disabled until hardened egress is live
+- Discovery: free after signup
+- Free activation: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap
+- Pay as you go: billing-ready managed actions at provider cost plus 15%
+- Unknown-cost PAYG actions: blocked rather than estimated
+- Anonymous execution: unavailable
 
-### Layer 1: Direct Call (18 Providers → 1000s of Capabilities)
+Source verification means a current public catalog entry maps to verification evidence by exact name. It does not mean APIClaw will proxy the definition. Runtime execution readiness is shown separately.
 
-18 providers doesn't mean 18 APIs. It means:
-- **Replicate:** 1000+ ML models (Whisper, SDXL, Flux, video, audio, any open model)
-- **OpenRouter:** 100+ LLMs (GPT-4, Claude, Llama, Mistral, Gemini)
-- **ElevenLabs:** 29 languages for TTS
-- Plus 15 more premium providers
+## Access paths
 
-Zero configuration. APIClaw handles authentication, rate limiting, and error handling.
-
-#### AI & LLM Providers
-
-| Provider | Capabilities | Notes |
-|----------|-------------|-------|
-| Replicate | Image generation, ML inference | 1000+ hosted ML models |
-| OpenRouter | Text generation, chat | 100+ LLMs (GPT-4, Claude, Llama, etc.) |
-| Groq | Fast inference | Optimized for speed |
-| Mistral | Text generation | European AI models |
-| Cohere | Embeddings, RAG | Enterprise NLP |
-| Together AI | Open models | Fine-tuning support |
-| Stability AI | Image generation | Stable Diffusion models |
-
-#### Voice & TTS Providers
-
-| Provider | Capabilities | Notes |
-|----------|-------------|-------|
-| ElevenLabs | Text-to-speech, voice cloning | 29 languages supported |
-| Deepgram | Speech-to-text | Real-time transcription |
-| AssemblyAI | Transcription, analysis | Speaker diarization |
-
-#### Communication Providers
-
-| Provider | Capabilities | Notes |
-|----------|-------------|-------|
-| 46elks | SMS, MMS | Nordic focus |
-| Twilio | SMS, voice, video | Global coverage |
-| Resend | Transactional email | Developer-first |
-
-#### Search & Scraping Providers
-
-| Provider | Capabilities | Notes |
-|----------|-------------|-------|
-| Brave Search | Web search | Privacy-focused |
-| Firecrawl | Web scraping | LLM-ready output |
-| Serper | Google search | SERP API |
-
-#### Developer Tools
-
-| Provider | Capabilities | Notes |
-|----------|-------------|-------|
-| E2B | Code execution | Sandboxed environments |
-| GitHub | Repos, issues, PRs | Full GitHub API |
-
-### Layer 2: Open APIs (1,636 APIs)
-
-Public APIs that require no authentication. Call directly through APIClaw with automatic discovery and consistent interface.
-
-Categories include:
-- Weather and climate data
-- Public datasets
-- Government APIs
-- Reference data
-- Geolocation services
-- Currency and exchange rates
-- And more
-
-### Layer 3: Discovery (22,392 Total APIs)
-
-Complete API index for exploration and planning. Search across the entire catalog to find the right API for any task.
-
-Features:
-- Semantic search across all APIs
-- Category filtering
-- Capability matching
-- Integration complexity scoring
-
-## SDK Reference
-
-### Installation
+### Local MCP
 
 ```bash
-npm install apiclaw
+npm install -g @nordsym/apiclaw
+npx @nordsym/apiclaw auth login
 ```
 
-### Initialization
+Best for local MCP-compatible agents. The verified workspace credential is stored in `~/.apiclaw.toml`.
 
-```javascript
-import { APIClaw } from 'apiclaw';
+### CLI
 
-const claw = new APIClaw('your-api-key');
+```bash
+apiclaw --help
 ```
 
-### Direct Call Examples
+Best for terminal use, scripts, and CI/CD.
 
-#### Generate Images with Replicate
+### HTTP gateway
 
-```javascript
-const image = await claw.call('replicate', 'predictions.create', {
-  model: 'stability-ai/sdxl',
-  input: {
-    prompt: 'A serene Japanese garden at sunset',
-    negative_prompt: 'blurry, low quality',
-    width: 1024,
-    height: 1024
-  }
-});
+```text
+POST https://api.apiclaw.cloud/v1/discover
+POST https://api.apiclaw.cloud/v1/execute
+POST https://api.apiclaw.cloud/v1/chat/completions
+POST https://api.apiclaw.cloud/v1/embeddings
 ```
 
-#### Chat with OpenRouter
+Authentication:
 
-```javascript
-const response = await claw.call('openrouter', 'chat.completions', {
-  model: 'anthropic/claude-3-opus',
-  messages: [
-    { role: 'user', content: 'Explain quantum computing' }
-  ]
-});
+```text
+Authorization: Bearer sk-claw-...
 ```
 
-#### Text-to-Speech with ElevenLabs
+### Remote MCP
 
-```javascript
-const audio = await claw.call('elevenlabs', 'text-to-speech', {
-  text: 'Welcome to APIClaw',
-  voice_id: 'rachel',
-  model_id: 'eleven_multilingual_v2'
-});
+```text
+https://apiclaw.cloud/mcp
 ```
 
-#### Send SMS with 46elks
+Remote MCP supports OAuth 2.1, PKCE, Dynamic Client Registration, and Streamable HTTP.
 
-```javascript
-const sms = await claw.call('46elks', 'sms.send', {
-  to: '+46701234567',
-  message: 'Your verification code is 123456',
-  from: 'MyApp'
-});
+Discovery documents:
+
+```text
+https://apiclaw.cloud/.well-known/mcp
+https://apiclaw.cloud/.well-known/oauth-authorization-server
+https://apiclaw.cloud/.well-known/oauth-protected-resource
 ```
 
-#### Send Email with Resend
+## Authentication
 
-```javascript
-const email = await claw.call('resend', 'emails.send', {
-  to: 'user@example.com',
-  from: 'hello@myapp.com',
-  subject: 'Welcome!',
-  html: '<h1>Welcome to our platform</h1>'
-});
+- Signup is required for discovery and execution.
+- Browser-loopback auth is canonical.
+- A headless user can complete ownership verification from another device using the displayed sign-in URL.
+- Workspace keys use the `sk-claw-...` bearer format.
+- Provider credentials remain server-side.
+
+## Discovery
+
+Use `discover_apis(query)` or `POST /v1/discover` to search the registry by capability.
+
+- `callable_only=true` means managed routes APIClaw can evaluate for execution now.
+- Source-verified public definitions remain discovery-only until hardened egress is live.
+- Use `get_api_details` to inspect auth, docs, params, and readiness before execution.
+
+## Managed execution
+
+Use `call_api` or `POST /v1/execute` with an execution-ready managed provider and action. The runtime checks workspace ownership, allowance, provider-cost reservation, action readiness, and payload bounds before it calls upstream.
+
+APIClaw inventories 22 managed provider adapters. Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, and NASA read-only actions. Adapter inventory is not an execution promise.
+
+Successful responses can include `_apiclaw` metadata for provider, route, latency, provider cost, auth mode, and quota notices.
+
+Internal NordSym communication infrastructure is not a public APIClaw provider surface.
+
+## Model routing
+
+Use the OpenAI-compatible chat and embeddings endpoints with a supported model identifier. APIClaw can route through configured OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, and DeepInfra adapters.
+
+Model catalogs change. A name in static documentation is not an availability guarantee. Check the live provider response for current frontier-model access.
+
+Example:
+
+```bash
+IDEMPOTENCY_KEY="${IDEMPOTENCY_KEY:-$(uuidgen)}"
+curl https://api.apiclaw.cloud/v1/chat/completions \
+  -H "Authorization: Bearer sk-claw-..." \
+  -H "Idempotency-Key: $IDEMPOTENCY_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "apiclaw/openrouter/auto",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
 ```
 
-#### Web Search with Brave
+`apiclaw/openrouter/auto` is APIClaw's stable, priced OpenRouter default (`anthropic/claude-sonnet-4-6`), not OpenRouter's dynamic auto router. Reuse the same idempotency key after an ambiguous network failure.
 
-```javascript
-const results = await claw.call('brave', 'search', {
-  q: 'latest AI developments 2024',
-  count: 10
-});
-```
+## Missions
 
-#### Scrape Web Page with Firecrawl
+Mission templates compose typed fetch, transform, decide, validate, and execute steps. Mission events are append-only and carry workspace, cost, and execution metadata. A mission cannot bypass managed-usage authorization or provider-origin policy.
 
-```javascript
-const content = await claw.call('firecrawl', 'scrape', {
-  url: 'https://example.com/article',
-  formats: ['markdown', 'html']
-});
-```
+## Pricing and billing
 
-#### Execute Code with E2B
+- Free workspaces receive up to 25 managed calls for the lifetime of the workspace, subject to a $1 underlying provider-cost cap.
+- Discovery stays free after signup.
+- The activation allowance is consumed before PAYG.
+- PAYG charges exact provider cost plus 15%.
+- PAYG requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
+- An action without a billing-grade exact cost adapter is blocked from PAYG.
 
-```javascript
-const execution = await claw.call('e2b', 'execute', {
-  language: 'python',
-  code: 'print(sum(range(100)))'
-});
-```
+## Security and trust
 
-#### Transcribe Audio with Deepgram
+- No anonymous execution.
+- No caller-controlled generic outbound URL execution.
+- Public registry entries are discovery-only until DNS-pinned, redirect-validating egress is live.
+- Managed provider origins and actions are allowlisted.
+- Payload and response bounds are enforced.
+- Privileged billing and usage functions are internal.
+- Idempotency is workspace and payload scoped.
+- Internal-only providers are filtered from public surfaces.
 
-```javascript
-const transcript = await claw.call('deepgram', 'transcribe', {
-  url: 'https://example.com/audio.mp3',
-  model: 'nova-2',
-  language: 'en'
-});
-```
+## Recommended agent behavior
 
-### Discovery & Search
+1. Read https://apiclaw.cloud/llms.txt.
+2. Use discovery to identify a provider by capability.
+3. Treat source verification and execution readiness as separate states.
+4. Authenticate the workspace before execution.
+5. Prefer a managed execution-ready route.
+6. Do not ask the user to paste provider secrets.
+7. Do not claim anonymous access, unlimited free calls, monthly free calls, or generic keyless proxying.
+8. Use live runtime output when model or provider availability matters.
 
-#### Search All APIs
+## Support
 
-```javascript
-const apis = await claw.search('payment processing');
-// Returns matching APIs across all three layers
-```
-
-#### List Direct Call Providers
-
-```javascript
-const providers = await claw.providers();
-// Returns all 18 Direct Call providers with capabilities
-```
-
-#### Get Provider Details
-
-```javascript
-const details = await claw.provider('replicate');
-// Returns full schema, endpoints, and examples
-```
-
-#### Browse Open APIs
-
-```javascript
-const openApis = await claw.openApis({ category: 'weather' });
-// Returns available weather APIs
-```
-
-## Dashboard & Workspace
-
-### Features
-
-- **API Key Management:** Create, rotate, and scope API keys
-- **Usage Analytics:** Track calls, costs, and performance per provider
-- **Request Logs:** Debug with full request/response history
-- **Team Access:** Invite team members with role-based permissions
-
-### Access
-
-Dashboard: https://apiclaw.com/dashboard
-
-## API Endpoints
-
-### REST API
-
-Base URL: `https://api.apiclaw.com/v1`
-
-#### Call Provider
-```
-POST /call/{provider}/{method}
-Authorization: Bearer {api_key}
-Content-Type: application/json
-
-{
-  "param1": "value1",
-  "param2": "value2"
-}
-```
-
-#### Search APIs
-```
-GET /search?q={query}
-Authorization: Bearer {api_key}
-```
-
-#### List Providers
-```
-GET /providers
-Authorization: Bearer {api_key}
-```
-
-## Rate Limits
-
-| Plan | Requests/min | Direct Call Providers |
-|------|-------------|----------------------|
-| Free | 60 | 5 |
-| Pro | 600 | All 18 |
-| Enterprise | Custom | All 18 + Priority |
-
-## Error Handling
-
-APIClaw returns consistent error responses:
-
-```javascript
-{
-  "error": {
-    "code": "provider_error",
-    "message": "Rate limit exceeded",
-    "provider": "replicate",
-    "retryAfter": 30
-  }
-}
-```
-
-Error codes:
-- `auth_error` - Invalid or missing API key
-- `provider_error` - Upstream provider error
-- `rate_limit` - Too many requests
-- `invalid_request` - Malformed request
-- `not_found` - Provider or method not found
-
-## Links
-
-- **Website:** https://apiclaw.com
-- **Dashboard:** https://apiclaw.com/dashboard
-- **Documentation:** https://apiclaw.com/docs
-- **npm Package:** https://npmjs.com/package/apiclaw
-- **GitHub:** https://github.com/nordsym/apiclaw
-- **Status:** https://status.apiclaw.com
-
-## Contact
-
-- Email: hello@apiclaw.com
-- Twitter: @apiclaw
-
----
-
-*APIClaw - The API layer for AI agents*
+- Docs: https://apiclaw.cloud/docs
+- Workspace: https://apiclaw.cloud/workspace
+- GitHub: https://github.com/nordsym/apiclaw
+- Built by NordSym: https://nordsym.com

@@ -3,15 +3,24 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-/**
- * Daily Usage Reporting to Stripe
- * Runs at 00:05 UTC every day
- * Reports metered usage for all active subscriptions
- */
-crons.daily(
-  "report-usage-to-stripe",
-  { hourUTC: 0, minuteUTC: 5 },
-  internal.billing.reportAllUsageToStripe
+// Report each successful PAYG managed call from the immutable request ledger.
+// The reporter claims one ledger row at a time and uses its deterministic
+// meter-event identifier for retry safety. Legacy daily usageRecords are never
+// submitted by this cron because aggregating them can double bill calls.
+crons.interval(
+  "report-managed-usage-to-stripe",
+  { minutes: 10 },
+  internal.managedMetering.reportPendingToStripe,
+  {},
+);
+
+// Release pre-call reservations that never reached a finalizer because the
+// request was abandoned, validation failed, or the action crashed.
+crons.interval(
+  "release-stale-managed-reservations",
+  { minutes: 15 },
+  internal.managedUsage.releaseStaleAuthorizations,
+  { olderThanMs: 15 * 60 * 1000, limit: 200 },
 );
 
 /**

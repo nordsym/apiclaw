@@ -18,7 +18,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.8.6';
+const VERSION = '2.8.7';
 
 const program = new Command();
 
@@ -133,7 +133,7 @@ authCmd
 
 authCmd
   .command('logout')
-  .description('Clear local credentials (~/.apiclaw.toml)')
+  .description('Revoke remote credentials and clear ~/.apiclaw.toml')
   .action(async () => {
     await authLogoutCommand();
   });
@@ -186,6 +186,7 @@ program
   .option('-m, --method <method>', 'HTTP method (GET/POST/PUT/PATCH/DELETE)')
   .option('--params <json>', 'Query string parameters as JSON')
   .option('-d, --body <json>', 'Request body as JSON')
+  .requiredOption('--idempotency-key <key>', 'Caller-owned operation key for this logical call')
   .action(callCommand);
 
 program

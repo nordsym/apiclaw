@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalMutation, internalAction } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // AGENT NAME GENERATION
@@ -47,10 +48,7 @@ function generateUUID(): string {
 export const getMainAgent = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       return null;
@@ -86,10 +84,7 @@ export const renameAgent = mutation({
     name: v.string(),
   },
   handler: async (ctx, { token, agentId, name }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) throw new Error("Invalid session");
 
@@ -114,10 +109,7 @@ export const renameMainAgent = mutation({
     name: v.string(),
   },
   handler: async (ctx, { token, name }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -194,10 +186,7 @@ export const getSubagents = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { token, limit = 50 }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       return { subagents: [], total: 0 };
@@ -235,10 +224,7 @@ export const getSubagentStats = query({
     subagentId: v.string(),
   },
   handler: async (ctx, { token, subagentId }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       return null;
@@ -258,7 +244,8 @@ export const getSubagentStats = query({
     // Get recent logs for this subagent
     const logs = await ctx.db
       .query("apiLogs")
-      .withIndex("by_subagentId", (q) => q.eq("subagentId", subagentId))
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .filter((q) => q.eq(q.field("subagentId"), subagentId))
       .order("desc")
       .take(100);
 
@@ -301,10 +288,7 @@ export const renameSubagent = mutation({
     name: v.string(),
   },
   handler: async (ctx, { token, subagentId, name }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -394,10 +378,7 @@ export const registerTaskAgent = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, { token, subagentId, name, description }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -497,10 +478,7 @@ export const updateAIBackend = mutation({
 export const getAgentOverview = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       return null;
@@ -557,10 +535,7 @@ export const deleteSubagent = mutation({
     subagentId: v.string(),
   },
   handler: async (ctx, { token, subagentId }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -593,10 +568,7 @@ export const updateSubagentStats = mutation({
     incrementCalls: v.optional(v.number()),
   },
   handler: async (ctx, { token, subagentId, incrementCalls = 1 }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -627,28 +599,10 @@ export const updateSubagentStats = mutation({
 // An agent = unique (fingerprint, mcpClient) pair
 // ============================================
 
-function generateSessionToken(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < 48; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
-function generateReferralCode(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let code = "CLAW-";
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
-
 /**
  * Ensure agent exists for this (fingerprint, mcpClient) pair.
- * Auto-provisions a free-tier workspace if none exists.
- * Called on every MCP server startup.
+ * Links a local agent only after a verified APIClaw session is supplied.
+ * Startup without auth remains read-only and receives no workspace identity.
  */
 export const ensureAgent = mutation({
   args: {
@@ -664,10 +618,7 @@ export const ensureAgent = mutation({
 
     // 0. If sessionToken provided, resolve to authenticated workspace and link agent there
     if (sessionToken) {
-      const session = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", sessionToken))
-        .first();
+      const session = await findUsableAgentSession(ctx.db, sessionToken, { audience: "durable" });
 
       if (session) {
         console.log(`[ensureAgent] sessionToken resolved → workspaceId=${session.workspaceId}`);
@@ -722,90 +673,12 @@ export const ensureAgent = mutation({
       }
     }
 
-    // 1. Check if agent already exists
-    const existing = await ctx.db
-      .query("agents")
-      .withIndex("by_fingerprint_client", (q) =>
-        q.eq("fingerprint", fingerprint).eq("mcpClient", mcpClient)
-      )
-      .first();
-
-    if (existing) {
-      // Update last active + platform
-      await ctx.db.patch(existing._id, {
-        lastActiveAt: now,
-        ...(platform ? { platform } : {}),
-      });
-
-      // Find session for this workspace
-      const existingSession = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_workspaceId", (q) => q.eq("workspaceId", existing.workspaceId))
-        .first();
-
-      return {
-        agentId: existing._id,
-        workspaceId: existing.workspaceId,
-        sessionToken: existingSession?.sessionToken || null,
-        isNew: false,
-      };
-    }
-
-    // 2. No agent exists — check if there's a workspace for this fingerprint (from another mcpClient)
-    const siblingAgent = await ctx.db
-      .query("agents")
-      .filter((q) => q.eq(q.field("fingerprint"), fingerprint))
-      .first();
-
-    let workspaceId;
-
-    if (siblingAgent) {
-      // Reuse existing workspace (same machine, different client)
-      workspaceId = siblingAgent.workspaceId;
-    } else {
-      // 3. No workspace at all — auto-provision free tier
-      workspaceId = await ctx.db.insert("workspaces", {
-        email: "", // no email yet — added when user registers
-        status: "unclaimed",
-        tier: "free",
-        usageCount: 0,
-        usageLimit: 50,
-        weeklyUsageCount: 0,
-        weeklyUsageLimit: 50,
-        hourlyUsageCount: 0,
-        referralCode: generateReferralCode(),
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-
-    // 4. Create agent record
-    const agentId = await ctx.db.insert("agents", {
-      fingerprint,
-      mcpClient,
-      workspaceId,
-      name: generateAgentName(),
-      platform: platform || undefined,
-      callCount: 0,
-      firstSeenAt: now,
-      lastActiveAt: now,
-    });
-
-    // 5. Create session
-    const newSessionToken = generateSessionToken();
-    await ctx.db.insert("agentSessions", {
-      workspaceId,
-      sessionToken: newSessionToken,
-      fingerprint,
-      lastUsedAt: now,
-      createdAt: now,
-    });
-
     return {
-      agentId,
-      workspaceId,
-      sessionToken: newSessionToken,
-      isNew: true,
+      agentId: null,
+      workspaceId: null,
+      sessionToken: null,
+      isNew: false,
+      authRequired: true,
     };
   },
 });
@@ -864,10 +737,7 @@ export const incrementAgentCalls = mutation({
 export const getWorkspaceAgents = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) return [];
 

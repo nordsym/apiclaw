@@ -56,6 +56,9 @@ export async function POST(req: NextRequest) {
 
   const isPublic = authMethod === "none";
   const name = typeof body.client_name === "string" ? body.client_name : "MCP Client";
+  if (Object.prototype.hasOwnProperty.call(body, "scope") && typeof body.scope !== "string") {
+    return badRequest("invalid_client_metadata", "scope must be a non-empty supported scope string");
+  }
   const scope = typeof body.scope === "string" ? body.scope : undefined;
 
   try {
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest) {
         redirectUris,
         grantTypes: grantTypesIn,
         tokenEndpointAuthMethod: authMethod,
-        scope,
+        ...(scope === undefined ? {} : { scope }),
         publicClient: isPublic,
       }
     );

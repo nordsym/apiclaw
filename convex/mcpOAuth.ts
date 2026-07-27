@@ -14,9 +14,14 @@
  *
  * Tokens are SHA-256 hashed for lookup, never stored raw.
  */
+import { findUsableAgentSession } from "./sessionSecurity";
 import { v } from "convex/values";
 import { mutation, query, internalMutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import {
+  normalizeRegisteredMcpScope,
+  resolveGrantedMcpScope,
+} from "../src/mcp-scope-policy";
 
 // ============================================
 // CONSTANTS
@@ -26,7 +31,6 @@ const ACCESS_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;        // 24h
 const REFRESH_TOKEN_TTL_MS = 90 * 24 * 60 * 60 * 1000;  // 90d
 const AUTH_CODE_TTL_MS = 10 * 60 * 1000;                // 10 min
 const DEFAULT_SCOPE = "mcp";
-const ALLOWED_SCOPES = new Set(["mcp", "mcp:read", "mcp:call", "mcp:billing"]);
 
 // ============================================
 // HELPERS
@@ -88,30 +92,32 @@ function generateRefreshToken(): string {
   return `rk-mcp-${randomString(48)}`;
 }
 
-function normalizeScope(input: string | undefined | null): string {
-  if (!input) return DEFAULT_SCOPE;
-  const parts = input.split(/\s+/).filter((s) => s.length > 0 && ALLOWED_SCOPES.has(s));
-  if (parts.length === 0) return DEFAULT_SCOPE;
-  return [...new Set(parts)].join(" ");
-}
-
-function validateRedirectUris(uris: string[]): { ok: true; uris: string[] } | { ok: false; error: string } {
+export function validateRedirectUris(uris: string[]): { ok: true; uris: string[] } | { ok: false; error: string } {
   if (!Array.isArray(uris) || uris.length === 0) {
     return { ok: false, error: "redirect_uris must be a non-empty array" };
   }
+  const normalized: string[] = [];
   for (const u of uris) {
     if (typeof u !== "string" || u.length === 0 || u.length > 2000) {
       return { ok: false, error: "invalid redirect_uri entry" };
     }
-    // Allow http for localhost (dev tooling), https everywhere else.
-    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(u);
-    const isHttps = u.startsWith("https://");
-    const isCustomScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(u) && !u.startsWith("http://") && !u.startsWith("https://");
-    if (!isLocalhost && !isHttps && !isCustomScheme) {
-      return { ok: false, error: `redirect_uri must use https, custom scheme, or be on localhost: ${u}` };
+    let parsed: URL;
+    try {
+      parsed = new URL(u);
+    } catch {
+      return { ok: false, error: `invalid redirect_uri: ${u}` };
     }
+    const isLoopbackHttp = parsed.protocol === "http:" &&
+      (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1" || parsed.hostname === "[::1]");
+    if (parsed.protocol !== "https:" && !isLoopbackHttp) {
+      return { ok: false, error: `redirect_uri must use https or loopback http: ${u}` };
+    }
+    if (parsed.username || parsed.password || parsed.hash) {
+      return { ok: false, error: `redirect_uri must not contain credentials or a fragment: ${u}` };
+    }
+    normalized.push(parsed.toString());
   }
-  return { ok: true, uris };
+  return { ok: true, uris: normalized };
 }
 
 // ============================================
@@ -134,6 +140,7 @@ export const registerDynamicClient = mutation({
     if (!redirectCheck.ok) {
       throw new Error(redirectCheck.error);
     }
+    const registeredScope = normalizeRegisteredMcpScope(args.scope);
     const trimmedName = args.name.trim().slice(0, 80) || "Unnamed MCP Client";
     const grantTypes = args.grantTypes && args.grantTypes.length > 0
       ? args.grantTypes.filter((g) => g === "authorization_code" || g === "refresh_token")
@@ -163,7 +170,7 @@ export const registerDynamicClient = mutation({
       redirectUris: redirectCheck.uris,
       grantTypes,
       tokenEndpointAuthMethod: tokenAuthMethod,
-      scope: normalizeScope(args.scope),
+      scope: registeredScope,
       registrationKind: "dynamic",
       createdAt: now,
       updatedAt: now,
@@ -177,7 +184,7 @@ export const registerDynamicClient = mutation({
       redirect_uris: redirectCheck.uris,
       grant_types: grantTypes,
       token_endpoint_auth_method: tokenAuthMethod,
-      scope: normalizeScope(args.scope),
+      scope: registeredScope,
     };
   },
 });
@@ -195,10 +202,7 @@ export const createDashboardConnector = mutation({
     redirectUris: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken, { audience: "durable" });
     if (!session) throw new Error("invalid_session");
     const workspace = await ctx.db.get(session.workspaceId);
     if (!workspace || workspace.status !== "active") throw new Error("workspace_inactive");
@@ -245,10 +249,7 @@ export const createDashboardConnector = mutation({
 export const listConnectors = query({
   args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
     if (!session) return [];
     const rows = await ctx.db
       .query("mcpOAuthClients")
@@ -271,10 +272,7 @@ export const listConnectors = query({
 export const revokeConnector = mutation({
   args: { sessionToken: v.string(), clientId: v.string() },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
     if (!session) throw new Error("invalid_session");
     const client = await ctx.db
       .query("mcpOAuthClients")
@@ -310,6 +308,7 @@ export const getClientForAuthorize = query({
       .first();
     if (!client || client.revokedAt) return null;
     if (!client.redirectUris.includes(args.redirectUri)) return null;
+    if (!validateRedirectUris([args.redirectUri]).ok) return null;
     return {
       clientId: client.clientId,
       name: client.name,
@@ -325,7 +324,7 @@ export const mintAuthCode = mutation({
     sessionToken: v.string(),                  // Clerk-bridge session
     clientId: v.string(),
     redirectUri: v.string(),
-    scope: v.string(),
+    scope: v.optional(v.string()),
     codeChallenge: v.string(),
     codeChallengeMethod: v.string(),           // "S256"
   },
@@ -337,10 +336,7 @@ export const mintAuthCode = mutation({
       throw new Error("invalid code_challenge");
     }
 
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.sessionToken))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken, { audience: "durable" });
     if (!session) throw new Error("invalid_session");
     const workspace = await ctx.db.get(session.workspaceId);
     if (!workspace || workspace.status !== "active") throw new Error("workspace_inactive");
@@ -351,6 +347,8 @@ export const mintAuthCode = mutation({
       .first();
     if (!client || client.revokedAt) throw new Error("invalid_client");
     if (!client.redirectUris.includes(args.redirectUri)) throw new Error("invalid_redirect_uri");
+    if (!validateRedirectUris([args.redirectUri]).ok) throw new Error("invalid_redirect_uri");
+    const grantedScope = resolveGrantedMcpScope(client.scope, args.scope);
 
     // Bind dynamic clients to this workspace on first authorize (one-time).
     if (!client.workspaceId) {
@@ -367,7 +365,7 @@ export const mintAuthCode = mutation({
       clientId: client.clientId,
       workspaceId: session.workspaceId,
       redirectUri: args.redirectUri,
-      scope: normalizeScope(args.scope) || client.scope || DEFAULT_SCOPE,
+      scope: grantedScope,
       codeChallenge: args.codeChallenge,
       codeChallengeMethod: args.codeChallengeMethod,
       expiresAt: now + AUTH_CODE_TTL_MS,
@@ -399,6 +397,7 @@ export const exchangeAuthCode = mutation({
     if (Date.now() > codeRow.expiresAt) throw new Error("invalid_grant");
     if (codeRow.clientId !== args.clientId) throw new Error("invalid_grant");
     if (codeRow.redirectUri !== args.redirectUri) throw new Error("invalid_grant");
+    if (!validateRedirectUris([args.redirectUri]).ok) throw new Error("invalid_grant");
 
     const client = await ctx.db
       .query("mcpOAuthClients")

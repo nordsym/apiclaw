@@ -3,7 +3,6 @@
  * Routes capability requests to the best available provider
  */
 
-import { executeAPICall } from './execute.js';
 import { logAPICall } from './mcp-analytics.js';
 
 // Convex HTTP API for capability queries
@@ -38,9 +37,32 @@ interface CapabilityResult {
   fallbackReason?: string;
   data?: unknown;
   error?: string;
+  code?: string;
+  outcomeUnknown?: boolean;
+  retryable?: boolean;
+  idempotencyKey?: string;
+  requestId?: string;
   cost?: number;
   currency?: string;
   latencyMs?: number;
+}
+
+type CapabilityProviderResult = {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  code?: string;
+  outcomeUnknown?: boolean;
+  retryable?: boolean;
+  idempotencyKey?: string;
+  requestId?: string;
+};
+
+function isNonRepeatableManagedResult(result: CapabilityProviderResult): boolean {
+  return result.outcomeUnknown === true ||
+    result.retryable === false ||
+    result.code === "outcome_unknown" ||
+    result.code === "idempotency_conflict";
 }
 
 /**
@@ -125,10 +147,24 @@ export async function executeCapability(
   action: string,
   params: Record<string, unknown>,
   userId: string,
-  preferences: CapabilityPreferences = {}
+  preferences: CapabilityPreferences = {},
+  executeCall?: (
+    provider: string,
+    action: string,
+    params: Record<string, unknown>,
+  ) => Promise<CapabilityProviderResult>,
 ): Promise<CapabilityResult> {
   const startTime = Date.now();
   const enableFallback = preferences.fallback !== false; // Default true
+  if (!executeCall) {
+    return {
+      success: false,
+      capability: capabilityId,
+      action,
+      fallbackAttempted: false,
+      error: "Capability execution requires the APIClaw gateway billing rail.",
+    };
+  }
   
   // Get providers for this capability
   const providers = await getProvidersForCapability(capabilityId, preferences.region);
@@ -183,13 +219,7 @@ export async function executeCapability(
       // Map params to provider-specific format
       const mappedParams = mapParams(params, provider.paramMapping || {});
       
-      // Execute via existing executeAPICall
-      const result = await executeAPICall(
-        provider.providerId,
-        action,
-        mappedParams,
-        userId
-      );
+      const result = await executeCall(provider.providerId, action, mappedParams);
       
       const latencyMs = Date.now() - startTime;
       
@@ -235,6 +265,36 @@ export async function executeCapability(
       
       // Provider returned error, try next
       lastError = result.error || 'Unknown error';
+
+      if (isNonRepeatableManagedResult(result)) {
+        logCapabilityUsage({
+          capabilityId,
+          providerId: provider.providerId,
+          userId,
+          action,
+          success: false,
+          fallbackUsed: fallbackAttempted,
+          fallbackReason: lastError,
+          latencyMs,
+          cost: 0,
+          currency: provider.currency,
+        });
+        return {
+          success: false,
+          capability: capabilityId,
+          action,
+          providerUsed: provider.providerId,
+          fallbackAttempted,
+          fallbackReason: fallbackAttempted ? lastError : undefined,
+          error: lastError,
+          code: result.code || "outcome_unknown",
+          outcomeUnknown: result.outcomeUnknown,
+          retryable: false,
+          idempotencyKey: result.idempotencyKey,
+          requestId: result.requestId,
+          latencyMs,
+        };
+      }
       
       if (!enableFallback) {
         break;
@@ -242,6 +302,24 @@ export async function executeCapability(
       
     } catch (e: any) {
       lastError = e.message || 'Provider execution failed';
+
+      if (isNonRepeatableManagedResult(e)) {
+        return {
+          success: false,
+          capability: capabilityId,
+          action,
+          providerUsed: provider.providerId,
+          fallbackAttempted,
+          fallbackReason: fallbackAttempted ? lastError : undefined,
+          error: lastError,
+          code: e.code || "outcome_unknown",
+          outcomeUnknown: e.outcomeUnknown ?? true,
+          retryable: false,
+          idempotencyKey: e.idempotencyKey,
+          requestId: e.requestId,
+          latencyMs: Date.now() - startTime,
+        };
+      }
       
       if (!enableFallback) {
         break;

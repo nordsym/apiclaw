@@ -1,18 +1,37 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import {
   markPostAuthWelcomeInTransaction,
   renderWelcomeHtml,
 } from "./postVerifyNudge";
+import {
+  nurtureDeliveryIdempotencyKey,
+  welcomeDeliveryIdempotencyKey,
+} from "./nurtureDeliveryKeys";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+} from "../src/product-truth";
 
-const preActivationWelcome = renderWelcomeHtml(false);
-assert.match(preActivationWelcome, /haven't made an API call yet/);
+const unsubscribeUrl = "https://api.apiclaw.cloud/nurture/unsubscribe?token=test";
+const preActivationWelcome = renderWelcomeHtml(false, unsubscribeUrl);
+assert.match(preActivationWelcome, /workspace, gateway, and usage tracking are live/);
 assert.match(preActivationWelcome, /AI agent infrastructure news/);
-assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|25 free calls\/month|50 calls\/month/);
-assert.match(preActivationWelcome, /50 managed calls per week/);
+assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|managed calls? (?:per|\/)(?:week|month)/);
+assert.match(preActivationWelcome, new RegExp(`${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls`, "i"));
+assert.match(preActivationWelcome, new RegExp(`\\$${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap`, "i"));
 
-const activatedWelcome = renderWelcomeHtml(true);
-assert.match(activatedWelcome, /first APIClaw call is through/);
-assert.doesNotMatch(activatedWelcome, /haven't made an API call yet/);
+assert.match(preActivationWelcome, /Unsubscribe from lifecycle email/);
+const activatedWelcome = renderWelcomeHtml(true, unsubscribeUrl);
+assert.equal(activatedWelcome, preActivationWelcome, "welcome payload must stay stable across idempotent retries");
+const source = readFileSync(fileURLToPath(new URL("./postVerifyNudge.ts", import.meta.url)), "utf8");
+assert.match(source, /"Idempotency-Key": welcomeDeliveryIdempotencyKey\(String\(w\._id\)\)/);
+assert.equal(
+  welcomeDeliveryIdempotencyKey("workspace-1"),
+  nurtureDeliveryIdempotencyKey("workspace-1", "welcome"),
+  "fast and fallback welcome senders must share one Resend operation key",
+);
 
 function fakeCtx(existingNurture?: Record<string, any>) {
   const patches: Array<{ id: string; value: Record<string, any> }> = [];
@@ -50,37 +69,72 @@ function fakeCtx(existingNurture?: Record<string, any>) {
   return { ctx: { db } as any, patches, inserts };
 }
 
-const existing = fakeCtx({
+const excluded = fakeCtx({
   _id: "nurture-1",
   email: undefined,
   stage: "excluded",
   emailsSent: 0,
 });
-const existingResult = await markPostAuthWelcomeInTransaction(
-  existing.ctx,
+const excludedResult = await markPostAuthWelcomeInTransaction(
+  excluded.ctx,
   "ws1" as any,
   1000,
 );
+assert.deepEqual(excludedResult, {
+  success: false,
+  reason: "nurture_excluded",
+});
+assert.deepEqual(excluded.patches, [], "excluded nurture records must never be re-enrolled");
+assert.equal(excluded.inserts.length, 0);
+
+const existing = fakeCtx({
+  _id: "nurture-2",
+  email: undefined,
+  stage: "new",
+  emailsSent: 0,
+});
+const existingResult = await markPostAuthWelcomeInTransaction(
+  existing.ctx,
+  "ws1" as any,
+  1100,
+);
 assert.deepEqual(existingResult, {
   success: true,
-  nurtureId: "nurture-1",
+  nurtureId: "nurture-2",
   inserted: false,
 });
 assert.deepEqual(existing.patches, [
-  { id: "ws1", value: { postVerifyNudgeSentAt: 1000 } },
+  { id: "ws1", value: { postVerifyNudgeSentAt: 1100 } },
   {
-    id: "nurture-1",
+    id: "nurture-2",
     value: {
       email: "new-user@example.net",
-      stage: "new",
       emailsSent: 1,
-      lastEmailSentAt: 1000,
+      lastEmailSentAt: 1100,
       lastEmailKind: "welcome",
-      updatedAt: 1000,
+      updatedAt: 1100,
     },
   },
 ]);
 assert.equal(existing.inserts.length, 0);
+
+const alreadyMarked = fakeCtx({
+  _id: "nurture-3",
+  email: "new-user@example.net",
+  stage: "new",
+  emailsSent: 1,
+  lastEmailKind: "welcome",
+});
+assert.deepEqual(
+  await markPostAuthWelcomeInTransaction(alreadyMarked.ctx, "ws1" as any, 1200),
+  {
+    success: true,
+    alreadyMarked: true,
+    nurtureId: "nurture-3",
+    inserted: false,
+  },
+);
+assert.deepEqual(alreadyMarked.patches, [], "repeat welcome marks must not increment the ledger");
 
 const missing = fakeCtx();
 const missingResult = await markPostAuthWelcomeInTransaction(

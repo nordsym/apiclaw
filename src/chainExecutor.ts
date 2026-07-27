@@ -10,20 +10,20 @@
  * - Full execution trace
  */
 
-import { executeAPICall } from './execute.js';
-import {
+import type {
   ChainContext,
   ChainStep,
   ChainStepUnion,
   ParallelStep,
   ConditionalStep,
   ForEachStep,
-  ErrorConfig,
+} from './chainResolver.js';
+import {
   resolveReferences,
   validateReferences,
   evaluateCondition,
-  ReferenceError,
 } from './chainResolver.js';
+import { createHash } from 'node:crypto';
 
 // ============================================================================
 // TYPES
@@ -73,6 +73,40 @@ export interface ChainOptions {
   verbose?: boolean;
   onStepComplete?: (step: StepTrace) => void;
   onStepStart?: (stepId: string, stepIndex: number) => void;
+  /** Caller-owned key for the whole chain. Each provider attempt derives a stable child key. */
+  operationKey?: string;
+  executeCall?: (
+    provider: string,
+    action: string,
+    params: Record<string, any>,
+    operation: { idempotencyKey?: string; stepId: string; attempt: number },
+  ) => Promise<{
+    success: boolean;
+    data?: any;
+    error?: string;
+    code?: string;
+    outcomeUnknown?: boolean;
+    retryable?: boolean;
+    idempotencyKey?: string;
+    requestId?: string;
+    cost?: number;
+  }>;
+}
+
+export function deriveChainStepIdempotencyKey(
+  operationKey: string,
+  stepId: string,
+  attempt: number,
+): string {
+  const digest = createHash('sha256')
+    .update('apiclaw-chain-step-v1\0')
+    .update(operationKey)
+    .update('\0')
+    .update(stepId)
+    .update('\0')
+    .update(String(attempt))
+    .digest('hex');
+  return `chain-${digest}`;
 }
 
 export interface ChainResult {
@@ -82,11 +116,11 @@ export interface ChainResult {
   completedAt: string;
   totalLatencyMs: number;
   totalCost: { cents: number };
-  
+
   // Results
   finalResult?: any;
   results: Record<string, any>;
-  
+
   // Error info (if failed)
   error?: ChainError;
   completedSteps: string[];
@@ -122,6 +156,8 @@ export interface StepTrace {
   errorCode?: string;
   cost?: { cents: number };
   retries?: number;
+  idempotencyKey?: string;
+  requestId?: string;
 }
 
 // ============================================================================
@@ -165,6 +201,9 @@ export async function executeChain(
   };
   
   try {
+    if (!options.executeCall) {
+      throw new Error("Chain execution requires the APIClaw gateway billing rail");
+    }
     // Validate inputs
     if (chain.inputs) {
       validateInputs(inputs || {}, chain.inputs);
@@ -217,6 +256,7 @@ export async function executeChain(
     result.results = { ...context.results };
     
   } catch (error: any) {
+    const nonRepeatable = isNonRepeatableStepError(error);
     // Handle failure
     result.success = false;
     result.error = {
@@ -228,12 +268,12 @@ export async function executeChain(
     result.results = { ...context.results };
     
     // Handle rollback for transactional mode
-    if (chain.errorPolicy?.mode === 'transactional' && chain.errorPolicy.rollback) {
+    if (!nonRepeatable && chain.errorPolicy?.mode === 'transactional' && chain.errorPolicy.rollback) {
       await executeRollback(chain.errorPolicy.rollback, context, credentials, options, result);
     }
     
     // Can resume if we have completed steps
-    result.canResume = result.completedSteps.length > 0;
+    result.canResume = !nonRepeatable && result.completedSteps.length > 0;
     if (result.canResume) {
       result.resumeToken = `${chainId}_step_${result.completedSteps.length}`;
     }
@@ -300,20 +340,43 @@ async function executeSingleStep(
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        // Get customer key for this provider
-        const customerKey = credentials.customerKeys?.[step.provider];
-        
         // Execute the API call
-        const apiResult = await executeAPICall(
+        const apiResult = await options.executeCall!(
           step.provider,
           step.action,
           resolvedParams,
-          credentials.userId,
-          customerKey
+          {
+            idempotencyKey: options.operationKey
+              ? deriveChainStepIdempotencyKey(options.operationKey, step.id, attempt)
+              : undefined,
+            stepId: step.id,
+            attempt,
+          },
         );
+        if (options.operationKey) {
+          stepTrace.idempotencyKey = deriveChainStepIdempotencyKey(
+            options.operationKey,
+            step.id,
+            attempt,
+          );
+        }
         
         if (!apiResult.success) {
-          throw new StepError(apiResult.error || 'API call failed', apiResult.code || 'PROVIDER_ERROR');
+          const nonRepeatable =
+            apiResult.outcomeUnknown === true ||
+            apiResult.retryable === false ||
+            apiResult.code === 'outcome_unknown' ||
+            apiResult.code === 'idempotency_conflict';
+          throw new StepError(
+            apiResult.error || 'API call failed',
+            apiResult.code || 'PROVIDER_ERROR',
+            undefined,
+            {
+              nonRepeatable,
+              idempotencyKey: apiResult.idempotencyKey,
+              requestId: apiResult.requestId,
+            },
+          );
         }
         
         // Success!
@@ -336,6 +399,7 @@ async function executeSingleStep(
       } catch (error: any) {
         lastError = error;
         stepTrace.retries = attempt;
+        if (isNonRepeatableStepError(error)) break;
         
         if (attempt < maxRetries) {
           // Wait before retry
@@ -352,12 +416,15 @@ async function executeSingleStep(
     stepTrace.success = false;
     stepTrace.error = error.message;
     stepTrace.errorCode = error.code;
+    stepTrace.idempotencyKey = error.idempotencyKey;
+    stepTrace.requestId = error.requestId;
+    const nonRepeatable = isNonRepeatableStepError(error);
     
     // Handle error based on policy
-    const shouldAbort = step.onError?.abort !== false && errorPolicy?.mode !== 'best-effort';
+    const shouldAbort = nonRepeatable || (step.onError?.abort !== false && errorPolicy?.mode !== 'best-effort');
     
     // Try fallback if configured
-    if (step.onError?.fallback && !options.dryRun) {
+    if (!nonRepeatable && step.onError?.fallback && !options.dryRun) {
       try {
         const fallbackResult = await executeSingleStep(
           step.onError.fallback,
@@ -423,6 +490,7 @@ async function executeParallelStep(
       try {
         return await executeSingleStep(ps, parallelContext, credentials, options, result);
       } catch (error) {
+        if (isNonRepeatableStepError(error)) throw error;
         // Return error as result for best-effort
         return { error: (error as Error).message };
       }
@@ -628,13 +696,28 @@ function sleep(ms: number): Promise<void> {
 export class StepError extends Error {
   code: string;
   retryAfter?: number;
-  
-  constructor(message: string, code: string, retryAfter?: number) {
+  nonRepeatable: boolean;
+  idempotencyKey?: string;
+  requestId?: string;
+
+  constructor(
+    message: string,
+    code: string,
+    retryAfter?: number,
+    options: { nonRepeatable?: boolean; idempotencyKey?: string; requestId?: string } = {},
+  ) {
     super(message);
     this.name = 'StepError';
     this.code = code;
     this.retryAfter = retryAfter;
+    this.nonRepeatable = options.nonRepeatable === true;
+    this.idempotencyKey = options.idempotencyKey;
+    this.requestId = options.requestId;
   }
+}
+
+function isNonRepeatableStepError(error: unknown): error is StepError {
+  return !!error && typeof error === 'object' && (error as { nonRepeatable?: unknown }).nonRepeatable === true;
 }
 
 export class TimeoutError extends Error {
@@ -720,10 +803,13 @@ export async function resumeChain(
 // RE-EXPORTS
 // ============================================================================
 
-export {
+export type {
   ChainContext,
   ChainStep,
   ChainStepUnion,
+} from './chainResolver.js';
+
+export {
   resolveReferences,
   validateReferences,
   evaluateCondition,

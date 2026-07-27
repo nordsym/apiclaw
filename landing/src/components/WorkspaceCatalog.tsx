@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   Layers,
@@ -20,6 +20,7 @@ import {
 
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 const GATEWAY_URL = process.env.NEXT_PUBLIC_APICLAW_GATEWAY_URL || "https://api.apiclaw.cloud";
+const TEST_CALL_PENDING_STORAGE_KEY = "apiclaw.workspace.pending-test-call";
 
 type SectionId = "discover" | "callable";
 
@@ -50,19 +51,31 @@ const fetchFromCatalogApi: FetchPage = async ({
   };
 };
 
-const fetchManagedProviders: FetchPage = async ({ page, pageSize, query, category, signal }) => {
+function createManagedProvidersFetcher(sessionToken?: string | null): FetchPage {
+  return async ({ page, pageSize, query, category, signal }) => {
   const response = await fetch(`${GATEWAY_URL}/api/discover`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(sessionToken ? { "X-APIClaw-Session": sessionToken } : {}),
+    },
     body: JSON.stringify({ query: "" }),
     signal,
   });
   if (!response.ok) throw new Error(`Gateway catalog ${response.status}`);
   const data = await response.json() as {
-    providers?: Array<{ providerId: string; name: string; description: string; category: string; pricing?: string }>;
+    providers?: Array<{
+      providerId: string;
+      name: string;
+      description: string;
+      category: string;
+      pricing?: string;
+      customerExecutableActions?: string[];
+    }>;
   };
   const normalizedQuery = query.trim().toLowerCase();
   const filtered = (data.providers || [])
+    .filter((provider) => (provider.customerExecutableActions?.length ?? 0) > 0)
     .filter((provider) => !normalizedQuery || [provider.providerId, provider.name, provider.description].some((value) => value.toLowerCase().includes(normalizedQuery)))
     .filter((provider) => !category || provider.category === category)
     .map((provider) => ({
@@ -73,6 +86,7 @@ const fetchManagedProviders: FetchPage = async ({ page, pageSize, query, categor
       auth: "managed",
       pricing: provider.pricing,
       callable: true,
+      actions: provider.customerExecutableActions,
     }));
   const offset = (page - 1) * pageSize;
   return {
@@ -80,7 +94,8 @@ const fetchManagedProviders: FetchPage = async ({ page, pageSize, query, categor
     total: filtered.length,
     hasMore: offset + pageSize < filtered.length,
   };
-};
+  };
+}
 
 // Health is shown only when the source row contains a measured status.
 
@@ -136,7 +151,7 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
       {section === "discover" ? (
         <DiscoverSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} />
       ) : (
-        <CallableSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} />
+        <CallableSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} sessionToken={sessionToken} />
       )}
     </div>
   );
@@ -145,17 +160,50 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
 function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
   const [query, setQuery] = useState("APIClaw agent infrastructure");
   const [running, setRunning] = useState(false);
+  const [outcomeUnknown, setOutcomeUnknown] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const testCallIdempotencyKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem(TEST_CALL_PENDING_STORAGE_KEY);
+      if (!pending) return;
+      const parsed = JSON.parse(pending) as { idempotencyKey?: string; query?: string };
+      if (!parsed.idempotencyKey) return;
+      testCallIdempotencyKeyRef.current = parsed.idempotencyKey;
+      if (parsed.query) setQuery(parsed.query);
+      setOutcomeUnknown(true);
+      setResult({
+        ok: false,
+        message: "A previous test call was accepted but its response was unavailable. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
+      });
+    } catch {
+      sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
+    }
+  }, []);
+
+  const clearPendingTestCall = () => {
+    testCallIdempotencyKeyRef.current = null;
+    sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
+  };
 
   const runTest = async () => {
     if (!sessionToken || !query.trim()) return;
     setRunning(true);
     setResult(null);
     try {
+      const idempotencyKey = testCallIdempotencyKeyRef.current ??
+        `workspace-test-${crypto.randomUUID()}`;
+      testCallIdempotencyKeyRef.current = idempotencyKey;
+      sessionStorage.setItem(TEST_CALL_PENDING_STORAGE_KEY, JSON.stringify({
+        idempotencyKey,
+        query: query.trim(),
+      }));
       const response = await fetch(`${GATEWAY_URL}/v1/execute`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
           "X-APIClaw-Session": sessionToken,
         },
         body: JSON.stringify({
@@ -165,14 +213,34 @@ function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
         }),
       });
       const data = await response.json();
+      const errorCode = typeof data?.error === "object" ? data.error.code : undefined;
+      if (errorCode === "idempotency_conflict" || response.status >= 500) {
+        setOutcomeUnknown(true);
+        setResult({
+          ok: false,
+          message: "This request was already accepted or may have completed, but its response is unavailable. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
+        });
+        return;
+      }
+      // A successful response or a terminal client error makes this operation
+      // unambiguous, so only then may a future click receive a fresh key.
+      clearPendingTestCall();
       if (!response.ok || data.error || data.success === false) {
         const message = data?.error?.message || data?.error || "The managed call failed.";
-        throw new Error(typeof message === "string" ? message : "The managed call failed.");
+        setResult({
+          ok: false,
+          message: typeof message === "string" ? message : "The managed call failed.",
+        });
+        return;
       }
       const count = data?.data?.web?.results?.length ?? data?.web?.results?.length ?? data?.result?.web?.results?.length ?? 0;
       setResult({ ok: true, message: `Managed call succeeded${count ? ` with ${count} results` : ""}. Open Activity to inspect the log.` });
-    } catch (error) {
-      setResult({ ok: false, message: error instanceof Error ? error.message : "The managed call failed." });
+    } catch {
+      setOutcomeUnknown(true);
+      setResult({
+        ok: false,
+        message: "The gateway response was lost. This request may already have completed. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
+      });
     } finally {
       setRunning(false);
     }
@@ -190,13 +258,14 @@ function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            disabled={outcomeUnknown}
             placeholder="What should the agent search for?"
             className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/40"
           />
         </div>
-        <button type="button" onClick={runTest} disabled={!sessionToken || running || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] disabled:opacity-50 transition">
+        <button type="button" onClick={runTest} disabled={!sessionToken || running || outcomeUnknown || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] disabled:opacity-50 transition">
           {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
-          {running ? "Running..." : "Run test call"}
+          {running ? "Running..." : outcomeUnknown ? "Check Activity" : "Run test call"}
         </button>
       </div>
       {result && <p role={result.ok ? "status" : "alert"} className={`text-sm mt-3 ${result.ok ? "text-green-500" : "text-red-500"}`}>{result.message}</p>}
@@ -297,7 +366,11 @@ type CatalogSectionProps = {
   debouncedQuery: string;
 };
 
-function CallableSection({ query, setQuery, category, setCategory, debouncedQuery }: CatalogSectionProps) {
+function CallableSection({ query, setQuery, category, setCategory, debouncedQuery, sessionToken }: CatalogSectionProps & { sessionToken?: string | null }) {
+  const fetchManagedProviders = useMemo(
+    () => createManagedProvidersFetcher(sessionToken),
+    [sessionToken],
+  );
 
   const { items, total, hasMore, loading, loadingMore, error, sentinelRef } =
     useInfiniteCatalog({

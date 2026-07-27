@@ -118,10 +118,9 @@ test('guard: workspace status pending → not_verified', () => {
   if (!r.ok) assert.equal(r.reason, 'not_verified');
 });
 
-test('guard: quota exhausted → quota_exceeded', () => {
+test('guard: stale local quota never overrides authoritative gateway PAYG', () => {
   const r = requireVerifiedOwner({ ...good, usageRemaining: 0 });
-  assert.equal(r.ok, false);
-  if (!r.ok) assert.equal(r.reason, 'quota_exceeded');
+  assert.equal(r.ok, true);
 });
 
 test('guard: happy path → ok', () => {
@@ -149,9 +148,9 @@ test('matrix: call_api / capability / resume_chain are enforced', () => {
   }
 });
 
-test('matrix: register_owner + verify_code are free (they BECOME the auth)', () => {
-  assert.equal(FREE_CALL_PATHS.has('register_owner'), true);
-  assert.equal(FREE_CALL_PATHS.has('verify_code'), true);
+test('matrix: retired OTP tools are not anonymous paths', () => {
+  assert.equal(FREE_CALL_PATHS.has('register_owner'), false);
+  assert.equal(FREE_CALL_PATHS.has('verify_code'), false);
 });
 
 test('matrix: free and enforced sets are disjoint', () => {
@@ -165,14 +164,13 @@ test('matrix: free and enforced sets are disjoint', () => {
 // ------------------------------------------------------------------
 import type { FunnelEventName } from './funnel-client.js';
 
-test('event canon: all 13 approved events are typed', () => {
+test('event canon: only client-originated events are typed', () => {
   const names: FunnelEventName[] = [
     'install',
     'first_run',
     'cli_browser_callback_success',
     'register_owner',
     'verify_code',
-    'first_call_api_success',
     'cli_browser_callback_failed',
     'register_owner_failed',
     'verify_code_failed',
@@ -181,7 +179,7 @@ test('event canon: all 13 approved events are typed', () => {
     'quota_hit',
     'gateway_retry',
   ];
-  assert.equal(names.length, 13);
+  assert.equal(names.length, 12);
 });
 
 console.log('');

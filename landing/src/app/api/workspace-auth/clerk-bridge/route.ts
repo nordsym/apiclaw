@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { safeAuthContinuation } from "@/lib/auth-continuation";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -19,15 +20,17 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
   }
 
   const user = await currentUser();
-  const email =
-    user?.primaryEmailAddress?.emailAddress ||
-    user?.emailAddresses?.[0]?.emailAddress;
+  const verifiedPrimary = user?.primaryEmailAddress?.verification?.status === "verified"
+    ? user.primaryEmailAddress.emailAddress
+    : undefined;
+  const verifiedFallback = user?.emailAddresses?.find(
+    (address) => address.verification?.status === "verified",
+  )?.emailAddress;
+  const email = verifiedPrimary || verifiedFallback;
 
   if (!email) {
     return NextResponse.redirect(new URL("/sign-in?error=no_email", req.url));
   }
-
-  const fingerprint = req.cookies.get("apiclaw_fingerprint")?.value;
 
   const convexRes = await fetch(`${CONVEX_URL}/api/mutation`, {
     method: "POST",
@@ -37,7 +40,7 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
       args: {
         email,
         clerkUserId: userId,
-        fingerprint,
+        fingerprint: `clerk:${userId}`,
         internalSecret: process.env.APICLAW_INTERNAL_SECRET,
       },
     }),
@@ -51,21 +54,21 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
   const data = await convexRes.json();
   const result = data.value || data;
   if (!result?.success || !result.sessionToken) {
-    console.error("clerk-bridge: bad result", result);
+    console.error("clerk-bridge: workspace claim rejected", {
+      success: Boolean(result?.success),
+      hasSessionToken: Boolean(result?.sessionToken),
+    });
     return NextResponse.redirect(new URL("/sign-in?error=bridge_failed", req.url));
   }
 
-  const url = new URL(req.url);
-  const linkCode = url.searchParams.get("link");
-  const next = linkCode ? `/workspace?link=${linkCode}` : "/workspace";
-
-  // Send through a client callback so it can write localStorage too —
-  // /workspace reads the session from localStorage, not the cookie.
-  const callback = new URL("/auth/clerk-callback", req.url);
-  callback.searchParams.set("t", result.sessionToken);
-  callback.searchParams.set("next", next);
-
-  const res = NextResponse.redirect(callback);
+  // Keep the bearer in an HttpOnly cookie. Never place it in a URL, browser
+  // history, referrer, analytics payload, or persistent JavaScript storage.
+  const continuation = safeAuthContinuation(
+    req.nextUrl.searchParams.get("next") || req.nextUrl.searchParams.get("redirect_url"),
+  );
+  const res = NextResponse.redirect(new URL(continuation, req.url));
+  res.headers.set("Cache-Control", "no-store, private");
+  res.headers.set("Referrer-Policy", "no-referrer");
   res.cookies.set("apiclaw_workspace_session", result.sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

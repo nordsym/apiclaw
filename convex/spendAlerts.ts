@@ -1,8 +1,14 @@
 import { v } from "convex/values";
-import { mutation, query, action, internalMutation } from "./_generated/server";
+import {
+  query,
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { checkEmailAllowedSync } from "./emailGuards";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // CONSTANTS
@@ -28,7 +34,7 @@ function getMonthStart(): number {
 /**
  * Update workspace budget settings
  */
-export const updateBudgetSettings = mutation({
+export const updateBudgetSettings = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
     budgetCap: v.optional(v.union(v.number(), v.null())), // in USD cents, null = unlimited
@@ -65,7 +71,7 @@ export const updateBudgetSettings = mutation({
  * Called after each successful API execution
  * Returns budget status for response
  */
-export const recordSpend = mutation({
+export const recordSpend = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
     amountCents: v.number(),
@@ -152,7 +158,7 @@ export const recordSpend = mutation({
  * Check budget before execution
  * Returns { allowed: boolean, reason?: string }
  */
-export const checkBudget = query({
+export const checkBudget = internalQuery({
   args: {
     workspaceId: v.id("workspaces"),
     estimatedCostCents: v.optional(v.number()),
@@ -207,7 +213,7 @@ export const checkBudget = query({
 /**
  * Get budget status for workspace dashboard
  */
-export const getBudgetStatus = query({
+export const getBudgetStatus = internalQuery({
   args: {
     workspaceId: v.id("workspaces"),
   },
@@ -252,10 +258,7 @@ export const getBudgetStatusByToken = query({
     token: v.string(),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return null;
@@ -297,7 +300,7 @@ export const getBudgetStatusByToken = query({
 /**
  * Send budget alert email (80% warning)
  */
-export const sendBudgetAlertEmail = action({
+export const sendBudgetAlertEmail = internalAction({
   args: {
     email: v.string(),
     currentSpendCents: v.number(),
@@ -371,7 +374,7 @@ export const sendBudgetAlertEmail = action({
 /**
  * Send budget exceeded email
  */
-export const sendBudgetExceededEmail = action({
+export const sendBudgetExceededEmail = internalAction({
   args: {
     email: v.string(),
     currentSpendCents: v.number(),

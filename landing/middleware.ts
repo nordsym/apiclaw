@@ -65,8 +65,7 @@ export default clerkMiddleware(async (auth, request) => {
   if (userId) {
     // Clerk authed but no apiclaw session — mint one via the bridge.
     const bridge = new URL("/api/workspace-auth/clerk-bridge", request.url);
-    const link = request.nextUrl.searchParams.get("link");
-    if (link) bridge.searchParams.set("link", link);
+    bridge.searchParams.set("next", pathname + (request.nextUrl.search || ""));
     return NextResponse.redirect(bridge);
   }
 
@@ -79,10 +78,7 @@ export default clerkMiddleware(async (auth, request) => {
   const ref = request.nextUrl.searchParams.get("ref");
   if (link) signIn.searchParams.set("link", link);
   if (ref) signIn.searchParams.set("ref", ref);
-  if (pathname.startsWith("/oauth/authorize")) {
-    const redirectTo = pathname + (request.nextUrl.search || "");
-    signIn.searchParams.set("redirect_url", redirectTo);
-  }
+  signIn.searchParams.set("redirect_url", pathname + (request.nextUrl.search || ""));
   return NextResponse.redirect(signIn);
 });
 

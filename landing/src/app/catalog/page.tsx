@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import statsData from "@/lib/stats.json";
+import {
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+} from "@apiclaw/product-truth";
 
 interface ApiEntry {
   name: string;
@@ -20,6 +23,9 @@ interface ApiEntry {
   auth: string;
   pricing: string;
   callable?: boolean;
+  managedAdapter?: boolean;
+  providerId?: string;
+  actions?: readonly string[];
   verified?: boolean;
   tier?: "managed" | "verified" | "working" | "needs_ctx" | "auth" | "dead" | "untested";
   latency_ms?: number | null;
@@ -30,6 +36,7 @@ interface CategoryInfo {
   total: number;
   callable: number;
   verified?: number;
+  managedAdapters?: number;
 }
 
 interface CatalogResponse {
@@ -39,11 +46,13 @@ interface CatalogResponse {
   hasMore: boolean;
   categories: Record<string, CategoryInfo>;
   totalCallable: number;
+  totalCustomerExecutable?: number;
   totalVerified?: number;
-  totalManaged?: number;
+  managedProviderAdapterCount?: number;
+  discoveryOnlyCount?: number;
 }
 
-type TierFilter = "" | "managed" | "verified" | "callable" | "discovery";
+type TierFilter = "" | "adapter" | "verified" | "callable" | "discovery";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   "AI & ML": <Cpu className="w-3.5 h-3.5" />,
@@ -77,28 +86,6 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   "Real Estate": <Home className="w-3.5 h-3.5" />,
 };
 
-const MANAGED_PROVIDERS: ApiEntry[] = [
-  { name: "OpenAI", description: "GPT-5.4, GPT-5, GPT-4o, o3, o4-mini. Direct routing via Intelligent Gateway, OAuth passthrough supported.", category: "AI & ML", baseUrl: "https://api.openai.com", docsUrl: "https://platform.openai.com/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "Anthropic", description: "Claude Opus, Sonnet, and Haiku — direct routing without OpenRouter markup.", category: "AI & ML", baseUrl: "https://api.anthropic.com", docsUrl: "https://docs.anthropic.com", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "OpenRouter", description: "800+ LLM models through a single API. GPT-4, Claude, Llama, Mistral, Gemini and more. Routed via Intelligent Gateway.", category: "AI & ML", baseUrl: "https://openrouter.ai", docsUrl: "https://openrouter.ai/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "xAI / Grok", description: "Grok-4, Grok-3, Grok-3-mini, Grok-2. Direct routing.", category: "AI & ML", baseUrl: "https://api.x.ai", docsUrl: "https://docs.x.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "Brave Search", description: "Privacy-focused web search API. Web, news, and image search with AI-ready structured results.", category: "Utilities", baseUrl: "https://api.search.brave.com", docsUrl: "https://brave.com/search/api/", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "ElevenLabs", description: "AI voice generation and text-to-speech. Natural-sounding voices in 29 languages.", category: "AI & ML", baseUrl: "https://api.elevenlabs.io", docsUrl: "https://elevenlabs.io/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Replicate", description: "Thousands of ML models. Stable Diffusion, Flux, Whisper, LLaMA and more. Run any open-source model on demand.", category: "AI & ML", baseUrl: "https://api.replicate.com", docsUrl: "https://replicate.com/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "Firecrawl", description: "Web scraping API for AI. Extract clean, structured data from any website.", category: "Utilities", baseUrl: "https://api.firecrawl.dev", docsUrl: "https://docs.firecrawl.dev", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "E2B", description: "Code execution sandbox for AI agents. Run untrusted code safely in isolated environments.", category: "Development", baseUrl: "https://api.e2b.dev", docsUrl: "https://e2b.dev/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Groq", description: "Ultra-fast LLM inference. Llama, Mixtral, and Gemma models at industry-leading speed.", category: "AI & ML", baseUrl: "https://api.groq.com", docsUrl: "https://console.groq.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Deepgram", description: "Speech-to-text and text-to-speech API. Real-time transcription with high accuracy.", category: "AI & ML", baseUrl: "https://api.deepgram.com", docsUrl: "https://developers.deepgram.com", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Serper", description: "Google Search API. Fast, affordable access to Google search results for AI applications.", category: "Utilities", baseUrl: "https://google.serper.dev", docsUrl: "https://serper.dev/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Mistral AI", description: "European AI models. Mistral, Mixtral, and custom fine-tuned models via API.", category: "AI & ML", baseUrl: "https://api.mistral.ai", docsUrl: "https://docs.mistral.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "Cohere", description: "Enterprise AI platform. Embed, generate, classify, and rerank with production-grade models.", category: "AI & ML", baseUrl: "https://api.cohere.ai", docsUrl: "https://docs.cohere.com", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "Together AI", description: "Open-source model inference. Run Llama, DeepSeek, and 100+ models with serverless or dedicated.", category: "AI & ML", baseUrl: "https://api.together.xyz", docsUrl: "https://docs.together.ai", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "Stability AI", description: "Image generation API. Stable Diffusion, SDXL, and next-gen image models.", category: "AI & ML", baseUrl: "https://api.stability.ai", docsUrl: "https://platform.stability.ai/docs", auth: "managed", pricing: "paid", callable: true, tier: "managed", verified: true },
-  { name: "AssemblyAI", description: "AI models for speech recognition, summarization, and audio intelligence.", category: "AI & ML", baseUrl: "https://api.assemblyai.com", docsUrl: "https://www.assemblyai.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "GitHub API", description: "Access GitHub repositories, issues, pull requests, actions, and more programmatically.", category: "Development", baseUrl: "https://api.github.com", docsUrl: "https://docs.github.com/rest", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-  { name: "APILayer", description: "22 callable APIs. Currency exchange, IP geolocation, stock data, aviation, screenshots, email verification and more.", category: "Finance", baseUrl: "https://apilayer.com", docsUrl: "https://apilayer.com/docs", auth: "managed", pricing: "freemium", callable: true, tier: "managed", verified: true },
-];
-
 const AUTH_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
   managed: { label: "Managed", icon: <Shield className="w-3 h-3" /> },
   apiKey: { label: "API Key", icon: <Key className="w-3 h-3" /> },
@@ -112,8 +99,12 @@ export default function CatalogPage() {
   const [categories, setCategories] = useState<Record<string, CategoryInfo>>({});
   const [total, setTotal] = useState(0);
   const [totalCallable, setTotalCallable] = useState(0);
-  const [totalVerified, setTotalVerified] = useState(0);
-  const [totalManaged, setTotalManaged] = useState(0);
+  const [managedProviderAdapterCount, setManagedProviderAdapterCount] = useState(
+    statsData.managedProviderAdapterCount,
+  );
+  const [discoveryOnlyCount, setDiscoveryOnlyCount] = useState(
+    Math.max(0, statsData.apiCount - statsData.sourceVerifiedCount - statsData.managedProviderAdapterCount),
+  );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -165,40 +156,18 @@ export default function CatalogPage() {
         const res = await fetch(`/api/catalog?${params}`);
         const data: CatalogResponse = await res.json();
 
-        // Prepend the canonical managed-provider list on first page when the
-        // active view includes managed APIs. /api/catalog also tags managed
-        // entries via verification-status, but the registry doesn't carry the
-        // marketing copy we want here, so we keep this curated list as the
-        // visual source of truth for the Tier 1 row.
-        let items = data.items;
-        let extraCount = 0;
-        const showManagedAtTop =
-          p === 1 &&
-          (tierFilter === "managed" ||
-            tierFilter === "verified" ||
-            tierFilter === "callable" ||
-            (callableOnly && !tierFilter));
-        if (showManagedAtTop) {
-          let managed = MANAGED_PROVIDERS;
-          if (debouncedQuery) {
-            const q = debouncedQuery.toLowerCase();
-            managed = managed.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
-          }
-          if (selectedCategory) {
-            managed = managed.filter(a => a.category === selectedCategory);
-          }
-          // Avoid double-listing: drop any /api/catalog row whose lowercase
-          // name matches a managed entry we're prepending.
-          const managedNames = new Set(managed.map((m) => m.name.toLowerCase()));
-          items = [...managed, ...items.filter((it) => !managedNames.has((it.name || "").toLowerCase()))];
-          extraCount = managed.length;
-        }
-
-        setApis((prev) => (append ? [...prev, ...items] : items));
-        setTotal(data.total + (p === 1 ? extraCount : 0));
-        setTotalCallable(data.totalCallable);
-        setTotalVerified(data.totalVerified ?? 0);
-        setTotalManaged(data.totalManaged ?? MANAGED_PROVIDERS.length);
+        setApis((prev) => (append ? [...prev, ...data.items] : data.items));
+        setTotal(data.total);
+        setTotalCallable(data.totalCustomerExecutable ?? data.totalCallable);
+        setManagedProviderAdapterCount(
+          data.managedProviderAdapterCount ?? statsData.managedProviderAdapterCount,
+        );
+        setDiscoveryOnlyCount(
+          data.discoveryOnlyCount ?? Math.max(
+            0,
+            statsData.apiCount - statsData.sourceVerifiedCount - (data.managedProviderAdapterCount ?? statsData.managedProviderAdapterCount),
+          ),
+        );
         setHasMore(data.hasMore);
         setCategories(data.categories);
       } catch (err) {
@@ -250,9 +219,10 @@ export default function CatalogPage() {
     ([, a], [, b]) => b.total - a.total
   );
 
-  const indexedCount = statsData.apiCount || 26701;
-  const callableHeadline = statsData.callableCount ?? 2906;
-  const discoveryOnlyHeadline = Math.max(0, indexedCount - callableHeadline);
+  const indexedCount = statsData.apiCount;
+  const sourceVerifiedHeadline = statsData.sourceVerifiedCount;
+  const customerExecutionHeadline = totalCallable || PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT;
+  const discoveryOnlyHeadline = discoveryOnlyCount;
 
   return (
     <main className="min-h-screen bg-background text-text-primary">
@@ -304,7 +274,7 @@ export default function CatalogPage() {
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">API Catalog</h1>
           <p className="text-text-secondary text-base max-w-2xl mb-6">
-            {indexedCount.toLocaleString()} APIs discoverable by AI agents. {callableHeadline.toLocaleString()} callable through APIClaw after free signup.
+            {indexedCount.toLocaleString()} APIs are discoverable by AI agents. {sourceVerifiedHeadline.toLocaleString()} current catalog entries map to source-verification evidence by exact name. Source verification is not execution. Discovery-only is the remaining registry inventory with neither source evidence nor a managed adapter. Customer-callable rails are shown separately.
           </p>
 
           <div className="flex flex-wrap gap-6 text-sm text-text-muted">
@@ -314,11 +284,19 @@ export default function CatalogPage() {
             </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-accent" />
-              <span><span className="text-text-primary font-semibold">{callableHeadline.toLocaleString()}</span> callable</span>
+              <span><span className="text-text-primary font-semibold">{sourceVerifiedHeadline.toLocaleString()}</span> source-verified</span>
             </div>
             <div className="flex items-center gap-2">
               <Search className="w-4 h-4 text-accent" />
               <span><span className="text-text-primary font-semibold">{discoveryOnlyHeadline.toLocaleString()}</span> discovery-only</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-accent" />
+              <span><span className="text-text-primary font-semibold">{managedProviderAdapterCount.toLocaleString()}</span> managed adapters</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-accent" />
+              <span><span className="text-text-primary font-semibold">{customerExecutionHeadline.toLocaleString()}</span> callable now</span>
             </div>
           </div>
         </div>
@@ -328,14 +306,16 @@ export default function CatalogPage() {
           <span className="text-xs uppercase tracking-wider text-text-muted mr-1">View</span>
             {([
               { id: "", label: "All", count: indexedCount, icon: <Database className="w-3.5 h-3.5" /> },
-              { id: "callable", label: "Callable", count: callableHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
+              { id: "callable", label: "Callable now", count: customerExecutionHeadline, icon: <Zap className="w-3.5 h-3.5" /> },
+              { id: "adapter", label: "Adapter inventory", count: managedProviderAdapterCount, icon: <Shield className="w-3.5 h-3.5" /> },
+              { id: "verified", label: "Source-verified", count: sourceVerifiedHeadline, icon: <Check className="w-3.5 h-3.5" /> },
               { id: "discovery", label: "Discovery only", count: discoveryOnlyHeadline, icon: <Search className="w-3.5 h-3.5" /> },
             ] as const).map(({ id, label, count, icon }) => {
             const active = tierFilter === id;
             return (
               <button
                 key={id || "all"}
-                onClick={() => { setTierFilter(id as TierFilter); if (id) setCallableOnly(false); }}
+                onClick={() => { setTierFilter(id as TierFilter); setCallableOnly(false); }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                   active
                     ? "bg-accent/10 border-accent/20 text-accent"
@@ -350,7 +330,7 @@ export default function CatalogPage() {
           })}
         </div>
 
-        {/* Search + callable toggle */}
+        {/* Search */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -381,10 +361,14 @@ export default function CatalogPage() {
           )}
         </div>
 
-        {/* Callable toggle */}
+        {/* Customer execution toggle */}
         <div className="flex items-center gap-3 mb-4">
           <button
-            onClick={() => setCallableOnly(!callableOnly)}
+            onClick={() => {
+              const next = !callableOnly;
+              setCallableOnly(next);
+              if (next) setTierFilter("");
+            }}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition ${
               callableOnly
                 ? "bg-accent/10 border-accent/20 text-accent"
@@ -392,11 +376,11 @@ export default function CatalogPage() {
             }`}
           >
             <Zap className="w-4 h-4" />
-            Callable only
+            Callable now only
             <span className="opacity-60">{(totalCallable).toLocaleString()}</span>
           </button>
           <span className="text-xs text-text-muted">
-            {callableOnly ? "Showing APIs your agent can call right now" : "Showing all discoverable APIs"}
+            {callableOnly ? "Showing the billing-grade routes your agent can call right now" : "Showing all discoverable APIs"}
           </span>
         </div>
 
@@ -416,8 +400,19 @@ export default function CatalogPage() {
           </button>
           {sortedCategories.map(([cat, info]) => {
             const isActive = cat === selectedCategory;
-            const count = callableOnly ? info.callable : info.total;
-            if (callableOnly && info.callable === 0) return null;
+            const count = callableOnly || tierFilter === "callable"
+              ? info.callable
+              : tierFilter === "adapter"
+                ? (info.managedAdapters ?? 0)
+              : tierFilter === "verified"
+                ? (info.verified ?? 0)
+              : tierFilter === "discovery"
+                ? Math.max(0, info.total - (info.verified ?? 0) - (info.managedAdapters ?? 0))
+                : info.total;
+            if ((callableOnly || tierFilter === "callable") && info.callable === 0) return null;
+            if (tierFilter === "adapter" && (info.managedAdapters ?? 0) === 0) return null;
+            if (tierFilter === "verified" && (info.verified ?? 0) === 0) return null;
+            if (tierFilter === "discovery" && info.total - (info.verified ?? 0) - (info.managedAdapters ?? 0) === 0) return null;
             return (
               <button
                 key={cat}
@@ -439,7 +434,7 @@ export default function CatalogPage() {
         {/* Result count */}
         {!loading && (
           <div className="text-xs text-text-muted mb-4">
-            {total.toLocaleString()} {callableOnly ? "callable " : ""}APIs{selectedCategory ? ` in ${selectedCategory}` : ""}{query ? ` matching "${query}"` : ""}
+            {total.toLocaleString()} {callableOnly || tierFilter === "callable" ? "customer-callable " : tierFilter === "adapter" ? "managed-adapter " : tierFilter === "verified" ? "source-verified " : tierFilter === "discovery" ? "discovery-only " : ""}APIs{selectedCategory ? ` in ${selectedCategory}` : ""}{query ? ` matching "${query}"` : ""}
           </div>
         )}
 
@@ -533,25 +528,49 @@ function ApiCard({ api }: { api: ApiEntry }) {
       </p>
 
       <div className="flex items-center gap-1.5 flex-wrap">
-        {(api.callable || api.auth === "managed" || api.tier === "managed") ? (
+        {api.callable ? (
           <>
-            {api.auth === "managed" || api.tier === "managed" ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <Shield className="w-2.5 h-2.5" />
-                Managed
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent"
+              title="Customer-callable through APIClaw with billing-grade cost truth"
+            >
+              <Zap className="w-2.5 h-2.5" />
+              Callable now
+            </span>
+            {api.actions?.length ? (
+              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">
+                {api.actions.length} {api.actions.length === 1 ? "action" : "actions"}
               </span>
-            ) : (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-accent/10 text-accent"
-                title={api.latency_ms ? `Smoketest verified · ${api.latency_ms} ms` : "Callable through APIClaw"}
-              >
-                <Zap className="w-2.5 h-2.5" />
-                Callable
-                {api.latency_ms ? <span className="opacity-60">{api.latency_ms}ms</span> : null}
-              </span>
-            )}
+            ) : null}
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">
               {api.category}
+            </span>
+          </>
+        ) : api.managedAdapter ? (
+          <>
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400"
+              title="Credentialed adapter inventory. Customer execution is not enabled until billing-grade cost truth is verified."
+            >
+              <Shield className="w-2.5 h-2.5" />
+              Managed adapter
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">
+              Not callable yet
+            </span>
+          </>
+        ) : api.verified ? (
+          <>
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              title={api.latency_ms ? `Source verification passed · ${api.latency_ms} ms` : "Source verification passed; APIClaw execution is not enabled"}
+            >
+              <Check className="w-2.5 h-2.5" />
+              Source-verified
+              {api.latency_ms ? <span className="opacity-60">{api.latency_ms}ms</span> : null}
+            </span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-background border border-border text-text-muted">
+              Not executable
             </span>
           </>
         ) : (

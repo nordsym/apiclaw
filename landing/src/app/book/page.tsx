@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, ArrowRight, Sun, Moon, ChevronLeft } from "lucide-react";
+import { getWorkspaceSessionToken } from "@/lib/workspace-session";
 
 const ALL_SLOTS = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
@@ -48,13 +49,13 @@ function BookForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  // Pre-fill from URL params (passed from workspace) or localStorage session
+  // Pre-fill from URL params or the same-origin workspace session cookie.
   useEffect(() => {
     const urlEmail = searchParams?.get("email");
     if (urlEmail) { setEmail(urlEmail); return; }
-    // Fallback: try to get workspace email from session in localStorage
-    try {
-      const token = localStorage.getItem("apiclaw_workspace_session");
+    void (async () => {
+      try {
+        const token = await getWorkspaceSessionToken();
       if (token) {
         fetch(`https://adventurous-avocet-799.convex.cloud/api/query`, {
           method: "POST",
@@ -64,7 +65,8 @@ function BookForm() {
           if (d?.value?.email) setEmail(d.value.email);
         }).catch(() => {});
       }
-    } catch { /* ignore */ }
+      } catch { /* ignore */ }
+    })();
   }, [searchParams]);
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");

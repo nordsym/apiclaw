@@ -23,8 +23,9 @@ fi
 mkdir -p "$STAGE/server"
 cp server/package.json "$STAGE/server/package.json"
 cp server/index.js     "$STAGE/server/index.js"
+cp vendor/nordsym-apiclaw-2.8.7.tgz "$STAGE/server/apiclaw.tgz"
 
-echo "→ Installing @nordsym/apiclaw into bundle (cwd: $STAGE/server)"
+echo "→ Installing vendored @nordsym/apiclaw 2.8.7 into bundle (cwd: $STAGE/server)"
 echo "→ npm: $(npm --version), node: $(node --version)"
 (
   cd "$STAGE/server" \
@@ -37,6 +38,7 @@ echo "→ npm: $(npm --version), node: $(node --version)"
        --prefer-online \
        --loglevel=warn
 )
+rm -f "$STAGE/server/apiclaw.tgz"
 
 echo "→ Trimming bundle"
 find "$STAGE/server/node_modules" -type d \( -name test -o -name tests -o -name __tests__ -o -name docs -o -name examples \) -prune -exec rm -rf {} + 2>/dev/null || true

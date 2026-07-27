@@ -1,94 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+function convexSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
+  if (configured) return configured.replace(/\/$/, "");
 
-const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+  const cloudUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (cloudUrl) return cloudUrl.replace(/\.convex\.cloud\/?$/, ".convex.site");
+
+  return "https://adventurous-avocet-799.convex.site";
+}
 
 export async function POST(req: NextRequest) {
-  if (!stripe) {
-    return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
-  }
-
   try {
     const { token } = await req.json();
-
     if (!token) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
 
-    // Verify session and get workspace
-    const sessionRes = await fetch(`${CONVEX_URL}/api/query`, {
+    const response = await fetch(`${convexSiteUrl()}/api/billing/checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        path: "workspaces:verifySession",
-        args: { sessionToken: token },
+        token,
+        mode: "setup",
+        returnUrl: process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
       }),
+      cache: "no-store",
     });
+    const data = await response.json();
 
-    const sessionData = await sessionRes.json();
-    const workspace = sessionData.value || sessionData;
-
-    if (!workspace || !workspace._id) {
-      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data?.error || "Checkout failed" },
+        { status: response.status },
+      );
     }
 
-    // Check if customer already exists
-    let customerId = workspace.stripeCustomerId;
-
-    if (!customerId) {
-      // Create new Stripe customer
-      const customer = await stripe.customers.create({
-        email: workspace.email,
-        metadata: {
-          workspaceId: workspace._id,
-        },
-      });
-
-      customerId = customer.id;
-
-      // Save customer ID to workspace
-      await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "billing:linkCustomer",
-          args: {
-            workspaceId: workspace._id,
-            stripeCustomerId: customerId,
-          },
-        }),
-      });
-    }
-
-    // Determine the app URL for redirects
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud";
-
-    // Create Checkout Session in setup mode (collect payment method)
-    // The Stripe webhook (setup_intent.succeeded) upgrades workspace to usage_based
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: "setup",
-      payment_method_types: ["card"],
-      metadata: {
-        workspaceId: workspace._id,
-        type: "usage_based",
-      },
-      success_url: `${appUrl}/workspace?billing=success`,
-      cancel_url: `${appUrl}/workspace?billing=cancel`,
-    });
-
-    return NextResponse.json({
-      url: session.url,
-      sessionId: session.id,
-    });
+    return NextResponse.json({ url: data.checkoutUrl, sessionId: data.sessionId });
   } catch (error) {
-    console.error("[Checkout] Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Checkout failed" },
-      { status: 500 }
-    );
+    console.error("[Checkout] Convex billing request failed:", error);
+    return NextResponse.json({ error: "Checkout failed" }, { status: 502 });
   }
 }

@@ -205,10 +205,16 @@ interface ExchangeResult {
   isNew?: boolean;
 }
 
+interface LogoutResult {
+  success: boolean;
+  error?: 'invalid_session' | 'api_key_mismatch';
+  revokedApiKey?: boolean;
+}
+
 export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<AuthConfig | null> {
+  const existing = readAuthConfig();
   // Already signed in?
   if (!options.force) {
-    const existing = readAuthConfig();
     if (existing) {
       console.log(chalk.green(`\n✓ Already signed in as ${chalk.bold(existing.email)}\n`));
       console.log(
@@ -294,6 +300,12 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
       code: callback.code,
       codeVerifier: verifier,
       fingerprint,
+      ...(options.force && existing
+        ? {
+            previousSessionToken: existing.sessionToken,
+            ...(existing.apiKey ? { previousApiKey: existing.apiKey } : {}),
+          }
+        : {}),
     });
   } catch (err) {
     exchSpinner.fail(`Exchange failed: ${(err as Error).message}`);
@@ -333,7 +345,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log('');
   console.log(chalk.bold('  CLI equivalent:'));
   console.log(chalk.dim('     apiclaw discover "web search"'));
-  console.log(chalk.dim('     apiclaw call brave_search/search --params \'{"q":"AI agent infrastructure news"}\''));
+  console.log(chalk.dim('     apiclaw call brave_search/search --params \'{"query":"AI agent infrastructure news"}\''));
   if (result.apiKey) {
     console.log('');
     console.log(chalk.bold('  For HTTP runtimes:'));
@@ -350,7 +362,28 @@ export async function authLogoutCommand(): Promise<void> {
     console.log(chalk.dim('  Not signed in.\n'));
     return;
   }
+
+  const spinner = ora('Revoking APIClaw credentials...').start();
+  let result: LogoutResult;
+  try {
+    result = await convexMutation<LogoutResult>('cliAuth:logout', {
+      sessionToken: existing.sessionToken,
+      ...(existing.apiKey ? { apiKey: existing.apiKey } : {}),
+    });
+  } catch (error) {
+    spinner.fail('Could not revoke APIClaw credentials');
+    console.error(chalk.yellow(`  Local credentials were preserved so logout can be retried.`));
+    throw error;
+  }
+
+  if (!result.success) {
+    spinner.fail(`Could not revoke APIClaw credentials (${result.error || 'unknown'})`);
+    console.error(chalk.yellow('  Local credentials were preserved so logout can be retried.'));
+    throw new Error(`APIClaw logout rejected: ${result.error || 'unknown'}`);
+  }
+
   clearAuthConfig();
+  spinner.succeed('Remote and local credentials revoked');
   console.log(chalk.green(`\n✓ Signed out (${existing.email})\n`));
 }
 

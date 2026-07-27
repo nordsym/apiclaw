@@ -36,9 +36,6 @@ if (!noSessionResult.ok) {
 assert.equal(requireVerifiedOwner(activeContext()).ok, true);
 
 const quotaResult = requireVerifiedOwner(activeContext({ usageRemaining: 0 }));
-assert.equal(quotaResult.ok, false);
-if (!quotaResult.ok) {
-  assert.equal(quotaResult.reason, "quota_exceeded");
-}
+assert.equal(quotaResult.ok, true, "the gateway, not stale MCP state, decides free-to-PAYG entitlement");
 
 console.log("APIClaw safe smoke tests passed");

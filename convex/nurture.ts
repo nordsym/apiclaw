@@ -1,11 +1,27 @@
-import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery, mutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
 import { checkEmailAllowedSync } from "./emailGuards";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from "../src/product-truth";
+import { CANON_STATS } from "../src/canon-stats";
+import { findUsableAgentSession } from "./sessionSecurity";
+import {
+  nurtureDeliveryIdempotencyKey,
+  nurtureUnsubscribeUrl,
+} from "./nurtureDeliveryKeys";
+
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
+const EMAIL_FROM = process.env.RESEND_FROM || "APIClaw <hello@apiclaw.cloud>";
 
 type NurtureSendCandidate = {
   nurtureId: Id<"nurture">;
+  workspaceId: Id<"workspaces">;
   email: string;
   kind: string;
 };
@@ -33,7 +49,7 @@ type NurtureRunResult = {
  *   partner-locked — explicit partner workspace, NEVER nurture
  *   excluded       — internal/test/opted-out
  *
- * Emails (sent via symbot-gmail webhook):
+ * Emails (sent directly through APIClaw's Resend account):
  *   welcome       — day 1 fallback only if the 10-minute post-auth welcome did not send
  *   try-discover  — day 2-3 if no searches yet (stage=new)
  *   first-call    — day 5-7 after first search, no calls (stage=activating)
@@ -90,7 +106,7 @@ export function isBlocked(email: string): boolean {
   return false;
 }
 
-export const getByWorkspaceId = query({
+export const getByWorkspaceId = internalQuery({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -100,14 +116,14 @@ export const getByWorkspaceId = query({
   },
 });
 
-export const list = query({
+export const list = internalQuery({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("nurture").collect();
   },
 });
 
-export const stats = query({
+export const stats = internalQuery({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("nurture").collect();
@@ -122,15 +138,55 @@ export const stats = query({
 });
 
 export const optOut = mutation({
+  args: { sessionToken: v.string() },
+  handler: async (ctx, args) => {
+    const session = await findUsableAgentSession(ctx.db, args.sessionToken);
+    if (!session) throw new Error("invalid_session");
+    return await optOutWorkspaceInTransaction(ctx, session.workspaceId, "authenticated preference");
+  },
+});
+
+export async function optOutWorkspaceInTransaction(
+  ctx: Pick<MutationCtx, "db">,
+  workspaceId: Id<"workspaces">,
+  source: string,
+  now = Date.now(),
+) {
+  const workspace = await ctx.db.get(workspaceId);
+  if (!workspace) return { success: false, reason: "workspace_not_found" as const };
+  const existing = await ctx.db
+    .query("nurture")
+    .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
+    .first();
+  if (existing) {
+    if (!existing.unsubscribed || existing.stage !== "excluded") {
+      await ctx.db.patch(existing._id, {
+        unsubscribed: true,
+        stage: "excluded",
+        notes: `Unsubscribed via ${source}`,
+        updatedAt: now,
+      });
+    }
+    return { success: true, alreadyUnsubscribed: existing.unsubscribed };
+  }
+  await ctx.db.insert("nurture", {
+    workspaceId,
+    email: workspace.email || undefined,
+    stage: "excluded",
+    lastActivityAt: workspace.lastActiveAt,
+    emailsSent: 0,
+    unsubscribed: true,
+    notes: `Unsubscribed via ${source}`,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return { success: true, alreadyUnsubscribed: false };
+}
+
+export const optOutByWorkspaceId = internalMutation({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, args) => {
-    const n = await ctx.db
-      .query("nurture")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
-      .first();
-    if (!n) return { success: false };
-    await ctx.db.patch(n._id, { unsubscribed: true, stage: "excluded", updatedAt: Date.now() });
-    return { success: true };
+    return await optOutWorkspaceInTransaction(ctx, args.workspaceId, "signed one-click link");
   },
 });
 
@@ -243,25 +299,27 @@ export const classifyAllWorkspaces = internalMutation({
 // ═══════════════════════════════════════════════════════════════
 // SENDER — daily cron picks up to N sendable nurture rows
 // ═══════════════════════════════════════════════════════════════
-const SYMBOT_GMAIL = "https://nordsym.app.n8n.cloud/webhook/symbot-gmail";
-
-export function bodyFor(kind: string, firstName: string): { subject: string; html: string } {
+export function bodyFor(
+  kind: string,
+  firstName: string,
+  unsubscribeUrl: string,
+): { subject: string; html: string } {
   const hi = firstName ? `Hi ${firstName},` : "Hi,";
-  const prompt = `Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.`;
+  const prompt = `Use APIClaw's managed Brave Search adapter with provider "brave_search", action "search", and query "AI agent infrastructure news". Then summarize the top 3 results with source links.`;
   const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
   const cta = `<p><a href="https://apiclaw.cloud/docs" style="display:inline-block;background:#dc2626;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Open the quickstart</a></p>`;
-  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes 50 managed calls per week. Pay as you go at API cost + 15% when the allowance is exhausted.</p>`;
+  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - The Control Plane for AI Agents. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes up to ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. Billing-ready actions can use pay as you go at provider cost + ${PAYG_MARGIN_PERCENT}% when the allowance is exhausted.<br/><a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe from lifecycle email</a>.</p>`;
 
   switch (kind) {
     case "welcome":
       return {
         subject: "Welcome to APIClaw - your agent can call APIs now",
-        html: `<p>${hi}</p><p>Your APIClaw workspace is live. You now have one control plane for discovery and execution across 26,701 discoverable APIs and 2,906 callable APIs.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
+        html: `<p>${hi}</p><p>Your APIClaw workspace is live. You now have one control plane for discovery across ${CANON_STATS.discoverable.toLocaleString()} APIs. ${CANON_STATS.source_verified.toLocaleString()} current catalog entries map to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${CANON_STATS.managed_provider_adapters} managed adapters, and ${CANON_STATS.customer_executable_providers} provider rails are customer-executable now.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
       };
     case "try-discover":
       return {
         subject: "Try one API search in APIClaw",
-        html: `<p>${hi}</p><p>If you have not tried discovery yet, run one search from your agent:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">discover_apis({ query: "web search" })</pre><p>APIClaw will show callable options first, then your agent can use <code>call_api</code> with the best match.</p>${cta}<p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>If you have not tried discovery yet, run one search from your agent:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">discover_apis({ query: "web search" })</pre><p>APIClaw shows source verification and managed execution readiness separately. For a deterministic first call, use the managed Brave Search adapter from the prompt below.</p>${promptBlock}${cta}<p>- Gustav</p>${footer}`,
       };
     case "first-call":
       return {
@@ -271,12 +329,12 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
     case "upgrade":
       return {
         subject: "Keep your agent running beyond the free tier",
-        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want it to keep going without interruption after the 50 managed calls included each week are exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want managed calls to continue after the lifetime free allowance is exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "power-upgrade":
       return {
         subject: "Your APIClaw workspace is getting real usage",
-        html: `<p>${hi}</p><p>Your workspace is making regular API calls. Add a payment method to continue on pay-as-you-go at API cost + 15% when free usage runs out.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your workspace is making regular API calls. Add a payment method to continue billing-ready managed actions at provider cost + ${PAYG_MARGIN_PERCENT}% when free managed usage runs out.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "reactivate-7d":
       return {
@@ -286,23 +344,54 @@ export function bodyFor(kind: string, firstName: string): { subject: string; htm
     case "reactivate-30d":
       return {
         subject: "Still here? Free to stay free.",
-        html: `<p>${hi}</p><p>Your workspace is still live. If APIClaw isn't the right fit, no worries. Reply STOP and I'll opt you out.</p><p>If it is: <a href="https://apiclaw.cloud/catalog">one search gets you back in</a>.</p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your workspace is still live. If APIClaw isn't the right fit, no worries. You can unsubscribe below.</p><p>If it is: <a href="https://apiclaw.cloud/catalog">one search gets you back in</a>.</p><p>- Gustav</p>${footer}`,
       };
     default:
       return { subject: "APIClaw update", html: `<p>${hi}</p>${footer}` };
   }
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+type NurtureDeliveryResult =
+  | { ok: true }
+  | { ok: false; reason: string };
+
+export async function sendNurtureEmailViaResend(
+  input: {
+    apiKey?: string;
+    to: string;
+    subject: string;
+    html: string;
+    idempotencyKey: string;
+    unsubscribeUrl: string;
+  },
+  fetchImpl: typeof fetch = fetch,
+): Promise<NurtureDeliveryResult> {
+  if (!input.apiKey) return { ok: false, reason: "missing_resend_api_key" };
   try {
-    const res = await fetch(SYMBOT_GMAIL, {
+    const res = await fetchImpl("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "send", to, subject, message: html, safeMode: true }),
+      headers: {
+        Authorization: `Bearer ${input.apiKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": input.idempotencyKey,
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        headers: {
+          "List-Unsubscribe": `<${input.unsubscribeUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
+      }),
+      signal: AbortSignal.timeout(15_000),
     });
-    return res.ok;
+    return res.ok
+      ? { ok: true }
+      : { ok: false, reason: `resend_${res.status}` };
   } catch {
-    return false;
+    return { ok: false, reason: "resend_transport_error" };
   }
 }
 
@@ -352,7 +441,7 @@ export const getSendCandidates = internalQuery({
 
     const rows = await ctx.db.query("nurture").collect();
     let considered = 0;
-    const candidates: Array<{ nurtureId: Id<"nurture">; email: string; kind: string }> = [];
+    const candidates: NurtureSendCandidate[] = [];
 
     for (const n of rows) {
       if (candidates.length >= cap) break;
@@ -368,25 +457,40 @@ export const getSendCandidates = internalQuery({
       considered++;
       if (!kind) continue;
 
-      candidates.push({ nurtureId: n._id, email: n.email, kind });
+      candidates.push({ nurtureId: n._id, workspaceId: n.workspaceId, email: n.email, kind });
     }
 
     return { considered, candidates };
   },
 });
 
+export async function markNurtureEmailInTransaction(
+  ctx: Pick<MutationCtx, "db">,
+  nurtureId: Id<"nurture">,
+  kind: string,
+  now = Date.now(),
+) {
+    const n = await ctx.db.get(nurtureId);
+    if (!n) return { success: false, reason: "not_found" as const };
+    if (n.unsubscribed || n.stage === "partner-locked" || n.stage === "excluded") {
+      return { success: false, reason: "nurture_excluded" as const };
+    }
+    if (n.lastEmailKind === kind) {
+      return { success: true, alreadyMarked: true };
+    }
+    await ctx.db.patch(n._id, {
+      emailsSent: n.emailsSent + 1,
+      lastEmailSentAt: now,
+      lastEmailKind: kind,
+      updatedAt: now,
+    });
+    return { success: true };
+}
+
 export const markEmailSent = internalMutation({
   args: { nurtureId: v.id("nurture"), kind: v.string() },
   handler: async (ctx, args) => {
-    const n = await ctx.db.get(args.nurtureId);
-    if (!n) return { success: false, reason: "not_found" };
-    await ctx.db.patch(n._id, {
-      emailsSent: n.emailsSent + 1,
-      lastEmailSentAt: Date.now(),
-      lastEmailKind: args.kind,
-      updatedAt: Date.now(),
-    });
-    return { success: true };
+    return await markNurtureEmailInTransaction(ctx, args.nurtureId, args.kind);
   },
 });
 
@@ -395,6 +499,8 @@ export const sendDailyNurture = internalAction({
   handler: async (ctx, args): Promise<NurtureRunResult> => {
     const cap = args.maxSends ?? 12;
     const dryRun = args.dryRun ?? false;
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const unsubscribeSecret = process.env.APICLAW_PSEUDONYM_SECRET;
     const { considered, candidates } = await ctx.runQuery(internal.nurture.getSendCandidates, {
       maxSends: cap,
       dryRun,
@@ -416,7 +522,16 @@ export const sendDailyNurture = internalAction({
       const email = candidate.email;
       const firstName = (email.split("@")[0] || "").split(/[._-]/)[0];
       const firstNamePretty = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-      const { subject, html } = bodyFor(kind, firstNamePretty);
+      if (!unsubscribeSecret) {
+        skipped++;
+        skipReasons.missing_unsubscribe_secret = (skipReasons.missing_unsubscribe_secret ?? 0) + 1;
+        continue;
+      }
+      const unsubscribeUrl = await nurtureUnsubscribeUrl(
+        String(candidate.workspaceId),
+        unsubscribeSecret,
+      );
+      const { subject, html } = bodyFor(kind, firstNamePretty, unsubscribeUrl);
 
       if (dryRun) {
         sentLog.push({ email, kind });
@@ -424,19 +539,32 @@ export const sendDailyNurture = internalAction({
         continue;
       }
 
-      const ok = await sendEmail(email, subject, html);
-      if (!ok) {
+      const delivery = await sendNurtureEmailViaResend({
+        apiKey: resendApiKey,
+        to: email,
+        subject,
+        html,
+        idempotencyKey: nurtureDeliveryIdempotencyKey(String(candidate.workspaceId), kind),
+        unsubscribeUrl,
+      });
+      if (!delivery.ok) {
         skipped++;
-        skipReasons.send_failed = (skipReasons.send_failed ?? 0) + 1;
+        skipReasons[delivery.reason] = (skipReasons[delivery.reason] ?? 0) + 1;
         continue;
       }
 
-      await ctx.runMutation(internal.nurture.markEmailSent, {
+      const mark = await ctx.runMutation(internal.nurture.markEmailSent, {
         nurtureId: candidate.nurtureId,
         kind,
-      });
-      sentLog.push({ email, kind });
-      sent++;
+      }) as { success: boolean; alreadyMarked?: boolean; reason?: string };
+      if (mark.success && !mark.alreadyMarked) {
+        sentLog.push({ email, kind });
+        sent++;
+      } else {
+        skipped++;
+        const reason = mark.alreadyMarked ? "already_marked" : mark.reason || "mark_failed";
+        skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+      }
     }
 
     return { sent, skipped, skipReasons, considered, capacity: cap, dryRun, sentLog };

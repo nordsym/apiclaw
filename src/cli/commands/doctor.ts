@@ -222,11 +222,9 @@ function checkClient(client: MCPClient, serverName = 'apiclaw'): CheckResult {
  */
 async function checkConnectivity(): Promise<CheckResult> {
   const apiUrl = getApiUrl();
-  const convexUrl = process.env.CONVEX_URL || 'https://adventurous-avocet-799.convex.cloud';
   const candidates = [
     `${apiUrl}/health`,
-    'https://apiclaw.cloud',
-    `${convexUrl.replace('.cloud', '.site')}/workspace/poll`,
+    'https://apiclaw.cloud/api/health',
   ];
   const failures: string[] = [];
 
@@ -247,15 +245,6 @@ async function checkConnectivity(): Promise<CheckResult> {
           name: 'API Server',
           status: 'pass',
           message: `${testUrl} reachable`,
-        };
-      }
-
-      if (testUrl.includes('/workspace/poll') && response.status === 400) {
-        return {
-          category: 'Connectivity',
-          name: 'API Server',
-          status: 'pass',
-          message: `${testUrl} reachable (auth endpoint responding)`,
         };
       }
 

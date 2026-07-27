@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check, X, AlertCircle, Info } from "lucide-react";
 
 export type ToastType = "success" | "error" | "info";
@@ -72,13 +72,13 @@ export function Toast({ message, type = "success", duration = 5000, onClose }: T
 export function useToast() {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
-  const showToast = (message: string, type: ToastType = "success") => {
+  const showToast = useCallback((message: string, type: ToastType = "success") => {
     setToast({ message, type });
-  };
+  }, []);
 
-  const hideToast = () => {
+  const hideToast = useCallback(() => {
     setToast(null);
-  };
+  }, []);
 
   return { toast, showToast, hideToast };
 }

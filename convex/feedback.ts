@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // SUBMIT FEEDBACK
@@ -13,10 +14,7 @@ export const submitFeedback = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -49,10 +47,7 @@ export const voteFeedback = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -117,10 +112,7 @@ export const getFeedback = query({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -171,10 +163,7 @@ export const getMyFeedback = query({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -204,10 +193,7 @@ export const updateFeedbackStatus = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session");
@@ -239,10 +225,7 @@ export const deleteFeedback = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session");

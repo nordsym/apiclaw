@@ -51,6 +51,7 @@ export const createSessionForWorkspace = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId,
       sessionToken,
+      sessionKind: "owner",
       fingerprint: "hivr-bees",
       lastUsedAt: Date.now(),
       createdAt: Date.now(),

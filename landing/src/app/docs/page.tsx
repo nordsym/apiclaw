@@ -466,7 +466,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
                   <li><code className="text-[var(--accent)]">elevenlabs</code> - Text-to-speech</li>
                   <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
                   <li><code className="text-[var(--accent)]">firecrawl</code> - Web scraping</li>
-                  <li><code className="text-[var(--accent)]">apilayer</code> - 22 callable APIs (rates, stocks, PDF, etc.)</li>
+                  <li><code className="text-[var(--accent)]">apilayer</code> - managed data API families (rates, stocks, PDF, etc.; runtime readiness varies by action)</li>
                 </ul>
               </div>
             </div>
@@ -480,7 +480,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;brave_search&quot;</span>,{'\n'}
                   {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;search&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">q</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;AI agents 2026&quot;</span>{' }'}{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;AI agents 2026&quot;</span>{' }'}{'\n'}
                   {'}'})
                 </code>
               </pre>
@@ -523,7 +523,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             <span className="text-[var(--accent)]">📡</span> List your API on APIClaw
           </h2>
           <p className="text-[var(--text-secondary)] mb-6">
-            APIClaw indexes {statsData.apiCount.toLocaleString()} APIs and {statsData.callableCount.toLocaleString()} are empirically callable. Adding yours takes one OpenAPI spec and a free email signup.
+            APIClaw indexes {statsData.apiCount.toLocaleString()} APIs and {statsData.sourceVerifiedCount.toLocaleString()} have source-verified definitions. Managed execution readiness is shown separately. Adding yours takes one OpenAPI spec and a free email signup.
           </p>
 
           <ol className="space-y-5 mb-8">

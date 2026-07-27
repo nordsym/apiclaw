@@ -32,7 +32,7 @@ const GATEWAY_URL =
 
 const FIRST_QUERY = "AI agent infrastructure news";
 const FIRST_CALL_PROMPT =
-  `Use APIClaw to find a callable web search API, call it with the query "${FIRST_QUERY}", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.`;
+  `Use APIClaw's managed Brave Search adapter with provider "brave_search", action "search", and query "${FIRST_QUERY}". Then summarize the top 3 results with source links.`;
 const INSTALL_COMMAND = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
 const CLI_COMMAND = `apiclaw discover "web search"\napiclaw call brave_search/search --params '{"query":"${FIRST_QUERY}"}'`;
 const REMOTE_MCP_URL = "https://apiclaw.cloud/mcp";
@@ -147,6 +147,7 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
   const [runError, setRunError] = useState<string | null>(null);
   const [results, setResults] = useState<LiveResult[]>([]);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const firstCallIdempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!sessionToken) return;
@@ -218,10 +219,14 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
     posthog.capture("onboarding_first_call_started", { door });
 
     try {
+      const idempotencyKey = firstCallIdempotencyKeyRef.current ??
+        `onboarding-${crypto.randomUUID()}`;
+      firstCallIdempotencyKeyRef.current = idempotencyKey;
       const response = await fetch(`${GATEWAY_URL}/v1/execute`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
           "X-APIClaw-Session": sessionToken,
         },
         body: JSON.stringify({
@@ -230,6 +235,10 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
           params: { query: FIRST_QUERY, count: 3 },
         }),
       });
+      // Receiving any HTTP response resolves the upstream ambiguity. A later
+      // user retry can use a fresh key. Network failures retain this key so a
+      // retry cannot accidentally dispatch a second paid provider call.
+      firstCallIdempotencyKeyRef.current = null;
       const payload = await response.json().catch(() => null);
       const succeeded = response.ok && payload?.success !== false;
       if (!succeeded) {
@@ -609,7 +618,7 @@ function DoorSetup({ door, sessionToken }: { door: DoorId; sessionToken: string 
   }
 
   if (door === "http") {
-    return <HttpSetup sessionToken={sessionToken} />;
+    return <HttpSetup />;
   }
 
   return (
@@ -620,7 +629,7 @@ function DoorSetup({ door, sessionToken }: { door: DoorId; sessionToken: string 
   );
 }
 
-function HttpSetup({ sessionToken }: { sessionToken: string }) {
+function HttpSetup() {
   const [key, setKey] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -638,11 +647,13 @@ function HttpSetup({ sessionToken }: { sessionToken: string }) {
     if (generating || key) return;
     setGenerating(true);
     setError(null);
-    const response = await callMutation("apiKeys:generateKey", {
-      token: sessionToken,
-      name: "Onboarding quick start",
+    const response = await fetch("/api/workspace/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ name: "Onboarding quick start" }),
     });
-    const payload = response?.value ?? response;
+    const payload = await response.json().catch(() => ({}));
     const rawKey = typeof payload?.key === "string" ? payload.key : null;
 
     if (!rawKey) {
@@ -684,8 +695,10 @@ function HttpSetup({ sessionToken }: { sessionToken: string }) {
   }
 
   const curl = [
+    'IDEMPOTENCY_KEY="${IDEMPOTENCY_KEY:-$(uuidgen)}"',
     "curl https://api.apiclaw.cloud/v1/execute \\",
     `  -H "Authorization: Bearer ${key}" \\`,
+    '  -H "Idempotency-Key: $IDEMPOTENCY_KEY" \\',
     "  -H \"Content-Type: application/json\" \\",
     `  -d '{"provider":"brave_search","action":"search","params":{"query":"${FIRST_QUERY}","count":3}}'`,
   ].join("\n");

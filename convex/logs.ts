@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // MUTATIONS
@@ -22,10 +23,7 @@ export const createLog = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session and get workspace
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       throw new Error("Invalid session token");
@@ -34,7 +32,9 @@ export const createLog = mutation({
     // Create log entry
     return await ctx.db.insert("apiLogs", {
       workspaceId: session.workspaceId,
-      sessionToken: args.token,
+      // The bearer token has already served its only purpose above. Never
+      // persist reusable credentials in analytics rows.
+      sessionToken: "",
       subagentId: args.subagentId,
       provider: args.provider,
       action: args.action,
@@ -50,10 +50,9 @@ export const createLog = mutation({
  * Internal log creation (when workspaceId is already known)
  * Used by execute functions that have already verified the session
  */
-export const createLogInternal = mutation({
+export const createLogInternal = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
-    sessionToken: v.string(),
     provider: v.string(),
     action: v.string(),
     status: v.union(v.literal("success"), v.literal("error")),
@@ -64,7 +63,7 @@ export const createLogInternal = mutation({
   handler: async (ctx, args) => {
     return await ctx.db.insert("apiLogs", {
       workspaceId: args.workspaceId,
-      sessionToken: args.sessionToken,
+      sessionToken: "",
       subagentId: args.subagentId,
       provider: args.provider,
       action: args.action,
@@ -80,7 +79,7 @@ export const createLogInternal = mutation({
  * Log an inbound call to a provider's workspace
  * Called when someone uses an API that belongs to another workspace
  */
-export const logProviderCall = mutation({
+export const logProviderCall = internalMutation({
   args: {
     provider: v.string(),
     action: v.string(),
@@ -152,10 +151,7 @@ export const getProviderAnalytics = query({
     direction: v.optional(v.string()), // "outbound" = my usage, "inbound" = traffic to my APIs, omit = all
   },
   handler: async (ctx, { token, hoursBack = 168, direction }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) return null;
 
     const since = Date.now() - hoursBack * 60 * 60 * 1000;
@@ -240,10 +236,9 @@ function getMonthStart(): number {
  * Creates log entry, tracks spend, returns budget status
  * Returns shouldSendAlert: true if 80% threshold crossed (caller should send email)
  */
-export const createLogWithSpend = mutation({
+export const createLogWithSpend = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
-    sessionToken: v.string(),
     provider: v.string(),
     action: v.string(),
     status: v.union(v.literal("success"), v.literal("error")),
@@ -259,7 +254,7 @@ export const createLogWithSpend = mutation({
     // 1. Create log entry
     const logId = await ctx.db.insert("apiLogs", {
       workspaceId: args.workspaceId,
-      sessionToken: args.sessionToken,
+      sessionToken: "",
       subagentId: args.subagentId,
       provider: args.provider,
       action: args.action,
@@ -356,10 +351,7 @@ export const getLogs = query({
     const cursor = args.cursor;
 
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { logs: [], hasMore: false };
@@ -432,10 +424,7 @@ export const getLogStats = query({
     const periodDays = args.periodDays ?? 7;
 
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return {
@@ -541,10 +530,7 @@ export const getProviders = query({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return [];
@@ -573,42 +559,54 @@ export const getBySubagent = query({
   },
   handler: async (ctx, { token, subagentId, limit = 20 }) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     
     if (!session) return null;
     
-    // Get API logs for this subagent
+    const boundedLimit = Math.min(Math.max(Math.trunc(limit), 1), 100);
+
+    // Scope both sources to the authenticated workspace before matching the
+    // caller-controlled subagent label. Subagent IDs are not globally unique.
     const apiLogs = await ctx.db
       .query("apiLogs")
-      .withIndex("by_subagentId", (q) => q.eq("subagentId", subagentId))
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .filter((q) => q.eq(q.field("subagentId"), subagentId))
       .order("desc")
-      .take(limit);
+      .take(boundedLimit);
     
     // Get search logs for this subagent  
     const searchLogs = await ctx.db
       .query("searchLogs")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .filter((q) => q.eq(q.field("subagentId"), subagentId))
       .order("desc")
-      .take(limit);
+      .take(boundedLimit);
     
     // Merge and sort by timestamp
     const combined = [
-      ...apiLogs.map(l => ({ 
-        ...l, 
+      ...apiLogs.map(l => ({
+        id: l._id,
         type: "direct_call" as const,
-        timestamp: l.createdAt 
+        provider: l.provider,
+        action: l.action,
+        status: l.status,
+        latencyMs: l.latencyMs,
+        createdAt: l.createdAt,
+        timestamp: l.createdAt,
       })),
-      ...searchLogs.map(l => ({ 
-        ...l, 
+      ...searchLogs.map(l => ({
+        id: l._id,
         type: "search" as const,
-        timestamp: l.timestamp 
+        query: l.query,
+        resultCount: l.resultCount,
+        hasResults: l.hasResults,
+        responseTimeMs: l.responseTimeMs,
+        createdAt: l.timestamp,
+        timestamp: l.timestamp,
       })),
     ].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     
-    return combined.slice(0, limit);
+    return combined.slice(0, boundedLimit);
   },
 });
 
@@ -620,10 +618,7 @@ export const clearWorkspaceLogs = mutation({
     token: v.string(),
   },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     
     if (!session) throw new Error("Invalid session");
     
@@ -656,6 +651,65 @@ export const clearWorkspaceLogs = mutation({
   },
 });
 
+/**
+ * Batched security migration for legacy analytics rows that stored reusable
+ * session credentials. The mutation returns counts only. Production callers
+ * must page until `isDone` is true, then remove the deprecated schema field in
+ * a later deployment.
+ */
+export const scrubStoredSessionTokens = internalMutation({
+  args: {
+    cursor: v.optional(v.union(v.string(), v.null())),
+    dryRun: v.boolean(),
+    revokeSessions: v.boolean(),
+  },
+  handler: async (ctx, { cursor, dryRun, revokeSessions }) => {
+    const page = await ctx.db.query("apiLogs").paginate({
+      cursor: cursor ?? null,
+      numItems: 256,
+    });
+    const exposed = page.page.filter((log) => {
+      const value = log.sessionToken;
+      return value !== "" && value !== "proxy" && value !== "migrated-filestack-seed";
+    });
+    let revokedSessions = 0;
+    let revokedBrowserChildren = 0;
+    let scrubbedRows = 0;
+
+    if (!dryRun) {
+      for (const log of exposed) {
+        if (revokeSessions) {
+          const session = await findUsableAgentSession(ctx.db, log.sessionToken);
+          if (session) {
+            const children = await ctx.db
+              .query("agentSessions")
+              .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", session._id))
+              .collect();
+            for (const child of children) {
+              await ctx.db.delete(child._id);
+              revokedBrowserChildren++;
+            }
+            await ctx.db.delete(session._id);
+            revokedSessions++;
+          }
+        }
+        await ctx.db.patch(log._id, { sessionToken: "" });
+        scrubbedRows++;
+      }
+    }
+
+    return {
+      scannedRows: page.page.length,
+      exposedRows: exposed.length,
+      revokedSessions,
+      revokedBrowserChildren,
+      scrubbedRows,
+      continueCursor: page.continueCursor,
+      isDone: page.isDone,
+    };
+  },
+});
+
 // Log proxy API calls from external agents (Hivr bees)
 //
 // Hot-path decontention 2026-05-27: previously patched workspaces.lastActiveAt
@@ -663,21 +717,20 @@ export const clearWorkspaceLogs = mutation({
 // against the workspaces table in a 9-hour window. Both patches are derived
 // from apiLogs.createdAt — the cron at hotPathRefresh:refreshLastActiveFromLogs
 // rolls those forward every 5 minutes from this insert.
-export const createProxyLog = mutation({
+export const createProxyLog = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
     provider: v.string(),
     action: v.string(),
     subagentId: v.optional(v.string()),
-    sessionToken: v.optional(v.string()),
   },
-  handler: async (ctx, { workspaceId, provider, action, subagentId, sessionToken }) => {
+  handler: async (ctx, { workspaceId, provider, action, subagentId }) => {
     await ctx.db.insert("apiLogs", {
       workspaceId,
       provider,
       action,
       subagentId: subagentId || "unknown",
-      sessionToken: sessionToken || "proxy",
+      sessionToken: "",
       status: "success",
       latencyMs: 0,
       direction: "outbound",

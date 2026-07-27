@@ -7,9 +7,7 @@ export default function SignUpPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const link = params.get("link");
     const ref = params.get("ref");
-    if (link) localStorage.setItem("apiclaw_pending_link", link);
     if (ref) localStorage.setItem("apiclaw_referral_code", ref);
   }, []);
 

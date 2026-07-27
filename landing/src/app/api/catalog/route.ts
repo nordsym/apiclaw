@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { isInternalCatalogEntry, isUnavailableManagedBrand } from "@/lib/provider-boundaries";
+import {
+  MANAGED_PROVIDER_ADAPTERS,
+  MANAGED_PROVIDER_ADAPTER_COUNT,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+  getManagedProviderAdapter,
+} from "@apiclaw/product-truth";
+import { CANON_STATS } from "../../../../../src/canon-stats";
 
 interface ApiEntry {
   name: string;
@@ -12,6 +19,9 @@ interface ApiEntry {
   auth: string;
   pricing: string;
   callable?: boolean;
+  managedAdapter?: boolean;
+  providerId?: string;
+  actions?: readonly string[];
   // Enriched from verification-status.json
   verified?: boolean;
   tier?: "managed" | "verified" | "working" | "needs_ctx" | "auth" | "dead" | "untested";
@@ -33,52 +43,42 @@ interface VerificationStatus {
   buckets: Record<string, number>;
   by_id: Record<string, VerificationEntry>;
   by_name_lower: Record<string, VerificationEntry>;
-  by_host?: Record<string, VerificationEntry>;
-}
-
-// Canon managed-provider brand names (lowercase). Must stay in sync with
-// scripts/clean-registry-flags.mjs. APIClaw owns the keys for these and the
-// registry's auth field is unreliable (often "apiKey" even when we proxy
-// with our own credentials), so we identify them by name match — including
-// "{brand} api" variants since the registry sometimes has those.
-// NOTE: This allowlist auto-promotes any registry row whose brand starts with these
-// names to tier:"managed", verified:true, callable:true. As of 2026-05-08 some
-// APILayer sub-APIs (Skills, Number Verification, World News, Image Crop, Form) are
-// upstream-blocked despite being managed. Per-action status lives in
-// providerDirectCall + APILAYER_SUBSCRIPTION_BLOCKED_NAMES; this allowlist is
-// brand-level only.
-const MANAGED_BRAND_NAMES = new Set([
-  "openai", "openai api",
-  "anthropic", "anthropic api", "anthropic claude", "anthropic messages api",
-  "openrouter", "openrouter api",
-  "x.ai", "x.ai api", "xai api", "grok", "grok api",
-  "brave search", "brave search ai",
-  "elevenlabs", "elevenlabs api", "elevenlabs tts",
-  "replicate", "replicate api",
-  "firecrawl", "firecrawl api",
-  "e2b", "e2b api",
-  "groq", "groq api",
-  "deepgram", "deepgram api",
-  "serper", "serper api",
-  "mistral", "mistral ai", "mistral api", "mistral ai api",
-  "cohere", "cohere api",
-  "together", "together ai", "together ai api", "together apis",
-  "stability", "stability ai", "stability ai api",
-  "assemblyai", "assemblyai api",
-  "github", "github api",
-  "apilayer",
-]);
-
-function hostFromUrl(u: string): string | null {
-  try {
-    return new URL(u).host.toLowerCase().replace(/^www\./, "");
-  } catch {
-    return null;
-  }
 }
 
 let cachedApis: ApiEntry[] | null = null;
 let cachedVerification: VerificationStatus | null = null;
+
+function assertPublicCatalogTruth(
+  apis: ApiEntry[],
+  verification: VerificationStatus | null,
+): void {
+  const actual = {
+    discoverable: apis.length,
+    sourceVerified: apis.filter((api) => api.verified === true).length,
+    verificationSweepPasses: verification?.buckets?.verified ?? 0,
+    managedAdapters: apis.filter((api) => api.managedAdapter === true).length,
+    customerExecutable: apis.filter((api) => api.callable === true).length,
+  };
+  const expected = {
+    discoverable: CANON_STATS.discoverable,
+    sourceVerified: CANON_STATS.source_verified,
+    verificationSweepPasses: CANON_STATS.verification_sweep_passes,
+    managedAdapters: CANON_STATS.managed_provider_adapters,
+    customerExecutable: CANON_STATS.customer_executable_providers,
+  };
+
+  if (
+    actual.discoverable !== expected.discoverable ||
+    actual.sourceVerified !== expected.sourceVerified ||
+    actual.verificationSweepPasses !== expected.verificationSweepPasses ||
+    actual.managedAdapters !== expected.managedAdapters ||
+    actual.customerExecutable !== expected.customerExecutable
+  ) {
+    throw new Error(
+      `Public catalog truth drift: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+    );
+  }
+}
 
 function loadVerification(): VerificationStatus | null {
   if (cachedVerification) return cachedVerification;
@@ -121,6 +121,7 @@ function loadApis(): ApiEntry[] {
   ];
 
   const verification = loadVerification();
+  let lastError: unknown = null;
 
   for (const p of paths) {
     try {
@@ -140,43 +141,34 @@ function loadApis(): ApiEntry[] {
         });
       }
 
-      const enriched = all
-        .filter((a) => !isInternalCatalogEntry(a))
+      const publicRegistryInventory = all.filter((a) =>
+          !isInternalCatalogEntry(a) &&
+          !isUnavailableManagedBrand([a.name, a.baseUrl, a.docsUrl].filter(Boolean).join(" "))
+        );
+      const discoveryRegistryInventory = publicRegistryInventory.filter(
+        (entry) => !getManagedProviderAdapter(entry.name),
+      );
+
+      const discoveryInventory = discoveryRegistryInventory
         .map((a): ApiEntry => {
           const nameLower = (a.name || "").toLowerCase().trim();
-          const isManagedByAuth = (a.auth || "").toLowerCase() === "managed";
-          const isManagedByName = MANAGED_BRAND_NAMES.has(nameLower);
-          const isUnavailableManaged = isUnavailableManagedBrand(nameLower);
-          const isManaged = (isManagedByAuth || isManagedByName) && !isUnavailableManaged;
 
-          // Verification join: try name first, then host fallback.
-          let v: VerificationEntry | undefined =
+          // Exact name is the only safe mapping available in the current
+          // compact evidence file. Shared spec-host fallback is prohibited.
+          const v: VerificationEntry | undefined =
             (nameLower && verification?.by_name_lower?.[nameLower]) || undefined;
-          if (!v) {
-            const host = hostFromUrl(a.baseUrl || "");
-            if (host && verification?.by_host?.[host]) {
-              v = verification.by_host[host];
-            }
-          }
 
           let tier: ApiEntry["tier"];
           let verified = false;
           let callable = a.callable === true;
 
-          if (isUnavailableManaged) {
-            tier = "auth";
-            verified = false;
-            callable = false;
-          } else if (isManaged) {
-            tier = "managed";
-            verified = true;
-            callable = true;
-          } else if (v) {
+          if (v) {
             tier = v.tier;
             verified = v.tier === "verified";
-            // Honest measurement: only verified providers count as callable.
-            // Working_other, auth, needs_ctx, dead all drop to discovery.
-            callable = v.tier === "verified";
+            // Source verification proves the definition responded upstream. It
+            // does not make APIClaw a safe generic proxy. Non-managed entries
+            // stay discovery-only until hardened egress is live.
+            callable = false;
           } else {
             // No verification result and not managed → demoted to discovery,
             // regardless of any stale registry callable flag. Honest count.
@@ -187,6 +179,7 @@ function loadApis(): ApiEntry[] {
           return {
             ...a,
             callable,
+            managedAdapter: false,
             tier,
             verified,
             latency_ms: v?.latency_ms ?? null,
@@ -194,15 +187,40 @@ function loadApis(): ApiEntry[] {
           };
         });
 
-      cachedApis = enriched;
+      // Replace registry aliases with one canonical card per managed adapter.
+      const managedAdapterInventory = MANAGED_PROVIDER_ADAPTERS.map(
+        (provider): ApiEntry => ({
+          name: provider.name,
+          description: provider.description,
+          category: provider.category,
+          baseUrl: provider.baseUrl,
+          docsUrl: provider.docsUrl,
+          auth: "managed",
+          pricing: provider.pricing,
+          callable: provider.customerExecutableActions.length > 0,
+          managedAdapter: true,
+          providerId: provider.id,
+          actions: provider.customerExecutableActions,
+          tier: provider.customerExecutableActions.length > 0 ? "managed" : "untested",
+          // Executable is a separate, stronger runtime property. It is not
+          // evidence that this catalog card passed the source sweep.
+          verified: false,
+          latency_ms: null,
+          last_verified_at: null,
+        }),
+      );
+
+      cachedApis = [...managedAdapterInventory, ...discoveryInventory];
+      assertPublicCatalogTruth(cachedApis, verification);
       return cachedApis!;
-    } catch {
+    } catch (error) {
+      lastError = error;
       continue;
     }
   }
 
-  cachedApis = [];
-  return cachedApis;
+  if (lastError instanceof Error) throw lastError;
+  throw new Error("Public catalog inventory is unavailable");
 }
 
 export async function GET(req: NextRequest) {
@@ -214,18 +232,18 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "60", 10), 100);
 
   const apis = loadApis();
-  const tierFilter = searchParams.get("tier") || ""; // managed | verified | callable | discovery
+  const tierFilter = searchParams.get("tier") || ""; // callable | adapter | verified | discovery
 
   let filtered = apis;
 
-  if (tierFilter === "managed") {
-    filtered = filtered.filter((a) => a.tier === "managed");
+  if (tierFilter === "managed" || tierFilter === "callable" || callableOnly) {
+    filtered = filtered.filter((a) => a.callable === true);
+  } else if (tierFilter === "adapter") {
+    filtered = filtered.filter((a) => a.managedAdapter === true);
   } else if (tierFilter === "verified") {
     filtered = filtered.filter((a) => a.verified === true);
-  } else if (tierFilter === "callable" || callableOnly) {
-    filtered = filtered.filter((a) => a.callable);
   } else if (tierFilter === "discovery") {
-    filtered = filtered.filter((a) => !a.callable);
+    filtered = filtered.filter((a) => a.managedAdapter !== true && a.verified !== true);
   }
 
   if (category) {
@@ -256,17 +274,22 @@ export async function GET(req: NextRequest) {
   const hasMore = offset + limit < total;
 
   // Category counts with callable + verified breakdown
-  const categories: Record<string, { total: number; callable: number; verified: number }> = {};
+  const categories: Record<string, { total: number; callable: number; verified: number; managedAdapters: number }> = {};
   for (const a of apis) {
     if (!categories[a.category]) {
-      categories[a.category] = { total: 0, callable: 0, verified: 0 };
+      categories[a.category] = { total: 0, callable: 0, verified: 0, managedAdapters: 0 };
     }
     categories[a.category].total += 1;
     if (a.callable) categories[a.category].callable += 1;
     if (a.verified) categories[a.category].verified += 1;
+    if (a.managedAdapter) categories[a.category].managedAdapters += 1;
   }
 
   const totalCallable = apis.filter((api) => api.callable).length;
+  const totalVerified = apis.filter((api) => api.verified).length;
+  const totalDiscoveryOnly = apis.filter(
+    (api) => api.managedAdapter !== true && api.verified !== true,
+  ).length;
   return NextResponse.json({
     items,
     total,
@@ -276,5 +299,12 @@ export async function GET(req: NextRequest) {
     hasMore,
     categories,
     totalCallable,
+    totalCustomerExecutable: totalCallable,
+    totalVerified,
+    sourceVerifiedCount: totalVerified,
+    discoveryOnlyCount: totalDiscoveryOnly,
+    managedProviderAdapterCount: MANAGED_PROVIDER_ADAPTER_COUNT,
+    customerExecutableProviderCount: PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+    canonGeneratedAt: CANON_STATS.generated_at,
   });
 }

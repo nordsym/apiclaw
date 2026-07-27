@@ -9,7 +9,7 @@ const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export const metadata: Metadata = {
   title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
-  description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
+  description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.sourceVerifiedCount.toLocaleString()} source-verified API definitions across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
   metadataBase: new URL("https://apiclaw.cloud"),
   icons: {
     icon: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
-    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
+    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.sourceVerifiedCount.toLocaleString()} source-verified API definitions across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
     type: "website",
     siteName: "APIClaw",
     locale: "en_US",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "APIClaw — The Control Plane for AI Agents | MCP · CLI · HTTP · Grok",
-    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
+    description: `Terminal-native execution for AI agents. Parallel missions, real observability, and one unified control plane across MCP, CLI, HTTP, and Grok. ${statsData.sourceVerifiedCount.toLocaleString()} source-verified API definitions across ${Object.keys(statsData.categoryBreakdown).length} categories.`,
     images: ["/api/og?v=6"],
     creator: "@nordsym",
   },
@@ -55,7 +55,7 @@ const schemaOrg = {
       "@type": "WebSite",
       "name": "APIClaw",
       "url": "https://apiclaw.cloud",
-      "description": `The control plane for AI agents. ${statsData.callableCount.toLocaleString()} callable APIs across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP, CLI, HTTP, and Grok-ready.`
+      "description": `The control plane for AI agents. ${statsData.sourceVerifiedCount.toLocaleString()} source-verified API definitions across ${Object.keys(statsData.categoryBreakdown).length} categories. MCP, CLI, HTTP, and Grok-ready.`
     },
     {
       "@type": "Organization",
@@ -67,7 +67,7 @@ const schemaOrg = {
       "name": "APIClaw",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
-      "description": `The control plane for AI agents. Terminal-native execution, parallel missions, real observability. ${statsData.callableCount.toLocaleString()} callable APIs across ${statsData.endpointCount.toLocaleString()} endpoints and ${statsData.capabilityCount} capability categories.`,
+      "description": `The control plane for AI agents. Terminal-native execution, parallel missions, and real observability across ${statsData.sourceVerifiedCount.toLocaleString()} source-verified API definitions and ${statsData.capabilityCount} capability categories.`,
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -106,8 +106,8 @@ export default function RootLayout({
         {CLERK_ENABLED ? (
           <ClerkProvider
             afterSignOutUrl="/api/workspace-auth/clerk-signout"
-            signInForceRedirectUrl="/api/workspace-auth/clerk-bridge"
-            signUpForceRedirectUrl="/api/workspace-auth/clerk-bridge"
+            signInFallbackRedirectUrl="/api/workspace-auth/clerk-bridge"
+            signUpFallbackRedirectUrl="/api/workspace-auth/clerk-bridge"
           >
             <PostHogProvider>{children}</PostHogProvider>
           </ClerkProvider>

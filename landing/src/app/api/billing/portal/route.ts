@@ -1,64 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+function convexSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
+  if (configured) return configured.replace(/\/$/, "");
 
-const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+  const cloudUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (cloudUrl) return cloudUrl.replace(/\.convex\.cloud\/?$/, ".convex.site");
+
+  return "https://adventurous-avocet-799.convex.site";
+}
 
 export async function POST(req: NextRequest) {
-  if (!stripe) {
-    return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
-  }
-
   try {
     const { token } = await req.json();
-
     if (!token) {
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
 
-    // Verify session and get workspace
-    const sessionRes = await fetch(`${CONVEX_URL}/api/query`, {
+    const response = await fetch(`${convexSiteUrl()}/api/billing/portal`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        path: "workspaces:getSessionWorkspace",
-        args: { token },
+        token,
+        returnUrl: process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
       }),
+      cache: "no-store",
     });
+    const data = await response.json();
 
-    const sessionData = await sessionRes.json();
-    const workspace = sessionData.value || sessionData;
-
-    if (!workspace || !workspace._id) {
-      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
-    }
-
-    if (!workspace.stripeCustomerId) {
+    if (!response.ok) {
       return NextResponse.json(
-        { error: "No billing account. Add a payment method first." },
-        { status: 400 }
+        { error: data?.error || "Failed to create portal session" },
+        { status: response.status },
       );
     }
 
-    // Determine the app URL for redirects
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.com";
-
-    // Create Billing Portal session
-    const session = await stripe.billingPortal.sessions.create({
-      customer: workspace.stripeCustomerId,
-      return_url: `${appUrl}/workspace?tab=settings&portal=success`,
-    });
-
-    return NextResponse.json({
-      url: session.url,
-    });
+    return NextResponse.json({ url: data.portalUrl });
   } catch (error) {
-    console.error("[Billing Portal] Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create portal session" },
-      { status: 500 }
-    );
+    console.error("[Billing Portal] Convex billing request failed:", error);
+    return NextResponse.json({ error: "Failed to create portal session" }, { status: 502 });
   }
 }

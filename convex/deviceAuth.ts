@@ -1,78 +1,32 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-const TTL_MS = 10 * 60 * 1000; // 10 minutes
-
-function randomCode(): string {
-  // 32 hex chars, URL-safe and unguessable enough for a 10-min TTL.
-  const bytes = new Uint8Array(16);
-  if (typeof crypto !== "undefined") {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-  }
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-}
-
 /**
- * Start a device-auth flow. Called by the MCP server when it gets a 401
- * from the gateway and has no local session. Returns a code that goes into
- * the URL the user's browser opens.
+ * The legacy browser-link flow returned a long-lived workspace bearer to a
+ * polling client. It is retired because a victim could be tricked into
+ * approving an attacker-created code. CLI loopback auth is the canonical,
+ * state-bound flow.
  */
 export const start = mutation({
   args: {
     fingerprint: v.optional(v.string()),
   },
-  handler: async (ctx, { fingerprint }) => {
-    const code = randomCode();
-    const now = Date.now();
-    await ctx.db.insert("deviceAuthCodes", {
-      code,
-      fingerprint,
-      status: "pending",
-      expiresAt: now + TTL_MS,
-      createdAt: now,
-    });
+  handler: async () => {
     return {
-      code,
-      expiresAt: now + TTL_MS,
-      linkUrl: `https://apiclaw.cloud/workspace?link=${code}`,
+      status: "retired" as const,
+      command: "npx @nordsym/apiclaw auth login",
+      message: "Legacy device linking is retired. Use the state-bound CLI browser login.",
     };
   },
 });
 
-/**
- * The MCP server polls this every couple seconds while the user signs in.
- * Returns "pending" until the /workspace page calls complete().
- */
+/** Retired polling surface. It never returns a workspace bearer. */
 export const poll = query({
   args: { code: v.string() },
-  handler: async (ctx, { code }) => {
-    const row = await ctx.db
-      .query("deviceAuthCodes")
-      .withIndex("by_code", (q) => q.eq("code", code))
-      .first();
-    if (!row) return { status: "not_found" as const };
-    if (row.expiresAt < Date.now() && row.status !== "linked") {
-      return { status: "expired" as const };
-    }
-    if (row.status === "linked" && row.sessionToken) {
-      return {
-        status: "linked" as const,
-        sessionToken: row.sessionToken,
-        workspaceId: row.workspaceId,
-        email: row.email,
-      };
-    }
-    return { status: "pending" as const };
-  },
+  handler: async () => ({ status: "retired" as const }),
 });
 
-/**
- * Called by the /workspace page after the user has signed in (existing
- * magic-link flow). Attaches their session to the device code so the MCP
- * server's next poll picks it up.
- */
+/** Retired completion surface. It never attaches a session to a device code. */
 export const complete = mutation({
   args: {
     code: v.string(),
@@ -80,25 +34,8 @@ export const complete = mutation({
     workspaceId: v.id("workspaces"),
     email: v.optional(v.string()),
   },
-  handler: async (ctx, { code, sessionToken, workspaceId, email }) => {
-    const row = await ctx.db
-      .query("deviceAuthCodes")
-      .withIndex("by_code", (q) => q.eq("code", code))
-      .first();
-    if (!row) {
-      throw new Error("Unknown device link code.");
-    }
-    if (row.expiresAt < Date.now()) {
-      throw new Error("Device link code expired. Restart from your MCP client.");
-    }
-    await ctx.db.patch(row._id, {
-      status: "linked",
-      sessionToken,
-      workspaceId,
-      email,
-      linkedAt: Date.now(),
-    });
-    return { ok: true };
+  handler: async () => {
+    throw new Error("Legacy device linking is retired. Run `npx @nordsym/apiclaw auth login`.");
   },
 });
 

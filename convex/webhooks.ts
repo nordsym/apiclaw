@@ -1,7 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query, action, internalAction, internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { Doc, Id } from "./_generated/dataModel";
+import { Doc } from "./_generated/dataModel";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // Event types available for webhooks
 export const WEBHOOK_EVENTS = [
@@ -12,14 +13,24 @@ export const WEBHOOK_EVENTS = [
   "agent.revoked",
 ] as const;
 
-// Generate a random secret for webhook signature verification
+// Customer-controlled webhook delivery is intentionally disabled until it can
+// run behind a destination-pinning egress proxy. Convex fetch alone cannot pin
+// DNS results, so URL validation would not close DNS-rebinding SSRF.
+export const CUSTOMER_WEBHOOK_DELIVERY_ENABLED = false;
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export function formatWebhookSecret(bytes: Uint8Array): string {
+  if (bytes.byteLength < 32) throw new Error("Webhook secrets require at least 32 random bytes");
+  return `whsec_v1_${bytesToHex(bytes)}`;
+}
+
 function generateSecret(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "whsec_";
-  for (let i = 0; i < 32; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return formatWebhookSecret(bytes);
 }
 
 // ============================================
@@ -30,10 +41,7 @@ export const getWebhooks = query({
   args: { token: v.string() },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -75,71 +83,17 @@ export const createWebhook = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
     }
 
-    // Validate URL
-    try {
-      new URL(args.url);
-    } catch {
-      return { error: "Invalid URL format" };
+    if (!CUSTOMER_WEBHOOK_DELIVERY_ENABLED) {
+      return {
+        error: "Customer webhook delivery is unavailable until destination-pinned egress is live.",
+      };
     }
-
-    // Validate URL is HTTPS
-    if (!args.url.startsWith("https://")) {
-      return { error: "Webhook URL must use HTTPS" };
-    }
-
-    // Validate events
-    const validEvents = args.events.filter((e) =>
-      WEBHOOK_EVENTS.includes(e as typeof WEBHOOK_EVENTS[number])
-    );
-
-    if (validEvents.length === 0) {
-      return { error: "At least one valid event is required" };
-    }
-
-    // Check webhook limit (max 5 per workspace)
-    const existingWebhooks = await ctx.db
-      .query("webhooks")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
-      .collect();
-
-    if (existingWebhooks.length >= 5) {
-      return { error: "Maximum 5 webhooks per workspace" };
-    }
-
-    // Check for duplicate URL
-    const duplicate = existingWebhooks.find((wh) => wh.url === args.url);
-    if (duplicate) {
-      return { error: "A webhook with this URL already exists" };
-    }
-
-    // Generate secret
-    const secret = generateSecret();
-
-    // Create webhook
-    const webhookId = await ctx.db.insert("webhooks", {
-      workspaceId: session.workspaceId,
-      url: args.url,
-      events: validEvents,
-      secret,
-      enabled: true,
-      failCount: 0,
-      createdAt: Date.now(),
-    });
-
-    return {
-      success: true,
-      webhookId,
-      secret, // Return secret only once on creation
-    };
   },
 });
 
@@ -152,10 +106,7 @@ export const updateWebhook = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -166,6 +117,12 @@ export const updateWebhook = mutation({
 
     if (!webhook || webhook.workspaceId !== session.workspaceId) {
       return { error: "Webhook not found" };
+    }
+
+    if (args.enabled === true && !CUSTOMER_WEBHOOK_DELIVERY_ENABLED) {
+      return {
+        error: "Customer webhook delivery is unavailable until destination-pinned egress is live.",
+      };
     }
 
     // Build update object
@@ -202,10 +159,7 @@ export const deleteWebhook = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -232,10 +186,7 @@ export const regenerateSecret = mutation({
   },
   handler: async (ctx, args) => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -289,54 +240,9 @@ export const testWebhook = action({
     if (!queryResult || "error" in queryResult) {
       return { error: queryResult?.error || "Webhook not found" };
     }
-
-    const webhook = queryResult.webhook;
-
-    // Create test payload
-    const payload = {
-      event: "test",
-      workspace: webhook.workspaceId,
-      timestamp: new Date().toISOString(),
-      data: {
-        message: "This is a test webhook from APIClaw",
-        webhookId: args.webhookId,
-      },
+    return {
+      error: "Customer webhook delivery is unavailable until destination-pinned egress is live.",
     };
-
-    // Sign the payload
-    const signature = await signPayload(JSON.stringify(payload), webhook.secret);
-
-    try {
-      const response = await fetch(webhook.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-APIClaw-Signature": signature,
-          "X-APIClaw-Event": "test",
-          "X-APIClaw-Timestamp": payload.timestamp,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        return {
-          success: true as const,
-          status: response.status,
-          message: "Webhook delivered successfully",
-        };
-      } else {
-        return {
-          success: false as const,
-          status: response.status,
-          message: `Webhook returned status ${response.status}`,
-        };
-      }
-    } catch (error) {
-      return {
-        success: false as const,
-        message: error instanceof Error ? error.message : "Failed to deliver webhook",
-      };
-    }
   },
 });
 
@@ -348,62 +254,8 @@ export const triggerWebhooks = internalAction({
     data: v.any(),
   },
   returns: v.object({ triggered: v.number(), total: v.optional(v.number()) }),
-  handler: async (ctx, args): Promise<{ triggered: number; total?: number }> => {
-    // Get all enabled webhooks for this workspace that subscribe to this event
-    const webhooksResult = await ctx.runQuery(internal.webhooks.getWebhooksForEvent, {
-      workspaceId: args.workspaceId,
-      event: args.event,
-    });
-
-    if (!webhooksResult || webhooksResult.length === 0) {
-      return { triggered: 0 };
-    }
-
-    const payload = {
-      event: args.event,
-      workspace: args.workspaceId,
-      timestamp: new Date().toISOString(),
-      data: args.data,
-    };
-
-    const payloadString = JSON.stringify(payload);
-    let successCount = 0;
-
-    // Send to each webhook
-    for (const webhook of webhooksResult) {
-      const signature = await signPayload(payloadString, webhook.secret);
-
-      try {
-        const response = await fetch(webhook.url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-APIClaw-Signature": signature,
-            "X-APIClaw-Event": args.event,
-            "X-APIClaw-Timestamp": payload.timestamp,
-          },
-          body: payloadString,
-        });
-
-        // Update webhook status
-        await ctx.runMutation(internal.webhooks.updateWebhookStatus, {
-          webhookId: webhook._id,
-          success: response.ok,
-        });
-
-        if (response.ok) {
-          successCount++;
-        }
-      } catch {
-        // Update webhook with failure
-        await ctx.runMutation(internal.webhooks.updateWebhookStatus, {
-          webhookId: webhook._id,
-          success: false,
-        });
-      }
-    }
-
-    return { triggered: successCount, total: webhooksResult.length };
+  handler: async (): Promise<{ triggered: number; total?: number }> => {
+    return { triggered: 0, total: 0 };
   },
 });
 
@@ -418,10 +270,7 @@ export const getWebhookInternal = internalQuery({
   },
   handler: async (ctx, args): Promise<{ error: string } | { webhook: Doc<"webhooks"> }> => {
     // Verify session
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
 
     if (!session) {
       return { error: "Invalid session" };
@@ -482,13 +331,15 @@ export const updateWebhookStatus = internalMutation({
 // HELPERS
 // ============================================
 
-async function signPayload(payload: string, secret: string): Promise<string> {
-  // Simple HMAC-like signature using SHA-256
-  // In a production environment, use proper crypto
+export async function signPayload(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(payload + secret);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-  return `sha256=${hashHex}`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+  return `v1=${bytesToHex(new Uint8Array(signature))}`;
 }

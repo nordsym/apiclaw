@@ -5,10 +5,9 @@
  * Tools:
  * - discover_apis: Search for APIs by capability
  * - get_api_details: Get full info about an API
- * - check_balance: Check credits and active purchases
+ * - check_balance: Check activation allowance and PAYG readiness
  */
 
-import { spawn } from 'node:child_process';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -19,15 +18,20 @@ import {
 
 import { discoverAPIs, getAPIDetails, getCategories, getAllAPIs } from './discovery.js';
 import { trackStartup, trackSearch, trackExecute, trackDiscovery } from './telemetry.js';
-import { getBalanceSummary } from './credits.js';
 import { getConnectedProviders } from './execute.js';
-import { executeMetered } from './metered.js';
-import { logAPICall } from './mcp-analytics.js';
-import { isOpenAPI, executeOpenAPI, listOpenAPIs, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
+import { isOpenAPI, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
 import { CANON_STATS } from './canon-stats.js';
-import { FREE_MANAGED_CALLS_PER_WEEK, nextWeeklyResetUtc } from './product-truth.js';
-import { isInternalOnlyProvider } from './provider-boundaries.js';
-import { getGateway, isGatewayEnabled, type GatewayResponse } from './gateway-client.js';
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from './product-truth.js';
+import {
+  isInternalOnlyProvider,
+  isInternalProviderReference,
+  isUnavailableManagedProvider,
+} from './provider-boundaries.js';
+import { getGateway, type GatewayResponse } from './gateway-client.js';
 import { PROXY_PROVIDERS } from './proxy.js';
 import { 
   requiresConfirmation,
@@ -42,13 +46,6 @@ import { readSession, writeSession, clearSession, getMachineFingerprint, detectM
 import { FIRST_CALL_PROMPT, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
-import { 
-  getOrCreateCustomer, 
-  createMeteredCheckoutSession, 
-  getUsageSummary,
-  METERED_BILLING 
-} from './stripe.js';
-import { estimateCost } from './metered.js';
 import { 
   executeChain, 
   getChainStatus, 
@@ -78,16 +75,6 @@ interface WorkspaceContext {
   status: string;
 }
 
-type IncrementUsageResult = {
-  success: boolean;
-  usageCount: number;
-  usageLimit: number;
-  usageRemaining: number;
-  weeklyUsageCount: number;
-  weeklyRemaining: number;
-  quotaWarning?: unknown;
-};
-
 let workspaceContext: WorkspaceContext | null = null;
 let currentAgentId: string | null = null; // Agent ID from agents table (set on startup)
 let pendingRegistrationEmail: string | null = null; // Email waiting for OTP verification
@@ -106,7 +93,7 @@ const anonymousRateLimits = new Map<string, AnonymousRateLimitState>();
 // Rate limit constants
 const ANONYMOUS_HOURLY_LIMIT = 5;
 const ANONYMOUS_WEEKLY_LIMIT = 10;
-const FREE_WEEKLY_LIMIT = FREE_MANAGED_CALLS_PER_WEEK;
+const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const MAX_MCP_TOOL_RESULT_BYTES = 900_000;
 
 type TransportCompactLimits = {
@@ -292,6 +279,15 @@ function calculateMinutesUntilNextHour(): number {
   return Math.ceil((nextHour.getTime() - now.getTime()) / 60000);
 }
 
+function nextAnonymousWeeklyResetUtc(nowMs = Date.now()): string {
+  const now = new Date(nowMs);
+  const daysUntilMonday = ((8 - now.getUTCDay()) % 7) || 7;
+  const nextMonday = new Date(now);
+  nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+  nextMonday.setUTCHours(0, 0, 0, 0);
+  return nextMonday.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+}
+
 /**
  * Check anonymous rate limits for proxy provider usage
  */
@@ -344,11 +340,11 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       allowed: false,
       error: JSON.stringify({
         success: false,
-        error: `⚡ You've hit your free tier limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).\n   Upgrade: https://apiclaw.cloud/upgrade`,
-        hint: "Authenticate for free managed calls, then continue at API cost + 15% with pay-as-you-go.",
+        error: `You've hit the anonymous execution limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).`,
+        hint: `Authenticate for ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, then continue at provider cost + ${PAYG_MARGIN_PERCENT}% with pay-as-you-go.`,
         action: "Run in terminal: npx @nordsym/apiclaw auth login",
         upgrade_url: "https://apiclaw.cloud/upgrade",
-        retry_after: nextWeeklyResetUtc()
+        retry_after: nextAnonymousWeeklyResetUtc()
       }, null, 2)
     };
   }
@@ -454,8 +450,8 @@ async function trackEarnProgress(workspaceId: string, provider: string, action: 
 
 /**
  * Rate limiting for anonymous proxy usage
- * Limits: 10 calls/week, 5 calls/hour (anonymous)
- *         50 calls/week, 10 calls/hour (authenticated)
+ * Legacy anonymous throttle: 10 calls/week, 5 calls/hour.
+ * Authenticated managed usage is enforced by the gateway's lifetime policy.
  */
 interface RateLimitState {
   hourly: { count: number; resetAt: number };
@@ -500,7 +496,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           estimated_seconds: 15,
           fallback: 'Complete browser auth on a device that can open the sign-in URL.',
           legacy_action: 'register_owner is retired. Use the browser auth command above.',
-          free_tier: 'Free managed calls are included after signup. Continue beyond the free tier at API cost + 15%.',
+          free_tier: `${FREE_MANAGED_CALLS_LIFETIME} managed calls are included for the lifetime of the workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider-cost cap. Discovery is free. Billing-ready managed actions can continue at provider cost + ${PAYG_MARGIN_PERCENT}% with pay-as-you-go.`,
           first_call_prompt: FIRST_CALL_PROMPT,
         }, null, 2),
         isAnonymous: true,
@@ -533,28 +529,8 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     };
   }
 
-  if (workspaceContext.usageRemaining === 0) {
-    // Free tier hit weekly limit
-    if (workspaceContext.tier === 'free') {
-      return { 
-        allowed: false, 
-        error: JSON.stringify({
-          success: false,
-          error: `You've hit your free tier limit (${FREE_WEEKLY_LIMIT} calls/week). Add a payment method to keep going at API cost + 15%.`,
-          hint: "Continue with pay-as-you-go. No Pro subscription required.",
-          upgrade_url: "https://apiclaw.cloud/upgrade",
-          retry_after: nextWeeklyResetUtc()
-        }, null, 2)
-      };
-    }
-    
-    // Other tiers (shouldn't happen, but handle gracefully)
-    return { 
-      allowed: false, 
-      error: `You've hit your free tier limit (${FREE_WEEKLY_LIMIT} calls/week). Add a payment method to keep going at API cost + 15%: https://apiclaw.cloud/upgrade` 
-    };
-  }
-  
+  // The gateway is the quota/PAYG authority. This context is a cached display
+  // snapshot and must not block a user who just enabled PAYG in the workspace.
   return { allowed: true, isAnonymous: false };
 }
 
@@ -581,16 +557,6 @@ function enforceOwner(channel: string):
       version: process.env.npm_package_version || 'unknown',
       props: { reason: result.reason, channel },
     });
-    if (result.reason === 'quota_exceeded') {
-      emitFunnelEvent({
-        event: 'quota_hit',
-        workspaceId: workspaceContext?.workspaceId,
-        email: workspaceContext?.email,
-        fingerprint: getMachineFingerprint(),
-        version: process.env.npm_package_version || 'unknown',
-        props: { tier: workspaceContext?.tier, limit: workspaceContext?.usageCount },
-      });
-    }
   } catch { /* non-blocking */ }
   return {
     ok: false,
@@ -601,114 +567,10 @@ function enforceOwner(channel: string):
   };
 }
 
-// Per-process marker: ensure first_call_api_success fires once per server boot.
-let firstCallEmitted = false;
-
 /**
  * Get customer API key from environment variable
  * Convention: {PROVIDER}_API_KEY (e.g., COACCEPT_API_KEY, ELKS_API_KEY)
  */
-// ─────────────────────────────────────────────────────────────────────────
-// Device-auth flow.
-//
-// On the first call_api 401 from the gateway, the MCP server kicks off a
-// browser-based magic-link signup. No keys are pasted into the install
-// dialog. No terminal commands are needed. Flow:
-//
-//   1. We POST deviceAuth:start → get a one-time code
-//   2. We open https://apiclaw.cloud/workspace?link=<code> in the user's
-//      default browser
-//   3. The user signs up / signs in via the existing magic-link flow
-//   4. The /workspace page calls deviceAuth:complete with the new session
-//   5. We poll deviceAuth:poll until the code flips to "linked", then
-//      write the session to ~/.apiclaw/session
-//
-// Time budget: 90 seconds. If the user doesn't finish in that window the
-// MCP returns an auth_pending tool result and the agent tells them to
-// finish the browser tab and ask again.
-// ─────────────────────────────────────────────────────────────────────────
-
-let deviceLinkInFlight = false;
-
-function openBrowser(url: string): void {
-  try {
-    const platform = process.platform;
-    const cmd =
-      platform === 'darwin' ? 'open' :
-      platform === 'win32'  ? 'cmd'  :
-      'xdg-open';
-    const args =
-      platform === 'win32' ? ['/c', 'start', '""', url] : [url];
-    spawn(cmd, args, {
-      detached: true,
-      stdio: 'ignore',
-      shell: platform === 'win32',
-    }).unref();
-  } catch (e) {
-    console.error('[APIClaw] Could not open browser:', e);
-  }
-}
-
-async function attemptDeviceLink(): Promise<{
-  ok: boolean;
-  linkUrl?: string;
-  reason?: 'pending' | 'expired' | 'error';
-}> {
-  if (deviceLinkInFlight) {
-    return { ok: false, reason: 'pending' };
-  }
-  deviceLinkInFlight = true;
-  try {
-    const startRes = await fetch(`${CONVEX_URL}/api/mutation`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: 'deviceAuth:start',
-        args: { fingerprint: getMachineFingerprint() },
-      }),
-    });
-    const startBody = (await startRes.json()) as any;
-    const start = startBody.value ?? startBody;
-    if (!start?.code || !start?.linkUrl) {
-      return { ok: false, reason: 'error' };
-    }
-
-    openBrowser(start.linkUrl);
-
-    const deadline = Date.now() + 90_000;
-    while (Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, 2000));
-      const pollRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: 'deviceAuth:poll',
-          args: { code: start.code },
-        }),
-      });
-      const pollBody = (await pollRes.json()) as any;
-      const poll = pollBody.value ?? pollBody;
-      if (poll?.status === 'linked' && poll.sessionToken) {
-        try {
-          writeSession(poll.sessionToken, poll.workspaceId ?? '', poll.email ?? '');
-        } catch (e) {
-          console.error('[APIClaw] Could not persist session:', e);
-        }
-        return { ok: true };
-      }
-      if (poll?.status === 'expired' || poll?.status === 'not_found') {
-        return { ok: false, reason: 'expired', linkUrl: start.linkUrl };
-      }
-    }
-    return { ok: false, reason: 'pending', linkUrl: start.linkUrl };
-  } catch (e) {
-    console.error('[APIClaw] Device link failed:', e);
-    return { ok: false, reason: 'error' };
-  } finally {
-    deviceLinkInFlight = false;
-  }
-}
-
 // ─────────────────────────────────────────────────────────────────────────
 // Suggested-call hints for discover_apis.
 //
@@ -817,7 +679,7 @@ const SUGGESTED_CALL_RULES: Array<{
       provider: 'brave_search',
       action: 'search',
       description: 'Live web search via Brave (APIClaw owns the key).',
-      example_params: { q: 'apiclaw nordsym', count: 10 },
+      example_params: { query: 'apiclaw nordsym', count: 10 },
       intent: 'web search',
     },
   },
@@ -889,29 +751,6 @@ function buildSuggestedCalls(query: string): SuggestedCall[] {
   return out;
 }
 
-function getCustomerKey(providerId: string): string | undefined {
-  // Try exact match first (e.g., 46elks -> 46ELKS_API_KEY)
-  const exactKey = `${providerId.toUpperCase().replace(/-/g, '_')}_API_KEY`;
-  if (process.env[exactKey]) {
-    return process.env[exactKey];
-  }
-  
-  // Try common variations
-  const variations = [
-    `${providerId.toUpperCase()}_API_KEY`,
-    `${providerId.toUpperCase()}_KEY`,
-    `${providerId.toUpperCase().replace(/_/g, '')}_API_KEY`,
-  ];
-  
-  for (const key of variations) {
-    if (process.env[key]) {
-      return process.env[key];
-    }
-  }
-  
-  return undefined;
-}
-
 // Tool definitions
 const tools: Tool[] = [
   {
@@ -939,7 +778,7 @@ const tools: Tool[] = [
         },
         callable_only: {
           type: 'boolean',
-          description: 'Default true: only return APIs APIClaw can execute right now (2,906+ callable APIs). Set false to also see the full 26,701+ discoverable registry. Signup is required, discovery is free.',
+          description: `Default true: only return managed APIs APIClaw can execute right now. Set false to include the full ${CANON_STATS.discoverable.toLocaleString()} registry, including ${CANON_STATS.source_verified.toLocaleString()} current catalog entries matched to source-verification evidence by exact name. Source verification is not execution. Signup is required; discovery is free.`,
           default: true,
         },
         max_results: {
@@ -984,15 +823,10 @@ const tools: Tool[] = [
   },
   {
     name: 'check_balance',
-    description: 'Check your credit balance and list active API purchases.',
+    description: 'Check the authenticated workspace tier, lifetime activation allowance, and verified PAYG status.',
     inputSchema: {
       type: 'object',
-      properties: {
-        agent_id: {
-          type: 'string',
-          description: 'Your agent identifier (optional, uses default if not provided)'
-        }
-      }
+      properties: {}
     }
   },
   {
@@ -1045,6 +879,10 @@ Example chain:
         params: {
           type: 'object',
           description: 'Parameters for the action. Varies by provider/action.'
+        },
+        idempotency_key: {
+          type: 'string',
+          description: 'Required caller-owned operation key. If the outcome is ambiguous, do not submit again; retain this key and request ID for reconciliation.'
         },
         customer_key: {
           type: 'string',
@@ -1120,18 +958,18 @@ Example chain:
           description: 'AI backend making this request (e.g., "claude-3-sonnet", "gpt-4"). Used for analytics.'
         }
       },
-      required: []
+      required: ['idempotency_key']
     }
   },
   {
     name: 'list_connected',
-    description: 'Summary of providers callable right now through APIClaw with no key paste. Defaults to a compact summary (managed providers + open-API counts). Pass verbose=true only if the agent explicitly needs the full open-API list. Use discover_apis(query) for narrow lookups instead of dumping the whole catalog.',
+    description: 'Summary of managed providers callable right now through APIClaw with no key paste. Defaults to a compact execution-ready summary. Pass verbose=true only if the agent explicitly needs source-verified discovery entries. Use discover_apis(query) for narrow lookups instead of dumping the whole catalog.',
     inputSchema: {
       type: 'object',
       properties: {
         verbose: {
           type: 'boolean',
-          description: 'If true, also include the full keyless open-API list (large response, will auto-compact). Default: false.',
+          description: 'If true, also include source-verified keyless registry entries for discovery. Public proxy execution remains disabled until hardened egress is live. Default: false.',
           default: false,
         },
         category: {
@@ -1192,11 +1030,11 @@ Example chain:
   },
   {
     name: 'list_models',
-    description: 'List the live APIClaw model catalog. Entries identify their provider, route source, and compatible gateway endpoint. Use the returned endpoint and model ID for execution.',
+    description: 'List the live APIClaw model catalog. Entries identify the model owner, serving source, and compatible gateway endpoint. Catalog presence does not prove execution readiness.',
     inputSchema: {
       type: 'object',
       properties: {
-        provider: { type: 'string', description: 'Optional: filter to one provider (anthropic, openai, xai, groq, mistral, together, openrouter, …)' },
+        provider: { type: 'string', description: 'Optional: filter to one provider (anthropic, openai, xai, groq, mistral, openrouter, etc.)' },
       },
     },
   },
@@ -1204,104 +1042,11 @@ Example chain:
   // WORKSPACE TOOLS
   // ============================================
   {
-    name: 'register_owner',
-    description: 'Retired legacy auth alias. Returns the canonical `npx @nordsym/apiclaw auth login` browser-auth command and never creates a session.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          description: 'Your email address (used for verification and account recovery)'
-        }
-      },
-      required: ['email']
-    }
-  },
-  {
-    name: 'verify_code',
-    description: 'Retired legacy verification alias. Use `npx @nordsym/apiclaw auth login` to verify ownership securely.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          description: 'The email address used in register_owner'
-        },
-        code: {
-          type: 'string',
-          description: 'The 6-digit verification code from the email'
-        }
-      },
-      required: ['email', 'code']
-    }
-  },
-  {
     name: 'check_workspace_status',
     description: 'Check your workspace status, tier, and usage remaining.',
     inputSchema: {
       type: 'object',
       properties: {}
-    }
-  },
-  {
-    name: 'remind_owner',
-    description: 'Send a reminder email to verify workspace ownership (if verification is pending).',
-    inputSchema: {
-      type: 'object',
-      properties: {}
-    }
-  },
-  // Metered Billing Tools
-  {
-    name: 'setup_metered_billing',
-    description: 'Set up pay-per-call billing. Creates a subscription that charges $0.002 per API call at end of month.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          description: 'Email for the billing account'
-        },
-        success_url: {
-          type: 'string',
-          description: 'URL to redirect after successful setup',
-          default: 'https://apiclaw.cloud/billing/success'
-        },
-        cancel_url: {
-          type: 'string',
-          description: 'URL to redirect if setup is cancelled',
-          default: 'https://apiclaw.cloud/billing/cancel'
-        }
-      },
-      required: ['email']
-    }
-  },
-  {
-    name: 'get_usage_summary',
-    description: 'Get current billing period usage and estimated cost for metered billing.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        subscription_id: {
-          type: 'string',
-          description: 'Stripe subscription ID (stored after setup_metered_billing)'
-        }
-      },
-      required: ['subscription_id']
-    }
-  },
-  {
-    name: 'estimate_cost',
-    description: 'Estimate the cost for a given number of API calls.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        call_count: {
-          type: 'number',
-          description: 'Number of API calls to estimate cost for'
-        }
-      },
-      required: ['call_count']
     }
   },
   // ============================================
@@ -1325,8 +1070,12 @@ Example chain:
           type: 'object',
           description: 'Template-specific parameters (see list_mission_templates for the schema).',
         },
+        idempotency_key: {
+          type: 'string',
+          description: 'Required caller-owned mission operation key. If the outcome is ambiguous, do not submit again; retain this key and request ID for reconciliation.',
+        },
       },
-      required: ['template'],
+      required: ['template', 'idempotency_key'],
     },
   },
   {
@@ -1422,14 +1171,39 @@ const server = new Server(
   }
 );
 
+const LOCAL_CANONICAL_TOOL_NAMES = new Set([
+  'apiclaw_help',
+  'discover_apis',
+  'get_api_details',
+  'list_categories',
+  'list_connected',
+  'list_models',
+  'call_api',
+  'check_balance',
+  'check_workspace_status',
+  'list_mission_templates',
+  'start_mission',
+  'discover_missions',
+  'mission_status',
+  'list_missions',
+]);
+const canonicalTools = tools.filter((tool) => LOCAL_CANONICAL_TOOL_NAMES.has(tool.name));
+
 // Handle list tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return { tools };
+  return { tools: canonicalTools };
 });
 
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
+
+  if (!LOCAL_CANONICAL_TOOL_NAMES.has(name)) {
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ error: `Unknown tool: ${name}` }) }],
+      isError: true,
+    };
+  }
 
   try {
     switch (name) {
@@ -1440,8 +1214,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${!isAuthenticated ? `
 GET STARTED (free):
-  1. register_owner({ email: "you@example.com" })  — sends 6-digit code
-  2. verify_code({ email: "you@example.com", code: "123456" })  - activates workspace
+  Run: npx @nordsym/apiclaw auth login
+  Complete the browser sign-in, then call check_workspace_status.
 ` : `
 STATUS: Authenticated as ${workspaceContext!.email} (${workspaceContext!.tier} tier)
 `}
@@ -1450,10 +1224,10 @@ DISCOVER APIs (signup required, free):
   discover_apis({ query: "text to speech", category: "ai" })
 
 CALL APIs (requires free registration):
-  call_api({ provider: "brave_search", action: "search", params: { q: "AI agents" } })
-  call_api({ provider: "elevenlabs", action: "tts", params: { text: "Hello" } })
+  call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
+  call_api({ provider: "github", action: "get_repo", params: { owner: "nordsym", repo: "apiclaw" } })
 
-${CANON_STATS.discoverable.toLocaleString()}+ DISCOVERABLE | ${CANON_STATS.callable.toLocaleString()}+ CALLABLE | Discovery is free after signup | Free tier: 50 managed calls / week
+${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Discovery is free | Free tier: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider cost
 
 Docs: https://apiclaw.cloud
 `;
@@ -1479,7 +1253,7 @@ Docs: https://apiclaw.cloud
         const startTime = Date.now();
 
         // Delegate to HTTP gateway /v1/discover so every door sees the same
-        // canon (26,701+ discoverable / 2,906+ callable). Local registry
+        // live gateway canon from CANON_STATS. Local registry
         // was stripped from the tarball in 2.8.3 (saved 150MB); hardcoded
         // curated set + Convex managed cache only ships ~53 entries standalone.
         // Gateway-fetch makes lokal MCP tool match HTTP + Remote MCP results.
@@ -1502,7 +1276,17 @@ Docs: https://apiclaw.cloud
           });
           if (discoverResp.ok) {
             const data: any = await discoverResp.json();
-            const open = (data.apis || []).map((a: any) => ({
+            const publicApis = (data.apis || []).filter((a: any) =>
+              !isInternalProviderReference({
+                id: a.id || a.providerId,
+                name: a.name,
+                baseUrl: a.baseUrl,
+                docsUrl: a.docsUrl,
+              }) &&
+              ![a.id, a.providerId, a.name, a.baseUrl, a.docsUrl]
+                .some((value) => isUnavailableManagedProvider(value))
+            );
+            const open = publicApis.map((a: any) => ({
               provider: {
                 id: String(a.name || '').toLowerCase().replace(/\s+/g, '_'),
                 name: a.name,
@@ -1655,7 +1439,7 @@ Docs: https://apiclaw.cloud
                   ? {
                       no_callable_match: true,
                       no_callable_match_hint:
-                        'No directly-callable provider matched. Try call_api({provider:"generic", action:"request", params:{url, method, ...}}) for any keyless public endpoint, or refine the query, or call list_connected to see what APIClaw can execute right now.',
+                        'No directly-callable managed provider matched. Refine the query or call list_connected to see what APIClaw can execute right now. Keyless registry entries are discovery-only until hardened egress is live.',
                     }
                   : {}),
                 ...(suggestedCalls.length > 0
@@ -1666,8 +1450,8 @@ Docs: https://apiclaw.cloud
                     }
                   : {}),
                 results: results.map(r => {
-                  // Binary funnel: callable iff APIClaw can execute it server-side
-                  // (managed adapter OR keyless open proxy). Everything else = discovery-only.
+                  // Managed adapters are executable. Source-verified keyless
+                  // registry entries remain discovery-only until hardened egress is live.
                   const anyProvider = r.provider as unknown as { callable?: boolean; auth?: string };
                   const isCallable = anyProvider.callable === true;
                   return {
@@ -1749,26 +1533,31 @@ Docs: https://apiclaw.cloud
       }
 
       case 'check_balance': {
-        const agentId = (args?.agent_id as string) || DEFAULT_AGENT_ID;
-        const summary = getBalanceSummary(agentId);
+        if (!workspaceContext?.sessionToken) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                status: 'auth_required',
+                message: 'Run `npx @nordsym/apiclaw auth login`, then call check_balance again.',
+              }),
+            }],
+          };
+        }
+
+        const response = await fetch(`${CONVEX_URL}/api/balance`, {
+          method: 'POST',
+          headers: { 'X-APIClaw-Session': workspaceContext.sessionToken },
+        });
+        const balance = await response.json().catch(() => ({
+          error: `Gateway returned HTTP ${response.status}`,
+        }));
 
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                status: 'success',
-                agent_id: agentId,
-                balance_usd: summary.credits.balance_usd,
-                currency: summary.credits.currency,
-                total_spent_usd: summary.total_spent_usd,
-                active_purchases: summary.active_purchases.map(p => ({
-                  id: p.id,
-                  provider: p.provider_id,
-                  credits_remaining: p.credits_purchased,
-                  status: p.status
-                }))
-              }, null, 2)
+              text: JSON.stringify(balance, null, 2)
             }
           ]
         };
@@ -1835,13 +1624,22 @@ Docs: https://apiclaw.cloud
         const provider = args?.provider as string;
         const action = args?.action as string;
         const params = (args?.params as Record<string, any>) || {};
+        const idempotencyKey = typeof args?.idempotency_key === 'string'
+          ? args.idempotency_key.trim()
+          : '';
+        if (!idempotencyKey) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'idempotency_key is required for managed execution' }) }],
+            isError: true,
+          };
+        }
         const confirmToken = args?.confirm_token as string | undefined;
         const dryRun = args?.dry_run as boolean | undefined;
         const chain = args?.chain as ChainStepUnion[] | undefined;
         const subagentId = args?.subagent_id as string | undefined;
         const aiBackend = args?.ai_backend as string | undefined;
 
-        if (isInternalOnlyProvider(provider)) {
+        if (isInternalOnlyProvider(provider) || isUnavailableManagedProvider(provider)) {
           return {
             content: [{
               type: 'text',
@@ -1899,6 +1697,30 @@ Docs: https://apiclaw.cloud
             
             const chainOptions: ChainOptions = {
               verbose: false,
+              operationKey: idempotencyKey,
+              executeCall: async (stepProvider, stepAction, stepParams, operation) => {
+                const gatewayResult = await getGateway().execute(
+                  stepProvider,
+                  stepAction,
+                  stepParams,
+                  {
+                    workspaceId: workspaceContext?.workspaceId,
+                    sessionToken: workspaceContext?.sessionToken,
+                    idempotencyKey: operation.idempotencyKey,
+                  },
+                );
+                return {
+                  success: gatewayResult.success,
+                  data: gatewayResult.data,
+                  error: gatewayResult.error,
+                  code: gatewayResult.code,
+                  outcomeUnknown: gatewayResult.outcomeUnknown,
+                  retryable: gatewayResult.retryable,
+                  idempotencyKey: gatewayResult.idempotencyKey,
+                  requestId: gatewayResult.requestId,
+                  cost: gatewayResult.cost,
+                };
+              },
             };
             
             // Execute the chain
@@ -1908,21 +1730,6 @@ Docs: https://apiclaw.cloud
               {}, // inputs
               chainOptions
             );
-            
-            // Track usage for chain (count completed steps)
-            if (chainResult.success && workspaceContext) {
-              const completedCount = chainResult.completedSteps.length;
-              
-              for (let i = 0; i < completedCount; i++) {
-                try {
-                  await convex.mutation("workspaces:incrementUsage" as any, {
-                    workspaceId: workspaceContext.workspaceId as any,
-                  });
-                } catch (e) {
-                  console.error('[APIClaw] Failed to track chain usage:', e);
-                }
-              }
-            }
             
             // Format response to match expected chain response format
             return {
@@ -2013,7 +1820,7 @@ Docs: https://apiclaw.cloud
         }
         
         const startTime = Date.now();
-        let result: { success: boolean; provider: string; action: string; data?: any; error?: string; cost?: number };
+        let result: GatewayResponse;
         let apiType: 'direct' | 'open';
 
         // Check if this is a confirmation of a pending action
@@ -2036,52 +1843,17 @@ Docs: https://apiclaw.cloud
           // Execute the confirmed action
           apiType = 'direct';
 
-          if (isGatewayEnabled()) {
-            // Route through Intelligent Gateway
-            const gatewayResult = await getGateway().execute(
-              pending.provider,
-              pending.action,
-              pending.params,
-              { workspaceId: workspaceContext?.workspaceId },
-            );
-            result = {
-              success: gatewayResult.success,
-              provider: gatewayResult.provider,
-              action: gatewayResult.action,
-              data: gatewayResult.data,
-              error: gatewayResult.error,
-              cost: gatewayResult.cost,
-            };
-          } else {
-            // Legacy: direct execution with metered billing
-            const customerKey = (args?.customer_key as string) || getCustomerKey(pending.provider);
-            const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
-            result = await executeMetered(pending.provider, pending.action, pending.params, {
-              customerId: stripeCustomerId,
-              customerKey,
-              userId: DEFAULT_AGENT_ID,
-            });
-
-            // Legacy logging (gateway handles this when enabled)
-            const analyticsUserId = workspaceContext
-              ? workspaceContext.workspaceId
-              : `anon:${getMachineFingerprint()}`;
-            logAPICall({
-              timestamp: new Date().toISOString(),
-              provider: pending.provider,
-              action: pending.action,
-              type: apiType,
-              userId: analyticsUserId,
-              success: result.success,
-              latencyMs: Date.now() - startTime,
-              error: result.error,
-            });
-
-            // Track earn progress (legacy path)
-            if (result.success && workspaceContext) {
-              await trackEarnProgress(workspaceContext.workspaceId, pending.provider, pending.action);
-            }
-          }
+          const gatewayResult = await getGateway().execute(
+            pending.provider,
+            pending.action,
+            pending.params,
+            {
+              workspaceId: workspaceContext?.workspaceId,
+              sessionToken: workspaceContext?.sessionToken,
+              idempotencyKey,
+            },
+          );
+          result = gatewayResult;
 
           return {
             content: [{
@@ -2091,7 +1863,14 @@ Docs: https://apiclaw.cloud
                 provider: result.provider,
                 action: result.action,
                 confirmed: true,
-                ...(result.success ? { data: result.data } : { error: result.error }),
+                ...(result.success ? { data: result.data } : {
+                  error: result.error,
+                  code: result.code,
+                  request_id: result.requestId,
+                  outcome_unknown: result.outcomeUnknown,
+                  retryable: result.retryable,
+                  idempotency_key: result.idempotencyKey,
+                }),
               }, {
                 hint: 'Ask for a summary or narrower params if the confirmed result is very large.',
               })
@@ -2149,101 +1928,24 @@ Docs: https://apiclaw.cloud
         // Regular execution (no confirmation needed)
         apiType = isOpenAPI(provider) ? 'open' : 'direct';
 
-        if (isGatewayEnabled()) {
-          // Route through Intelligent Gateway (handles billing, logging, analytics)
-          const gatewayParams = {
-            ...params,
-            ...(apiType === 'open' ? { baseUrl: getOpenAPIBaseUrl(provider, action, params) } : {}),
-          };
-          const gatewayResult = await getGateway().execute(
-            provider,
-            action,
-            gatewayParams,
-            { workspaceId: workspaceContext?.workspaceId },
-          );
-          result = {
-            success: gatewayResult.success,
-            provider: gatewayResult.provider,
-            action: gatewayResult.action,
-            data: gatewayResult.data,
-            error: gatewayResult.error,
-            cost: gatewayResult.cost,
-          };
-        } else {
-          // Legacy: direct local execution
-          if (apiType === 'open') {
-            result = await executeOpenAPI(provider, action, params);
-          } else {
-            const customerKey = (args?.customer_key as string) || getCustomerKey(provider);
-            const stripeCustomerId = (args?.stripe_customer_id as string) || process.env.APICLAW_STRIPE_CUSTOMER_ID;
-            result = await executeMetered(provider, action, params, {
-              customerId: stripeCustomerId,
-              customerKey,
-              userId: DEFAULT_AGENT_ID,
-            });
-          }
-
-          // Legacy logging (gateway handles all of this when enabled)
-          const analyticsUserId = workspaceContext
-            ? workspaceContext.workspaceId
-            : `anon:${getMachineFingerprint()}`;
-
-          logAPICall({
-            timestamp: new Date().toISOString(),
-            provider,
-            action,
-            type: apiType,
-            userId: analyticsUserId,
-            success: result.success,
-            latencyMs: Date.now() - startTime,
-            error: result.error,
-          });
-
-          if (workspaceContext) {
-            convex.mutation("logs:createLogInternal" as any, {
-              workspaceId: workspaceContext.workspaceId as any,
-              sessionToken: workspaceContext.sessionToken || "",
-              provider,
-              action,
-              status: result.success ? "success" : "error",
-              latencyMs: Date.now() - startTime,
-              errorMessage: result.success ? undefined : (result.error || "Unknown error"),
-            }).catch(() => {}); // fire-and-forget
-
-            convex.mutation("logs:logProviderCall" as any, {
-              provider,
-              action,
-              status: result.success ? "success" : "error",
-              latencyMs: Date.now() - startTime,
-              callerWorkspaceId: workspaceContext.workspaceId,
-              errorMessage: result.success ? undefined : (result.error || "Unknown error"),
-            }).catch(() => {}); // fire-and-forget
-          }
-
-          // Increment usage for workspace (non-free APIs only, legacy path)
-          if (result.success && workspaceContext && !isFreeAPI) {
-            try {
-              const usageResult = await convex.mutation("workspaces:incrementUsage" as any, {
-                workspaceId: workspaceContext.workspaceId as any,
-              }) as IncrementUsageResult;
-              if (usageResult.success) {
-                workspaceContext.usageRemaining = usageResult.usageRemaining ?? -1;
-                workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
-              }
-
-              if (currentAgentId) {
-                convex.mutation("agents:incrementAgentCalls" as any, { agentId: currentAgentId as any }).catch(() => {});
-              }
-
-              await trackEarnProgress(workspaceContext.workspaceId, provider, action);
-            } catch (e) {
-              console.error('[APIClaw] Failed to track usage:', e);
-            }
-          }
-        }
+        const gatewayParams = {
+          ...params,
+          ...(apiType === 'open' ? { baseUrl: getOpenAPIBaseUrl(provider, action, params) } : {}),
+        };
+        const gatewayResult = await getGateway().execute(
+          provider,
+          action,
+          gatewayParams,
+          {
+            workspaceId: workspaceContext?.workspaceId,
+            sessionToken: workspaceContext?.sessionToken,
+            idempotencyKey,
+          },
+        );
+        result = gatewayResult;
 
         // When gateway is enabled, still update local workspace context for nudge logic
-        if (isGatewayEnabled() && result.success && workspaceContext && !isFreeAPI) {
+        if (result.success && workspaceContext && !isFreeAPI) {
           workspaceContext.usageCount = (workspaceContext.usageCount || 0) + 1;
         }
 
@@ -2263,26 +1965,9 @@ Docs: https://apiclaw.cloud
           });
         }
 
-        // Funnel: first_call_api_success (once per workspace, deduped server-side)
-        if (result.success && workspaceContext && !isFreeAPI && !firstCallEmitted) {
-          firstCallEmitted = true;
-          emitFunnelEvent({
-            event: 'first_call_api_success',
-            email: workspaceContext.email,
-            workspaceId: workspaceContext.workspaceId,
-            sessionToken: workspaceContext.sessionToken,
-            fingerprint: getMachineFingerprint(),
-            mcpClient: detectMCPClient(),
-            platform: process.platform,
-            version: process.env.npm_package_version || 'unknown',
-            dedupeKey: `first_call:${workspaceContext.workspaceId}`,
-            props: { provider, action, channel: 'mcp:call_api' },
-          });
-        }
-
-        // Workspace-required path: gateway returned 401 because no session.
-        // Open a browser to /workspace?link=CODE, poll for the user to
-        // sign up / sign in, then retry the call. No keys, no terminal.
+        // Workspace-required path. Authentication is completed through the
+        // state-bound CLI loopback flow. The retired device-link flow could
+        // hand a victim's bearer session to an attacker-controlled poller.
         if (!result.success && (result as any).authRequired) {
           const ar = (result as any).authRequired as {
             message: string;
@@ -2290,48 +1975,18 @@ Docs: https://apiclaw.cloud
             docsUrl?: string;
             freeTierCalls?: number;
           };
-
-          const link = await attemptDeviceLink();
-
-          if (link.ok) {
-            // We have a fresh session. Retry the gateway call once.
-            const retry = await getGateway().execute(provider, action, params, {});
-            if (retry.success) {
-              return {
-                content: [
-                  {
-                type: 'text',
-                text: safeJsonStringify({
-                  status: 'success',
-                  message: 'Linked APIClaw to your workspace and ran the call.',
-                  provider: retry.provider,
-                      action: retry.action,
-                      type: apiType,
-                    data: retry.data,
-                    ...(retry.cost !== undefined ? { cost_sek: retry.cost } : {}),
-                    }, {
-                      hint: 'Retry with narrower params or ask for a summary if the linked-call result is too large.',
-                    }),
-                  },
-                ],
-              };
-            }
-            // Linked but call still failed — fall through to error path
-          }
-
-          // Browser opened, user didn't finish in time. Tell agent + user.
           return {
             content: [
               {
                 type: 'text',
                 text: JSON.stringify({
-                  status: 'auth_pending',
-                  message:
-                    'Opened apiclaw.cloud/workspace in your browser. Sign in with your email to link this MCP server, then ask me to retry the call.',
+                  status: 'auth_required',
+                  message: ar.message,
                   action_required:
-                    'Tell the user a browser tab opened with the APIClaw signup. After they sign in, the link is automatic — no key paste needed. Ask them to retry the original prompt once the page shows "linked".',
-                  link_url: link.linkUrl,
-                  free_tier_calls: ar.freeTierCalls ?? 25,
+                    'Run `npx @nordsym/apiclaw auth login` in a terminal, finish the browser sign-in, then retry the original call.',
+                  command: 'npx @nordsym/apiclaw auth login',
+                  signup_url: ar.signupUrl,
+                  free_tier_calls: ar.freeTierCalls ?? FREE_MANAGED_CALLS_LIFETIME,
                   provider,
                   action,
                 }, null, 2),
@@ -2347,7 +2002,14 @@ Docs: https://apiclaw.cloud
           provider: result.provider,
           action: result.action,
           type: apiType,
-          ...(result.success ? { data: result.data } : { error: result.error }),
+          ...(result.success ? { data: result.data } : {
+            error: result.error,
+            code: result.code,
+            request_id: result.requestId,
+            outcome_unknown: result.outcomeUnknown,
+            retryable: result.retryable,
+            idempotency_key: result.idempotencyKey,
+          }),
           ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
         };
 
@@ -2373,70 +2035,19 @@ Docs: https://apiclaw.cloud
       }
 
       case 'list_connected': {
-        const verbose = args?.verbose === true;
-        const filterCategory = typeof args?.category === 'string' ? (args.category as string) : undefined;
-
         const directProviders = getConnectedProviders();
-        const openProviders = listOpenAPIs();
-
-        // Cheap top-N "what kind of open APIs are there" rollup so the agent
-        // gets a useful narrative without 9k entries.
-        const allAPIs = getAllAPIs();
-        const openCategoryCounts: Record<string, number> = {};
-        for (const a of allAPIs) {
-          const anyA = a as unknown as { callable?: boolean; category?: string };
-          if (anyA.callable === true && anyA.category) {
-            openCategoryCounts[anyA.category] = (openCategoryCounts[anyA.category] || 0) + 1;
-          }
-        }
-        const topOpenCategories = Object.entries(openCategoryCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 12)
-          .map(([category, count]) => ({ category, callable: count }));
-
         const summary = {
           status: 'success',
-          message: 'APIClaw can execute these RIGHT NOW — no key paste, no integration code.',
+          message: 'Managed providers APIClaw can execute without the caller pasting provider keys.',
           counts: {
-            discoverable: CANON_STATS.discoverable,
-            callable: CANON_STATS.callable,
-            managed_brands: CANON_STATS.managed_brands,
-            managed_directcallconfigs: CANON_STATS.managed_directcallconfigs,
+            managed: directProviders.length,
           },
           managed_providers: {
-            description: 'APIClaw owns the keys. Free tier: 50 managed calls/week across the whole platform, then pay-as-you-go (provider cost + 15%).',
+            description: `APIClaw owns the keys. Free tier: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Billing-ready actions can then use pay-as-you-go at provider cost + ${PAYG_MARGIN_PERCENT}%.`,
             providers: directProviders,
           },
-          open_apis_summary: {
-            description: 'Keyless public APIs proxied via call_api({provider, action, params}). Free.',
-            total_providers: openProviders.length,
-            top_categories: topOpenCategories,
-            generic_passthrough: {
-              hint: 'Use call_api({provider:"generic", action:"request", params:{url, method, headers, query, body}}) to hit any keyless public endpoint not curated below.',
-            },
-          },
-          usage: 'discover_apis(query) for narrow search. call_api(provider, action, params) to execute. Set verbose=true to also see the full open-API list.',
+          usage: 'Use discover_apis(query) for the wider catalog and call_api(provider, action, params) for managed execution.',
         } as Record<string, unknown>;
-
-        if (verbose) {
-          const filtered = filterCategory
-            ? allAPIs.filter((a) => {
-                const anyA = a as unknown as { callable?: boolean; category?: string };
-                return anyA.callable === true && anyA.category === filterCategory;
-              }).map((a) => ({
-                provider: (a as unknown as { id: string }).id,
-                name: (a as unknown as { name: string }).name,
-                category: (a as unknown as { category?: string }).category,
-              }))
-            : openProviders;
-          summary.open_apis_full = {
-            description: filterCategory
-              ? `Open APIs in category "${filterCategory}".`
-              : 'Full keyless open-API list (auto-compacted if oversized; prefer discover_apis for narrow lookups).',
-            count: filtered.length,
-            providers: filtered,
-          };
-        }
 
         return {
           content: [
@@ -2503,7 +2114,28 @@ Docs: https://apiclaw.cloud
           action,
           params,
           DEFAULT_AGENT_ID,
-          preferences
+          preferences,
+          async (selectedProvider, selectedAction, selectedParams) => {
+            const response = await getGateway().execute(
+              selectedProvider,
+              selectedAction,
+              selectedParams,
+              {
+                workspaceId: workspaceContext?.workspaceId,
+                sessionToken: workspaceContext?.sessionToken,
+              },
+            );
+            return {
+              success: response.success,
+              data: response.data,
+              error: response.error,
+              code: response.code,
+              outcomeUnknown: response.outcomeUnknown,
+              retryable: response.retryable,
+              idempotencyKey: response.idempotencyKey,
+              requestId: response.requestId,
+            };
+          },
         );
 
         return {
@@ -2516,7 +2148,14 @@ Docs: https://apiclaw.cloud
               provider_used: result.providerUsed,
               fallback_attempted: result.fallbackAttempted,
               ...(result.fallbackReason ? { fallback_reason: result.fallbackReason } : {}),
-              ...(result.success ? { data: result.data } : { error: result.error }),
+              ...(result.success ? { data: result.data } : {
+                error: result.error,
+                code: result.code,
+                request_id: result.requestId,
+                outcome_unknown: result.outcomeUnknown,
+                retryable: result.retryable,
+                idempotency_key: result.idempotencyKey,
+              }),
               ...(result.cost !== undefined ? { cost: result.cost, currency: result.currency } : {}),
               latency_ms: result.latencyMs,
             }, {
@@ -2547,6 +2186,19 @@ Docs: https://apiclaw.cloud
 
       case 'list_models': {
         const provider = typeof args?.provider === 'string' ? args.provider : '';
+        if (isInternalOnlyProvider(provider) || isUnavailableManagedProvider(provider)) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                object: 'list',
+                data: [],
+                error: 'Provider is not available through the public APIClaw runtime.',
+              }, null, 2),
+            }],
+            isError: true,
+          };
+        }
         const q = provider ? `?provider=${encodeURIComponent(provider)}` : '';
         const baseUrl = process.env.APICLAW_GATEWAY_URL ||
           (CONVEX_URL.includes('convex.cloud')
@@ -2859,7 +2511,6 @@ Docs: https://apiclaw.cloud
             email: result.workspace!.email,
             workspaceId: result.workspace!.id,
             fingerprint: getMachineFingerprint(),
-            sessionToken: result.sessionToken,
             mcpClient: detectMCPClient(),
             platform: process.platform,
             version: process.env.npm_package_version || 'unknown',
@@ -3065,151 +2716,6 @@ Docs: https://apiclaw.cloud
         }
       }
 
-      // Metered Billing Tools
-      case 'setup_metered_billing': {
-        const { email, success_url, cancel_url } = args as {
-          email: string;
-          success_url?: string;
-          cancel_url?: string;
-        };
-
-        if (!email) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: 'Email is required' }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        // Create or get customer
-        const customerResult = await getOrCreateCustomer(email, email);
-        if ('error' in customerResult) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: customerResult.error }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        // Create checkout session for metered subscription
-        const checkoutResult = await createMeteredCheckoutSession(
-          email,
-          success_url || 'https://apiclaw.cloud/billing/success',
-          cancel_url || 'https://apiclaw.cloud/billing/cancel'
-        );
-
-        if ('error' in checkoutResult) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: checkoutResult.error }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              status: 'checkout_ready',
-              message: 'Complete checkout to activate pay-per-call billing',
-              checkout_url: checkoutResult.url,
-              session_id: checkoutResult.sessionId,
-              customer_id: customerResult.customerId,
-              pricing: {
-                per_call: '$0.002',
-                billing_period: 'monthly',
-                billed_at: 'end of period based on usage'
-              }
-            }, null, 2)
-          }]
-        };
-      }
-
-      case 'get_usage_summary': {
-        const { subscription_id } = args as { subscription_id: string };
-
-        if (!subscription_id) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: 'subscription_id is required' }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        const usage = await getUsageSummary(subscription_id);
-        if ('error' in usage) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: usage.error }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              status: 'success',
-              billing_period: {
-                start: new Date(usage.period.start * 1000).toISOString(),
-                end: new Date(usage.period.end * 1000).toISOString()
-              },
-              usage: {
-                total_calls: usage.totalCalls,
-                price_per_call: METERED_BILLING.pricePerCall,
-                estimated_cost: `$${usage.totalCost.toFixed(4)}`
-              }
-            }, null, 2)
-          }]
-        };
-      }
-
-      case 'estimate_cost': {
-        const { call_count } = args as { call_count: number };
-
-        if (!call_count || call_count < 0) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({ status: 'error', error: 'Valid call_count is required' }, null, 2)
-            }],
-            isError: true
-          };
-        }
-
-        const estimate = estimateCost(call_count);
-
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              status: 'success',
-              estimate: {
-                calls: estimate.calls,
-                price_per_call: `$${estimate.pricePerCall}`,
-                total_cost: `$${estimate.totalCost.toFixed(4)}`,
-                currency: estimate.currency
-              },
-              examples: {
-                '100 calls': `$${(100 * METERED_BILLING.pricePerCall).toFixed(2)}`,
-                '1,000 calls': `$${(1000 * METERED_BILLING.pricePerCall).toFixed(2)}`,
-                '10,000 calls': `$${(10000 * METERED_BILLING.pricePerCall).toFixed(2)}`
-              }
-            }, null, 2)
-          }]
-        };
-      }
-
       // ============================================
       // CONTROL PLANE — MISSIONS
       // ============================================
@@ -3267,14 +2773,40 @@ Docs: https://apiclaw.cloud
           (CONVEX_URL.includes('convex.cloud')
             ? CONVEX_URL.replace('.convex.cloud', '.convex.site')
             : 'https://adventurous-avocet-799.convex.site');
-        const res = await fetch(`${baseUrl}/v1/missions/start`, {
+        const idempotencyKey = typeof args?.idempotency_key === 'string'
+          ? args.idempotency_key.trim()
+          : '';
+        if (!idempotencyKey) {
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ error: 'idempotency_key is required to start a mission' }) }],
+            isError: true,
+          };
+        }
+        const startRequest = () => fetch(`${baseUrl}/v1/missions/start`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-APIClaw-Session': ctx.sessionToken,
+            'Idempotency-Key': idempotencyKey,
           },
           body: JSON.stringify({ template, params, templateVersion: args?.template_version }),
         });
+        let res: Response;
+        try {
+          res = await startRequest();
+        } catch {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                error: 'outcome_unknown',
+                message: 'The mission start may already have been accepted. Do not submit it again. Retain the operation key for reconciliation.',
+                idempotency_key: idempotencyKey,
+              }, null, 2),
+            }],
+            isError: true,
+          };
+        }
         const data = (await res.json()) as { missionId?: string; status?: string; isInternal?: boolean; poll?: string };
         if (!res.ok) {
           return {
@@ -3545,13 +3077,6 @@ Docs: https://apiclaw.cloud
 
 // Start server
 async function main() {
-  // Check for CLI mode
-  if (process.argv.includes('--cli') || process.argv.includes('-c')) {
-    const { startCLI } = await import('./cli.js');
-    await startCLI();
-    return;
-  }
-  
   const transport = new StdioServerTransport();
   await server.connect(transport);
   trackStartup();
@@ -3594,39 +3119,27 @@ async function main() {
     if (result?.agentId) {
       currentAgentId = result.agentId;
     }
-    // Only write a new anonymous session if no valid session file exists.
-    // Never overwrite a file that has an email — that would cause the next
-    // startup to read email:"" → delete the file → lose auth entirely.
-    if (result?.isNew && result?.sessionToken && !hasValidSession) {
-      const existingFile = readSession();
-      if (!existingFile) {
-        writeSession(result.sessionToken, result.workspaceId, "");
-      }
-    }
   } catch (e) {
     console.error('[APIClaw] Agent registration failed (non-blocking):', e);
   }
   
   // Welcome message with onboarding
   console.error(`
-🦞 APIClaw v1.1.5 — The API Layer for AI Agents
+🦞 APIClaw - The Control Plane for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ 19,000+ APIs indexed
-✓ 23 categories  
-✓ 9 managed providers ready
-${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - use register_owner'}
+✓ ${CANON_STATS.discoverable.toLocaleString()} APIs discoverable
+✓ ${CANON_STATS.source_verified.toLocaleString()} exact-name source-verified catalog entries
+✓ Managed execution readiness is explicit
+${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - run: npx @nordsym/apiclaw auth login'}
 
 Quick Start:
-  ${!hasValidSession ? 'register_owner({ email: "you@example.com" })  # First, authenticate\n  ' : ''}discover_apis("send SMS to Sweden")
+  ${!hasValidSession ? 'npx @nordsym/apiclaw auth login  # First, authenticate\n  ' : ''}discover_apis("find a web search API")
   discover_apis("search the web")
   call_api({ provider: "brave_search", ... })
 
-Managed (no API key needed — APIClaw holds them):
+Managed routes (provider keys stay server-side):
   list_connected()
-
-Interactive CLI mode:
-  npx @nordsym/apiclaw --cli
 
 Docs: https://apiclaw.cloud
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

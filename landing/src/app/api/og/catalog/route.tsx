@@ -31,7 +31,7 @@ export async function GET() {
             API Catalog
           </div>
           <div style={{ fontSize: 28, color: '#a3a3a3', maxWidth: 700, lineHeight: 1.4 }}>
-            Browse {statsData.apiCount.toLocaleString()}+ APIs across {categoryCount} categories. {statsData.callableCount.toLocaleString()}+ callable instantly through MCP or API key.
+            Browse {statsData.apiCount.toLocaleString()}+ APIs across {categoryCount} categories. {statsData.sourceVerifiedCount.toLocaleString()}+ source-verified definitions.
           </div>
         </div>
 
@@ -42,16 +42,16 @@ export async function GET() {
             <span style={{ fontSize: 18, color: '#737373' }}>Discoverable APIs</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 40, fontWeight: 700, color: '#22c55e' }}>{statsData.callableCount.toLocaleString()}+</span>
-            <span style={{ fontSize: 18, color: '#737373' }}>Callable APIs</span>
+            <span style={{ fontSize: 40, fontWeight: 700, color: '#22c55e' }}>{statsData.sourceVerifiedCount.toLocaleString()}+</span>
+            <span style={{ fontSize: 18, color: '#737373' }}>Source-verified</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span style={{ fontSize: 40, fontWeight: 700, color: '#a78bfa' }}>{categoryCount}</span>
             <span style={{ fontSize: 18, color: '#737373' }}>Categories</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 40, fontWeight: 700, color: '#f59e0b' }}>{statsData.managedCount}</span>
-            <span style={{ fontSize: 18, color: '#737373' }}>Managed Providers</span>
+            <span style={{ fontSize: 40, fontWeight: 700, color: '#f59e0b' }}>{statsData.managedProviderAdapterCount}</span>
+            <span style={{ fontSize: 18, color: '#737373' }}>Managed Adapters</span>
           </div>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { isPublicCustomerExecutableAction } from "../src/product-truth";
+
 export const INTERNAL_ONLY_PROVIDER_IDS = ["46elks", "twilio", "resend"] as const;
 export const UNAVAILABLE_MANAGED_PROVIDER_IDS = [
   "together",
@@ -12,4 +14,16 @@ export function isInternalProviderReference(value: string | undefined | null): b
 
 export function isPubliclyAvailableManagedProvider(providerId: string): boolean {
   return !isInternalProviderReference(providerId) && !UNAVAILABLE_MANAGED_PATTERN.test(providerId);
+}
+
+export function isCustomerExecutableManagedAction(providerId: string, action: string): boolean {
+  return isPublicCustomerExecutableAction(providerId, action);
+}
+
+export function isManagedActionAllowedForTraffic(
+  providerId: string,
+  action: string,
+  trafficClass: "customer" | "internal",
+): boolean {
+  return trafficClass === "internal" || isCustomerExecutableManagedAction(providerId, action);
 }

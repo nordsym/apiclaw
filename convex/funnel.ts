@@ -8,6 +8,7 @@
  *   register_owner     — user called register_owner (OTP sent)
  *   verify_code        — user verified OTP, workspace active (legacy)
  *   first_call_api_success — workspace's first successful call_api (non-discover)
+ *   workspace_reactivated — existing workspace returned and made a successful call
  *
  * Classification (source):
  *   human    — real user, reasonable UA, interactive MCP client
@@ -18,10 +19,11 @@
  * Truth metrics are built from (event=workspace_authenticated AND source=human) and
  * (event=first_call_api_success AND source=human). Vanity = install count.
  */
-import { mutation, query, internalMutation } from "./_generated/server";
+import { mutation, internalQuery, internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 export const FUNNEL_EVENTS = [
   "install",
@@ -36,6 +38,7 @@ export const FUNNEL_EVENTS = [
   "register_owner",
   "verify_code",
   "first_call_api_success",
+  "workspace_reactivated",
 ] as const;
 
 export type FunnelEvent = (typeof FUNNEL_EVENTS)[number];
@@ -201,7 +204,6 @@ export const recordEvent = mutation({
     classification: v.string(),
     workspaceId: v.optional(v.id("workspaces")),
     fingerprint: v.optional(v.string()),
-    sessionToken: v.optional(v.string()),
     email: v.optional(v.string()),
     userAgent: v.optional(v.string()),
     mcpClient: v.optional(v.string()),
@@ -214,8 +216,12 @@ export const recordEvent = mutation({
     if (!ALL_EVENTS.includes(args.event)) {
       return { success: false, error: `unknown_event:${args.event}` };
     }
-    if (args.event === "workspace_authenticated") {
-      return { success: false, error: "server_managed_event:workspace_authenticated" };
+    if (
+      args.event === "workspace_authenticated" ||
+      args.event === "first_call_api_success" ||
+      args.event === "workspace_reactivated"
+    ) {
+      return { success: false, error: `server_managed_event:${args.event}` };
     }
     const allowedClass: Classification[] = ["human", "ci", "bot", "internal"];
     if (!allowedClass.includes(args.classification as Classification)) {
@@ -237,7 +243,6 @@ export const recordEvent = mutation({
       classification: args.classification,
       workspaceId: args.workspaceId,
       fingerprint: args.fingerprint,
-      sessionToken: args.sessionToken,
       email: args.email,
       userAgent: args.userAgent,
       mcpClient: args.mcpClient,
@@ -369,7 +374,7 @@ export const backfillWorkspaceAuthenticated = internalMutation({
 });
 
 // Roll up the canonical funnel for a time window. Default: last 7d, human only.
-export const getFunnel = query({
+export const getFunnel = internalQuery({
   args: {
     hoursBack: v.optional(v.number()),
     includeClassifications: v.optional(v.array(v.string())),
@@ -414,7 +419,7 @@ function safeRatio(num: number, denom: number): number {
 // Weekly scorecard — the canonical KPI snapshot.
 // Returns truth metrics (human-only by default) with optional comparison
 // against the previous period of equal length.
-export const getScorecard = query({
+export const getScorecard = internalQuery({
   args: {
     hoursBack: v.optional(v.number()),
     classification: v.optional(v.string()), // "human" by default
@@ -594,7 +599,7 @@ function authenticatedWorkspaceKeys(
 }
 
 // Diagnostics-only query — reasons for drop-off and errors.
-export const getDiagnostics = query({
+export const getDiagnostics = internalQuery({
   args: {
     hoursBack: v.optional(v.number()),
     classification: v.optional(v.string()),
@@ -630,9 +635,60 @@ export const getDiagnostics = query({
 });
 
 // Quick listing for debugging.
-export const getRecent = query({
+export const getRecent = internalQuery({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit = 100 }) => {
     return await ctx.db.query("funnelEvents").order("desc").take(limit);
+  },
+});
+
+/**
+ * One-time security migration for legacy funnel rows that stored bearer
+ * credentials. Returns counts only and never returns token or customer data.
+ * Keep the schema field until this mutation has scrubbed production, then
+ * remove the deprecated field in the final schema deployment.
+ */
+export const scrubStoredSessionTokens = internalMutation({
+  args: {
+    dryRun: v.boolean(),
+    revokeSessions: v.boolean(),
+  },
+  handler: async (ctx, { dryRun, revokeSessions }) => {
+    const events = await ctx.db.query("funnelEvents").collect();
+    const exposed = events.filter((event) => Boolean(event.sessionToken));
+    let revokedSessions = 0;
+    let revokedBrowserChildren = 0;
+    let scrubbedRows = 0;
+
+    if (!dryRun) {
+      for (const event of exposed) {
+        const token = event.sessionToken;
+        if (revokeSessions && token) {
+          const session = await findUsableAgentSession(ctx.db, token);
+          if (session) {
+            const children = await ctx.db
+              .query("agentSessions")
+              .withIndex("by_parentSessionId", (q) => q.eq("parentSessionId", session._id))
+              .collect();
+            for (const child of children) {
+              await ctx.db.delete(child._id);
+              revokedBrowserChildren++;
+            }
+            await ctx.db.delete(session._id);
+            revokedSessions++;
+          }
+        }
+        await ctx.db.patch(event._id, { sessionToken: undefined });
+        scrubbedRows++;
+      }
+    }
+
+    return {
+      scannedRows: events.length,
+      exposedRows: exposed.length,
+      revokedSessions,
+      revokedBrowserChildren,
+      scrubbedRows,
+    };
   },
 });

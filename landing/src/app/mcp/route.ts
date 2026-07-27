@@ -9,8 +9,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { convexQuery, convexMutation } from "@/lib/convex";
 import {
   CANONICAL_MCP_TOOLS,
+  createBestEffortMcpToolBudget,
   dispatchCanonicalTool,
 } from "@/lib/mcp-tools-canon";
+import {
+  filterMcpToolsForScope,
+  mcpScopeAllowsTool,
+  requiredMcpCapabilityForTool,
+} from "@apiclaw/mcp-scope-policy";
+import {
+  jsonByteLength,
+  mapWithConcurrency,
+  McpRequestBodyError,
+  MCP_BATCH_CONCURRENCY,
+  MCP_BATCH_RESULT_MAX_BYTES,
+  MCP_RESULT_MAX_BYTES,
+  parseDeclaredContentLength,
+  readMcpJsonBodyCapped,
+  validateMcpBatchSize,
+} from "./limits";
 
 export const runtime = "nodejs";
 
@@ -23,6 +40,7 @@ type JsonRpcRequest = { jsonrpc: "2.0"; id: JsonRpcId; method: string; params?: 
 
 type WorkspaceContext = {
   ok: true;
+  tokenId: string;
   workspaceId: string;
   clientId: string;
   scope: string;
@@ -39,20 +57,64 @@ type ContextDenial = { ok: false; status: number; body: unknown; headers?: Recor
 // routes (e.g. /mcp/sse) read from one definition and stay drift-free.
 const TOOLS = CANONICAL_MCP_TOOLS;
 
+// Best-effort instance-local protection against one OAuth token monopolizing a
+// warm route instance. Authoritative distributed execution limits remain in
+// the Convex gateway and are applied again by /v1/execute.
+const bestEffortToolBudget = createBestEffortMcpToolBudget({
+  maxCalls: 60,
+  windowMs: 60_000,
+  maxConcurrent: 4,
+  maxTrackedKeys: 10_000,
+});
+
+const JSON_RESPONSE_HEADERS = {
+  "Cache-Control": "no-store",
+  "Access-Control-Allow-Origin": "*",
+  "Content-Type": "application/json",
+};
+
 function jsonRpcResult(id: JsonRpcId, result: unknown) {
-  return NextResponse.json({ jsonrpc: "2.0", id, result }, {
-    headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
-  });
+  try {
+    const payload = { jsonrpc: "2.0", id, result };
+    const encoded = jsonByteLength(payload);
+    if (encoded.bytes > MCP_RESULT_MAX_BYTES) {
+      return jsonRpcError(id, -32005, "Result exceeds the remote MCP response limit");
+    }
+    return new NextResponse(encoded.json, { headers: JSON_RESPONSE_HEADERS });
+  } catch {
+    return jsonRpcError(id, -32603, "Result could not be serialized safely");
+  }
 }
 
-function jsonRpcError(id: JsonRpcId, code: number, message: string, data?: unknown) {
+function jsonRpcError(
+  id: JsonRpcId,
+  code: number,
+  message: string,
+  data?: unknown,
+  status = 200,
+) {
   return NextResponse.json({
     jsonrpc: "2.0",
     id,
-    error: { code, message, ...(data ? { data } : {}) },
+    error: { code, message, ...(data !== undefined ? { data } : {}) },
   }, {
-    headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
+    status,
+    headers: JSON_RESPONSE_HEADERS,
   });
+}
+
+function batchJsonRpcResponse(payloads: unknown[]): NextResponse {
+  const encoded = jsonByteLength(payloads);
+  if (encoded.bytes > MCP_BATCH_RESULT_MAX_BYTES) {
+    return jsonRpcError(
+      null,
+      -32005,
+      "Batch result exceeds the remote MCP response limit",
+      undefined,
+      413,
+    );
+  }
+  return new NextResponse(encoded.json, { headers: JSON_RESPONSE_HEADERS });
 }
 
 function unauthorized(reason: string) {
@@ -92,6 +154,7 @@ async function resolveContext(req: NextRequest): Promise<WorkspaceContext | Cont
     }
     return {
       ok: true,
+      tokenId: resolved.tokenId,
       workspaceId: resolved.workspaceId,
       clientId: resolved.clientId,
       scope: resolved.scope,
@@ -128,6 +191,38 @@ async function dispatchTool(name: string, args: Record<string, unknown>, ctx: Wo
   return await dispatchCanonicalTool(name, args, { bearer: ctx.bearer });
 }
 
+function isJsonRpcRequest(value: unknown): value is JsonRpcRequest {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Partial<JsonRpcRequest>;
+  return candidate.jsonrpc === "2.0" && typeof candidate.method === "string";
+}
+
+function boundedErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : "Tool execution failed.";
+  return message.length <= 2_048 ? message : `${message.slice(0, 2_048)}...`;
+}
+
+async function responsePayload(response: NextResponse): Promise<unknown | null> {
+  if (response.status === 202 || response.body === null) return null;
+  const raw = await response.text();
+  if (new TextEncoder().encode(raw).byteLength > MCP_RESULT_MAX_BYTES) {
+    return {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32005, message: "Result exceeds the remote MCP response limit" },
+    };
+  }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32603, message: "Internal response serialization failed" },
+    };
+  }
+}
+
 async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
   const { id, method, params } = rpc;
 
@@ -142,7 +237,7 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
         version: "1.0.0",
       },
       instructions:
-        "APIClaw — the Control Plane for AI Agents. Discover 26,000+ APIs (discover_apis), execute managed providers (call_api), route by capability (capability), or run full multi-step missions (start_mission). Workspace observability lives in get_usage_summary, check_balance, and mission_status. All state belongs to the email-verified workspace this token authorized.",
+        "APIClaw is the Control Plane for AI Agents. Discover 26,000+ APIs (discover_apis), execute managed providers (call_api), or run full multi-step missions (start_mission). Workspace observability lives in check_balance and mission_status. All state belongs to the email-verified workspace this token authorized.",
     });
   }
 
@@ -151,14 +246,35 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
   }
 
   if (method === "tools/list") {
-    return jsonRpcResult(id, { tools: TOOLS });
+    return jsonRpcResult(id, { tools: filterMcpToolsForScope(ctx.scope, TOOLS) });
   }
 
   if (method === "tools/call") {
     const p = (params ?? {}) as { name?: string; arguments?: Record<string, unknown> };
     const toolName = typeof p.name === "string" ? p.name : "";
     if (!toolName) return jsonRpcError(id, -32602, "tool name required");
+    if (!TOOLS.some((tool) => tool.name === toolName)) {
+      return jsonRpcError(id, -32601, `Unknown tool: ${toolName}`);
+    }
+    if (!mcpScopeAllowsTool(ctx.scope, toolName)) {
+      const required = requiredMcpCapabilityForTool(toolName);
+      return jsonRpcError(id, -32003, "Insufficient OAuth scope", {
+        error: "insufficient_scope",
+        required_scope: required ? `mcp:${required}` : undefined,
+      });
+    }
     const t0 = Date.now();
+    const budgetLease = bestEffortToolBudget.acquire(ctx.tokenId);
+    if (!budgetLease.ok) {
+      const message = budgetLease.reason === "concurrency_limit"
+        ? "Remote MCP concurrent tool-call limit reached. Retry after an in-flight call completes."
+        : "Remote MCP tool-call rate limit reached. Retry later.";
+      logToolCallFireAndForget(ctx, toolName, Date.now() - t0, false, budgetLease.reason);
+      return jsonRpcResult(id, {
+        isError: true,
+        content: [{ type: "text", text: message }],
+      });
+    }
     try {
       const result = await dispatchTool(toolName, p.arguments ?? {}, ctx);
       logToolCallFireAndForget(ctx, toolName, Date.now() - t0, true);
@@ -166,11 +282,14 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
         content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }],
       });
     } catch (e) {
-      logToolCallFireAndForget(ctx, toolName, Date.now() - t0, false, e instanceof Error ? e.message : "unknown");
+      const message = boundedErrorMessage(e);
+      logToolCallFireAndForget(ctx, toolName, Date.now() - t0, false, message);
       return jsonRpcResult(id, {
         isError: true,
-        content: [{ type: "text", text: e instanceof Error ? e.message : "Tool execution failed." }],
+        content: [{ type: "text", text: message }],
       });
+    } finally {
+      budgetLease.release();
     }
   }
 
@@ -182,38 +301,62 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
 }
 
 export async function POST(req: NextRequest) {
+  try {
+    parseDeclaredContentLength(req.headers);
+  } catch (error) {
+    if (error instanceof McpRequestBodyError) {
+      return jsonRpcError(null, error.rpcCode, error.message, undefined, error.status);
+    }
+    return jsonRpcError(null, -32600, "Invalid Request", undefined, 400);
+  }
+
   const ctx = await resolveContext(req);
   if (!ctx.ok) return unauthorized("invalid_or_missing_bearer");
 
   let body: unknown;
   try {
-    body = await req.json();
-  } catch {
-    return jsonRpcError(null, -32700, "Parse error");
+    body = await readMcpJsonBodyCapped(req);
+  } catch (error) {
+    if (error instanceof McpRequestBodyError) {
+      return jsonRpcError(null, error.rpcCode, error.message, undefined, error.status);
+    }
+    return jsonRpcError(null, -32700, "Parse error", undefined, 400);
   }
 
   // Spec allows batch requests as arrays.
   if (Array.isArray(body)) {
-    const responses = await Promise.all(
-      body.map(async (rpc) => {
+    const batchSize = validateMcpBatchSize(body);
+    if (!batchSize.ok) {
+      return jsonRpcError(null, batchSize.rpcCode, batchSize.message, undefined, batchSize.status);
+    }
+
+    const responses = await mapWithConcurrency(
+      body,
+      MCP_BATCH_CONCURRENCY,
+      async (candidate): Promise<unknown | null> => {
+        if (!isJsonRpcRequest(candidate)) {
+          return responsePayload(jsonRpcError(null, -32600, "Invalid Request"));
+        }
         try {
-          const r = await handleRpc(rpc as JsonRpcRequest, ctx);
-          if (r instanceof NextResponse) return await r.json().catch(() => null);
-          return null;
-        } catch { return null; }
-      })
+          return await responsePayload(await handleRpc(candidate, ctx));
+        } catch {
+          return responsePayload(jsonRpcError(candidate.id ?? null, -32603, "Internal error"));
+        }
+      },
     );
-    return NextResponse.json(responses.filter((x) => x !== null), {
-      headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
-    });
+    const payloads = responses.filter((value): value is unknown => value !== null);
+    if (payloads.length === 0) return new NextResponse(null, { status: 202 });
+    return batchJsonRpcResponse(payloads);
   }
 
-  const rpc = body as JsonRpcRequest;
-  if (!rpc || rpc.jsonrpc !== "2.0" || typeof rpc.method !== "string") {
-    return jsonRpcError((rpc as { id?: JsonRpcId })?.id ?? null, -32600, "Invalid Request");
+  if (!isJsonRpcRequest(body)) {
+    const id = body && typeof body === "object" && "id" in body
+      ? (body as { id?: JsonRpcId }).id ?? null
+      : null;
+    return jsonRpcError(id, -32600, "Invalid Request", undefined, 400);
   }
 
-  return handleRpc(rpc, ctx);
+  return handleRpc(body, ctx);
 }
 
 export async function GET(req: NextRequest) {

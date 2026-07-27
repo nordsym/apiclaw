@@ -6,6 +6,39 @@ import { resolveDirectModelRoute } from "./modelRouting";
 import { resolveManagedCredential } from "./managedCredentials";
 import { resolveFrontierModelCost } from "./modelPricing";
 import {
+  buildCostBoundedOpenRouterRequest,
+  estimateInputTokens,
+  estimateManagedProviderCostUsd,
+  hasBillingGradeManagedCost,
+  normalizeManagedLlmRequestForCost,
+  providerReportedUsageCostUsd,
+  resolveManagedResponseCost,
+  resolveExplicitOpenRouterExecution,
+  resolveExplicitOpenRouterTarget,
+  UnsafeManagedOpenRouterRequestError,
+  verifiedFixedManagedProviderCostUsd,
+} from "./managedCostPolicy";
+import { decorateOpenRouterRequest } from "./openRouterAttribution";
+import { hasActivePaygEntitlement, isInternalTier } from "./managedUsagePolicy";
+import { getWorkspaceUsageDisplay } from "./workspaces";
+import {
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  getManagedProviderAdapter,
+} from "../src/product-truth";
+import { mcpScopeAllows, type McpCapability } from "../src/mcp-scope-policy";
+import {
+  deriveManagedRequestId,
+  deriveRequestFingerprint,
+  githubContentsApiUrl,
+  githubRepositoryApiUrl,
+  InvalidIdempotencyKeyError,
+  MANAGED_REQUEST_BODY_MAX_BYTES,
+  normalizeMaxOutputTokens,
+  requireManagedIdempotencyKey,
+  requiresLegacyClientUpgrade,
+} from "./httpTrust";
+import type { Id } from "./_generated/dataModel";
+import {
   INTERNAL_ONLY_PROVIDER_IDS,
   isInternalProviderReference,
   isPubliclyAvailableManagedProvider,
@@ -18,12 +51,133 @@ import {
   portalOptions,
   webhookOptions,
 } from "./stripeActions";
+import { verifyNurtureUnsubscribeToken } from "./nurtureDeliveryKeys";
 
 const http = httpRouter();
+
+async function nurtureUnsubscribeHandler(ctx: any, request: Request): Promise<Response> {
+  const token = new URL(request.url).searchParams.get("token") ?? "";
+  const secret = process.env.APICLAW_PSEUDONYM_SECRET ?? "";
+  const workspaceId = await verifyNurtureUnsubscribeToken(token, secret);
+  if (!workspaceId) {
+    return new Response("Invalid unsubscribe link.", {
+      status: 400,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
+  try {
+    const result = await ctx.runMutation((internal as any).nurture.optOutByWorkspaceId, {
+      workspaceId: workspaceId as Id<"workspaces">,
+    });
+    if (!result?.success) {
+      return new Response("This workspace is no longer available.", {
+        status: 404,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+      });
+    }
+  } catch {
+    return new Response("Invalid unsubscribe link.", {
+      status: 400,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
+  return new Response(
+    "<!doctype html><html><body style=\"font-family:system-ui;padding:48px;background:#0a0a0a;color:#fafafa\"><h1>You are unsubscribed.</h1><p>APIClaw lifecycle email is now disabled for this workspace.</p></body></html>",
+    {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+    },
+  );
+}
+
+http.route({
+  path: "/nurture/unsubscribe",
+  method: "GET",
+  handler: httpAction(nurtureUnsubscribeHandler),
+});
+
+http.route({
+  path: "/nurture/unsubscribe",
+  method: "POST",
+  handler: httpAction(nurtureUnsubscribeHandler),
+});
 
 const CANON_DISCOVERABLE_APIS = 26_701;
 const CANON_CALLABLE_APIS = 2_906;
 const legacyMagicLinkRetired = (): boolean => true;
+
+const SAFE_PROVIDER_PATH_SEGMENT = /^[A-Za-z0-9._~-]+$/;
+
+function encodeProviderPathSegment(value: unknown, label: string): string {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value === "." ||
+    value === ".." ||
+    !SAFE_PROVIDER_PATH_SEGMENT.test(value)
+  ) {
+    throw new RangeError(`${label} must be one safe provider path segment.`);
+  }
+  return encodeURIComponent(value);
+}
+
+function assertCredentialedProviderPath(url: URL, expectedOrigin: string, expectedPathname: string): string {
+  if (
+    url.origin !== expectedOrigin ||
+    url.pathname !== expectedPathname ||
+    url.search !== "" ||
+    url.hash !== ""
+  ) {
+    throw new RangeError("Credentialed provider URL did not match the intended route.");
+  }
+  return url.toString();
+}
+
+export function elevenLabsTextToSpeechUrl(voiceId: unknown): string {
+  const encodedVoiceId = encodeProviderPathSegment(voiceId, "ElevenLabs voice ID");
+  const expectedPathname = `/v1/text-to-speech/${encodedVoiceId}`;
+  return assertCredentialedProviderPath(
+    new URL(expectedPathname, "https://api.elevenlabs.io"),
+    "https://api.elevenlabs.io",
+    expectedPathname,
+  );
+}
+
+export function replicatePredictionUrl(predictionId: unknown): string {
+  const encodedPredictionId = encodeProviderPathSegment(predictionId, "Replicate prediction ID");
+  const expectedPathname = `/v1/predictions/${encodedPredictionId}`;
+  return assertCredentialedProviderPath(
+    new URL(expectedPathname, "https://api.replicate.com"),
+    "https://api.replicate.com",
+    expectedPathname,
+  );
+}
+
+export function replicateModelPredictionsUrl(model: unknown): string {
+  if (typeof model !== "string") {
+    throw new RangeError("Replicate model must be exactly owner/model.");
+  }
+  const segments = model.split("/");
+  if (segments.length !== 2) {
+    throw new RangeError("Replicate model must be exactly owner/model.");
+  }
+  const owner = encodeProviderPathSegment(segments[0], "Replicate model owner");
+  const modelName = encodeProviderPathSegment(segments[1], "Replicate model name");
+  const expectedPathname = `/v1/models/${owner}/${modelName}/predictions`;
+  return assertCredentialedProviderPath(
+    new URL(expectedPathname, "https://api.replicate.com"),
+    "https://api.replicate.com",
+    expectedPathname,
+  );
+}
+
+export function nasaReadOnlyMethod(value: unknown): "GET" {
+  const method = (value ?? "GET").toString().toUpperCase();
+  if (method !== "GET") {
+    throw new RangeError("NASA managed execution is read-only and only supports GET.");
+  }
+  return "GET";
+}
 
 // Provider catalog - runtime provider capabilities and credential handles.
 interface ProviderMeta {
@@ -422,28 +576,54 @@ const MODEL_COSTS: Record<string, { input: number; output: number }> = {
 // APIClaw margin: 15% on top of provider cost (market standard)
 const APICLAW_MARGIN = 0.15;
 
-function calculateCallCost(model: string, usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): { providerCost: number; apiclawCost: number } {
-  if (!usage) return { providerCost: 0, apiclawCost: 0 };
+function resolveKnownModelCost(model: string, inputTokens = 0): { input: number; output: number } | undefined {
+  const frontier = resolveFrontierModelCost(model, inputTokens);
+  if (frontier) return frontier;
+  const exact = MODEL_COSTS[model];
+  if (exact) return exact;
+  const withoutProvider = model.replace(/^(?:openai|anthropic|xai|groq|mistral|together|deepinfra|openrouter)\//i, "");
+  return MODEL_COSTS[withoutProvider];
+}
+
+function calculateCallCost(model: string, usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): { providerCost: number; apiclawCost: number } | undefined {
+  if (!usage) return undefined;
 
   const inputTokens = usage.prompt_tokens || 0;
   const outputTokens = usage.completion_tokens || 0;
-
-  // Find cost entry (try current frontier price, exact legacy match, then partial)
-  let costs = resolveFrontierModelCost(model, inputTokens) ?? MODEL_COSTS[model];
-  if (!costs) {
-    const modelLower = model.toLowerCase();
-    const key = Object.keys(MODEL_COSTS).find(k => modelLower.includes(k.toLowerCase()));
-    if (key) costs = MODEL_COSTS[key];
-  }
-  if (!costs) {
-    // Unknown model -- estimate at medium tier
-    costs = { input: 1.00, output: 3.00 };
-  }
+  const costs = resolveKnownModelCost(model, inputTokens);
+  if (!costs) return undefined;
 
   const providerCost = (inputTokens * costs.input + outputTokens * costs.output) / 1_000_000;
   const apiclawCost = providerCost * (1 + APICLAW_MARGIN);
 
   return { providerCost, apiclawCost };
+}
+
+function estimateKnownModelUpperBoundUsd(model: string, inputTokens: number, maxOutputTokens: number): number | undefined {
+  return calculateCallCost(model, {
+    prompt_tokens: inputTokens,
+    completion_tokens: maxOutputTokens,
+  })?.providerCost;
+}
+
+function costBoundedOpenRouterRequest(
+  payload: unknown,
+  model: string,
+  maxOutputTokens: number,
+  estimatedInputTokens: number,
+): Record<string, unknown> {
+  const prices = resolveKnownModelCost(model, estimatedInputTokens);
+  if (!prices) {
+    throw new UnsafeManagedOpenRouterRequestError(
+      "This OpenRouter model has no verified APIClaw price ceiling.",
+    );
+  }
+  return buildCostBoundedOpenRouterRequest(payload, {
+    model,
+    maxOutputTokens,
+    maxInputPriceUsdPerMillion: prices.input,
+    maxOutputPriceUsdPerMillion: prices.output,
+  });
 }
 
 // ==============================================
@@ -462,92 +642,9 @@ interface RoutingDecision {
 }
 
 // ==============================================
-// ADVISOR: Analyzes prompts to pick optimal model+provider
-// Opt-in only -- runs when routingMode === "advisor" AND model is "auto" or unspecified.
-// Default routingMode "balanced" no longer triggers the advisor; explicit model names
-// are honored verbatim and unspecified/auto falls through to rule-based routing.
-// Uses Mistral Small (~$0.00001/decision) for near-zero cost intelligence
+// ADVISOR mode is intentionally local and deterministic. Routing decisions must
+// never spend a second managed provider call behind the customer's back.
 // ==============================================
-
-const ADVISOR_SYSTEM_PROMPT = `You are an LLM routing advisor. Given a user prompt, pick the optimal provider and model.
-
-PROVIDERS (use exact provider key and model name):
-
-provider: "mistral", model: "mistral-small-latest" -- Fast, cheap. Simple Q&A, translation, summarization.
-provider: "mistral", model: "mistral-large-latest" -- Strong reasoning, coding, complex analysis.
-provider: "mistral", model: "codestral-latest" -- Code generation, debugging, technical.
-provider: "together", model: "meta-llama/Llama-3.3-70B-Instruct-Turbo" -- Strong open-source all-rounder.
-provider: "together", model: "deepseek-ai/DeepSeek-R1" -- Deep reasoning, math, chain-of-thought.
-provider: "together", model: "Qwen/Qwen2.5-72B-Instruct-Turbo" -- Multilingual, strong CJK.
-provider: "openrouter", model: "anthropic/claude-sonnet-4-6" -- Best quality. Complex multi-step, nuanced writing.
-provider: "openrouter", model: "openai/gpt-4o" -- Vision, function calling, broad knowledge.
-provider: "openrouter", model: "google/gemini-2.0-flash-001" -- Fast multimodal, long context.
-
-Respond with ONLY JSON:
-{"provider":"mistral","model":"mistral-small-latest","reason":"simple factual query"}`;
-
-interface AdvisorDecision {
-  provider: string;
-  model: string;
-  reason: string;
-}
-
-async function advisorPickModel(
-  messages: Array<{ role: string; content: string }>,
-  settings: { blockedProviders: string[] }
-): Promise<AdvisorDecision | null> {
-  // Extract first user message for analysis (keep it short)
-  const userMsg = messages.find(m => m.role === "user");
-  if (!userMsg) return null;
-
-  const promptPreview = typeof userMsg.content === "string"
-    ? userMsg.content.slice(0, 500)
-    : JSON.stringify(userMsg.content).slice(0, 500);
-
-  // Use Mistral Small as the advisor (fast + cheap)
-  const mistralKey = process.env.MISTRAL_API_KEY;
-  if (!mistralKey) return null;
-
-  try {
-    const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${mistralKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "mistral-small-latest",
-        messages: [
-          { role: "system", content: ADVISOR_SYSTEM_PROMPT },
-          { role: "user", content: `Route this prompt:\n\n${promptPreview}` },
-        ],
-        max_tokens: 100,
-        temperature: 0,
-      }),
-    });
-
-    if (!response.ok) return null;
-
-    const data: any = await response.json();
-    const content = data?.choices?.[0]?.message?.content?.trim();
-    if (!content) return null;
-
-    // Parse JSON response (handle markdown code blocks)
-    const jsonStr = content.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
-    const decision = JSON.parse(jsonStr) as AdvisorDecision;
-
-    // Validate the decision
-    if (!decision.provider || !decision.model) return null;
-
-    // Check if the suggested provider is blocked
-    if (settings.blockedProviders.includes(decision.provider)) return null;
-
-    return decision;
-  } catch {
-    // Advisor failed silently -- fall through to rule-based routing
-    return null;
-  }
-}
 
 async function routeLLMRequest(
   requestedModel: string,
@@ -559,6 +656,26 @@ async function routeLLMRequest(
   },
   messages?: Array<{ role: string; content: string }>
 ): Promise<RoutingDecision | null> {
+  const explicitOpenRouterTarget = resolveExplicitOpenRouterTarget(requestedModel);
+  if (explicitOpenRouterTarget) {
+    if (settings.blockedProviders.includes("openrouter")) {
+      return null;
+    }
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) return null;
+    return {
+      provider: "openrouter",
+      model: explicitOpenRouterTarget.model,
+      baseUrl: "https://openrouter.ai/api/v1/chat/completions",
+      apiKey,
+      reason: "explicit_openrouter",
+      extraHeaders: {
+        "HTTP-Referer": "https://apiclaw.cloud",
+        "X-Title": "APIClaw Gateway",
+      },
+    };
+  }
+
   // 1. Canonical direct-provider IDs preserve the exact upstream slug.
   const directRoute = resolveDirectModelRoute(requestedModel);
   if (directRoute && !settings.blockedProviders.includes(directRoute.provider)) {
@@ -579,53 +696,32 @@ async function routeLLMRequest(
     }
   }
 
-  // 2. ADVISOR
-  // Triggers when: routingMode === "advisor" AND model is "auto" or unspecified.
-  // Callers who specify a model name skip the advisor entirely (handled in step 1).
-  // Default mode "balanced" intentionally does NOT invoke the advisor anymore --
-  // most callers want the model they asked for, not a re-pick by another LLM.
+  // 2. ADVISOR. This is a deterministic provider preference, not a model call.
   const isAutoModel = !requestedModel || requestedModel === "auto";
-  const useAdvisor = isAutoModel && settings.routingMode === "advisor" && messages && messages.length > 0;
-
-  if (useAdvisor) {
-    const advisorDecision = await advisorPickModel(messages, settings);
-    if (advisorDecision) {
-      // Map advisor decision to a routing decision
-      const providerKey = advisorDecision.provider;
-      const providerMeta = PROVIDERS[providerKey];
-
-      if (providerMeta?.isLLM && providerMeta.envKey && providerMeta.baseUrl) {
-        const apiKey = process.env[providerMeta.envKey];
-        if (apiKey) {
-          return {
-            provider: providerKey,
-            model: advisorDecision.model,
-            baseUrl: providerMeta.baseUrl,
-            apiKey,
-            reason: `advisor_${providerKey}: ${advisorDecision.reason}`,
-            ...(providerKey === "openrouter" ? {
-              extraHeaders: { "HTTP-Referer": "https://apiclaw.cloud", "X-Title": "APIClaw Gateway" },
-            } : {}),
-          };
-        }
-      }
-
-      // Advisor picked a provider we don't have direct keys for -- route via OpenRouter
-      if (!settings.blockedProviders.includes("openrouter") && settings.allowOpenRouterFallback !== false) {
-        const orKey = process.env.OPENROUTER_API_KEY;
-        if (orKey) {
-          return {
-            provider: "openrouter",
-            model: advisorDecision.model,
-            baseUrl: "https://openrouter.ai/api/v1/chat/completions",
-            apiKey: orKey,
-            reason: `advisor_via_openrouter: ${advisorDecision.reason}`,
-            extraHeaders: { "HTTP-Referer": "https://apiclaw.cloud", "X-Title": "APIClaw Gateway" },
-          };
-        }
-      }
+  if (isAutoModel && settings.routingMode === "advisor") {
+    const localChoices = [
+      { provider: "mistral", model: "mistral-small-latest" },
+      { provider: "groq", model: "llama-3.3-70b-versatile" },
+      { provider: "openrouter", model: "anthropic/claude-sonnet-4-6" },
+    ];
+    for (const choice of localChoices) {
+      if (settings.blockedProviders.includes(choice.provider)) continue;
+      if (choice.provider === "openrouter" && settings.allowOpenRouterFallback === false) continue;
+      const providerMeta = PROVIDERS[choice.provider];
+      if (!providerMeta?.envKey || !providerMeta.baseUrl) continue;
+      const apiKey = process.env[providerMeta.envKey];
+      if (!apiKey) continue;
+      return {
+        provider: choice.provider,
+        model: choice.model,
+        baseUrl: providerMeta.baseUrl,
+        apiKey,
+        reason: `advisor_local_${choice.provider}`,
+        ...(choice.provider === "openrouter" ? {
+          extraHeaders: { "HTTP-Referer": "https://apiclaw.cloud", "X-Title": "APIClaw Gateway" },
+        } : {}),
+      };
     }
-    // Advisor failed -- fall through to rule-based routing
   }
 
   // 3. Static routing mode preferences (fallback)
@@ -948,7 +1044,7 @@ function anthropicToOpenaiResponse(anthropicData: any, model: string): any {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-APIClaw-Internal, X-APIClaw-Subagent, X-APIClaw-Api-Key, X-APIClaw-Session, X-APIClaw-Identifier, X-APIClaw-Route, X-APIClaw-Workspace",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, Idempotency-Key, X-APIClaw-Internal, X-APIClaw-Subagent, X-APIClaw-Api-Key, X-APIClaw-Session, X-APIClaw-Identifier, X-APIClaw-Route, X-APIClaw-Workspace",
 };
 
 // ============================================
@@ -967,7 +1063,7 @@ function unauthResponse(reason: string) {
     {
       error: {
         message:
-          "Workspace required. APIClaw includes 50 managed calls per week. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
+          "Workspace required. APIClaw includes 25 managed calls lifetime, subject to a $1 provider-cost cap. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
         type: "auth_error",
         code: "unauth",
         reason,
@@ -1006,6 +1102,117 @@ function jsonResponse(data: unknown, status = 200) {
   });
 }
 
+function legacyClientUpgradeResponse(): Response {
+  return jsonResponse({
+    error: {
+      code: "legacy_client_upgrade_required",
+      type: "upgrade_required",
+      message: "APIClaw 2.8.6 cannot safely execute against the current gateway contract. Upgrade, sign in again, and restart your MCP client.",
+      minimumVersion: "2.8.7",
+      commands: [
+        "npm install -g @nordsym/apiclaw@latest",
+        "apiclaw auth login --force",
+      ],
+      docsUrl: "https://apiclaw.cloud/install",
+    },
+  }, 426);
+}
+
+async function recordLegacyClientUpgrade(
+  ctx: any,
+  request: Request,
+  path: "/v1/execute" | "/v1/call",
+): Promise<void> {
+  try {
+    await ctx.runMutation(api.funnel.recordEvent, {
+      event: "call_api_blocked",
+      classification: "human",
+      userAgent: request.headers.get("User-Agent") ?? undefined,
+      props: {
+        reason: "legacy_client_upgrade_required",
+        path,
+        minimumVersion: "2.8.7",
+      },
+    });
+  } catch (error: any) {
+    console.error("[Legacy client] Funnel log failed:", error?.message);
+  }
+}
+
+type ResolvedWorkspaceAuth = {
+  workspaceId?: string;
+  keyId?: string;
+  authMethod: "api-key" | "session" | "identifier" | "mcp-oauth" | "internal" | "anonymous";
+  mcpScope?: string;
+};
+
+function mcpScopeDenial(
+  auth: Pick<ResolvedWorkspaceAuth, "authMethod" | "mcpScope">,
+  required: McpCapability,
+): Response | null {
+  if (auth.authMethod !== "mcp-oauth" || mcpScopeAllows(auth.mcpScope, required)) {
+    return null;
+  }
+
+  return new Response(
+    JSON.stringify({
+      error: {
+        code: "insufficient_scope",
+        type: "auth_error",
+        message: `OAuth scope mcp:${required} is required.`,
+        requiredScope: `mcp:${required}`,
+      },
+    }),
+    {
+      status: 403,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        "WWW-Authenticate": `Bearer error="insufficient_scope", scope="mcp:${required}"`,
+      },
+    },
+  );
+}
+
+const MAX_BUFFERED_UPSTREAM_BYTES = 10 * 1024 * 1024;
+
+async function readUpstreamBytesCapped(response: Response): Promise<Uint8Array> {
+  const declared = Number(response.headers.get("Content-Length") ?? 0);
+  if (Number.isFinite(declared) && declared > MAX_BUFFERED_UPSTREAM_BYTES) {
+    throw new RangeError("Upstream response exceeded the 10 MB buffered response cap.");
+  }
+  const reader = response.body?.getReader();
+  if (!reader) return new Uint8Array();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_BUFFERED_UPSTREAM_BYTES) {
+      await reader.cancel();
+      throw new RangeError("Upstream response exceeded the 10 MB buffered response cap.");
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+async function readUpstreamTextCapped(response: Response): Promise<string> {
+  return new TextDecoder().decode(await readUpstreamBytesCapped(response));
+}
+
+async function readUpstreamJsonCapped(response: Response): Promise<any> {
+  const raw = await readUpstreamTextCapped(response);
+  return raw ? JSON.parse(raw) : {};
+}
+
 // ============================================
 // UNIFIED AUTH: resolves workspace from any auth method
 // Priority: 1) Authorization: Bearer sk-claw-... (API key)
@@ -1016,7 +1223,15 @@ function jsonResponse(data: unknown, status = 200) {
 async function resolveWorkspaceFromRequest(
   ctx: any,
   request: Request
-): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "identifier" | "mcp-oauth" | "anonymous" }> {
+): Promise<ResolvedWorkspaceAuth> {
+  const internalHeader = request.headers.get("X-APIClaw-Internal");
+  if (internalHeader) {
+    const expected = process.env.APICLAW_INTERNAL_SECRET;
+    if (!expected || internalHeader !== expected) return { authMethod: "anonymous" };
+    const workspaceId = request.headers.get("X-APIClaw-Workspace") || undefined;
+    return { workspaceId, authMethod: "internal" };
+  }
+
   // 1a. API key via Authorization: Bearer sk-claw-...
   const authHeader = request.headers.get("Authorization");
   let rawKey: string | null = null;
@@ -1049,7 +1264,7 @@ async function resolveWorkspaceFromRequest(
       const resolved = await ctx.runQuery(api.mcpOAuth.resolveBearerToken, { token: oauthToken });
       if (resolved?.ok) {
         ctx.runMutation(api.mcpOAuth.touchToken, { tokenId: resolved.tokenId }).catch(() => {});
-        return { workspaceId: resolved.workspaceId, authMethod: "mcp-oauth" };
+        return { workspaceId: resolved.workspaceId, authMethod: "mcp-oauth", mcpScope: resolved.scope };
       }
     } catch (e: any) {
       console.error("[Auth] MCP OAuth resolution failed:", e.message);
@@ -1096,45 +1311,268 @@ function internalOnlyResponse(_provider: string) {
 }
 
 function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
+  const unavailable = quota.reason === "managed_action_not_customer_executable";
+  const costHold = quota.reason === "managed_cost_hold";
   return jsonResponse(
     {
       error: {
-        code: "quota_exceeded",
+        code: unavailable
+          ? "managed_action_not_available"
+          : costHold
+            ? "managed_cost_hold"
+            : "quota_exceeded",
         reason: quota.reason || "quota_exceeded",
         message:
           quota.message ||
           "Free tier quota exceeded. Keep going at API cost + 15% with pay-as-you-go: https://apiclaw.cloud/upgrade",
-        type: "quota_error",
+        type: unavailable ? "permission_error" : costHold ? "billing_error" : "quota_error",
+        ...(costHold ? { retryable: false } : {}),
         tier: quota.tier,
         provider,
         action,
         path,
-        weeklyUsageCount: quota.weeklyCount,
-        weeklyUsageLimit: quota.weeklyLimit,
-        weeklyRemaining: quota.weeklyRemaining,
-        hourlyUsageCount: quota.hourlyCount,
-        hourlyUsageLimit: quota.hourlyLimit,
-        hourlyRemaining: quota.hourlyRemaining,
-        upgradeUrl: quota.upgradeUrl || "https://apiclaw.cloud/upgrade",
+        managedUsageCount: quota.managedUsageCount,
+        managedUsageLimit: quota.managedUsageLimit,
+        managedUsageRemaining: quota.managedUsageRemaining,
+        activationProviderCostUsd: quota.activationProviderCostUsd,
+        activationProviderCostCapUsd: quota.activationProviderCostCapUsd,
+        activationProviderCostRemainingUsd: quota.activationProviderCostRemainingUsd,
+        ...(!costHold
+          ? { upgradeUrl: quota.upgradeUrl || "https://apiclaw.cloud/upgrade" }
+          : {}),
       },
     },
-    402
+    unavailable ? 403 : costHold ? 503 : 402
   );
+}
+
+type ManagedCallGate = {
+  ledgerId: Id<"managedCallLedger">;
+  requestId: string;
+  billingClass: "activation" | "payg" | "internal" | "contract";
+  trafficClass: "customer" | "internal";
+  fixedProviderCostUsd?: number;
+  quotaWarning?: unknown;
+};
+
+type ManagedCallFinalization = {
+  billingException?: string;
+  reservedProviderCostMicros?: number;
+  reportedProviderCostMicros?: number;
+};
+
+async function managedRequestPayload(request: Request, suppliedPayload: unknown): Promise<unknown> {
+  if (suppliedPayload !== undefined) {
+    const serialized = typeof suppliedPayload === "string"
+      ? suppliedPayload
+      : JSON.stringify(suppliedPayload);
+    if (serialized === undefined || new TextEncoder().encode(serialized).byteLength > MANAGED_REQUEST_BODY_MAX_BYTES) {
+      throw new RangeError(`Managed request bodies are limited to ${MANAGED_REQUEST_BODY_MAX_BYTES} bytes.`);
+    }
+    return suppliedPayload;
+  }
+  const raw = await readManagedRequestTextCapped(request);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+async function readManagedRequestTextCapped(request: Request): Promise<string> {
+  const contentLength = Number(request.headers.get("Content-Length") ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > MANAGED_REQUEST_BODY_MAX_BYTES) {
+    throw new RangeError(`Managed request bodies are limited to ${MANAGED_REQUEST_BODY_MAX_BYTES} bytes.`);
+  }
+  const body = request.clone().body;
+  if (!body) return "";
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    total += value.byteLength;
+    if (total > MANAGED_REQUEST_BODY_MAX_BYTES) {
+      await reader.cancel();
+      throw new RangeError(`Managed request bodies are limited to ${MANAGED_REQUEST_BODY_MAX_BYTES} bytes.`);
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+async function readManagedJsonBodyCapped(request: Request): Promise<any> {
+  const raw = await readManagedRequestTextCapped(request);
+  return raw ? JSON.parse(raw) : {};
 }
 
 async function enforcePreCallQuota(
   ctx: any,
+  request: Request,
   workspaceId: string | undefined,
   provider: string,
   action: string,
-  path: string
-): Promise<Response | null> {
-  if (!workspaceId) return null;
+  path: string,
+  options: {
+    model?: string;
+    estimatedProviderCostUsd?: number;
+    estimatedInputTokens?: number;
+    maxOutputTokens?: number;
+    billingGradeCost?: boolean;
+    trafficClass?: "customer" | "internal";
+    requestPayload?: unknown;
+  } = {},
+): Promise<Response | ManagedCallGate> {
+  if (!workspaceId) {
+    return jsonResponse({
+      error: {
+        code: options.trafficClass === "internal" ? "internal_workspace_required" : "workspace_required",
+        type: "auth_error",
+        message: options.trafficClass === "internal"
+          ? "Internal managed calls require X-APIClaw-Workspace for billing attribution."
+          : "Managed calls require an authenticated APIClaw workspace.",
+      },
+    }, 401);
+  }
 
-  const quota = await ctx.runQuery(api.workspaces.checkCallQuota, {
-    workspaceId: workspaceId as any,
+  const trafficClass = options.trafficClass === "internal" ? "internal" : "customer";
+  let idempotencyKey: string | null;
+  try {
+    idempotencyKey = requireManagedIdempotencyKey(
+      request.headers.get("Idempotency-Key"),
+      trafficClass,
+    );
+  } catch (error) {
+    if (error instanceof InvalidIdempotencyKeyError) {
+      return jsonResponse({
+        error: {
+          code: request.headers.get("Idempotency-Key") === null
+            ? "idempotency_key_required"
+            : "invalid_idempotency_key",
+          type: "invalid_request_error",
+          message: error.message,
+        },
+      }, 400);
+    }
+    throw error;
+  }
+
+  const estimatedProviderCostUsd = options.estimatedProviderCostUsd ?? estimateManagedProviderCostUsd({
+    provider,
+    action,
+    model: options.model,
+    estimatedInputTokens: options.estimatedInputTokens,
+    maxOutputTokens: options.maxOutputTokens,
   });
-  if (quota?.allowed) return null;
+  const requiresExactModelPrice = ["chat", "chat_completions", "responses", "messages"].includes(action) ||
+    PROVIDERS[provider]?.isLLM === true || provider === "llm" || provider === "auto";
+  if (requiresExactModelPrice && estimatedProviderCostUsd === undefined) {
+    return jsonResponse({
+      error: {
+        code: "unpriced_managed_model",
+        type: "billing_error",
+        message: "This model has no verified direct-provider price. APIClaw will not dispatch it until exact pricing is registered.",
+        provider,
+        action,
+        model: options.model,
+      },
+    }, 422);
+  }
+  const billingGradeCost = options.billingGradeCost ?? hasBillingGradeManagedCost({
+    provider,
+    action,
+    model: options.model,
+    estimatedInputTokens: options.estimatedInputTokens,
+    maxOutputTokens: options.maxOutputTokens,
+  });
+  const fixedProviderCostUsd = verifiedFixedManagedProviderCostUsd({ provider, action });
+  let requestId: string;
+  let requestFingerprint: string;
+  try {
+    const payload = idempotencyKey === null
+      ? undefined
+      : await managedRequestPayload(request, options.requestPayload);
+    requestFingerprint = await deriveRequestFingerprint(payload);
+    requestId = await deriveManagedRequestId({
+      idempotencyKey,
+      workspaceId,
+      provider,
+      action,
+      path,
+      model: options.model,
+      payload,
+    });
+  } catch (error) {
+    if (error instanceof InvalidIdempotencyKeyError || error instanceof RangeError) {
+      return jsonResponse({
+        error: {
+          code: "invalid_idempotency_key",
+          type: "invalid_request_error",
+          message: error.message,
+        },
+      }, 400);
+    }
+    throw error;
+  }
+
+  let quota: any;
+  try {
+    quota = await ctx.runMutation((internal as any).managedUsage.authorizeManagedCall, {
+      workspaceId: workspaceId as any,
+      requestId,
+      requestFingerprint,
+      provider,
+      action,
+      model: options.model,
+      path,
+      estimatedProviderCostUsd,
+      billingGradeCost,
+      trafficClass: options.trafficClass,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("requestId collision")) {
+      return jsonResponse({
+        error: {
+          code: "idempotency_conflict",
+          type: "conflict_error",
+          message: "This Idempotency-Key is already bound to a different managed request.",
+        },
+      }, 409);
+    }
+    throw error;
+  }
+  if (quota?.duplicate) {
+    return jsonResponse({
+      error: {
+        code: "idempotency_conflict",
+        type: "conflict_error",
+        message: "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        requestId,
+        ledgerId: quota.ledgerId,
+        reason: quota.reason,
+        outcome: "already_accepted",
+      },
+    }, 409);
+  }
+  if (quota?.allowed) {
+    return {
+      ledgerId: quota.ledgerId,
+      requestId,
+      billingClass: quota.billingClass,
+      trafficClass: quota.trafficClass,
+      fixedProviderCostUsd,
+      quotaWarning: quota.quotaWarning,
+    };
+  }
 
   try {
     await ctx.runMutation(api.funnel.recordEvent, {
@@ -1154,6 +1592,174 @@ async function enforcePreCallQuota(
   }
 
   return quotaExceededResponse(quota || {}, provider, action, path);
+}
+
+async function finalizeManagedCall(
+  ctx: any,
+  gate: ManagedCallGate | undefined,
+  details: {
+    success: boolean;
+    providerCostUsd?: number;
+    provider?: string;
+    model?: string;
+    inputTokens?: number;
+    outputTokens?: number;
+    upstreamRequestId?: string;
+    costSource?: "provider_response" | "token_price_table" | "fixed_price_policy" | "reservation" | "zero_cost";
+  },
+): Promise<ManagedCallFinalization | undefined> {
+  if (!gate) return;
+  return await ctx.runMutation((internal as any).managedUsage.finalizeManagedCall, {
+    ledgerId: gate.ledgerId,
+    ...details,
+  });
+}
+
+function managedCostReconciliationResponse(
+  gate: ManagedCallGate | undefined,
+  finalization: ManagedCallFinalization | undefined,
+): Response | null {
+  if (!gate || gate.trafficClass !== "customer" || !finalization?.billingException) return null;
+  return jsonResponse({
+    error: {
+      code: "managed_cost_reconciliation_required",
+      type: "billing_error",
+      message: "The provider-reported cost did not match APIClaw's authorized ceiling. The response was withheld and managed execution is paused for review.",
+      requestId: gate.requestId,
+      retryable: false,
+    },
+  }, 502);
+}
+
+function successfulManagedCostDetails(gate: ManagedCallGate | undefined): {
+  providerCostUsd?: number;
+  costSource: "fixed_price_policy" | "reservation" | "zero_cost";
+} {
+  const fixedCost = gate?.fixedProviderCostUsd;
+  if (fixedCost === undefined) return { costSource: "reservation" };
+  return {
+    providerCostUsd: fixedCost,
+    costSource: fixedCost === 0 ? "zero_cost" : "fixed_price_policy",
+  };
+}
+
+async function preserveAmbiguousPostDispatchReservation(
+  ctx: any,
+  gate: ManagedCallGate | undefined,
+  details: { provider?: string; model?: string } = {},
+): Promise<void> {
+  // The current ledger has no separate "outcome_unknown" status. Marking the
+  // reservation consumed is the conservative alternative: activation spend is
+  // not refunded after an upstream may have accepted work, and PAYG records a
+  // billing exception instead of inventing a zero-cost call.
+  await finalizeManagedCall(ctx, gate, {
+    success: true,
+    provider: details.provider,
+    model: details.model,
+    costSource: "reservation",
+  });
+}
+
+async function ambiguousPostDispatchResponse(
+  ctx: any,
+  gate: ManagedCallGate | undefined,
+  details: { provider?: string; model?: string } = {},
+  status = 502,
+  extra: Record<string, unknown> = {},
+): Promise<Response> {
+  await preserveAmbiguousPostDispatchReservation(ctx, gate, details);
+  return jsonResponse({
+    ...extra,
+    success: false,
+    code: "outcome_unknown",
+    requestId: gate?.requestId,
+    retryable: false,
+    error: {
+      code: "outcome_unknown",
+      type: "gateway_error",
+      message: "The upstream request may have completed, but APIClaw could not recover its response. Do not repeat this operation with a new idempotency key. Check Activity first.",
+      requestId: gate?.requestId,
+      retryable: false,
+    },
+  }, status);
+}
+
+async function finalizeProxyJson(
+  ctx: any,
+  gate: ManagedCallGate,
+  response: Response,
+  data: any,
+  model?: string,
+  provider = "",
+): Promise<Response> {
+  const usage = data?.usage;
+  const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? 0;
+  const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? 0;
+  const providerReportedCost = providerReportedUsageCostUsd(usage);
+  const calculated = model && usage
+    ? calculateCallCost(model, { prompt_tokens: inputTokens, completion_tokens: outputTokens })
+    : undefined;
+  const costDecision = resolveManagedResponseCost({
+    provider,
+    responseOk: response.ok,
+    fixedProviderCostUsd: gate.fixedProviderCostUsd,
+    providerReportedCostUsd: providerReportedCost,
+    tokenTableCostUsd: calculated?.providerCost,
+  });
+  const finalization = await finalizeManagedCall(ctx, gate, {
+    success: response.ok,
+    providerCostUsd: costDecision.providerCostUsd,
+    model,
+    inputTokens: usage ? inputTokens : undefined,
+    outputTokens: usage ? outputTokens : undefined,
+    upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+    costSource: costDecision.costSource,
+  });
+  const reconciliationResponse = managedCostReconciliationResponse(gate, finalization);
+  if (reconciliationResponse) return reconciliationResponse;
+  return jsonResponse(data, response.status);
+}
+
+async function finalizeProxyFailure(
+  ctx: any,
+  gate: ManagedCallGate,
+  error: unknown,
+  status = 500,
+  options: { postDispatch?: boolean; provider?: string; model?: string } = {},
+): Promise<Response> {
+  // Proxy handlers validate expected caller/config errors explicitly before
+  // reaching this catch. An unexpected exception is therefore conservatively
+  // treated as post-dispatch unless the caller proves otherwise.
+  if (options.postDispatch !== false) {
+    return ambiguousPostDispatchResponse(ctx, gate, {
+      provider: options.provider,
+      model: options.model,
+    }, status);
+  }
+  await finalizeManagedCall(ctx, gate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+  const message = error instanceof Error ? error.message : String(error);
+  return jsonResponse({
+    success: false,
+    error: {
+      code: "managed_request_failed",
+      type: "gateway_error",
+      message,
+    },
+  }, status);
+}
+
+async function rejectProxyBeforeUpstream(
+  ctx: any,
+  gate: ManagedCallGate,
+  data: unknown,
+  status: number,
+): Promise<Response> {
+  await finalizeManagedCall(ctx, gate, {
+    success: false,
+    providerCostUsd: 0,
+    costSource: "zero_cost",
+  });
+  return jsonResponse(data, status);
 }
 
 async function recordFirstSuccessfulGatewayCall(
@@ -1189,11 +1795,22 @@ async function validateAndLogProxyCall(
   request: Request,
   provider: string,
   action: string
-): Promise<Response | { valid: true; workspaceId?: string; subagentId?: string; authMethod: string }> {
+): Promise<Response | {
+  valid: true;
+  workspaceId: string;
+  subagentId?: string;
+  authMethod: string;
+  managedGate: ManagedCallGate;
+  authorizedModel?: string;
+  authorizedMaxOutputTokens?: number;
+  authorizedInputTokens?: number;
+}> {
   const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
 
   // Resolve workspace from any auth method
   const auth = await resolveWorkspaceFromRequest(ctx, request);
+  const scopeDenied = mcpScopeDenial(auth, "call");
+  if (scopeDenied) return scopeDenied;
   const resolvedWorkspaceId = auth.workspaceId;
   const identifier = request.headers.get("X-APIClaw-Identifier") || auth.workspaceId || "unknown";
 
@@ -1228,20 +1845,73 @@ async function validateAndLogProxyCall(
     } catch (e: any) {
       console.error("[Proxy] Funnel log failed:", e.message);
     }
-    if (isEnforceMode()) {
-      return unauthResponse("proxy_requires_auth");
-    }
-    // shadow mode: fall through, record analytics, pass the call
+    return unauthResponse("proxy_requires_auth");
   }
 
-  const quotaBlock = await enforcePreCallQuota(
+  let requestPayload: any = undefined;
+  let authorizedModel: string | undefined;
+  let authorizedMaxOutputTokens: number | undefined;
+  let estimatedInputTokens: number | undefined;
+  let estimatedProviderCostUsd: number | undefined;
+  if (action === "chat") {
+    try {
+      requestPayload = await managedRequestPayload(request, undefined);
+      if (!requestPayload || typeof requestPayload !== "object" || Array.isArray(requestPayload)) {
+        return jsonResponse({ error: { code: "invalid_request", message: "Managed chat body must be a JSON object." } }, 400);
+      }
+      const defaults: Record<string, string> = {
+        openrouter: "anthropic/claude-sonnet-4-6",
+        groq: "llama-3.3-70b-versatile",
+        mistral: "mistral-small-latest",
+        cohere: "command-a-03-2025",
+        together: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        deepinfra: "moonshotai/Kimi-K2.6",
+      };
+      authorizedModel = typeof requestPayload.model === "string" && requestPayload.model
+        ? requestPayload.model
+        : defaults[provider];
+      authorizedMaxOutputTokens = normalizeMaxOutputTokens(
+        requestPayload.max_completion_tokens ?? requestPayload.max_tokens,
+        1_024,
+      );
+      requestPayload = normalizeManagedLlmRequestForCost(requestPayload, {
+        model: authorizedModel ?? "",
+        maxOutputTokens: authorizedMaxOutputTokens,
+        outputField: requestPayload.max_completion_tokens !== undefined
+          ? "max_completion_tokens"
+          : "max_tokens",
+      });
+      estimatedInputTokens = estimateInputTokens(requestPayload);
+      estimatedProviderCostUsd = authorizedModel
+        ? estimateKnownModelUpperBoundUsd(authorizedModel, estimatedInputTokens, authorizedMaxOutputTokens)
+        : undefined;
+    } catch (error) {
+      return jsonResponse({
+        error: {
+          code: "invalid_managed_request",
+          message: error instanceof Error ? error.message : "Invalid managed request",
+        },
+      }, 400);
+    }
+  }
+
+  const quotaGate = await enforcePreCallQuota(
     ctx,
+    request,
     resolvedWorkspaceId,
     provider,
     action,
-    `/proxy/${provider}`
+    `/proxy/${provider}`,
+    {
+      model: authorizedModel,
+      estimatedProviderCostUsd,
+      estimatedInputTokens,
+      maxOutputTokens: authorizedMaxOutputTokens,
+      trafficClass: auth.authMethod === "internal" ? "internal" : "customer",
+      requestPayload,
+    },
   );
-  if (quotaBlock) return quotaBlock;
+  if (quotaGate instanceof Response) return quotaGate;
 
   // ALWAYS log to analytics (mirrors existing behavior for dashboard continuity)
   try {
@@ -1256,25 +1926,31 @@ async function validateAndLogProxyCall(
     console.error("[Proxy] Analytics logging failed:", e.message, e.stack);
   }
 
-  // If we have a workspace, log and increment usage
+  // If we have a workspace, log the request. Usage was already atomically
+  // reserved above and must never be incremented in a second transaction.
   if (resolvedWorkspaceId) {
     try {
-      await ctx.runMutation(api.logs.createProxyLog, {
+      await ctx.runMutation(internal.logs.createProxyLog, {
         workspaceId: resolvedWorkspaceId as any,
         provider,
         action,
         subagentId,
       });
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: resolvedWorkspaceId as any,
-      });
     } catch (e: any) {
       console.error("[Proxy] Workspace logging failed:", e.message);
     }
-    return { valid: true, workspaceId: resolvedWorkspaceId, subagentId, authMethod: auth.authMethod };
+    return {
+      valid: true,
+      workspaceId: resolvedWorkspaceId,
+      subagentId,
+      authMethod: auth.authMethod,
+      managedGate: quotaGate,
+      authorizedModel,
+      authorizedMaxOutputTokens,
+      authorizedInputTokens: estimatedInputTokens,
+    };
   }
-
-  return { valid: true, subagentId, authMethod: auth.authMethod };
+  return jsonResponse({ error: { code: "workspace_required", message: "Managed calls require a workspace." } }, 401);
 }
 
 // OPTIONS handler for CORS
@@ -1318,17 +1994,29 @@ http.route({
 http.route({
   path: "/v1/discover",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
+  handler: httpAction(async (ctx, request): Promise<Response> => {
     try {
-      const authResult = await requireApiKeyAuth(ctx, request);
+      const authResult = await requireApiKeyAuth(ctx, request, "read");
       if (authResult instanceof Response) {
-        return discoverAuthResponse("discover_requires_signup");
+        return authResult.status === 403
+          ? authResult
+          : discoverAuthResponse("discover_requires_signup");
       }
 
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const query = body.query || "";
       const category = body.category || "";
       const callableOnly = body.callable_only ?? false;
+      const tier = typeof body.tier === "string" ? body.tier.trim().toLowerCase() : "";
+      const allowedTiers = new Set(["", "managed", "verified", "callable", "discovery"]);
+      if (!allowedTiers.has(tier)) {
+        return jsonResponse({
+          error: {
+            code: "invalid_tier",
+            message: "tier must be one of: managed, verified, callable, discovery",
+          },
+        }, 400);
+      }
       const page = body.page || 1;
       const limit = Math.min(body.limit || 20, 100);
 
@@ -1337,11 +2025,12 @@ http.route({
       if (query) params.set("q", query);
       if (category) params.set("category", category);
       if (callableOnly) params.set("callable", "true");
+      if (tier) params.set("tier", tier);
       params.set("page", String(page));
       params.set("limit", String(limit));
 
       const catalogUrl = `https://apiclaw.cloud/api/catalog?${params.toString()}`;
-      const catalogRes = await fetch(catalogUrl);
+      const catalogRes = await fetch(catalogUrl, { signal: AbortSignal.timeout(10_000) });
 
       if (!catalogRes.ok) {
         return jsonResponse({ error: "Registry unavailable" }, 502);
@@ -1372,19 +2061,7 @@ http.route({
           filestack: ["file upload", "upload file", "file storage", "file picker", "image upload", "upload image", "file transform", "image transform", "resize image", "document upload", "upload document", "file delivery", "cdn upload", "file processing", "ocr", "virus scan", "file convert", "convert pdf", "filestack"],
         };
         const queryLower = String(query).toLowerCase();
-        const sessionToken = request.headers.get("X-APIClaw-Session");
-        const auth = request.headers.get("Authorization") || "";
-        // Best-effort caller workspace resolution — sessions or sk-claw-key
-        let callerWorkspaceId: string = "anonymous";
-        try {
-          if (sessionToken) {
-            const session = await ctx.runQuery(api.workspaces.getSession, { token: sessionToken });
-            if (session?.workspaceId) callerWorkspaceId = session.workspaceId as string;
-          } else if (auth.startsWith("Bearer sk-claw-")) {
-            const result = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey: auth.slice(7) });
-            if (result?.workspaceId) callerWorkspaceId = result.workspaceId as string;
-          }
-        } catch { /* ignore — anonymous fallback is fine for discovery */ }
+        const callerWorkspaceId = authResult.workspaceId;
 
         for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
           if (keywords.some((kw) => queryLower.includes(kw))) {
@@ -1431,8 +2108,14 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
+      const authResult = await requireApiKeyAuth(ctx, request, "read");
+      if (authResult instanceof Response) {
+        return authResult.status === 403
+          ? authResult
+          : discoverAuthResponse("discover_requires_signup");
+      }
       const startTime = Date.now();
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const query = (body.query || "").toLowerCase();
       
       // Get optional auth context
@@ -1450,10 +2133,15 @@ http.route({
             provider.tags.some((tag) => tag.includes(query))
           );
         })
-        .map(([id, provider]) => ({
-          providerId: id,
-          ...provider,
-        }));
+        .map(([id, provider]) => {
+          const adapter = getManagedProviderAdapter(id);
+          return {
+            providerId: id,
+            ...provider,
+            customerExecutableActions: adapter?.customerExecutableActions ?? [],
+            customerExecutable: (adapter?.customerExecutableActions.length ?? 0) > 0,
+          };
+        });
 
       const responseTimeMs = Date.now() - startTime;
 
@@ -1482,15 +2170,21 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     try {
-      const body = await request.json();
-      const { providerId } = body;
+      const authResult = await requireApiKeyAuth(ctx, request, "read");
+      if (authResult instanceof Response) {
+        return authResult.status === 403
+          ? authResult
+          : discoverAuthResponse("details_require_signup");
+      }
+      const body = await readManagedJsonBodyCapped(request);
+      const providerId = body.providerId || body.name || body.api_id;
 
       if (!providerId) {
         return jsonResponse({ error: "providerId required" }, 400);
       }
 
       const provider = PROVIDERS[providerId as keyof typeof PROVIDERS];
-      if (!provider) {
+      if (!provider || !isPubliclyAvailableManagedProvider(String(providerId))) {
         return jsonResponse({ error: "Provider not found" }, 404);
       }
 
@@ -1510,29 +2204,43 @@ http.route({
 http.route({
   path: "/api/balance",
   method: "GET",
+  handler: httpAction(async () => jsonResponse({ error: "legacy_balance_retired" }, 410)),
+});
+
+// Authenticated workspace allowance and billing readiness for the current CLI.
+http.route({
+  path: "/api/balance",
+  method: "POST",
   handler: httpAction(async (ctx, request) => {
-    const url = new URL(request.url);
-    const agentId = url.searchParams.get("agentId");
-
-    if (!agentId) {
-      return jsonResponse({ error: "agentId required" }, 400);
+    const auth = await resolveWorkspaceFromRequest(ctx, request);
+    const scopeDenied = mcpScopeDenial(auth, "billing");
+    if (scopeDenied) return scopeDenied;
+    if (auth.authMethod === "anonymous" || !auth.workspaceId) {
+      return unauthResponse("balance_requires_authenticated_workspace");
     }
-
-    const credits = await ctx.runQuery(api.credits.getAgentCredits, { agentId });
-    
-    if (!credits) {
-      return jsonResponse({
-        agentId,
-        balanceUsd: 0,
-        currency: "USD",
-        message: "No account found. Top up to get started!",
-      });
+    const workspace = await ctx.runQuery(internal.billing.getWorkspace, {
+      id: auth.workspaceId as Id<"workspaces">,
+    });
+    if (!workspace || workspace.status !== "active") {
+      return unauthResponse("workspace_inactive_or_missing");
     }
-
+    const usage = getWorkspaceUsageDisplay(workspace);
     return jsonResponse({
-      agentId: credits.agentId,
-      balanceUsd: credits.balanceUsd,
-      currency: credits.currency,
+      authenticated: true,
+      email: workspace.email,
+      status: workspace.status,
+      tier: workspace.tier,
+      usageCount: usage.usageCount,
+      usageLimit: usage.usageLimit,
+      usageRemaining: usage.usageRemaining,
+      managedUsageCount: workspace.managedUsageCount ?? workspace.usageCount ?? 0,
+      managedUsageLimit: usage.usageLimit,
+      activationProviderCostUsd: (workspace.activationProviderCostMicros ?? 0) / 1_000_000,
+      activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
+      paygActive: hasActivePaygEntitlement(workspace),
+      hasStripe: !!workspace.stripeCustomerId,
+      createdAt: workspace.createdAt,
+      authMethod: auth.authMethod,
     });
   }),
 });
@@ -1541,128 +2249,24 @@ http.route({
 http.route({
   path: "/api/purchase",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    try {
-      const body = await request.json();
-      const { agentId, providerId, amountUsd } = body;
-
-      if (!agentId || !providerId || !amountUsd) {
-        return jsonResponse(
-          { error: "agentId, providerId, and amountUsd required" },
-          400
-        );
-      }
-
-      if (amountUsd < 1 || amountUsd > 1000) {
-        return jsonResponse(
-          { error: "amountUsd must be between 1 and 1000" },
-          400
-        );
-      }
-
-      const provider = PROVIDERS[providerId as keyof typeof PROVIDERS];
-      if (!provider) {
-        return jsonResponse({ error: "Provider not found" }, 404);
-      }
-
-      // Check balance first
-      const credits = await ctx.runQuery(api.credits.getAgentCredits, { agentId });
-      if (!credits || credits.balanceUsd < amountUsd) {
-        return jsonResponse(
-          {
-            error: "Insufficient balance",
-            currentBalance: credits?.balanceUsd || 0,
-            required: amountUsd,
-          },
-          402
-        );
-      }
-
-      // Execute purchase
-      const purchase = await ctx.runMutation(api.purchases.purchaseAccess, {
-        agentId,
-        providerId,
-        amountUsd,
-        credentials: generateCredentials(providerId),
-      });
-
-      if (!purchase) {
-        return jsonResponse({ error: "Purchase failed" }, 500);
-      }
-
-      return jsonResponse({
-        success: true,
-        purchase: {
-          id: purchase._id,
-          providerId: purchase.providerId,
-          amountUsd: purchase.amountUsd,
-          creditsGranted: purchase.creditsGranted,
-          status: purchase.status,
-        },
-        message: `Successfully purchased $${amountUsd} of ${provider.name} credits`,
-      });
-    } catch (e: any) {
-      return jsonResponse({ error: e.message || "Purchase failed" }, 400);
-    }
-  }),
+  handler: httpAction(async () => jsonResponse({ error: "legacy_credit_purchase_retired" }, 410)),
 });
 
 // Admin: Grant credits
 http.route({
   path: "/admin/grant-credits",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    try {
-      const body = await request.json();
-      const { agentId, amount, reason } = body;
-
-      if (!agentId || !amount) {
-        return jsonResponse({ error: "agentId and amount required" }, 400);
-      }
-
-      // TODO: Add admin auth check here
-      // For now, allow grants (this is for Hivr integration)
-
-      const result = await ctx.runMutation(api.credits.addCredits, {
-        agentId,
-        amountUsd: amount,
-        source: reason || "admin_grant",
-      });
-
-      return jsonResponse({
-        success: true,
-        agentId,
-        credited: amount,
-        newBalance: result?.balanceUsd,
-        reason,
-      });
-    } catch (e: any) {
-      return jsonResponse({ error: e.message || "Grant failed" }, 400);
-    }
-  }),
+  handler: httpAction(async () => jsonResponse({ error: "public_credit_grant_retired" }, 410)),
 });
 
-// Helper functions
 function getCreditsPerDollar(providerId: string): number {
   const rates: Record<string, number> = {
-    "46elks": 30,
-    twilio: 25,
     resend: 1000,
     brave_search: 200,
     openrouter: 100,
     elevenlabs: 3333,
   };
   return rates[providerId] || 100;
-}
-
-function generateCredentials(providerId: string): object {
-  // In production, this would generate or retrieve actual API keys
-  // For now, return placeholder indicating how to use
-  return {
-    type: "apiclaw_proxy",
-    endpoint: `https://adventurous-avocet-799.convex.site/proxy/${providerId}`,
-    note: "Use APIClaw proxy endpoint. Credentials managed automatically.",
-  };
 }
 
 export default http;
@@ -1682,12 +2286,39 @@ http.route({
     
     const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
     if (!OPENROUTER_KEY) {
-      return jsonResponse({ error: "OpenRouter not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "OpenRouter not configured" }, 500);
     }
 
+    let upstreamDispatchAttempted = false;
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
+      if (body.stream === true) {
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, {
+          error: "Streaming managed responses are unavailable until exact usage metering can be reconciled. Use stream=false.",
+          code: "streaming_billing_unavailable",
+        }, 400);
+      }
+      const model = __gate.authorizedModel!;
+      const maxOutputTokens = __gate.authorizedMaxOutputTokens!;
+      const upstreamBody = __gate.managedGate.trafficClass === "customer"
+        ? costBoundedOpenRouterRequest(
+            body,
+            model,
+            maxOutputTokens,
+            __gate.authorizedInputTokens ?? estimateInputTokens(body),
+          )
+        : {
+            ...body,
+            model,
+            max_tokens: maxOutputTokens,
+            stream: false,
+            max_completion_tokens: undefined,
+          };
+      const pseudonymSecret = process.env.APICLAW_PSEUDONYM_SECRET;
+      if (!pseudonymSecret) throw new Error("OpenRouter attribution secret is not configured");
+      const attributedBody = await decorateOpenRouterRequest(upstreamBody, __gate.workspaceId, pseudonymSecret);
       
+      upstreamDispatchAttempted = true;
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -1696,13 +2327,24 @@ http.route({
           "HTTP-Referer": "https://apiclaw.cloud",
           "X-Title": "APIClaw",
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(attributedBody),
+        signal: AbortSignal.timeout(60_000),
       });
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model, "openrouter");
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, {
+          error: e.message,
+          code: e.code,
+        }, 400);
+      }
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: upstreamDispatchAttempted,
+        provider: "openrouter",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -1718,11 +2360,11 @@ http.route({
     
     const BRAVE_KEY = process.env.BRAVE_API_KEY;
     if (!BRAVE_KEY) {
-      return jsonResponse({ error: "Brave Search not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Brave Search not configured" }, 500);
     }
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { query, count = 10 } = body;
 
       const url = new URL("https://api.search.brave.com/res/v1/web/search");
@@ -1733,10 +2375,15 @@ http.route({
         headers: { "X-Subscription-Token": BRAVE_KEY },
       });
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(
+        ctx,
+        __gate.managedGate,
+        e,
+        e instanceof RangeError || e instanceof TypeError ? 400 : 500,
+      );
     }
   }),
 });
@@ -1752,11 +2399,11 @@ http.route({
     
     const RESEND_KEY = process.env.RESEND_API_KEY;
     if (!RESEND_KEY) {
-      return jsonResponse({ error: "Resend not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Resend not configured" }, 500);
     }
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
 
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -1767,10 +2414,10 @@ http.route({
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -1786,14 +2433,20 @@ http.route({
     
     const ELEVENLABS_KEY = process.env.ELEVENLABS_API_KEY;
     if (!ELEVENLABS_KEY) {
-      return jsonResponse({ error: "ElevenLabs not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "ElevenLabs not configured" }, 500);
     }
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { text, voice_id = "21m00Tcm4TlvDq8ikWAM" } = body;
+      let endpoint: string;
+      try {
+        endpoint = elevenLabsTextToSpeechUrl(voice_id);
+      } catch {
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "invalid voice_id" }, 400);
+      }
 
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "xi-api-key": ELEVENLABS_KEY,
@@ -1806,20 +2459,22 @@ http.route({
       });
 
       if (!response.ok) {
-        const error = await response.text();
+        const error = await readUpstreamTextCapped(response);
+        await finalizeManagedCall(ctx, __gate.managedGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
         return jsonResponse({ error }, response.status);
       }
 
       // Return audio as base64
-      const arrayBuffer = await response.arrayBuffer();
+      const arrayBuffer = (await readUpstreamBytesCapped(response)).buffer;
       const base64 = Buffer.from(arrayBuffer).toString("base64");
+      await finalizeManagedCall(ctx, __gate.managedGate, { success: true, costSource: "reservation" });
       
       return jsonResponse({
         audio_base64: base64,
         content_type: "audio/mpeg",
       });
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -1860,11 +2515,11 @@ http.route({
     const ELKS_USER = process.env.ELKS_API_USER;
     const ELKS_PASS = process.env.ELKS_API_PASSWORD;
     if (!ELKS_USER || !ELKS_PASS) {
-      return jsonResponse({ error: "46elks not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "46elks not configured" }, 500);
     }
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { to, message, from = "APIClaw" } = body;
 
       const auth = btoa(`${ELKS_USER}:${ELKS_PASS}`);
@@ -1878,10 +2533,10 @@ http.route({
         body: new URLSearchParams({ from, to, message }),
       });
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -1898,15 +2553,15 @@ http.route({
     const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
     const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
     if (!TWILIO_SID || !TWILIO_TOKEN) {
-      return jsonResponse({ error: "Twilio not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Twilio not configured" }, 500);
     }
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { to, message, from } = body;
 
       if (!from) {
-        return jsonResponse({ error: "Twilio requires 'from' number" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Twilio requires 'from' number" }, 400);
       }
 
       const auth = btoa(`${TWILIO_SID}:${TWILIO_TOKEN}`);
@@ -1923,10 +2578,10 @@ http.route({
         }
       );
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -1949,16 +2604,11 @@ http.route({
   path: "/proxy/github",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
-    // Validate session and log usage
-    const body = await request.json();
+    // Read a bounded body before deriving the action used by the managed gate.
+    const body = await readManagedJsonBodyCapped(request);
     const action = body.action || "search_repos";
     const __gate = await validateAndLogProxyCall(ctx, request, "github", action);
     if (__gate instanceof Response) return __gate;
-    
-    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    if (!GITHUB_TOKEN) {
-      return jsonResponse({ error: "GitHub not configured" }, 500);
-    }
 
     try {
       const { action, ...params } = body;
@@ -1968,41 +2618,70 @@ http.route({
 
       // Route based on action
       switch (action) {
-        case "search_repos":
-          const { query, sort = "stars", limit = 10 } = params;
-          url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=${limit}`;
+        case "search_repos": {
+          const query = typeof params.query === "string" ? params.query.trim() : "";
+          if (!query || query.length > 256) {
+            return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "query must be between 1 and 256 characters" }, 400);
+          }
+          const sort = ["stars", "forks", "help-wanted-issues", "updated"].includes(params.sort)
+            ? params.sort
+            : "stars";
+          const limit = Math.min(100, Math.max(1, Number.isSafeInteger(params.limit) ? params.limit : 10));
+          const searchUrl = new URL("https://api.github.com/search/repositories");
+          searchUrl.searchParams.set("q", query);
+          searchUrl.searchParams.set("sort", sort);
+          searchUrl.searchParams.set("per_page", String(limit));
+          url = searchUrl.toString();
           break;
-        
-        case "get_repo":
-          const { owner, repo } = params;
-          url = `https://api.github.com/repos/${owner}/${repo}`;
+        }
+
+        case "get_repo": {
+          url = githubRepositoryApiUrl(params.owner, params.repo);
           break;
-        
-        case "list_issues":
-          const { owner: issueOwner, repo: issueRepo, state = "open", limit: issueLimit = 10 } = params;
-          url = `https://api.github.com/repos/${issueOwner}/${issueRepo}/issues?state=${state}&per_page=${issueLimit}`;
+        }
+
+        case "list_issues": {
+          const issuesUrl = new URL(`${githubRepositoryApiUrl(params.owner, params.repo)}/issues`);
+          const state = ["open", "closed", "all"].includes(params.state) ? params.state : "open";
+          const issueLimit = Math.min(100, Math.max(1, Number.isSafeInteger(params.limit) ? params.limit : 10));
+          issuesUrl.searchParams.set("state", state);
+          issuesUrl.searchParams.set("per_page", String(issueLimit));
+          url = issuesUrl.toString();
           break;
-        
-        case "create_issue":
-          const { owner: createOwner, repo: createRepo, title, body: issueBody = "" } = params;
-          url = `https://api.github.com/repos/${createOwner}/${createRepo}/issues`;
+        }
+
+        case "create_issue": {
+          if (__gate.managedGate.trafficClass !== "internal") {
+            return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "GitHub write actions require an owner-scoped connection" }, 403);
+          }
+          const title = typeof params.title === "string" ? params.title.trim() : "";
+          const issueBody = typeof params.body === "string" ? params.body : "";
+          if (!title || title.length > 256 || issueBody.length > 65_536) {
+            return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Invalid issue title or body" }, 400);
+          }
+          url = `${githubRepositoryApiUrl(params.owner, params.repo)}/issues`;
           method = "POST";
           fetchBody = JSON.stringify({ title, body: issueBody });
           break;
-        
-        case "get_file":
-          const { owner: fileOwner, repo: fileRepo, path } = params;
-          url = `https://api.github.com/repos/${fileOwner}/${fileRepo}/contents/${path}`;
+        }
+
+        case "get_file": {
+          url = githubContentsApiUrl(params.owner, params.repo, params.path);
           break;
-        
+        }
+
         default:
-          return jsonResponse({ error: `Unknown action: ${action}` }, 400);
+          return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: `Unknown action: ${action}` }, 400);
       }
+
+      const internalGitHubToken = __gate.managedGate.trafficClass === "internal"
+        ? process.env.GITHUB_TOKEN
+        : undefined;
 
       const response = await fetch(url, {
         method,
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          ...(internalGitHubToken ? { "Authorization": `Bearer ${internalGitHubToken}` } : {}),
           "Accept": "application/vnd.github+json",
           "User-Agent": "APIClaw",
           ...(fetchBody ? { "Content-Type": "application/json" } : {}),
@@ -2010,10 +2689,15 @@ http.route({
         ...(fetchBody ? { body: fetchBody } : {}),
       });
 
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(
+        ctx,
+        __gate.managedGate,
+        e,
+        e instanceof RangeError || e instanceof TypeError ? 400 : 500,
+      );
     }
   }),
 });
@@ -2035,14 +2719,14 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const SERPER_KEY = process.env.SERPER_API_KEY;
     if (!SERPER_KEY) {
-      return jsonResponse({ error: "Serper not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Serper not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { query, q, num = 10, gl = "us", hl = "en" } = body;
       const searchQuery = query || q;
       if (!searchQuery) {
-        return jsonResponse({ error: "query required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "query required" }, 400);
       }
       const response = await fetch("https://google.serper.dev/search", {
         method: "POST",
@@ -2052,10 +2736,10 @@ http.route({
         },
         body: JSON.stringify({ q: searchQuery, num, gl, hl }),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2077,13 +2761,13 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const FIRECRAWL_KEY = process.env.FIRECRAWL_API_KEY;
     if (!FIRECRAWL_KEY) {
-      return jsonResponse({ error: "Firecrawl not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Firecrawl not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { url, formats = ["markdown"], onlyMainContent = true } = body;
       if (!url) {
-        return jsonResponse({ error: "url required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "url required" }, 400);
       }
       const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
         method: "POST",
@@ -2093,10 +2777,10 @@ http.route({
         },
         body: JSON.stringify({ url, formats, onlyMainContent }),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2118,13 +2802,15 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const GROQ_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_KEY) {
-      return jsonResponse({ error: "Groq not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Groq not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { model = "llama-3.3-70b-versatile", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      const body = await readManagedJsonBodyCapped(request);
+      const { messages, temperature = 0.7 } = body;
+      const model = __gate.authorizedModel!;
+      const max_tokens = __gate.authorizedMaxOutputTokens!;
       if (!messages) {
-        return jsonResponse({ error: "messages required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "messages required" }, 400);
       }
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -2133,11 +2819,16 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, messages, temperature, max_tokens }),
+        signal: AbortSignal.timeout(60_000),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: true,
+        provider: "groq",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -2159,13 +2850,15 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const MISTRAL_KEY = process.env.MISTRAL_API_KEY;
     if (!MISTRAL_KEY) {
-      return jsonResponse({ error: "Mistral not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Mistral not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { model = "mistral-small-latest", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      const body = await readManagedJsonBodyCapped(request);
+      const { messages, temperature = 0.7 } = body;
+      const model = __gate.authorizedModel!;
+      const max_tokens = __gate.authorizedMaxOutputTokens!;
       if (!messages) {
-        return jsonResponse({ error: "messages required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "messages required" }, 400);
       }
       const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
         method: "POST",
@@ -2174,11 +2867,16 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, messages, temperature, max_tokens }),
+        signal: AbortSignal.timeout(60_000),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: true,
+        provider: "mistral",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -2200,13 +2898,15 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const COHERE_KEY = process.env.COHERE_API_KEY;
     if (!COHERE_KEY) {
-      return jsonResponse({ error: "Cohere not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Cohere not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { model = "command-a-03-2025", message, chat_history, temperature = 0.7, max_tokens = 1024 } = body;
+      const body = await readManagedJsonBodyCapped(request);
+      const { message, chat_history, temperature = 0.7 } = body;
+      const model = __gate.authorizedModel!;
+      const max_tokens = __gate.authorizedMaxOutputTokens!;
       if (!message) {
-        return jsonResponse({ error: "message required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "message required" }, 400);
       }
       const response = await fetch("https://api.cohere.com/v2/chat", {
         method: "POST",
@@ -2215,11 +2915,16 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, message, chat_history, temperature, max_tokens }),
+        signal: AbortSignal.timeout(60_000),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: true,
+        provider: "cohere",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -2241,17 +2946,22 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const REPLICATE_KEY = process.env.REPLICATE_API_TOKEN;
     if (!REPLICATE_KEY) {
-      return jsonResponse({ error: "Replicate not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Replicate not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { model, input, version } = body;
       if (!model && !version) {
-        return jsonResponse({ error: "model or version required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "model or version required" }, 400);
       }
-      const endpoint = version
-        ? "https://api.replicate.com/v1/predictions"
-        : `https://api.replicate.com/v1/models/${model}/predictions`;
+      let endpoint: string;
+      try {
+        endpoint = version
+          ? "https://api.replicate.com/v1/predictions"
+          : replicateModelPredictionsUrl(model);
+      } catch {
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "model must be exactly owner/model" }, 400);
+      }
       const payload = version ? { version, input } : { input };
       const response = await fetch(endpoint, {
         method: "POST",
@@ -2262,10 +2972,10 @@ http.route({
         },
         body: JSON.stringify(payload),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model || version);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2288,21 +2998,27 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const REPLICATE_KEY = process.env.REPLICATE_API_TOKEN;
     if (!REPLICATE_KEY) {
-      return jsonResponse({ error: "Replicate not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Replicate not configured" }, 500);
     }
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
     if (!id) {
-      return jsonResponse({ error: "id query param required" }, 400);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "id query param required" }, 400);
+    }
+    let endpoint: string;
+    try {
+      endpoint = replicatePredictionUrl(id);
+    } catch {
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "invalid prediction id" }, 400);
     }
     try {
-      const response = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
+      const response = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${REPLICATE_KEY}` },
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2324,13 +3040,13 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;
     if (!DEEPGRAM_KEY) {
-      return jsonResponse({ error: "Deepgram not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Deepgram not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { url, model = "nova-3", language = "en", smart_format = true } = body;
       if (!url) {
-        return jsonResponse({ error: "url required (audio file URL)" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "url required (audio file URL)" }, 400);
       }
       const params = new URLSearchParams({
         model,
@@ -2348,10 +3064,10 @@ http.route({
           body: JSON.stringify({ url }),
         }
       );
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2373,13 +3089,18 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const E2B_KEY = process.env.E2B_API_KEY;
     if (!E2B_KEY) {
-      return jsonResponse({ error: "E2B not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "E2B not configured" }, 500);
     }
     try {
-      const result = await executeE2BCode(E2B_KEY, await request.json());
+      const result = await executeE2BCode(E2B_KEY, await readManagedJsonBodyCapped(request));
+      await finalizeManagedCall(ctx, __gate.managedGate, {
+        success: result.ok,
+        providerCostUsd: result.ok ? undefined : 0,
+        costSource: result.ok ? "reservation" : "zero_cost",
+      });
       return jsonResponse(result.data, result.status);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2401,13 +3122,15 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const TOGETHER_KEY = process.env.TOGETHER_API_KEY;
     if (!TOGETHER_KEY) {
-      return jsonResponse({ error: "Together AI not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Together AI not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { model = "meta-llama/Llama-3.3-70B-Instruct-Turbo", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      const body = await readManagedJsonBodyCapped(request);
+      const { messages, temperature = 0.7 } = body;
+      const model = __gate.authorizedModel!;
+      const max_tokens = __gate.authorizedMaxOutputTokens!;
       if (!messages || !Array.isArray(messages)) {
-        return jsonResponse({ error: "messages array required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "messages array required" }, 400);
       }
       const response = await fetch("https://api.together.xyz/v1/chat/completions", {
         method: "POST",
@@ -2416,11 +3139,16 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, messages, temperature, max_tokens }),
+        signal: AbortSignal.timeout(60_000),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: true,
+        provider: "together",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -2442,13 +3170,15 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const DEEPINFRA_KEY = process.env.DEEPINFRA_API_KEY;
     if (!DEEPINFRA_KEY) {
-      return jsonResponse({ error: "DeepInfra not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "DeepInfra not configured" }, 500);
     }
     try {
-      const body = await request.json();
-      const { model = "moonshotai/Kimi-K2.6", messages, temperature = 0.7, max_tokens = 1024 } = body;
+      const body = await readManagedJsonBodyCapped(request);
+      const { messages, temperature = 0.7 } = body;
+      const model = __gate.authorizedModel!;
+      const max_tokens = __gate.authorizedMaxOutputTokens!;
       if (!messages || !Array.isArray(messages)) {
-        return jsonResponse({ error: "messages array required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "messages array required" }, 400);
       }
       const response = await fetch("https://api.deepinfra.com/v1/openai/chat/completions", {
         method: "POST",
@@ -2457,11 +3187,16 @@ http.route({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, messages, temperature, max_tokens }),
+        signal: AbortSignal.timeout(60_000),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 500, {
+        postDispatch: true,
+        provider: "deepinfra",
+        model: __gate.authorizedModel,
+      });
     }
   }),
 });
@@ -2483,13 +3218,13 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const STABILITY_KEY = process.env.STABILITY_API_KEY;
     if (!STABILITY_KEY) {
-      return jsonResponse({ error: "Stability AI not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "Stability AI not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { prompt, model = "sd3.5-large", output_format = "png", aspect_ratio = "1:1" } = body;
       if (!prompt) {
-        return jsonResponse({ error: "prompt required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "prompt required" }, 400);
       }
       const formData = new FormData();
       formData.append("prompt", prompt);
@@ -2506,10 +3241,10 @@ http.route({
           body: formData,
         }
       );
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data, model);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2531,13 +3266,13 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const ASSEMBLYAI_KEY = process.env.ASSEMBLYAI_API_KEY;
     if (!ASSEMBLYAI_KEY) {
-      return jsonResponse({ error: "AssemblyAI not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "AssemblyAI not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { audio_url, language_detection = true, speaker_labels = true } = body;
       if (!audio_url) {
-        return jsonResponse({ error: "audio_url required" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "audio_url required" }, 400);
       }
       const response = await fetch("https://api.assemblyai.com/v2/transcript", {
         method: "POST",
@@ -2547,10 +3282,10 @@ http.route({
         },
         body: JSON.stringify({ audio_url, language_detection, speaker_labels }),
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2572,13 +3307,13 @@ http.route({
     if (__gate instanceof Response) return __gate;
     const APILAYER_KEY = process.env.APILAYER_API_KEY;
     if (!APILAYER_KEY) {
-      return jsonResponse({ error: "APILayer not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "APILayer not configured" }, 500);
     }
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { service, endpoint, params = {} } = body;
       if (!service || !endpoint) {
-        return jsonResponse({ error: "service and endpoint required (e.g. service:'exchangerates', endpoint:'/latest')" }, 400);
+        return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "service and endpoint required (e.g. service:'exchangerates', endpoint:'/latest')" }, 400);
       }
       const queryString = new URLSearchParams(params).toString();
       const url = `https://api.apilayer.com/${service}${endpoint}${queryString ? '?' + queryString : ''}`;
@@ -2588,10 +3323,10 @@ http.route({
           apikey: APILAYER_KEY,
         },
       });
-      const data = await response.json();
-      return jsonResponse(data, response.status);
+      const data = await readUpstreamJsonCapped(response);
+      return finalizeProxyJson(ctx, __gate.managedGate, response, data);
     } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e);
     }
   }),
 });
@@ -2613,18 +3348,39 @@ http.route({
 
     const NASA_KEY = process.env.NASA_API_KEY;
     if (!NASA_KEY) {
-      return jsonResponse({ error: "NASA not configured" }, 500);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "NASA not configured" }, 500);
     }
 
-    let body: any = {};
-    try { body = await request.json(); } catch {}
+    let body: any;
+    try {
+      body = await readManagedJsonBodyCapped(request);
+    } catch (error) {
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, {
+        error: {
+          code: error instanceof RangeError ? "request_body_too_large" : "invalid_json",
+          message: error instanceof RangeError
+            ? "NASA request body exceeds the managed request limit."
+            : "NASA request body must be valid JSON.",
+        },
+      }, error instanceof RangeError ? 413 : 400);
+    }
     const path: string = typeof body?.path === "string" && body.path.startsWith("/") ? body.path : "/planetary/apod";
-    const method: string = (body?.method ?? "GET").toString().toUpperCase();
+    let method: "GET";
+    try {
+      method = nasaReadOnlyMethod(body?.method);
+    } catch (error) {
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, {
+        error: {
+          code: "read_only_provider",
+          message: error instanceof Error ? error.message : "NASA managed execution is read-only.",
+        },
+      }, 405);
+    }
     const params: Record<string, any> = (body?.params && typeof body.params === "object") ? body.params : {};
 
     const url = new URL(path, "https://api.nasa.gov");
     if (url.origin !== "https://api.nasa.gov") {
-      return jsonResponse({ error: "invalid_target", detail: "path must resolve under api.nasa.gov" }, 400);
+      return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "invalid_target", detail: "path must resolve under api.nasa.gov" }, 400);
     }
     for (const [k, v] of Object.entries(params)) {
       if (v === undefined || v === null) continue;
@@ -2639,13 +3395,18 @@ http.route({
         signal: AbortSignal.timeout(25000),
       });
       const ct = resp.headers.get("Content-Type") ?? "application/json";
-      const text = await resp.text();
+      const text = await readUpstreamTextCapped(resp);
+      await finalizeManagedCall(ctx, __gate.managedGate, {
+        success: resp.ok,
+        providerCostUsd: 0,
+        costSource: "zero_cost",
+      });
       return new Response(text, {
         status: resp.status,
         headers: { ...corsHeaders, "Content-Type": ct, "X-APIClaw-Mode": "managed", "X-APIClaw-Provider": "NASA" },
       });
     } catch (e: any) {
-      return jsonResponse({ error: "upstream_failed", message: e?.message ?? "fetch failed" }, 502);
+      return finalizeProxyFailure(ctx, __gate.managedGate, e, 502, { provider: "nasa" });
     }
   }),
 });
@@ -2672,7 +3433,7 @@ http.route({
     }, 410);
 
     try {
-      const body = await request.json();
+      const body = await readManagedJsonBodyCapped(request);
       const { email, fingerprint } = body;
 
       if (!email || !email.includes("@")) {
@@ -2692,7 +3453,7 @@ http.route({
 <h2>An AI Agent Wants to Connect</h2>
 <p>Click below to verify your email and activate your workspace.</p>
 <p><a href="${verifyUrl}" style="background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;display:inline-block;">Verify Email</a></p>
-<p style="color:#666;font-size:13px;">Free tier: 50 managed calls per week. This link expires in 1 hour.</p>
+<p style="color:#666;font-size:13px;">Free activation: 25 managed calls lifetime, subject to a $1 provider-cost cap. This link expires in 1 hour.</p>
 <p style="color:#999;font-size:11px;">Or copy this link: ${verifyUrl}</p>
 </div>`;
       
@@ -2745,57 +3506,6 @@ http.route({
   handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
 });
 
-// Poll magic link status (for agents to check if user clicked)
-http.route({
-  path: "/workspace/poll",
-  method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    const url = new URL(request.url);
-    const token = url.searchParams.get("token");
-
-    if (!token) {
-      return jsonResponse({ error: "token required" }, 400);
-    }
-
-    const result = await ctx.runQuery(api.workspaces.pollMagicLink, { token });
-    return jsonResponse(result);
-  }),
-});
-
-http.route({
-  path: "/workspace/poll",
-  method: "OPTIONS",
-  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
-});
-
-// Verify session token
-http.route({
-  path: "/workspace/verify-session",
-  method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    const url = new URL(request.url);
-    const sessionToken = url.searchParams.get("sessionToken");
-
-    if (!sessionToken) {
-      return jsonResponse({ error: "sessionToken required" }, 400);
-    }
-
-    const result = await ctx.runQuery(api.workspaces.verifySession, { sessionToken });
-    
-    if (!result) {
-      return jsonResponse({ error: "Invalid or expired session" }, 401);
-    }
-
-    return jsonResponse(result);
-  }),
-});
-
-http.route({
-  path: "/workspace/verify-session",
-  method: "OPTIONS",
-  handler: httpAction(async () => new Response(null, { headers: corsHeaders })),
-});
-
 // Get workspace by email
 http.route({
   path: "/workspace/by-email",
@@ -2831,21 +3541,7 @@ http.route({
 http.route({
   path: "/workspace/send-reminder",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    try {
-      const body = await request.json();
-      const { email, token } = body;
-
-      if (!email || !token) {
-        return jsonResponse({ error: "email and token required" }, 400);
-      }
-
-      await ctx.runAction(api.email.sendReminderEmail, { email, token });
-      return jsonResponse({ success: true });
-    } catch (e: any) {
-      return jsonResponse({ error: e.message }, 500);
-    }
-  }),
+  handler: httpAction(async () => jsonResponse({ error: "legacy_reminder_retired" }, 410)),
 });
 
 http.route({
@@ -2901,31 +3597,7 @@ http.route({
 http.route({
   path: "/proxy/test-logging",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    const identifier = request.headers.get("X-APIClaw-Identifier");
-
-    try {
-      const logId = await ctx.runMutation(api.analytics.log, {
-        event: "test_endpoint",
-        provider: "test",
-        identifier: identifier || "test",
-        metadata: { test: true },
-      });
-
-      return jsonResponse({
-        success: true,
-        identifier,
-        logId,
-        message: "Logged successfully"
-      });
-    } catch (e: any) {
-      return jsonResponse({
-        success: false,
-        error: e.message,
-        stack: e.stack
-      }, 500);
-    }
-  }),
+  handler: httpAction(async () => jsonResponse({ error: "debug_endpoint_retired" }, 410)),
 });
 
 // ==============================================
@@ -2947,18 +3619,25 @@ function extractBearerToken(request: Request): string | null {
 // Helper: require auth (permanent API key OR CLI session). 401 if missing.
 // Accepted forms:
 //   Authorization: Bearer sk-claw-…     (legacy, still supported)
+//   Authorization: Bearer sk-mcp-…      (Remote MCP OAuth)
 //   X-APIClaw-Api-Key: sk-claw-…        (preferred permanent header)
 //   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw login)
 async function requireApiKeyAuth(
   ctx: any,
-  request: Request
-): Promise<{ workspaceId: string; keyId?: string; authMethod: "api-key" | "session" } | Response> {
+  request: Request,
+  requiredMcpCapability: McpCapability = "call",
+): Promise<{ workspaceId: string; keyId?: string; authMethod: "api-key" | "session" | "mcp-oauth" } | Response> {
   const auth = await resolveWorkspaceFromRequest(ctx, request);
   if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
     return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
   }
   if (auth.authMethod === "session" && auth.workspaceId) {
     return { workspaceId: auth.workspaceId, authMethod: "session" };
+  }
+  if (auth.authMethod === "mcp-oauth" && auth.workspaceId) {
+    const scopeDenied = mcpScopeDenial(auth, requiredMcpCapability);
+    if (scopeDenied) return scopeDenied;
+    return { workspaceId: auth.workspaceId, authMethod: "mcp-oauth" };
   }
   return jsonResponse(
     {
@@ -2988,7 +3667,7 @@ http.route({
     // Parse body
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
     }
@@ -2998,14 +3677,84 @@ http.route({
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
 
-    const quotaBlock = await enforcePreCallQuota(
-      ctx,
-      workspaceId,
-      "llm",
-      "chat_completions",
-      "/v1/chat/completions"
+    let configuredDefaultModel: string | null = null;
+    let configuredTier = "free";
+    try {
+      const routingSettings = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+      configuredDefaultModel = routingSettings?.defaultModel ?? null;
+      configuredTier = routingSettings?.tier ?? "free";
+    } catch {}
+    const explicitOpenRouterTarget = resolveExplicitOpenRouterTarget(model);
+    const openRouterExecution = resolveExplicitOpenRouterExecution({
+      provider: !isInternalTier(configuredTier) || explicitOpenRouterTarget ? "openrouter" : "auto",
+      action: "chat",
+      requestedModel: model || configuredDefaultModel || "auto",
+    });
+    const managedModelForRequest = openRouterExecution?.model ?? (model === "auto"
+      ? "mistral-small-latest"
+      : model || configuredDefaultModel || "anthropic/claude-sonnet-4-6");
+    const modelForRouting = openRouterExecution?.routingModel ?? managedModelForRequest;
+    let authorizedMaxOutputTokens: number;
+    try {
+      authorizedMaxOutputTokens = normalizeMaxOutputTokens(rest.max_completion_tokens ?? rest.max_tokens);
+    } catch (error) {
+      return jsonResponse({
+        error: {
+          message: error instanceof Error ? error.message : "Invalid maximum output token value",
+          type: "invalid_request_error",
+          code: "invalid_max_output_tokens",
+        },
+      }, 400);
+    }
+    if (rest.max_completion_tokens !== undefined) {
+      rest.max_completion_tokens = authorizedMaxOutputTokens;
+      delete rest.max_tokens;
+    } else {
+      rest.max_tokens = authorizedMaxOutputTokens;
+      delete rest.max_completion_tokens;
+    }
+    const normalizedRequestPayload = normalizeManagedLlmRequestForCost(
+      { ...body, messages, stream },
+      {
+        model: managedModelForRequest,
+        maxOutputTokens: authorizedMaxOutputTokens,
+        outputField: rest.max_completion_tokens !== undefined
+          ? "max_completion_tokens"
+          : "max_tokens",
+      },
     );
-    if (quotaBlock) return quotaBlock;
+    const estimatedInputTokens = estimateInputTokens(normalizedRequestPayload);
+
+    const quotaGate = await enforcePreCallQuota(
+      ctx,
+      request,
+      workspaceId,
+      openRouterExecution?.provider ?? "llm",
+      "chat_completions",
+      "/v1/chat/completions",
+      {
+        model: managedModelForRequest,
+        estimatedProviderCostUsd: estimateKnownModelUpperBoundUsd(
+          managedModelForRequest,
+          estimatedInputTokens,
+          authorizedMaxOutputTokens,
+        ),
+        estimatedInputTokens,
+        maxOutputTokens: authorizedMaxOutputTokens,
+        requestPayload: normalizedRequestPayload,
+      },
+    );
+    if (quotaGate instanceof Response) return quotaGate;
+    if (stream && quotaGate.trafficClass === "customer") {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+      return jsonResponse({
+        error: {
+          code: "streaming_billing_unavailable",
+          type: "billing_error",
+          message: "Streaming managed responses are temporarily unavailable for customer billing. Use stream=false so exact usage can be reconciled.",
+        },
+      }, 400);
+    }
 
     // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT
     // AND the requested model is Codex-routable (gpt-5.x, codex-*)
@@ -3031,6 +3780,13 @@ http.route({
         codexTier = ws?.tier ?? "free";
       } catch {}
       if (codexTier !== "founder" && codexTier !== "partner") {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: false,
+          provider: "openai-codex",
+          providerCostUsd: 0,
+          model: managedModelForRequest,
+          costSource: "zero_cost",
+        });
         return jsonResponse({
           error: {
             message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must use apiclaw's managed routing (omit X-APIClaw-OAuth header).",
@@ -3062,13 +3818,12 @@ http.route({
             authMethod: "api-key",
           },
         });
-        await ctx.runMutation(api.logs.createProxyLog, {
+        await ctx.runMutation(internal.logs.createProxyLog, {
           workspaceId: workspaceId as any,
           provider: "openai-codex",
           action: "chat_completions",
           subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
         });
-        await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
       } catch (e: any) {
         console.error("[/v1/chat/completions Codex] logging failed:", e?.message);
       }
@@ -3078,6 +3833,7 @@ http.route({
           method: "POST",
           headers: buildCodexHeaders(codexOauth!),
           body: JSON.stringify(codexBody),
+          signal: AbortSignal.timeout(60_000),
         });
 
         // Non-2xx → map Codex { detail } to OpenAI error shape and return early.
@@ -3085,6 +3841,13 @@ http.route({
           let detail: any = null;
           try { detail = await upstream.json(); } catch { detail = { detail: await upstream.text() }; }
           const errMsg = detail?.error?.message ?? detail?.detail ?? `Codex upstream HTTP ${upstream.status}`;
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: false,
+            provider: "openai-codex",
+            providerCostUsd: 0,
+            model: codexModel,
+            costSource: "zero_cost",
+          });
           return jsonResponse({
             error: {
               message: errMsg,
@@ -3103,6 +3866,13 @@ http.route({
         }
 
         if (stream && upstream.body) {
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: true,
+            provider: "openai-codex",
+            providerCostUsd: 0,
+            model: codexModel,
+            costSource: "zero_cost",
+          });
           await recordFirstSuccessfulGatewayCall(ctx, {
             workspaceId,
             path: "/v1/chat/completions",
@@ -3129,6 +3899,7 @@ http.route({
         const latencyMs = Date.now() - startTime;
 
         if (sseError) {
+          await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: codexModel, costSource: "zero_cost" });
           return jsonResponse({
             error: { message: sseError.message ?? "Codex stream error", type: "codex_error", code: sseError.code ?? "stream_error" },
             _apiclaw: {
@@ -3141,6 +3912,7 @@ http.route({
           }, 502);
         }
         if (!responsesData) {
+          await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: codexModel, costSource: "zero_cost" });
           return jsonResponse({
             error: { message: "Codex stream completed without response payload", type: "codex_error", code: "empty_stream" },
             _apiclaw: {
@@ -3162,6 +3934,16 @@ http.route({
         });
 
         const chatData = responsesToChatCompletionsResponse(responsesData, codexModel);
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: true,
+          provider: "openai-codex",
+          providerCostUsd: 0,
+          model: codexModel,
+          inputTokens: responsesData?.usage?.input_tokens,
+          outputTokens: responsesData?.usage?.output_tokens,
+          upstreamRequestId: responsesData?.id,
+          costSource: "zero_cost",
+        });
         (chatData as any)._apiclaw = {
           gateway: "v1",
           endpoint: "/v1/chat/completions",
@@ -3175,6 +3957,7 @@ http.route({
         };
         return jsonResponse(chatData, upstream.status);
       } catch (e: any) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: model || undefined, costSource: "zero_cost" });
         return jsonResponse({ error: { message: e?.message ?? String(e), type: "api_error" } }, 502);
       }
     }
@@ -3214,9 +3997,9 @@ http.route({
       ? [routeOverride, ...settings.preferredProviders]
       : settings.preferredProviders;
 
-    const effectiveModel = model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
+    const effectiveModel = modelForRouting;
 
-    // Route the request (async -- may invoke advisor for intelligent model selection)
+    // Route the request. Advisor mode is deterministic and performs no hidden provider call.
     const route = await routeLLMRequest(effectiveModel, {
       routingMode: effectiveRoutingMode,
       preferredProviders: effectivePreferred,
@@ -3225,6 +4008,7 @@ http.route({
     }, messages);
 
     if (!route) {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
       return jsonResponse({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
     }
 
@@ -3232,6 +4016,7 @@ http.route({
     const requestedModelForGuard = String(effectiveModel || route.model || "");
     const codexSubscriptionModel = /^(openai\/|openai-codex\/)?(gpt-5(\.|-|$)|codex-)/i.test(requestedModelForGuard);
     if (isFounderOrPartner && route.provider === "openai" && codexSubscriptionModel) {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, provider: route.provider, providerCostUsd: 0, model: route.model, costSource: "zero_cost" });
       return jsonResponse({
         error: {
           message: "Founder OpenAI GPT-5/Codex routing requires valid Codex OAuth passthrough. Refusing managed OpenAI API key fallback.",
@@ -3265,14 +4050,11 @@ http.route({
           authMethod: "api-key",
         },
       });
-      await ctx.runMutation(api.logs.createProxyLog, {
+      await ctx.runMutation(internal.logs.createProxyLog, {
         workspaceId: workspaceId as any,
         provider: route.provider,
         action: "chat_completions",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
-      });
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: workspaceId as any,
       });
     } catch (e: any) {
       console.error("[Gateway] Logging failed:", e.message);
@@ -3289,6 +4071,7 @@ http.route({
       : route.apiKey;
 
     // Forward to the chosen provider
+    let upstreamDispatchAttempted = false;
     try {
       const isAnthropic = route.provider === "anthropic";
       let requestBody: any;
@@ -3312,6 +4095,19 @@ http.route({
           stream: stream || false,
           ...rest,
         };
+        if (route.provider === "openrouter") {
+          if (quotaGate.trafficClass === "customer") {
+            requestBody = costBoundedOpenRouterRequest(
+              requestBody,
+              route.model,
+              authorizedMaxOutputTokens,
+              estimatedInputTokens,
+            );
+          }
+          const pseudonymSecret = process.env.APICLAW_PSEUDONYM_SECRET;
+          if (!pseudonymSecret) throw new Error("OpenRouter attribution secret is not configured");
+          requestBody = await decorateOpenRouterRequest(requestBody, workspaceId, pseudonymSecret);
+        }
         headers = {
           "Authorization": `Bearer ${effectiveApiKey}`,
           "Content-Type": "application/json",
@@ -3323,15 +4119,18 @@ http.route({
         ? "founder_oauth_passthrough"
         : "managed_provider_key";
 
-      let response = await fetch(route.baseUrl, {
+      upstreamDispatchAttempted = true;
+      const response = await fetch(route.baseUrl, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),
+        signal: AbortSignal.timeout(60_000),
       });
 
       // OAuth passthrough failures must not fall back to managed OpenAI billing.
       const usedOAuth = oauthPassthroughEligible && effectiveApiKey !== route.apiKey;
       if (usedOAuth && (response.status === 401 || response.status === 403)) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, provider: route.provider, providerCostUsd: 0, model: route.model, costSource: "zero_cost" });
         return jsonResponse({
           error: {
             message: `OAuth passthrough failed with ${response.status}. Managed OpenAI API key fallback is disabled for founder/partner workspaces.`,
@@ -3362,6 +4161,13 @@ http.route({
 
       // For streaming responses, proxy the stream directly
       if (stream && response.body) {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: response.ok,
+          provider: route.provider,
+          providerCostUsd: oauthPassthroughEligible ? 0 : undefined,
+          model: route.model,
+          costSource: oauthPassthroughEligible ? "zero_cost" : "reservation",
+        });
         return new Response(response.body, {
           status: response.status,
           headers: {
@@ -3374,7 +4180,7 @@ http.route({
       }
 
       // Non-streaming: return JSON
-      let data = await response.json();
+      let data = await readUpstreamJsonCapped(response);
 
       // Translate Anthropic response to OpenAI format
       if (isAnthropic && response.ok) {
@@ -3384,20 +4190,32 @@ http.route({
 
       // Calculate cost from token usage
       const usage = (data as any)?.usage;
-      const { providerCost, apiclawCost } = calculateCallCost(route.model, usage);
-
-      // Log cost to usage records (fire and forget)
-      if (apiclawCost > 0) {
-        ctx.runMutation(internal.billing.logCallCost, {
-          workspaceId: workspaceId as any,
-          provider: route.provider,
-          model: route.model,
-          providerCostUsd: providerCost,
-          apiclawCostUsd: apiclawCost,
-          inputTokens: usage?.prompt_tokens || 0,
-          outputTokens: usage?.completion_tokens || 0,
-        }).catch(() => {});
-      }
+      const calculatedCost = calculateCallCost(route.model, usage);
+      const providerReportedCost = providerReportedUsageCostUsd(usage);
+      const managedCostDecision = resolveManagedResponseCost({
+        provider: route.provider,
+        responseOk: response.ok,
+        providerReportedCostUsd: providerReportedCost,
+        tokenTableCostUsd: calculatedCost?.providerCost,
+      });
+      const providerCost = oauthPassthroughEligible
+        ? 0
+        : managedCostDecision.providerCostUsd;
+      const apiclawCost = providerCost === undefined ? undefined : oauthPassthroughEligible ? 0 : providerCost * (1 + APICLAW_MARGIN);
+      const finalization = await finalizeManagedCall(ctx, quotaGate, {
+        success: response.ok,
+        provider: route.provider,
+        providerCostUsd: providerCost,
+        model: route.model,
+        inputTokens: usage?.prompt_tokens || 0,
+        outputTokens: usage?.completion_tokens || 0,
+        upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+        costSource: oauthPassthroughEligible
+          ? "zero_cost"
+          : managedCostDecision.costSource,
+      });
+      const reconciliationResponse = managedCostReconciliationResponse(quotaGate, finalization);
+      if (reconciliationResponse) return reconciliationResponse;
 
       // Add APIClaw metadata
       if (data && typeof data === "object") {
@@ -3410,8 +4228,8 @@ http.route({
           credentialSource: authMode,
           gateway: "v1",
           cost: {
-            providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
-            totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+            providerUsd: providerCost === undefined ? null : Math.round(providerCost * 1_000_000) / 1_000_000,
+            totalUsd: apiclawCost === undefined ? null : Math.round(apiclawCost * 1_000_000) / 1_000_000,
             margin: "15%",
           },
         };
@@ -3419,6 +4237,36 @@ http.route({
 
       return jsonResponse(data, response.status);
     } catch (e: any) {
+      if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: false,
+          providerCostUsd: 0,
+          model: managedModelForRequest,
+          costSource: "zero_cost",
+        });
+        return jsonResponse({
+          error: {
+            message: e.message,
+            type: "invalid_request_error",
+            code: e.code,
+          },
+        }, 400);
+      }
+      if (upstreamDispatchAttempted) {
+        return ambiguousPostDispatchResponse(
+          ctx,
+          quotaGate,
+          { provider: route.provider, model: route.model },
+          502,
+        );
+      }
+      await finalizeManagedCall(ctx, quotaGate, {
+        success: false,
+        provider: route.provider,
+        providerCostUsd: 0,
+        model: route.model,
+        costSource: "zero_cost",
+      });
       return jsonResponse({ error: { message: e.message, type: "server_error" } }, 500);
     }
   }),
@@ -3531,7 +4379,7 @@ http.route({
 
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
     }
@@ -3555,6 +4403,25 @@ http.route({
       );
     }
 
+    const embeddingGate = await enforcePreCallQuota(
+      ctx,
+      request,
+      workspaceId,
+      backend.provider,
+      "embeddings",
+      "/v1/embeddings",
+      {
+        model: `${backend.provider}/${backend.model}`,
+        estimatedProviderCostUsd: estimateManagedProviderCostUsd({
+          provider: backend.provider,
+          action: "embeddings",
+          model: backend.model,
+        }),
+        requestPayload: body,
+      },
+    );
+    if (embeddingGate instanceof Response) return embeddingGate;
+
     // Log usage
     try {
       await ctx.runMutation(api.analytics.log, {
@@ -3569,19 +4436,17 @@ http.route({
           authMethod: "api-key",
         },
       });
-      await ctx.runMutation(api.logs.createProxyLog, {
+      await ctx.runMutation(internal.logs.createProxyLog, {
         workspaceId: workspaceId as any,
         provider: backend.provider,
         action: "embeddings",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
       });
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: workspaceId as any,
-      });
     } catch (e: any) {
       console.error("[Gateway] Embeddings logging failed:", e.message);
     }
 
+    let upstreamDispatchAttempted = false;
     try {
       let providerRequestBody: any;
       let providerHeaders: Record<string, string> = {
@@ -3610,16 +4475,25 @@ http.route({
         };
       }
 
+      upstreamDispatchAttempted = true;
       const response = await fetch(backend.baseUrl, {
         method: "POST",
         headers: providerHeaders,
         body: JSON.stringify(providerRequestBody),
+        signal: AbortSignal.timeout(60_000),
       });
 
-      const providerData = await response.json();
+      const providerData = await readUpstreamJsonCapped(response);
       const latencyMs = Date.now() - startTime;
 
       if (!response.ok) {
+        await finalizeManagedCall(ctx, embeddingGate, {
+          success: false,
+          provider: backend.provider,
+          providerCostUsd: 0,
+          model: backend.model,
+          costSource: "zero_cost",
+        });
         return jsonResponse(
           {
             error: {
@@ -3675,8 +4549,28 @@ http.route({
         };
       }
 
+      const inputTokens = openAIData?.usage?.prompt_tokens ?? openAIData?.usage?.total_tokens ?? 0;
+      await finalizeManagedCall(ctx, embeddingGate, {
+        success: true,
+        provider: backend.provider,
+        model: backend.model,
+        inputTokens,
+        outputTokens: 0,
+        upstreamRequestId: typeof providerData?.id === "string" ? providerData.id : undefined,
+        costSource: "reservation",
+      });
+
       return jsonResponse(openAIData, 200);
     } catch (e: any) {
+      if (upstreamDispatchAttempted) {
+        return ambiguousPostDispatchResponse(
+          ctx,
+          embeddingGate,
+          { provider: backend.provider, model: backend.model },
+          502,
+        );
+      }
+      await finalizeManagedCall(ctx, embeddingGate, { success: false, provider: backend.provider, providerCostUsd: 0, model: backend.model, costSource: "zero_cost" });
       return jsonResponse({ error: { message: e.message, type: "server_error" } }, 500);
     }
   }),
@@ -3691,17 +4585,49 @@ http.route({
 // ==============================================
 // /v1/execute — Unified execution gateway
 // ==============================================
-// Single endpoint for ALL API call types:
+// Single endpoint for managed API call types:
 //   1. Managed providers (19 providers, APIClaw owns keys)
 //   2. LLM routing (Groq, Mistral, Together, OpenRouter)
-//   3. Open APIs (generic HTTP proxy with caller-supplied baseUrl)
+// Unmanaged APIs remain discoverable but are not caller-controlled egress.
 //
 // Auth: Bearer sk-claw-... OR X-APIClaw-Internal (server-to-server)
 // ==============================================
 
+const VERIFIED_APILAYER_HTTPS_ORIGINS = new Set([
+  "https://api.apilayer.com",
+  "https://api.promptapi.com",
+  "https://api.pdflayer.com",
+  "https://api.screenshotlayer.com",
+  "https://api.ipapi.com",
+  "https://api.exchangerate.host",
+]);
+
+export function buildVerifiedApilayerHttpsUrl(
+  base: string,
+  query?: Record<string, unknown>,
+): string {
+  const url = new URL(base);
+  if (
+    url.protocol !== "https:" ||
+    url.username !== "" ||
+    url.password !== "" ||
+    !VERIFIED_APILAYER_HTTPS_ORIGINS.has(url.origin)
+  ) {
+    throw new RangeError("APILayer managed actions require a verified HTTPS origin.");
+  }
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined && value !== null && value !== "") {
+        url.searchParams.set(key, String(value));
+      }
+    }
+  }
+  return url.toString();
+}
+
 // Managed provider dispatch: maps provider+action to an upstream HTTP call
-// Returns { url, method, headers, body } or null if unknown
-function buildManagedRequest(
+// Returns { url, method, headers, body } or null if unknown/unavailable.
+export function buildManagedRequest(
   provider: string,
   action: string,
   params: Record<string, any>
@@ -3782,9 +4708,15 @@ function buildManagedRequest(
     }
     case "elevenlabs": {
       if (action !== "text_to_speech") return null;
-      const voiceId = params.voice_id || "21m00Tcm4TlvDq8ikWAM";
+      const voiceId = params.voice_id === undefined ? "21m00Tcm4TlvDq8ikWAM" : params.voice_id;
+      let url: string;
+      try {
+        url = elevenLabsTextToSpeechUrl(voiceId);
+      } catch {
+        return null;
+      }
       return {
-        url: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        url,
         method: "POST",
         headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3849,17 +4781,26 @@ function buildManagedRequest(
       };
     }
     case "github": {
-      const ghHeaders = { "Authorization": `Bearer ${apiKey}`, "Accept": "application/vnd.github.v3+json", "User-Agent": "APIClaw-Gateway" };
+      // Customer GitHub reads intentionally use the public API without the
+      // shared NordSym token. Private data and write actions require a future
+      // owner-scoped GitHub connection.
+      const ghHeaders = { "Accept": "application/vnd.github.v3+json", "User-Agent": "APIClaw-Gateway" };
       if (action === "search_repos") {
+        const query = typeof (params.query || params.q) === "string" ? String(params.query || params.q).trim() : "";
+        if (!query || query.length > 256) return null;
         const ghUrl = new URL("https://api.github.com/search/repositories");
-        ghUrl.searchParams.set("q", params.query || params.q || "");
+        ghUrl.searchParams.set("q", query);
         return { url: ghUrl.toString(), method: "GET", headers: ghHeaders };
       }
-      if (action === "get_repo") {
-        return { url: `https://api.github.com/repos/${params.owner}/${params.repo}`, method: "GET", headers: ghHeaders };
-      }
-      if (action === "get_file") {
-        return { url: `https://api.github.com/repos/${params.owner}/${params.repo}/contents/${params.path}`, method: "GET", headers: ghHeaders };
+      try {
+        if (action === "get_repo") {
+          return { url: githubRepositoryApiUrl(params.owner, params.repo), method: "GET", headers: ghHeaders };
+        }
+        if (action === "get_file") {
+          return { url: githubContentsApiUrl(params.owner, params.repo, params.path), method: "GET", headers: ghHeaders };
+        }
+      } catch {
+        return null;
       }
       return null;
     }
@@ -3928,14 +4869,11 @@ function buildManagedRequest(
       return null;
     }
     case "apilayer": {
-      // 14 unified APILayer actions + popular legacy APIs — ported from src/execute.ts
-      // Reads product-specific env keys where APILayer requires them; falls back to unified.
+      // Every credentialed APILayer request is pinned to an explicitly verified
+      // HTTPS origin. Legacy products that were only configured with plaintext
+      // HTTP are deliberately unavailable until their HTTPS contract is proven.
       const p = (params as Record<string, any>) || {};
-      const buildUrl = (base: string, qs?: Record<string, any>) => {
-        const u = new URL(base);
-        if (qs) for (const [k, v] of Object.entries(qs)) if (v !== undefined && v !== null && v !== "") u.searchParams.set(k, String(v));
-        return u.toString();
-      };
+      const buildUrl = buildVerifiedApilayerHttpsUrl;
       const envKey = (name: string) => process.env[name] || apiKey;
 
       switch (action) {
@@ -3996,7 +4934,7 @@ function buildManagedRequest(
           if (p.width) formData.set("width", String(p.width));
           if (p.height) formData.set("height", String(p.height));
           return {
-            url: "https://api.apilayer.com/smart_crop/url",
+            url: buildUrl("https://api.apilayer.com/smart_crop/url"),
             method: "POST",
             headers: { apikey: apiKey, "Content-Type": "application/x-www-form-urlencoded" },
             body: formData.toString(),
@@ -4004,8 +4942,14 @@ function buildManagedRequest(
         }
         case "form_submit": {
           if (!p.endpoint) return null;
+          let endpoint: string;
+          try {
+            endpoint = encodeProviderPathSegment(p.endpoint, "APILayer form endpoint");
+          } catch {
+            return null;
+          }
           return {
-            url: `https://api.apilayer.com/form_api/${p.endpoint}`,
+            url: buildUrl(`https://api.apilayer.com/form_api/${endpoint}`),
             method: "POST",
             headers: { apikey: apiKey, "Content-Type": "application/json" },
             body: JSON.stringify(p.data || {}),
@@ -4044,143 +4988,32 @@ function buildManagedRequest(
             headers: {},
           };
         }
-        case "vat_check": {
-          if (!p.vat_number) return null;
-          return {
-            url: buildUrl("http://apilayer.net/api/validate", { access_key: envKey("VATLAYER_API_KEY"), vat_number: p.vat_number }),
-            method: "GET",
-            headers: {},
-          };
-        }
-
-        // Legacy domains (each uses product-specific access_key query param)
-        case "market_data": {
-          if (!p.symbols) return null;
-          return {
-            url: buildUrl("http://api.marketstack.com/v1/eod", {
-              access_key: envKey("MARKETSTACK_API_KEY"), symbols: p.symbols, limit: p.limit || 10, date_from: p.date_from, date_to: p.date_to,
-            }),
-            method: "GET", headers: {},
-          };
-        }
-        case "aviation": {
-          return {
-            url: buildUrl("http://api.aviationstack.com/v1/flights", {
-              access_key: envKey("AVIATIONSTACK_API_KEY"), flight_iata: p.flight_iata, dep_iata: p.dep_iata, arr_iata: p.arr_iata, airline_iata: p.airline_iata,
-            }),
-            method: "GET", headers: {},
-          };
-        }
+        // These legacy products were configured against plaintext-only URLs.
+        // Never send API keys or customer input over those transports.
+        case "vat_check":
+        case "market_data":
+        case "aviation":
         case "weatherstack_current":
-        case "weather": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.weatherstack.com/current", { access_key: envKey("WEATHERSTACK_API_KEY"), query: p.query, units: p.units || "m" }),
-            method: "GET", headers: {},
-          };
-        }
-        case "weatherstack_forecast": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.weatherstack.com/forecast", { access_key: envKey("WEATHERSTACK_API_KEY"), query: p.query, forecast_days: p.forecast_days || 3 }),
-            method: "GET", headers: {},
-          };
-        }
-        case "ipstack_lookup": {
-          if (!p.ip) return null;
-          return {
-            url: buildUrl(`http://api.ipstack.com/${encodeURIComponent(p.ip)}`, { access_key: envKey("IPSTACK_API_KEY") }),
-            method: "GET", headers: {},
-          };
-        }
+        case "weather":
+        case "weatherstack_forecast":
+        case "ipstack_lookup":
+        case "currencylayer_live":
+        case "currencylayer_convert":
+        case "coinlayer_live":
+        case "positionstack_forward":
+        case "positionstack_reverse":
+        case "fixer_latest":
+        case "fixer_convert":
+        case "languagelayer_detect":
+        case "scrapestack_scrape":
+        case "serpstack_search":
+        case "mediastack_news":
+        case "userstack_detect":
+          return null;
         case "ipapi_lookup": {
           if (!p.ip) return null;
           return {
             url: buildUrl(`https://api.ipapi.com/api/${encodeURIComponent(p.ip)}`, { access_key: envKey("IPAPI_API_KEY") }),
-            method: "GET", headers: {},
-          };
-        }
-        case "currencylayer_live": {
-          return {
-            url: buildUrl("http://api.currencylayer.com/live", { access_key: envKey("CURRENCYLAYER_API_KEY"), source: p.source || "USD", currencies: p.currencies }),
-            method: "GET", headers: {},
-          };
-        }
-        case "currencylayer_convert": {
-          if (!p.from || !p.to || !p.amount) return null;
-          return {
-            url: buildUrl("http://api.currencylayer.com/convert", {
-              access_key: envKey("CURRENCYLAYER_API_KEY"), from: p.from, to: p.to, amount: p.amount, date: p.date,
-            }),
-            method: "GET", headers: {},
-          };
-        }
-        case "coinlayer_live": {
-          return {
-            url: buildUrl("http://api.coinlayer.com/live", { access_key: envKey("COINLAYER_API_KEY"), target: p.target || "USD", symbols: p.symbols }),
-            method: "GET", headers: {},
-          };
-        }
-        case "positionstack_forward": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.positionstack.com/v1/forward", { access_key: envKey("POSITIONSTACK_API_KEY"), query: p.query, limit: p.limit || 1 }),
-            method: "GET", headers: {},
-          };
-        }
-        case "positionstack_reverse": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.positionstack.com/v1/reverse", { access_key: envKey("POSITIONSTACK_API_KEY"), query: p.query, limit: p.limit || 1 }),
-            method: "GET", headers: {},
-          };
-        }
-        case "fixer_latest": {
-          return {
-            url: buildUrl("http://data.fixer.io/api/latest", { access_key: envKey("FIXER_API_KEY"), base: p.base || "EUR", symbols: p.symbols }),
-            method: "GET", headers: {},
-          };
-        }
-        case "fixer_convert": {
-          if (!p.from || !p.to || !p.amount) return null;
-          return {
-            url: buildUrl("http://data.fixer.io/api/convert", {
-              access_key: envKey("FIXER_API_KEY"), from: p.from, to: p.to, amount: p.amount, date: p.date,
-            }),
-            method: "GET", headers: {},
-          };
-        }
-        case "languagelayer_detect": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.languagelayer.com/detect", { access_key: envKey("LANGUAGELAYER_API_KEY"), query: p.query }),
-            method: "GET", headers: {},
-          };
-        }
-        case "scrapestack_scrape": {
-          if (!p.url) return null;
-          return {
-            url: buildUrl("http://api.scrapestack.com/scrape", { access_key: envKey("SCRAPESTACK_API_KEY"), url: p.url, render_js: p.render_js ? "1" : "0" }),
-            method: "GET", headers: {},
-          };
-        }
-        case "serpstack_search": {
-          if (!p.query) return null;
-          return {
-            url: buildUrl("http://api.serpstack.com/search", { access_key: envKey("SERPSTACK_API_KEY"), query: p.query, num: p.num || 10 }),
-            method: "GET", headers: {},
-          };
-        }
-        case "mediastack_news": {
-          return {
-            url: buildUrl("http://api.mediastack.com/v1/news", { access_key: envKey("MEDIASTACK_API_KEY"), keywords: p.keywords, categories: p.categories, limit: p.limit || 10 }),
-            method: "GET", headers: {},
-          };
-        }
-        case "userstack_detect": {
-          if (!p.ua) return null;
-          return {
-            url: buildUrl("http://api.userstack.com/detect", { access_key: envKey("USERSTACK_API_KEY"), ua: p.ua }),
             method: "GET", headers: {},
           };
         }
@@ -4277,7 +5110,12 @@ async function executeE2BCode(
 async function resolveExecuteAuth(
   ctx: any,
   request: Request
-): Promise<{ workspaceId?: string; keyId?: string; authMethod: "api-key" | "session" | "internal" | "anonymous" } | Response> {
+): Promise<{
+  workspaceId?: string;
+  keyId?: string;
+  authMethod: "api-key" | "session" | "mcp-oauth" | "internal" | "anonymous";
+  mcpScope?: string;
+} | Response> {
   // 1. Internal server-to-server auth
   const internalSecret = request.headers.get("X-APIClaw-Internal");
   if (internalSecret) {
@@ -4296,6 +5134,13 @@ async function resolveExecuteAuth(
   }
   if (auth.authMethod === "session" && auth.workspaceId) {
     return { workspaceId: auth.workspaceId, authMethod: "session" };
+  }
+  if (auth.authMethod === "mcp-oauth" && auth.workspaceId) {
+    return {
+      workspaceId: auth.workspaceId,
+      authMethod: "mcp-oauth",
+      mcpScope: auth.mcpScope,
+    };
   }
 
   // 3. Anonymous → shadow vs enforce
@@ -4325,15 +5170,22 @@ http.route({
   handler: httpAction(async (ctx, request) => {
     const startTime = Date.now();
 
+    if (requiresLegacyClientUpgrade("/v1/execute", request.headers)) {
+      await recordLegacyClientUpgrade(ctx, request, "/v1/execute");
+      return legacyClientUpgradeResponse();
+    }
+
     // Auth
     const authResult = await resolveExecuteAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
+    const scopeDenied = mcpScopeDenial(authResult, "call");
+    if (scopeDenied) return scopeDenied;
     const { workspaceId, authMethod } = authResult;
 
     // Parse body
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request" } }, 400);
     }
@@ -4365,23 +5217,95 @@ http.route({
 
     const subagentId = request.headers.get("X-APIClaw-Subagent") || "main";
 
-    const quotaBlock = await enforcePreCallQuota(
-      ctx,
-      workspaceId,
-      provider,
-      action,
-      "/v1/execute"
+    let quotaGate: ManagedCallGate | undefined;
+    const isLLMExecution = action === "chat" && (
+      provider === "auto" || PROVIDERS[provider]?.isLLM === true
     );
-    if (quotaBlock) return quotaBlock;
+    let explicitOpenRouterExecution: ReturnType<typeof resolveExplicitOpenRouterExecution>;
+    let authorizedMaxOutputTokens: number | undefined;
+    if (isLLMExecution) {
+      let configuredDefaultModel: string | null = null;
+      if (workspaceId) {
+        try {
+          const settings = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+          configuredDefaultModel = settings?.defaultModel ?? null;
+        } catch {}
+      }
+      const requestedModel = params.model || configuredDefaultModel;
+      explicitOpenRouterExecution = resolveExplicitOpenRouterExecution({
+        provider,
+        action,
+        requestedModel,
+      });
+      params.model = explicitOpenRouterExecution?.model ?? (requestedModel === "auto"
+        ? "mistral-small-latest"
+        : requestedModel || "anthropic/claude-sonnet-4-6");
+      try {
+        authorizedMaxOutputTokens = normalizeMaxOutputTokens(params.max_completion_tokens ?? params.max_tokens);
+      } catch (error) {
+        return jsonResponse({
+          success: false,
+          error: error instanceof Error ? error.message : "Invalid maximum output token value",
+          code: "invalid_max_output_tokens",
+        }, 400);
+      }
+      if (params.max_completion_tokens !== undefined) {
+        params.max_completion_tokens = authorizedMaxOutputTokens;
+        delete params.max_tokens;
+      } else {
+        params.max_tokens = authorizedMaxOutputTokens;
+        delete params.max_completion_tokens;
+      }
+    }
+    const isManagedExecution = provider === "auto" || !!PROVIDERS[provider] || action === "chat";
+    if (isManagedExecution) {
+      // Reserve from the full normalized body. Tool schemas, instructions,
+      // system prompts, and other auxiliary input can dwarf messages alone.
+      const estimatedInputTokens = estimateInputTokens(params);
+      const gate = await enforcePreCallQuota(
+        ctx,
+        request,
+        workspaceId,
+        explicitOpenRouterExecution?.provider ?? provider,
+        action,
+        "/v1/execute",
+        {
+          model: params.model,
+          estimatedProviderCostUsd: isLLMExecution && authorizedMaxOutputTokens !== undefined
+            ? estimateKnownModelUpperBoundUsd(params.model, estimatedInputTokens, authorizedMaxOutputTokens)
+            : undefined,
+          estimatedInputTokens,
+          maxOutputTokens: authorizedMaxOutputTokens,
+          // Explicit OpenRouter requests are hard-bound before authorization
+          // and return provider-reported usage.cost. Generic LLM routing stays
+          // unavailable to customer billing because its cost rail is unknown
+          // until after the reservation is created.
+          billingGradeCost: explicitOpenRouterExecution
+            ? true
+            : isLLMExecution
+              ? false
+              : undefined,
+          trafficClass: authMethod === "internal" ? "internal" : "customer",
+          requestPayload: body,
+        },
+      );
+      if (gate instanceof Response) return gate;
+      quotaGate = gate;
+      if (params.stream && gate.trafficClass === "customer") {
+        await finalizeManagedCall(ctx, gate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+        return jsonResponse({
+          success: false,
+          error: "Streaming managed responses require exact usage metering and are temporarily unavailable. Use stream=false.",
+          code: "streaming_billing_unavailable",
+        }, 400);
+      }
+    }
 
     // Determine execution path
     let routeDetail = "";
 
     // Path 1: LLM routing (provider "auto" or known LLM provider with action "chat")
-    const isLLMRequest = action === "chat" && (
-      provider === "auto" ||
-      (PROVIDERS[provider]?.isLLM === true)
-    );
+    const isLLMRequest = isLLMExecution;
 
     if (isLLMRequest) {
       // LLM routing path
@@ -4411,7 +5335,7 @@ http.route({
 
       const effectiveModel = params.model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
 
-      const route = await routeLLMRequest(effectiveModel, {
+      const route = await routeLLMRequest(explicitOpenRouterExecution?.routingModel ?? effectiveModel, {
         routingMode: effectiveRoutingMode,
         preferredProviders: finalPreferred,
         blockedProviders: settings.blockedProviders,
@@ -4419,6 +5343,7 @@ http.route({
       }, params.messages);
 
       if (!route) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
         return jsonResponse({ success: false, error: "No LLM provider available", _apiclaw: { latencyMs: Date.now() - startTime, route: "none", gateway: true } }, 503);
       }
 
@@ -4435,14 +5360,15 @@ http.route({
             workspaceId: workspaceId as any,
             metadata: { action: "execute_chat", model: effectiveModel, routedTo: route.provider, routeReason: route.reason, authMethod },
           });
-          await ctx.runMutation(api.logs.createProxyLog, {
+          await ctx.runMutation(internal.logs.createProxyLog, {
             workspaceId: workspaceId as any, provider: route.provider, action: "chat", subagentId,
           });
-          executeLlmUsageResult = await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
+          executeLlmUsageResult = quotaGate ? { quotaWarning: quotaGate.quotaWarning } : null;
         } catch (e: any) { console.error("[Execute] LLM logging failed:", e.message); }
       }
 
       // Forward to provider
+      let upstreamDispatchAttempted = false;
       try {
         const { model: _m, ...restParams } = params;
         const isAnthropic = route.provider === "anthropic";
@@ -4461,6 +5387,19 @@ http.route({
           };
         } else {
           finalBody = { model: route.model, messages: params.messages, stream: params.stream || false, ...restParams };
+          if (route.provider === "openrouter" && workspaceId) {
+            if (quotaGate?.trafficClass === "customer") {
+              finalBody = costBoundedOpenRouterRequest(
+                finalBody,
+                route.model,
+                authorizedMaxOutputTokens!,
+                estimateInputTokens(params),
+              );
+            }
+            const pseudonymSecret = process.env.APICLAW_PSEUDONYM_SECRET;
+            if (!pseudonymSecret) throw new Error("OpenRouter attribution secret is not configured");
+            finalBody = await decorateOpenRouterRequest(finalBody, workspaceId, pseudonymSecret);
+          }
           headers = {
             "Authorization": `Bearer ${route.apiKey}`,
             "Content-Type": "application/json",
@@ -4468,8 +5407,10 @@ http.route({
           };
         }
 
+        upstreamDispatchAttempted = true;
         const response = await fetch(route.baseUrl, {
           method: "POST", headers, body: JSON.stringify(finalBody),
+          signal: AbortSignal.timeout(60_000),
         });
 
         if (response.ok) {
@@ -4484,13 +5425,20 @@ http.route({
 
         // Streaming
         if (params.stream && response.body) {
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: response.ok,
+            provider: route.provider,
+            model: route.model,
+            costSource: response.ok ? "reservation" : "zero_cost",
+            providerCostUsd: response.ok ? undefined : 0,
+          });
           return new Response(response.body, {
             status: response.status,
             headers: { "Content-Type": response.headers.get("Content-Type") || "text/event-stream", "Cache-Control": "no-cache", ...corsHeaders },
           });
         }
 
-        let data = await response.json();
+        let data = await readUpstreamJsonCapped(response);
 
         // Translate Anthropic response to OpenAI format
         if (isAnthropic && response.ok) {
@@ -4500,20 +5448,28 @@ http.route({
 
         // Calculate cost from token usage (parity with /v1/chat/completions)
         const usage = (data as any)?.usage;
-        const { providerCost, apiclawCost } = calculateCallCost(route.model, usage);
-
-        // Log cost to usage records
-        if (apiclawCost > 0 && workspaceId) {
-          ctx.runMutation(internal.billing.logCallCost, {
-            workspaceId: workspaceId as any,
-            provider: route.provider,
-            model: route.model,
-            providerCostUsd: providerCost,
-            apiclawCostUsd: apiclawCost,
-            inputTokens: usage?.prompt_tokens || 0,
-            outputTokens: usage?.completion_tokens || 0,
-          }).catch(() => {});
-        }
+        const calculatedCost = calculateCallCost(route.model, usage);
+        const providerReportedCost = providerReportedUsageCostUsd(usage);
+        const managedCostDecision = resolveManagedResponseCost({
+          provider: route.provider,
+          responseOk: response.ok,
+          providerReportedCostUsd: providerReportedCost,
+          tokenTableCostUsd: calculatedCost?.providerCost,
+        });
+        const providerCost = managedCostDecision.providerCostUsd;
+        const apiclawCost = providerCost === undefined ? undefined : providerCost * (1 + APICLAW_MARGIN);
+        const finalization = await finalizeManagedCall(ctx, quotaGate, {
+          success: response.ok,
+          provider: route.provider,
+          providerCostUsd: providerCost,
+          model: route.model,
+          inputTokens: usage?.prompt_tokens || 0,
+          outputTokens: usage?.completion_tokens || 0,
+          upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+          costSource: managedCostDecision.costSource,
+        });
+        const reconciliationResponse = managedCostReconciliationResponse(quotaGate, finalization);
+        if (reconciliationResponse) return reconciliationResponse;
 
         return jsonResponse({
           success: response.ok,
@@ -4524,13 +5480,38 @@ http.route({
           _apiclaw: {
             latencyMs, route: routeDetail, gateway: true, model: route.model,
             cost: {
-              providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
-              totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+              providerUsd: providerCost === undefined ? null : Math.round(providerCost * 1_000_000) / 1_000_000,
+              totalUsd: apiclawCost === undefined ? null : Math.round(apiclawCost * 1_000_000) / 1_000_000,
               margin: "15%",
             },
           },
         }, response.ok ? 200 : response.status);
       } catch (e: any) {
+        if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: false,
+            providerCostUsd: 0,
+            model: params.model,
+            costSource: "zero_cost",
+          });
+          return jsonResponse({
+            success: false,
+            provider,
+            action,
+            error: e.message,
+            code: e.code,
+          }, 400);
+        }
+        if (upstreamDispatchAttempted) {
+          return ambiguousPostDispatchResponse(
+            ctx,
+            quotaGate,
+            { model: params.model },
+            502,
+            { provider, action },
+          );
+        }
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, model: params.model, costSource: "zero_cost" });
         return jsonResponse({ success: false, provider: provider, action, error: e.message, _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true } }, 500);
       }
     }
@@ -4543,6 +5524,7 @@ http.route({
       const isE2BRun = provider === "e2b" && action === "run_code";
       const req = isE2BRun ? null : buildManagedRequest(provider, action, params);
       if (!req && !isE2BRun) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, provider, providerCostUsd: 0, model: params.model, costSource: "zero_cost" });
         return jsonResponse({
           success: false,
           error: `Unknown action "${action}" for provider "${provider}"`,
@@ -4558,20 +5540,22 @@ http.route({
             workspaceId: workspaceId as any,
             metadata: { action, subagentId, authMethod, via: "execute" },
           });
-          await ctx.runMutation(api.logs.createProxyLog, {
+          await ctx.runMutation(internal.logs.createProxyLog, {
             workspaceId: workspaceId as any, provider, action, subagentId,
           });
-          await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
         } catch (e: any) { console.error("[Execute] Managed logging failed:", e.message); }
       }
 
       // Execute upstream call
+      let upstreamDispatchAttempted = false;
       try {
         if (isE2BRun) {
           const e2bKey = resolveManagedCredential("e2b", "E2B_API_KEY", process.env);
           if (!e2bKey) {
+            await finalizeManagedCall(ctx, quotaGate, { success: false, provider, providerCostUsd: 0, costSource: "zero_cost" });
             return jsonResponse({ success: false, provider, action, error: "E2B is not configured" }, 503);
           }
+          upstreamDispatchAttempted = true;
           const result = await executeE2BCode(e2bKey, params);
           const latencyMs = Date.now() - startTime;
           if (result.ok) {
@@ -4583,6 +5567,13 @@ http.route({
               action,
             });
           }
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: result.ok,
+            provider,
+            providerCostUsd: result.ok ? undefined : 0,
+            model: params.model,
+            costSource: result.ok ? "reservation" : "zero_cost",
+          });
           return jsonResponse({
             success: result.ok,
             provider,
@@ -4593,12 +5584,18 @@ http.route({
         }
 
         if (!req) {
+          await finalizeManagedCall(ctx, quotaGate, { success: false, provider, providerCostUsd: 0, costSource: "zero_cost" });
           return jsonResponse({ success: false, provider, action, error: "Managed request could not be built" }, 500);
         }
 
-        const fetchOpts: RequestInit = { method: req.method, headers: req.headers };
+        const fetchOpts: RequestInit = {
+          method: req.method,
+          headers: req.headers,
+          signal: AbortSignal.timeout(60_000),
+        };
         if (req.body) fetchOpts.body = req.body;
 
+        upstreamDispatchAttempted = true;
         const response = await fetch(req.url, fetchOpts);
         const latencyMs = Date.now() - startTime;
 
@@ -4616,7 +5613,7 @@ http.route({
         // Without this, gateway/HTTP calls bypass partner dashboards.
         if (workspaceId) {
           try {
-            await ctx.runMutation(api.logs.logProviderCall, {
+            await ctx.runMutation(internal.logs.logProviderCall, {
               provider,
               action,
               status: response.ok ? "success" : "error",
@@ -4637,14 +5634,21 @@ http.route({
           contentType.includes("application/pdf") ||
           contentType.includes("application/octet-stream");
         if (isBinary) {
-          const buf = await response.arrayBuffer();
-          const bytes = new Uint8Array(buf);
+          const bytes = await readUpstreamBytesCapped(response);
           let binary = "";
           const chunk = 0x8000;
           for (let i = 0; i < bytes.length; i += chunk) {
             binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
           }
           const base64 = btoa(binary);
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: response.ok,
+            provider,
+            ...(response.ok
+              ? successfulManagedCostDetails(quotaGate)
+              : { providerCostUsd: 0, costSource: "zero_cost" as const }),
+            model: params.model,
+          });
           return jsonResponse({
             success: response.ok,
             provider,
@@ -4652,7 +5656,7 @@ http.route({
             data: {
               message: response.ok ? "Binary asset returned" : "Binary error",
               content_type: contentType,
-              size: buf.byteLength,
+              size: bytes.byteLength,
               base64,
             },
             _apiclaw: { latencyMs, route: routeDetail, gateway: true },
@@ -4660,13 +5664,23 @@ http.route({
         }
 
         // For text/json responses read once as text then try json parse
-        const raw = await response.text();
+        const raw = await readUpstreamTextCapped(response);
         let data: any;
         try {
           data = JSON.parse(raw);
         } catch {
           data = { raw };
         }
+
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: response.ok,
+          provider,
+          ...(response.ok
+            ? successfulManagedCostDetails(quotaGate)
+            : { providerCostUsd: 0, costSource: "zero_cost" as const }),
+          model: params.model,
+          upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+        });
 
         return jsonResponse({
           success: response.ok,
@@ -4679,7 +5693,7 @@ http.route({
         const latencyMs = Date.now() - startTime;
         if (workspaceId) {
           try {
-            await ctx.runMutation(api.logs.logProviderCall, {
+            await ctx.runMutation(internal.logs.logProviderCall, {
               provider,
               action,
               status: "error",
@@ -4690,6 +5704,16 @@ http.route({
             });
           } catch {}
         }
+        if (upstreamDispatchAttempted) {
+          return ambiguousPostDispatchResponse(
+            ctx,
+            quotaGate,
+            { provider, model: params.model },
+            502,
+            { provider, action },
+          );
+        }
+        await finalizeManagedCall(ctx, quotaGate, { success: false, provider, providerCostUsd: 0, model: params.model, costSource: "zero_cost" });
         return jsonResponse({
           success: false, provider, action, error: e.message,
           _apiclaw: { latencyMs, route: routeDetail, gateway: true },
@@ -4697,81 +5721,19 @@ http.route({
       }
     }
 
-    // Path 3: Open API (generic HTTP proxy)
-    // Open API path
-    routeDetail = `open_${provider}`;
-
-    const { baseUrl, method = "GET", headers: customHeaders = {}, body: customBody } = params;
-    if (!baseUrl) {
-      return jsonResponse({
-        success: false,
-        error: `Unknown provider "${provider}". For open APIs, include params.baseUrl.`,
-        _apiclaw: { latencyMs: Date.now() - startTime, route: "unknown", gateway: true },
-      }, 400);
-    }
-
-    // Log usage. Capture incrementUsage result so we can surface its
-    // _notice (A-17 80% quota warning) into the success response below.
-    let openExecuteUsageResult: { quotaWarning?: any } | null = null;
-    if (workspaceId) {
-      try {
-        await ctx.runMutation(api.analytics.log, {
-          event: "api_call", provider: `open:${provider}`, identifier: workspaceId,
-          workspaceId: workspaceId as any,
-          metadata: { action, subagentId, authMethod, baseUrl, via: "execute_open" },
-        });
-        await ctx.runMutation(api.logs.createProxyLog, {
-          workspaceId: workspaceId as any, provider: `open:${provider}`, action, subagentId,
-        });
-        openExecuteUsageResult = await ctx.runMutation(api.workspaces.incrementUsage, { workspaceId: workspaceId as any });
-      } catch (e: any) { console.error("[Execute] Open API logging failed:", e.message); }
-    }
-
-    // Execute open API call
-    try {
-      const fetchOpts: RequestInit = {
-        method: method.toUpperCase(),
-        headers: { "Content-Type": "application/json", ...customHeaders },
-      };
-      if (customBody && method.toUpperCase() !== "GET") {
-        fetchOpts.body = typeof customBody === "string" ? customBody : JSON.stringify(customBody);
-      }
-
-      const response = await fetch(baseUrl, fetchOpts);
-      const latencyMs = Date.now() - startTime;
-
-      if (response.ok) {
-        await recordFirstSuccessfulGatewayCall(ctx, {
-          workspaceId,
-          path: "/v1/execute",
-          authMethod,
-          provider: `open:${provider}`,
-          action,
-        });
-      }
-
-      let data: any;
-      const ct = response.headers.get("Content-Type") || "";
-      if (ct.includes("json")) {
-        try { data = await response.json(); } catch { data = { raw: await response.text() }; }
-      } else {
-        data = { raw: await response.text() };
-      }
-
-      return jsonResponse({
-        success: response.ok,
-        provider,
-        action,
-        data,
-        ...(openExecuteUsageResult?.quotaWarning ? { _notice: openExecuteUsageResult.quotaWarning } : {}),
-        _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-      }, response.ok ? 200 : response.status);
-    } catch (e: any) {
-      return jsonResponse({
-        success: false, provider, action, error: e.message,
-        _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
-      }, 500);
-    }
+    // Caller-controlled egress is intentionally unavailable. Discovery remains
+    // public, while execution requires a managed, origin-pinned adapter. A
+    // central DNS-pinned and redirect-validating egress layer must exist before
+    // this surface can safely return.
+    return jsonResponse({
+      success: false,
+      error: {
+        code: "managed_adapter_required",
+        message: `Provider "${provider}" is discovery-only until a managed egress adapter is available.`,
+        hint: "Use /v1/discover for metadata and request a managed adapter for execution.",
+      },
+      _apiclaw: { latencyMs: Date.now() - startTime, route: "discovery_only", gateway: true },
+    }, 501);
   }),
 });
 
@@ -5191,7 +6153,7 @@ http.route({
 
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
     }
@@ -5199,14 +6161,41 @@ http.route({
       return jsonResponse({ error: { message: "model and input are required", type: "invalid_request_error" } }, 400);
     }
 
-    const quotaBlock = await enforcePreCallQuota(
+    let authorizedMaxOutputTokens: number;
+    try {
+      authorizedMaxOutputTokens = normalizeMaxOutputTokens(body.max_output_tokens);
+    } catch (error) {
+      return jsonResponse({
+        error: {
+          message: error instanceof Error ? error.message : "Invalid maximum output token value",
+          type: "invalid_request_error",
+          code: "invalid_max_output_tokens",
+        },
+      }, 400);
+    }
+    body.max_output_tokens = authorizedMaxOutputTokens;
+    const estimatedInputTokens = estimateInputTokens(body);
+
+    const quotaGate = await enforcePreCallQuota(
       ctx,
+      request,
       workspaceId,
       "openai",
       "responses",
-      "/v1/responses"
+      "/v1/responses",
+      {
+        model: body.model,
+        estimatedProviderCostUsd: estimateKnownModelUpperBoundUsd(
+          body.model,
+          estimatedInputTokens,
+          authorizedMaxOutputTokens,
+        ),
+        estimatedInputTokens,
+        maxOutputTokens: authorizedMaxOutputTokens,
+        requestPayload: body,
+      },
     );
-    if (quotaBlock) return quotaBlock;
+    if (quotaGate instanceof Response) return quotaGate;
 
     // Normalize model id
     let modelId: string = body.model;
@@ -5224,6 +6213,7 @@ http.route({
         respTier = ws?.tier ?? "free";
       } catch {}
       if (respTier !== "founder" && respTier !== "partner") {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, model: body.model, costSource: "zero_cost" });
         return jsonResponse({
           error: {
             message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must omit X-APIClaw-OAuth (use apiclaw's managed routing).",
@@ -5244,11 +6234,16 @@ http.route({
       : { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" };
 
     if (!useCodex && !process.env.OPENAI_API_KEY) {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai", providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
       return jsonResponse({ error: { message: "OPENAI_API_KEY not configured", type: "api_error" } }, 503);
     }
 
     const forwardBody = { ...body, model: modelId };
     const stream = !!body.stream;
+    if (stream && quotaGate.trafficClass === "customer") {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
+      return jsonResponse({ error: { code: "streaming_billing_unavailable", message: "Use stream=false so managed usage can be reconciled exactly." } }, 400);
+    }
 
     try {
       await ctx.runMutation(api.analytics.log, {
@@ -5263,24 +6258,24 @@ http.route({
           authMethod: "api-key",
         },
       });
-      await ctx.runMutation(api.logs.createProxyLog, {
+      await ctx.runMutation(internal.logs.createProxyLog, {
         workspaceId: workspaceId as any,
         provider: useCodex ? "openai-codex" : "openai",
         action: "responses",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
       });
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: workspaceId as any,
-      });
     } catch (e: any) {
       console.error("[/v1/responses] logging failed:", e?.message);
     }
 
+    let upstreamDispatchAttempted = false;
     try {
+      upstreamDispatchAttempted = true;
       const upstream = await fetch(upstreamUrl, {
         method: "POST",
         headers: upstreamHeaders,
         body: JSON.stringify(forwardBody),
+        signal: AbortSignal.timeout(60_000),
       });
 
       if (upstream.ok) {
@@ -5294,6 +6289,13 @@ http.route({
       }
 
       if (stream && upstream.body) {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: upstream.ok,
+          provider: useCodex ? "openai-codex" : "openai",
+          providerCostUsd: useCodex ? 0 : upstream.ok ? undefined : 0,
+          model: modelId,
+          costSource: useCodex ? "zero_cost" : upstream.ok ? "reservation" : "zero_cost",
+        });
         return new Response(upstream.body, {
           status: upstream.status,
           headers: {
@@ -5305,31 +6307,28 @@ http.route({
         });
       }
 
-      const data = await upstream.json();
+      const data = await readUpstreamJsonCapped(upstream);
       const latencyMs = Date.now() - startTime;
 
       // Cost tracking: Codex OAuth = $0 to apiclaw (caller's ChatGPT sub pays).
       // Direct OpenAI = pass-through + 15% (or 0% for internal workspaces).
-      if (!useCodex) {
-        const u = data?.usage ?? {};
-        const promptTokens = u.input_tokens ?? 0;
-        const completionTokens = u.output_tokens ?? 0;
-        const { providerCost, apiclawCost } = calculateCallCost(
-          `openai/${modelId}`,
-          { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: promptTokens + completionTokens }
-        );
-        if (apiclawCost > 0) {
-          ctx.runMutation(internal.billing.logCallCost, {
-            workspaceId: workspaceId as any,
-            provider: "openai",
-            model: modelId,
-            providerCostUsd: providerCost,
-            apiclawCostUsd: apiclawCost,
-            inputTokens: promptTokens,
-            outputTokens: completionTokens,
-          }).catch(() => {});
-        }
-      }
+      const u = data?.usage ?? {};
+      const promptTokens = u.input_tokens ?? 0;
+      const completionTokens = u.output_tokens ?? 0;
+      const calculated = calculateCallCost(
+        `openai/${modelId}`,
+        { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: promptTokens + completionTokens },
+      );
+      await finalizeManagedCall(ctx, quotaGate, {
+        success: upstream.ok,
+        provider: useCodex ? "openai-codex" : "openai",
+        providerCostUsd: upstream.ok ? (useCodex ? 0 : calculated?.providerCost) : undefined,
+        model: modelId,
+        inputTokens: promptTokens,
+        outputTokens: completionTokens,
+        upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+        costSource: useCodex ? "zero_cost" : calculated ? "token_price_table" : "reservation",
+      });
 
       if (data && typeof data === "object" && !("error" in data)) {
         (data as any)._apiclaw = {
@@ -5347,6 +6346,15 @@ http.route({
 
       return jsonResponse(data, upstream.status);
     } catch (e: any) {
+      if (upstreamDispatchAttempted) {
+        return ambiguousPostDispatchResponse(
+          ctx,
+          quotaGate,
+          { provider: useCodex ? "openai-codex" : "openai", model: modelId },
+          502,
+        );
+      }
+      await finalizeManagedCall(ctx, quotaGate, { success: false, provider: useCodex ? "openai-codex" : "openai", providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
       return jsonResponse({ error: { message: e?.message ?? String(e), type: "api_error" } }, 502);
     }
   }),
@@ -5375,7 +6383,7 @@ http.route({
 
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "Invalid JSON body" } }, 400);
     }
@@ -5386,14 +6394,41 @@ http.route({
       return jsonResponse({ type: "error", error: { type: "invalid_request_error", message: "messages array is required" } }, 400);
     }
 
-    const quotaBlock = await enforcePreCallQuota(
+    let authorizedMaxOutputTokens: number;
+    try {
+      authorizedMaxOutputTokens = normalizeMaxOutputTokens(body.max_tokens);
+    } catch (error) {
+      return jsonResponse({
+        type: "error",
+        error: {
+          type: "invalid_request_error",
+          message: error instanceof Error ? error.message : "Invalid maximum output token value",
+        },
+      }, 400);
+    }
+    body.max_tokens = authorizedMaxOutputTokens;
+    const estimatedInputTokens = estimateInputTokens(body);
+
+    const quotaGate = await enforcePreCallQuota(
       ctx,
+      request,
       workspaceId,
       "anthropic",
       "messages",
-      "/v1/messages"
+      "/v1/messages",
+      {
+        model: body.model,
+        estimatedProviderCostUsd: estimateKnownModelUpperBoundUsd(
+          body.model,
+          estimatedInputTokens,
+          authorizedMaxOutputTokens,
+        ),
+        estimatedInputTokens,
+        maxOutputTokens: authorizedMaxOutputTokens,
+        requestPayload: body,
+      },
     );
-    if (quotaBlock) return quotaBlock;
+    if (quotaGate instanceof Response) return quotaGate;
 
     // Normalize model id: accept "anthropic/claude-..." or "claude-..." — Anthropic API expects the bare form.
     let modelId: string = body.model;
@@ -5401,6 +6436,7 @@ http.route({
 
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
     if (!ANTHROPIC_API_KEY) {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "anthropic", providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
       return jsonResponse({ type: "error", error: { type: "api_error", message: "ANTHROPIC_API_KEY not configured on apiclaw gateway. Contact gustav@nordsym.com." } }, 503);
     }
 
@@ -5417,6 +6453,10 @@ http.route({
 
     const forwardBody = { ...body, model: modelId };
     const stream = !!body.stream;
+    if (stream && quotaGate.trafficClass === "customer") {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "anthropic", providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
+      return jsonResponse({ type: "error", error: { type: "billing_error", message: "Use stream=false so managed usage can be reconciled exactly." } }, 400);
+    }
 
     // Log call (fire-and-forget)
     try {
@@ -5432,24 +6472,24 @@ http.route({
           authMethod: "api-key",
         },
       });
-      await ctx.runMutation(api.logs.createProxyLog, {
+      await ctx.runMutation(internal.logs.createProxyLog, {
         workspaceId: workspaceId as any,
         provider: "anthropic",
         action: "messages",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
       });
-      await ctx.runMutation(api.workspaces.incrementUsage, {
-        workspaceId: workspaceId as any,
-      });
     } catch (e: any) {
       console.error("[/v1/messages] logging failed:", e?.message);
     }
 
+    let upstreamDispatchAttempted = false;
     try {
+      upstreamDispatchAttempted = true;
       const upstream = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: upstreamHeaders,
         body: JSON.stringify(forwardBody),
+        signal: AbortSignal.timeout(60_000),
       });
 
       if (upstream.ok) {
@@ -5464,6 +6504,13 @@ http.route({
 
       // Streaming: passthrough SSE
       if (stream && upstream.body) {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: upstream.ok,
+          provider: "anthropic",
+          providerCostUsd: upstream.ok ? undefined : 0,
+          model: modelId,
+          costSource: upstream.ok ? "reservation" : "zero_cost",
+        });
         return new Response(upstream.body, {
           status: upstream.status,
           headers: {
@@ -5476,7 +6523,7 @@ http.route({
       }
 
       // Non-streaming: read JSON, log cost, inject _apiclaw metadata, return
-      const data = await upstream.json();
+      const data = await readUpstreamJsonCapped(upstream);
       const latencyMs = Date.now() - startTime;
 
       // Cost calc — reuse existing calculateCallCost. Anthropic's usage shape differs from OpenAI;
@@ -5484,22 +6531,23 @@ http.route({
       const u = (data as any)?.usage ?? {};
       const promptTokens = (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0);
       const completionTokens = u.output_tokens ?? 0;
-      const { providerCost, apiclawCost } = calculateCallCost(
+      const calculated = calculateCallCost(
         `anthropic/${modelId}`,
         { prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: promptTokens + completionTokens }
       );
+      const providerCost = calculated?.providerCost;
+      const apiclawCost = calculated?.apiclawCost;
 
-      if (apiclawCost > 0) {
-        ctx.runMutation(internal.billing.logCallCost, {
-          workspaceId: workspaceId as any,
-          provider: "anthropic",
-          model: modelId,
-          providerCostUsd: providerCost,
-          apiclawCostUsd: apiclawCost,
-          inputTokens: promptTokens,
-          outputTokens: completionTokens,
-        }).catch(() => {});
-      }
+      await finalizeManagedCall(ctx, quotaGate, {
+        success: upstream.ok,
+        provider: "anthropic",
+        providerCostUsd: upstream.ok ? providerCost : undefined,
+        model: modelId,
+        inputTokens: promptTokens,
+        outputTokens: completionTokens,
+        upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
+        costSource: calculated ? "token_price_table" : "reservation",
+      });
 
       if (data && typeof data === "object" && !("error" in data)) {
         (data as any)._apiclaw = {
@@ -5509,16 +6557,26 @@ http.route({
           model: modelId,
           latencyMs,
           cost: {
-            providerUsd: Math.round(providerCost * 1_000_000) / 1_000_000,
-            totalUsd: Math.round(apiclawCost * 1_000_000) / 1_000_000,
+            providerUsd: providerCost === undefined ? null : Math.round(providerCost * 1_000_000) / 1_000_000,
+            totalUsd: apiclawCost === undefined ? null : Math.round(apiclawCost * 1_000_000) / 1_000_000,
             margin: "15%",
           },
         };
       }
 
       return jsonResponse(data, upstream.status);
-    } catch (e: any) {
-      return jsonResponse({ type: "error", error: { type: "api_error", message: e?.message ?? String(e) } }, 502);
+      } catch (e: any) {
+        if (upstreamDispatchAttempted) {
+          return ambiguousPostDispatchResponse(
+            ctx,
+            quotaGate,
+            { provider: "anthropic", model: modelId },
+            502,
+            { type: "error" },
+          );
+        }
+        await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "anthropic", providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
+        return jsonResponse({ type: "error", error: { type: "api_error", message: e?.message ?? String(e) } }, 502);
     }
   }),
 });
@@ -5594,56 +6652,11 @@ http.route({
 // ==============================================
 // /v1/call — UNIFIED EXECUTION LAYER
 // Binary funnel: every providerAPIs row with listingStatus="live" is reachable
-// through this endpoint. Three branches by authType:
+// through this endpoint when backed by a managed adapter. Branches by authType:
 //   "managed" → internal dispatch to existing /proxy/{providerName} adapter
-//   "none"    → universal pass-through with SSRF guard + circuit breaker
-//   else      → 400 discovery_only
+//   everything else → discovery_only
 // No BYOK. Ever.
 // ==============================================
-
-// SSRF guard: block private/loopback/link-local/metadata addresses.
-function isPrivateHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "::1") return true;
-  if (h === "169.254.169.254") return true; // AWS/GCP metadata
-  if (h.endsWith(".internal") || h.endsWith(".local")) return true;
-  // IPv4 private ranges
-  const m = h.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-  if (m) {
-    const [a, b] = [parseInt(m[1], 10), parseInt(m[2], 10)];
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 0) return true;
-  }
-  // IPv6 unique-local / link-local
-  if (/^f[cd][0-9a-f]{2}:/.test(h) || /^fe[89ab][0-9a-f]:/.test(h)) return true;
-  return false;
-}
-
-// Validate + build the final URL for an open-proxy call.
-// Constraint: resolved URL's origin must match baseUrl's origin.
-function buildOpenProxyURL(baseUrl: string, userPath: string, params?: Record<string, string>): URL | null {
-  let base: URL;
-  try { base = new URL(baseUrl); } catch { return null; }
-  if (base.protocol !== "http:" && base.protocol !== "https:") return null;
-  if (isPrivateHost(base.hostname)) return null;
-  // Normalize path: always starts with /, never contains schema://
-  const path = userPath.startsWith("/") ? userPath : "/" + userPath;
-  if (path.startsWith("//") || /^[a-z]+:\/\//i.test(userPath)) return null;
-  const merged = new URL(path, base.toString().replace(/\/$/, "") + "/");
-  if (merged.origin !== base.origin) return null; // prevents // relative path escapes
-  if (isPrivateHost(merged.hostname)) return null;
-  // Append params
-  if (params) {
-    for (const [k, val] of Object.entries(params)) {
-      if (typeof val === "string") merged.searchParams.set(k, val);
-    }
-  }
-  return merged;
-}
 
 // Map of managed-provider names → /proxy/{adapter} internal forwarding.
 // Case-insensitive. Names must match providerAPIs.name exactly (one word each).
@@ -5678,6 +6691,11 @@ http.route({
   handler: httpAction(async (ctx, request) => {
     const t0 = Date.now();
 
+    if (requiresLegacyClientUpgrade("/v1/call", request.headers)) {
+      await recordLegacyClientUpgrade(ctx, request, "/v1/call");
+      return legacyClientUpgradeResponse();
+    }
+
     // Auth — accepts Bearer sk-claw, X-APIClaw-Api-Key, or X-APIClaw-Session.
     const auth = await resolveWorkspaceFromRequest(ctx, request);
     const workspaceId = auth.workspaceId;
@@ -5704,7 +6722,7 @@ http.route({
     }
 
     let body: any;
-    try { body = await request.json(); }
+    try { body = await readManagedJsonBodyCapped(request); }
     catch { return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400); }
 
     const apiName: string = typeof body?.api === "string" ? body.api.trim() : "";
@@ -5715,6 +6733,8 @@ http.route({
     if (!apiName) {
       return jsonResponse({ error: { code: "missing_api", message: "Body must include { api: string }" } }, 400);
     }
+    const scopeDenied = mcpScopeDenial(auth, "call");
+    if (scopeDenied) return scopeDenied;
     if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(method)) {
       return jsonResponse({ error: { code: "invalid_method", message: `Unsupported method ${method}` } }, 400);
     }
@@ -5814,6 +6834,7 @@ http.route({
             ...(request.headers.get("X-APIClaw-Api-Key") ? { "X-APIClaw-Api-Key": request.headers.get("X-APIClaw-Api-Key")! } : {}),
             ...(request.headers.get("X-APIClaw-Session") ? { "X-APIClaw-Session": request.headers.get("X-APIClaw-Session")! } : {}),
             ...(request.headers.get("X-APIClaw-Subagent") ? { "X-APIClaw-Subagent": request.headers.get("X-APIClaw-Subagent")! } : {}),
+            ...(request.headers.get("Idempotency-Key") ? { "Idempotency-Key": request.headers.get("Idempotency-Key")! } : {}),
           },
           body: JSON.stringify({ path: userPath, method, params, body: userBody, ...userBody }),
           signal: AbortSignal.timeout(25000),
@@ -5858,108 +6879,13 @@ http.route({
 
     // ---------------- Branch: open-proxy (authType="none") ----------------
     if (row.authType === "none" && row.proxyMode === "open_proxy") {
-      const baseUrl = row.baseUrl ?? row.docsUrl;
-      if (!baseUrl) {
-        return jsonResponse({ error: { code: "missing_base_url", message: `"${row.name}" has no baseUrl configured.` } }, 500);
-      }
-      const target = buildOpenProxyURL(baseUrl, userPath, params);
-      if (!target) {
-        return jsonResponse(
-          { error: { code: "invalid_target", message: "Resolved URL failed SSRF/origin validation", baseUrl, path: userPath } },
-          400
-        );
-      }
-
-      // Content-type allowlist + size cap enforced in response handling.
-      try {
-        const fetchInit: RequestInit = {
-          method,
-          headers: {
-            "User-Agent": "APIClaw/2.5 (+https://apiclaw.cloud)",
-            Accept: "application/json, text/*, application/xml;q=0.9",
-          },
-          signal: AbortSignal.timeout(25000),
-        };
-        if (method !== "GET" && method !== "DELETE" && userBody !== undefined) {
-          (fetchInit.headers as any)["Content-Type"] = "application/json";
-          fetchInit.body = typeof userBody === "string" ? userBody : JSON.stringify(userBody);
-        }
-        const upstream = await fetch(target.toString(), fetchInit);
-
-        if (upstream.ok) {
-          await recordFirstSuccessfulGatewayCall(ctx, {
-            workspaceId,
-            path: "/v1/call",
-            authMethod: auth.authMethod,
-            provider: row.name,
-            action: `${method} ${userPath}`,
-          });
-        }
-
-        // 10 MB response cap
-        const reader = upstream.body?.getReader();
-        const CAP = 10 * 1024 * 1024;
-        const chunks: Uint8Array[] = [];
-        let total = 0;
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            total += value.byteLength;
-            if (total > CAP) {
-              await reader.cancel();
-              await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 413 });
-              return jsonResponse(
-                { error: { code: "response_too_large", message: "Upstream exceeded 10 MB cap." } },
-                413
-              );
-            }
-            chunks.push(value);
-          }
-        }
-        const buf = new Uint8Array(total);
-        let off = 0; for (const c of chunks) { buf.set(c, off); off += c.byteLength; }
-
-        const ok = upstream.status >= 200 && upstream.status < 500;
-        if (ok) await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: row.id });
-        else await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: upstream.status });
-
-        try {
-          await ctx.runMutation(api.analytics.log, {
-            ...analyticsBase,
-            provider: row.name,
-            metadata: {
-              route: "v1_call", mode: "open_proxy",
-              method, target: target.origin + target.pathname,
-              status: upstream.status, latencyMs: Date.now() - t0, bytes: total,
-            },
-          });
-        } catch {}
-
-        return new Response(buf, {
-          status: upstream.status,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": upstream.headers.get("Content-Type") ?? "application/json",
-            "X-APIClaw-Mode": "open_proxy",
-            "X-APIClaw-Provider": row.name,
-            "X-APIClaw-Upstream-Bytes": total.toString(),
-          },
-        });
-      } catch (e: any) {
-        await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 0 });
-        const isTimeout = e?.name === "TimeoutError" || /timeout|abort/i.test(e?.message ?? "");
-        return jsonResponse(
-          {
-            error: {
-              code: isTimeout ? "upstream_timeout" : "upstream_error",
-              message: e?.message ?? "upstream fetch failed",
-              provider: row.name,
-            },
-          },
-          isTimeout ? 504 : 502
-        );
-      }
+      return jsonResponse({
+        error: {
+          code: "discovery_only",
+          message: `"${row.name}" remains discoverable but open-proxy execution is disabled until APIClaw has DNS-pinned, redirect-validating egress.`,
+          docsUrl: row.docsUrl,
+        },
+      }, 501);
     }
 
     // ---------------- Branch: everything else = discovery_only ----------------
@@ -6034,14 +6960,33 @@ http.route({
 http.route({
   path: "/v1/missions/start",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
+  handler: httpAction(async (ctx, request): Promise<Response> => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    const scopeDenied = mcpScopeDenial(auth, "call");
+    if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
       return unauthResponse("missions_require_auth");
     }
+    const trafficClass = auth.authMethod === "internal" ? "internal" : "customer";
+    let idempotencyKey: string | null;
+    try {
+      idempotencyKey = requireManagedIdempotencyKey(
+        request.headers.get("Idempotency-Key"),
+        trafficClass,
+      );
+    } catch (error) {
+      return jsonResponse({
+        error: {
+          code: request.headers.get("Idempotency-Key") === null
+            ? "idempotency_key_required"
+            : "invalid_idempotency_key",
+          message: error instanceof Error ? error.message : "Invalid Idempotency-Key",
+        },
+      }, 400);
+    }
     let body: any;
     try {
-      body = await request.json();
+      body = await readManagedJsonBodyCapped(request);
     } catch {
       return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400);
     }
@@ -6052,14 +6997,21 @@ http.route({
     if (!template) {
       return jsonResponse({ error: { code: "missing_template", message: "Body must include { template }" } }, 400);
     }
-    const quotaBlock = await enforcePreCallQuota(
-      ctx,
-      auth.workspaceId,
-      "mission",
-      template,
-      "/v1/missions/start"
-    );
-    if (quotaBlock) return quotaBlock;
+    const requestPayload = { template, templateVersion, params };
+    const [requestId, requestFingerprint] = await Promise.all([
+      deriveManagedRequestId({
+        idempotencyKey,
+        workspaceId: auth.workspaceId,
+        provider: "mission",
+        action: "start",
+        path: "/v1/missions/start",
+        payload: requestPayload,
+      }),
+      deriveRequestFingerprint(requestPayload),
+    ]);
+    // Mission creation is free control-plane work. Each cost-bearing mission
+    // primitive reserves and finalizes its own managed ledger row immediately
+    // before and after the corresponding upstream request.
 
     const initiatorMap: Record<string, string> = {
       "api-key": "http",
@@ -6070,29 +7022,34 @@ http.route({
     const initiator = initiatorMap[auth.authMethod] ?? "http";
 
     try {
-      const created: any = await ctx.runMutation(api.missions.createMission, {
+      const created: any = await ctx.runMutation(internal.missions.createMission, {
         workspaceIdOverride: auth.workspaceId as any,
+        requestId,
+        requestFingerprint,
         template,
         templateVersion,
         params,
         initiator,
       });
-      // Fire-and-forget execution; CLI/MCP poll status separately.
-      ctx.runAction(api.missions.runMission, { missionId: created.missionId }).catch((e: any) => {
-        console.error("[missions] runMission failed:", e?.message);
-      });
+      // Creation and one execution schedule are atomic inside the mutation.
+      // Exact replays return the original mission without scheduling again.
       return jsonResponse(
         {
           missionId: created.missionId,
           status: created.status,
           isInternal: created.isInternal,
+          idempotentReplay: created.duplicate,
           poll: `/v1/missions/${created.missionId}`,
         },
         202
       );
     } catch (e: any) {
       const msg = e?.message ?? "create_failed";
-      const code = msg.startsWith("unknown_template") ? 400 : 500;
+      const code = msg.startsWith("unknown_template")
+        ? 400
+        : msg.startsWith("idempotency_conflict")
+          ? 409
+          : 500;
       return jsonResponse({ error: { code: msg.split(":")[0] || "create_failed", message: msg } }, code);
     }
   }),
@@ -6109,12 +7066,14 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx, request) => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    const scopeDenied = mcpScopeDenial(auth, "read");
+    if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
       return unauthResponse("missions_require_auth");
     }
     const url = new URL(request.url);
     const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10) || 50, 200);
-    const rows = await ctx.runQuery(api.missions.listForWorkspace, {
+    const rows = await ctx.runQuery(internal.missions.listForWorkspace, {
       workspaceId: auth.workspaceId as any,
       limit,
     });
@@ -6135,6 +7094,8 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx, request) => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    const scopeDenied = mcpScopeDenial(auth, "read");
+    if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
       return unauthResponse("missions_require_auth");
     }
@@ -6143,7 +7104,7 @@ http.route({
     if (!tail || tail === "templates" || tail === "start") {
       return jsonResponse({ error: { code: "not_found", message: "Unknown subpath" } }, 404);
     }
-    const data = await ctx.runQuery(api.missions.getMission, { missionId: tail as any });
+    const data = await ctx.runQuery(internal.missions.getMission, { missionId: tail as any });
     if (!data || !data.mission) {
       return jsonResponse({ error: { code: "not_found", message: "mission not found" } }, 404);
     }

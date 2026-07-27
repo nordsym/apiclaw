@@ -1,46 +1,155 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { FREE_MANAGED_CALLS_PER_WEEK, nextWeeklyResetUtc } from "./product-truth.js";
+import { CANON_STATS } from "./canon-stats.js";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  FREE_MANAGED_WARNING_AT,
+  MANAGED_PROVIDER_ADAPTER_COUNT,
+  MANAGED_PROVIDER_ADAPTERS,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS,
+  MANAGED_USAGE_POLICY,
+  PAYG_MARGIN_RATE,
+  getManagedProviderAdapter,
+  getPublicCustomerExecutableProvider,
+  isPublicCustomerExecutableAction,
+} from "./product-truth.js";
 
-assert.equal(FREE_MANAGED_CALLS_PER_WEEK, 50);
-assert.match(
-  readFileSync("convex/quota.ts", "utf8"),
-  new RegExp(`FREE_WEEKLY_LIMIT = ${FREE_MANAGED_CALLS_PER_WEEK}\\b`),
-);
+assert.equal(FREE_MANAGED_CALLS_LIFETIME, 25);
+assert.equal(FREE_MANAGED_PROVIDER_COST_CAP_USD, 1);
+assert.equal(FREE_MANAGED_WARNING_AT, 20);
+assert.equal(PAYG_MARGIN_RATE, 0.15);
+assert.deepEqual(MANAGED_USAGE_POLICY, {
+  freeManagedCallsLifetime: 25,
+  freeManagedProviderCostCapUsd: 1,
+  freeManagedWarningAt: 20,
+  discoveryIsFree: true,
+  keylessPublicExecutionAvailable: false,
+  paygMarginRate: 0.15,
+  paygPriceBasis: "provider_cost",
+  paygRequiresBillingGradeAdapter: true,
+});
+
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 4);
+assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
+assert.equal(CANON_STATS.discoverable, 26_619);
+assert.equal(CANON_STATS.source_verified, 689);
+assert.equal(CANON_STATS.verification_sweep_passes, 2_895);
+assert.equal(CANON_STATS.managed_provider_adapters, MANAGED_PROVIDER_ADAPTER_COUNT);
 assert.equal(
-  nextWeeklyResetUtc(Date.UTC(2026, 6, 16, 12, 0, 0)),
-  "2026-07-20 00:00 UTC",
+  CANON_STATS.customer_executable_providers,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
-assert.equal(
-  nextWeeklyResetUtc(Date.UTC(2026, 6, 20, 0, 0, 0)),
-  "2026-07-27 00:00 UTC",
+assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
+assert.deepEqual(
+  MANAGED_PROVIDER_ADAPTERS.filter(({ id }) =>
+    ["together", "twilio", "46elks", "resend"].includes(id),
+  ),
+  [],
 );
+assert.deepEqual(
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map(({ id, customerExecutableActions }) => [id, [...customerExecutableActions]]),
+  [
+    ["openrouter", ["chat"]],
+    ["brave_search", ["search"]],
+    ["github", ["search_repos", "get_repo", "get_file"]],
+    [
+      "nasa",
+      [
+        "apod",
+        "neo_feed",
+        "neo_lookup",
+        "epic",
+        "epic_date",
+        "mars_weather",
+        "earth_imagery",
+        "earth_assets",
+        "donki_notifications",
+        "call",
+      ],
+    ],
+  ],
+);
+assert.equal(getPublicCustomerExecutableProvider("GitHub API")?.id, "github");
+assert.equal(getManagedProviderAdapter("AssemblyAI")?.id, "assemblyai");
+assert.equal(getPublicCustomerExecutableProvider("AssemblyAI"), undefined);
+assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), true);
+assert.equal(isPublicCustomerExecutableAction("github", "create_issue"), false);
+assert.equal(isPublicCustomerExecutableAction("replicate", "run"), false);
+
+const executeSource = readFileSync("src/execute.ts", "utf8");
+assert.match(executeSource, /PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS/);
+assert.doesNotMatch(
+  executeSource.slice(executeSource.indexOf("export function getConnectedProviders")),
+  /Object\.entries\(handlers\)/,
+  "list_connected must not infer customer execution from credentialed handlers",
+);
+
+for (const catalogFile of [
+  "landing/src/app/catalog/page.tsx",
+  "landing/src/app/api/catalog/route.ts",
+]) {
+  const source = readFileSync(catalogFile, "utf8");
+  assert.match(source, /@apiclaw\/product-truth/);
+  assert.doesNotMatch(
+    source,
+    /OpenAI[^\n]+callable:\s*true|AssemblyAI[^\n]+callable:\s*true|Replicate[^\n]+callable:\s*true/,
+    `${catalogFile} must not promote credential presence to customer execution`,
+  );
+}
 
 const activeTruthSurfaces = [
   "README.md",
+  "apiclaw-README.md",
   "src/index.ts",
   "convex/http.ts",
   "convex/email.ts",
   "convex/nurture.ts",
   "convex/postVerifyNudge.ts",
+  "convex/adminStats.ts",
   "landing/src/lib/plans.ts",
   "landing/src/app/page.tsx",
   "landing/src/app/workspace/page.tsx",
   "landing/src/components/CheckoutButton.tsx",
+  "landing/public/llms.txt",
+  "landing/public/agents.md",
 ];
+
+const staleManagedAllowance = /(?:50 (?:free )?managed calls|25 calls per month|managed calls? (?:per|\/)(?:\s*)(?:week|month)|managed-call allowance (?:per|\/)(?:\s*)(?:week|month)|weekly managed call quota|monthly free tier|free API calls this month|\$0\.002\/call|\$0\.002 per API call|unlock unlimited usage)/i;
+const staleExecutionClaim = /keyless public (?:API )?calls (?:stay|are|remain) free|public APIs proxied through APIClaw without auth/i;
 
 for (const file of activeTruthSurfaces) {
   const content = readFileSync(file, "utf8");
-  assert.doesNotMatch(
-    content,
-    /25 (?:free )?(?:managed |API )?calls(?: per month|\/month)|monthly free tier|Free tier: 50 API calls\b|free API calls this month|\$0\.002\/call|unlock unlimited usage/i,
-    `${file} contains stale free-tier truth`,
-  );
+  assert.doesNotMatch(content, staleManagedAllowance, `${file} contains stale managed-usage truth`);
+  assert.doesNotMatch(content, staleExecutionClaim, `${file} claims disabled keyless proxy execution`);
 }
 
+for (const file of ["convex/quota.ts", "convex/managedUsagePolicy.ts", "src/index.ts"]) {
+  assert.match(
+    readFileSync(file, "utf8"),
+    /FREE_MANAGED_CALLS_LIFETIME/,
+    `${file} must consume the canonical lifetime allowance`,
+  );
+}
+assert.match(
+  readFileSync("convex/adminStats.ts", "utf8"),
+  /getWorkspaceUsageDisplay[\s\S]*?FREE_MANAGED_PROVIDER_COST_CAP_USD/,
+  "operator usage must consume canonical lifetime and provider-cost policy",
+);
+
 const planCopy = readFileSync("landing/src/lib/plans.ts", "utf8");
-assert.match(planCopy, /calls: "50"/);
-assert.match(planCopy, /callsSub: "managed calls per week"/);
+assert.match(planCopy, /String\(FREE_MANAGED_CALLS_LIFETIME\)/);
+assert.match(planCopy, /lifetime of the workspace/);
+assert.match(planCopy, /FREE_MANAGED_PROVIDER_COST_CAP_USD/);
+assert.match(planCopy, /PAYG_MARGIN_RATE/);
+
+for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md"]) {
+  const content = readFileSync(file, "utf8");
+  assert.match(content, /25[^\n]*lifetime|25 managed calls for the lifetime/i, `${file} must state the lifetime call allowance`);
+  assert.match(content, /\$1[^\n]*provider-cost|\$1[^\n]*provider cost/i, `${file} must state the provider-cost cap`);
+  assert.match(content, /provider cost (?:plus|\+) 15%|API cost plus 15%/i, `${file} must state the PAYG margin`);
+}
 
 const workspacePage = [
   readFileSync("landing/src/app/workspace/page.tsx", "utf8"),
@@ -54,5 +163,157 @@ assert.doesNotMatch(workspacePage, /Together(?: AI)?/, "retired provider must no
 assert.doesNotMatch(workspacePage, /workspaces:setPassword|Change Password/, "legacy password UI must not be reachable");
 assert.doesNotMatch(readFileSync("convex/workspaces.ts", "utf8"), /export const setPassword/, "legacy password mutation must not be exported");
 assert.equal(existsSync("landing/public/dev-login.html"), false, "public dev login artifact must not ship");
+assert.equal(existsSync("landing/public/.well-known/ai-plugin.json"), false, "obsolete no-auth ChatGPT plugin manifest must not ship");
 
-console.log("product truth: public copy matches the enforced 50 managed calls per week");
+const packageMetadata = JSON.parse(readFileSync("package.json", "utf8")) as {
+  version: string;
+  description: string;
+  scripts: Record<string, string>;
+  bin: Record<string, string>;
+};
+const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
+  version: string;
+  packages: Record<string, { version?: string; bin?: Record<string, string> }>;
+};
+assert.equal(packageMetadata.version, "2.8.7");
+assert.equal(packageLock.version, "2.8.7");
+assert.equal(packageLock.packages[""].version, "2.8.7");
+assert.match(packageMetadata.description, /26,619 API definitions/);
+assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
+assert.match(packageMetadata.description, /Source verification is not execution/);
+assert.match(packageMetadata.description, /22 managed adapters/);
+assert.match(packageMetadata.description, /4 provider rails customer-executable/);
+for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
+  const health = readFileSync(healthFile, "utf8");
+  assert.match(health, /service: 'apiclaw-gateway'/);
+  assert.match(health, /version: '2\.8\.7'/);
+}
+assert.deepEqual(packageMetadata.bin, { apiclaw: "./dist/bin.js" });
+assert.equal("start:http" in packageMetadata.scripts, false, "retired local HTTP server must not ship as an npm script");
+assert.deepEqual(packageLock.packages[""].bin, { apiclaw: "dist/bin.js" });
+for (const retiredSource of [
+  "src/bin-http.ts",
+  "src/http-api.ts",
+  "src/http-server-minimal.ts",
+  "src/metered.ts",
+  "src/access-control.ts",
+  "src/hivr-whitelist.ts",
+  "src/product-whitelist.ts",
+  "api/discover.ts",
+]) {
+  assert.equal(existsSync(retiredSource), false, `${retiredSource} must not ship`);
+}
+for (const retiredBuild of ["dist/bin-http.js", "dist/http-api.js", "dist/http-server-minimal.js", "dist/metered.js"]) {
+  assert.equal(existsSync(retiredBuild), false, `${retiredBuild} must not remain in the release build`);
+}
+for (const releaseSurface of ["package.json", "package-lock.json", "HTTP-API.md"]) {
+  assert.doesNotMatch(
+    readFileSync(releaseSurface, "utf8"),
+    /\bapiclaw-http\b|start:http|bin-http/,
+    `${releaseSurface} must not advertise the retired local HTTP server`,
+  );
+}
+assert.match(readFileSync("HTTP-API.md", "utf8"), /https:\/\/api\.apiclaw\.cloud\/v1\/execute/);
+
+const publicDiscoveryCopyFiles = [
+  "package.json",
+  "landing/src/app/.well-known/mcp/route.ts",
+  "landing/mcpb/manifest.json",
+  "landing/src/lib/mcp-tools-canon.ts",
+  "landing/public/.well-known/openapi.json",
+  "landing/public/stats.json",
+  "landing/src/app/api/catalog/route.ts",
+  "src/canon-stats.ts",
+  "src/discovery.ts",
+];
+for (const file of publicDiscoveryCopyFiles) {
+  const content = readFileSync(file, "utf8");
+  assert.doesNotMatch(
+    content,
+    /2,?906\+?\s+(?:APIs?\s+)?(?:are\s+)?(?:callable|executable)|2\.9k\s+(?:callable|executable)|empirically callable|universal pass-through proxy/i,
+    `${file} turns source verification into an execution claim`,
+  );
+  assert.doesNotMatch(
+    content,
+    /\b(?:Together(?: AI)?|46elks|Twilio|Resend)\b/i,
+    `${file} exposes a retired or internal-only provider`,
+  );
+}
+
+const publicStats = JSON.parse(readFileSync("landing/public/stats.json", "utf8")) as Record<string, unknown>;
+assert.equal(publicStats.apiCount, CANON_STATS.discoverable);
+assert.equal(publicStats.sourceVerifiedCount, CANON_STATS.source_verified);
+assert.equal(publicStats.managedProviderAdapterCount, MANAGED_PROVIDER_ADAPTER_COUNT);
+assert.equal(
+  publicStats.customerExecutableProviderCount,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+);
+assert.equal("callableCount" in publicStats, false, "public stats must not expose the legacy callableCount label");
+
+const sourceStats = JSON.parse(readFileSync("landing/src/lib/stats.json", "utf8")) as Record<string, unknown>;
+assert.equal(sourceStats.apiCount, publicStats.apiCount);
+assert.equal(sourceStats.sourceVerifiedCount, publicStats.sourceVerifiedCount);
+assert.equal(sourceStats.managedProviderAdapterCount, publicStats.managedProviderAdapterCount);
+assert.equal(sourceStats.customerExecutableProviderCount, publicStats.customerExecutableProviderCount);
+assert.equal("callableCount" in sourceStats, false, "source stats must not expose the legacy callableCount label");
+assert.equal(
+  (sourceStats.historicalVerificationBuckets as { verified: number }).verified,
+  CANON_STATS.verification_sweep_passes,
+  "historical sweep passes must remain separate from safely mapped source verification",
+);
+assert.equal(
+  Object.values(publicStats.categoryBreakdown as Record<string, number>)
+    .reduce((sum, count) => sum + count, 0),
+  CANON_STATS.discoverable,
+  "public category counts must cover the exact public catalog inventory",
+);
+
+const catalogRoute = readFileSync("landing/src/app/api/catalog/route.ts", "utf8");
+assert.match(catalogRoute, /CANON_STATS/);
+assert.match(catalogRoute, /assertPublicCatalogTruth\(cachedApis, verification\)/);
+assert.doesNotMatch(
+  catalogRoute,
+  /by_host/,
+  "shared-host fallback must not mark unrelated catalog cards as source-verified",
+);
+const statsGenerator = readFileSync("landing/scripts/generate-stats.js", "utf8");
+assert.match(statsGenerator, /buildPublicInventory/);
+assert.doesNotMatch(
+  statsGenerator,
+  /CANON_(?:API_COUNT|SOURCE_VERIFIED|MANAGED_PROVIDER_ADAPTERS)/,
+  "the measured generator must not carry a second copy of catalog canon",
+);
+const statsSync = readFileSync("landing/scripts/sync-canon-to-stats.mjs", "utf8");
+assert.match(statsSync, /CANON_STATS_PATH/);
+assert.match(statsSync, /drift: measured=/);
+
+const publicOpenApi = JSON.parse(readFileSync("landing/public/.well-known/openapi.json", "utf8")) as {
+  paths: Record<string, unknown>;
+};
+for (const internalPath of ["/proxy/46elks", "/proxy/twilio", "/proxy/resend", "/proxy/together"]) {
+  assert.equal(internalPath in publicOpenApi.paths, false, `${internalPath} must not appear in the public OpenAPI document`);
+}
+
+assert.match(
+  readFileSync("convex/http.ts", "utf8"),
+  /Access-Control-Allow-Headers[^\n]+Idempotency-Key/,
+  "browser managed calls must be allowed to send their idempotency key",
+);
+assert.match(
+  readFileSync("landing/src/components/OnboardingWizard.tsx", "utf8"),
+  /"Idempotency-Key": idempotencyKey/,
+  "the golden first managed call must be idempotent",
+);
+
+const mcpbManifest = JSON.parse(readFileSync("landing/mcpb/manifest.json", "utf8")) as {
+  version: string;
+  tools: Array<{ name: string }>;
+};
+assert.equal(mcpbManifest.version, "2.8.7");
+assert.doesNotMatch(
+  mcpbManifest.tools.map((tool) => tool.name).join(" "),
+  /\b(?:estimate_cost|get_usage_summary)\b/,
+  "the desktop extension manifest must match the implemented MCP tool surface",
+);
+
+console.log("product truth: 25 lifetime managed calls, $1 provider-cost cap, and provider cost + 15% PAYG");

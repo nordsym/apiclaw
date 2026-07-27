@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
 // HELPER FUNCTIONS
@@ -24,10 +25,7 @@ function generateToken(): string {
 export const getMembers = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) return [];
 
@@ -76,10 +74,7 @@ export const inviteMember = mutation({
     role: v.union(v.literal("admin"), v.literal("member")),
   },
   handler: async (ctx, { token, email, role }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) throw new Error("Invalid session");
 
@@ -180,10 +175,7 @@ export const removeMember = mutation({
     memberEmail: v.string(),
   },
   handler: async (ctx, { token, memberEmail }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
 
     if (!session) throw new Error("Invalid session");
 

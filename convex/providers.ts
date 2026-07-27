@@ -1,5 +1,6 @@
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 // Register a new provider and their first API
 export const registerProvider = internalMutation({
@@ -96,6 +97,7 @@ export const registerProvider = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId: workspace!._id,
       sessionToken,
+      sessionKind: "owner",
       lastUsedAt: now,
       createdAt: now,
     });
@@ -119,10 +121,7 @@ export const getProviderByEmail = internalQuery({
 export const getWorkspaceProviderConsole = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) throw new Error("Invalid or expired session");
 
     const provider = await ctx.db
@@ -462,6 +461,7 @@ export const verifyMagicLink = internalMutation({
     await ctx.db.insert("agentSessions", {
       workspaceId: workspace!._id,
       sessionToken,
+      sessionKind: "owner",
       lastUsedAt: now,
       createdAt: now,
     });
@@ -483,10 +483,7 @@ export const getSession = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     // 1. Try unified agentSessions (by sessionToken)
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, token);
 
     if (agentSession) {
       // Resolve provider via workspace
@@ -608,10 +605,7 @@ export const addAPI = mutation({
     // Unified session lookup
     let providerId: any = null;
 
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, args.token);
 
     if (agentSession) {
       const prov = await ctx.db
@@ -661,10 +655,7 @@ export const deleteAPI = mutation({
     // Unified session lookup
     let providerId: any = null;
 
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, args.token);
 
     if (agentSession) {
       const prov = await ctx.db
@@ -805,10 +796,7 @@ export const getAnalytics = query({
 
     // Session token is the only accepted ownership proof.
     if (token) {
-      const agentSession = await ctx.db
-        .query("agentSessions")
-        .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-        .first();
+      const agentSession = await findUsableAgentSession(ctx.db, token);
 
       if (agentSession) {
         const prov = await ctx.db
@@ -963,10 +951,7 @@ export const getEarnings = query({
     // Unified session lookup
     let providerId: any = null;
 
-    const agentSession = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const agentSession = await findUsableAgentSession(ctx.db, token);
 
     if (agentSession) {
       const prov = await ctx.db
@@ -1099,10 +1084,7 @@ export const debugUpdateAPI = internalMutation({
 export const getByWorkspaceId = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) throw new Error("Invalid or expired session");
     return await ctx.db
       .query("providerAPIs")
@@ -1124,10 +1106,7 @@ export const createForWorkspace = mutation({
     pricingNotes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", args.token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, args.token);
     if (!session) throw new Error("Invalid or expired session");
     const provider = await ctx.db
       .query("providers")
@@ -1157,10 +1136,7 @@ export const createForWorkspace = mutation({
 export const deleteForWorkspace = mutation({
   args: { apiId: v.id("providerAPIs"), token: v.string() },
   handler: async (ctx, { apiId, token }) => {
-    const session = await ctx.db
-      .query("agentSessions")
-      .withIndex("by_sessionToken", (q) => q.eq("sessionToken", token))
-      .first();
+    const session = await findUsableAgentSession(ctx.db, token);
     if (!session) throw new Error("Invalid or expired session");
     const api = await ctx.db.get(apiId);
     if (!api || api.workspaceId !== session.workspaceId) {

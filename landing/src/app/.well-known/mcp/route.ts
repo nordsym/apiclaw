@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import statsData from "@/lib/stats.json";
+import { CANONICAL_MCP_TOOLS } from "@/lib/mcp-tools-canon";
+import {
+  FREE_MANAGED_CALLS_LIFETIME,
+  FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  PAYG_MARGIN_RATE,
+} from "@apiclaw/product-truth";
 
 // Discovery hint for MCP-aware clients and directories. There is no formal
 // /.well-known/mcp standard yet (as of 2026-05) but several emerging MCP
@@ -10,12 +16,12 @@ const ISSUER = "https://apiclaw.cloud";
 
 export async function GET() {
   const apiCount = statsData.apiCount.toLocaleString();
-  const callable = statsData.callableCount.toLocaleString();
-  const managed = statsData.managedCount;
+  const sourceVerified = statsData.sourceVerifiedCount.toLocaleString();
+  const paygMarginPercent = PAYG_MARGIN_RATE * 100;
   const meta = {
     name: "APIClaw",
     description:
-      `The API layer for AI agents. ${apiCount} discoverable APIs, ${callable} empirically callable, ${managed} fully managed (OpenAI, Anthropic, xAI, Groq, Mistral, ElevenLabs, Brave Search, Firecrawl, GitHub, APILayer, and more). Universal pass-through proxy for keyless public APIs.`,
+      `The control plane for AI agents. ${apiCount} discoverable API definitions, including ${sourceVerified} source-verified definitions. Managed execution is available only where a verified server-side adapter is live.`,
     vendor: "NordSym AB",
     homepage: ISSUER,
     documentation: `${ISSUER}/docs`,
@@ -33,17 +39,10 @@ export async function GET() {
       dynamic_client_registration: true,
       pkce_required: true,
     },
-    tools: [
-      "discover_apis",
-      "get_api_details",
-      "call_api",
-      "list_categories",
-      "list_connected",
-      "check_balance",
-    ],
+    tools: CANONICAL_MCP_TOOLS.map((tool) => tool.name),
     categories: ["api-gateway", "developer-tools", "llm", "infrastructure"],
     keywords: ["mcp", "api", "openrouter", "openai", "anthropic", "xai", "grok", "elevenlabs"],
-    pricing: "Free tier (25 calls/month) + pay-as-you-go (provider cost + 15%)",
+    pricing: `Free workspace: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total provider cost. Billing-ready adapters can then use provider cost + ${paygMarginPercent}% pay as you go.`,
   };
   return NextResponse.json(meta, {
     headers: {

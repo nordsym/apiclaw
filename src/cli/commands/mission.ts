@@ -38,14 +38,25 @@ function authError(): never {
 async function fetchJson<T = any>(
   path: string,
   init: RequestInit = {},
-  token?: string
+  token?: string,
+  transportRetries = 0,
 ): Promise<{ status: number; body: T }> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
   if (token) headers["X-APIClaw-Session"] = token;
-  const res = await fetch(`${GATEWAY}${path}`, { ...init, headers });
+  let res: Response | undefined;
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= transportRetries; attempt++) {
+    try {
+      res = await fetch(`${GATEWAY}${path}`, { ...init, headers });
+      break;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (!res) throw lastError;
   const text = await res.text();
   let body: any;
   try {
@@ -127,14 +138,29 @@ async function startMission(template: string, paramArgs: string[]) {
   const token = loadSession();
   if (!token) authError();
   const params = parseKv(paramArgs);
-  const { status, body } = await fetchJson<any>(
-    "/v1/missions/start",
-    {
-      method: "POST",
-      body: JSON.stringify({ template, params }),
-    },
-    token
-  );
+  const idempotencyKey = params["idempotency-key"]?.trim();
+  delete params["idempotency-key"];
+  if (!idempotencyKey) {
+    console.error(color(RED, "✗ --idempotency-key <key> is required to start a mission"));
+    process.exit(1);
+  }
+  let response: { status: number; body: any };
+  try {
+    response = await fetchJson<any>(
+      "/v1/missions/start",
+      {
+        method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify({ template, params }),
+      },
+      token,
+    );
+  } catch {
+    console.error(color(RED, "✗ Mission outcome unknown."));
+    console.error(`Do not submit it again. Retain operation key ${idempotencyKey} for reconciliation.`);
+    process.exit(1);
+  }
+  const { status, body } = response;
   if (status !== 202) {
     console.error(color(RED, "✗ failed to start mission") + ":", body?.error?.message ?? body);
     process.exit(1);
@@ -228,7 +254,7 @@ async function listMissions(limit: number) {
   }
   const missions = body.missions ?? [];
   if (missions.length === 0) {
-    console.log(color(DIM, "No missions yet. Try: ") + color(CYAN, "apiclaw mission start genprd --topic \"...\""));
+    console.log(color(DIM, "No missions yet. Run ") + color(CYAN, "apiclaw mission templates") + color(DIM, " to see customer-ready templates."));
     return;
   }
   console.log("");
@@ -260,7 +286,7 @@ export async function missionCommand(rawArgs: string[]) {
     case "start": {
       const template = rest[0];
       if (!template) {
-        console.error(color(RED, "✗ usage: apiclaw mission start <template> [--param value ...]"));
+        console.error(color(RED, "✗ usage: apiclaw mission start <template> --idempotency-key <key> [--param value ...]"));
         console.error("  See: apiclaw mission templates");
         process.exit(1);
       }

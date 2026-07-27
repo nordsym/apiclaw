@@ -1,8 +1,10 @@
-// Generate stats at build time from apis.json + scaled pipeline data
+// Generate measured catalog stats from the same inventory and policy modules
+// used by the public /api/catalog route. sync-canon-to-stats.mjs validates the
+// result against src/canon-stats.ts before a build may continue.
 const fs = require('fs');
 const path = require('path');
+const ts = require('typescript');
 
-// Category mapping (consolidate similar ones)
 const categoryMap = {
   'AI': 'AI & ML',
   'AI & ML': 'AI & ML',
@@ -72,103 +74,123 @@ const categoryMap = {
 };
 
 const outputPath = path.join(__dirname, '../src/lib/stats.json');
+const verificationPath = path.join(__dirname, '../src/lib/verification-status.json');
+const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
+const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
+const productTruthPath = path.join(__dirname, '../../src/product-truth.ts');
+const providerBoundariesPath = path.join(__dirname, '../src/lib/provider-boundaries.ts');
+
+function loadTypeScriptModule(filePath) {
+  const source = fs.readFileSync(filePath, 'utf8');
+  const output = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+    },
+    fileName: filePath,
+  }).outputText;
+  const module = { exports: {} };
+  new Function('exports', 'module', 'require', output)(module.exports, module, require);
+  return module.exports;
+}
+
+function buildPublicInventory(registry, verification, productTruth, boundaries) {
+  const all = [...(registry.apis || [])];
+  if (!all.some((entry) => String(entry.name || '').toLowerCase().trim() === 'e2b')) {
+    all.push({
+      name: 'E2B',
+      category: 'AI & ML',
+      baseUrl: 'https://api.e2b.app',
+      docsUrl: 'https://e2b.dev/docs',
+    });
+  }
+
+  const discoveryRows = all
+    .filter((entry) =>
+      !boundaries.isInternalCatalogEntry(entry) &&
+      !boundaries.isUnavailableManagedBrand(
+        [entry.name, entry.baseUrl, entry.docsUrl].filter(Boolean).join(' '),
+      )
+    )
+    .filter((entry) => !productTruth.getManagedProviderAdapter(entry.name));
+
+  const discovery = discoveryRows
+    .map((entry) => {
+      const nameLower = String(entry.name || '').toLowerCase().trim();
+      const evidence =
+        (nameLower && verification.by_name_lower?.[nameLower]) || null;
+      return {
+        category: entry.category || 'Other',
+        verified: evidence?.tier === 'verified',
+        managedAdapter: false,
+        customerExecutable: false,
+      };
+    });
+
+  const managed = productTruth.MANAGED_PROVIDER_ADAPTERS.map((provider) => ({
+    category: provider.category,
+    verified: false,
+    managedAdapter: true,
+    customerExecutable: provider.customerExecutableActions.length > 0,
+  }));
+
+  return [...managed, ...discovery];
+}
 
 (async () => {
-try {
-  // Check if stats.json already has scaled pipeline data (apiCount > 30000)
-  // If so, only update npmDownloads (live fetch) and preserve everything else
-  let existingStats = null;
   try {
-    existingStats = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-  } catch { /* no existing stats */ }
+    const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
+    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+    const verification = JSON.parse(fs.readFileSync(verificationPath, 'utf8'));
+    const productTruth = loadTypeScriptModule(productTruthPath);
+    const boundaries = loadTypeScriptModule(providerBoundariesPath);
+    const inventory = buildPublicInventory(registry, verification, productTruth, boundaries);
 
-  // If we have scaled pipeline stats (apiCount > 30k), preserve them and only refresh npm
-  if (existingStats && existingStats.apiCount > 30000) {
+    const categoryBreakdown = {};
+    for (const entry of inventory) {
+      const category = categoryMap[entry.category] || entry.category || 'Other';
+      categoryBreakdown[category] = (categoryBreakdown[category] || 0) + 1;
+    }
+
+    let existingStats = {};
+    try {
+      existingStats = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+    } catch {
+      // The canonical sync writes the complete file immediately after this step.
+    }
+
     let npmDownloads = existingStats.npmDownloads || 10184;
     try {
       const npmRes = await fetch('https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/@nordsym/apiclaw');
       const npmData = await npmRes.json();
       if (npmData.downloads) npmDownloads = npmData.downloads;
-    } catch { /* use existing */ }
+    } catch {
+      // Keep the last measured value when npm is unavailable.
+    }
 
-    existingStats.npmDownloads = npmDownloads;
-    existingStats.generatedAt = new Date().toISOString();
+    const stats = {
+      apiCount: inventory.length,
+      sourceVerifiedCount: inventory.filter((entry) => entry.verified).length,
+      managedProviderAdapterCount: inventory.filter((entry) => entry.managedAdapter).length,
+      customerExecutableProviderCount: inventory.filter((entry) => entry.customerExecutable).length,
+      npmDownloads,
+      endpointCount: existingStats.endpointCount || 0,
+      capabilityCount: existingStats.capabilityCount || 15,
+      generatedAt: new Date().toISOString(),
+      categoryBreakdown,
+      historicalVerificationBuckets: verification.buckets,
+    };
 
-    fs.writeFileSync(outputPath, JSON.stringify(existingStats, null, 2));
-    console.log('✓ Stats preserved (scaled pipeline data), npm downloads refreshed:', npmDownloads);
-    return;
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, JSON.stringify(stats, null, 2) + '\n');
+    console.log('Stats measured from the public catalog inventory:', {
+      apiCount: stats.apiCount,
+      sourceVerifiedCount: stats.sourceVerifiedCount,
+      managedProviderAdapterCount: stats.managedProviderAdapterCount,
+      customerExecutableProviderCount: stats.customerExecutableProviderCount,
+    });
+  } catch (error) {
+    console.error('Failed to generate measured public catalog stats:', error);
+    process.exitCode = 1;
   }
-
-  // Otherwise, generate from apis.json (pre-scaling path)
-  const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
-  const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
-  const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
-
-  const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-
-  // Consolidate categories using the mapping and count them
-  const categoryBreakdown = {};
-  registry.apis.forEach(api => {
-    const cat = categoryMap[api.category] || api.category || 'Other';
-    categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + 1;
-  });
-
-  // Count open APIs (no auth required) - case insensitive
-  const openApiCount = registry.apis.filter(api =>
-    !api.auth || api.auth === '' || api.auth.toLowerCase() === 'none'
-  ).length;
-
-  // Managed providers count
-  const managedCount = 19;
-
-  // npm downloads (fetched live from npm registry)
-  let npmDownloads = 10184; // fallback
-  try {
-    const npmRes = await fetch('https://api.npmjs.org/downloads/point/2000-01-01:2099-12-31/@nordsym/apiclaw');
-    const npmData = await npmRes.json();
-    if (npmData.downloads) npmDownloads = npmData.downloads;
-  } catch { /* use fallback */ }
-
-  // Baseline before sync-canon-to-stats.mjs applies the current public canon.
-  const CANON_API_COUNT = 26701;
-  const CANON_CALLABLE = 2906;
-  const CANON_MANAGED = 49;
-
-  const stats = {
-    apiCount: CANON_API_COUNT,
-    callableCount: CANON_CALLABLE,
-    openApiCount: openApiCount,
-    managedCount: CANON_MANAGED,
-    npmDownloads: Math.max(npmDownloads, 12206),
-    endpointCount: 0,
-    capabilityCount: 15,
-    generatedAt: new Date().toISOString(),
-    categoryBreakdown: categoryBreakdown
-  };
-
-  // Ensure directory exists
-  const dir = path.dirname(outputPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-
-  fs.writeFileSync(outputPath, JSON.stringify(stats, null, 2));
-  console.log('✓ Stats generated:', stats);
-} catch (err) {
-  console.error('Failed to generate stats:', err);
-  // Write fallback stats
-  const fallback = {
-    apiCount: 47977,
-    callableCount: 9528,
-    openApiCount: 9482,
-    managedCount: 19,
-    npmDownloads: 10184,
-    endpointCount: 294032,
-    capabilityCount: 15,
-    generatedAt: new Date().toISOString(),
-    categoryBreakdown: {}
-  };
-  fs.writeFileSync(outputPath, JSON.stringify(fallback, null, 2));
-  console.log('✓ Fallback stats written');
-}
 })();

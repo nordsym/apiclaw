@@ -3,6 +3,7 @@
 // reach the consent page, so we know there's an active apiclaw session.
 import { NextRequest, NextResponse } from "next/server";
 import { convexMutation, ConvexCallError } from "@/lib/convex";
+import { parseSafeOAuthRedirectUri } from "@/lib/oauth-redirect";
 
 export const runtime = "nodejs";
 
@@ -10,7 +11,7 @@ type AuthorizePayload = {
   client_id?: string;
   redirect_uri?: string;
   state?: string;
-  scope?: string;
+  scope?: unknown;
   code_challenge?: string;
   code_challenge_method?: string;
 };
@@ -35,18 +36,25 @@ export async function POST(req: NextRequest) {
   if ((code_challenge_method ?? "S256") !== "S256") {
     return NextResponse.json({ error: "unsupported_code_challenge_method" }, { status: 400 });
   }
+  if (Object.prototype.hasOwnProperty.call(body, "scope") && typeof scope !== "string") {
+    return NextResponse.json({ error: "invalid_scope" }, { status: 400 });
+  }
+  const safeRedirect = parseSafeOAuthRedirectUri(redirect_uri);
+  if (!safeRedirect) {
+    return NextResponse.json({ error: "invalid_redirect_uri" }, { status: 400 });
+  }
 
   try {
     const { code } = await convexMutation<{ code: string }>("mcpOAuth:mintAuthCode", {
       sessionToken,
       clientId: client_id,
       redirectUri: redirect_uri,
-      scope: scope ?? "mcp",
+      ...(typeof scope === "string" ? { scope } : {}),
       codeChallenge: code_challenge,
       codeChallengeMethod: "S256",
     });
 
-    const target = new URL(redirect_uri);
+    const target = safeRedirect;
     target.searchParams.set("code", code);
     if (state) target.searchParams.set("state", state);
 
