@@ -7,6 +7,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const modules = [
   ["../../src/product-truth.ts", "../src/lib/product-truth.generated.ts"],
   ["../../src/mcp-scope-policy.ts", "../src/lib/mcp-scope-policy.generated.ts"],
+  ["../../src/canon-stats.ts", "../src/lib/canon-stats.generated.ts"],
 ];
 
 for (const [sourceRelative, generatedRelative] of modules) {

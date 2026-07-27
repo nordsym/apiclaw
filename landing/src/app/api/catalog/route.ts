@@ -8,7 +8,7 @@ import {
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
   getManagedProviderAdapter,
 } from "@apiclaw/product-truth";
-import { CANON_STATS } from "../../../../../src/canon-stats";
+import { CANON_STATS } from "@apiclaw/canon-stats";
 
 interface ApiEntry {
   name: string;
