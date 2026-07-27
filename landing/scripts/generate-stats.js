@@ -139,6 +139,21 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
 
 (async () => {
   try {
+    if (process.env.APICLAW_ISOLATED_LANDING_BUILD === '1' || !fs.existsSync(productTruthPath)) {
+      const checkedIn = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+      for (const field of [
+        'apiCount',
+        'sourceVerifiedCount',
+        'managedProviderAdapterCount',
+        'customerExecutableProviderCount',
+      ]) {
+        if (!Number.isFinite(checkedIn[field])) {
+          throw new Error(`Checked-in stats are missing ${field}`);
+        }
+      }
+      console.log('Using locally verified checked-in catalog stats in the isolated landing build');
+      return;
+    }
     const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
     const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
     const verification = JSON.parse(fs.readFileSync(verificationPath, 'utf8'));

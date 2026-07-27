@@ -9,7 +9,7 @@
  * Run manually or via `npm run build:stats`.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,6 +18,22 @@ const STATS_PATH = resolve(__dirname, '../src/lib/stats.json');
 const PUBLIC_STATS_PATH = resolve(__dirname, '../public/stats.json');
 const VERIFICATION_PATH = resolve(__dirname, '../src/lib/verification-status.json');
 const CANON_STATS_PATH = resolve(__dirname, '../../src/canon-stats.ts');
+
+if (process.env.APICLAW_ISOLATED_LANDING_BUILD === '1' || !existsSync(CANON_STATS_PATH)) {
+  const checkedIn = JSON.parse(readFileSync(STATS_PATH, 'utf8'));
+  for (const field of [
+    'apiCount',
+    'sourceVerifiedCount',
+    'managedProviderAdapterCount',
+    'customerExecutableProviderCount',
+  ]) {
+    if (!Number.isFinite(checkedIn[field])) {
+      throw new Error(`Checked-in stats are missing ${field}`);
+    }
+  }
+  console.error('[sync-canon] isolated landing build is using the locally verified checked-in stats');
+  process.exit(0);
+}
 
 function readCanonStats() {
   const source = readFileSync(CANON_STATS_PATH, 'utf8');
