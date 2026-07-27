@@ -15,8 +15,8 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@apiclaw/product-truth": ["../src/product-truth.ts"],
-      "@apiclaw/mcp-scope-policy": ["../src/mcp-scope-policy.ts"]
+      "@apiclaw/product-truth": ["./src/lib/product-truth.generated.ts"],
+      "@apiclaw/mcp-scope-policy": ["./src/lib/mcp-scope-policy.generated.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
