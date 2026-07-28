@@ -19,6 +19,8 @@ export type CodexOAuthDispatchErrorCode =
   | "oauth_retry_budget_exhausted";
 
 export class CodexOAuthDispatchError extends Error {
+  declare readonly cause?: unknown;
+
   constructor(
     readonly code: CodexOAuthDispatchErrorCode,
     readonly executionCertainty: CodexOAuthExecutionCertainty,
@@ -27,8 +29,16 @@ export class CodexOAuthDispatchError extends Error {
     message: string,
     options?: { cause?: unknown },
   ) {
-    super(message, options);
+    super(message);
     this.name = "CodexOAuthDispatchError";
+    if (options && "cause" in options) {
+      Object.defineProperty(this, "cause", {
+        configurable: true,
+        enumerable: false,
+        value: options.cause,
+        writable: true,
+      });
+    }
   }
 }
 
