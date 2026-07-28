@@ -1,0 +1,188 @@
+{
+  "contractVersion": "apiclaw-idempotency-binding/v1",
+  "httpStatus": 409,
+  "bindingMethod": "sha256_key_request_v1",
+  "secretIdempotencyKeyEchoed": false,
+  "bindingAlgorithm": {
+    "encoding": "UTF-8",
+    "input": "<contractVersion>\\n<canonicalRequestId>\\n<outboundIdempotencyKey>",
+    "digest": "ib_<lowercase SHA-256 hex>"
+  },
+  "verificationInputs": {
+    "completed": "fixture-completed-key",
+    "terminal_failed": "fixture-failed-key",
+    "in_progress": "fixture-running-key",
+    "terminal_unknown": "fixture-unknown-key"
+  },
+  "states": {
+    "completed": {
+      "error": {
+        "code": "idempotency_conflict",
+        "outcome": "already_accepted",
+        "idempotencyBinding": {
+          "version": "apiclaw-idempotency-binding/v1",
+          "method": "sha256_key_request_v1",
+          "bound": true,
+          "currentRequestId": "idem_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "originalRequestId": "idem_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "digest": "ib_48b536b2d7ca8c98a7fc8380bd793b86e613bc8f385e44c93c0cad9570c91c04"
+        },
+        "receipt": {
+          "requestId": "idem_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "status": "succeeded",
+          "outcome": "succeeded",
+          "executionCertainty": "completed",
+          "attempts": 1,
+          "retryable": false,
+          "operatorActionRequired": false,
+          "responseRecoverable": false,
+          "terminal": true,
+          "providerCostUsd": 0
+        },
+        "type": "conflict_error",
+        "message": "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        "requestId": "idem_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "ledgerId": "ledger_completed",
+        "reason": "duplicate_request_succeeded",
+        "terminalReceipt": {
+          "requestId": "idem_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "outcome": "succeeded",
+          "executionCertainty": "completed",
+          "attempts": 1,
+          "operatorActionRequired": false,
+          "retryable": false
+        }
+      }
+    },
+    "terminal_failed": {
+      "error": {
+        "code": "idempotency_conflict",
+        "outcome": "already_accepted",
+        "idempotencyBinding": {
+          "version": "apiclaw-idempotency-binding/v1",
+          "method": "sha256_key_request_v1",
+          "bound": true,
+          "currentRequestId": "idem_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "originalRequestId": "idem_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "digest": "ib_2d85a9f1fa8621a90dbebe96f16d42ac465d8c4aa7d27410645af61d9c0cbe70"
+        },
+        "receipt": {
+          "requestId": "idem_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "status": "failed",
+          "outcome": "terminal",
+          "executionCertainty": "provider_terminal_failure",
+          "attempts": 1,
+          "retryable": false,
+          "operatorActionRequired": false,
+          "responseRecoverable": false,
+          "terminal": true,
+          "providerCostUsd": 0,
+          "code": "server_error"
+        },
+        "type": "conflict_error",
+        "message": "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        "requestId": "idem_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "ledgerId": "ledger_failed",
+        "reason": "duplicate_request_failed",
+        "terminalReceipt": {
+          "requestId": "idem_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "outcome": "terminal",
+          "executionCertainty": "provider_terminal_failure",
+          "attempts": 1,
+          "operatorActionRequired": false,
+          "retryable": false,
+          "code": "server_error"
+        }
+      }
+    },
+    "in_progress": {
+      "error": {
+        "code": "idempotency_conflict",
+        "outcome": "already_accepted",
+        "idempotencyBinding": {
+          "version": "apiclaw-idempotency-binding/v1",
+          "method": "sha256_key_request_v1",
+          "bound": true,
+          "currentRequestId": "idem_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "originalRequestId": "idem_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "digest": "ib_f0e4583d899b6c07e53ba9a80c3ee790c8169f8f7734abba31b279341481482e"
+        },
+        "receipt": {
+          "requestId": "idem_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "status": "authorized",
+          "outcome": "in_progress",
+          "executionCertainty": "uncertain",
+          "attempts": 1,
+          "retryable": false,
+          "operatorActionRequired": false,
+          "responseRecoverable": false,
+          "terminal": false
+        },
+        "type": "conflict_error",
+        "message": "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        "requestId": "idem_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "ledgerId": "ledger_running",
+        "reason": "duplicate_request_authorized"
+      }
+    },
+    "terminal_unknown": {
+      "error": {
+        "code": "idempotency_conflict",
+        "outcome": "already_accepted",
+        "idempotencyBinding": {
+          "version": "apiclaw-idempotency-binding/v1",
+          "method": "sha256_key_request_v1",
+          "bound": true,
+          "currentRequestId": "idem_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "originalRequestId": "idem_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "digest": "ib_56fbc414d2e8225ab85e110fd4af240555a1d598c635926dcf074ddb110cb932"
+        },
+        "receipt": {
+          "requestId": "idem_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "status": "failed",
+          "outcome": "outcome_unknown",
+          "executionCertainty": "uncertain",
+          "attempts": 1,
+          "retryable": false,
+          "operatorActionRequired": true,
+          "responseRecoverable": false,
+          "terminal": true,
+          "code": "oauth_upstream_timeout"
+        },
+        "type": "conflict_error",
+        "message": "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        "requestId": "idem_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "ledgerId": "ledger_unknown_terminal",
+        "reason": "duplicate_request_failed",
+        "terminalReceipt": {
+          "requestId": "idem_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "outcome": "outcome_unknown",
+          "executionCertainty": "uncertain",
+          "attempts": 1,
+          "operatorActionRequired": true,
+          "retryable": false,
+          "code": "oauth_upstream_timeout"
+        }
+      }
+    },
+    "unbound_missing": {
+      "error": {
+        "code": "idempotency_conflict",
+        "outcome": "outcome_unknown",
+        "idempotencyBinding": {
+          "version": "apiclaw-idempotency-binding/v1",
+          "method": "sha256_key_request_v1",
+          "bound": false
+        },
+        "receipt": null,
+        "retryable": false,
+        "responseRecoverable": false,
+        "type": "conflict_error",
+        "message": "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+        "requestId": "idem_cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "ledgerId": "ledger_unknown",
+        "reason": "duplicate_request_failed"
+      }
+    }
+  }
+}

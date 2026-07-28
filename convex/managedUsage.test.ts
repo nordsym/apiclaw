@@ -128,6 +128,20 @@ assert.deepEqual(managedDuplicateTerminalReceipt({
   code: "oauth_upstream_timeout",
 });
 assert.deepEqual(managedDuplicateTerminalReceipt({
+  requestId: "idem_oauth_redacted",
+  terminalCode: "secret-shaped-but-valid-looking",
+  executionCertainty: "provider_terminal_failure",
+  operatorActionRequired: false,
+  retryAttempts: 1,
+}), {
+  requestId: "idem_oauth_redacted",
+  outcome: "terminal",
+  executionCertainty: "provider_terminal_failure",
+  attempts: 1,
+  operatorActionRequired: false,
+  retryable: false,
+});
+assert.deepEqual(managedDuplicateTerminalReceipt({
   requestId: "idem_oauth_success",
   executionCertainty: "completed",
   operatorActionRequired: false,

@@ -12,6 +12,10 @@ import {
 } from "./managedUsagePolicy";
 import { isManagedActionAllowedForTraffic } from "./providerBoundaries";
 import { PAYG_MARGIN_RATE } from "../src/product-truth";
+import {
+  buildIdempotencyReplayReceipt,
+  safeReplayTerminalCode,
+} from "./idempotencyBinding";
 
 const trafficClassValidator = v.union(v.literal("customer"), v.literal("internal"));
 const costSourceValidator = v.union(
@@ -51,6 +55,7 @@ export function managedDuplicateTerminalReceipt(ledger: {
   retryAttempts?: number;
 }) {
   if (!ledger.executionCertainty) return undefined;
+  const code = safeReplayTerminalCode(ledger.terminalCode);
   return {
     requestId: ledger.requestId,
     outcome: ledger.executionCertainty === "uncertain"
@@ -62,7 +67,7 @@ export function managedDuplicateTerminalReceipt(ledger: {
     attempts: ledger.retryAttempts ?? 1,
     operatorActionRequired: ledger.operatorActionRequired ?? false,
     retryable: false,
-    ...(ledger.terminalCode ? { code: ledger.terminalCode } : {}),
+    ...(code ? { code } : {}),
   };
 }
 
@@ -425,7 +430,7 @@ export const authorizeManagedCall = internalMutation({
         ledgerId: existing._id,
         billingClass: existing.billingClass,
         trafficClass: existing.trafficClass,
-        terminalReceipt: managedDuplicateTerminalReceipt(existing),
+        receipt: buildIdempotencyReplayReceipt(existing),
       };
     }
 

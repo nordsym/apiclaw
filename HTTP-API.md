@@ -70,5 +70,11 @@ curl https://api.apiclaw.cloud/v1/chat/completions \
 
 `apiclaw/openrouter/auto` is APIClaw's stable, priced OpenRouter default (`anthropic/claude-sonnet-4-6`), not OpenRouter's dynamic auto router. Reuse the same `Idempotency-Key` after an ambiguous network failure.
 
+If the original managed request was already accepted, APIClaw returns HTTP 409
+without dispatching upstream again. Clients that reconcile this response must
+verify the versioned binding and receipt contract in
+[`docs/idempotency-binding-v1.md`](docs/idempotency-binding-v1.md). A 409 is
+never permission to retry with a new key.
+
 See [apiclaw.cloud/docs](https://apiclaw.cloud/docs) for the current provider and
 action surface. Runtime output is authoritative for current readiness.
