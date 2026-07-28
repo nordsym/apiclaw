@@ -9,10 +9,8 @@ const execute = http.slice(
   executeRouteStart,
   http.indexOf('http.route({\n  path:', executeRouteStart + 1),
 );
-const chatCompletions = http.slice(
-  http.indexOf('path: "/v1/chat/completions"'),
-  http.indexOf('path: "/v1/chat/completions"') + 65_000,
-);
+const chatCompletionsStart = http.indexOf('http.route({\n  path: "/v1/chat/completions"');
+const chatCompletions = http.slice(chatCompletionsStart, chatCompletionsStart + 65_000);
 const openRouterProxy = http.slice(
   http.indexOf('path: "/proxy/openrouter"'),
   http.indexOf('path: "/proxy/openrouter"') + 12_000,
@@ -38,7 +36,7 @@ assert.match(
 );
 assert.match(
   chatCompletions,
-  /openRouterExecution\?\.provider \?\? "llm"[\s\S]*?costBoundedOpenRouterRequest\([\s\S]*?decorateOpenRouterRequest/,
+  /codexOAuthCandidate \? "openai-codex" : openRouterExecution\?\.provider \?\? "llm"[\s\S]*?costBoundedOpenRouterRequest\([\s\S]*?decorateOpenRouterRequest/,
   "OpenAI-compatible customer chat must use the same cost-bounded OpenRouter rail",
 );
 assert.match(

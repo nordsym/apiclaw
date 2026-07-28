@@ -14,6 +14,11 @@ export type InboundEventPayload = {
   authenticatedAt?: number;
   stalledMinutes?: number;
   welcomeSent?: boolean;
+  requestId?: string;
+  path?: string;
+  code?: string;
+  attempts?: number;
+  operatorActionRequired?: boolean;
 };
 
 export async function deliverInboundEvent(
@@ -83,6 +88,34 @@ export const notifyActivationStalled = internalAction({
       source: "apiclaw",
       event: "activation_stalled",
       ...args,
+    });
+  },
+});
+
+export const notifyOAuthPassthroughIncident = internalAction({
+  args: {
+    workspaceId: v.string(),
+    tier: v.string(),
+    timestamp: v.number(),
+    requestId: v.string(),
+    path: v.string(),
+    code: v.string(),
+    attempts: v.number(),
+  },
+  returns: v.object({ delivered: v.boolean(), status: v.number() }),
+  handler: async (_ctx, args) => {
+    return await deliverInboundEvent({
+      source: "apiclaw",
+      event: "oauth_passthrough_reconciliation_required",
+      email: "internal-runtime",
+      workspaceId: args.workspaceId,
+      tier: args.tier,
+      timestamp: args.timestamp,
+      requestId: args.requestId,
+      path: args.path,
+      code: args.code,
+      attempts: args.attempts,
+      operatorActionRequired: true,
     });
   },
 });

@@ -52,6 +52,13 @@ import {
   webhookOptions,
 } from "./stripeActions";
 import { verifyNurtureUnsubscribeToken } from "./nurtureDeliveryKeys";
+import {
+  CodexOAuthDispatchError,
+  adjudicateCodexTerminalSSE,
+  codexHttpFailureCertainty,
+  codexOAuthExecutionReceipt,
+  dispatchCodexOAuthRequest,
+} from "./oauthPassthrough";
 
 const http = httpRouter();
 
@@ -1361,6 +1368,26 @@ type ManagedCallFinalization = {
   reportedProviderCostMicros?: number;
 };
 
+function requireCodexOAuthIdempotency(request: Request): string | Response {
+  try {
+    return requireManagedIdempotencyKey(
+      request.headers.get("Idempotency-Key"),
+      "customer",
+    )!;
+  } catch (error) {
+    return jsonResponse({
+      error: {
+        code: request.headers.get("Idempotency-Key") === null
+          ? "idempotency_key_required"
+          : "invalid_idempotency_key",
+        type: "invalid_request_error",
+        message: error instanceof Error ? error.message : "A stable Idempotency-Key is required for OAuth passthrough.",
+        retryable: false,
+      },
+    }, 400);
+  }
+}
+
 async function managedRequestPayload(request: Request, suppliedPayload: unknown): Promise<unknown> {
   if (suppliedPayload !== undefined) {
     const serialized = typeof suppliedPayload === "string"
@@ -1560,6 +1587,7 @@ async function enforcePreCallQuota(
         ledgerId: quota.ledgerId,
         reason: quota.reason,
         outcome: "already_accepted",
+        ...(quota.terminalReceipt ? { terminalReceipt: quota.terminalReceipt } : {}),
       },
     }, 409);
   }
@@ -1606,6 +1634,10 @@ async function finalizeManagedCall(
     outputTokens?: number;
     upstreamRequestId?: string;
     costSource?: "provider_response" | "token_price_table" | "fixed_price_policy" | "reservation" | "zero_cost";
+    terminalCode?: string;
+    executionCertainty?: "not_dispatched" | "provider_rejected" | "provider_terminal_failure" | "completed" | "uncertain";
+    operatorActionRequired?: boolean;
+    retryAttempts?: number;
   },
 ): Promise<ManagedCallFinalization | undefined> {
   if (!gate) return;
@@ -1682,6 +1714,73 @@ async function ambiguousPostDispatchResponse(
       retryable: false,
     },
   }, status);
+}
+
+async function codexOAuthOutcomeUnknownResponse(
+  ctx: any,
+  gate: ManagedCallGate,
+  error: CodexOAuthDispatchError,
+  details: {
+    workspaceId: string;
+    tier: string;
+    path: "/v1/chat/completions" | "/v1/responses";
+  },
+): Promise<Response> {
+  await ctx.runMutation((internal as any).managedUsage.markInternalOutcomeUnknown, {
+    ledgerId: gate.ledgerId,
+    code: error.code,
+    attempts: error.attempts,
+  });
+  const receipt = codexOAuthExecutionReceipt({
+    requestId: gate.requestId,
+    outcome: "outcome_unknown",
+    executionCertainty: error.executionCertainty,
+    attempts: error.attempts,
+    recovered: false,
+    operatorActionRequired: error.operatorActionRequired,
+    code: error.code,
+  });
+
+  if (error.operatorActionRequired) {
+    try {
+      const delivered = await ctx.runAction((internal as any).inbound.notifyOAuthPassthroughIncident, {
+        workspaceId: details.workspaceId,
+        tier: details.tier,
+        timestamp: Date.now(),
+        requestId: gate.requestId,
+        path: details.path,
+        code: error.code,
+        attempts: error.attempts,
+      });
+      if (delivered?.delivered) {
+        await ctx.runMutation((internal as any).managedUsage.markInternalOperatorAlertDelivered, {
+          ledgerId: gate.ledgerId,
+          deliveredAt: Date.now(),
+        });
+      }
+    } catch (alertError) {
+      console.error(
+        "[OAuth passthrough] actionable incident alert failed:",
+        alertError instanceof Error ? alertError.message : "unknown_error",
+      );
+    }
+  }
+
+  return jsonResponse({
+    error: {
+      code: error.code,
+      type: "gateway_error",
+      message: "The OAuth provider may have completed the request after APIClaw lost the response. Do not submit it with a new idempotency key. Reconcile the requestId before deciding whether to retry.",
+      requestId: gate.requestId,
+      retryable: false,
+      operatorActionRequired: error.operatorActionRequired,
+    },
+    _apiclaw: {
+      provider: "openai-codex",
+      via: "codex-oauth",
+      execution: receipt,
+    },
+  }, error.code === "oauth_upstream_timeout" ? 504 : 502);
 }
 
 async function finalizeProxyJson(
@@ -3694,6 +3793,33 @@ http.route({
       ? "mistral-small-latest"
       : model || configuredDefaultModel || "anthropic/claude-sonnet-4-6");
     const modelForRouting = openRouterExecution?.routingModel ?? managedModelForRequest;
+    const codexOauth = request.headers.get("X-APIClaw-OAuth");
+    const modelStr = (model || "").toString().toLowerCase();
+    const bareModel = modelStr.startsWith("openai/")
+      ? modelStr.slice("openai/".length)
+      : modelStr.startsWith("openai-codex/")
+        ? modelStr.slice("openai-codex/".length)
+        : modelStr;
+    const codexRoutableModel = /^(gpt-5\.|gpt-5-codex|codex-)/.test(bareModel) || bareModel === "gpt-5";
+    const codexOAuthCandidate = isCodexJwt(codexOauth) && codexRoutableModel;
+    const codexAuthorizedModel = bareModel || "gpt-5.4";
+    if (
+      codexOAuthCandidate &&
+      configuredTier !== "founder" &&
+      configuredTier !== "partner"
+    ) {
+      return jsonResponse({
+        error: {
+          message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must use apiclaw's managed routing.",
+          type: "permission_error",
+          code: "byok_not_permitted",
+        },
+      }, 403);
+    }
+    const codexIdempotency = codexOAuthCandidate
+      ? requireCodexOAuthIdempotency(request)
+      : null;
+    if (codexIdempotency instanceof Response) return codexIdempotency;
     let authorizedMaxOutputTokens: number;
     try {
       authorizedMaxOutputTokens = normalizeMaxOutputTokens(rest.max_completion_tokens ?? rest.max_tokens);
@@ -3729,18 +3855,21 @@ http.route({
       ctx,
       request,
       workspaceId,
-      openRouterExecution?.provider ?? "llm",
+      codexOAuthCandidate ? "openai-codex" : openRouterExecution?.provider ?? "llm",
       "chat_completions",
       "/v1/chat/completions",
       {
-        model: managedModelForRequest,
-        estimatedProviderCostUsd: estimateKnownModelUpperBoundUsd(
-          managedModelForRequest,
-          estimatedInputTokens,
-          authorizedMaxOutputTokens,
-        ),
+        model: codexOAuthCandidate ? codexAuthorizedModel : managedModelForRequest,
+        estimatedProviderCostUsd: codexOAuthCandidate
+          ? 0
+          : estimateKnownModelUpperBoundUsd(
+              managedModelForRequest,
+              estimatedInputTokens,
+              authorizedMaxOutputTokens,
+            ),
         estimatedInputTokens,
         maxOutputTokens: authorizedMaxOutputTokens,
+        billingGradeCost: codexOAuthCandidate ? true : undefined,
         requestPayload: normalizedRequestPayload,
       },
     );
@@ -3765,36 +3894,10 @@ http.route({
     // Canon: BYOK is NOT a public concept in apiclaw. OAuth-passthrough is restricted to
     // founder/partner workspaces so external customers can't pipe their own subs through
     // the gateway. They go through apiclaw's managed keys + pass-through pricing instead.
-    const codexOauth = request.headers.get("X-APIClaw-OAuth");
-    // Codex backend serves gpt-5.x variants and codex-* slugs. Other models (gpt-4o, o3,
-    // anthropic/*, mistralai/*, etc.) must not be short-circuited — they fall through to
-    // normal routing and the OAuth header is harmlessly ignored.
-    const modelStr = (model || "").toString().toLowerCase();
-    const bareModel = modelStr.startsWith("openai/") ? modelStr.slice("openai/".length) : modelStr.startsWith("openai-codex/") ? modelStr.slice("openai-codex/".length) : modelStr;
-    const codexRoutableModel = /^(gpt-5\.|gpt-5-codex|codex-)/.test(bareModel) || bareModel === "gpt-5";
-    if (isCodexJwt(codexOauth) && codexRoutableModel) {
-      // Load workspace tier to gate OAuth passthrough.
-      let codexTier = "free";
-      try {
-        const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
-        codexTier = ws?.tier ?? "free";
-      } catch {}
-      if (codexTier !== "founder" && codexTier !== "partner") {
-        await finalizeManagedCall(ctx, quotaGate, {
-          success: false,
-          provider: "openai-codex",
-          providerCostUsd: 0,
-          model: managedModelForRequest,
-          costSource: "zero_cost",
-        });
-        return jsonResponse({
-          error: {
-            message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must use apiclaw's managed routing (omit X-APIClaw-OAuth header).",
-            type: "permission_error",
-            code: "byok_not_permitted",
-          },
-        }, 403);
-      }
+    // Codex backend serves gpt-5.x variants and codex-* slugs. Other models
+    // fall through to normal managed routing.
+    if (codexOAuthCandidate) {
+      const codexTier = configuredTier;
       let codexModel = model || "gpt-5.4";
       if (codexModel.startsWith("openai-codex/")) codexModel = codexModel.slice("openai-codex/".length);
       if (codexModel.startsWith("openai/")) codexModel = codexModel.slice("openai/".length);
@@ -3828,18 +3931,41 @@ http.route({
         console.error("[/v1/chat/completions Codex] logging failed:", e?.message);
       }
 
+      let dispatchDispose = () => {};
+      let dispatchAttempts = 0;
       try {
-        const upstream = await fetch(`${OPENAI_CODEX_RESPONSES_BASE_URL}/responses`, {
-          method: "POST",
-          headers: buildCodexHeaders(codexOauth!),
+        const dispatch = await dispatchCodexOAuthRequest({
+          url: `${OPENAI_CODEX_RESPONSES_BASE_URL}/responses`,
+          headers: buildCodexHeaders(
+            codexOauth!,
+            codexIdempotency!,
+          ),
           body: JSON.stringify(codexBody),
-          signal: AbortSignal.timeout(60_000),
+          requestSignal: request.signal,
         });
+        const upstream = dispatch.response;
+        dispatchDispose = dispatch.dispose;
+        dispatchAttempts = dispatch.attempts;
 
         // Non-2xx → map Codex { detail } to OpenAI error shape and return early.
         if (!upstream.ok) {
           let detail: any = null;
           try { detail = await upstream.json(); } catch { detail = { detail: await upstream.text() }; }
+          dispatchDispose();
+          if (codexHttpFailureCertainty(upstream.status) === "uncertain") {
+            return codexOAuthOutcomeUnknownResponse(
+              ctx,
+              quotaGate,
+              new CodexOAuthDispatchError(
+                "oauth_upstream_server_error",
+                "uncertain",
+                dispatch.attempts,
+                true,
+                `Codex returned HTTP ${upstream.status} after accepting the dispatch.`,
+              ),
+              { workspaceId, tier: codexTier, path: "/v1/chat/completions" },
+            );
+          }
           const errMsg = detail?.error?.message ?? detail?.detail ?? `Codex upstream HTTP ${upstream.status}`;
           await finalizeManagedCall(ctx, quotaGate, {
             success: false,
@@ -3847,6 +3973,10 @@ http.route({
             providerCostUsd: 0,
             model: codexModel,
             costSource: "zero_cost",
+            terminalCode: detail?.error?.code ?? `http_${upstream.status}`,
+            executionCertainty: "provider_rejected",
+            operatorActionRequired: false,
+            retryAttempts: dispatch.attempts,
           });
           return jsonResponse({
             error: {
@@ -3861,69 +3991,75 @@ http.route({
               credentialSource: "founder_oauth_passthrough",
               upstream_status: upstream.status,
               latencyMs: Date.now() - startTime,
+              execution: codexOAuthExecutionReceipt({
+                requestId: quotaGate.requestId,
+                outcome: "provider_rejected",
+                executionCertainty: "provider_rejected",
+                attempts: dispatch.attempts,
+                recovered: dispatch.recovered,
+                operatorActionRequired: false,
+                code: detail?.error?.code ?? `http_${upstream.status}`,
+              }),
             },
           }, upstream.status);
         }
 
-        if (stream && upstream.body) {
+        // Codex always streams upstream. APIClaw buffers to a terminal event so
+        // ledger state, activation, and the downstream receipt cannot become
+        // successful on headers alone. Streaming callers still receive SSE,
+        // emitted only after terminal reconciliation.
+        const { response: responsesData, error: sseError } = await consumeCodexResponsesSSE(upstream.body);
+        dispatchDispose();
+        const latencyMs = Date.now() - startTime;
+        const terminal = adjudicateCodexTerminalSSE({ response: responsesData, error: sseError });
+
+        if (terminal.kind === "provider_terminal_failure") {
           await finalizeManagedCall(ctx, quotaGate, {
-            success: true,
+            success: false,
             provider: "openai-codex",
             providerCostUsd: 0,
             model: codexModel,
             costSource: "zero_cost",
+            terminalCode: terminal.code,
+            executionCertainty: "provider_terminal_failure",
+            operatorActionRequired: false,
+            retryAttempts: dispatch.attempts,
           });
-          await recordFirstSuccessfulGatewayCall(ctx, {
-            workspaceId,
-            path: "/v1/chat/completions",
-            authMethod,
-            provider: "openai-codex",
-            action: "chat_completions",
-          });
-          // Translate Responses-API SSE → Chat Completions SSE so OpenAI-compat
-          // clients (OpenClaw, LangChain, Cursor, etc) can parse the stream.
-          const translated = translateCodexSSEToChatCompletions(upstream.body, codexModel);
-          return new Response(translated, {
-            status: upstream.status,
-            headers: {
-              "Content-Type": "text/event-stream",
-              "Cache-Control": "no-cache",
-              "Connection": "keep-alive",
-              ...corsHeaders,
-            },
-          });
-        }
-
-        // Non-streaming caller: consume SSE serverside, take response.completed payload.
-        const { response: responsesData, error: sseError } = await consumeCodexResponsesSSE(upstream.body);
-        const latencyMs = Date.now() - startTime;
-
-        if (sseError) {
-          await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: codexModel, costSource: "zero_cost" });
           return jsonResponse({
-            error: { message: sseError.message ?? "Codex stream error", type: "codex_error", code: sseError.code ?? "stream_error" },
+            error: { message: terminal.message, type: "codex_error", code: terminal.code, retryable: false },
             _apiclaw: {
               provider: "openai-codex",
               via: "codex-oauth",
               authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
               credentialSource: "founder_oauth_passthrough",
               latencyMs,
+              execution: codexOAuthExecutionReceipt({
+                requestId: quotaGate.requestId,
+                outcome: "provider_failed",
+                executionCertainty: "provider_terminal_failure",
+                attempts: dispatch.attempts,
+                recovered: dispatch.recovered,
+                operatorActionRequired: false,
+                code: terminal.code,
+              }),
             },
           }, 502);
         }
-        if (!responsesData) {
-          await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: codexModel, costSource: "zero_cost" });
-          return jsonResponse({
-            error: { message: "Codex stream completed without response payload", type: "codex_error", code: "empty_stream" },
-            _apiclaw: {
-              provider: "openai-codex",
-              via: "codex-oauth",
-              authMode: "founder_oauth_passthrough" satisfies ApiClawAuthMode,
-              credentialSource: "founder_oauth_passthrough",
-              latencyMs,
-            },
-          }, 502);
+        if (terminal.kind === "outcome_unknown") {
+          return codexOAuthOutcomeUnknownResponse(
+            ctx,
+            quotaGate,
+            new CodexOAuthDispatchError(
+              "oauth_empty_terminal_response",
+              "uncertain",
+              dispatch.attempts,
+              true,
+              "Codex closed the accepted stream without a terminal response.",
+            ),
+            { workspaceId, tier: codexTier, path: "/v1/chat/completions" },
+          );
         }
+        const completedResponse = terminal.response;
 
         await recordFirstSuccessfulGatewayCall(ctx, {
           workspaceId,
@@ -3933,16 +4069,19 @@ http.route({
           action: "chat_completions",
         });
 
-        const chatData = responsesToChatCompletionsResponse(responsesData, codexModel);
+        const chatData = responsesToChatCompletionsResponse(completedResponse, codexModel);
         await finalizeManagedCall(ctx, quotaGate, {
           success: true,
           provider: "openai-codex",
           providerCostUsd: 0,
           model: codexModel,
-          inputTokens: responsesData?.usage?.input_tokens,
-          outputTokens: responsesData?.usage?.output_tokens,
-          upstreamRequestId: responsesData?.id,
+          inputTokens: completedResponse?.usage?.input_tokens,
+          outputTokens: completedResponse?.usage?.output_tokens,
+          upstreamRequestId: completedResponse?.id,
           costSource: "zero_cost",
+          executionCertainty: "completed",
+          operatorActionRequired: false,
+          retryAttempts: dispatch.attempts,
         });
         (chatData as any)._apiclaw = {
           gateway: "v1",
@@ -3954,11 +4093,82 @@ http.route({
           model: codexModel,
           latencyMs,
           cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" },
+          execution: codexOAuthExecutionReceipt({
+            requestId: quotaGate.requestId,
+            outcome: "succeeded",
+            executionCertainty: "completed",
+            attempts: dispatch.attempts,
+            recovered: dispatch.recovered,
+            operatorActionRequired: false,
+          }),
         };
+        if (stream) {
+          return new Response(completedChatResponseSSE(chatData), {
+            status: upstream.status,
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive",
+              "X-APIClaw-Request-Id": quotaGate.requestId,
+              "X-APIClaw-Execution-Attempts": String(dispatch.attempts),
+              ...corsHeaders,
+            },
+          });
+        }
         return jsonResponse(chatData, upstream.status);
       } catch (e: any) {
-        await finalizeManagedCall(ctx, quotaGate, { success: false, provider: "openai-codex", providerCostUsd: 0, model: model || undefined, costSource: "zero_cost" });
-        return jsonResponse({ error: { message: e?.message ?? String(e), type: "api_error" } }, 502);
+        dispatchDispose();
+        if (e instanceof CodexOAuthDispatchError && e.executionCertainty === "uncertain") {
+          return codexOAuthOutcomeUnknownResponse(
+            ctx,
+            quotaGate,
+            e,
+            { workspaceId, tier: codexTier, path: "/v1/chat/completions" },
+          );
+        }
+        if (e instanceof CodexOAuthDispatchError) {
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: false,
+            provider: "openai-codex",
+            providerCostUsd: 0,
+            model: codexModel,
+            costSource: "zero_cost",
+          });
+          return jsonResponse({
+            error: {
+              message: e.message,
+              type: "gateway_error",
+              code: e.code,
+              retryable: false,
+            },
+            _apiclaw: {
+              provider: "openai-codex",
+              via: "codex-oauth",
+              execution: codexOAuthExecutionReceipt({
+                requestId: quotaGate.requestId,
+                outcome: "cancelled",
+                executionCertainty: e.executionCertainty,
+                attempts: e.attempts,
+                recovered: false,
+                operatorActionRequired: false,
+                code: e.code,
+              }),
+            },
+          }, 499);
+        }
+        return codexOAuthOutcomeUnknownResponse(
+          ctx,
+          quotaGate,
+          new CodexOAuthDispatchError(
+            "oauth_transport_error",
+            "uncertain",
+            Math.max(1, dispatchAttempts),
+            true,
+            "Codex response processing failed after dispatch.",
+            { cause: e },
+          ),
+          { workspaceId, tier: codexTier, path: "/v1/chat/completions" },
+        );
       }
     }
 
@@ -5782,114 +5992,34 @@ const OPENAI_CODEX_RESPONSES_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const OPENAI_NATIVE_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const CODEX_ORIGINATOR = "apiclaw_gateway";
 
-// Codex Responses SSE → Chat Completions SSE translator.
-// Wraps the upstream Responses-API stream and emits Chat-Completions-shape
-// chunks that OpenAI-compat clients (OpenClaw, Cursor, LangChain, etc) can parse.
-function translateCodexSSEToChatCompletions(
-  upstreamBody: ReadableStream<Uint8Array>,
-  model: string,
-): ReadableStream<Uint8Array> {
-  const chatId = `chatcmpl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const created = Math.floor(Date.now() / 1000);
+function completedChatResponseSSE(chatData: any): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  const toolCallsByIndex: Record<number, { id: string; name: string; args: string }> = {};
-  let buf = "";
-  let sentRole = false;
-  let finishEmitted = false;
-
-  function emitChunk(controller: ReadableStreamDefaultController<Uint8Array>, delta: any, finishReason: string | null = null, usage: any = null) {
-    const chunk: any = {
-      id: chatId,
-      object: "chat.completion.chunk",
-      created,
-      model,
-      choices: [{ index: 0, delta, finish_reason: finishReason }],
-    };
-    if (usage) chunk.usage = usage;
-    controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
-  }
-
+  const choice = chatData?.choices?.[0] ?? {};
+  const chunk = {
+    ...chatData,
+    object: "chat.completion.chunk",
+    choices: [{
+      index: choice.index ?? 0,
+      delta: choice.message ?? {},
+      finish_reason: choice.finish_reason ?? "stop",
+    }],
+  };
   return new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const reader = upstreamBody.getReader();
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buf += decoder.decode(value, { stream: true });
-          let idx;
-          while ((idx = buf.indexOf("\n\n")) !== -1) {
-            const block = buf.slice(0, idx);
-            buf = buf.slice(idx + 2);
-            const dataLines = block.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim());
-            if (dataLines.length === 0) continue;
-            const payload = dataLines.join("");
-            if (!payload || payload === "[DONE]") continue;
-            let evt: any;
-            try { evt = JSON.parse(payload); } catch { continue; }
-            const t = evt?.type;
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+}
 
-            if (t === "response.output_text.delta" && typeof evt.delta === "string") {
-              if (!sentRole) { emitChunk(controller, { role: "assistant", content: "" }); sentRole = true; }
-              emitChunk(controller, { content: evt.delta });
-            } else if (t === "response.output_item.added" && evt.item?.type === "function_call") {
-              const idx = evt.output_index ?? 0;
-              toolCallsByIndex[idx] = { id: evt.item.call_id ?? evt.item.id, name: evt.item.name ?? "", args: "" };
-              if (!sentRole) { emitChunk(controller, { role: "assistant", content: null }); sentRole = true; }
-              emitChunk(controller, {
-                tool_calls: [{
-                  index: idx,
-                  id: toolCallsByIndex[idx].id,
-                  type: "function",
-                  function: { name: toolCallsByIndex[idx].name, arguments: "" },
-                }],
-              });
-            } else if (t === "response.function_call_arguments.delta" && typeof evt.delta === "string") {
-              const idx = evt.output_index ?? 0;
-              if (toolCallsByIndex[idx]) toolCallsByIndex[idx].args += evt.delta;
-              emitChunk(controller, {
-                tool_calls: [{
-                  index: idx,
-                  function: { arguments: evt.delta },
-                }],
-              });
-            } else if (t === "response.completed" || t === "response.failed") {
-              if (finishEmitted) continue;
-              finishEmitted = true;
-              const hasToolCalls = Object.keys(toolCallsByIndex).length > 0;
-              const stopReason = hasToolCalls ? "tool_calls" : (t === "response.failed" ? "stop" : "stop");
-              const u = evt.response?.usage ?? {};
-              const promptTokens = u.input_tokens ?? 0;
-              const completionTokens = u.output_tokens ?? 0;
-              const cachedTokens = u.input_tokens_details?.cached_tokens ?? 0;
-              const usageOut: any = {
-                prompt_tokens: promptTokens,
-                completion_tokens: completionTokens,
-                total_tokens: u.total_tokens ?? promptTokens + completionTokens,
-              };
-              if (cachedTokens > 0) usageOut.prompt_tokens_details = { cached_tokens: cachedTokens };
-              emitChunk(controller, {}, stopReason, usageOut);
-            } else if (t === "response.error" || t === "error") {
-              const errPayload = {
-                id: chatId,
-                object: "chat.completion.chunk",
-                created,
-                model,
-                error: evt.error ?? evt,
-              };
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(errPayload)}\n\n`));
-            }
-          }
-        }
-        if (!finishEmitted) emitChunk(controller, {}, "stop");
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      } catch (e: any) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: { message: e?.message ?? String(e), type: "stream_translator_error" } })}\n\n`));
-      } finally {
-        controller.close();
-        try { reader.releaseLock(); } catch {}
-      }
+function completedResponsesSSE(data: any): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(encoder.encode(`event: response.completed\ndata: ${JSON.stringify({ type: "response.completed", response: data })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
     },
   });
 }
@@ -5899,18 +6029,29 @@ function translateCodexSSEToChatCompletions(
 // (which Codex requires), `response.completed.response.output` is empty — we must
 // collect output items from `response.output_item.done` events.
 async function consumeCodexResponsesSSE(body: ReadableStream<Uint8Array> | null): Promise<{ response: any | null; error: any | null }> {
-  if (!body) return { response: null, error: { message: "empty stream" } };
+  if (!body) {
+    return {
+      response: null,
+      error: { code: "oauth_empty_terminal_response", message: "Codex returned an empty stream." },
+    };
+  }
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buf = "";
   let baseResponse: any = null;       // snapshot from response.completed (with usage, id, status)
   const itemsByIndex: Record<number, any> = {};
   let errorPayload: any = null;
+  let totalBytes = 0;
 
   try {
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
+      totalBytes += value?.byteLength ?? 0;
+      if (totalBytes > 8 * 1024 * 1024) {
+        await reader.cancel("Codex SSE response exceeded the 8 MiB gateway limit.");
+        throw new RangeError("Codex SSE response exceeded the 8 MiB gateway limit.");
+      }
       buf += decoder.decode(value, { stream: true });
       let idx;
       while ((idx = buf.indexOf("\n\n")) !== -1) {
@@ -5940,7 +6081,12 @@ async function consumeCodexResponsesSSE(body: ReadableStream<Uint8Array> | null)
   }
 
   if (errorPayload) return { response: null, error: errorPayload };
-  if (!baseResponse) return { response: null, error: { message: "no response.completed event received" } };
+  if (!baseResponse) {
+    return {
+      response: null,
+      error: { code: "oauth_empty_terminal_response", message: "Codex closed the stream without a terminal response event." },
+    };
+  }
 
   // Synthesize: take baseResponse and fill output from collected item.done events
   const orderedItems = Object.keys(itemsByIndex)
@@ -5964,7 +6110,7 @@ function extractChatgptAccountId(token: string): string | null {
   } catch { return null; }
 }
 
-function buildCodexHeaders(oauthToken: string): Record<string, string> {
+function buildCodexHeaders(oauthToken: string, idempotencyKey?: string): Record<string, string> {
   const headers: Record<string, string> = {
     Authorization: oauthToken.startsWith("Bearer ") ? oauthToken : `Bearer ${oauthToken}`,
     "Content-Type": "application/json",
@@ -5972,6 +6118,7 @@ function buildCodexHeaders(oauthToken: string): Record<string, string> {
     "User-Agent": "apiclaw_gateway/1.0 (Convex; +https://apiclaw.cloud)",
     "openai-beta": "responses=experimental",
   };
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   // ChatGPT-Account-ID is required by /backend-api/codex (matches Codex CLI's BearerAuthProvider).
   // Extract from the OAuth JWT's chatgpt_account_id claim.
   const accountId = extractChatgptAccountId(oauthToken);
@@ -6176,61 +6323,69 @@ http.route({
     body.max_output_tokens = authorizedMaxOutputTokens;
     const estimatedInputTokens = estimateInputTokens(body);
 
+    let modelId: string = body.model;
+    if (modelId.startsWith("openai/")) modelId = modelId.slice("openai/".length);
+    if (modelId.startsWith("openai-codex/")) modelId = modelId.slice("openai-codex/".length);
+
+    // Resolve OAuth and tier before metering so the ledger records the route
+    // that will actually be dispatched.
+    const oauthHeader = request.headers.get("X-APIClaw-OAuth");
+    const useCodex = isCodexJwt(oauthHeader);
+    let respTier = "free";
+    try {
+      const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
+      respTier = ws?.tier ?? "free";
+    } catch {}
+    if (useCodex && respTier !== "founder" && respTier !== "partner") {
+      return jsonResponse({
+        error: {
+          message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must omit X-APIClaw-OAuth.",
+          type: "permission_error",
+          code: "byok_not_permitted",
+        },
+      }, 403);
+    }
+    const codexIdempotency = useCodex
+      ? requireCodexOAuthIdempotency(request)
+      : null;
+    if (codexIdempotency instanceof Response) return codexIdempotency;
+
     const quotaGate = await enforcePreCallQuota(
       ctx,
       request,
       workspaceId,
-      "openai",
+      useCodex ? "openai-codex" : "openai",
       "responses",
       "/v1/responses",
       {
-        model: body.model,
-        estimatedProviderCostUsd: estimateKnownModelUpperBoundUsd(
-          body.model,
-          estimatedInputTokens,
-          authorizedMaxOutputTokens,
-        ),
+        model: modelId,
+        estimatedProviderCostUsd: useCodex
+          ? 0
+          : estimateKnownModelUpperBoundUsd(
+              body.model,
+              estimatedInputTokens,
+              authorizedMaxOutputTokens,
+            ),
         estimatedInputTokens,
         maxOutputTokens: authorizedMaxOutputTokens,
+        billingGradeCost: useCodex ? true : undefined,
         requestPayload: body,
       },
     );
     if (quotaGate instanceof Response) return quotaGate;
 
-    // Normalize model id
-    let modelId: string = body.model;
-    if (modelId.startsWith("openai/")) modelId = modelId.slice("openai/".length);
-    if (modelId.startsWith("openai-codex/")) modelId = modelId.slice("openai-codex/".length);
-
     // Route: Codex JWT in X-APIClaw-OAuth header → chatgpt.com, else api.openai.com.
     // Canon: BYOK / OAuth-passthrough restricted to founder/partner workspaces.
-    const oauthHeader = request.headers.get("X-APIClaw-OAuth");
-    let useCodex = isCodexJwt(oauthHeader);
-    if (useCodex) {
-      let respTier = "free";
-      try {
-        const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
-        respTier = ws?.tier ?? "free";
-      } catch {}
-      if (respTier !== "founder" && respTier !== "partner") {
-        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, model: body.model, costSource: "zero_cost" });
-        return jsonResponse({
-          error: {
-            message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must omit X-APIClaw-OAuth (use apiclaw's managed routing).",
-            type: "permission_error",
-            code: "byok_not_permitted",
-          },
-        }, 403);
-      }
-    }
-
     const authMode: ApiClawAuthMode = useCodex
       ? "founder_oauth_passthrough"
       : "managed_provider_key";
 
     const upstreamUrl = useCodex ? `${OPENAI_CODEX_RESPONSES_BASE_URL}/responses` : OPENAI_NATIVE_RESPONSES_URL;
     const upstreamHeaders = useCodex
-      ? buildCodexHeaders(oauthHeader!)
+      ? buildCodexHeaders(
+          oauthHeader!,
+          codexIdempotency!,
+        )
       : { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" };
 
     if (!useCodex && !process.env.OPENAI_API_KEY) {
@@ -6238,7 +6393,11 @@ http.route({
       return jsonResponse({ error: { message: "OPENAI_API_KEY not configured", type: "api_error" } }, 503);
     }
 
-    const forwardBody = { ...body, model: modelId };
+    const forwardBody = {
+      ...body,
+      model: modelId,
+      ...(useCodex ? { stream: true } : {}),
+    };
     const stream = !!body.stream;
     if (stream && quotaGate.trafficClass === "customer") {
       await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, model: modelId, costSource: "zero_cost" });
@@ -6269,16 +6428,32 @@ http.route({
     }
 
     let upstreamDispatchAttempted = false;
+    let dispatchDispose = () => {};
+    let oauthDispatchAttempts = 0;
+    let oauthRecovered = false;
     try {
       upstreamDispatchAttempted = true;
-      const upstream = await fetch(upstreamUrl, {
-        method: "POST",
-        headers: upstreamHeaders,
-        body: JSON.stringify(forwardBody),
-        signal: AbortSignal.timeout(60_000),
-      });
+      const upstream = useCodex
+        ? await (async () => {
+            const dispatch = await dispatchCodexOAuthRequest({
+              url: upstreamUrl,
+              headers: upstreamHeaders,
+              body: JSON.stringify(forwardBody),
+              requestSignal: request.signal,
+            });
+            dispatchDispose = dispatch.dispose;
+            oauthDispatchAttempts = dispatch.attempts;
+            oauthRecovered = dispatch.recovered;
+            return dispatch.response;
+          })()
+        : await fetch(upstreamUrl, {
+            method: "POST",
+            headers: upstreamHeaders,
+            body: JSON.stringify(forwardBody),
+            signal: AbortSignal.timeout(60_000),
+          });
 
-      if (upstream.ok) {
+      if (upstream.ok && !useCodex) {
         await recordFirstSuccessfulGatewayCall(ctx, {
           workspaceId,
           path: "/v1/responses",
@@ -6288,7 +6463,7 @@ http.route({
         });
       }
 
-      if (stream && upstream.body) {
+      if (stream && upstream.body && !useCodex) {
         await finalizeManagedCall(ctx, quotaGate, {
           success: upstream.ok,
           provider: useCodex ? "openai-codex" : "openai",
@@ -6307,7 +6482,118 @@ http.route({
         });
       }
 
-      const data = await readUpstreamJsonCapped(upstream);
+      if (useCodex && !upstream.ok) {
+        const rejected = await readUpstreamJsonCapped(upstream);
+        dispatchDispose();
+        if (codexHttpFailureCertainty(upstream.status) === "uncertain") {
+          return codexOAuthOutcomeUnknownResponse(
+            ctx,
+            quotaGate,
+            new CodexOAuthDispatchError(
+              "oauth_upstream_server_error",
+              "uncertain",
+              oauthDispatchAttempts,
+              true,
+              `Codex returned HTTP ${upstream.status} after accepting the dispatch.`,
+            ),
+            { workspaceId, tier: respTier, path: "/v1/responses" },
+          );
+        }
+        const failureCode = rejected?.error?.code ?? `http_${upstream.status}`;
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: false,
+          provider: "openai-codex",
+          providerCostUsd: 0,
+          model: modelId,
+          costSource: "zero_cost",
+          terminalCode: failureCode,
+          executionCertainty: "provider_rejected",
+          operatorActionRequired: false,
+          retryAttempts: oauthDispatchAttempts,
+        });
+        return jsonResponse({
+          ...rejected,
+          _apiclaw: {
+            provider: "openai-codex",
+            via: "codex-oauth",
+            execution: codexOAuthExecutionReceipt({
+              requestId: quotaGate.requestId,
+              outcome: "provider_rejected",
+              executionCertainty: "provider_rejected",
+              attempts: oauthDispatchAttempts,
+              recovered: oauthRecovered,
+              operatorActionRequired: false,
+              code: failureCode,
+            }),
+          },
+        }, upstream.status);
+      }
+
+      let data: any;
+      if (useCodex) {
+        const consumed = await consumeCodexResponsesSSE(upstream.body);
+        dispatchDispose();
+        const terminal = adjudicateCodexTerminalSSE(consumed);
+        if (terminal.kind === "provider_terminal_failure") {
+          await finalizeManagedCall(ctx, quotaGate, {
+            success: false,
+            provider: "openai-codex",
+            providerCostUsd: 0,
+            model: modelId,
+            costSource: "zero_cost",
+            terminalCode: terminal.code,
+            executionCertainty: "provider_terminal_failure",
+            operatorActionRequired: false,
+            retryAttempts: oauthDispatchAttempts,
+          });
+          return jsonResponse({
+            error: {
+              message: terminal.message,
+              type: "codex_error",
+              code: terminal.code,
+              retryable: false,
+            },
+            _apiclaw: {
+              provider: "openai-codex",
+              via: "codex-oauth",
+              execution: codexOAuthExecutionReceipt({
+                requestId: quotaGate.requestId,
+                outcome: "provider_failed",
+                executionCertainty: "provider_terminal_failure",
+                attempts: oauthDispatchAttempts,
+                recovered: oauthRecovered,
+                operatorActionRequired: false,
+                code: terminal.code,
+              }),
+            },
+          }, 502);
+        }
+        if (terminal.kind === "outcome_unknown") {
+          return codexOAuthOutcomeUnknownResponse(
+            ctx,
+            quotaGate,
+            new CodexOAuthDispatchError(
+              "oauth_empty_terminal_response",
+              "uncertain",
+              oauthDispatchAttempts,
+              true,
+              "Codex closed the accepted stream without a terminal response.",
+            ),
+            { workspaceId, tier: respTier, path: "/v1/responses" },
+          );
+        }
+        data = terminal.response;
+        await recordFirstSuccessfulGatewayCall(ctx, {
+          workspaceId,
+          path: "/v1/responses",
+          authMethod,
+          provider: "openai-codex",
+          action: "responses",
+        });
+      } else {
+        data = await readUpstreamJsonCapped(upstream);
+      }
+      dispatchDispose();
       const latencyMs = Date.now() - startTime;
 
       // Cost tracking: Codex OAuth = $0 to apiclaw (caller's ChatGPT sub pays).
@@ -6328,6 +6614,12 @@ http.route({
         outputTokens: completionTokens,
         upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
         costSource: useCodex ? "zero_cost" : calculated ? "token_price_table" : "reservation",
+        ...(useCodex ? {
+          terminalCode: upstream.ok ? undefined : `http_${upstream.status}`,
+          executionCertainty: upstream.ok ? "completed" as const : "provider_rejected" as const,
+          operatorActionRequired: false,
+          retryAttempts: oauthDispatchAttempts,
+        } : {}),
       });
 
       if (data && typeof data === "object" && !("error" in data)) {
@@ -6341,11 +6633,89 @@ http.route({
           model: modelId,
           latencyMs,
           ...(useCodex ? { cost: { providerUsd: 0, totalUsd: 0, note: "Codex OAuth — paid via ChatGPT subscription" } } : {}),
+          ...(useCodex ? {
+            execution: codexOAuthExecutionReceipt({
+              requestId: quotaGate.requestId,
+              outcome: upstream.ok ? "succeeded" : "provider_rejected",
+              executionCertainty: upstream.ok ? "completed" : "provider_rejected",
+              attempts: oauthDispatchAttempts,
+              recovered: oauthRecovered,
+              operatorActionRequired: false,
+              ...(!upstream.ok ? { code: `http_${upstream.status}` } : {}),
+            }),
+          } : {}),
         };
       }
 
+      if (useCodex && stream) {
+        return new Response(completedResponsesSSE(data), {
+          status: upstream.status,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-APIClaw-Request-Id": quotaGate.requestId,
+            "X-APIClaw-Execution-Attempts": String(oauthDispatchAttempts),
+            ...corsHeaders,
+          },
+        });
+      }
       return jsonResponse(data, upstream.status);
     } catch (e: any) {
+      dispatchDispose();
+      if (useCodex && e instanceof CodexOAuthDispatchError && e.executionCertainty === "uncertain") {
+        return codexOAuthOutcomeUnknownResponse(
+          ctx,
+          quotaGate,
+          e,
+          { workspaceId, tier: respTier, path: "/v1/responses" },
+        );
+      }
+      if (useCodex && e instanceof CodexOAuthDispatchError) {
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: false,
+          provider: "openai-codex",
+          providerCostUsd: 0,
+          model: modelId,
+          costSource: "zero_cost",
+        });
+        return jsonResponse({
+          error: {
+            message: e.message,
+            type: "gateway_error",
+            code: e.code,
+            retryable: false,
+          },
+          _apiclaw: {
+            provider: "openai-codex",
+            via: "codex-oauth",
+            execution: codexOAuthExecutionReceipt({
+              requestId: quotaGate.requestId,
+              outcome: "cancelled",
+              executionCertainty: e.executionCertainty,
+              attempts: e.attempts,
+              recovered: false,
+              operatorActionRequired: false,
+              code: e.code,
+            }),
+          },
+        }, 499);
+      }
+      if (useCodex && upstreamDispatchAttempted) {
+        return codexOAuthOutcomeUnknownResponse(
+          ctx,
+          quotaGate,
+          new CodexOAuthDispatchError(
+            "oauth_transport_error",
+            "uncertain",
+            Math.max(1, oauthDispatchAttempts),
+            true,
+            "Codex response processing failed after dispatch.",
+            { cause: e },
+          ),
+          { workspaceId, tier: respTier, path: "/v1/responses" },
+        );
+      }
       if (upstreamDispatchAttempted) {
         return ambiguousPostDispatchResponse(
           ctx,
