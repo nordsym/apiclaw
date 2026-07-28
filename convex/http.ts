@@ -37,6 +37,11 @@ import {
   requireManagedIdempotencyKey,
   requiresLegacyClientUpgrade,
 } from "./httpTrust";
+import {
+  buildBoundIdempotencyReplayContract,
+  buildDuplicateIdempotencyConflictError,
+  buildUnboundIdempotencyReplayContract,
+} from "./idempotencyBinding";
 import type { Id } from "./_generated/dataModel";
 import {
   INTERNAL_ONLY_PROVIDER_IDS,
@@ -1567,9 +1572,10 @@ async function enforcePreCallQuota(
     });
   } catch (error) {
     if (error instanceof Error && error.message.includes("requestId collision")) {
+      const replay = buildUnboundIdempotencyReplayContract();
       return jsonResponse({
         error: {
-          code: "idempotency_conflict",
+          ...replay,
           type: "conflict_error",
           message: "This Idempotency-Key is already bound to a different managed request.",
         },
@@ -1578,17 +1584,16 @@ async function enforcePreCallQuota(
     throw error;
   }
   if (quota?.duplicate) {
+    const replay = quota.receipt
+      ? await buildBoundIdempotencyReplayContract(idempotencyKey, requestId, quota.receipt)
+      : buildUnboundIdempotencyReplayContract();
     return jsonResponse({
-      error: {
-        code: "idempotency_conflict",
-        type: "conflict_error",
-        message: "This managed request was already accepted. APIClaw will not dispatch it upstream again.",
+      error: buildDuplicateIdempotencyConflictError({
+        replay,
         requestId,
-        ledgerId: quota.ledgerId,
+        ledgerId: String(quota.ledgerId),
         reason: quota.reason,
-        outcome: "already_accepted",
-        ...(quota.terminalReceipt ? { terminalReceipt: quota.terminalReceipt } : {}),
-      },
+      }),
     }, 409);
   }
   if (quota?.allowed) {
