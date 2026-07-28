@@ -6,6 +6,7 @@ import {
   buildStripeBillingSnapshot,
   customerChargeMicros,
   duplicateManagedRequestReason,
+  managedDuplicateTerminalReceipt,
   microsToUsd,
   managedFinalizationMatchesAuthorization,
   resolveActivationProviderCostMicros,
@@ -111,6 +112,34 @@ for (const [status, reason] of [
 ] as const) {
   assert.equal(duplicateManagedRequestReason(status), reason);
 }
+assert.deepEqual(managedDuplicateTerminalReceipt({
+  requestId: "idem_oauth_unknown",
+  terminalCode: "oauth_upstream_timeout",
+  executionCertainty: "uncertain",
+  operatorActionRequired: true,
+  retryAttempts: 1,
+}), {
+  requestId: "idem_oauth_unknown",
+  outcome: "outcome_unknown",
+  executionCertainty: "uncertain",
+  attempts: 1,
+  operatorActionRequired: true,
+  retryable: false,
+  code: "oauth_upstream_timeout",
+});
+assert.deepEqual(managedDuplicateTerminalReceipt({
+  requestId: "idem_oauth_success",
+  executionCertainty: "completed",
+  operatorActionRequired: false,
+  retryAttempts: 1,
+}), {
+  requestId: "idem_oauth_success",
+  outcome: "succeeded",
+  executionCertainty: "completed",
+  attempts: 1,
+  operatorActionRequired: false,
+  retryable: false,
+});
 
 const now = Date.UTC(2026, 6, 18, 12);
 assert.equal(authorizationNeedsReconciliation({

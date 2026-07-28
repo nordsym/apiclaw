@@ -43,6 +43,29 @@ export function duplicateManagedRequestReason(status: LedgerStatus): DuplicateMa
   return "duplicate_request_failed";
 }
 
+export function managedDuplicateTerminalReceipt(ledger: {
+  requestId: string;
+  terminalCode?: string;
+  executionCertainty?: "not_dispatched" | "provider_rejected" | "provider_terminal_failure" | "completed" | "uncertain";
+  operatorActionRequired?: boolean;
+  retryAttempts?: number;
+}) {
+  if (!ledger.executionCertainty) return undefined;
+  return {
+    requestId: ledger.requestId,
+    outcome: ledger.executionCertainty === "uncertain"
+      ? "outcome_unknown"
+      : ledger.executionCertainty === "completed"
+        ? "succeeded"
+        : "terminal",
+    executionCertainty: ledger.executionCertainty,
+    attempts: ledger.retryAttempts ?? 1,
+    operatorActionRequired: ledger.operatorActionRequired ?? false,
+    retryable: false,
+    ...(ledger.terminalCode ? { code: ledger.terminalCode } : {}),
+  };
+}
+
 export function authorizationNeedsReconciliation(
   ledger: {
     status: LedgerStatus;
@@ -402,6 +425,7 @@ export const authorizeManagedCall = internalMutation({
         ledgerId: existing._id,
         billingClass: existing.billingClass,
         trafficClass: existing.trafficClass,
+        terminalReceipt: managedDuplicateTerminalReceipt(existing),
       };
     }
 
@@ -508,6 +532,16 @@ export const finalizeManagedCall = internalMutation({
     outputTokens: v.optional(v.number()),
     upstreamRequestId: v.optional(v.string()),
     costSource: v.optional(costSourceValidator),
+    terminalCode: v.optional(v.string()),
+    executionCertainty: v.optional(v.union(
+      v.literal("not_dispatched"),
+      v.literal("provider_rejected"),
+      v.literal("provider_terminal_failure"),
+      v.literal("completed"),
+      v.literal("uncertain"),
+    )),
+    operatorActionRequired: v.optional(v.boolean()),
+    retryAttempts: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const ledger = await ctx.db.get(args.ledgerId);
@@ -621,6 +655,10 @@ export const finalizeManagedCall = internalMutation({
       costSource,
       reportedProviderCostMicros: authorizedCost.reportedProviderCostMicros,
       billingException,
+      terminalCode: args.terminalCode,
+      executionCertainty: args.executionCertainty,
+      operatorActionRequired: args.operatorActionRequired,
+      retryAttempts: args.retryAttempts,
       reconciliationRequiredAt: billingException ? now : undefined,
       stripeStatus: realizedCost.stripePending
         ? "pending"
@@ -640,6 +678,86 @@ export const finalizeManagedCall = internalMutation({
       reportedProviderCostMicros: authorizedCost.reportedProviderCostMicros,
       billingException,
     };
+  },
+});
+
+export const markInternalOutcomeUnknown = internalMutation({
+  args: {
+    ledgerId: v.id("managedCallLedger"),
+    code: v.string(),
+    attempts: v.number(),
+  },
+  returns: v.object({
+    marked: v.boolean(),
+    requestId: v.string(),
+    terminalCode: v.string(),
+    executionCertainty: v.literal("uncertain"),
+    operatorActionRequired: v.boolean(),
+    retryAttempts: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const ledger = await ctx.db.get(args.ledgerId);
+    if (!ledger) throw new Error("Managed call ledger entry not found");
+    if (ledger.trafficClass !== "internal" || ledger.provider !== "openai-codex") {
+      throw new Error("Outcome-unknown closure is restricted to internal openai-codex calls");
+    }
+    if (ledger.status !== "authorized") {
+      return {
+        marked: false,
+        requestId: ledger.requestId,
+        terminalCode: ledger.terminalCode ?? args.code,
+        executionCertainty: "uncertain" as const,
+        operatorActionRequired: ledger.operatorActionRequired ?? true,
+        retryAttempts: ledger.retryAttempts ?? args.attempts,
+      };
+    }
+    const now = Date.now();
+    await ctx.db.patch(ledger._id, {
+      status: "failed",
+      providerCostMicros: 0,
+      customerChargeMicros: 0,
+      marginMicros: 0,
+      costSource: "zero_cost",
+      stripeStatus: "not_applicable",
+      terminalCode: args.code,
+      executionCertainty: "uncertain",
+      operatorActionRequired: true,
+      retryAttempts: args.attempts,
+      completedAt: now,
+      updatedAt: now,
+    });
+    return {
+      marked: true,
+      requestId: ledger.requestId,
+      terminalCode: args.code,
+      executionCertainty: "uncertain" as const,
+      operatorActionRequired: true,
+      retryAttempts: args.attempts,
+    };
+  },
+});
+
+export const markInternalOperatorAlertDelivered = internalMutation({
+  args: {
+    ledgerId: v.id("managedCallLedger"),
+    deliveredAt: v.number(),
+  },
+  returns: v.object({ marked: v.boolean() }),
+  handler: async (ctx, args) => {
+    const ledger = await ctx.db.get(args.ledgerId);
+    if (
+      !ledger ||
+      ledger.executionCertainty !== "uncertain" ||
+      ledger.operatorActionRequired !== true ||
+      ledger.operatorAlertSentAt !== undefined
+    ) {
+      return { marked: false };
+    }
+    await ctx.db.patch(ledger._id, {
+      operatorAlertSentAt: args.deliveredAt,
+      updatedAt: Math.max(ledger.updatedAt, args.deliveredAt),
+    });
+    return { marked: true };
   },
 });
 

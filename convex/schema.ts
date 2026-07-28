@@ -187,6 +187,17 @@ export default defineSchema({
       v.literal("succeeded"),
       v.literal("failed")
     ),
+    terminalCode: v.optional(v.string()),
+    executionCertainty: v.optional(v.union(
+      v.literal("not_dispatched"),
+      v.literal("provider_rejected"),
+      v.literal("provider_terminal_failure"),
+      v.literal("completed"),
+      v.literal("uncertain")
+    )),
+    operatorActionRequired: v.optional(v.boolean()),
+    retryAttempts: v.optional(v.number()),
+    operatorAlertSentAt: v.optional(v.number()),
     reservedProviderCostMicros: v.number(),
     // Immutable-at-authorization PAYG billing context. Metering must never
     // reconstruct a historical charge from mutable workspace configuration.

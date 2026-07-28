@@ -33,6 +33,36 @@ assert.deepEqual(JSON.parse(capturedBody), {
 });
 assert.equal(capturedBody.includes("{{"), false);
 
+await deliverInboundEvent({
+  source: "apiclaw",
+  event: "oauth_passthrough_reconciliation_required",
+  email: "internal-runtime",
+  workspaceId: "workspace_internal",
+  tier: "founder",
+  timestamp: 1_753_700_000_000,
+  requestId: "idem_oauth_incident",
+  path: "/v1/responses",
+  code: "oauth_upstream_timeout",
+  attempts: 1,
+  operatorActionRequired: true,
+}, async (_url, init) => {
+  capturedBody = String(init?.body ?? "");
+  return new Response("ok", { status: 200 });
+}, "test-inbound-secret");
+assert.deepEqual(JSON.parse(capturedBody), {
+  source: "apiclaw",
+  event: "oauth_passthrough_reconciliation_required",
+  email: "internal-runtime",
+  workspaceId: "workspace_internal",
+  tier: "founder",
+  timestamp: 1_753_700_000_000,
+  requestId: "idem_oauth_incident",
+  path: "/v1/responses",
+  code: "oauth_upstream_timeout",
+  attempts: 1,
+  operatorActionRequired: true,
+});
+
 let unsignedFetchAttempted = false;
 const unsigned = await deliverInboundEvent({
   source: "apiclaw",
@@ -48,4 +78,4 @@ const unsigned = await deliverInboundEvent({
 assert.deepEqual(unsigned, { delivered: false, status: 0 });
 assert.equal(unsignedFetchAttempted, false, "unsigned inbound alerts must fail closed");
 
-console.log("Inbound signup alerts preserve the flat n8n rendering contract");
+console.log("Inbound signup and OAuth incident alerts preserve the flat n8n rendering contract");
