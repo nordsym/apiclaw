@@ -106,12 +106,13 @@ for (const routePath of ["/v1/chat/completions", "/v1/responses"]) {
 
 {
   let attempts = 0;
+  const transportCause = new TypeError("socket reset");
   await assert.rejects(
     dispatchCodexOAuthRequest({
       ...base,
       fetcher: async () => {
         attempts += 1;
-        throw new TypeError("socket reset");
+        throw transportCause;
       },
     }),
     (error: unknown) => {
@@ -119,6 +120,8 @@ for (const routePath of ["/v1/chat/completions", "/v1/responses"]) {
       assert.equal(error.code, "oauth_transport_error");
       assert.equal(error.executionCertainty, "uncertain");
       assert.equal(error.operatorActionRequired, true);
+      assert.equal(error.cause, transportCause);
+      assert.equal(Object.prototype.propertyIsEnumerable.call(error, "cause"), false);
       return true;
     },
   );
