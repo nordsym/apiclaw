@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { CANON_STATS } from "./canon-stats.js";
 import { MANAGED_USAGE_POLICY } from "./product-truth.js";
 import {
@@ -78,7 +78,12 @@ assert.doesNotMatch(
 assert.match(readFileSync("src/product-truth.ts", "utf8"), /keylessPublicExecutionAvailable: false/);
 assert.match(
   readFileSync("landing/src/app/api/catalog/route.ts", "utf8"),
-  /isWorkspacePublicCatalogCard/,
+  /workspace-public-apis\.json/,
+);
+assert.equal(existsSync("src/workspace-public-apis.generated.ts"), false);
+assert.doesNotMatch(
+  readFileSync("src/workspace-public-apis.data.ts", "utf8"),
+  /as const satisfies/,
 );
 
 console.log(

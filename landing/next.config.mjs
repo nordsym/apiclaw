@@ -3,7 +3,6 @@ const nextConfig = {
   output: 'standalone',
   webpack(config) {
     config.resolve.alias['@apiclaw/product-truth'] = new URL('../src/product-truth.ts', import.meta.url).pathname;
-    config.resolve.alias['@apiclaw/workspace-public-apis'] = new URL('../src/workspace-public-apis.ts', import.meta.url).pathname;
     return config;
   },
   async redirects() {

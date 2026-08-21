@@ -7,7 +7,7 @@
   "npmDownloads": 20058,
   "endpointCount": 0,
   "capabilityCount": 15,
-  "generatedAt": "2026-08-21T17:20:20.827Z",
+  "generatedAt": "2026-08-21T17:37:25.640Z",
   "categoryBreakdown": {
     "AI & ML": 2164,
     "Utilities": 8890,
@@ -48,6 +48,5 @@
     "auth": 375,
     "needs_ctx": 506,
     "dead": 1131
-  },
-  "canonGeneratedAt": "2026-08-21"
+  }
 }

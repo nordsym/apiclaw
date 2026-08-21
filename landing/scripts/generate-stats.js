@@ -77,7 +77,7 @@ const verificationPath = path.join(__dirname, '../src/lib/verification-status.js
 const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
 const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
 const productTruthPath = path.join(__dirname, '../../src/product-truth.ts');
-const workspacePublicPath = path.join(__dirname, '../../src/workspace-public-apis.generated.ts');
+const workspacePublicPath = path.join(__dirname, '../../src/workspace-public-apis.json');
 
 function normalizeProviderReference(value) {
   return String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
@@ -129,13 +129,16 @@ function loadBoundaries() {
 }
 
 function loadWorkspacePublicNames() {
-  if (!fs.existsSync(workspacePublicPath)) return new Set();
-  const source = fs.readFileSync(workspacePublicPath, 'utf8');
-  const names = new Set();
-  for (const match of source.matchAll(/"name":\s*"([^"]+)"/g)) {
-    names.add(match[1].toLowerCase().trim());
+  const candidates = [
+    workspacePublicPath,
+    path.join(__dirname, '../src/lib/workspace-public-apis.json'),
+  ];
+  for (const filePath of candidates) {
+    if (!fs.existsSync(filePath)) continue;
+    const rows = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    return new Set(rows.map((row) => String(row.name || '').toLowerCase().trim()).filter(Boolean));
   }
-  return names;
+  return new Set();
 }
 
 function buildPublicInventory(registry, verification, productTruth, boundaries, workspacePublicNames) {

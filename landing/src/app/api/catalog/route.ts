@@ -9,7 +9,6 @@ import {
   getManagedProviderAdapter,
 } from "@apiclaw/product-truth";
 import { CANON_STATS } from "@apiclaw/canon-stats";
-import { isWorkspacePublicCatalogCard } from "@apiclaw/workspace-public-apis";
 
 interface ApiEntry {
   name: string;
@@ -48,6 +47,31 @@ interface VerificationStatus {
 
 let cachedApis: ApiEntry[] | null = null;
 let cachedVerification: VerificationStatus | null = null;
+let cachedWorkspacePublicNames: Set<string> | null = null;
+
+function isWorkspacePublicCatalogCard(name: string | undefined): boolean {
+  if (!cachedWorkspacePublicNames) {
+    const paths = [
+      path.join(process.cwd(), "src/lib/workspace-public-apis.json"),
+      path.join(process.cwd(), "landing/src/lib/workspace-public-apis.json"),
+    ];
+    for (const filePath of paths) {
+      try {
+        const rows = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Array<{ name?: string }>;
+        cachedWorkspacePublicNames = new Set(
+          rows.map((row) => String(row.name || "").toLowerCase().trim()).filter(Boolean),
+        );
+        break;
+      } catch {
+        continue;
+      }
+    }
+    if (!cachedWorkspacePublicNames) {
+      throw new Error("workspace-public-apis.json is missing from the landing catalog");
+    }
+  }
+  return typeof name === "string" && cachedWorkspacePublicNames.has(name.toLowerCase().trim());
+}
 
 function assertPublicCatalogTruth(
   apis: ApiEntry[],
