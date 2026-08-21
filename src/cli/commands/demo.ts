@@ -51,7 +51,7 @@ export async function demoCommand(): Promise<void> {
     console.log(chalk.yellow('  Sign in first to run the demo:\n'));
     const result = await authLoginCommand({});
     if (!result) {
-      console.error(chalk.red('\n  Login failed. Run: npx @nordsym/apiclaw login\n'));
+      console.error(chalk.red('\n  Login failed. Run: npx @nordsym/apiclaw auth login\n'));
       process.exit(1);
     }
     session = readSession();

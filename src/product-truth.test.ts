@@ -44,6 +44,7 @@ assert.equal(
   CANON_STATS.customer_executable_providers,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
+assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
   MANAGED_PROVIDER_ADAPTERS.filter(({ id }) =>
@@ -268,6 +269,7 @@ assert.equal(
   publicStats.customerExecutableProviderCount,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
+assert.equal(publicStats.npmDownloads, CANON_STATS.npm_installs);
 assert.equal("callableCount" in publicStats, false, "public stats must not expose the legacy callableCount label");
 
 const sourceStats = JSON.parse(readFileSync("landing/src/lib/stats.json", "utf8")) as Record<string, unknown>;
@@ -275,6 +277,7 @@ assert.equal(sourceStats.apiCount, publicStats.apiCount);
 assert.equal(sourceStats.sourceVerifiedCount, publicStats.sourceVerifiedCount);
 assert.equal(sourceStats.managedProviderAdapterCount, publicStats.managedProviderAdapterCount);
 assert.equal(sourceStats.customerExecutableProviderCount, publicStats.customerExecutableProviderCount);
+assert.equal(sourceStats.npmDownloads, publicStats.npmDownloads);
 assert.equal("callableCount" in sourceStats, false, "source stats must not expose the legacy callableCount label");
 assert.equal(
   (sourceStats.historicalVerificationBuckets as { verified: number }).verified,
@@ -290,6 +293,11 @@ assert.equal(
 
 const catalogRoute = readFileSync("landing/src/app/api/catalog/route.ts", "utf8");
 assert.match(catalogRoute, /CANON_STATS/);
+assert.match(
+  catalogRoute,
+  /customerExecutable: CANON_STATS\.customer_executable_providers/,
+  "catalog load must assert customer-executable count against canon, not a hardcoded 4",
+);
 assert.match(catalogRoute, /assertPublicCatalogTruth\(cachedApis, verification\)/);
 assert.doesNotMatch(
   catalogRoute,

@@ -2,7 +2,7 @@
  * `apiclaw mission ...` — Control Plane CLI surface.
  *
  * Reads the local session token (~/.apiclaw/session, written by
- * `apiclaw login`), routes through APIClaw's gateway, and reports
+ * `apiclaw auth login`), routes through APIClaw's gateway, and reports
  * status / cost / events. Same workspace, same auth, same logs as MCP
  * and HTTP — fourth door, same control plane.
  */
@@ -31,7 +31,7 @@ function loadSession(): string | null {
 }
 
 function authError(): never {
-  console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "apiclaw login"));
+  console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "apiclaw auth login"));
   process.exit(1);
 }
 

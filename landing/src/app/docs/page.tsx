@@ -411,7 +411,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             {/* discover_apis */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">discover_apis</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Search 5,600+ APIs using natural language.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Search 26,619 discoverable APIs using natural language.</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{\n'}

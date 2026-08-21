@@ -188,7 +188,7 @@ export default function InstallPage() {
             </h3>
             <CopyableLine cmd="npx @nordsym/apiclaw --version" prompt="$" />
             <p className="text-xs text-text-muted mt-2">
-              Should print a version like <code className="font-mono">2.5.3</code>. Then
+              Should print a version like <code className="font-mono">2.8.6</code> or newer. Then
               restart Claude Desktop and look for APIClaw in the MCP tools list.
             </p>
           </div>

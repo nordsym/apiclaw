@@ -94,7 +94,7 @@ Pricing canon: underlying provider cost plus a 15% margin. Stripe metered billin
 ## Status
 
 - ✅ Live at `apiclaw.cloud` and `api.apiclaw.cloud`
-- ✅ npm package `@nordsym/apiclaw` — 16,485+ all-time installs
+- ✅ npm package `@nordsym/apiclaw` — 20,058 all-time installs (2026-08-21)
 - ✅ Claude Desktop Extension hosted at `apiclaw.cloud/apiclaw.mcpb` (~50 MB bundle, zero-key install)
 - ✅ Mission runtime v2 (5 typed primitives) live in Convex prod
 - ✅ Remote MCP via Streamable HTTP + OAuth 2.1 + PKCE + DCR, validated end-to-end in Grok

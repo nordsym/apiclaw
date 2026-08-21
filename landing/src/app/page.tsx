@@ -30,7 +30,7 @@ const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "Discoverable APIs", live: true },
   { number: statsData.sourceVerifiedCount.toLocaleString(), label: "Exact-name source-verified", live: true },
-  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "12,200+"), label: "Installs", live: true },
+  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "20,058"), label: "npm installs", live: false },
 ];
 
 const trustedBy = [
@@ -180,7 +180,7 @@ const whoIsThisFor = [
 const terminalLines = [
   { type: "prompt", text: "curl -fsSL https://apiclaw.cloud/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
-  { type: "output", text: "🦞 APIClaw v2.5.3", delay: 100 },
+  { type: "output", text: "🦞 APIClaw v2.8.7", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
   { type: "success", text: `✓ ${statsData.apiCount.toLocaleString()} APIs loaded`, delay: 200 },

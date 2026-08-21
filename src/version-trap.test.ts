@@ -38,7 +38,15 @@ assert.doesNotMatch(installPage, /replicate|elevenlabs|\/v1\/call/);
 const docs = readFileSync("landing/src/app/docs/page.tsx", "utf8");
 assert.match(docs, /fixer_latest/);
 assert.match(docs, /nasa/);
-assert.doesNotMatch(docs, /elevenlabs|replicate/);
+assert.match(docs, /26,619/);
+assert.doesNotMatch(docs, /elevenlabs|replicate|5,600|Firecrawl/);
+assert.doesNotMatch(installPage, /2\.5\.3/);
+
+const homepage = readFileSync("landing/src/app/page.tsx", "utf8");
+assert.doesNotMatch(homepage, /16,?485|2\.5\.3/);
+
+assert.match(http, /apiclaw auth login/);
+assert.doesNotMatch(http, /run `apiclaw login`/);
 
 const hero = readFileSync("landing/src/components/HeroDoorsPreview.tsx", "utf8");
 assert.match(hero, /nasa/);
