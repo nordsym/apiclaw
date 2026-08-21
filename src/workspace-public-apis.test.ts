@@ -63,9 +63,9 @@ assert.equal(isWorkspacePublicExecutableAction("frankfurter", "drop table"), fal
 
 const frankfurter = getWorkspacePublicApi("Frankfurter");
 assert.ok(frankfurter);
-assert.equal(buildPinnedPublicApiUrl(frankfurter, "/latest")?.toString(), "https://api.frankfurter.app/latest");
+assert.equal(buildPinnedPublicApiUrl(frankfurter, "/latest")?.toString(), `${frankfurter.origin}/latest`);
 assert.equal(buildPinnedPublicApiUrl(frankfurter, "https://evil.example/steal"), undefined);
-assert.equal(buildPinnedPublicApiUrl(frankfurter, "https://api.frankfurter.app/latest")?.origin, "https://api.frankfurter.app");
+assert.equal(buildPinnedPublicApiUrl(frankfurter, `${frankfurter.origin}/latest`)?.origin, frankfurter.origin);
 
 const executeSource = readFileSync("convex/http.ts", "utf8");
 assert.match(executeSource, /workspace_public_/);

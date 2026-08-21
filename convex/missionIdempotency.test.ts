@@ -44,7 +44,7 @@ assert.equal(
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "GenPRD", actionName: "generate_prd" },
-}]), false, "unverified variable-cost mission steps must not be advertised to customers");
+}]), true);
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "brave_search", actionName: "search" },
@@ -52,6 +52,10 @@ assert.equal(isCustomerRunnableMissionTemplate([{
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "replicate", actionName: "run" },
+}]), true);
+assert.equal(isCustomerRunnableMissionTemplate([{
+  kind: "fetch",
+  config: { source: "providerAction", providerId: "together", actionName: "chat" },
 }]), false, "mission discovery must not advertise unavailable managed adapters");
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "transform",

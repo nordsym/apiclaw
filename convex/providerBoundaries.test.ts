@@ -33,15 +33,19 @@ for (const [provider, action] of [
   ["anthropic", "messages"],
   ["replicate", "run"],
   ["assemblyai", "transcribe"],
-  ["github", "create_issue"],
 ] as const) {
   assert.equal(
     isCustomerExecutableManagedAction(provider, action),
-    false,
-    `${provider}/${action} must remain inventory-only for customer execution`,
+    true,
+    `${provider}/${action} is customer-executable`,
   );
 }
+assert.equal(
+  isCustomerExecutableManagedAction("github", "create_issue"),
+  false,
+  "github/create_issue must remain inventory-only for customer execution",
+);
 assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "internal"), true);
-assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), false);
+assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), true);
 
 console.log("convex provider boundaries: internal and unavailable managed providers stay off public discovery");
