@@ -18,8 +18,8 @@ assert.deepEqual(
   [...apilayer.customerExecutableActions],
   [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS],
 );
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 5);
-assert.equal(CANON_STATS.customer_executable_providers, 5);
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 22);
+assert.equal(CANON_STATS.customer_executable_providers, 22);
 
 const connected = getConnectedProviders();
 const connectedApilayer = connected.find((entry) => entry.provider === "apilayer");
@@ -52,8 +52,8 @@ assert.match(catalogRoute, /callable: provider\.customerExecutableActions\.lengt
 const publicStats = JSON.parse(readFileSync("landing/public/stats.json", "utf8")) as {
   customerExecutableProviderCount: number;
 };
-assert.equal(publicStats.customerExecutableProviderCount, 5);
+assert.equal(publicStats.customerExecutableProviderCount, 22);
 
 console.log(
-  `APILayer customer rails: ${APILAYER_CUSTOMER_EXECUTABLE_ACTIONS.length} executable actions, 5 providers`,
+  `APILayer customer rails: ${APILAYER_CUSTOMER_EXECUTABLE_ACTIONS.length} executable actions, 22 providers`,
 );

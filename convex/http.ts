@@ -24,7 +24,12 @@ import { getWorkspaceUsageDisplay } from "./workspaces";
 import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
   getManagedProviderAdapter,
+  isPublicCustomerExecutableAction,
 } from "../src/product-truth";
+import {
+  buildPinnedPublicApiUrl,
+  getWorkspacePublicApi,
+} from "../src/workspace-public-apis";
 import { mcpScopeAllows, type McpCapability } from "../src/mcp-scope-policy";
 import {
   deriveManagedRequestId,
@@ -1366,6 +1371,7 @@ type ManagedCallGate = {
   billingClass: "activation" | "payg" | "internal" | "contract";
   trafficClass: "customer" | "internal";
   fixedProviderCostUsd?: number;
+  reservedProviderCostUsd?: number;
   quotaWarning?: unknown;
 };
 
@@ -1604,6 +1610,7 @@ async function enforcePreCallQuota(
       billingClass: quota.billingClass,
       trafficClass: quota.trafficClass,
       fixedProviderCostUsd,
+      reservedProviderCostUsd: estimatedProviderCostUsd,
       quotaWarning: quota.quotaWarning,
     };
   }
@@ -1673,11 +1680,13 @@ function successfulManagedCostDetails(gate: ManagedCallGate | undefined): {
   providerCostUsd?: number;
   costSource: "fixed_price_policy" | "reservation" | "zero_cost";
 } {
-  const fixedCost = gate?.fixedProviderCostUsd;
-  if (fixedCost === undefined) return { costSource: "reservation" };
+  // APILayer pattern: the authorized reservation is the realized cost when
+  // the adapter has no separate provider-reported usage.cost.
+  const realizedCost = gate?.fixedProviderCostUsd ?? gate?.reservedProviderCostUsd;
+  if (realizedCost === undefined) return { costSource: "reservation" };
   return {
-    providerCostUsd: fixedCost,
-    costSource: fixedCost === 0 ? "zero_cost" : "fixed_price_policy",
+    providerCostUsd: realizedCost,
+    costSource: realizedCost === 0 ? "zero_cost" : "fixed_price_policy",
   };
 }
 
@@ -5438,6 +5447,20 @@ export function buildManagedRequest(
           return null;
       }
     }
+    case "voyage": {
+      if (action !== "embeddings") return null;
+      const input = params.input ?? params.texts ?? params.text;
+      if (input === undefined || input === null) return null;
+      return {
+        url: "https://api.voyageai.com/v1/embeddings",
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: params.model || "voyage-3-large",
+          input,
+        }),
+      };
+    }
     default:
       return null;
   }
@@ -5670,7 +5693,11 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         delete params.max_completion_tokens;
       }
     }
-    const isManagedExecution = provider === "auto" || !!PROVIDERS[provider] || action === "chat";
+    const publicApi = getWorkspacePublicApi(String(provider));
+    if (publicApi && (!workspaceId || authMethod === "anonymous")) {
+      return unauthResponse("public_api_requires_workspace_auth");
+    }
+    const isManagedExecution = provider === "auto" || !!PROVIDERS[provider] || action === "chat" || !!publicApi;
     if (isManagedExecution) {
       // Reserve from the full normalized body. Tool schemas, instructions,
       // system prompts, and other auxiliary input can dwarf messages alone.
@@ -5695,9 +5722,14 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           // until after the reservation is created.
           billingGradeCost: explicitOpenRouterExecution
             ? true
-            : isLLMExecution
-              ? false
-              : undefined,
+            : isPublicCustomerExecutableAction(
+              explicitOpenRouterExecution?.provider ?? provider,
+              action,
+            )
+              ? true
+              : isLLMExecution
+                ? false
+                : undefined,
           trafficClass: authMethod === "internal" ? "internal" : "customer",
           requestPayload: body,
         },
@@ -5863,12 +5895,27 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         const usage = (data as any)?.usage;
         const calculatedCost = calculateCallCost(route.model, usage);
         const providerReportedCost = providerReportedUsageCostUsd(usage);
-        const managedCostDecision = resolveManagedResponseCost({
+        let managedCostDecision = resolveManagedResponseCost({
           provider: route.provider,
           responseOk: response.ok,
           providerReportedCostUsd: providerReportedCost,
           tokenTableCostUsd: calculatedCost?.providerCost,
         });
+        // Non-OpenRouter customer-executable LLM rails reuse the authorized
+        // reservation when the provider omits usage. OpenRouter still requires
+        // usage.cost and must stay fail-closed.
+        if (
+          response.ok &&
+          managedCostDecision.providerCostUsd === undefined &&
+          route.provider !== "openrouter" &&
+          isPublicCustomerExecutableAction(route.provider, "chat") &&
+          quotaGate?.reservedProviderCostUsd !== undefined
+        ) {
+          managedCostDecision = {
+            providerCostUsd: quotaGate.reservedProviderCostUsd,
+            costSource: "fixed_price_policy",
+          };
+        }
         const providerCost = managedCostDecision.providerCostUsd;
         const apiclawCost = providerCost === undefined ? undefined : providerCost * (1 + APICLAW_MARGIN);
         const finalization = await finalizeManagedCall(ctx, quotaGate, {
@@ -5983,9 +6030,10 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           await finalizeManagedCall(ctx, quotaGate, {
             success: result.ok,
             provider,
-            providerCostUsd: result.ok ? undefined : 0,
+            ...(result.ok
+              ? successfulManagedCostDetails(quotaGate)
+              : { providerCostUsd: 0, costSource: "zero_cost" as const }),
             model: params.model,
-            costSource: result.ok ? "reservation" : "zero_cost",
           });
           return jsonResponse({
             success: result.ok,
@@ -6134,10 +6182,112 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       }
     }
 
-    // Caller-controlled egress is intentionally unavailable. Discovery remains
-    // public, while execution requires a managed, origin-pinned adapter. A
-    // central DNS-pinned and redirect-validating egress layer must exist before
-    // this surface can safely return.
+    // Path 3: workspace-authenticated public / no-key origins. Anonymous
+    // keyless proxy stays disabled. Origin is pinned to the cataloged HTTPS
+    // base and redirects are rejected.
+    if (publicApi) {
+      if (!workspaceId || authMethod === "anonymous") {
+        return unauthResponse("public_api_requires_workspace_auth");
+      }
+      if (!quotaGate) {
+        return jsonResponse({
+          success: false,
+          error: { code: "quota_required", message: "Workspace public execution requires a managed quota reservation." },
+        }, 500);
+      }
+      routeDetail = `workspace_public_${publicApi.id}`;
+      const isKroki = publicApi.id === "kroki" && action === "render";
+      const pinned = isKroki
+        ? buildPinnedPublicApiUrl(publicApi, `/${params.type || "mermaid"}/${params.format || "svg"}`)
+        : buildPinnedPublicApiUrl(publicApi, params.path);
+      if (!pinned) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+        return jsonResponse({
+          success: false,
+          error: {
+            code: "unsafe_public_origin",
+            message: `Provider "${provider}" path is not pinned to ${publicApi.origin}.`,
+          },
+          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+        }, 400);
+      }
+      let upstreamDispatchAttempted = false;
+      try {
+        const headers: Record<string, string> = {
+          Accept: "application/json",
+          "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud)",
+        };
+        const fetchOpts: RequestInit = {
+          method: isKroki ? "POST" : "GET",
+          headers,
+          redirect: "error",
+          signal: AbortSignal.timeout(15_000),
+        };
+        if (isKroki) {
+          if (typeof params.diagram !== "string" || !params.diagram) {
+            await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+            return jsonResponse({
+              success: false,
+              error: { code: "invalid_params", message: "Kroki render requires diagram text." },
+            }, 400);
+          }
+          headers["Content-Type"] = "text/plain";
+          fetchOpts.body = params.diagram;
+        }
+        upstreamDispatchAttempted = true;
+        const response = await fetch(pinned.toString(), fetchOpts);
+        const latencyMs = Date.now() - startTime;
+        if (response.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/execute",
+            authMethod,
+            provider: publicApi.id,
+            action,
+          });
+        }
+        const raw = await readUpstreamTextCapped(response);
+        let data: any;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          data = { raw };
+        }
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: response.ok,
+          provider: publicApi.id,
+          ...(response.ok
+            ? successfulManagedCostDetails(quotaGate)
+            : { providerCostUsd: 0, costSource: "zero_cost" as const }),
+        });
+        return jsonResponse({
+          success: response.ok,
+          provider: publicApi.id,
+          action,
+          data,
+          _apiclaw: { latencyMs, route: routeDetail, gateway: true },
+        }, response.ok ? 200 : response.status);
+      } catch (e: any) {
+        if (upstreamDispatchAttempted) {
+          return ambiguousPostDispatchResponse(
+            ctx,
+            quotaGate,
+            { provider: publicApi.id },
+            502,
+            { provider: publicApi.id, action },
+          );
+        }
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+        return jsonResponse({
+          success: false,
+          provider: publicApi.id,
+          action,
+          error: e.message,
+          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
+        }, 500);
+      }
+    }
+
     return jsonResponse({
       success: false,
       error: {
@@ -7476,14 +7626,71 @@ http.route({
     }
 
     // ---------------- Branch: open-proxy (authType="none") ----------------
+    // Workspace-authenticated, origin-pinned public execution. Anonymous
+    // keyless proxy remains disabled.
     if (row.authType === "none" && row.proxyMode === "open_proxy") {
-      return jsonResponse({
-        error: {
-          code: "discovery_only",
-          message: `"${row.name}" remains discoverable but open-proxy execution is disabled until APIClaw has DNS-pinned, redirect-validating egress.`,
-          docsUrl: row.docsUrl,
-        },
-      }, 501);
+      const publicApi = getWorkspacePublicApi(row.name) ?? getWorkspacePublicApi(apiName);
+      if (!workspaceId || auth.authMethod === "anonymous") {
+        return unauthResponse("public_api_requires_workspace_auth");
+      }
+      if (!publicApi) {
+        return jsonResponse({
+          error: {
+            code: "discovery_only",
+            message: `"${row.name}" is a harvested no-key row but is not on the workspace-public allowlist.`,
+            docsUrl: row.docsUrl,
+          },
+        }, 501);
+      }
+      const pinned = buildPinnedPublicApiUrl(publicApi, userPath);
+      if (!pinned) {
+        return jsonResponse({
+          error: {
+            code: "unsafe_public_origin",
+            message: `"${row.name}" path is not pinned to ${publicApi.origin}.`,
+          },
+        }, 400);
+      }
+      if (method !== "GET") {
+        return jsonResponse({
+          error: {
+            code: "method_not_allowed",
+            message: "Workspace-public execution is GET-only except curated Kroki render via /v1/execute.",
+          },
+        }, 405);
+      }
+      try {
+        const forwardRes = await fetch(pinned.toString(), {
+          method: "GET",
+          headers: { Accept: "application/json", "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud)" },
+          redirect: "error",
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (forwardRes.ok) {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId,
+            path: "/v1/call",
+            authMethod: auth.authMethod,
+            provider: publicApi.id,
+            action: `${method} ${userPath}`,
+          });
+        }
+        const respText = await forwardRes.text();
+        return new Response(respText, {
+          status: forwardRes.status,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": forwardRes.headers.get("Content-Type") ?? "application/json",
+            "X-APIClaw-Mode": "workspace_public",
+            "X-APIClaw-Provider": publicApi.name,
+          },
+        });
+      } catch (e: any) {
+        return jsonResponse(
+          { error: { code: "public_origin_error", message: e?.message ?? "public origin fetch failed", provider: publicApi.name } },
+          502,
+        );
+      }
     }
 
     // ---------------- Branch: everything else = discovery_only ----------------

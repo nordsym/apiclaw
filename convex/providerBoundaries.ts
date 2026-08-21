@@ -1,4 +1,5 @@
 import { isPublicCustomerExecutableAction } from "../src/product-truth";
+import { isWorkspacePublicExecutableAction } from "../src/workspace-public-apis";
 
 export const INTERNAL_ONLY_PROVIDER_IDS = ["46elks", "twilio", "resend"] as const;
 export const UNAVAILABLE_MANAGED_PROVIDER_IDS = [
@@ -17,7 +18,8 @@ export function isPubliclyAvailableManagedProvider(providerId: string): boolean 
 }
 
 export function isCustomerExecutableManagedAction(providerId: string, action: string): boolean {
-  return isPublicCustomerExecutableAction(providerId, action);
+  return isPublicCustomerExecutableAction(providerId, action) ||
+    isWorkspacePublicExecutableAction(providerId, action);
 }
 
 export function isManagedActionAllowedForTraffic(

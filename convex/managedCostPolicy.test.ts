@@ -16,11 +16,12 @@ import {
 
 assert.equal(estimateManagedProviderCostUsd({ provider: "brave_search", action: "search" }), 0.005);
 assert.equal(estimateManagedProviderCostUsd({ provider: "github", action: "search_repos" }), 0);
-assert.equal(estimateManagedProviderCostUsd({ provider: "replicate", action: "run" }), undefined);
-assert.equal(estimateManagedProviderCostUsd({ provider: "stability", action: "generate" }), undefined);
-assert.equal(estimateManagedProviderCostUsd({ provider: "e2b", action: "run_code" }), undefined);
+assert.equal(estimateManagedProviderCostUsd({ provider: "replicate", action: "run" }), 0.05);
+assert.equal(estimateManagedProviderCostUsd({ provider: "stability", action: "generate" }), 0.04);
+assert.equal(estimateManagedProviderCostUsd({ provider: "e2b", action: "run_code" }), 0.02);
 assert.equal(estimateManagedProviderCostUsd({ provider: "genprd", action: "providerAction" }), 0.04);
 assert.equal(hasBillingGradeManagedCost({ provider: "genprd", action: "providerAction" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "genprd", action: "generate_prd" }), true);
 assert.equal(estimateManagedProviderCostUsd({ provider: "openrouter", action: "chat" }), undefined);
 assert.equal(estimateManagedProviderCostUsd({
   provider: "openrouter",
@@ -49,9 +50,11 @@ cyclic.self = cyclic;
 assert.equal(estimateInputTokens(cyclic), Number.MAX_SAFE_INTEGER);
 assert.equal(hasBillingGradeManagedCost({ provider: "openrouter", action: "chat" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "openrouter", action: "embeddings" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "openai", action: "chat" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "anthropic", action: "messages" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "groq", action: "chat" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "openai", action: "chat" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "anthropic", action: "messages" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "groq", action: "chat" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "voyage", action: "embeddings" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "serper", action: "search" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "brave_search", action: "search" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "github", action: "search_repos" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), true);
@@ -63,7 +66,9 @@ assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action:
 
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "brave_search", action: "search" }), 0.005);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "github", action: "get_repo" }), 0);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), undefined);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), 0.001);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "firecrawl", action: "scrape" }), 0.02);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "voyage", action: "embeddings" }), 0.02);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), 0.01);
 
 assert.deepEqual(resolveManagedResponseCost({

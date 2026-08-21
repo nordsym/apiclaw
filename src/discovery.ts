@@ -8,6 +8,8 @@ import { dirname, join } from 'path';
 import { getConnectedProviders } from './execute.js';
 import { openAPIs, isOpenAPI } from './open-apis.js';
 import { isInternalProviderReference, isUnavailableManagedProvider } from './provider-boundaries.js';
+import { getPublicCustomerExecutableProvider } from './product-truth.js';
+import { isWorkspacePublicCatalogCard } from './workspace-public-apis.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,10 +32,12 @@ function loadLocalRegistry(): APIProvider[] {
             (entry as APIProvider & { docsUrl?: string }).docsUrl,
           ].some((value) => isUnavailableManagedProvider(value))
         )
-        // The registry records whether the upstream API responded during
-        // verification, not whether APIClaw can safely proxy it today. Local
-        // registry entries remain discovery-only until hardened egress is live.
-        .map((entry) => ({ ...entry, callable: false }))
+        // Harvested apiKey/unknown rows stay discovery-only. Workspace-
+        // authenticated public/no-key origins from the allowlist are callable.
+        .map((entry) => ({
+          ...entry,
+          callable: isWorkspacePublicCatalogCard(entry.name),
+        }))
       : [];
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
@@ -629,7 +633,7 @@ export function discoverAPIs(
       regions: ['global'],
       agent_success_rate: 1.0,
       avg_latency_ms: 500,
-      callable: true,
+      callable: !!getPublicCustomerExecutableProvider(mp.providerName),
       managed: true,
     };
 

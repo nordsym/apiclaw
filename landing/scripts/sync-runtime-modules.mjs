@@ -8,6 +8,7 @@ const modules = [
   ["../../src/product-truth.ts", "../src/lib/product-truth.generated.ts"],
   ["../../src/mcp-scope-policy.ts", "../src/lib/mcp-scope-policy.generated.ts"],
   ["../../src/canon-stats.ts", "../src/lib/canon-stats.generated.ts"],
+  ["../../src/workspace-public-apis.json", "../src/lib/workspace-public-apis.json"],
 ];
 
 for (const [sourceRelative, generatedRelative] of modules) {

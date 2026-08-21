@@ -220,7 +220,7 @@ export default function Home() {
     const installs = statsData.npmDownloads.toLocaleString();
     const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total} discoverable APIs and ${sourceVerified} current catalog entries matched to source-verification evidence by exact name, with ~${installs} agent installs. Source verification is not execution.
 
-Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried. ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Adapter inventory is not an execution promise.
+Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried and customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Adapter inventory is not an execution promise.
 
 Four doors, one control plane:
 1. Install: local MCP for Claude Desktop and other local clients.
@@ -1134,7 +1134,7 @@ Install:
               },
               {
                 q: "What can I actually call?",
-                a: `${statsData.apiCount.toLocaleString()} discoverable API definitions, including ${statsData.sourceVerifiedCount.toLocaleString()} current catalog entries mapped to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters; ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Keyless registry entries remain discovery-only until hardened egress is live.`
+                a: `${statsData.apiCount.toLocaleString()} discoverable API definitions, including ${statsData.sourceVerifiedCount.toLocaleString()} current catalog entries mapped to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters, all customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.`
               },
               {
                 q: "What are missions?",

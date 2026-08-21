@@ -969,7 +969,7 @@ Example chain:
       properties: {
         verbose: {
           type: 'boolean',
-          description: 'If true, also include source-verified keyless registry entries for discovery. Public proxy execution remains disabled until hardened egress is live. Default: false.',
+          description: 'If true, also include source-verified registry entries for discovery. Anonymous keyless proxy stays disabled. Workspace-authenticated public/no-key origins are executable. Default: false.',
           default: false,
         },
         category: {
@@ -1440,7 +1440,7 @@ Docs: https://apiclaw.cloud
                   ? {
                       no_callable_match: true,
                       no_callable_match_hint:
-                        'No directly-callable managed provider matched. Refine the query or call list_connected to see what APIClaw can execute right now. Keyless registry entries are discovery-only until hardened egress is live.',
+                        'No directly-callable managed or workspace-public provider matched. Refine the query or call list_connected to see what APIClaw can execute right now. Harvested apiKey/unknown rows stay discovery-only.',
                     }
                   : {}),
                 ...(suggestedCalls.length > 0
@@ -1451,8 +1451,8 @@ Docs: https://apiclaw.cloud
                     }
                   : {}),
                 results: results.map(r => {
-                  // Managed adapters are executable. Source-verified keyless
-                  // registry entries remain discovery-only until hardened egress is live.
+                  // Managed adapters and workspace-public no-key origins are
+                  // executable. Harvested apiKey/unknown rows stay discovery-only.
                   const anyProvider = r.provider as unknown as { callable?: boolean; auth?: string };
                   const isCallable = anyProvider.callable === true;
                   return {

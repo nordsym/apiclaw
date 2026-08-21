@@ -1,4 +1,5 @@
 import { isPublicCustomerExecutableAction } from "../src/product-truth";
+import { isWorkspacePublicExecutableApi } from "../src/workspace-public-apis";
 import { resolveFrontierModelCost } from "./modelPricing";
 
 // Reservations are intentionally conservative. Fixed/near-fixed providers can
@@ -16,6 +17,12 @@ const FIXED_PROVIDER_RESERVATIONS_USD: Record<string, number> = {
   coingecko: 0,
   resend: 0.001,
   genprd: 0.04,
+  cohere: 0.01,
+  elevenlabs: 0.10,
+  replicate: 0.05,
+  stability: 0.04,
+  e2b: 0.02,
+  voyage: 0.02,
 };
 
 const LLM_PROVIDERS = new Set([
@@ -114,6 +121,7 @@ export function estimateManagedProviderCostUsd(input: ManagedCostEstimateInput):
   const provider = input.provider.toLowerCase();
   if (provider === "openai-codex") return 0;
   if (provider === "mission") return 0.04;
+  if (isWorkspacePublicExecutableApi(input.provider)) return 0;
   if (input.action === "embeddings") return 0.02;
 
   if (LLM_PROVIDERS.has(provider) || input.action === "chat" || input.action === "chat_completions" || input.action === "responses" || input.action === "messages") {
@@ -146,12 +154,18 @@ export function estimateManagedProviderCostUsd(input: ManagedCostEstimateInput):
 // treated as customer-billable truth.
 export function hasBillingGradeManagedCost(input: ManagedCostEstimateInput): boolean {
   const provider = input.provider.toLowerCase();
-  if (input.action === "embeddings") return false;
+  if (isWorkspacePublicExecutableApi(input.provider)) return true;
   if (VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return true;
   if (verifiedFixedManagedProviderCostUsd(input) !== undefined) return true;
-  // OpenRouter is the only customer LLM rail whose response contract reports
-  // realized provider spend as usage.cost. Direct token-table calculations are
-  // estimates because caching and provider-specific discounts are ambiguous.
+  // Customer-executable LLM rails may use the token-bound reservation as
+  // realized cost (same pattern as APILayer). OpenRouter still prefers
+  // usage.cost when the provider reports it.
+  if (
+    isPublicCustomerExecutableAction(provider, input.action) &&
+    (LLM_PROVIDERS.has(provider) || LLM_ACTIONS.has(input.action))
+  ) {
+    return true;
+  }
   return provider === "openrouter" && LLM_ACTIONS.has(input.action);
 }
 
@@ -159,15 +173,15 @@ export function verifiedFixedManagedProviderCostUsd(
   input: Pick<ManagedCostEstimateInput, "provider" | "action">,
 ): number | undefined {
   const provider = input.provider.toLowerCase();
-  if (VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return 0;
-  // APILayer's contracted rails reuse the existing $0.01 reservation as the
-  // realized per-call cost. Only customer-executable actions qualify so
-  // subscription-blocked handlers cannot enter PAYG.
-  if (
-    provider === "apilayer" &&
-    isPublicCustomerExecutableAction("apilayer", input.action)
-  ) {
-    return FIXED_PROVIDER_RESERVATIONS_USD.apilayer;
+  if (isWorkspacePublicExecutableApi(input.provider) || VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return 0;
+  // Customer-executable adapters reuse their existing reservation as the
+  // realized per-call cost (APILayer's pattern). Inventory-only actions
+  // stay unpriced so they cannot enter PAYG.
+  if (isPublicCustomerExecutableAction(provider, input.action)) {
+    const reserved = FIXED_PROVIDER_RESERVATIONS_USD[provider];
+    if (reserved !== undefined) return reserved;
+    const verified = VERIFIED_FIXED_PROVIDER_COSTS_USD[provider]?.[input.action];
+    if (verified !== undefined) return verified;
   }
   return VERIFIED_FIXED_PROVIDER_COSTS_USD[provider]?.[input.action];
 }

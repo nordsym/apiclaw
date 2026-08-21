@@ -1403,7 +1403,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
         <div className="space-y-4">
           <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2"><FileCode2 className="w-4 h-4 text-purple-400" />1,636 Keyless API Definitions</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-2">These upstream APIs advertise no authentication requirement. Your agent can discover them via <code className="text-purple-400">discover_apis()</code>. Generic APIClaw proxy execution remains disabled until hardened egress is live.</p>
+            <p className="text-sm text-[var(--text-muted)] mb-2">These upstream APIs advertise no authentication requirement. Workspace-authenticated public/no-key origins on the allowlist execute through <code className="text-purple-400">POST /v1/execute</code> with origin pinning. Anonymous keyless proxy stays disabled.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {[
