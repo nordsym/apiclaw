@@ -185,8 +185,11 @@ export function isWorkspacePublicExecutableAction(
 }
 
 /**
- * Pin a caller path onto a cataloged public origin. Rejects origin changes,
- * credentials, and private/docs hosts. Used by /v1/execute.
+ * Pin a caller path onto a cataloged public origin. Relative paths resolve
+ * against the cataloged HTTPS baseUrl (not origin), so CoinGecko
+ * `/simple/price` keeps `/api/v3`. Absolute https URLs stay origin-pinned.
+ * Rejects origin changes, credentials, and private/docs hosts. Used by
+ * /v1/execute.
  */
 export function buildPinnedPublicApiUrl(
   api: WorkspacePublicApi,
@@ -205,9 +208,12 @@ export function buildPinnedPublicApiUrl(
     if (absolute.origin !== pinned.origin) return undefined;
     return isSafePublicApiBaseUrl(absolute.toString());
   }
-  if (!rawPath.startsWith("/")) return undefined;
+  if (!rawPath.startsWith("/") || rawPath.startsWith("//")) return undefined;
   try {
-    const resolved = new URL(rawPath, pinned.origin);
+    // A leading "/" is an absolute-path URL and would drop baseUrl's prefix
+    // (`/api/v3`). Treat the cataloged base as a directory and join.
+    const baseHref = pinned.href.endsWith("/") ? pinned.href : `${pinned.href}/`;
+    const resolved = new URL(rawPath.slice(1), baseHref);
     if (resolved.origin !== pinned.origin) return undefined;
     return isSafePublicApiBaseUrl(resolved.toString());
   } catch {

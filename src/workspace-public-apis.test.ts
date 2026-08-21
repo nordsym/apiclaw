@@ -63,9 +63,29 @@ assert.equal(isWorkspacePublicExecutableAction("frankfurter", "drop table"), fal
 
 const frankfurter = getWorkspacePublicApi("Frankfurter");
 assert.ok(frankfurter);
-assert.equal(buildPinnedPublicApiUrl(frankfurter, "/latest")?.toString(), `${frankfurter.origin}/latest`);
+assert.equal(frankfurter.baseUrl, "https://api.frankfurter.app");
+assert.equal(buildPinnedPublicApiUrl(frankfurter, "/latest")?.toString(), "https://api.frankfurter.app/latest");
 assert.equal(buildPinnedPublicApiUrl(frankfurter, "https://evil.example/steal"), undefined);
 assert.equal(buildPinnedPublicApiUrl(frankfurter, `${frankfurter.origin}/latest`)?.origin, frankfurter.origin);
+
+const coingecko = getWorkspacePublicApi("CoinGecko");
+assert.ok(coingecko);
+assert.equal(coingecko.baseUrl, "https://api.coingecko.com/api/v3");
+assert.equal(coingecko.origin, "https://api.coingecko.com");
+assert.equal(
+  buildPinnedPublicApiUrl(coingecko, "/simple/price")?.toString(),
+  "https://api.coingecko.com/api/v3/simple/price",
+);
+assert.equal(
+  buildPinnedPublicApiUrl(coingecko, "/simple/price?ids=solana")?.toString(),
+  "https://api.coingecko.com/api/v3/simple/price?ids=solana",
+);
+assert.equal(buildPinnedPublicApiUrl(coingecko, "https://evil.example/steal"), undefined);
+assert.equal(buildPinnedPublicApiUrl(coingecko, "//evil.example/steal"), undefined);
+assert.equal(
+  buildPinnedPublicApiUrl(coingecko, "https://api.coingecko.com/simple/price")?.toString(),
+  "https://api.coingecko.com/simple/price",
+);
 
 const executeSource = readFileSync("convex/http.ts", "utf8");
 assert.match(executeSource, /workspace_public_/);
