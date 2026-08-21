@@ -352,7 +352,7 @@ export default function InstallPage() {
                 The installer covers apt / dnf / yum / pacman / zypper / apk. For
                 anything else, install Node.js 18+ via your package manager, then run:
               </p>
-              <CopyableLine cmd="npx -y @nordsym/apiclaw@2.8.7 mcp-install" prompt="$" />
+              <CopyableLine cmd="npx -y @nordsym/apiclaw@latest mcp-install" prompt="$" />
             </Disclosure>
             <Disclosure title="Claude Desktop doesn't see APIClaw after install">
               <ol className="list-decimal pl-5 space-y-1.5">

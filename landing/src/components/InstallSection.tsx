@@ -30,7 +30,7 @@ const ONE_LINERS: Record<OS, { label: string; cmd: string; sub?: string }> = {
   },
   unknown: {
     label: "Universal",
-    cmd: "npx -y @nordsym/apiclaw@2.8.7 mcp-install",
+    cmd: "npx -y @nordsym/apiclaw@latest mcp-install",
     sub: "Requires Node.js 18+.",
   },
 };

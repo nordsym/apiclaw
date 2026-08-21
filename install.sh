@@ -77,7 +77,7 @@ echo -e "${GREEN}✓${NC} npx available"
 echo ""
 echo -e "${CYAN}Installing APIClaw MCP server...${NC}"
 echo ""
-npx @nordsym/apiclaw@2.8.7 mcp-install
+npx @nordsym/apiclaw@latest mcp-install
 
 echo ""
 echo -e "${GREEN}${BOLD}Done!${NC} APIClaw is ready to use in Claude."

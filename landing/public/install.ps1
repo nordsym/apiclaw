@@ -142,7 +142,7 @@ Write-Host ""
 Write-Host "Installing APIClaw MCP server..." -ForegroundColor Cyan
 Write-Host ""
 
-$npxArgs = @("-y", "@nordsym/apiclaw@2.8.7", "mcp-install")
+$npxArgs = @("-y", "@nordsym/apiclaw@latest", "mcp-install")
 & npx @npxArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host ""

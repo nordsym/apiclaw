@@ -90,9 +90,14 @@ assert.equal(
   null,
 );
 assert.equal(LEGACY_CLIENT_MINIMUM_VERSION, "2.8.7");
+assert.equal(LEGACY_CLIENT_UPGRADE_COMMANDS.length, 1);
+assert.equal(
+  LEGACY_CLIENT_UPGRADE_COMMANDS[0],
+  "npx -y @nordsym/apiclaw@latest auth login --force",
+);
 for (const command of LEGACY_CLIENT_UPGRADE_COMMANDS) {
-  assert.doesNotMatch(command, /@latest\b/);
-  assert.match(command, /@nordsym\/apiclaw@2\.8\.7|auth login --force/);
+  assert.doesNotMatch(command, /@2\.8\.7\b/);
+  assert.match(command, /@nordsym\/apiclaw@latest|auth login --force/);
 }
 assert.equal(requireManagedIdempotencyKey(null, "internal"), null);
 assert.throws(

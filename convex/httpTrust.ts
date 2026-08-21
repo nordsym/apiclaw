@@ -53,9 +53,10 @@ export function synthesizeLegacyIdempotencyKey(): string {
 }
 
 export const LEGACY_CLIENT_MINIMUM_VERSION = "2.8.7";
+/** Published npm latest is 2.8.6. 2.8.7 is not on the registry. Recovery
+ *  must install a version that exists and that the gateway will execute. */
 export const LEGACY_CLIENT_UPGRADE_COMMANDS = [
-  "npm install -g @nordsym/apiclaw@2.8.7",
-  "apiclaw auth login --force",
+  "npx -y @nordsym/apiclaw@latest auth login --force",
 ] as const;
 
 export function rewriteLegacyProviderActionCall(body: unknown): {
