@@ -1286,7 +1286,7 @@ async function resolveWorkspaceFromRequest(
     return { authMethod: "anonymous" };
   }
 
-  // 2. CLI session token (apiclaw login → ~/.apiclaw/session)
+  // 2. CLI session token (apiclaw auth login → ~/.apiclaw/session)
   const sessionToken = request.headers.get("X-APIClaw-Session");
   if (sessionToken && sessionToken.length >= 20) {
     try {
@@ -3726,7 +3726,7 @@ function extractBearerToken(request: Request): string | null {
 //   Authorization: Bearer sk-claw-…     (legacy, still supported)
 //   Authorization: Bearer sk-mcp-…      (Remote MCP OAuth)
 //   X-APIClaw-Api-Key: sk-claw-…        (preferred permanent header)
-//   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw login)
+//   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw auth login)
 async function requireApiKeyAuth(
   ctx: any,
   request: Request,
