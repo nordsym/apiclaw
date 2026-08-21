@@ -9,6 +9,13 @@ import { dirname, join } from 'path';
 import { platform, homedir } from 'os';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
+import {
+  AUTH_LOGIN_COMMAND,
+  FIRST_CALL_CLI,
+  completeFirstRunAuth,
+} from '../../first-run.js';
+// Printed next step: npx @nordsym/apiclaw auth login
+import { authLoginCommand } from './auth.js';
 
 export interface MCPInstallOptions {
   client?: string;
@@ -312,8 +319,18 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
   console.log('');
   
   if (detectedClients.length === 0) {
-    console.log(chalk.yellow('⚠️  No MCP clients detected.'));
+    console.log(chalk.yellow('No MCP clients detected.'));
     console.log('   Install Claude Desktop or Claude Code first.\n');
+    if (options.dryRun) {
+      console.log(`After install, sign in with: ${AUTH_LOGIN_COMMAND}\n`);
+      process.exit(0);
+    }
+    const auth = await completeFirstRunAuth({
+      launch: (opts) => authLoginCommand(opts),
+    });
+    if (!auth.complete) {
+      console.log(`Sign in so CLI and later MCP calls work:\n  ${AUTH_LOGIN_COMMAND}\n`);
+    }
     process.exit(0);
   }
   
@@ -344,30 +361,35 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
   
   if (failCount === 0) {
     if (options.dryRun) {
-      console.log(chalk.cyan('\n✅ Dry run complete! Run without --dry-run to apply changes.\n'));
-    } else if (successCount > 0) {
-      console.log(chalk.green('\n✅ APIClaw installed successfully!\n'));
-      console.log(chalk.bold('What you get:\n'));
-      console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
-      console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
-      console.log(chalk.cyan('  🔑 Managed') + ' 1,500+ premium (APIClaw manages keys)');
-      console.log('');
-      console.log('Next:');
-      console.log('  1. Restart your MCP client');
-      console.log('  2. Try: "Find weather APIs"');
-      console.log('');
-      console.log('Docs: https://apiclaw.com/docs\n');
-    } else {
-      console.log(chalk.yellow('\n✅ APIClaw already installed in all clients.\n'));
-      console.log(chalk.bold('What you have:\n'));
-      console.log(chalk.cyan('  🔍 Search') + '      22,000+ APIs to discover');
-      console.log(chalk.cyan('  🌐 Open APIs') + '   1,600 free APIs');
-      console.log(chalk.cyan('  🔑 Managed') + ' 1,500+ premium (APIClaw manages keys)');
-      console.log('');
-      console.log('Run with --force to reinstall (coming soon).\n');
+      console.log(chalk.cyan('\nDry run complete. Run without --dry-run to apply changes.\n'));
+      console.log(`After install, sign in with: ${AUTH_LOGIN_COMMAND}\n`);
+      return;
     }
+
+    if (successCount > 0) {
+      console.log(chalk.green('\nMCP config written.\n'));
+    } else {
+      console.log(chalk.yellow('\nAPIClaw is already in the detected MCP clients.\n'));
+    }
+
+    const auth = await completeFirstRunAuth({
+      launch: (opts) => authLoginCommand(opts),
+    });
+    if (auth.complete) {
+      console.log('Restart your MCP client, then try:');
+      console.log(`  ${FIRST_CALL_CLI}`);
+      console.log('Docs: https://apiclaw.cloud/docs\n');
+      return;
+    }
+
+    console.log(chalk.bold('MCP is installed. Sign-in is still required.\n'));
+    console.log(`  ${AUTH_LOGIN_COMMAND}`);
+    console.log('Then confirm with:');
+    console.log(`  npx @nordsym/apiclaw auth whoami`);
+    // MCP config wrote successfully. Leave exit 0 so install.sh can run its
+    // own whoami gate. Never print Done here.
   } else {
-    console.log(chalk.red(`\n⚠️  Installation completed with ${failCount} error(s).\n`));
+    console.log(chalk.red(`\nInstallation completed with ${failCount} error(s).\n`));
     process.exit(1);
   }
 }

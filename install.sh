@@ -79,7 +79,61 @@ echo -e "${CYAN}Installing APIClaw MCP server...${NC}"
 echo ""
 npx @nordsym/apiclaw@latest mcp-install
 
+# First-run auth gate. Never print Done until `auth whoami` succeeds.
+AUTH_LOGIN_CMD="npx @nordsym/apiclaw auth login"
+AUTH_WHOAMI_CMD="npx @nordsym/apiclaw auth whoami"
+
+apiclaw_can_launch_auth() {
+    if [ -n "${CI:-}" ] || [ "${APICLAW_SKIP_AUTH:-}" = "1" ] || [ "${APICLAW_SKIP_AUTH:-}" = "true" ]; then
+        return 1
+    fi
+    case "$(uname -s)" in
+        Darwin) return 0 ;;
+        MINGW*|MSYS*|CYGWIN*) return 0 ;;
+        *)
+            if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+                return 0
+            fi
+            return 1
+            ;;
+    esac
+}
+
 echo ""
-echo -e "${GREEN}${BOLD}Done!${NC} APIClaw is ready to use in Claude."
-echo -e "${DIM}Restart Claude Desktop to activate.${NC}"
+echo -e "${CYAN}Next step: sign in so a managed call can succeed.${NC}"
+echo -e "  ${BOLD}${AUTH_LOGIN_CMD}${NC}"
 echo ""
+
+if apiclaw_can_launch_auth && { [ -t 1 ] || [ -t 0 ]; }; then
+    echo -e "${DIM}Opening browser sign-in...${NC}"
+    npx -y @nordsym/apiclaw@latest auth login || true
+fi
+
+# Published whoami used to exit 0 even when signed out. Trust the session file.
+apiclaw_whoami_ok() {
+    if [ -f "$HOME/.apiclaw.toml" ] && grep -q 'session_token' "$HOME/.apiclaw.toml" && grep -q 'email' "$HOME/.apiclaw.toml"; then
+        return 0
+    fi
+    if [ -f "$HOME/.apiclaw/session" ]; then
+        return 0
+    fi
+    return 1
+}
+
+if apiclaw_whoami_ok; then
+    npx -y @nordsym/apiclaw@latest auth whoami || true
+    echo ""
+    echo -e "${GREEN}${BOLD}Done.${NC} Signed in. A managed call can succeed now."
+    echo -e "${DIM}First call: apiclaw call nasa/apod --params '{}'${NC}"
+    echo -e "${DIM}Restart Claude Desktop to activate the MCP server.${NC}"
+    echo ""
+    exit 0
+fi
+
+echo ""
+echo -e "${RED}${BOLD}Not done.${NC} Sign-in is required before any managed call."
+echo -e "  ${BOLD}${AUTH_LOGIN_CMD}${NC}"
+echo -e "${DIM}Headless or SSH? Open the browser URL on another device, then confirm:${NC}"
+echo -e "  ${AUTH_WHOAMI_CMD}"
+echo ""
+exit 1

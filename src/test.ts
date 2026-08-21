@@ -30,8 +30,10 @@ assert.equal(noSessionResult.ok, false);
 if (!noSessionResult.ok) {
   assert.equal(noSessionResult.payload.action, "agent_auth_required");
   assert.equal(typeof noSessionResult.payload.first_call_prompt, "string");
-  assert.match(noSessionResult.payload.first_call_prompt as string, /discover_apis/);
+  assert.equal(noSessionResult.payload.command, "npx @nordsym/apiclaw auth login");
   assert.match(noSessionResult.payload.first_call_prompt as string, /call_api/);
+  assert.match(noSessionResult.payload.first_call_prompt as string, /nasa|fixer_latest|brave_search/);
+  assert.doesNotMatch(noSessionResult.payload.first_call_prompt as string, /elevenlabs|replicate/i);
 }
 assert.equal(requireVerifiedOwner(activeContext()).ok, true);
 

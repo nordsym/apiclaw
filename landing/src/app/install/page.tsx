@@ -186,10 +186,17 @@ export default function InstallPage() {
               <Check className="w-5 h-5 text-accent" />
               Verify the install
             </h3>
-            <CopyableLine cmd="npx @nordsym/apiclaw --version" prompt="$" />
+            <CopyableLine cmd="npx @nordsym/apiclaw auth login" prompt="$" />
+            <p className="text-xs text-text-muted mt-2 mb-3">
+              Required before any managed call. Opens a browser, writes{" "}
+              <code className="font-mono">~/.apiclaw.toml</code>. Headless? Open the printed URL
+              on another device.
+            </p>
+            <CopyableLine cmd="npx @nordsym/apiclaw auth whoami" prompt="$" />
             <p className="text-xs text-text-muted mt-2">
-              Should print a version like <code className="font-mono">2.8.6</code> or newer. Then
-              restart Claude Desktop and look for APIClaw in the MCP tools list.
+              Must print your email. Then restart Claude Desktop and try NASA APOD:{" "}
+              <code className="font-mono">call_api</code> with provider{" "}
+              <code className="font-mono">nasa</code>, action <code className="font-mono">apod</code>.
             </p>
           </div>
         </div>

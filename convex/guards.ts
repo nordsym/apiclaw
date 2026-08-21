@@ -45,7 +45,7 @@ export async function resolveVerifiedOwner(
       ok: false,
       reason: "no_session",
       message:
-        "Sign-in required. Run `npx @nordsym/apiclaw auth login` to open the browser sign-in, or `npx @nordsym/apiclaw login --email-fallback` for the magic-link flow. Re-call this tool after sign-in completes.",
+        "Sign-in required. Run `npx @nordsym/apiclaw auth login` to open the browser sign-in. Headless or SSH: open the printed URL on another device. Re-call this tool after sign-in completes.",
     };
   }
 
