@@ -17,7 +17,8 @@
       "@/*": ["./src/*"],
       "@apiclaw/product-truth": ["./src/lib/product-truth.generated.ts"],
       "@apiclaw/mcp-scope-policy": ["./src/lib/mcp-scope-policy.generated.ts"],
-      "@apiclaw/canon-stats": ["./src/lib/canon-stats.generated.ts"]
+      "@apiclaw/canon-stats": ["./src/lib/canon-stats.generated.ts"],
+      "@apiclaw/workspace-public-apis": ["./src/lib/workspace-public-apis.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

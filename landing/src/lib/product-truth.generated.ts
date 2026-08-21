@@ -15,6 +15,7 @@ export const MANAGED_USAGE_POLICY = {
   freeManagedWarningAt: FREE_MANAGED_WARNING_AT,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
+  workspaceAuthenticatedPublicExecutionAvailable: true,
   paygMarginRate: PAYG_MARGIN_RATE,
   paygPriceBasis: "provider_cost",
   paygRequiresBillingGradeAdapter: true,
@@ -87,7 +88,7 @@ export const APILAYER_PAID_PLAN_ONLY_ACTIONS = [
 ] as const;
 
 export const PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_SUMMARY =
-  "OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails";
+  "22 managed provider rails plus workspace-authenticated public/no-key HTTPS origins";
 
 export const MANAGED_PROVIDER_ADAPTERS = [
   {
@@ -105,8 +106,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "groq",
     name: "Groq",
     aliases: ["groq", "groq api"],
-    customerExecutableActions: [],
-    description: "Managed LLM inference adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat"],
+    description: "Managed Groq chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.groq.com",
     docsUrl: "https://console.groq.com/docs",
@@ -116,8 +117,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "mistral",
     name: "Mistral AI",
     aliases: ["mistral", "mistral ai", "mistral api", "mistral ai api"],
-    customerExecutableActions: [],
-    description: "Managed Mistral model adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat"],
+    description: "Managed Mistral chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.mistral.ai",
     docsUrl: "https://docs.mistral.ai",
@@ -127,8 +128,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "deepinfra",
     name: "DeepInfra",
     aliases: ["deepinfra", "deepinfra api"],
-    customerExecutableActions: [],
-    description: "Managed inference adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat"],
+    description: "Managed DeepInfra chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.deepinfra.com",
     docsUrl: "https://deepinfra.com/docs",
@@ -138,8 +139,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "openai",
     name: "OpenAI",
     aliases: ["openai", "openai api"],
-    customerExecutableActions: [],
-    description: "Managed OpenAI adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat"],
+    description: "Managed OpenAI chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.openai.com",
     docsUrl: "https://platform.openai.com/docs",
@@ -149,8 +150,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "xai",
     name: "xAI",
     aliases: ["xai", "xai api", "x.ai", "x.ai api", "grok", "grok api"],
-    customerExecutableActions: [],
-    description: "Managed Grok model adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat"],
+    description: "Managed xAI Grok chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.x.ai",
     docsUrl: "https://docs.x.ai",
@@ -160,8 +161,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "anthropic",
     name: "Anthropic",
     aliases: ["anthropic", "anthropic api", "anthropic claude", "anthropic messages api"],
-    customerExecutableActions: [],
-    description: "Managed Claude adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat", "messages"],
+    description: "Managed Anthropic Claude chat adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.anthropic.com",
     docsUrl: "https://docs.anthropic.com",
@@ -171,8 +172,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "cohere",
     name: "Cohere",
     aliases: ["cohere", "cohere api"],
-    customerExecutableActions: [],
-    description: "Managed language-model adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["chat", "rerank"],
+    description: "Managed Cohere chat and rerank adapter. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.cohere.ai",
     docsUrl: "https://docs.cohere.com",
@@ -193,8 +194,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "serper",
     name: "Serper",
     aliases: ["serper", "serper api"],
-    customerExecutableActions: [],
-    description: "Managed search adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["search"],
+    description: "Managed Google SERP search. The existing per-call reservation is the billing-grade realized cost.",
     category: "Utilities",
     baseUrl: "https://google.serper.dev",
     docsUrl: "https://serper.dev",
@@ -204,8 +205,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "elevenlabs",
     name: "ElevenLabs",
     aliases: ["elevenlabs", "elevenlabs api", "elevenlabs tts"],
-    customerExecutableActions: [],
-    description: "Managed voice adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["text_to_speech"],
+    description: "Managed ElevenLabs text-to-speech. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.elevenlabs.io",
     docsUrl: "https://elevenlabs.io/docs",
@@ -215,8 +216,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "deepgram",
     name: "Deepgram",
     aliases: ["deepgram", "deepgram api"],
-    customerExecutableActions: [],
-    description: "Managed speech adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["transcribe"],
+    description: "Managed Deepgram transcription. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.deepgram.com",
     docsUrl: "https://developers.deepgram.com",
@@ -226,8 +227,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "assemblyai",
     name: "AssemblyAI",
     aliases: ["assemblyai", "assemblyai api"],
-    customerExecutableActions: [],
-    description: "Managed speech-intelligence adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["transcribe"],
+    description: "Managed AssemblyAI transcription. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.assemblyai.com",
     docsUrl: "https://www.assemblyai.com/docs",
@@ -237,8 +238,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "replicate",
     name: "Replicate",
     aliases: ["replicate", "replicate api"],
-    customerExecutableActions: [],
-    description: "Managed model-execution adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["run"],
+    description: "Managed Replicate predictions. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.replicate.com",
     docsUrl: "https://replicate.com/docs",
@@ -248,8 +249,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "stability",
     name: "Stability AI",
     aliases: ["stability", "stability ai", "stability ai api"],
-    customerExecutableActions: [],
-    description: "Managed image-generation adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["generate"],
+    description: "Managed Stability image generation. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.stability.ai",
     docsUrl: "https://platform.stability.ai/docs",
@@ -259,8 +260,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "firecrawl",
     name: "Firecrawl",
     aliases: ["firecrawl", "firecrawl api"],
-    customerExecutableActions: [],
-    description: "Managed web-extraction adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["scrape", "crawl", "map"],
+    description: "Managed Firecrawl scrape, crawl, and map. Reservation is the billing-grade realized cost.",
     category: "Utilities",
     baseUrl: "https://api.firecrawl.dev",
     docsUrl: "https://docs.firecrawl.dev",
@@ -270,8 +271,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "genprd",
     name: "GenPRD",
     aliases: ["genprd", "genprd api"],
-    customerExecutableActions: [],
-    description: "Managed product-requirements adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["generate_prd"],
+    description: "Managed GenPRD generation. Reservation is the billing-grade realized cost.",
     category: "Business",
     baseUrl: "https://genprd.se",
     docsUrl: "https://genprd.se",
@@ -292,8 +293,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "e2b",
     name: "E2B",
     aliases: ["e2b", "e2b api"],
-    customerExecutableActions: [],
-    description: "Managed code-sandbox adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["run_code"],
+    description: "Managed E2B code sandbox. Reservation is the billing-grade realized cost.",
     category: "Development",
     baseUrl: "https://api.e2b.dev",
     docsUrl: "https://e2b.dev/docs",
@@ -336,8 +337,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "voyage",
     name: "Voyage AI",
     aliases: ["voyage", "voyage ai", "voyage api", "voyage ai api"],
-    customerExecutableActions: [],
-    description: "Managed embeddings adapter. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: ["embeddings"],
+    description: "Managed Voyage embeddings. Reservation is the billing-grade realized cost.",
     category: "AI & ML",
     baseUrl: "https://api.voyageai.com",
     docsUrl: "https://docs.voyageai.com",
@@ -383,11 +384,15 @@ export function isPublicCustomerExecutableAction(
   if (!action) return false;
   const provider = getPublicCustomerExecutableProvider(providerReference);
   const normalizedAction = action.trim().toLowerCase();
-  // The OpenAI-compatible endpoint names the same public OpenRouter chat rail
-  // `chat_completions`. Keep the product-facing action canonical as `chat`
-  // while authorizing both protocol spellings from this single source.
-  const canonicalAction = provider?.id === "openrouter" && normalizedAction === "chat_completions"
-    ? "chat"
+  // OpenAI-compatible callers name the same chat rail `chat_completions`.
+  // Anthropic callers may send `messages`. Keep product-facing actions
+  // canonical while authorizing both protocol spellings.
+  const llmChatProviders = new Set([
+    "openrouter", "groq", "mistral", "deepinfra", "openai", "xai", "anthropic", "cohere",
+  ]);
+  const canonicalAction = llmChatProviders.has(provider?.id ?? "") &&
+    (normalizedAction === "chat_completions" || normalizedAction === "messages")
+    ? (provider?.id === "anthropic" && normalizedAction === "messages" ? "messages" : "chat")
     : normalizedAction;
   return provider?.customerExecutableActions.some(
     (candidate) => candidate === canonicalAction,

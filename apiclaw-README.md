@@ -20,9 +20,8 @@ The control plane for AI agents. APIClaw gives agents one workspace for API disc
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not APIClaw execution.
 - 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
-- Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails.
-- Managed execution is available only when a server-side adapter is live and the request passes the current trust and cost policy.
-- Keyless public definitions remain discovery-only until DNS-pinned, redirect-validating egress is live.
+- 22 managed provider rails are customer-executable now. Reservation is the billing-grade realized cost where the adapter has no provider-reported usage.
+- 1,003 workspace-authenticated public/no-key HTTPS origins are executable. Anonymous keyless public execution stays disabled.
 - Signup is required. There is no anonymous execution.
 - Internal NordSym communication infrastructure is not part of the public provider surface.
 
@@ -75,7 +74,7 @@ Use `discover_apis` to search by job-to-be-done. Results distinguish among:
 
 Use `call_api` only with a managed route returned as executable. Unknown-cost customer traffic fails closed. Public registry entries never become an open proxy.
 
-The managed adapter inventory spans model, search, voice, media, developer, and data providers. Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Subscription-blocked APILayer actions and keyless public APIs stay discovery-only. Runtime output is the authority for provider and action readiness.
+The managed adapter inventory spans model, search, voice, media, developer, and data providers. All 22 managed provider rails are customer-executable now. 1,003 workspace-authenticated public/no-key HTTPS origins are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
 
 ## Model routing
 
@@ -111,7 +110,7 @@ Usage, provider cost, customer charge, and billing state are visible in the work
 
 - Managed provider credentials stay server-side.
 - Workspace ownership is verified before execution.
-- Public registry execution is disabled until hardened egress is live.
+- Public/no-key origins execute only after workspace auth, with HTTPS origin pinning and redirect rejection. Anonymous keyless proxy stays disabled.
 - Billing requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
 - Usage authorization and finalization are recorded in an immutable workspace-scoped ledger.
 - Internal-only providers are filtered from public catalog and copy.

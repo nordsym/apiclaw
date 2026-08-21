@@ -9,6 +9,7 @@ import {
   getManagedProviderAdapter,
 } from "@apiclaw/product-truth";
 import { CANON_STATS } from "@apiclaw/canon-stats";
+import { isWorkspacePublicCatalogCard } from "@apiclaw/workspace-public-apis";
 
 interface ApiEntry {
   name: string;
@@ -64,7 +65,7 @@ function assertPublicCatalogTruth(
     sourceVerified: CANON_STATS.source_verified,
     verificationSweepPasses: CANON_STATS.verification_sweep_passes,
     managedAdapters: CANON_STATS.managed_provider_adapters,
-    customerExecutable: CANON_STATS.customer_executable_providers,
+    customerExecutable: CANON_STATS.customer_executable_catalog_cards,
   };
 
   if (
@@ -160,20 +161,18 @@ function loadApis(): ApiEntry[] {
 
           let tier: ApiEntry["tier"];
           let verified = false;
-          let callable = a.callable === true;
+          const workspacePublic = isWorkspacePublicCatalogCard(a.name);
+          // Harvested apiKey/unknown rows stay discovery-only. Only the
+          // workspace-authenticated public/no-key allowlist is callable.
+          let callable = workspacePublic;
 
           if (v) {
             tier = v.tier;
             verified = v.tier === "verified";
-            // Source verification proves the definition responded upstream. It
-            // does not make APIClaw a safe generic proxy. Non-managed entries
-            // stay discovery-only until hardened egress is live.
-            callable = false;
+            if (workspacePublic) tier = "working";
           } else {
-            // No verification result and not managed → demoted to discovery,
-            // regardless of any stale registry callable flag. Honest count.
-            callable = false;
-            if (a.callable === true) tier = "untested";
+            if (workspacePublic) tier = "working";
+            else if (a.callable === true) tier = "untested";
           }
 
           return {

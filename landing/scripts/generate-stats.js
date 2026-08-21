@@ -3,7 +3,6 @@
 // result against src/canon-stats.ts before a build may continue.
 const fs = require('fs');
 const path = require('path');
-const ts = require('typescript');
 
 const categoryMap = {
   'AI': 'AI & ML',
@@ -78,23 +77,68 @@ const verificationPath = path.join(__dirname, '../src/lib/verification-status.js
 const localRegistryPath = path.join(__dirname, '../src/lib/apis.json');
 const parentRegistryPath = path.join(__dirname, '../../src/registry/apis.json');
 const productTruthPath = path.join(__dirname, '../../src/product-truth.ts');
-const providerBoundariesPath = path.join(__dirname, '../src/lib/provider-boundaries.ts');
+const workspacePublicPath = path.join(__dirname, '../../src/workspace-public-apis.generated.ts');
 
-function loadTypeScriptModule(filePath) {
-  const source = fs.readFileSync(filePath, 'utf8');
-  const output = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.CommonJS,
-      target: ts.ScriptTarget.ES2022,
-    },
-    fileName: filePath,
-  }).outputText;
-  const module = { exports: {} };
-  new Function('exports', 'module', 'require', output)(module.exports, module, require);
-  return module.exports;
+function normalizeProviderReference(value) {
+  return String(value).trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-function buildPublicInventory(registry, verification, productTruth, boundaries) {
+function loadProductTruth(filePath) {
+  const source = fs.readFileSync(filePath, 'utf8');
+  const start = source.indexOf('export const MANAGED_PROVIDER_ADAPTERS = [');
+  const end = source.indexOf('] as const satisfies', start);
+  if (start < 0 || end < 0) {
+    throw new Error('MANAGED_PROVIDER_ADAPTERS not found in product-truth.ts');
+  }
+  const adapters = [];
+  for (const block of source.slice(start, end).split(/\n  \{/).slice(1)) {
+    const id = block.match(/id:\s*"([^"]+)"/)?.[1];
+    const name = block.match(/name:\s*"([^"]+)"/)?.[1];
+    const category = block.match(/category:\s*"([^"]+)"/)?.[1];
+    const aliases = [...(block.match(/aliases:\s*\[([\s\S]*?)\]/)?.[1] || '').matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+    const actionsField = block.match(/customerExecutableActions:\s*(APILAYER_CUSTOMER_EXECUTABLE_ACTIONS|\[[\s\S]*?\])/)?.[1] || '[]';
+    const customerExecutableActions = actionsField.includes('APILAYER')
+      ? ['__apilayer__']
+      : [...actionsField.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+    if (id && name) {
+      adapters.push({ id, name, aliases, category, customerExecutableActions });
+    }
+  }
+  return {
+    MANAGED_PROVIDER_ADAPTERS: adapters,
+    getManagedProviderAdapter(reference) {
+      if (!reference) return undefined;
+      const normalized = normalizeProviderReference(reference);
+      return adapters.find((provider) =>
+        provider.aliases.some((alias) => normalizeProviderReference(alias) === normalized),
+      );
+    },
+  };
+}
+
+function loadBoundaries() {
+  const internalPattern = /(^|[^a-z0-9])(46elks|twilio|resend)([^a-z0-9]|$)/i;
+  const unavailablePattern = /(^|[^a-z0-9])together(?: ai)?([^a-z0-9]|$)/i;
+  const matches = (reference, pattern) =>
+    [reference.name, reference.id, reference.baseUrl, reference.docsUrl]
+      .some((value) => typeof value === 'string' && pattern.test(value));
+  return {
+    isInternalCatalogEntry: (reference) => matches(reference, internalPattern),
+    isUnavailableManagedBrand: (name) => typeof name === 'string' && unavailablePattern.test(name),
+  };
+}
+
+function loadWorkspacePublicNames() {
+  if (!fs.existsSync(workspacePublicPath)) return new Set();
+  const source = fs.readFileSync(workspacePublicPath, 'utf8');
+  const names = new Set();
+  for (const match of source.matchAll(/"name":\s*"([^"]+)"/g)) {
+    names.add(match[1].toLowerCase().trim());
+  }
+  return names;
+}
+
+function buildPublicInventory(registry, verification, productTruth, boundaries, workspacePublicNames) {
   const all = [...(registry.apis || [])];
   if (!all.some((entry) => String(entry.name || '').toLowerCase().trim() === 'e2b')) {
     all.push({
@@ -123,7 +167,7 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
         category: entry.category || 'Other',
         verified: evidence?.tier === 'verified',
         managedAdapter: false,
-        customerExecutable: false,
+        customerExecutable: workspacePublicNames.has(String(entry.name || '').toLowerCase().trim()),
       };
     });
 
@@ -146,6 +190,7 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
         'sourceVerifiedCount',
         'managedProviderAdapterCount',
         'customerExecutableProviderCount',
+        'customerExecutableCatalogCardCount',
       ]) {
         if (!Number.isFinite(checkedIn[field])) {
           throw new Error(`Checked-in stats are missing ${field}`);
@@ -157,9 +202,10 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
     const registryPath = fs.existsSync(localRegistryPath) ? localRegistryPath : parentRegistryPath;
     const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
     const verification = JSON.parse(fs.readFileSync(verificationPath, 'utf8'));
-    const productTruth = loadTypeScriptModule(productTruthPath);
-    const boundaries = loadTypeScriptModule(providerBoundariesPath);
-    const inventory = buildPublicInventory(registry, verification, productTruth, boundaries);
+    const productTruth = loadProductTruth(productTruthPath);
+    const boundaries = loadBoundaries();
+    const workspacePublicNames = loadWorkspacePublicNames();
+    const inventory = buildPublicInventory(registry, verification, productTruth, boundaries, workspacePublicNames);
 
     const categoryBreakdown = {};
     for (const entry of inventory) {
@@ -187,7 +233,8 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
       apiCount: inventory.length,
       sourceVerifiedCount: inventory.filter((entry) => entry.verified).length,
       managedProviderAdapterCount: inventory.filter((entry) => entry.managedAdapter).length,
-      customerExecutableProviderCount: inventory.filter((entry) => entry.customerExecutable).length,
+      customerExecutableProviderCount: inventory.filter((entry) => entry.managedAdapter && entry.customerExecutable).length,
+      customerExecutableCatalogCardCount: inventory.filter((entry) => entry.customerExecutable).length,
       npmDownloads,
       endpointCount: existingStats.endpointCount || 0,
       capabilityCount: existingStats.capabilityCount || 15,
@@ -203,6 +250,7 @@ function buildPublicInventory(registry, verification, productTruth, boundaries) 
       sourceVerifiedCount: stats.sourceVerifiedCount,
       managedProviderAdapterCount: stats.managedProviderAdapterCount,
       customerExecutableProviderCount: stats.customerExecutableProviderCount,
+      customerExecutableCatalogCardCount: stats.customerExecutableCatalogCardCount,
     });
   } catch (error) {
     console.error('Failed to generate measured public catalog stats:', error);

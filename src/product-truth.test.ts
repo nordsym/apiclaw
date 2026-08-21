@@ -29,12 +29,13 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   freeManagedWarningAt: 20,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
+  workspaceAuthenticatedPublicExecutionAvailable: true,
   paygMarginRate: 0.15,
   paygPriceBasis: "provider_cost",
   paygRequiresBillingGradeAdapter: true,
 });
 
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 5);
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 22);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
 assert.equal(CANON_STATS.discoverable, 26_619);
 assert.equal(CANON_STATS.source_verified, 689);
@@ -44,6 +45,8 @@ assert.equal(
   CANON_STATS.customer_executable_providers,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
+assert.equal(CANON_STATS.workspace_public_executable, 1_003);
+assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_025);
 assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
@@ -53,35 +56,46 @@ assert.deepEqual(
   [],
 );
 assert.deepEqual(
-  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map(({ id, customerExecutableActions }) => [id, [...customerExecutableActions]]),
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map(({ id }) => id),
   [
-    ["openrouter", ["chat"]],
-    ["brave_search", ["search"]],
-    ["github", ["search_repos", "get_repo", "get_file"]],
-    [
-      "nasa",
-      [
-        "apod",
-        "neo_feed",
-        "neo_lookup",
-        "epic",
-        "epic_date",
-        "mars_weather",
-        "earth_imagery",
-        "earth_assets",
-        "donki_notifications",
-        "call",
-      ],
-    ],
-    ["apilayer", [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]],
+    "openrouter",
+    "groq",
+    "mistral",
+    "deepinfra",
+    "openai",
+    "xai",
+    "anthropic",
+    "cohere",
+    "brave_search",
+    "serper",
+    "elevenlabs",
+    "deepgram",
+    "assemblyai",
+    "replicate",
+    "stability",
+    "firecrawl",
+    "genprd",
+    "github",
+    "e2b",
+    "nasa",
+    "apilayer",
+    "voyage",
   ],
 );
+assert.deepEqual(getPublicCustomerExecutableProvider("OpenRouter")?.customerExecutableActions, ["chat"]);
+assert.deepEqual(getPublicCustomerExecutableProvider("Groq")?.customerExecutableActions, ["chat"]);
+assert.deepEqual(getPublicCustomerExecutableProvider("Anthropic")?.customerExecutableActions, ["chat", "messages"]);
+assert.deepEqual(getPublicCustomerExecutableProvider("Firecrawl")?.customerExecutableActions, ["scrape", "crawl", "map"]);
+assert.deepEqual(getPublicCustomerExecutableProvider("APILayer")?.customerExecutableActions, [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]);
 assert.equal(getPublicCustomerExecutableProvider("GitHub API")?.id, "github");
 assert.equal(getManagedProviderAdapter("AssemblyAI")?.id, "assemblyai");
-assert.equal(getPublicCustomerExecutableProvider("AssemblyAI"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("AssemblyAI")?.id, "assemblyai");
 assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), true);
 assert.equal(isPublicCustomerExecutableAction("github", "create_issue"), false);
-assert.equal(isPublicCustomerExecutableAction("replicate", "run"), false);
+assert.equal(isPublicCustomerExecutableAction("replicate", "run"), true);
+assert.equal(isPublicCustomerExecutableAction("voyage", "embeddings"), true);
+assert.equal(isPublicCustomerExecutableAction("elevenlabs", "text_to_speech"), true);
+assert.equal(isPublicCustomerExecutableAction("e2b", "run_code"), true);
 assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), true);
 assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), true);
 for (const action of APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS) {
@@ -203,7 +217,7 @@ assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 managed adapters/);
-assert.match(packageMetadata.description, /5 provider rails customer-executable/);
+assert.match(packageMetadata.description, /22 provider rails customer-executable/);
 for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
   const health = readFileSync(healthFile, "utf8");
   assert.match(health, /service: 'apiclaw-gateway'/);
@@ -295,8 +309,8 @@ const catalogRoute = readFileSync("landing/src/app/api/catalog/route.ts", "utf8"
 assert.match(catalogRoute, /CANON_STATS/);
 assert.match(
   catalogRoute,
-  /customerExecutable: CANON_STATS\.customer_executable_providers/,
-  "catalog load must assert customer-executable count against canon, not a hardcoded 4",
+  /customerExecutable: CANON_STATS\.customer_executable_catalog_cards/,
+  "catalog load must assert callable catalog cards against canon",
 );
 assert.match(catalogRoute, /assertPublicCatalogTruth\(cachedApis, verification\)/);
 assert.doesNotMatch(

@@ -26,6 +26,7 @@ if (process.env.APICLAW_ISOLATED_LANDING_BUILD === '1' || !existsSync(CANON_STAT
     'sourceVerifiedCount',
     'managedProviderAdapterCount',
     'customerExecutableProviderCount',
+    'customerExecutableCatalogCardCount',
   ]) {
     if (!Number.isFinite(checkedIn[field])) {
       throw new Error(`Checked-in stats are missing ${field}`);
@@ -55,6 +56,8 @@ function readCanonStats() {
     verification_sweep_passes: number('verification_sweep_passes'),
     managed_provider_adapters: number('managed_provider_adapters'),
     customer_executable_providers: number('customer_executable_providers'),
+    workspace_public_executable: number('workspace_public_executable'),
+    customer_executable_catalog_cards: number('customer_executable_catalog_cards'),
     npm_installs: number('npm_installs'),
   };
 }
@@ -81,6 +84,7 @@ const before = {
   sourceVerifiedCount: stats.sourceVerifiedCount,
   managedProviderAdapterCount: stats.managedProviderAdapterCount,
   customerExecutableProviderCount: stats.customerExecutableProviderCount,
+  customerExecutableCatalogCardCount: stats.customerExecutableCatalogCardCount,
 };
 
 const measured = {
@@ -88,6 +92,7 @@ const measured = {
   sourceVerifiedCount: CANON.source_verified,
   managedProviderAdapterCount: CANON.managed_provider_adapters,
   customerExecutableProviderCount: CANON.customer_executable_providers,
+  customerExecutableCatalogCardCount: CANON.customer_executable_catalog_cards,
 };
 for (const [field, expected] of Object.entries(measured)) {
   if (stats[field] !== expected) {
@@ -106,6 +111,7 @@ stats.apiCount = CANON.discoverable;
 stats.sourceVerifiedCount = CANON.source_verified;
 stats.managedProviderAdapterCount = CANON.managed_provider_adapters;
 stats.customerExecutableProviderCount = CANON.customer_executable_providers;
+stats.customerExecutableCatalogCardCount = CANON.customer_executable_catalog_cards;
 stats.npmDownloads = CANON.npm_installs;
 stats.canonGeneratedAt = CANON.generated_at;
 stats.generatedAt = new Date().toISOString();
