@@ -20,7 +20,7 @@ The control plane for AI agents. APIClaw gives agents one workspace for API disc
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not APIClaw execution.
 - 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
-- Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only.
+- Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails.
 - Managed execution is available only when a server-side adapter is live and the request passes the current trust and cost policy.
 - Keyless public definitions remain discovery-only until DNS-pinned, redirect-validating egress is live.
 - Signup is required. There is no anonymous execution.
@@ -75,7 +75,7 @@ Use `discover_apis` to search by job-to-be-done. Results distinguish among:
 
 Use `call_api` only with a managed route returned as executable. Unknown-cost customer traffic fails closed. Public registry entries never become an open proxy.
 
-The managed adapter inventory spans model, search, voice, media, developer, and data providers. Only the four explicitly customer-executable provider rails are callable by customer workspaces today. Runtime output is the authority for provider and action readiness.
+The managed adapter inventory spans model, search, voice, media, developer, and data providers. Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Subscription-blocked APILayer actions and keyless public APIs stay discovery-only. Runtime output is the authority for provider and action readiness.
 
 ## Model routing
 

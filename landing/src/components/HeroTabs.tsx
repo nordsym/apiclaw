@@ -32,7 +32,7 @@ export function HeroTabs() {
   const configSnippetJson = selectedClient === "chatgpt" ? chatGptInstructions : jsonConfig;
 
   const terminalCommandMac = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
-  const terminalCommandWin = "npx @nordsym/apiclaw mcp-install";
+  const terminalCommandWin = "npx @nordsym/apiclaw@latest mcp-install";
 
   const copyConfig = () => {
     navigator.clipboard.writeText(configSnippetJson);
@@ -159,7 +159,7 @@ export function HeroTabs() {
                     </div>
                     <div className="code-preview-body overflow-x-auto">
                       <pre className="text-sm whitespace-pre-wrap break-all">
-                        <span className="text-blue-400">{'>'}</span> npx @nordsym/apiclaw mcp-install
+                        <span className="text-blue-400">{'>'}</span> npx @nordsym/apiclaw@latest mcp-install
                       </pre>
                     </div>
                   </div>

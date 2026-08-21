@@ -34,7 +34,7 @@ try {
 console.log('');
 console.log(`  🦞 APIClaw installed successfully!`);
 console.log('');
-console.log(`  → Sign in:     ${CYAN}npx @nordsym/apiclaw login${RESET}`);
+console.log(`  → Sign in:     ${CYAN}npx @nordsym/apiclaw auth login${RESET}`);
 console.log(`  → Full setup:  ${CYAN}npx @nordsym/apiclaw setup${RESET}  ${DIM}(auto-detects Claude, Cursor, Windsurf)${RESET}`);
 console.log(`  ⭐ Star us: ${CYAN}https://github.com/nordsym/apiclaw${RESET}  ${DIM}(helps more devs find us)${RESET}`);
 console.log('');

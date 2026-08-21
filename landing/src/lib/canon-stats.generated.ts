@@ -65,11 +65,13 @@ export const CANON_STATS = {
    */
   managed_provider_adapters: 22,
 
-  /** Managed providers with at least one customer-executable action. */
-  customer_executable_providers: 4,
+  /** Managed providers with at least one customer-executable action.
+   *  Must stay equal to PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT or
+   *  landing/src/app/api/catalog/route.ts throws on load. */
+  customer_executable_providers: 5,
 
-  /** All-time npm installs (canon as of 2026-05-27 per npmjs dashboard). */
-  npm_installs: 16_485,
+  /** All-time npm installs (canon as of 2026-08-21 per npmjs dashboard). */
+  npm_installs: 20_058,
 
   /** API Surface narrative (used in marketing copy). */
   hero_line: '26,619 discoverable APIs · 689 source-verified',

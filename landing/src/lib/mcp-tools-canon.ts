@@ -75,7 +75,7 @@ export const CANONICAL_MCP_TOOLS = [
     inputSchema: {
       type: "object",
       properties: {
-        provider: { type: "string", description: "Managed provider ID (e.g., brave_search, openrouter, github, nasa)" },
+        provider: { type: "string", description: "Managed provider ID (e.g., brave_search, openrouter, github, nasa, apilayer)" },
         action: { type: "string", description: "Provider action (e.g., search, chat, search_repos)" },
         params: { type: "object", description: "Parameters for the selected provider action" },
         idempotency_key: { type: "string", description: "Required caller-owned operation key. Keep it with the result. If the outcome is ambiguous, do not submit the operation again; retain this key and the request ID for reconciliation." },

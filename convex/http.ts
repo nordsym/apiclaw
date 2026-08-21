@@ -36,6 +36,11 @@ import {
   normalizeMaxOutputTokens,
   requireManagedIdempotencyKey,
   requiresLegacyClientUpgrade,
+  rewriteLegacyProviderActionCall,
+  synthesizeLegacyIdempotencyKey,
+  hasCustomerManagedCredential,
+  LEGACY_CLIENT_MINIMUM_VERSION,
+  LEGACY_CLIENT_UPGRADE_COMMANDS,
 } from "./httpTrust";
 import {
   buildBoundIdempotencyReplayContract,
@@ -506,7 +511,7 @@ const PROVIDERS: Record<string, ProviderMeta> = {
   },
   apilayer: {
     name: "APILayer",
-    description: "14 APIs: exchange rates, market data, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping, and more.",
+    description: "Contracted APILayer/Idera HTTPS rails: exchange rates, market data, aviation, PDF, screenshots, email verification, VAT, news, weather, IP lookup, and more.",
     category: "multi",
     pricing: "Free tier available, paid plans per API",
     regions: ["Global"],
@@ -1093,7 +1098,7 @@ function discoverAuthResponse(reason: string) {
     {
       error: {
         message:
-          "Signup required for API discovery. Discovery is free after signup. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw login`.",
+          "Signup required for API discovery. Discovery is free after signup. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw auth login`.",
         type: "auth_error",
         code: "signup_required",
         reason,
@@ -1120,11 +1125,8 @@ function legacyClientUpgradeResponse(): Response {
       code: "legacy_client_upgrade_required",
       type: "upgrade_required",
       message: "APIClaw 2.8.6 cannot safely execute against the current gateway contract. Upgrade, sign in again, and restart your MCP client.",
-      minimumVersion: "2.8.7",
-      commands: [
-        "npm install -g @nordsym/apiclaw@latest",
-        "apiclaw auth login --force",
-      ],
+      minimumVersion: LEGACY_CLIENT_MINIMUM_VERSION,
+      commands: [...LEGACY_CLIENT_UPGRADE_COMMANDS],
       docsUrl: "https://apiclaw.cloud/install",
     },
   }, 426);
@@ -1143,7 +1145,7 @@ async function recordLegacyClientUpgrade(
       props: {
         reason: "legacy_client_upgrade_required",
         path,
-        minimumVersion: "2.8.7",
+        minimumVersion: LEGACY_CLIENT_MINIMUM_VERSION,
       },
     });
   } catch (error: any) {
@@ -1284,7 +1286,7 @@ async function resolveWorkspaceFromRequest(
     return { authMethod: "anonymous" };
   }
 
-  // 2. CLI session token (apiclaw login → ~/.apiclaw/session)
+  // 2. CLI session token (apiclaw auth login → ~/.apiclaw/session)
   const sessionToken = request.headers.get("X-APIClaw-Session");
   if (sessionToken && sessionToken.length >= 20) {
     try {
@@ -1479,10 +1481,9 @@ async function enforcePreCallQuota(
   const trafficClass = options.trafficClass === "internal" ? "internal" : "customer";
   let idempotencyKey: string | null;
   try {
-    idempotencyKey = requireManagedIdempotencyKey(
-      request.headers.get("Idempotency-Key"),
-      trafficClass,
-    );
+    const suppliedKey = request.headers.get("Idempotency-Key")
+      ?? (trafficClass === "customer" ? synthesizeLegacyIdempotencyKey() : null);
+    idempotencyKey = requireManagedIdempotencyKey(suppliedKey, trafficClass);
   } catch (error) {
     if (error instanceof InvalidIdempotencyKeyError) {
       return jsonResponse({
@@ -3725,7 +3726,7 @@ function extractBearerToken(request: Request): string | null {
 //   Authorization: Bearer sk-claw-…     (legacy, still supported)
 //   Authorization: Bearer sk-mcp-…      (Remote MCP OAuth)
 //   X-APIClaw-Api-Key: sk-claw-…        (preferred permanent header)
-//   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw login)
+//   X-APIClaw-Session: <sessionToken>   (CLI login — apiclaw auth login)
 async function requireApiKeyAuth(
   ctx: any,
   request: Request,
@@ -3746,7 +3747,7 @@ async function requireApiKeyAuth(
   return jsonResponse(
     {
       error: {
-        message: "Authentication required. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw login`.",
+        message: "Authentication required. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw auth login`.",
         type: "invalid_api_key",
         code: "invalid_api_key",
         signupUrl: "https://apiclaw.cloud/sign-up",
@@ -4815,6 +4816,20 @@ const VERIFIED_APILAYER_HTTPS_ORIGINS = new Set([
   "https://api.screenshotlayer.com",
   "https://api.ipapi.com",
   "https://api.exchangerate.host",
+  "https://api.marketstack.com",
+  "https://api.aviationstack.com",
+  "https://apilayer.net",
+  "https://data.fixer.io",
+  "https://api.currencylayer.com",
+  "https://api.coinlayer.com",
+  "https://api.weatherstack.com",
+  "https://api.ipstack.com",
+  "https://api.positionstack.com",
+  "https://api.languagelayer.com",
+  "https://api.scrapestack.com",
+  "https://api.serpstack.com",
+  "https://api.mediastack.com",
+  "https://api.userstack.com",
 ]);
 
 export function buildVerifiedApilayerHttpsUrl(
@@ -5203,27 +5218,208 @@ export function buildManagedRequest(
             headers: {},
           };
         }
-        // These legacy products were configured against plaintext-only URLs.
-        // Never send API keys or customer input over those transports.
-        case "vat_check":
-        case "market_data":
+        case "vat_check": {
+          if (!p.vat_number) return null;
+          return {
+            url: buildUrl("https://apilayer.net/api/validate", {
+              access_key: envKey("APILAYER_VATLAYER_KEY"),
+              vat_number: p.vat_number,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "market_data": {
+          if (!p.symbols) return null;
+          return {
+            url: buildUrl("https://api.marketstack.com/v1/eod", {
+              access_key: envKey("APILAYER_MARKETSTACK_KEY"),
+              symbols: p.symbols,
+              limit: p.limit || 10,
+              date_from: p.date_from,
+              date_to: p.date_to,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "aviation":
-        case "weatherstack_current":
-        case "weather":
-        case "weatherstack_forecast":
-        case "ipstack_lookup":
+          return {
+            url: buildUrl("https://api.aviationstack.com/v1/flights", {
+              access_key: envKey("APILAYER_AVIATIONSTACK_KEY"),
+              flight_iata: p.flight_iata,
+              dep_iata: p.dep_iata,
+              arr_iata: p.arr_iata,
+              airline_iata: p.airline_iata,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "weatherstack_current": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.weatherstack.com/current", {
+              access_key: envKey("WEATHERSTACK_API_KEY"),
+              query: p.query,
+              units: p.units || "m",
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "weatherstack_forecast": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.weatherstack.com/forecast", {
+              access_key: envKey("WEATHERSTACK_API_KEY"),
+              query: p.query,
+              forecast_days: p.forecast_days || 1,
+              units: p.units || "m",
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "ipstack_lookup": {
+          if (!p.ip) return null;
+          return {
+            url: buildUrl(`https://api.ipstack.com/${encodeURIComponent(String(p.ip))}`, {
+              access_key: envKey("IPSTACK_API_KEY"),
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "currencylayer_live":
-        case "currencylayer_convert":
+          return {
+            url: buildUrl("https://api.currencylayer.com/live", {
+              access_key: envKey("CURRENCYLAYER_API_KEY"),
+              source: p.source || "USD",
+              currencies: p.currencies,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "currencylayer_convert": {
+          if (!p.from || !p.to || !p.amount) return null;
+          return {
+            url: buildUrl("https://api.currencylayer.com/convert", {
+              access_key: envKey("CURRENCYLAYER_API_KEY"),
+              from: p.from,
+              to: p.to,
+              amount: p.amount,
+              date: p.date,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "coinlayer_live":
-        case "positionstack_forward":
-        case "positionstack_reverse":
+          return {
+            url: buildUrl("https://api.coinlayer.com/live", {
+              access_key: envKey("COINLAYER_API_KEY"),
+              target: p.target || "USD",
+              symbols: p.symbols,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "positionstack_forward": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.positionstack.com/v1/forward", {
+              access_key: envKey("POSITIONSTACK_API_KEY"),
+              query: p.query,
+              limit: p.limit || 1,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "positionstack_reverse": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.positionstack.com/v1/reverse", {
+              access_key: envKey("POSITIONSTACK_API_KEY"),
+              query: p.query,
+              limit: p.limit || 1,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "fixer_latest":
-        case "fixer_convert":
-        case "languagelayer_detect":
-        case "scrapestack_scrape":
-        case "serpstack_search":
+          return {
+            url: buildUrl("https://data.fixer.io/api/latest", {
+              access_key: envKey("FIXER_API_KEY"),
+              // Free-plan constraint: non-EUR base is rejected upstream.
+              base: p.base || "EUR",
+              symbols: p.symbols,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "languagelayer_detect": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.languagelayer.com/detect", {
+              access_key: envKey("LANGUAGELAYER_API_KEY"),
+              query: p.query,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "scrapestack_scrape": {
+          if (!p.url) return null;
+          return {
+            url: buildUrl("https://api.scrapestack.com/scrape", {
+              access_key: envKey("SCRAPESTACK_API_KEY"),
+              url: p.url,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "serpstack_search": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.serpstack.com/search", {
+              access_key: envKey("SERPSTACK_API_KEY"),
+              query: p.query,
+              num: p.num || 10,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "mediastack_news":
-        case "userstack_detect":
+          return {
+            url: buildUrl("https://api.mediastack.com/v1/news", {
+              access_key: envKey("MEDIASTACK_API_KEY"),
+              keywords: p.keywords,
+              categories: p.categories,
+              countries: p.countries,
+              languages: p.languages,
+              limit: p.limit || 25,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "userstack_detect": {
+          if (!p.ua) return null;
+          return {
+            url: buildUrl("https://api.userstack.com/detect", {
+              access_key: envKey("USERSTACK_API_KEY"),
+              ua: p.ua,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        // Paid-plan-only or still-unverified transports stay fail-closed.
+        case "weather":
+        case "fixer_convert":
           return null;
         case "ipapi_lookup": {
           if (!p.ip) return null;
@@ -5335,11 +5531,16 @@ async function resolveExecuteAuth(
   const internalSecret = request.headers.get("X-APIClaw-Internal");
   if (internalSecret) {
     const expectedSecret = process.env.APICLAW_INTERNAL_SECRET;
-    if (!expectedSecret || internalSecret !== expectedSecret) {
+    if (expectedSecret && internalSecret === expectedSecret) {
+      const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
+      return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
+    }
+    // Published 2.8.6 always sent Internal (often empty or a local dummy).
+    // A customer credential still completes the call; dummy Internal without
+    // one stays 401 so workspace-header-only traffic cannot forge internal.
+    if (!hasCustomerManagedCredential(request.headers)) {
       return jsonResponse({ error: { message: "Invalid internal secret", type: "auth_error" } }, 401);
     }
-    const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
-    return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
   }
 
   // 2. API key or CLI session (unified resolver handles both new header forms)
@@ -5379,10 +5580,7 @@ async function resolveExecuteAuth(
   return { authMethod: "anonymous" };
 }
 
-http.route({
-  path: "/v1/execute",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
+async function handleManagedExecute(ctx: any, request: Request): Promise<Response> {
     const startTime = Date.now();
 
     if (requiresLegacyClientUpgrade("/v1/execute", request.headers)) {
@@ -5949,7 +6147,12 @@ http.route({
       },
       _apiclaw: { latencyMs: Date.now() - startTime, route: "discovery_only", gateway: true },
     }, 501);
-  }),
+}
+
+http.route({
+  path: "/v1/execute",
+  method: "POST",
+  handler: httpAction(handleManagedExecute),
 });
 
 http.route({
@@ -7099,6 +7302,26 @@ http.route({
     let body: any;
     try { body = await readManagedJsonBodyCapped(request); }
     catch { return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400); }
+
+    const rewritten = rewriteLegacyProviderActionCall(body);
+    if (rewritten) {
+      const rewriteHeaders = new Headers(request.headers);
+      if (!rewriteHeaders.get("Idempotency-Key")?.trim()) {
+        rewriteHeaders.set("Idempotency-Key", synthesizeLegacyIdempotencyKey());
+      }
+      if (hasCustomerManagedCredential(rewriteHeaders)) {
+        rewriteHeaders.delete("X-APIClaw-Internal");
+      }
+      rewriteHeaders.set("content-type", "application/json");
+      return handleManagedExecute(
+        ctx,
+        new Request(new URL("/v1/execute", request.url), {
+          method: "POST",
+          headers: rewriteHeaders,
+          body: JSON.stringify(rewritten),
+        }),
+      );
+    }
 
     const apiName: string = typeof body?.api === "string" ? body.api.trim() : "";
     const userPath: string = typeof body?.path === "string" ? body.path : "/";

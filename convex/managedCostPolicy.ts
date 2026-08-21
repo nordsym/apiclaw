@@ -1,3 +1,4 @@
+import { isPublicCustomerExecutableAction } from "../src/product-truth";
 import { resolveFrontierModelCost } from "./modelPricing";
 
 // Reservations are intentionally conservative. Fixed/near-fixed providers can
@@ -159,6 +160,15 @@ export function verifiedFixedManagedProviderCostUsd(
 ): number | undefined {
   const provider = input.provider.toLowerCase();
   if (VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return 0;
+  // APILayer's contracted rails reuse the existing $0.01 reservation as the
+  // realized per-call cost. Only customer-executable actions qualify so
+  // subscription-blocked handlers cannot enter PAYG.
+  if (
+    provider === "apilayer" &&
+    isPublicCustomerExecutableAction("apilayer", input.action)
+  ) {
+    return FIXED_PROVIDER_RESERVATIONS_USD.apilayer;
+  }
   return VERIFIED_FIXED_PROVIDER_COSTS_USD[provider]?.[input.action];
 }
 

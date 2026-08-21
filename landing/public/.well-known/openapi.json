@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "APIClaw API",
-    "description": "The control plane for AI agents. Discover 26,619 API definitions, including 689 exact-name source-verified catalog entries. Source verification is not execution. APIClaw inventories 22 managed adapters, with four provider rails customer-executable today.",
+    "description": "The control plane for AI agents. Discover 26,619 API definitions, including 689 exact-name source-verified catalog entries. Source verification is not execution. APIClaw inventories 22 managed adapters, with five provider rails customer-executable today.",
     "version": "1.0.0",
     "contact": {
       "name": "NordSym AB",

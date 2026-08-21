@@ -21,7 +21,7 @@ APIClaw is NordSym's agent-native runtime for API discovery, managed execution, 
 - Discoverable API definitions: 26,619
 - Exact-name source-verified catalog entries: 689
 - Managed provider adapter inventory: 22
-- Customer-executable provider rails: 4
+- Customer-executable provider rails: 5
 - Managed execution: available only where a server-side adapter is live
 - Keyless public execution: disabled until hardened egress is live
 - Discovery: free after signup
@@ -102,7 +102,7 @@ Use `discover_apis(query)` or `POST /v1/discover` to search the registry by capa
 
 Use `call_api` or `POST /v1/execute` with an execution-ready managed provider and action. The runtime checks workspace ownership, allowance, provider-cost reservation, action readiness, and payload bounds before it calls upstream.
 
-APIClaw inventories 22 managed provider adapters. Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, and NASA read-only actions. Adapter inventory is not an execution promise.
+APIClaw inventories 22 managed provider adapters. Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, NASA read-only actions, and APILayer's contracted HTTPS rails. Adapter inventory is not an execution promise.
 
 Successful responses can include `_apiclaw` metadata for provider, route, latency, provider cost, auth mode, and quota notices.
 

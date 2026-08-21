@@ -30,7 +30,7 @@ const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "Discoverable APIs", live: true },
   { number: statsData.sourceVerifiedCount.toLocaleString(), label: "Exact-name source-verified", live: true },
-  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "12,200+"), label: "Installs", live: true },
+  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "20,058"), label: "npm installs", live: false },
 ];
 
 const trustedBy = [
@@ -86,11 +86,11 @@ const howItWorks = [
       <>
         <span className="text-gray-500">{"// Agent uses call_api tool"}</span>{"\n"}
         {"{"}{"\n"}
-        {"  "}<span className="text-red-400">"provider"</span>: <span className="text-green-400">"replicate"</span>,{"\n"}
-        {"  "}<span className="text-red-400">"action"</span>: <span className="text-green-400">"flux-schnell"</span>,{"\n"}
-        {"  "}<span className="text-red-400">"params"</span>: {"{ "}<span className="text-red-400">"prompt"</span>: <span className="text-green-400">"..."</span>{" }"}{"\n"}
+        {"  "}<span className="text-red-400">"provider"</span>: <span className="text-green-400">"nasa"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"action"</span>: <span className="text-green-400">"apod"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"params"</span>: {"{"}{"}"}{"\n"}
         {"}"}{"\n"}
-        <span className="text-gray-500">{"// → image URL, no API key needed"}</span>
+        <span className="text-gray-500">{"// → Astronomy Picture of the Day"}</span>
       </>
     ),
   },
@@ -180,7 +180,7 @@ const whoIsThisFor = [
 const terminalLines = [
   { type: "prompt", text: "curl -fsSL https://apiclaw.cloud/install.sh | bash" },
   { type: "output", text: "", delay: 500 },
-  { type: "output", text: "🦞 APIClaw v2.5.3", delay: 100 },
+  { type: "output", text: "🦞 APIClaw v2.8.7", delay: 100 },
   { type: "output", text: "", delay: 50 },
   { type: "success", text: "✓ Connecting to registry...", delay: 300 },
   { type: "success", text: `✓ ${statsData.apiCount.toLocaleString()} APIs loaded`, delay: 200 },
@@ -220,7 +220,7 @@ export default function Home() {
     const installs = statsData.npmDownloads.toLocaleString();
     const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total} discoverable APIs and ${sourceVerified} current catalog entries matched to source-verification evidence by exact name, with ~${installs} agent installs. Source verification is not execution.
 
-Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried. ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Adapter inventory is not an execution promise.
+Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried. ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Adapter inventory is not an execution promise.
 
 Four doors, one control plane:
 1. Install: local MCP for Claude Desktop and other local clients.
@@ -1134,7 +1134,7 @@ Install:
               },
               {
                 q: "What can I actually call?",
-                a: `${statsData.apiCount.toLocaleString()} discoverable API definitions, including ${statsData.sourceVerifiedCount.toLocaleString()} current catalog entries mapped to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters; ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Keyless registry entries remain discovery-only until hardened egress is live.`
+                a: `${statsData.apiCount.toLocaleString()} discoverable API definitions, including ${statsData.sourceVerifiedCount.toLocaleString()} current catalog entries mapped to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${MANAGED_PROVIDER_ADAPTER_COUNT} managed adapters; ${PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT} provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Keyless registry entries remain discovery-only until hardened egress is live.`
               },
               {
                 q: "What are missions?",

@@ -7,6 +7,9 @@ import {
   FREE_MANAGED_WARNING_AT,
   MANAGED_PROVIDER_ADAPTER_COUNT,
   MANAGED_PROVIDER_ADAPTERS,
+  APILAYER_CUSTOMER_EXECUTABLE_ACTIONS,
+  APILAYER_PAID_PLAN_ONLY_ACTIONS,
+  APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS,
   MANAGED_USAGE_POLICY,
@@ -31,7 +34,7 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   paygRequiresBillingGradeAdapter: true,
 });
 
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 4);
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 5);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
 assert.equal(CANON_STATS.discoverable, 26_619);
 assert.equal(CANON_STATS.source_verified, 689);
@@ -41,6 +44,7 @@ assert.equal(
   CANON_STATS.customer_executable_providers,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
+assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
   MANAGED_PROVIDER_ADAPTERS.filter(({ id }) =>
@@ -69,6 +73,7 @@ assert.deepEqual(
         "call",
       ],
     ],
+    ["apilayer", [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]],
   ],
 );
 assert.equal(getPublicCustomerExecutableProvider("GitHub API")?.id, "github");
@@ -77,6 +82,22 @@ assert.equal(getPublicCustomerExecutableProvider("AssemblyAI"), undefined);
 assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), true);
 assert.equal(isPublicCustomerExecutableAction("github", "create_issue"), false);
 assert.equal(isPublicCustomerExecutableAction("replicate", "run"), false);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), true);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), true);
+for (const action of APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS) {
+  assert.equal(
+    isPublicCustomerExecutableAction("apilayer", action),
+    false,
+    `${action} is subscription-blocked and must stay inventory-only`,
+  );
+}
+for (const action of APILAYER_PAID_PLAN_ONLY_ACTIONS) {
+  assert.equal(
+    isPublicCustomerExecutableAction("apilayer", action),
+    false,
+    `${action} is paid-plan-only and must stay inventory-only`,
+  );
+}
 
 const executeSource = readFileSync("src/execute.ts", "utf8");
 assert.match(executeSource, /PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS/);
@@ -182,7 +203,7 @@ assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 managed adapters/);
-assert.match(packageMetadata.description, /4 provider rails customer-executable/);
+assert.match(packageMetadata.description, /5 provider rails customer-executable/);
 for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
   const health = readFileSync(healthFile, "utf8");
   assert.match(health, /service: 'apiclaw-gateway'/);
@@ -248,6 +269,7 @@ assert.equal(
   publicStats.customerExecutableProviderCount,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
+assert.equal(publicStats.npmDownloads, CANON_STATS.npm_installs);
 assert.equal("callableCount" in publicStats, false, "public stats must not expose the legacy callableCount label");
 
 const sourceStats = JSON.parse(readFileSync("landing/src/lib/stats.json", "utf8")) as Record<string, unknown>;
@@ -255,6 +277,7 @@ assert.equal(sourceStats.apiCount, publicStats.apiCount);
 assert.equal(sourceStats.sourceVerifiedCount, publicStats.sourceVerifiedCount);
 assert.equal(sourceStats.managedProviderAdapterCount, publicStats.managedProviderAdapterCount);
 assert.equal(sourceStats.customerExecutableProviderCount, publicStats.customerExecutableProviderCount);
+assert.equal(sourceStats.npmDownloads, publicStats.npmDownloads);
 assert.equal("callableCount" in sourceStats, false, "source stats must not expose the legacy callableCount label");
 assert.equal(
   (sourceStats.historicalVerificationBuckets as { verified: number }).verified,
@@ -270,6 +293,11 @@ assert.equal(
 
 const catalogRoute = readFileSync("landing/src/app/api/catalog/route.ts", "utf8");
 assert.match(catalogRoute, /CANON_STATS/);
+assert.match(
+  catalogRoute,
+  /customerExecutable: CANON_STATS\.customer_executable_providers/,
+  "catalog load must assert customer-executable count against canon, not a hardcoded 4",
+);
 assert.match(catalogRoute, /assertPublicCatalogTruth\(cachedApis, verification\)/);
 assert.doesNotMatch(
   catalogRoute,

@@ -42,6 +42,53 @@ export type ManagedProviderAdapter = {
   pricing: "free" | "freemium" | "paid";
 };
 
+/**
+ * Contracted APILayer/Idera actions that already have a live execute handler
+ * and a verified HTTPS origin. Subscription-blocked and paid-plan-only
+ * actions stay off this list even when a handler exists.
+ */
+export const APILAYER_CUSTOMER_EXECUTABLE_ACTIONS = [
+  "exchange_rates",
+  "market_data",
+  "aviation",
+  "pdf_generate",
+  "screenshot",
+  "verify_email",
+  "finance_news",
+  "scrape",
+  "vat_check",
+  "currencylayer_live",
+  "currencylayer_convert",
+  "coinlayer_live",
+  "exchangeratehost_latest",
+  "weatherstack_current",
+  "weatherstack_forecast",
+  "ipstack_lookup",
+  "ipapi_lookup",
+  "positionstack_forward",
+  "positionstack_reverse",
+  "languagelayer_detect",
+  "scrapestack_scrape",
+  "serpstack_search",
+  "mediastack_news",
+  "userstack_detect",
+  "fixer_latest",
+] as const;
+
+export const APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS = [
+  "verify_number",
+  "world_news",
+  "image_crop",
+  "form_submit",
+] as const;
+
+export const APILAYER_PAID_PLAN_ONLY_ACTIONS = [
+  "fixer_convert",
+] as const;
+
+export const PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_SUMMARY =
+  "OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails";
+
 export const MANAGED_PROVIDER_ADAPTERS = [
   {
     id: "openrouter",
@@ -278,8 +325,8 @@ export const MANAGED_PROVIDER_ADAPTERS = [
     id: "apilayer",
     name: "APILayer",
     aliases: ["apilayer", "apilayer api"],
-    customerExecutableActions: [],
-    description: "Managed multi-API adapter inventory. Customer execution awaits billing-grade cost truth.",
+    customerExecutableActions: APILAYER_CUSTOMER_EXECUTABLE_ACTIONS,
+    description: "Contracted APILayer/Idera HTTPS rails: exchange rates, marketstack, aviationstack, pdflayer, screenshotlayer, email verification, finance news, scraper, vatlayer, currencylayer, coinlayer, exchangerate.host, weatherstack, ipstack, ipapi, positionstack, languagelayer, scrapestack, serpstack, mediastack, userstack, and fixer (EUR base). Subscription-blocked and paid-plan-only actions stay inventory-only.",
     category: "Finance",
     baseUrl: "https://apilayer.com",
     docsUrl: "https://apilayer.com/docs",

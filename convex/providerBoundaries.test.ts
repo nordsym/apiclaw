@@ -20,6 +20,14 @@ assert.equal(isCustomerExecutableManagedAction("openrouter", "chat_completions")
 assert.equal(isCustomerExecutableManagedAction("brave_search", "search"), true);
 assert.equal(isCustomerExecutableManagedAction("github", "get_file"), true);
 assert.equal(isCustomerExecutableManagedAction("nasa", "apod"), true);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "exchange_rates"), true);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "weatherstack_current"), true);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "fixer_latest"), true);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "verify_number"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "world_news"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "image_crop"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "form_submit"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "fixer_convert"), false);
 for (const [provider, action] of [
   ["openai", "chat"],
   ["anthropic", "messages"],

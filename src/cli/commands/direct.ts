@@ -22,7 +22,7 @@ function color(c: string, s: string): string { return `${c}${s}${RESET}`; }
 function authHeader(): Record<string, string> {
   const s = readSession();
   if (!s?.sessionToken) {
-    console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "apiclaw login"));
+    console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "apiclaw auth login"));
     process.exit(1);
   }
   return { "X-APIClaw-Session": s.sessionToken };

@@ -351,18 +351,14 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
           
           <div className="space-y-6">
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Generate an image</h3>
+              <h3 className="text-lg font-semibold mb-4">NASA Astronomy Picture of the Day</h3>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
-                  <span className="text-[var(--text-muted)]">// Find image-generation providers</span>{'\n'}
-                  <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{ '}<span className="text-sky-600 dark:text-sky-400">query</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;text to image generation&quot;</span>{' }'}){'\n\n'}
-                  <span className="text-[var(--text-muted)]">// Send via APIClaw managed call</span>{'\n'}
+                  <span className="text-[var(--text-muted)]">// First managed call — POST /v1/execute</span>{'\n'}
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;replicate&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">action</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;flux-schnell&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">prompt</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;a coastal lobster trap at dawn&quot;</span>{'\n'}
-                  {"  }"}{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;nasa&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">action</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;apod&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{}'}{'\n'}
                   {'}'})
                 </code>
               </pre>
@@ -382,16 +378,13 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             </div>
 
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Generate speech</h3>
+              <h3 className="text-lg font-semibold mb-4">Latest EUR exchange rates</h3>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">call_api</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;elevenlabs&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">endpoint</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;tts&quot;</span>,{'\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">text</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;Hello, I am an AI agent!&quot;</span>,{'\n'}
-                  {"    "}<span className="text-sky-600 dark:text-sky-400">voice</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;adam&quot;</span>{'\n'}
-                  {"  }"}{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">provider</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;apilayer&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">action</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;fixer_latest&quot;</span>,{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">params</span>: {'{ '}<span className="text-sky-600 dark:text-sky-400">base</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;EUR&quot;</span>{' }'}{'\n'}
                   {'}'})
                 </code>
               </pre>
@@ -418,7 +411,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
             {/* discover_apis */}
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6">
               <h3 className="text-lg font-mono text-[var(--accent)] mb-2">discover_apis</h3>
-              <p className="text-[var(--text-secondary)] mb-4">Search 5,600+ APIs using natural language.</p>
+              <p className="text-[var(--text-secondary)] mb-4">Search 26,619 discoverable APIs using natural language.</p>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">discover_apis</span>({'{\n'}
@@ -445,7 +438,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
               <pre className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 overflow-x-auto">
                 <code className="text-sm">
                   <span className="text-purple-600 dark:text-purple-400">get_api_details</span>({'{\n'}
-                  {"  "}<span className="text-sky-600 dark:text-sky-400">api_id</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;replicate&quot;</span>{'\n'}
+                  {"  "}<span className="text-sky-600 dark:text-sky-400">api_id</span>: <span className="text-emerald-600 dark:text-emerald-400">&quot;nasa&quot;</span>{'\n'}
                   {'}'})
                 </code>
               </pre>
@@ -462,11 +455,10 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</code>
                 <strong className="text-[var(--text-primary)]">Currently available:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
                   <li><code className="text-[var(--accent)]">openrouter</code> - 800+ LLMs</li>
-                  <li><code className="text-[var(--accent)]">replicate</code> - Image, audio, ML models</li>
-                  <li><code className="text-[var(--accent)]">elevenlabs</code> - Text-to-speech</li>
                   <li><code className="text-[var(--accent)]">brave_search</code> - Web search</li>
-                  <li><code className="text-[var(--accent)]">firecrawl</code> - Web scraping</li>
-                  <li><code className="text-[var(--accent)]">apilayer</code> - managed data API families (rates, stocks, PDF, etc.; runtime readiness varies by action)</li>
+                  <li><code className="text-[var(--accent)]">github</code> - Read-only GitHub</li>
+                  <li><code className="text-[var(--accent)]">nasa</code> - Astronomy Picture of the Day</li>
+                  <li><code className="text-[var(--accent)]">apilayer</code> - Fixer latest (EUR base) and other contracted HTTPS rails</li>
                 </ul>
               </div>
             </div>
