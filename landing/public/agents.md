@@ -102,7 +102,7 @@ apiclaw --help
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not execution.
 - 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
-- Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only.
+- Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails.
 - OpenAI-compatible LLM gateway.
 - Remote MCP validated end to end.
 - Mission runtime with append-only events.

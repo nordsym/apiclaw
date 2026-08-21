@@ -66,7 +66,7 @@ export const CANON_STATS = {
   managed_provider_adapters: 22,
 
   /** Managed providers with at least one customer-executable action. */
-  customer_executable_providers: 4,
+  customer_executable_providers: 5,
 
   /** All-time npm installs (canon as of 2026-05-27 per npmjs dashboard). */
   npm_installs: 16_485,

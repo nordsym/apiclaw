@@ -24,7 +24,7 @@ APIClaw provides unified API access for AI agents across four doors: local MCP i
 - Discoverable APIs: 26,619
 - Exact-name source-verified catalog entries: 689
 - Managed provider adapter inventory: 22
-- Customer-executable provider rails: 4
+- Customer-executable provider rails: 5
 - npm package: @nordsym/apiclaw
 - Free tier: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap
 - Discovery: free after signup
@@ -112,7 +112,7 @@ Responses include `_apiclaw` metadata where applicable: provider, route, latency
 ## Managed provider boundary
 
 - APIClaw inventories 22 managed provider adapters. Inventory means server-side adapter support, not customer execution.
-- Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, and NASA read-only actions.
+- Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only actions, NASA read-only actions, and APILayer's contracted HTTPS rails.
 - Remaining managed adapters stay unavailable to customer traffic until their trust and billing contracts are exact.
 
 Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.

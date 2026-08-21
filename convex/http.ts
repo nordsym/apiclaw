@@ -506,7 +506,7 @@ const PROVIDERS: Record<string, ProviderMeta> = {
   },
   apilayer: {
     name: "APILayer",
-    description: "14 APIs: exchange rates, market data, aviation, PDF, screenshots, email/phone verification, VAT, news, scraping, and more.",
+    description: "Contracted APILayer/Idera HTTPS rails: exchange rates, market data, aviation, PDF, screenshots, email verification, VAT, news, weather, IP lookup, and more.",
     category: "multi",
     pricing: "Free tier available, paid plans per API",
     regions: ["Global"],
@@ -4815,6 +4815,20 @@ const VERIFIED_APILAYER_HTTPS_ORIGINS = new Set([
   "https://api.screenshotlayer.com",
   "https://api.ipapi.com",
   "https://api.exchangerate.host",
+  "https://api.marketstack.com",
+  "https://api.aviationstack.com",
+  "https://apilayer.net",
+  "https://data.fixer.io",
+  "https://api.currencylayer.com",
+  "https://api.coinlayer.com",
+  "https://api.weatherstack.com",
+  "https://api.ipstack.com",
+  "https://api.positionstack.com",
+  "https://api.languagelayer.com",
+  "https://api.scrapestack.com",
+  "https://api.serpstack.com",
+  "https://api.mediastack.com",
+  "https://api.userstack.com",
 ]);
 
 export function buildVerifiedApilayerHttpsUrl(
@@ -5203,27 +5217,208 @@ export function buildManagedRequest(
             headers: {},
           };
         }
-        // These legacy products were configured against plaintext-only URLs.
-        // Never send API keys or customer input over those transports.
-        case "vat_check":
-        case "market_data":
+        case "vat_check": {
+          if (!p.vat_number) return null;
+          return {
+            url: buildUrl("https://apilayer.net/api/validate", {
+              access_key: envKey("APILAYER_VATLAYER_KEY"),
+              vat_number: p.vat_number,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "market_data": {
+          if (!p.symbols) return null;
+          return {
+            url: buildUrl("https://api.marketstack.com/v1/eod", {
+              access_key: envKey("APILAYER_MARKETSTACK_KEY"),
+              symbols: p.symbols,
+              limit: p.limit || 10,
+              date_from: p.date_from,
+              date_to: p.date_to,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "aviation":
-        case "weatherstack_current":
-        case "weather":
-        case "weatherstack_forecast":
-        case "ipstack_lookup":
+          return {
+            url: buildUrl("https://api.aviationstack.com/v1/flights", {
+              access_key: envKey("APILAYER_AVIATIONSTACK_KEY"),
+              flight_iata: p.flight_iata,
+              dep_iata: p.dep_iata,
+              arr_iata: p.arr_iata,
+              airline_iata: p.airline_iata,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "weatherstack_current": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.weatherstack.com/current", {
+              access_key: envKey("WEATHERSTACK_API_KEY"),
+              query: p.query,
+              units: p.units || "m",
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "weatherstack_forecast": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.weatherstack.com/forecast", {
+              access_key: envKey("WEATHERSTACK_API_KEY"),
+              query: p.query,
+              forecast_days: p.forecast_days || 1,
+              units: p.units || "m",
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "ipstack_lookup": {
+          if (!p.ip) return null;
+          return {
+            url: buildUrl(`https://api.ipstack.com/${encodeURIComponent(String(p.ip))}`, {
+              access_key: envKey("IPSTACK_API_KEY"),
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "currencylayer_live":
-        case "currencylayer_convert":
+          return {
+            url: buildUrl("https://api.currencylayer.com/live", {
+              access_key: envKey("CURRENCYLAYER_API_KEY"),
+              source: p.source || "USD",
+              currencies: p.currencies,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "currencylayer_convert": {
+          if (!p.from || !p.to || !p.amount) return null;
+          return {
+            url: buildUrl("https://api.currencylayer.com/convert", {
+              access_key: envKey("CURRENCYLAYER_API_KEY"),
+              from: p.from,
+              to: p.to,
+              amount: p.amount,
+              date: p.date,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "coinlayer_live":
-        case "positionstack_forward":
-        case "positionstack_reverse":
+          return {
+            url: buildUrl("https://api.coinlayer.com/live", {
+              access_key: envKey("COINLAYER_API_KEY"),
+              target: p.target || "USD",
+              symbols: p.symbols,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "positionstack_forward": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.positionstack.com/v1/forward", {
+              access_key: envKey("POSITIONSTACK_API_KEY"),
+              query: p.query,
+              limit: p.limit || 1,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "positionstack_reverse": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.positionstack.com/v1/reverse", {
+              access_key: envKey("POSITIONSTACK_API_KEY"),
+              query: p.query,
+              limit: p.limit || 1,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "fixer_latest":
-        case "fixer_convert":
-        case "languagelayer_detect":
-        case "scrapestack_scrape":
-        case "serpstack_search":
+          return {
+            url: buildUrl("https://data.fixer.io/api/latest", {
+              access_key: envKey("FIXER_API_KEY"),
+              // Free-plan constraint: non-EUR base is rejected upstream.
+              base: p.base || "EUR",
+              symbols: p.symbols,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "languagelayer_detect": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.languagelayer.com/detect", {
+              access_key: envKey("LANGUAGELAYER_API_KEY"),
+              query: p.query,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "scrapestack_scrape": {
+          if (!p.url) return null;
+          return {
+            url: buildUrl("https://api.scrapestack.com/scrape", {
+              access_key: envKey("SCRAPESTACK_API_KEY"),
+              url: p.url,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        case "serpstack_search": {
+          if (!p.query) return null;
+          return {
+            url: buildUrl("https://api.serpstack.com/search", {
+              access_key: envKey("SERPSTACK_API_KEY"),
+              query: p.query,
+              num: p.num || 10,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
         case "mediastack_news":
-        case "userstack_detect":
+          return {
+            url: buildUrl("https://api.mediastack.com/v1/news", {
+              access_key: envKey("MEDIASTACK_API_KEY"),
+              keywords: p.keywords,
+              categories: p.categories,
+              countries: p.countries,
+              languages: p.languages,
+              limit: p.limit || 25,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        case "userstack_detect": {
+          if (!p.ua) return null;
+          return {
+            url: buildUrl("https://api.userstack.com/detect", {
+              access_key: envKey("USERSTACK_API_KEY"),
+              ua: p.ua,
+            }),
+            method: "GET",
+            headers: {},
+          };
+        }
+        // Paid-plan-only or still-unverified transports stay fail-closed.
+        case "weather":
+        case "fixer_convert":
           return null;
         case "ipapi_lookup": {
           if (!p.ip) return null;

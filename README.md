@@ -26,7 +26,7 @@ Route across supported models from OpenAI, Anthropic, [OpenRouter](https://openr
 | **Discover 26,619 APIs** | Find providers by job-to-be-done. Health-ranked, capability-tagged, callable-or-not flagged. The `discover_apis` tool delegates to the gateway so every door returns the same canon. |
 | **Mission runtime** | Compose `fetch`, `transform`, `decide`, `validate`, `execute` primitives into typed orchestrations. Append-only `missionEvents` audit log. Cost-budget per mission with hard halt. Parallel-execution scaffolding ready. |
 | **Observability built in** | Every call logged with `_apiclaw` metadata (provider, route, latency, cost, auth mode). 80% quota warning surfaces as `_notice` before paywall. Weekly funnel scorecard mailed Monday 08:00 UTC. |
-| **Managed where it matters** | APIClaw inventories 22 server-side managed adapters. Four provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Adapter inventory is not an execution promise. Runtime readiness is explicit and unknown-cost customer traffic fails closed. |
+| **Managed where it matters** | APIClaw inventories 22 server-side managed adapters. Five provider rails are customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Adapter inventory is not an execution promise. Runtime readiness is explicit and unknown-cost customer traffic fails closed. |
 
 ---
 
@@ -71,7 +71,7 @@ The full registry, searchable via `discover_apis(query)`. Every entry tagged by 
 These current public catalog entries map to source-verification evidence by exact name. Source verification is discovery evidence, not proof that APIClaw can execute the API.
 
 - **Managed adapter inventory (22)** - APIClaw has server-side adapter and credential support. Inventory alone does not enable customer execution.
-- **Customer-executable providers (4)** - OpenRouter chat, Brave Search, GitHub read-only actions, and NASA read-only actions.
+- **Customer-executable providers (5)** - OpenRouter chat, Brave Search, GitHub read-only actions, NASA read-only actions, and APILayer's contracted HTTPS rails.
 - **Source-verified definitions (689)** - Discovery-only unless the result also exposes an explicitly customer-executable managed action.
 
 ### Mission templates
@@ -98,7 +98,7 @@ Pricing canon: underlying provider cost plus a 15% margin. Stripe metered billin
 - ✅ Claude Desktop Extension hosted at `apiclaw.cloud/apiclaw.mcpb` (~50 MB bundle, zero-key install)
 - ✅ Mission runtime v2 (5 typed primitives) live in Convex prod
 - ✅ Remote MCP via Streamable HTTP + OAuth 2.1 + PKCE + DCR, validated end-to-end in Grok
-- ✅ 22 managed provider adapters inventoried, with 4 provider rails customer-executable today
+- ✅ 22 managed provider adapters inventoried, with 5 provider rails customer-executable today
 - 🟢 99.9% uptime since launch
 
 Daily ship cadence — see [GitHub releases](https://github.com/nordsym/apiclaw/releases) for the latest changes.

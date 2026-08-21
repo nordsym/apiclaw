@@ -4,7 +4,7 @@
   "display_name": "APIClaw",
   "version": "2.8.7",
   "description": "The Control Plane for AI Agents. Discover 26,619 API definitions, including 689 exact-name source-verified entries. Source verification is not execution.",
-  "long_description": "APIClaw is a unified control plane for API discovery, managed execution, model routing, missions, and observability. Agents can search 26,619 API definitions. Of the current catalog entries, 689 map to source-verification evidence by exact name. Source verification is not a promise of proxy execution. APIClaw inventories 22 managed provider adapters, with four provider rails customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, and NASA read-only. Provider keys stay server-side. Sign in once with `apiclaw auth login`; the same credential works across local MCP, CLI, HTTP gateway, and Remote MCP. A free workspace includes 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap. Billing-ready actions can then use pay as you go at provider cost + 15%.",
+  "long_description": "APIClaw is a unified control plane for API discovery, managed execution, model routing, missions, and observability. Agents can search 26,619 API definitions. Of the current catalog entries, 689 map to source-verification evidence by exact name. Source verification is not a promise of proxy execution. APIClaw inventories 22 managed provider adapters, with five provider rails customer-executable now: OpenRouter chat, Brave Search, GitHub read-only, NASA read-only, and APILayer's contracted HTTPS rails. Provider keys stay server-side. Sign in once with `apiclaw auth login`; the same credential works across local MCP, CLI, HTTP gateway, and Remote MCP. A free workspace includes 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap. Billing-ready actions can then use pay as you go at provider cost + 15%.",
   "author": {
     "name": "NordSym AB",
     "email": "gustav@nordsym.com",
@@ -28,7 +28,7 @@
   },
   "tools": [
     { "name": "apiclaw_help", "description": "Onboarding help. Returns canon stats, available tools, and the auth + first-call flow." },
-    { "name": "discover_apis", "description": "Find APIs by job-to-be-done. Search 26,619 discoverable definitions by capability and health. Pass callable_only=true to restrict results to the four customer-executable provider rails." },
+    { "name": "discover_apis", "description": "Find APIs by job-to-be-done. Search 26,619 discoverable definitions by capability and health. Pass callable_only=true to restrict results to the five customer-executable provider rails." },
     { "name": "get_api_details", "description": "Full specs, pricing, limits, and auth details for a specific provider." },
     { "name": "list_categories", "description": "Browse providers by category (AI, search, voice, communication, finance, weather, etc.)." },
     { "name": "list_connected", "description": "List managed provider adapters ready for execution. Provider keys stay server-side with APIClaw." },
