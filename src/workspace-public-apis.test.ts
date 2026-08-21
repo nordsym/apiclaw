@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { CANON_STATS } from "./canon-stats.js";
 import { MANAGED_USAGE_POLICY } from "./product-truth.js";
 import {
+  CURATED_WORKSPACE_PUBLIC_APIS,
   WORKSPACE_PUBLIC_EXECUTABLE_COUNT,
   buildPinnedPublicApiUrl,
   getWorkspacePublicApi,
@@ -63,10 +64,16 @@ assert.equal(isWorkspacePublicExecutableAction("frankfurter", "drop table"), fal
 
 const frankfurter = getWorkspacePublicApi("Frankfurter");
 assert.ok(frankfurter);
-assert.equal(frankfurter.baseUrl, "https://api.frankfurter.app");
-assert.equal(buildPinnedPublicApiUrl(frankfurter, "/latest")?.toString(), "https://api.frankfurter.app/latest");
 assert.equal(buildPinnedPublicApiUrl(frankfurter, "https://evil.example/steal"), undefined);
 assert.equal(buildPinnedPublicApiUrl(frankfurter, `${frankfurter.origin}/latest`)?.origin, frankfurter.origin);
+
+const curatedFrankfurter = CURATED_WORKSPACE_PUBLIC_APIS.find((api) => api.id === "frankfurter");
+assert.ok(curatedFrankfurter);
+assert.equal(curatedFrankfurter.baseUrl, "https://api.frankfurter.app");
+assert.equal(
+  buildPinnedPublicApiUrl(curatedFrankfurter, "/latest")?.toString(),
+  "https://api.frankfurter.app/latest",
+);
 
 const coingecko = getWorkspacePublicApi("CoinGecko");
 assert.ok(coingecko);
