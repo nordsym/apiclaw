@@ -1103,7 +1103,7 @@ function discoverAuthResponse(reason: string) {
     {
       error: {
         message:
-          "Signup required for API discovery. Discovery is free after signup. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw auth login`.",
+          "Signup required for API discovery. Discovery is free after signup. Get a free key at https://apiclaw.cloud/sign-up or run `npx @nordsym/apiclaw auth login`.",
         type: "auth_error",
         code: "signup_required",
         reason,
@@ -3756,7 +3756,7 @@ async function requireApiKeyAuth(
   return jsonResponse(
     {
       error: {
-        message: "Authentication required. Get a free key at https://apiclaw.cloud/sign-up or run `apiclaw auth login`.",
+        message: "Authentication required. Get a free key at https://apiclaw.cloud/sign-up or run `npx @nordsym/apiclaw auth login`.",
         type: "invalid_api_key",
         code: "invalid_api_key",
         signupUrl: "https://apiclaw.cloud/sign-up",

@@ -151,8 +151,56 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+# First-run auth gate. Never print Done until `auth whoami` succeeds.
+$AuthLoginCmd = "npx @nordsym/apiclaw auth login"
+$AuthWhoamiCmd = "npx @nordsym/apiclaw auth whoami"
+
+function Test-ApiclawCanLaunchAuth {
+    if ($env:CI) { return $false }
+    if ($env:APICLAW_SKIP_AUTH -eq "1" -or $env:APICLAW_SKIP_AUTH -eq "true") { return $false }
+    return [Environment]::UserInteractive
+}
+
 Write-Host ""
-Write-Host "Done!" -ForegroundColor Green -NoNewline
-Write-Host " APIClaw is ready to use in Claude Desktop."
-Write-Host "Restart Claude Desktop to activate." -ForegroundColor DarkGray
+Write-Host "Next step: sign in so a managed call can succeed." -ForegroundColor Cyan
+Write-Host "  $AuthLoginCmd"
 Write-Host ""
+
+if (Test-ApiclawCanLaunchAuth) {
+    Write-Host "Opening browser sign-in..." -ForegroundColor DarkGray
+    try {
+        & npx -y @nordsym/apiclaw@latest auth login
+    } catch {
+        Write-Host "Sign-in did not finish. You can re-run: $AuthLoginCmd" -ForegroundColor Yellow
+    }
+}
+
+function Test-ApiclawWhoami {
+    $toml = Join-Path $HOME ".apiclaw.toml"
+    $legacy = Join-Path $HOME ".apiclaw\session"
+    if ((Test-Path $toml) -and (Select-String -Path $toml -Pattern "session_token" -Quiet) -and (Select-String -Path $toml -Pattern "email" -Quiet)) {
+        return $true
+    }
+    if (Test-Path $legacy) { return $true }
+    return $false
+}
+
+if (Test-ApiclawWhoami) {
+    & npx -y @nordsym/apiclaw@latest auth whoami
+    Write-Host ""
+    Write-Host "Done." -ForegroundColor Green -NoNewline
+    Write-Host " Signed in. A managed call can succeed now."
+    Write-Host "First call: apiclaw call nasa/apod --params '{}'" -ForegroundColor DarkGray
+    Write-Host "Restart Claude Desktop to activate the MCP server." -ForegroundColor DarkGray
+    Write-Host ""
+    exit 0
+}
+
+Write-Host ""
+Write-Host "Not done." -ForegroundColor Red -NoNewline
+Write-Host " Sign-in is required before any managed call."
+Write-Host "  $AuthLoginCmd"
+Write-Host "Headless or SSH? Open the browser URL on another device, then confirm:" -ForegroundColor Yellow
+Write-Host "  $AuthWhoamiCmd"
+Write-Host ""
+exit 1

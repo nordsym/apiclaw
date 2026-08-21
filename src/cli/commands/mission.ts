@@ -31,7 +31,7 @@ function loadSession(): string | null {
 }
 
 function authError(): never {
-  console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "apiclaw auth login"));
+  console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "npx @nordsym/apiclaw auth login"));
   process.exit(1);
 }
 

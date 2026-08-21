@@ -103,7 +103,12 @@ const good: WorkspaceContextLike = {
 test('guard: no workspace → no_session', () => {
   const r = requireVerifiedOwner(null);
   assert.equal(r.ok, false);
-  if (!r.ok) assert.equal(r.reason, 'no_session');
+  if (!r.ok) {
+    assert.equal(r.reason, 'no_session');
+    assert.equal(r.payload.command, 'npx @nordsym/apiclaw auth login');
+    assert.equal(r.payload.action, 'agent_auth_required');
+    assert.match(String(r.payload.first_call_prompt), /nasa|fixer_latest|brave_search/);
+  }
 });
 
 test('guard: workspace without email → pending_verification', () => {

@@ -3135,9 +3135,9 @@ async function main() {
 ${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - run: npx @nordsym/apiclaw auth login'}
 
 Quick Start:
-  ${!hasValidSession ? 'npx @nordsym/apiclaw auth login  # First, authenticate\n  ' : ''}discover_apis("find a web search API")
-  discover_apis("search the web")
-  call_api({ provider: "brave_search", ... })
+  ${!hasValidSession ? 'npx @nordsym/apiclaw auth login  # First, authenticate\n  ' : ''}call_api({ provider: "nasa", action: "apod", params: {} })
+  call_api({ provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } })
+  call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
 
 Managed routes (provider keys stay server-side):
   list_connected()

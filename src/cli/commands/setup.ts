@@ -283,8 +283,8 @@ export async function setupCommand(options: SetupOptions): Promise<void> {
       console.log('\n✅ APIClaw configured successfully!\n');
       console.log('Next steps:');
       console.log('  1. Restart your AI coding assistant');
-      console.log('  2. Ask your agent: "List available APIs"\n');
-      console.log('Need help? https://apiclaw.cloud/docs/setup\n');
+      console.log('  2. Ask your agent: call_api with provider "nasa", action "apod"\n');
+      console.log('Need help? https://apiclaw.cloud/docs\n');
     } else if (skipped === results.length) {
       console.log('\n✅ APIClaw already configured in all clients.\n');
       console.log('Use --force to reconfigure.\n');

@@ -142,7 +142,8 @@ authCmd
   .command('whoami')
   .description('Show the currently authenticated workspace')
   .action(async () => {
-    await authWhoamiCommand();
+    const ok = await authWhoamiCommand();
+    if (!ok) process.exit(1);
   });
 
 // `apiclaw login` — thin alias for `apiclaw auth login` (browser-loopback).

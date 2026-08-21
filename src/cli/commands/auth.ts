@@ -19,7 +19,7 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
-import { FIRST_CALL_PROMPT } from '../../registration-guard.js';
+import { AUTH_LOGIN_COMMAND, FIRST_CALL_CLI, FIRST_CALL_PROMPT } from '../../first-run.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
@@ -344,7 +344,8 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log(chalk.dim(`     ${FIRST_CALL_PROMPT}`));
   console.log('');
   console.log(chalk.bold('  CLI equivalent:'));
-  console.log(chalk.dim('     apiclaw discover "web search"'));
+  console.log(chalk.dim(`     ${FIRST_CALL_CLI}`));
+  console.log(chalk.dim('     apiclaw call apilayer/fixer_latest --params \'{"base":"EUR"}\''));
   console.log(chalk.dim('     apiclaw call brave_search/search --params \'{"query":"AI agent infrastructure news"}\''));
   if (result.apiKey) {
     console.log('');
@@ -387,11 +388,11 @@ export async function authLogoutCommand(): Promise<void> {
   console.log(chalk.green(`\n✓ Signed out (${existing.email})\n`));
 }
 
-export async function authWhoamiCommand(): Promise<void> {
+export async function authWhoamiCommand(): Promise<boolean> {
   const cfg = readAuthConfig();
   if (!cfg) {
-    console.log(chalk.dim('  Not signed in. Run: apiclaw auth login\n'));
-    return;
+    console.log(chalk.dim(`  Not signed in. Run: ${AUTH_LOGIN_COMMAND}\n`));
+    return false;
   }
   console.log('');
   console.log(`  ${chalk.bold('Email:')}       ${cfg.email}`);
@@ -401,4 +402,5 @@ export async function authWhoamiCommand(): Promise<void> {
   }
   console.log(`  ${chalk.bold('Config:')}      ${AUTH_CONFIG_PATH}`);
   console.log('');
+  return true;
 }

@@ -6,6 +6,10 @@
  * Paying paths (call_api single + chain, capability, resume_chain) DO.
  */
 
+import { AUTH_LOGIN_COMMAND, FIRST_CALL_PROMPT } from "./first-run.js";
+
+export { FIRST_CALL_PROMPT } from "./first-run.js";
+
 export interface WorkspaceContextLike {
   sessionToken: string;
   workspaceId: string;
@@ -24,9 +28,6 @@ export type GuardReason =
   | "no_session"
   | "not_verified"
   | "pending_verification";
-
-export const FIRST_CALL_PROMPT =
-  'Use APIClaw to find a callable web search API, call it with the query "AI agent infrastructure news", then summarize the top 3 results with source links. If you need to choose a provider/action, run discover_apis first and then call_api with the best callable match.';
 
 // Paths that are allowed without a verified owner.
 export const FREE_CALL_PATHS = new Set<string>([
@@ -60,13 +61,13 @@ export function requireVerifiedOwner(
         action: "agent_auth_required",
         error: "APIClaw needs a one-time sign-in before this tool can run.",
         instruction: "Tell the user to run this in their terminal:",
-        command: "npx @nordsym/apiclaw auth login",
+        command: AUTH_LOGIN_COMMAND,
         what_happens:
           "Opens the browser, one-tap Google sign-in, writes ~/.apiclaw.toml. About 15 seconds.",
         after_signin:
           "Re-call this tool — the session will be picked up automatically.",
         fallback_for_headless:
-          "npx @nordsym/apiclaw auth login (secure browser ownership verification).",
+          `${AUTH_LOGIN_COMMAND} (open the browser URL on another device if this machine is headless).`,
         signup_url: "https://apiclaw.cloud/sign-in",
         free_tier: "Free tier included. See https://apiclaw.cloud/pricing.",
         first_call_prompt: FIRST_CALL_PROMPT,
@@ -83,7 +84,7 @@ export function requireVerifiedOwner(
         action: "agent_auth_required",
         error: "Workspace is not linked to a verified email yet.",
         instruction: "Tell the user to run this in their terminal:",
-        command: "npx @nordsym/apiclaw auth login",
+        command: AUTH_LOGIN_COMMAND,
         signup_url: "https://apiclaw.cloud/sign-in",
         first_call_prompt: FIRST_CALL_PROMPT,
       },
@@ -98,7 +99,7 @@ export function requireVerifiedOwner(
         status: "pending_verification",
         error: `Workspace status: ${workspaceContext.status}. Please complete sign-in.`,
         instruction: "Tell the user to finish sign-in by running:",
-        command: "npx @nordsym/apiclaw auth login",
+        command: AUTH_LOGIN_COMMAND,
         signup_url: "https://apiclaw.cloud/sign-in",
         first_call_prompt: FIRST_CALL_PROMPT,
       },
