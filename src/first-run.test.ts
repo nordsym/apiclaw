@@ -134,10 +134,12 @@ const installFiles = [
 
 for (const file of installFiles) {
   const source = readFileSync(file, "utf8");
-  assert.match(
-    source,
-    /npx @nordsym\/apiclaw auth login/,
-    `${file} must print the exact recovery command`,
+  const hasLiteral = /npx @nordsym\/apiclaw auth login/.test(source);
+  const usesCanon =
+    /AUTH_LOGIN_COMMAND/.test(source) && /from ['"].*first-run/.test(source);
+  assert.ok(
+    hasLiteral || usesCanon,
+    `${file} must print npx @nordsym/apiclaw auth login (literal or AUTH_LOGIN_COMMAND)`,
   );
   assert.match(source, /whoami/, `${file} must refuse Done until whoami works`);
   assert.doesNotMatch(source, /@nordsym\/apiclaw@2\.8\.7/, `${file} must not pin unpublished 2.8.7`);

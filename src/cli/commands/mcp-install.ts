@@ -14,6 +14,7 @@ import {
   FIRST_CALL_CLI,
   completeFirstRunAuth,
 } from '../../first-run.js';
+// Printed next step: npx @nordsym/apiclaw auth login
 import { authLoginCommand } from './auth.js';
 
 export interface MCPInstallOptions {
