@@ -40,7 +40,7 @@ It is not a human-first API marketplace. It is infrastructure for agents and age
 Best for Claude Desktop, Cursor, Windsurf, OpenClaw, and local MCP-compatible agents.
 
 ```bash
-npm install -g @nordsym/apiclaw
+npm install -g @nordsym/apiclaw@2.8.7
 npx @nordsym/apiclaw auth login
 ```
 

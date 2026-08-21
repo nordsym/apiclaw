@@ -6,9 +6,13 @@ import {
   githubContentsApiUrl,
   githubRepositoryApiUrl,
   InvalidIdempotencyKeyError,
+  LEGACY_CLIENT_MINIMUM_VERSION,
+  LEGACY_CLIENT_UPGRADE_COMMANDS,
   normalizeMaxOutputTokens,
   requireManagedIdempotencyKey,
   requiresLegacyClientUpgrade,
+  rewriteLegacyProviderActionCall,
+  synthesizeLegacyIdempotencyKey,
   validateIdempotencyKey,
 } from "./httpTrust";
 
@@ -34,7 +38,11 @@ assert.equal(
 );
 assert.equal(
   requiresLegacyClientUpgrade("/v1/call", new Headers({ "X-APIClaw-Session": "redacted-session" })),
-  true,
+  false,
+);
+assert.equal(
+  requiresLegacyClientUpgrade("/v1/execute", new Headers({ "X-APIClaw-Session": "redacted-session" })),
+  false,
 );
 assert.equal(
   requiresLegacyClientUpgrade("/v1/call", new Headers({
@@ -43,6 +51,49 @@ assert.equal(
   })),
   false,
 );
+assert.equal(
+  requiresLegacyClientUpgrade("/v1/call", new Headers({
+    Authorization: "Bearer sk-claw-published-latest",
+  })),
+  false,
+);
+assert.equal(
+  requiresLegacyClientUpgrade("/v1/execute", new Headers({
+    "X-APIClaw-Internal": "",
+    "X-APIClaw-Workspace": "workspace-forged",
+  })),
+  true,
+);
+assert.equal(
+  requiresLegacyClientUpgrade("/v1/call", new Headers()),
+  false,
+);
+assert.match(synthesizeLegacyIdempotencyKey(), /^legacy-[0-9a-f-]{36}$/);
+assert.deepEqual(
+  rewriteLegacyProviderActionCall({
+    provider: "nasa",
+    action: "apod",
+    params: {},
+  }),
+  { provider: "nasa", action: "apod", params: {} },
+);
+assert.deepEqual(
+  rewriteLegacyProviderActionCall({
+    provider: "apilayer",
+    action: "fixer_latest",
+    params: { base: "EUR" },
+  }),
+  { provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } },
+);
+assert.equal(
+  rewriteLegacyProviderActionCall({ api: "NASA APOD", path: "/" }),
+  null,
+);
+assert.equal(LEGACY_CLIENT_MINIMUM_VERSION, "2.8.7");
+for (const command of LEGACY_CLIENT_UPGRADE_COMMANDS) {
+  assert.doesNotMatch(command, /@latest\b/);
+  assert.match(command, /@nordsym\/apiclaw@2\.8\.7|auth login --force/);
+}
 assert.equal(requireManagedIdempotencyKey(null, "internal"), null);
 assert.throws(
   () => requireManagedIdempotencyKey("contains whitespace", "internal"),

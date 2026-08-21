@@ -148,7 +148,7 @@ echo ""
 echo -e "${CYAN}Installing APIClaw MCP server...${NC}"
 echo ""
 
-if ! npx -y @nordsym/apiclaw@latest mcp-install; then
+if ! npx -y @nordsym/apiclaw@2.8.7 mcp-install; then
     echo ""
     echo -e "${RED}✗${NC} MCP install step failed."
     echo -e "${YELLOW}  Full guide:${NC} https://apiclaw.cloud/install"

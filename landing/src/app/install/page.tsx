@@ -244,15 +244,16 @@ export default function InstallPage() {
           <p className="text-sm text-text-secondary mb-4">
             Sign up at <code className="font-mono">/workspace</code>, get an{" "}
             <code className="font-mono text-accent">sk-claw-…</code> key, and call{" "}
-            <code className="font-mono">/v1/call</code> from any language. Your agent
+            <code className="font-mono">/v1/execute</code> from any language. Your agent
             handles the user. APIClaw handles the APIs.
           </p>
           <CopyableLine
             multiline
-            cmd={`curl https://api.apiclaw.cloud/v1/call \\
+            cmd={`curl https://api.apiclaw.cloud/v1/execute \\
   -H "Authorization: Bearer sk-claw-..." \\
+  -H "Idempotency-Key: first-managed-call" \\
   -H "Content-Type: application/json" \\
-  -d '{"provider":"replicate","action":"flux-pro","params":{"prompt":"a coffee mug"}}'`}
+  -d '{"provider":"nasa","action":"apod","params":{}}'`}
           />
           <div className="flex flex-wrap gap-3 mt-4">
             <Link
@@ -351,7 +352,7 @@ export default function InstallPage() {
                 The installer covers apt / dnf / yum / pacman / zypper / apk. For
                 anything else, install Node.js 18+ via your package manager, then run:
               </p>
-              <CopyableLine cmd="npx -y @nordsym/apiclaw mcp-install" prompt="$" />
+              <CopyableLine cmd="npx -y @nordsym/apiclaw@2.8.7 mcp-install" prompt="$" />
             </Disclosure>
             <Disclosure title="Claude Desktop doesn't see APIClaw after install">
               <ol className="list-decimal pl-5 space-y-1.5">

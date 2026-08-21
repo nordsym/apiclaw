@@ -4,10 +4,10 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const http = readFileSync(fileURLToPath(new URL("./http.ts", import.meta.url)), "utf8");
-const executeRouteStart = http.indexOf('http.route({\n  path: "/v1/execute"');
+const executeRouteStart = http.indexOf("async function handleManagedExecute");
 const execute = http.slice(
   executeRouteStart,
-  http.indexOf('http.route({\n  path:', executeRouteStart + 1),
+  http.indexOf('http.route({\n  path: "/v1/execute"', executeRouteStart + 1),
 );
 const chatCompletionsStart = http.indexOf('http.route({\n  path: "/v1/chat/completions"');
 const chatCompletions = http.slice(chatCompletionsStart, chatCompletionsStart + 65_000);

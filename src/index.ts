@@ -1224,8 +1224,9 @@ DISCOVER APIs (signup required, free):
   discover_apis({ query: "text to speech", category: "ai" })
 
 CALL APIs (requires free registration):
+  call_api({ provider: "nasa", action: "apod", params: {} })
+  call_api({ provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } })
   call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
-  call_api({ provider: "github", action: "get_repo", params: { owner: "nordsym", repo: "apiclaw" } })
 
 ${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Discovery is free | Free tier: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider cost
 
@@ -1467,7 +1468,7 @@ Docs: https://apiclaw.cloud
                     match_reasons: r.match_reasons,
                     callable: isCallable,
                     execution: isCallable
-                      ? { tool: 'call_api', endpoint: '/v1/call', hint: 'APIClaw handles auth + routing.' }
+                      ? { tool: 'call_api', endpoint: '/v1/execute', hint: 'APIClaw handles auth + routing.' }
                       : { tool: null, endpoint: null, hint: 'Discovery-only. See docsUrl for integration.' },
                   };
                 })

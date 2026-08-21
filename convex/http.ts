@@ -36,6 +36,11 @@ import {
   normalizeMaxOutputTokens,
   requireManagedIdempotencyKey,
   requiresLegacyClientUpgrade,
+  rewriteLegacyProviderActionCall,
+  synthesizeLegacyIdempotencyKey,
+  hasCustomerManagedCredential,
+  LEGACY_CLIENT_MINIMUM_VERSION,
+  LEGACY_CLIENT_UPGRADE_COMMANDS,
 } from "./httpTrust";
 import {
   buildBoundIdempotencyReplayContract,
@@ -1120,11 +1125,8 @@ function legacyClientUpgradeResponse(): Response {
       code: "legacy_client_upgrade_required",
       type: "upgrade_required",
       message: "APIClaw 2.8.6 cannot safely execute against the current gateway contract. Upgrade, sign in again, and restart your MCP client.",
-      minimumVersion: "2.8.7",
-      commands: [
-        "npm install -g @nordsym/apiclaw@latest",
-        "apiclaw auth login --force",
-      ],
+      minimumVersion: LEGACY_CLIENT_MINIMUM_VERSION,
+      commands: [...LEGACY_CLIENT_UPGRADE_COMMANDS],
       docsUrl: "https://apiclaw.cloud/install",
     },
   }, 426);
@@ -1143,7 +1145,7 @@ async function recordLegacyClientUpgrade(
       props: {
         reason: "legacy_client_upgrade_required",
         path,
-        minimumVersion: "2.8.7",
+        minimumVersion: LEGACY_CLIENT_MINIMUM_VERSION,
       },
     });
   } catch (error: any) {
@@ -1479,10 +1481,9 @@ async function enforcePreCallQuota(
   const trafficClass = options.trafficClass === "internal" ? "internal" : "customer";
   let idempotencyKey: string | null;
   try {
-    idempotencyKey = requireManagedIdempotencyKey(
-      request.headers.get("Idempotency-Key"),
-      trafficClass,
-    );
+    const suppliedKey = request.headers.get("Idempotency-Key")
+      ?? (trafficClass === "customer" ? synthesizeLegacyIdempotencyKey() : null);
+    idempotencyKey = requireManagedIdempotencyKey(suppliedKey, trafficClass);
   } catch (error) {
     if (error instanceof InvalidIdempotencyKeyError) {
       return jsonResponse({
@@ -5530,11 +5531,16 @@ async function resolveExecuteAuth(
   const internalSecret = request.headers.get("X-APIClaw-Internal");
   if (internalSecret) {
     const expectedSecret = process.env.APICLAW_INTERNAL_SECRET;
-    if (!expectedSecret || internalSecret !== expectedSecret) {
+    if (expectedSecret && internalSecret === expectedSecret) {
+      const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
+      return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
+    }
+    // Published 2.8.6 always sent Internal (often empty or a local dummy).
+    // A customer credential still completes the call; dummy Internal without
+    // one stays 401 so workspace-header-only traffic cannot forge internal.
+    if (!hasCustomerManagedCredential(request.headers)) {
       return jsonResponse({ error: { message: "Invalid internal secret", type: "auth_error" } }, 401);
     }
-    const workspaceHeader = request.headers.get("X-APIClaw-Workspace");
-    return { workspaceId: workspaceHeader || undefined, authMethod: "internal" };
   }
 
   // 2. API key or CLI session (unified resolver handles both new header forms)
@@ -5574,10 +5580,7 @@ async function resolveExecuteAuth(
   return { authMethod: "anonymous" };
 }
 
-http.route({
-  path: "/v1/execute",
-  method: "POST",
-  handler: httpAction(async (ctx, request) => {
+async function handleManagedExecute(ctx: any, request: Request): Promise<Response> {
     const startTime = Date.now();
 
     if (requiresLegacyClientUpgrade("/v1/execute", request.headers)) {
@@ -6144,7 +6147,12 @@ http.route({
       },
       _apiclaw: { latencyMs: Date.now() - startTime, route: "discovery_only", gateway: true },
     }, 501);
-  }),
+}
+
+http.route({
+  path: "/v1/execute",
+  method: "POST",
+  handler: httpAction(handleManagedExecute),
 });
 
 http.route({
@@ -7294,6 +7302,26 @@ http.route({
     let body: any;
     try { body = await readManagedJsonBodyCapped(request); }
     catch { return jsonResponse({ error: { code: "invalid_json", message: "Body must be JSON" } }, 400); }
+
+    const rewritten = rewriteLegacyProviderActionCall(body);
+    if (rewritten) {
+      const rewriteHeaders = new Headers(request.headers);
+      if (!rewriteHeaders.get("Idempotency-Key")?.trim()) {
+        rewriteHeaders.set("Idempotency-Key", synthesizeLegacyIdempotencyKey());
+      }
+      if (hasCustomerManagedCredential(rewriteHeaders)) {
+        rewriteHeaders.delete("X-APIClaw-Internal");
+      }
+      rewriteHeaders.set("content-type", "application/json");
+      return handleManagedExecute(
+        ctx,
+        new Request(new URL("/v1/execute", request.url), {
+          method: "POST",
+          headers: rewriteHeaders,
+          body: JSON.stringify(rewritten),
+        }),
+      );
+    }
 
     const apiName: string = typeof body?.api === "string" ? body.api.trim() : "";
     const userPath: string = typeof body?.path === "string" ? body.path : "/";

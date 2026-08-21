@@ -42,16 +42,54 @@ export function requireManagedIdempotencyKey(
   return value;
 }
 
+export function hasCustomerManagedCredential(headers: Headers): boolean {
+  if (headers.get("X-APIClaw-Session") || headers.get("X-APIClaw-Api-Key")) return true;
+  const authorization = headers.get("Authorization") ?? "";
+  return /^(Bearer|Api-Key)\s+sk-(claw|mcp)-/i.test(authorization);
+}
+
+export function synthesizeLegacyIdempotencyKey(): string {
+  return `legacy-${crypto.randomUUID()}`;
+}
+
+export const LEGACY_CLIENT_MINIMUM_VERSION = "2.8.7";
+export const LEGACY_CLIENT_UPGRADE_COMMANDS = [
+  "npm install -g @nordsym/apiclaw@2.8.7",
+  "apiclaw auth login --force",
+] as const;
+
+export function rewriteLegacyProviderActionCall(body: unknown): {
+  provider: string;
+  action: string;
+  params: Record<string, unknown>;
+} | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const record = body as Record<string, unknown>;
+  const provider = typeof record.provider === "string" ? record.provider.trim() : "";
+  const action = typeof record.action === "string" ? record.action.trim() : "";
+  const api = typeof record.api === "string" ? record.api.trim() : "";
+  if (!provider || !action || api) return null;
+  const params =
+    record.params && typeof record.params === "object" && !Array.isArray(record.params)
+      ? record.params as Record<string, unknown>
+      : {};
+  return { provider, action, params };
+}
+
 /**
- * Detect the two published 2.8.6 execution shapes that cannot satisfy the
- * hardened auth and idempotency contract. The legacy local MCP shape is only
- * identifiable by its always-present X-APIClaw-Internal header; it must never
- * be bridged because its workspace header is otherwise forgeable.
+ * Block only the forgeable 2.8.6 local-MCP shape: an empty X-APIClaw-Internal
+ * header with no customer credential. Published latest must still complete a
+ * first managed call on /v1/execute (and /v1/call rewritten to execute).
+ * Workspace-header-only Internal traffic stays fail-closed.
  */
-export function requiresLegacyClientUpgrade(path: "/v1/execute" | "/v1/call", headers: Headers): boolean {
+export function requiresLegacyClientUpgrade(
+  _path: "/v1/execute" | "/v1/call",
+  headers: Headers,
+): boolean {
   if (headers.get("Idempotency-Key") !== null) return false;
-  if (path === "/v1/call") return true;
-  return headers.has("X-APIClaw-Internal");
+  if (hasCustomerManagedCredential(headers)) return false;
+  const internal = headers.get("X-APIClaw-Internal");
+  return internal !== null && internal.trim() === "";
 }
 
 function canonicalize(value: unknown): unknown {

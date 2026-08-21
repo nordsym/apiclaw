@@ -86,11 +86,11 @@ const howItWorks = [
       <>
         <span className="text-gray-500">{"// Agent uses call_api tool"}</span>{"\n"}
         {"{"}{"\n"}
-        {"  "}<span className="text-red-400">"provider"</span>: <span className="text-green-400">"replicate"</span>,{"\n"}
-        {"  "}<span className="text-red-400">"action"</span>: <span className="text-green-400">"flux-schnell"</span>,{"\n"}
-        {"  "}<span className="text-red-400">"params"</span>: {"{ "}<span className="text-red-400">"prompt"</span>: <span className="text-green-400">"..."</span>{" }"}{"\n"}
+        {"  "}<span className="text-red-400">"provider"</span>: <span className="text-green-400">"nasa"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"action"</span>: <span className="text-green-400">"apod"</span>,{"\n"}
+        {"  "}<span className="text-red-400">"params"</span>: {"{"}{"}"}{"\n"}
         {"}"}{"\n"}
-        <span className="text-gray-500">{"// → image URL, no API key needed"}</span>
+        <span className="text-gray-500">{"// → Astronomy Picture of the Day"}</span>
       </>
     ),
   },

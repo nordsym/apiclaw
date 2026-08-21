@@ -24,11 +24,11 @@ const DOORS: Door[] = [
         <span className="text-text-secondary">{"({ "}</span>
         <span className="text-text-primary">provider</span>
         <span className="text-text-secondary">: </span>
-        <span className="text-accent">"elevenlabs"</span>
+        <span className="text-accent">"nasa"</span>
         <span className="text-text-secondary">, </span>
         <span className="text-text-primary">action</span>
         <span className="text-text-secondary">: </span>
-        <span className="text-accent">"tts"</span>
+        <span className="text-accent">"apod"</span>
         <span className="text-text-secondary">{", params })"}</span>
       </>
     ),
@@ -57,7 +57,7 @@ const DOORS: Door[] = [
       <>
         <span className="text-text-muted">{"// fetch"}</span>{"\n"}
         <span className="text-text-primary">POST </span>
-        <span className="text-accent">api.apiclaw.cloud/v1/call</span>{"\n"}
+        <span className="text-accent">api.apiclaw.cloud/v1/execute</span>{"\n"}
         <span className="text-text-muted">Authorization: </span>
         <span className="text-accent">Bearer sk-claw-…</span>
       </>

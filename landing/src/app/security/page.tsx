@@ -250,7 +250,7 @@ export default function SecurityPage() {
                 <div>
                   <h4 className="font-semibold text-green-400 mb-1">Key Insight</h4>
                   <p className="text-text-secondary text-sm">
-                    Your agent sends a request like <code className="bg-surface px-2 py-0.5 rounded text-xs">{"call_api('replicate', 'flux-schnell', {...})"}</code>. 
+                    Your agent sends a request like <code className="bg-surface px-2 py-0.5 rounded text-xs">{"call_api('nasa', 'apod', {})"}</code>. 
                     APIClaw adds the real credentials server-side. The agent never sees or stores any API key — 
                     even if compromised, your credentials remain safe.
                   </p>
