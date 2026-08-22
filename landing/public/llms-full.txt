@@ -8,6 +8,7 @@ APIClaw is NordSym's agent-native runtime for API discovery, managed execution, 
 ## Canonical endpoints
 
 - Website: https://apiclaw.cloud
+- Skill: https://apiclaw.cloud/SKILL.md
 - Docs: https://apiclaw.cloud/docs
 - Catalog: https://apiclaw.cloud/catalog
 - Workspace: https://apiclaw.cloud/workspace
@@ -156,14 +157,15 @@ Mission templates compose typed fetch, transform, decide, validate, and execute 
 
 ## Recommended agent behavior
 
-1. Read https://apiclaw.cloud/llms.txt.
-2. Use discovery to identify a provider by capability.
-3. Treat source verification and execution readiness as separate states.
-4. Authenticate the workspace before execution.
-5. Prefer a managed execution-ready route.
-6. Do not ask the user to paste provider secrets.
-7. Do not claim anonymous access, unlimited free calls, monthly free calls, or generic keyless proxying.
-8. Use live runtime output when model or provider availability matters.
+1. Read https://apiclaw.cloud/SKILL.md and follow it to one POST /v1/execute 200.
+2. Read https://apiclaw.cloud/llms.txt for identity and product truth.
+3. Use discovery to identify a provider by capability.
+4. Treat source verification and execution readiness as separate states.
+5. Authenticate the workspace before execution.
+6. Prefer a managed execution-ready route.
+7. Do not ask the user to paste provider secrets.
+8. Do not claim anonymous access, unlimited free calls, monthly free calls, or generic keyless proxying.
+9. Use live runtime output when model or provider availability matters.
 
 ## Support
 

@@ -27,10 +27,12 @@ import {
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 
+const SKILL_SETUP_LINE = "set up https://apiclaw.cloud/SKILL.md";
+
 const stats = [
   { number: statsData.apiCount.toLocaleString(), label: "Discoverable APIs", live: true },
-  { number: statsData.sourceVerifiedCount.toLocaleString(), label: "Exact-name source-verified", live: true },
-  { number: (statsData.npmDownloads && statsData.npmDownloads >= 12200 ? statsData.npmDownloads.toLocaleString() : "20,058"), label: "npm installs", live: false },
+  { number: (statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString(), label: "Callable now", live: true },
+  { number: String(statsData.managedProviderAdapterCount ?? MANAGED_PROVIDER_ADAPTER_COUNT), label: "Managed adapters", live: true },
 ];
 
 const trustedBy = [
@@ -196,6 +198,7 @@ export default function Home() {
   const [showCopied, setShowCopied] = useState(false);
   const [showContextCopied, setShowContextCopied] = useState(false);
   const [showHeroCmdCopied, setShowHeroCmdCopied] = useState(false);
+  const [showSkillCopied, setShowSkillCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [showProvidersModal, setShowProvidersModal] = useState(false);
   const [showManagedModal, setShowManagedModal] = useState(false);
@@ -217,12 +220,16 @@ export default function Home() {
   const copyContextToClipboard = () => {
     const total = statsData.apiCount.toLocaleString();
     const sourceVerified = statsData.sourceVerifiedCount.toLocaleString();
-    const installs = statsData.npmDownloads.toLocaleString();
-    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total} discoverable APIs and ${sourceVerified} current catalog entries matched to source-verification evidence by exact name, with ~${installs} agent installs. Source verification is not execution.
+    const callable = (statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString();
+    const adapters = String(statsData.managedProviderAdapterCount ?? MANAGED_PROVIDER_ADAPTER_COUNT);
+    const context = `APIClaw is the Control Plane for AI Agents. Terminal-native execution, parallel missions, real observability. One unified runtime across ${total} discoverable APIs, ${callable} callable catalog cards, and ${adapters} managed adapters. ${sourceVerified} current catalog entries match source-verification evidence by exact name. Source verification is not execution. The metric that matters is a successful POST /v1/execute, not an install count.
+
+Agent front door: give the agent https://apiclaw.cloud/SKILL.md
+  ${SKILL_SETUP_LINE}
 
 Managed boundary: ${MANAGED_PROVIDER_ADAPTER_COUNT} provider adapters are inventoried and customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Adapter inventory is not an execution promise.
 
-Four doors, one control plane:
+Four runtime doors, one control plane:
 1. Install: local MCP for Claude Desktop and other local clients.
 2. CLI: terminal, scripts, CI/CD.
 3. HTTP: server-side agents and OpenClaw-style agents.
@@ -238,11 +245,12 @@ Pricing: ${FREE_MANAGED_CALLS_LIFETIME} managed calls for the lifetime of each w
 
 Auth (agent-native, ~10s, zero inbox):
   npx @nordsym/apiclaw auth login
-Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), writes ~/.apiclaw.toml. The same auth covers MCP, CLI, HTTP, and Remote MCP. If a tool returns action="agent_auth_required", run that exact command.
+Opens the user's browser, one-tap Clerk sign-in (Google or passwordless email), writes ~/.apiclaw.toml. The same auth covers MCP, CLI, HTTP, and Remote MCP. Never ask the user to paste a token into chat. If a tool returns action="agent_auth_required", run that exact command.
 
-When an API call would help the task, execute it through whichever door the agent uses. Credentials for managed providers are held server-side and never reach the agent.
+When an API call would help the task, POST /v1/execute with provider/action (NASA APOD first, Frankfurter /latest fallback). Never catalog-name apiclaw call CoinGecko.
 
 Install:
+- Agent skill: https://apiclaw.cloud/SKILL.md
 - Claude Desktop (one-click .mcpb): https://apiclaw.cloud/apiclaw.mcpb
 - Any OS via terminal (install + auth, ~30s total):
     curl -fsSL https://apiclaw.cloud/install.sh | bash
@@ -588,6 +596,35 @@ Install:
                 Terminal-native execution, parallel missions, and real observability across supported models and a live API registry. One runtime, four entry points, one workspace.
               </p>
 
+              <div className="mb-5 rounded-2xl border border-accent/30 bg-accent/5 p-4 sm:p-5 text-left">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-accent font-medium mb-2">
+                  Give this to your agent
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(SKILL_SETUP_LINE);
+                    setShowSkillCopied(true);
+                    setTimeout(() => setShowSkillCopied(false), 2000);
+                  }}
+                  className="group w-full inline-flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border bg-background hover:border-accent/40 text-text-primary font-mono text-xs sm:text-sm transition-all duration-200"
+                  title="Copy agent one-liner"
+                >
+                  <span className="inline-flex items-center gap-2 min-w-0">
+                    <span className="text-accent select-none">$</span>
+                    <span className="truncate">{SKILL_SETUP_LINE}</span>
+                  </span>
+                  {showSkillCopied ? (
+                    <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors flex-shrink-0" />
+                  )}
+                </button>
+                <p className="text-xs text-text-muted mt-3 leading-relaxed">
+                  The agent reads <a href="/SKILL.md" className="text-accent hover:underline">SKILL.md</a>, signs in with Clerk, and lands one <code className="font-mono">POST /v1/execute</code>. No token paste.
+                </p>
+              </div>
+
               {/* Primary CTAs */}
               <div className="flex flex-col sm:flex-row gap-3 mb-5">
                 <a
@@ -598,6 +635,24 @@ Install:
                   Install to Claude Desktop
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("curl -fsSL https://apiclaw.cloud/install.sh | bash");
+                    setShowCopied(true);
+                    setTimeout(() => setShowCopied(false), 2000);
+                  }}
+                  className="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-lg border border-border bg-surface hover:bg-surface-elevated hover:border-accent/40 text-text-primary font-mono text-xs sm:text-sm transition-all duration-200 active:scale-[0.98]"
+                  title="Copy curl|bash"
+                >
+                  <span className="text-accent select-none">$</span>
+                  <span className="truncate">curl -fsSL https://apiclaw.cloud/install.sh | bash</span>
+                  {showCopied ? (
+                    <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors flex-shrink-0" />
+                  )}
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -618,7 +673,7 @@ Install:
                 </button>
               </div>
               <p className="text-xs text-text-muted mb-5 max-w-xl">
-                One install for Claude Desktop, one command for everywhere else. Same workspace across MCP, CLI, HTTP, and Remote MCP — works on macOS, Linux, and Windows.
+                Skill for agents. curl|bash for local MCP. Same Clerk auth across MCP, CLI, HTTP, and Remote MCP — macOS, Linux, and Windows.
               </p>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs sm:text-sm text-text-muted">
@@ -677,6 +732,35 @@ Install:
             <p className="text-text-muted text-base sm:text-lg mt-3 max-w-2xl mx-auto">
               One auth, every door. <code className="text-accent">apiclaw auth login</code> opens your browser, signs you in, writes ~/.apiclaw.toml — and every door reads the same workspace from there.
             </p>
+          </div>
+
+          <div className="mb-6 rounded-2xl border border-accent/30 bg-accent/5 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex w-8 h-8 rounded-lg bg-accent/10 text-accent items-center justify-center">
+                  <FileText className="w-4 h-4" />
+                </span>
+                <span className="text-[10px] uppercase tracking-widest text-text-muted font-mono">Skill</span>
+              </div>
+              <div className="text-base font-semibold mb-1 tracking-tight">Give this to your agent</div>
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Agent-native front door. The agent reads <a href="/SKILL.md" className="text-accent hover:underline">SKILL.md</a>, runs Clerk login, and lands one <code className="font-mono">POST /v1/execute</code>. Sit next to curl|bash, MCP, and CLI.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(SKILL_SETUP_LINE);
+                setShowSkillCopied(true);
+                setTimeout(() => setShowSkillCopied(false), 2000);
+              }}
+              className="font-mono text-xs sm:text-sm text-text-primary bg-background border border-border rounded-md px-3 py-2 hover:border-accent/40 transition-colors inline-flex items-center gap-2 flex-shrink-0"
+              title="Copy agent one-liner"
+            >
+              <span className="text-accent select-none">$</span>
+              <span>{SKILL_SETUP_LINE}</span>
+              {showSkillCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-text-muted" />}
+            </button>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -839,28 +923,52 @@ Install:
               ))}
             </div>
 
-            <div className="mt-5 rounded-xl border border-border bg-surface px-4 py-3">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  One command. Same workspace across all four doors.
+            <div className="mt-5 space-y-3">
+              <div className="rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent" />
+                    Agent door. Same workspace as curl|bash / MCP / CLI.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(SKILL_SETUP_LINE);
+                      setShowSkillCopied(true);
+                      setTimeout(() => setShowSkillCopied(false), 2000);
+                    }}
+                    className="font-mono text-xs sm:text-sm text-text-primary bg-background border border-border rounded-md px-3 py-1.5 hover:border-accent/40 transition-colors flex items-center gap-2"
+                    title="Copy agent one-liner"
+                  >
+                    <span className="text-accent select-none">$</span>
+                    <span>{SKILL_SETUP_LINE}</span>
+                    {showSkillCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-text-muted" />}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText("npx @nordsym/apiclaw auth login");
-                  }}
-                  className="font-mono text-xs sm:text-sm text-text-primary bg-surface-elevated border border-border rounded-md px-3 py-1.5 hover:border-accent/40 transition-colors flex items-center gap-2"
-                  title="Copy command"
-                >
-                  <span className="text-accent select-none">$</span>
-                  <span>npx @nordsym/apiclaw auth login</span>
-                  <Copy className="w-3.5 h-3.5 text-text-muted" />
-                </button>
               </div>
-              <p className="text-[11px] text-text-muted mt-2.5 leading-relaxed">
-                Works on macOS, Linux, and Windows. On headless systems, open the sign-in URL on a device where you can verify ownership.
-              </p>
+              <div className="rounded-xl border border-border bg-surface px-4 py-3">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    One command. Same workspace across all four doors.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText("npx @nordsym/apiclaw auth login");
+                    }}
+                    className="font-mono text-xs sm:text-sm text-text-primary bg-surface-elevated border border-border rounded-md px-3 py-1.5 hover:border-accent/40 transition-colors flex items-center gap-2"
+                    title="Copy command"
+                  >
+                    <span className="text-accent select-none">$</span>
+                    <span>npx @nordsym/apiclaw auth login</span>
+                    <Copy className="w-3.5 h-3.5 text-text-muted" />
+                  </button>
+                </div>
+                <p className="text-[11px] text-text-muted mt-2.5 leading-relaxed">
+                  Works on macOS, Linux, and Windows. On headless systems, open the sign-in URL on a device where you can verify ownership.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -1126,7 +1234,7 @@ Install:
               },
               {
                 q: "How does my agent connect?",
-                a: `Four doors. Install for local MCP. CLI for terminal workflows. HTTP for server-side agents and OpenClaw-style agents. Remote MCP for connected clients. Same workspace, same auth, same logs. One \`apiclaw auth login\` covers all four.`
+                a: `Give the agent \`set up https://apiclaw.cloud/SKILL.md\`. That is the agent-native door. Humans still use curl|bash for local MCP, CLI for terminals, HTTP for server-side agents, and Remote MCP for connected clients. Same workspace, same Clerk auth, same logs. One \`apiclaw auth login\` covers every door. Never paste a token into chat.`
               },
               {
                 q: "How does signup work?",
@@ -1202,6 +1310,7 @@ Install:
             <div className="md:col-span-2">
               <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-medium mb-4">Product</h4>
               <ul className="space-y-2.5 text-sm">
+                <li><a href="/SKILL.md" className="text-text-secondary hover:text-text-primary transition-colors">SKILL.md</a></li>
                 <li><a href="#who-is-this-for" className="text-text-secondary hover:text-text-primary transition-colors">Install</a></li>
                 <li><a href="/sign-in" className="text-text-secondary hover:text-text-primary transition-colors">Sign in</a></li>
                 <li><a href="/catalog" className="text-text-secondary hover:text-text-primary transition-colors">Catalog</a></li>

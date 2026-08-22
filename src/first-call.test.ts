@@ -168,6 +168,7 @@ const firstCallFiles = [
   "install.sh",
   "landing/public/install.sh",
   "landing/public/install.ps1",
+  "landing/public/SKILL.md",
 ];
 for (const file of firstCallFiles) {
   const source = readFileSync(file, "utf8");

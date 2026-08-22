@@ -149,6 +149,7 @@ const activeTruthSurfaces = [
   "landing/src/components/CheckoutButton.tsx",
   "landing/public/llms.txt",
   "landing/public/agents.md",
+  "landing/public/SKILL.md",
 ];
 
 const staleManagedAllowance = /(?:50 (?:free )?managed calls|25 calls per month|managed calls? (?:per|\/)(?:\s*)(?:week|month)|managed-call allowance (?:per|\/)(?:\s*)(?:week|month)|weekly managed call quota|monthly free tier|free API calls this month|\$0\.002\/call|\$0\.002 per API call|unlock unlimited usage)/i;
@@ -179,7 +180,7 @@ assert.match(planCopy, /lifetime of the workspace/);
 assert.match(planCopy, /FREE_MANAGED_PROVIDER_COST_CAP_USD/);
 assert.match(planCopy, /PAYG_MARGIN_RATE/);
 
-for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md"]) {
+for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md", "landing/public/SKILL.md"]) {
   const content = readFileSync(file, "utf8");
   assert.match(content, /25[^\n]*lifetime|25 managed calls for the lifetime/i, `${file} must state the lifetime call allowance`);
   assert.match(content, /\$1[^\n]*provider-cost|\$1[^\n]*provider cost/i, `${file} must state the provider-cost cap`);
@@ -260,6 +261,7 @@ const publicDiscoveryCopyFiles = [
   "landing/src/app/api/catalog/route.ts",
   "src/canon-stats.ts",
   "src/discovery.ts",
+  "landing/public/SKILL.md",
 ];
 for (const file of publicDiscoveryCopyFiles) {
   const content = readFileSync(file, "utf8");
