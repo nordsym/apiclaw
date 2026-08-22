@@ -8,7 +8,8 @@
  *   4. Open browserUrl in default browser (open / xdg-open / start).
  *   5. Wait for /callback?code=X&state=Y on loopback (max 5 min).
  *   6. Validate state, POST cliAuth:exchange with {code, codeVerifier} → session+key.
- *   7. Write ~/.apiclaw.toml, verify, print success + next-step hints.
+ *   7. Write ~/.apiclaw.toml, verify, then POST /v1/execute (provider nasa
+ *      action apod, Frankfurter /latest fallback). Print a one-line result, not Done.
  */
 
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
@@ -19,7 +20,8 @@ import ora from 'ora';
 import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
-import { AUTH_LOGIN_COMMAND, FIRST_CALL_CLI, FIRST_CALL_PROMPT } from '../../first-run.js';
+import { completeFirstExecute, type FirstExecuteResult } from '../../first-call.js';
+import { AUTH_LOGIN_COMMAND, firstRunExecuteFailedMessage } from '../../first-run.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
@@ -32,6 +34,18 @@ interface AuthLoginOptions {
   printMcpToken?: boolean;
   force?: boolean;
   noOpen?: boolean;
+}
+
+export type AuthLoginResult = AuthConfig & { firstCall?: FirstExecuteResult };
+
+async function runAndPrintFirstCall(sessionToken: string): Promise<FirstExecuteResult> {
+  const firstCall = await completeFirstExecute({ sessionToken });
+  if (firstCall.ok && firstCall.summary) {
+    console.log(firstCall.summary);
+  } else {
+    console.log(firstRunExecuteFailedMessage());
+  }
+  return firstCall;
 }
 
 function base64url(buf: Buffer): string {
@@ -211,7 +225,7 @@ interface LogoutResult {
   revokedApiKey?: boolean;
 }
 
-export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<AuthConfig | null> {
+export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<AuthLoginResult | null> {
   const existing = readAuthConfig();
   // Already signed in?
   if (!options.force) {
@@ -220,7 +234,8 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
       console.log(
         chalk.dim(`  Use ${chalk.white('apiclaw auth login --force')} to switch accounts, or ${chalk.white('apiclaw auth logout')} to clear.\n`)
       );
-      return existing;
+      const firstCall = await runAndPrintFirstCall(existing.sessionToken);
+      return { ...existing, firstCall };
     }
   }
 
@@ -339,14 +354,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   }
   console.log(chalk.dim(`     Config written to ${AUTH_CONFIG_PATH}`));
 
-  console.log('');
-  console.log(chalk.bold('  Copy/paste into your agent:'));
-  console.log(chalk.dim(`     ${FIRST_CALL_PROMPT}`));
-  console.log('');
-  console.log(chalk.bold('  CLI equivalent:'));
-  console.log(chalk.dim(`     ${FIRST_CALL_CLI}`));
-  console.log(chalk.dim('     apiclaw call apilayer/fixer_latest --params \'{"base":"EUR"}\''));
-  console.log(chalk.dim('     apiclaw call brave_search/search --params \'{"query":"AI agent infrastructure news"}\''));
+  const firstCall = await runAndPrintFirstCall(cfg.sessionToken);
   if (result.apiKey) {
     console.log('');
     console.log(chalk.bold('  For HTTP runtimes:'));
@@ -354,7 +362,17 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   }
   console.log('');
 
-  return cfg;
+  return { ...cfg, firstCall };
+}
+
+export async function authFirstCallCommand(): Promise<boolean> {
+  const cfg = readAuthConfig();
+  if (!cfg) {
+    console.log(chalk.dim(`  Not signed in. Run: ${AUTH_LOGIN_COMMAND}\n`));
+    return false;
+  }
+  const firstCall = await runAndPrintFirstCall(cfg.sessionToken);
+  return firstCall.ok;
 }
 
 export async function authLogoutCommand(): Promise<void> {

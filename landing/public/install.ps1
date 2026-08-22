@@ -151,9 +151,11 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-# First-run auth gate. Never print Done until `auth whoami` succeeds.
+# First-run auth gate. Never print Done until whoami works and the first
+# POST /v1/execute returns 200 (NASA APOD, Frankfurter /latest fallback).
 $AuthLoginCmd = "npx @nordsym/apiclaw auth login"
 $AuthWhoamiCmd = "npx @nordsym/apiclaw auth whoami"
+$AuthFirstCallCmd = "npx @nordsym/apiclaw auth first-call"
 
 function Test-ApiclawCanLaunchAuth {
     if ($env:CI) { return $false }
@@ -185,15 +187,71 @@ function Test-ApiclawWhoami {
     return $false
 }
 
+function Get-ApiclawSessionToken {
+    $toml = Join-Path $HOME ".apiclaw.toml"
+    if (Test-Path $toml) {
+        $match = Select-String -Path $toml -Pattern 'session_token\s*=\s*"([^"]+)"'
+        if ($match) { return $match.Matches[0].Groups[1].Value }
+    }
+    $legacy = Join-Path $HOME ".apiclaw\session"
+    if (Test-Path $legacy) {
+        $data = Get-Content -Raw -Path $legacy | ConvertFrom-Json
+        if ($data.sessionToken) { return $data.sessionToken }
+    }
+    return $null
+}
+
+function Invoke-ApiclawFirstExecute {
+    $token = Get-ApiclawSessionToken
+    if (-not $token) { return $null }
+    $gateway = $env:APICLAW_GATEWAY_URL
+    if (-not $gateway) { $gateway = "https://adventurous-avocet-799.convex.site" }
+    $headers = @{
+        "Content-Type" = "application/json"
+        "X-APIClaw-Session" = $token
+    }
+    $attempts = @(
+        @{ provider = "nasa"; action = "apod"; params = @{} },
+        @{ provider = "frankfurter"; action = "latest"; params = @{ path = "/latest" } }
+    )
+    foreach ($attempt in $attempts) {
+        $headers["Idempotency-Key"] = "apiclaw-first-$($attempt.provider)-$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())"
+        try {
+            $res = Invoke-RestMethod -Method Post -Uri "$gateway/v1/execute" -Headers $headers -Body ($attempt | ConvertTo-Json -Compress)
+            if ($res.success -eq $false) { continue }
+            if ($attempt.provider -eq "nasa") {
+                $title = $res.data.title
+                if ($title) { return "NASA APOD: $title" }
+                return "NASA APOD received"
+            }
+            $usd = $res.data.rates.USD
+            if ($usd) { return "EUR/USD $usd" }
+            return "EUR FX rate received"
+        } catch {
+            continue
+        }
+    }
+    return $null
+}
+
 if (Test-ApiclawWhoami) {
     & npx -y @nordsym/apiclaw@latest auth whoami
     Write-Host ""
-    Write-Host "Done." -ForegroundColor Green -NoNewline
-    Write-Host " Signed in. A managed call can succeed now."
-    Write-Host "First call: apiclaw call nasa/apod --params '{}'" -ForegroundColor DarkGray
-    Write-Host "Restart Claude Desktop to activate the MCP server." -ForegroundColor DarkGray
+    $firstLine = Invoke-ApiclawFirstExecute
+    if ($firstLine) {
+        Write-Host "Done." -ForegroundColor Green -NoNewline
+        Write-Host " Signed in."
+        Write-Host $firstLine -ForegroundColor DarkGray
+        Write-Host "Restart Claude Desktop to activate the MCP server." -ForegroundColor DarkGray
+        Write-Host ""
+        exit 0
+    }
     Write-Host ""
-    exit 0
+    Write-Host "Not done." -ForegroundColor Red -NoNewline
+    Write-Host " Sign-in worked, but the first execute did not succeed."
+    Write-Host "  $AuthFirstCallCmd"
+    Write-Host ""
+    exit 1
 }
 
 Write-Host ""

@@ -155,9 +155,11 @@ if ! npx -y @nordsym/apiclaw@latest mcp-install; then
     exit 1
 fi
 
-# First-run auth gate. Never print Done until `auth whoami` succeeds.
+# First-run auth gate. Never print Done until whoami works and the first
+# POST /v1/execute returns 200 (NASA APOD, Frankfurter /latest fallback).
 AUTH_LOGIN_CMD="npx @nordsym/apiclaw auth login"
 AUTH_WHOAMI_CMD="npx @nordsym/apiclaw auth whoami"
+AUTH_FIRST_CALL_CMD="npx @nordsym/apiclaw auth first-call"
 
 apiclaw_can_launch_auth() {
     if [ -n "${CI:-}" ] || [ "${APICLAW_SKIP_AUTH:-}" = "1" ] || [ "${APICLAW_SKIP_AUTH:-}" = "true" ]; then
@@ -196,14 +198,87 @@ apiclaw_whoami_ok() {
     return 1
 }
 
+# POST /v1/execute with provider/action. Never a catalog name on /v1/call.
+apiclaw_first_execute() {
+    node <<'NODE'
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+function sessionToken() {
+  const toml = path.join(os.homedir(), ".apiclaw.toml");
+  if (fs.existsSync(toml)) {
+    const match = fs.readFileSync(toml, "utf8").match(/session_token\s*=\s*"([^"]+)"/);
+    if (match) return match[1];
+  }
+  const legacy = path.join(os.homedir(), ".apiclaw", "session");
+  if (fs.existsSync(legacy)) {
+    const data = JSON.parse(fs.readFileSync(legacy, "utf8"));
+    if (data.sessionToken) return data.sessionToken;
+  }
+  return "";
+}
+
+function line(provider, body) {
+  const data = body && typeof body === "object" && body.data && typeof body.data === "object" ? body.data : body || {};
+  if (provider === "nasa") {
+    const title = typeof data.title === "string" ? data.title.trim() : "";
+    return title ? `NASA APOD: ${title}` : "NASA APOD received";
+  }
+  const usd = data.rates && data.rates.USD;
+  return usd != null ? `EUR/USD ${usd}` : "EUR FX rate received";
+}
+
+async function execute(token, provider, action, params) {
+  const gateway = process.env.APICLAW_GATEWAY_URL || "https://adventurous-avocet-799.convex.site";
+  const res = await fetch(`${gateway}/v1/execute`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-APIClaw-Session": token,
+      "Idempotency-Key": `apiclaw-first-${provider}-${Date.now()}`,
+    },
+    body: JSON.stringify({ provider, action, params }),
+  });
+  let body = {};
+  try { body = JSON.parse(await res.text()); } catch {}
+  return { status: res.status, body };
+}
+
+(async () => {
+  const token = sessionToken();
+  if (!token) process.exit(1);
+  const nasa = await execute(token, "nasa", "apod", {});
+  if (nasa.status === 200 && nasa.body.success !== false) {
+    console.log(line("nasa", nasa.body));
+    process.exit(0);
+  }
+  const fx = await execute(token, "frankfurter", "latest", { path: "/latest" });
+  if (fx.status === 200 && fx.body.success !== false) {
+    console.log(line("frankfurter", fx.body));
+    process.exit(0);
+  }
+  process.exit(1);
+})();
+NODE
+}
+
 if apiclaw_whoami_ok; then
     npx -y @nordsym/apiclaw@latest auth whoami || true
     echo ""
-    echo -e "${GREEN}${BOLD}Done.${NC} Signed in. A managed call can succeed now."
-    echo -e "${DIM}First call: apiclaw call nasa/apod --params '{}'${NC}"
-    echo -e "${DIM}Restart Claude Desktop to activate the MCP server.${NC}"
+    FIRST_LINE=""
+    if FIRST_LINE=$(apiclaw_first_execute); then
+        echo -e "${GREEN}${BOLD}Done.${NC} Signed in."
+        echo -e "${DIM}${FIRST_LINE}${NC}"
+        echo -e "${DIM}Restart Claude Desktop to activate the MCP server.${NC}"
+        echo ""
+        exit 0
+    fi
     echo ""
-    exit 0
+    echo -e "${RED}${BOLD}Not done.${NC} Sign-in worked, but the first execute did not succeed."
+    echo -e "  ${AUTH_FIRST_CALL_CMD}"
+    echo ""
+    exit 1
 fi
 
 echo ""
