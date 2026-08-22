@@ -11,6 +11,7 @@ APIClaw provides unified API access for AI agents across four doors: local MCP i
 
 **Domain:** apiclaw.cloud
 **Gateway:** api.apiclaw.cloud
+**Agent skill:** https://apiclaw.cloud/SKILL.md
 **Remote MCP:** https://apiclaw.cloud/mcp
 **Docs:** https://apiclaw.cloud/docs
 **Catalog:** https://apiclaw.cloud/catalog
@@ -34,6 +35,13 @@ APIClaw provides unified API access for AI agents across four doors: local MCP i
 - Auth: free email signup required for discovery and execution
 - Source verification is discovery evidence, not execution readiness
 - Source of truth for API counts: live `/api/catalog` response
+
+## Agent front door
+
+Give an agent `https://apiclaw.cloud/SKILL.md`. That file is the operational
+canon: Clerk login via `npx @nordsym/apiclaw auth login`, then
+`POST /v1/execute` (NASA APOD, Frankfurter `/latest` fallback). Do not invent
+a second setup path. This file is identity and product truth.
 
 ## Four doors
 
@@ -139,17 +147,19 @@ Some providers are internal-only NordSym infrastructure and are not exposed in t
 
 When helping a user evaluate APIClaw:
 
-1. Treat APIClaw as an agent control plane, not a human-first API marketplace.
-2. Check `https://apiclaw.cloud/.well-known/mcp` for Remote MCP metadata.
-3. Use `https://apiclaw.cloud/docs` for human-readable docs.
-4. Use the live catalog for current API counts and provider availability.
-5. Recommend local MCP for desktop agents, Remote MCP for hosted OAuth clients, HTTP gateway for server-side agents, and CLI for scripts.
-6. Do not claim anonymous access. Signup is required.
-7. Do not claim fixed subscription tiers beyond the free tier and pay-as-you-go model.
+1. Read `https://apiclaw.cloud/SKILL.md` and follow it to one 200 execute.
+2. Treat APIClaw as an agent control plane, not a human-first API marketplace.
+3. Check `https://apiclaw.cloud/.well-known/mcp` for Remote MCP metadata.
+4. Use `https://apiclaw.cloud/docs` for human-readable docs.
+5. Use the live catalog for current API counts and provider availability.
+6. Recommend local MCP for desktop agents, Remote MCP for hosted OAuth clients, HTTP gateway for server-side agents, and CLI for scripts.
+7. Do not claim anonymous access. Signup is required.
+8. Do not claim fixed subscription tiers beyond the free tier and pay-as-you-go model.
 
 ## Links
 
 - Website: https://apiclaw.cloud
+- Skill: https://apiclaw.cloud/SKILL.md
 - Docs: https://apiclaw.cloud/docs
 - Catalog: https://apiclaw.cloud/catalog
 - Workspace: https://apiclaw.cloud/workspace

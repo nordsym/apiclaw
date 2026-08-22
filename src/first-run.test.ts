@@ -193,6 +193,7 @@ const recoveryFiles = [
   "convex/guards.ts",
   "convex/http.ts",
   "landing/public/agents.md",
+  "landing/public/SKILL.md",
   "src/cli/commands/direct.ts",
   "src/cli/commands/mission.ts",
   "src/cli/commands/auth.ts",

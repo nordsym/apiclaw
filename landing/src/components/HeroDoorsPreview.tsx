@@ -118,6 +118,20 @@ export function HeroDoorsPreview() {
             {paused ? "paused" : "auto-rotate"}
           </div>
         </div>
+        <a
+          href="/SKILL.md"
+          className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border-subtle bg-accent/5 hover:bg-accent/10 transition"
+        >
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-widest text-accent font-semibold">Skill</div>
+            <div className="font-mono text-[12px] sm:text-[13px] text-text-primary truncate">
+              $ set up https://apiclaw.cloud/SKILL.md
+            </div>
+          </div>
+          <span className="text-[10px] uppercase tracking-widest text-text-muted flex-shrink-0">
+            Agent door
+          </span>
+        </a>
 
         <div className="divide-y divide-border-subtle">
           {DOORS.map((door, idx) => {

@@ -18,7 +18,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ```
 landing/
 ├── src/          # Next.js pages and components
-├── public/       # Static assets (demo.gif, llms.txt, agents.md)
+├── public/       # Static assets (demo.gif, SKILL.md, llms.txt, agents.md, install.sh)
 └── pages/        # API routes
 ```
 

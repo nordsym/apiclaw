@@ -12,6 +12,7 @@ const files = [
   "landing/src/components/InstallSection.tsx",
   "landing/src/components/HeroTabs.tsx",
   "landing/public/agents.md",
+  "landing/public/SKILL.md",
 ];
 
 for (const file of files) {
@@ -44,6 +45,8 @@ assert.doesNotMatch(docs, /elevenlabs|replicate|5,600|Firecrawl/);
 
 const homepage = readFileSync("landing/src/app/page.tsx", "utf8");
 assert.doesNotMatch(homepage, /16,?485|2\.5\.3/);
+assert.match(homepage, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/);
+assert.doesNotMatch(homepage, /label: "npm installs"/);
 
 assert.match(http, /npx @nordsym\/apiclaw auth login/);
 assert.doesNotMatch(http, /run `apiclaw login`/);
