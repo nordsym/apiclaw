@@ -27,7 +27,7 @@ assert.match(skill, /nasa/, "first research call is NASA APOD");
 assert.match(skill, /apod/, "first research call is NASA APOD");
 assert.match(skill, /frankfurter/i, "Frankfurter /latest is the fallback");
 assert.match(skill, /\/latest/, "Frankfurter fallback uses /latest");
-assert.match(skill, /auth first-call/, "first-call command is the preferred path");
+assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
 assert.match(skill, /1,?025/, "callable count is the live catalog card count");
 assert.match(skill, /26,?619/, "discoverable count is canon");
 assert.match(skill, /22 managed adapters/, "adapter inventory is canon");

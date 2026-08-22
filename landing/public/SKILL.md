@@ -72,14 +72,8 @@ Rules:
 ## 3. First execute — POST /v1/execute
 
 whoami is not Done. Done is HTTP 200 from `POST /v1/execute`.
-
-Preferred path (NASA APOD, then Frankfurter `/latest`):
-
-```bash
-npx @nordsym/apiclaw auth first-call
-```
-
-That is the same first research call `install.sh` uses after sign-in.
+This is the same first research call `install.sh` uses after sign-in:
+NASA APOD, then Frankfurter `/latest`.
 
 ### Preferred rail: NASA APOD
 
@@ -125,7 +119,8 @@ A 200 with a EUR FX rate is success.
   a slash hit legacy `POST /v1/call`.
 - Managed HTTP calls need one `Idempotency-Key` per logical operation.
   Reuse the same key after an ambiguous network failure.
-- After login, `auth first-call` is enough. Do not invent a third rail.
+- After login, run the NASA curl above. If it is not 200, run Frankfurter.
+  Do not invent a third rail.
 
 ## 4. After the first 200
 
