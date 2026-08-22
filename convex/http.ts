@@ -1129,7 +1129,7 @@ function legacyClientUpgradeResponse(): Response {
     error: {
       code: "legacy_client_upgrade_required",
       type: "upgrade_required",
-      message: "APIClaw 2.8.6 cannot safely execute against the current gateway contract. Upgrade, sign in again, and restart your MCP client.",
+      message: "This client cannot execute against the current gateway. Upgrade, sign in again, then POST /v1/execute with a provider/action (for example nasa/apod). Catalog names without a slash still hit /v1/call and will keep failing.",
       minimumVersion: LEGACY_CLIENT_MINIMUM_VERSION,
       commands: [...LEGACY_CLIENT_UPGRADE_COMMANDS],
       docsUrl: "https://apiclaw.cloud/install",

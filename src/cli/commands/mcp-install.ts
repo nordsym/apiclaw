@@ -11,7 +11,6 @@ import { execSync } from 'child_process';
 import chalk from 'chalk';
 import {
   AUTH_LOGIN_COMMAND,
-  FIRST_CALL_CLI,
   completeFirstRunAuth,
 } from '../../first-run.js';
 // Printed next step: npx @nordsym/apiclaw auth login
@@ -376,8 +375,7 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
       launch: (opts) => authLoginCommand(opts),
     });
     if (auth.complete) {
-      console.log('Restart your MCP client, then try:');
-      console.log(`  ${FIRST_CALL_CLI}`);
+      console.log('Restart your MCP client.');
       console.log('Docs: https://apiclaw.cloud/docs\n');
       return;
     }

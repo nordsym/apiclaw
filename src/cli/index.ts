@@ -11,7 +11,7 @@ import { mcpInstallCommand } from './commands/mcp-install.js';
 import { doctorCommand } from './commands/doctor.js';
 import { restoreCommand } from './commands/restore.js';
 import { uninstallCommand } from './commands/uninstall.js';
-import { authLoginCommand, authLogoutCommand, authWhoamiCommand } from './commands/auth.js';
+import { authFirstCallCommand, authLoginCommand, authLogoutCommand, authWhoamiCommand } from './commands/auth.js';
 import { demoCommand } from './commands/demo.js';
 import { missionCommand } from './commands/mission.js';
 import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './commands/direct.js';
@@ -143,6 +143,14 @@ authCmd
   .description('Show the currently authenticated workspace')
   .action(async () => {
     const ok = await authWhoamiCommand();
+    if (!ok) process.exit(1);
+  });
+
+authCmd
+  .command('first-call')
+  .description('Complete the first research execute (NASA APOD, Frankfurter fallback)')
+  .action(async () => {
+    const ok = await authFirstCallCommand();
     if (!ok) process.exit(1);
   });
 

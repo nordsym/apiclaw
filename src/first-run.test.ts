@@ -9,6 +9,7 @@ import {
   canLaunchInteractiveAuth,
   completeFirstRunAuth,
   firstRunCompleteMessage,
+  firstRunExecuteFailedMessage,
   firstRunIncompleteMessage,
 } from "./first-run.js";
 import { requireVerifiedOwner } from "./registration-guard.js";
@@ -84,10 +85,16 @@ assert.doesNotMatch(incomplete, /\bDone\b/);
 assert.doesNotMatch(incomplete, /apiclaw login/);
 assert.doesNotMatch(incomplete, /@2\.8\.7/);
 
-const complete = firstRunCompleteMessage("ada@example.com");
+const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
 assert.match(complete, /ada@example.com/);
-assert.match(complete, /nasa\/apod/);
+assert.match(complete, /NASA APOD: Helix Nebula/);
+assert.doesNotMatch(firstRunCompleteMessage("ada@example.com"), /nasa\/apod/);
+
+const executeFailed = firstRunExecuteFailedMessage();
+assert.match(executeFailed, /Not done/);
+assert.match(executeFailed, /first execute/);
+assert.doesNotMatch(executeFailed, /\bDone\b/);
 
 const noSession = requireVerifiedOwner(null);
 assert.equal(noSession.ok, false);
@@ -118,12 +125,20 @@ assert.equal(skipped.launched, false);
 
 const already = await completeFirstRunAuth({
   whoami: () => true,
+  firstExecute: async () => ({
+    ok: true,
+    provider: "nasa",
+    action: "apod",
+    summary: "NASA APOD: Helix Nebula",
+    status: 200,
+  }),
   launch: async () => {
     throw new Error("launch must not run when whoami already works");
   },
 });
 assert.equal(already.complete, true);
 assert.equal(already.launched, false);
+assert.equal(already.firstCall?.ok, true);
 
 const installFiles = [
   "install.sh",
@@ -142,6 +157,11 @@ for (const file of installFiles) {
     `${file} must print npx @nordsym/apiclaw auth login (literal or AUTH_LOGIN_COMMAND)`,
   );
   assert.match(source, /whoami/, `${file} must refuse Done until whoami works`);
+  assert.match(
+    source,
+    /\/v1\/execute|firstExecute|first-call|completeFirstRunAuth/i,
+    `${file} must first-execute before Done`,
+  );
   assert.doesNotMatch(source, /@nordsym\/apiclaw@2\.8\.7/, `${file} must not pin unpublished 2.8.7`);
   assert.doesNotMatch(source, /apiclaw login(?! )/, `${file} must not tell users apiclaw login`);
   assert.doesNotMatch(
@@ -160,7 +180,11 @@ for (const file of installFiles) {
 for (const file of ["install.sh", "landing/public/install.sh", "landing/public/install.ps1"]) {
   const source = readFileSync(file, "utf8");
   assert.match(source, /Not done/, `${file} must refuse to claim Done without a session`);
-  assert.match(source, /nasa\/apod/, `${file} must point at a live first rail`);
+  assert.match(source, /nasa/, `${file} must prefer NASA APOD`);
+  assert.match(source, /apod/, `${file} must prefer NASA APOD`);
+  assert.match(source, /frankfurter/i, `${file} must fall back to Frankfurter`);
+  assert.match(source, /\/v1\/execute/, `${file} must POST /v1/execute`);
+  assert.doesNotMatch(source, /apiclaw call CoinGecko/, `${file} must not use catalog-name /v1/call`);
 }
 
 const recoveryFiles = [
@@ -195,4 +219,4 @@ assert.doesNotMatch(guards, /email-fallback/);
 const http = readFileSync("convex/http.ts", "utf8");
 assert.match(http, /npx @nordsym\/apiclaw auth login/);
 
-console.log("first-run: auth login is the next step; Done requires whoami; first call is a live rail");
+console.log("first-run: auth login is the next step; Done requires whoami and a 200 execute");

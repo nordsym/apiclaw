@@ -1,12 +1,18 @@
 /**
- * First-run canon — install is not Done until whoami works.
- *
- * Shared by mcp-install, install.sh / install.ps1 (via the same commands),
+ * First-run canon — install is not Done until whoami works AND the first
+ * POST /v1/execute returns 200. Shared by mcp-install, install.sh / install.ps1,
  * no_session recovery, and the first managed-call prompt. Do not invent a
  * second login command or a dead first-wow rail here.
  */
 
 import { readAuthConfig } from "./auth-config.js";
+import {
+  AUTH_FIRST_CALL_COMMAND,
+  completeFirstExecute,
+  type FirstExecuteResult,
+} from "./first-call.js";
+
+export { AUTH_FIRST_CALL_COMMAND } from "./first-call.js";
 
 /** User-facing recovery / next-step command. Never pin an unpublished version. */
 export const AUTH_LOGIN_COMMAND = "npx @nordsym/apiclaw auth login";
@@ -66,12 +72,17 @@ export function firstRunIncompleteMessage(): string {
   ].join("\n");
 }
 
-export function firstRunCompleteMessage(email?: string): string {
+export function firstRunCompleteMessage(email?: string, summary?: string): string {
   const who = email ? ` Signed in as ${email}.` : "";
+  const line = summary?.trim();
+  return line ? `Done.${who}\n${line}` : `Done.${who}`;
+}
+
+export function firstRunExecuteFailedMessage(): string {
   return [
-    `Done.${who} A managed call can succeed now.`,
-    `First call: ${FIRST_CALL_CLI}`,
-    `Or paste into your agent: ${FIRST_CALL_PROMPT}`,
+    "Not done. Sign-in worked, but the first execute did not succeed.",
+    "NASA APOD via POST /v1/execute, then Frankfurter /latest.",
+    `  ${AUTH_FIRST_CALL_COMMAND}`,
   ].join("\n");
 }
 
@@ -81,38 +92,64 @@ export function printFirstRunIncomplete(): void {
   console.log("");
 }
 
-export function printFirstRunComplete(email?: string): void {
+export function printFirstRunComplete(email?: string, summary?: string): void {
   console.log("");
-  console.log(firstRunCompleteMessage(email));
+  console.log(firstRunCompleteMessage(email, summary));
+  console.log("");
+}
+
+export function printFirstRunExecuteFailed(): void {
+  console.log("");
+  console.log(firstRunExecuteFailedMessage());
   console.log("");
 }
 
 export interface CompleteFirstRunAuthOptions {
   /** When true, skip launching login (dry-run / already attempted). */
   skipLaunch?: boolean;
-  launch?: (options?: { force?: boolean }) => Promise<{ email?: string } | null>;
+  launch?: (options?: { force?: boolean }) => Promise<{
+    email?: string;
+    firstCall?: FirstExecuteResult;
+  } | null>;
   /** Injected for tests. Defaults to reading ~/.apiclaw.toml. */
   whoami?: () => boolean;
+  /** Injected for tests. Defaults to NASA APOD then Frankfurter via /v1/execute. */
+  firstExecute?: () => Promise<FirstExecuteResult>;
 }
 
 export interface CompleteFirstRunAuthResult {
   complete: boolean;
   launched: boolean;
   email?: string;
+  firstCall?: FirstExecuteResult;
+}
+
+async function finishFirstRun(
+  email: string | undefined,
+  launched: boolean,
+  firstExecute: () => Promise<FirstExecuteResult>,
+  already?: FirstExecuteResult,
+): Promise<CompleteFirstRunAuthResult> {
+  const firstCall = already?.ok ? already : await firstExecute();
+  if (firstCall.ok) {
+    printFirstRunComplete(email, firstCall.summary);
+    return { complete: true, launched, email, firstCall };
+  }
+  printFirstRunExecuteFailed();
+  return { complete: false, launched, email, firstCall };
 }
 
 /**
  * After MCP/config install: launch login when a TTY/browser is available,
- * then refuse to claim Done until whoami works.
+ * then refuse to claim Done until whoami works and the first execute returns 200.
  */
 export async function completeFirstRunAuth(
   options: CompleteFirstRunAuthOptions = {},
 ): Promise<CompleteFirstRunAuthResult> {
   const whoami = options.whoami ?? hasWorkingWhoami;
+  const firstExecute = options.firstExecute ?? (() => completeFirstExecute());
   if (whoami()) {
-    const email = readAuthConfig()?.email;
-    printFirstRunComplete(email);
-    return { complete: true, launched: false, email };
+    return finishFirstRun(readAuthConfig()?.email, false, firstExecute);
   }
 
   let launched = false;
@@ -124,8 +161,7 @@ export async function completeFirstRunAuth(
     launched = true;
     const result = await options.launch({});
     if (result?.email && whoami()) {
-      printFirstRunComplete(result.email);
-      return { complete: true, launched, email: result.email };
+      return finishFirstRun(result.email, launched, firstExecute, result.firstCall);
     }
   }
 
