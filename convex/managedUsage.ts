@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import {
   activationManagedCallCount,
@@ -202,6 +203,12 @@ export function usdToMicros(value: number): number {
 
 export function microsToUsd(value: number): number {
   return value / 1_000_000;
+}
+
+// costCents is USD cents (apiLogs.costCents / workspace.monthlySpendCents unit).
+// 1,000,000 micros = 1 USD = 100 cents, so cents = micros / 10,000.
+export function microsToCents(value: number): number {
+  return value / 10_000;
 }
 
 type ManagedLedgerSummaryRow = {
@@ -671,6 +678,18 @@ export const finalizeManagedCall = internalMutation({
       completedAt: now,
       updatedAt: now,
     });
+
+    // Best-effort: surface realized cost on the matching apiLogs row for
+    // Activity/analytics. Never let an analytics patch fail the caller's
+    // already-finalized billing outcome.
+    try {
+      await ctx.runMutation(internal.logs.attachCost, {
+        requestId: ledger.requestId,
+        costCents: microsToCents(args.success ? chargeMicros : 0),
+      });
+    } catch (e) {
+      console.warn("[finalizeManagedCall] attachCost failed:", e instanceof Error ? e.message : e);
+    }
 
     return {
       success: args.success,

@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { api } from "./_generated/api";
 import { findUsableAgentSession } from "./sessionSecurity";
+import { computeByCaller } from "./providerCallerAnalytics";
 
 // ============================================
 // MUTATIONS
@@ -198,6 +199,10 @@ export const getProviderAnalytics = query({
     // Unique callers (for inbound)
     const uniqueCallers = new Set(inboundLogs.map((l) => l.callerWorkspaceId).filter(Boolean)).size;
 
+    // Per-caller breakdown (for inbound) -- raw callerWorkspaceId is never
+    // returned, only a stable derived key (see providerCallerAnalytics.ts).
+    const byCaller = computeByCaller(inboundLogs, session.workspaceId);
+
     const callLogs = periodLogs.filter((l) => !l.action.startsWith("discovery:"));
     const discoveryLogs = periodLogs.filter((l) => l.action.startsWith("discovery:"));
 
@@ -206,6 +211,7 @@ export const getProviderAnalytics = query({
       totalDiscoveries: discoveryLogs.length,
       inboundCalls: inboundLogs.filter((l) => !l.action.startsWith("discovery:")).length,
       uniqueCallers,
+      byCaller,
       byDay: Object.entries(byDay)
         .map(([date, data]) => ({ date, calls: data.calls, searches: data.searches }))
         .sort((a, b) => a.date.localeCompare(b.date)),
@@ -404,6 +410,7 @@ export const getLogs = query({
         latencyMs: log.latencyMs,
         errorMessage: log.errorMessage,
         subagentId: log.subagentId || null,
+        costCents: log.costCents,
         createdAt: log.createdAt,
       })),
       hasMore,
@@ -723,8 +730,9 @@ export const createProxyLog = internalMutation({
     provider: v.string(),
     action: v.string(),
     subagentId: v.optional(v.string()),
+    requestId: v.optional(v.string()),
   },
-  handler: async (ctx, { workspaceId, provider, action, subagentId }) => {
+  handler: async (ctx, { workspaceId, provider, action, subagentId, requestId }) => {
     await ctx.db.insert("apiLogs", {
       workspaceId,
       provider,
@@ -734,9 +742,37 @@ export const createProxyLog = internalMutation({
       status: "success",
       latencyMs: 0,
       direction: "outbound",
+      requestId,
       createdAt: Date.now(),
     });
 
     return { success: true };
+  },
+});
+
+/**
+ * Patch a previously-written apiLogs row with the realized cost, once it's
+ * known (after the managed-metering ledger finalizes for this requestId).
+ * Fire-and-forget from the caller's perspective: a miss (no row found for
+ * this requestId, e.g. proxy log didn't fire or predates this field) is a
+ * silent no-op, never an error, since this only feeds analytics.
+ */
+export const attachCost = internalMutation({
+  args: {
+    requestId: v.string(),
+    costCents: v.number(),
+  },
+  handler: async (ctx, { requestId, costCents }) => {
+    const row = await ctx.db
+      .query("apiLogs")
+      .withIndex("by_requestId", (q) => q.eq("requestId", requestId))
+      .first();
+
+    if (!row) {
+      return { patched: false };
+    }
+
+    await ctx.db.patch(row._id, { costCents });
+    return { patched: true };
   },
 });

@@ -7,6 +7,7 @@ import {
   customerChargeMicros,
   duplicateManagedRequestReason,
   managedDuplicateTerminalReceipt,
+  microsToCents,
   microsToUsd,
   managedFinalizationMatchesAuthorization,
   resolveActivationProviderCostMicros,
@@ -19,6 +20,9 @@ import {
 assert.equal(usdToMicros(1), 1_000_000);
 assert.equal(usdToMicros(0.000001), 1);
 assert.equal(microsToUsd(150_000), 0.15);
+assert.equal(microsToCents(150_000), 15);
+assert.equal(microsToCents(1_000_000), 100);
+assert.equal(microsToCents(0), 0);
 assert.equal(customerChargeMicros(1_000_000, "payg"), 1_150_000);
 assert.equal(customerChargeMicros(1_000_000, "activation"), 0);
 assert.equal(customerChargeMicros(1_000_000, "internal"), 0);

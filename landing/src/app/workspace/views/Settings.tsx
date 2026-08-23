@@ -80,10 +80,26 @@ function WorkspaceSection({ workspace, sessionToken, onWorkspaceUpdate }: { work
   );
 }
 
+/** Parse a comma-separated provider id list into a clean, deduped array. */
+function parseProviderList(input: string): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of input.split(",")) {
+    const id = raw.trim().toLowerCase();
+    if (id && !seen.has(id)) {
+      seen.add(id);
+      result.push(id);
+    }
+  }
+  return result;
+}
+
 function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) {
   const [routingMode, setRoutingMode] = useState("balanced");
   const [defaultModel, setDefaultModel] = useState("");
   const [allowFallback, setAllowFallback] = useState(true);
+  const [preferredProvidersInput, setPreferredProvidersInput] = useState("");
+  const [blockedProvidersInput, setBlockedProvidersInput] = useState("");
   const [catalog, setCatalog] = useState<CatalogModel[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -108,6 +124,8 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
         setRoutingMode(mode);
         setDefaultModel(settings?.defaultModel || "");
         setAllowFallback(settings?.allowOpenRouterFallback !== false);
+        setPreferredProvidersInput(((settings?.preferredProviders as string[] | undefined) || []).join(", "));
+        setBlockedProvidersInput(((settings?.blockedProviders as string[] | undefined) || []).join(", "));
         setLoaded(true);
       })
       .catch(() => {
@@ -143,6 +161,8 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
             routingMode,
             defaultModel: defaultModel || null,
             allowOpenRouterFallback: allowFallback,
+            preferredProviders: parseProviderList(preferredProvidersInput),
+            blockedProviders: parseProviderList(blockedProvidersInput),
           },
         }),
       });
@@ -194,6 +214,30 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
               <span className="mt-0.5 block text-[12.5px] text-[var(--text-muted)]">Route through OpenRouter when no direct provider matches the model.</span>
             </span>
           </label>
+
+          <div className="border-t border-[var(--border-subtle)] pt-4">
+            <span className="mb-1.5 block text-[13px] text-[var(--text-muted)]">Routing</span>
+            <div className="space-y-4">
+              <Field label="Preferred providers" hint="Comma-separated provider ids, tried first in this order (e.g. groq, mistral).">
+                <input
+                  type="text"
+                  value={preferredProvidersInput}
+                  onChange={(e) => { setPreferredProvidersInput(e.target.value); touch(); }}
+                  placeholder="groq, mistral"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Blocked providers" hint="Comma-separated provider ids that routing must never use (e.g. together).">
+                <input
+                  type="text"
+                  value={blockedProvidersInput}
+                  onChange={(e) => { setBlockedProvidersInput(e.target.value); touch(); }}
+                  placeholder="together"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+          </div>
 
           <div className="flex items-center gap-3">
             <button type="button" onClick={save} disabled={state === "saving"} className={`${btnSolid} disabled:opacity-50`}>

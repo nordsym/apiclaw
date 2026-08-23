@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, internalAction, internalQuery } from "./_generated/server";
+import { internalMutation, internalAction, internalQuery, query, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import Stripe from "stripe";
@@ -14,6 +14,7 @@ import {
   resolveProtectedSubscriptionStatus,
   resolveTierAfterBillingTransition,
 } from "./stripeWebhookEvents";
+import { findUsableAgentSession } from "./sessionSecurity";
 
 const PAYG_USAGE_LIMIT = 999_999_999;
 
@@ -612,73 +613,104 @@ export const updatePaymentMethodInfo = internalMutation({
 // ============================================
 
 /**
- * Get billing info for a workspace
+ * Shared handler for billing info, reused by the internal query (trusted
+ * server-side callers that already resolved a workspaceId) and the public
+ * session-authenticated query below. Do not add secret/Stripe-key fields
+ * here; this is exposed to the client via getBillingInfo.
+ */
+async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
+  const workspace = await ctx.db.get(workspaceId);
+  if (!workspace) {
+    throw new Error("Workspace not found");
+  }
+
+  // Get recent invoices
+  const invoices = await ctx.db
+    .query("invoices")
+    .withIndex("by_workspaceId_createdAt", (q) =>
+      q.eq("workspaceId", workspaceId)
+    )
+    .order("desc")
+    .take(12);
+
+  // Calculate current period usage
+  const now = new Date();
+  const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const ledger = await ctx.db
+    .query("managedCallLedger")
+    .withIndex("by_workspaceId_createdAt", (q) =>
+      q.eq("workspaceId", workspaceId).gte("createdAt", periodStart.getTime()),
+    )
+    .collect();
+  const currentPeriodUsage = ledger.filter((row) => row.status === "succeeded").length;
+
+  // Determine plan limits
+  const plan = workspace.billingPlan || "free";
+  const managedUsageCount = workspace.managedUsageCount ?? workspace.usageCount ?? 0;
+  const activationProviderCostUsd = (workspace.activationProviderCostMicros ?? 0) / 1_000_000;
+
+  return {
+    plan,
+    tier: workspace.tier,
+    usage: managedUsageCount,
+    currentPeriodUsage,
+    limit: plan === "free" ? FREE_MANAGED_CALLS_LIFETIME : -1,
+    activationProviderCostUsd,
+    activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
+    creditBalance: workspace.creditBalance || 0,
+    stripeCustomerId: workspace.stripeCustomerId,
+    stripeSubscriptionId: workspace.stripeSubscriptionId,
+    lastBillingDate: workspace.lastBillingDate,
+    currentPeriodStart: periodStart.getTime(),
+    monthlySpendCents: Math.round((workspace.monthlySpendCents ?? 0)),
+    invoices: invoices.map((inv) => ({
+      id: inv._id,
+      stripeInvoiceId: inv.stripeInvoiceId,
+      amount: inv.amount,
+      status: inv.status,
+      periodStart: inv.periodStart,
+      periodEnd: inv.periodEnd,
+      callCount: inv.callCount,
+      pdfUrl: inv.pdfUrl,
+      createdAt: inv.createdAt,
+    })),
+    paymentMethod: workspace.hasPaymentMethod
+      ? {
+          brand: workspace.cardBrand ?? null,
+          last4: workspace.cardLast4 ?? null,
+          type: workspace.paymentMethodType ?? null,
+        }
+      : null,
+    // Check if payment method needed
+    needsPaymentMethod:
+      plan === "free" && (
+        managedUsageCount >= FREE_MANAGED_CALLS_LIFETIME ||
+        activationProviderCostUsd >= FREE_MANAGED_PROVIDER_COST_CAP_USD
+      ),
+  };
+}
+
+/**
+ * Get billing info for a workspace (trusted internal callers).
  */
 export const getInfo = internalQuery({
   args: {
     workspaceId: v.id("workspaces"),
   },
-  handler: async (ctx, args) => {
-    const workspace = await ctx.db.get(args.workspaceId);
-    if (!workspace) {
-      throw new Error("Workspace not found");
-    }
+  handler: async (ctx, args) => buildBillingInfo(ctx, args.workspaceId),
+});
 
-    // Get recent invoices
-    const invoices = await ctx.db
-      .query("invoices")
-      .withIndex("by_workspaceId_createdAt", (q) =>
-        q.eq("workspaceId", args.workspaceId)
-      )
-      .order("desc")
-      .take(10);
-
-    // Calculate current period usage
-    const now = new Date();
-    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const ledger = await ctx.db
-      .query("managedCallLedger")
-      .withIndex("by_workspaceId_createdAt", (q) =>
-        q.eq("workspaceId", args.workspaceId).gte("createdAt", periodStart.getTime()),
-      )
-      .collect();
-    const currentPeriodUsage = ledger.filter((row) => row.status === "succeeded").length;
-
-    // Determine plan limits
-    const plan = workspace.billingPlan || "free";
-    const managedUsageCount = workspace.managedUsageCount ?? workspace.usageCount ?? 0;
-    const activationProviderCostUsd = (workspace.activationProviderCostMicros ?? 0) / 1_000_000;
-
-    return {
-      plan,
-      tier: workspace.tier,
-      usage: managedUsageCount,
-      currentPeriodUsage,
-      limit: plan === "free" ? FREE_MANAGED_CALLS_LIFETIME : -1,
-      activationProviderCostUsd,
-      activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
-      creditBalance: workspace.creditBalance || 0,
-      stripeCustomerId: workspace.stripeCustomerId,
-      stripeSubscriptionId: workspace.stripeSubscriptionId,
-      lastBillingDate: workspace.lastBillingDate,
-      invoices: invoices.map((inv) => ({
-        id: inv._id,
-        stripeInvoiceId: inv.stripeInvoiceId,
-        amount: inv.amount,
-        status: inv.status,
-        periodStart: inv.periodStart,
-        periodEnd: inv.periodEnd,
-        callCount: inv.callCount,
-        pdfUrl: inv.pdfUrl,
-        createdAt: inv.createdAt,
-      })),
-      // Check if payment method needed
-      needsPaymentMethod:
-        plan === "free" && (
-          managedUsageCount >= FREE_MANAGED_CALLS_LIFETIME ||
-          activationProviderCostUsd >= FREE_MANAGED_PROVIDER_COST_CAP_USD
-        ),
-    };
+/**
+ * Public, session-authenticated billing info for the workspace UI.
+ * Returns null on an invalid/expired session instead of throwing, matching
+ * the fail-soft convention used by getWorkspaceDashboard/getLogs.
+ */
+export const getBillingInfo = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await findUsableAgentSession(ctx.db, token);
+    if (!session) return null;
+    return await buildBillingInfo(ctx, session.workspaceId);
   },
 });
 

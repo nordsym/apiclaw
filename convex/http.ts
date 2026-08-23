@@ -2051,6 +2051,7 @@ async function validateAndLogProxyCall(
         provider,
         action,
         subagentId,
+        requestId: quotaGate.requestId,
       });
     } catch (e: any) {
       console.error("[Proxy] Workspace logging failed:", e.message);
@@ -4282,6 +4283,7 @@ http.route({
         provider: route.provider,
         action: "chat_completions",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+        requestId: quotaGate.requestId,
       });
     } catch (e: any) {
       console.error("[Gateway] Logging failed:", e.message);
@@ -4668,6 +4670,7 @@ http.route({
         provider: backend.provider,
         action: "embeddings",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+        requestId: embeddingGate.requestId,
       });
     } catch (e: any) {
       console.error("[Gateway] Embeddings logging failed:", e.message);
@@ -5809,6 +5812,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           });
           await ctx.runMutation(internal.logs.createProxyLog, {
             workspaceId: workspaceId as any, provider: route.provider, action: "chat", subagentId,
+            requestId: quotaGate?.requestId,
           });
           executeLlmUsageResult = quotaGate ? { quotaWarning: quotaGate.quotaWarning } : null;
         } catch (e: any) { console.error("[Execute] LLM logging failed:", e.message); }
@@ -6004,6 +6008,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           });
           await ctx.runMutation(internal.logs.createProxyLog, {
             workspaceId: workspaceId as any, provider, action, subagentId,
+            requestId: quotaGate?.requestId,
           });
         } catch (e: any) { console.error("[Execute] Managed logging failed:", e.message); }
       }
@@ -6782,6 +6787,7 @@ http.route({
         provider: useCodex ? "openai-codex" : "openai",
         action: "responses",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+        requestId: quotaGate.requestId,
       });
     } catch (e: any) {
       console.error("[/v1/responses] logging failed:", e?.message);
@@ -7207,6 +7213,7 @@ http.route({
         provider: "anthropic",
         action: "messages",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
+        requestId: quotaGate.requestId,
       });
     } catch (e: any) {
       console.error("[/v1/messages] logging failed:", e?.message);

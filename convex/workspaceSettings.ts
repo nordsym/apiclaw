@@ -24,8 +24,6 @@ export const get = query({
         workspaceId,
         routingMode: "balanced",
         defaultModel: null,
-        maxPricePerMTokens: null,
-        monthlyBudgetLimit: null,
         preferredProviders: [],
         blockedProviders: [],
         allowOpenRouterFallback: true,
@@ -54,8 +52,6 @@ export const getForRouting = internalQuery({
       return {
         routingMode: "balanced" as const,
         defaultModel: null as string | null,
-        maxPricePerMTokens: null as number | null,
-        monthlyBudgetLimit: null as number | null,
         preferredProviders: [] as string[],
         blockedProviders: [] as string[],
         allowOpenRouterFallback: true,
@@ -66,8 +62,6 @@ export const getForRouting = internalQuery({
     return {
       routingMode: settings.routingMode,
       defaultModel: settings.defaultModel ?? null,
-      maxPricePerMTokens: settings.maxPricePerMTokens ?? null,
-      monthlyBudgetLimit: settings.monthlyBudgetLimit ?? null,
       preferredProviders: settings.preferredProviders ?? [],
       blockedProviders: settings.blockedProviders ?? [],
       allowOpenRouterFallback: settings.allowOpenRouterFallback ?? true,
@@ -86,8 +80,6 @@ export const upsert = mutation({
     token: v.string(),
     routingMode: v.optional(v.string()),
     defaultModel: v.optional(v.union(v.string(), v.null())),
-    maxPricePerMTokens: v.optional(v.union(v.float64(), v.null())),
-    monthlyBudgetLimit: v.optional(v.union(v.float64(), v.null())),
     preferredProviders: v.optional(v.array(v.string())),
     blockedProviders: v.optional(v.array(v.string())),
     allowOpenRouterFallback: v.optional(v.boolean()),
@@ -118,8 +110,6 @@ export const upsert = mutation({
     const updates: Record<string, unknown> = { updatedAt: now };
     if (args.routingMode !== undefined) updates.routingMode = args.routingMode;
     if (args.defaultModel !== undefined) updates.defaultModel = args.defaultModel ?? undefined;
-    if (args.maxPricePerMTokens !== undefined) updates.maxPricePerMTokens = args.maxPricePerMTokens ?? undefined;
-    if (args.monthlyBudgetLimit !== undefined) updates.monthlyBudgetLimit = args.monthlyBudgetLimit ?? undefined;
     if (args.preferredProviders !== undefined) updates.preferredProviders = args.preferredProviders;
     if (args.blockedProviders !== undefined) updates.blockedProviders = args.blockedProviders;
     if (args.allowOpenRouterFallback !== undefined) updates.allowOpenRouterFallback = args.allowOpenRouterFallback;
@@ -133,8 +123,6 @@ export const upsert = mutation({
       workspaceId,
       routingMode: args.routingMode || "balanced",
       defaultModel: args.defaultModel ?? undefined,
-      maxPricePerMTokens: args.maxPricePerMTokens ?? undefined,
-      monthlyBudgetLimit: args.monthlyBudgetLimit ?? undefined,
       preferredProviders: args.preferredProviders,
       blockedProviders: args.blockedProviders,
       allowOpenRouterFallback: args.allowOpenRouterFallback ?? true,

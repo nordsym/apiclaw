@@ -51,8 +51,8 @@ export const usage: UsageData = {
 
 // Shape of convex/logs.ts getLogs: { logs, hasMore, nextCursor }. subagentId null = main agent.
 const apiLogs = [
-  { id: "l1", provider: "nasa", action: "apod", status: "success", latencyMs: 412, errorMessage: undefined, subagentId: null, createdAt: NOW - 5 * 60_000 },
-  { id: "l2", provider: "frankfurter", action: "latest", status: "success", latencyMs: 188, errorMessage: undefined, subagentId: "research", createdAt: NOW - 3 * H },
+  { id: "l1", provider: "nasa", action: "apod", status: "success", latencyMs: 412, errorMessage: undefined, subagentId: null, costCents: 0.42, createdAt: NOW - 5 * 60_000 },
+  { id: "l2", provider: "frankfurter", action: "latest", status: "success", latencyMs: 188, errorMessage: undefined, subagentId: "research", costCents: 1.5, createdAt: NOW - 3 * H },
   { id: "l3", provider: "openrouter", action: "chat", status: "error", latencyMs: 950, errorMessage: "429 Too Many Requests: rate limited by upstream, retry after 20s", subagentId: "research", createdAt: NOW - 2 * D },
   { id: "l4", provider: "nasa", action: "neo_feed", status: "success", latencyMs: 640, errorMessage: undefined, subagentId: null, createdAt: NOW - 3 * D },
   { id: "l5", provider: "frankfurter", action: "convert", status: "success", latencyMs: 201, errorMessage: undefined, subagentId: null, createdAt: NOW - 6 * D },
@@ -83,6 +83,31 @@ const chainTrace = {
     { _id: "ce2", stepId: "summarize", stepIndex: 1, status: "failed", input: { model: "gpt" }, latencyMs: 1420, costCents: 3, error: { code: "PROVIDER_ERROR", message: "openrouter returned 429", retryCount: 1 }, createdAt: chainExecutions[0].createdAt, startedAt: chainExecutions[0].startedAt! + 420, completedAt: chainExecutions[0].completedAt },
   ],
   tokensSaved: 0,
+};
+
+// Shape of convex/billing.ts getBillingInfo (buildBillingInfo). Three
+// invoices (two paid, one open with no PDF yet) and one card on file.
+export const billingInfo = {
+  plan: "usage_based",
+  tier: "usage_based",
+  usage: 41,
+  currentPeriodUsage: 12,
+  limit: -1,
+  activationProviderCostUsd: 0,
+  activationProviderCostCapUsd: 5,
+  creditBalance: 0,
+  stripeCustomerId: "cus_dev123",
+  stripeSubscriptionId: "sub_dev123",
+  lastBillingDate: NOW - 6 * D,
+  currentPeriodStart: NOW - 6 * D,
+  monthlySpendCents: 2140,
+  invoices: [
+    { id: "inv_1", stripeInvoiceId: "in_dev1", amount: 940, status: "paid", periodStart: NOW - 36 * D, periodEnd: NOW - 6 * D, callCount: 210, pdfUrl: "https://invoice.stripe.com/i/dev1", createdAt: NOW - 6 * D },
+    { id: "inv_2", stripeInvoiceId: "in_dev2", amount: 620, status: "paid", periodStart: NOW - 66 * D, periodEnd: NOW - 36 * D, callCount: 140, pdfUrl: "https://invoice.stripe.com/i/dev2", createdAt: NOW - 36 * D },
+    { id: "inv_3", stripeInvoiceId: "in_dev3", amount: 0, status: "open", periodStart: NOW - 96 * D, periodEnd: NOW - 66 * D, callCount: 0, pdfUrl: undefined, createdAt: NOW - 66 * D },
+  ],
+  paymentMethod: { brand: "visa", last4: "4242", type: "card" },
+  needsPaymentMethod: false,
 };
 
 /** Map of Convex path -> response value. Functions receive args. */
@@ -122,7 +147,7 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
   "chains:getChainExecutions": (args: Record<string, unknown>) => chainExecutions.filter((c) => !args.status || args.status === "all" || c.status === args.status),
   "chains:getChainTraceAuth": chainTrace,
   "chains:resumeChainAuth": { success: true, chainId },
-  "workspaceSettings:get": { routingMode: "balanced", defaultModel: null, maxPricePerMTokens: null, monthlyBudgetLimit: null, preferredProviders: [], blockedProviders: [], allowOpenRouterFallback: true, _isDefault: true },
+  "workspaceSettings:get": { routingMode: "balanced", defaultModel: null, preferredProviders: ["groq", "mistral"], blockedProviders: ["together"], allowOpenRouterFallback: true, _isDefault: true },
   // Provider console: api_1 has a draft routing config the owner can edit; api_2 has none yet.
   "managedRouting:getOwnerConfigByApiId": (args: Record<string, unknown>) => (args.apiId === "api_1" ? { _id: "dc_1", apiId: "api_1", baseUrl: "https://api.acme-weather.example", authType: "api_key", authHeader: "x-api-key", authPrefix: "", rateLimitPerUser: 60, rateLimitPerDay: 5000, pricePerRequest: 0, status: "draft", allowCustomerKeys: true, requireCustomerKeys: false, encryptedMasterKey: "", hasCredential: false, createdAt: NOW - 9 * D, updatedAt: NOW - 2 * D } : null),
   "directCall:getActions": (args: Record<string, unknown>) => (args.directCallId === "dc_1" ? [
@@ -136,7 +161,13 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
   // Shape = convex/logs.ts getProviderAnalytics. Same shape for inbound and outbound.
   "logs:getProviderAnalytics": { totalCalls: 41, totalDiscoveries: 44, inboundCalls: 41, uniqueCallers: 6, avgLatency: 230, successRate: 97.5,
     byDay: usage.byDay.map((d, i) => ({ ...d, calls: d.calls * 3, searches: [2, 4, 1, 5, 3, 2, 4, 3, 6, 2, 4, 3, 2, 3][i] })),
-    byAction: [{ action: "forecast", calls: 33, success: 33, type: "call" }, { action: "current", calls: 8, success: 7, type: "call" }, { action: "Search: weather forecast", calls: 26, success: 26, type: "discovery" }, { action: "Search: nordic weather", calls: 18, success: 18, type: "discovery" }] },
+    byAction: [{ action: "forecast", calls: 33, success: 33, type: "call" }, { action: "current", calls: 8, success: 7, type: "call" }, { action: "Search: weather forecast", calls: 26, success: 26, type: "discovery" }, { action: "Search: nordic weather", calls: 18, success: 18, type: "discovery" }],
+    byCaller: [
+      { callerKey: "ws-4f3a9c21", calls: 19, errors: 0, lastCallAt: NOW - 1 * H },
+      { callerKey: "you", calls: 12, errors: 1, lastCallAt: NOW - 3 * H },
+      { callerKey: "ws-88b1de07", calls: 7, errors: 0, lastCallAt: NOW - 2 * D },
+      { callerKey: "ws-0c72f5aa", calls: 3, errors: 2, lastCallAt: NOW - 6 * D },
+    ] },
   "workspaces:updateWorkspaceName": { ok: true },
   "workspaceSettings:upsert": { ok: true },
   "apiKeys:revokeKey": { ok: true },
@@ -149,6 +180,7 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
   "onboarding:getState": { completedAt: null, dismissedAt: null, source: null, building: null },
   "onboarding:complete": { ok: true },
   "onboarding:dismiss": { ok: true },
+  "billing:getBillingInfo": billingInfo,
 };
 
 const catalogItems = [
@@ -209,10 +241,3 @@ export const gateway: Record<string, unknown> = {
   },
 };
 
-export const billingInfo = {
-  tier: "free",
-  stripeCustomerId: undefined,
-  paygActive: false,
-  invoices: [],
-  paymentMethods: [],
-};

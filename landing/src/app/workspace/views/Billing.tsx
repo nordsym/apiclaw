@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
@@ -9,10 +9,41 @@ import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
   PAYG_MARGIN_RATE,
 } from "@apiclaw/product-truth";
-import { Workspace } from "../_shared";
-import { PageHeader, Section, Panel, StatGrid, StatCard, Row, Status, Empty, btnSolid, btnQuiet } from "./ui";
+import { CONVEX_URL, Workspace } from "../_shared";
+import { PageHeader, Section, Panel, StatGrid, StatCard, Row, Status, Empty, Loading, btnSolid, btnQuiet } from "./ui";
 
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
+
+interface BillingInvoice {
+  id: string;
+  amount: number;
+  status: string;
+  createdAt: number;
+  pdfUrl?: string;
+}
+
+interface BillingInfo {
+  currentPeriodStart?: number;
+  creditBalance: number;
+  monthlySpendCents?: number;
+  invoices: BillingInvoice[];
+  paymentMethod: { brand: string | null; last4: string | null; type: string | null } | null;
+}
+
+function formatCents(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
+}
+
+async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${CONVEX_URL}/api/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.status === "error") throw new Error(data.errorMessage || `${path} failed`);
+  return (data.value ?? data) as T;
+}
 
 function planLabel(tier: string): string {
   if (tier === "partner") return "Partner";
@@ -37,6 +68,30 @@ export function BillingTab({
   const usageLimit = workspace?.usageLimit ?? FREE_MANAGED_CALLS_LIFETIME;
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [billingInfoLoading, setBillingInfoLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!sessionToken) {
+      setBillingInfoLoading(false);
+      return;
+    }
+    setBillingInfoLoading(true);
+    convexQuery<BillingInfo | null>("billing:getBillingInfo", { token: sessionToken })
+      .then((result) => {
+        if (!cancelled) setBillingInfo(result);
+      })
+      .catch(() => {
+        if (!cancelled) setBillingInfo(null);
+      })
+      .finally(() => {
+        if (!cancelled) setBillingInfoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionToken]);
 
   const openBillingPortal = async () => {
     if (!sessionToken) {
@@ -163,17 +218,76 @@ export function BillingTab({
           </Row>
         ) : isPartner ? (
           <Empty title="Billed by agreement" body="Partner workspaces are invoiced outside Stripe." />
-        ) : (
-          <Empty
-            title="No invoices yet"
-            body="Invoices appear here once a payment method is on file."
-            action={currentTier === "free" ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
-          />
-        )}
+        ) : null}
         {portalError && <p className="mt-3 text-[12.5px] text-[var(--accent)]">{portalError}</p>}
         <p className="mt-6 text-[12.5px] text-[var(--text-muted)]">
           Pay as you go continues only for actions with an exact billing adapter. Custom limits or SLA: <a href="/book" className="claw-link text-[var(--text-primary)]">talk to us</a>.
         </p>
+      </Section>
+
+      <Section title="Credits and spend">
+        {billingInfoLoading ? (
+          <Loading label="Loading billing details" />
+        ) : (
+          <StatGrid cols={3}>
+            <StatCard title="Credit balance" value={formatCents(billingInfo?.creditBalance ?? 0)} />
+            <StatCard title="This month's spend" value={formatCents(billingInfo?.monthlySpendCents ?? 0)} />
+            <StatCard
+              title="Current period"
+              value={billingInfo?.currentPeriodStart ? new Date(billingInfo.currentPeriodStart).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Not started"}
+              hint="Started"
+            />
+          </StatGrid>
+        )}
+      </Section>
+
+      <Section title="Invoices">
+        {billingInfoLoading ? (
+          <Loading label="Loading invoices" />
+        ) : billingInfo?.invoices?.length ? (
+          <div>
+            {billingInfo.invoices.map((inv) => (
+              <Row
+                key={inv.id}
+                right={
+                  inv.pdfUrl ? (
+                    <a href={inv.pdfUrl} target="_blank" rel="noreferrer" className="claw-link text-[var(--text-primary)]">
+                      PDF
+                    </a>
+                  ) : (
+                    <span className="text-[var(--text-muted)]">No PDF</span>
+                  )
+                }
+              >
+                <div className="flex items-baseline gap-3">
+                  <span className="text-[14px]">{new Date(inv.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  <span className="text-[14px] text-[var(--text-secondary)]">{formatCents(inv.amount)}</span>
+                  <span className="text-[12.5px] capitalize text-[var(--text-muted)]">{inv.status}</span>
+                </div>
+              </Row>
+            ))}
+          </div>
+        ) : (
+          <Empty title="No invoices yet" body="Invoices appear here once a billing period closes." />
+        )}
+      </Section>
+
+      <Section title="Payment method">
+        {billingInfoLoading ? (
+          <Loading label="Loading payment method" />
+        ) : billingInfo?.paymentMethod ? (
+          <Row>
+            <p className="text-[14px] capitalize">
+              {billingInfo.paymentMethod.brand || billingInfo.paymentMethod.type || "Card"} ending {billingInfo.paymentMethod.last4 || "····"}
+            </p>
+          </Row>
+        ) : (
+          <Empty
+            title="No payment method on file"
+            body="Add a card to continue past the free allowance."
+            action={currentTier === "free" ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
+          />
+        )}
       </Section>
     </div>
   );

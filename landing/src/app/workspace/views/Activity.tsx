@@ -71,6 +71,12 @@ function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
+function formatLogCostCents(cents: number | undefined) {
+  if (cents === undefined) return null;
+  const dollars = cents / 100;
+  return `$${dollars.toFixed(dollars < 0.01 ? 4 : 2)}`;
+}
+
 const selectClass = `${inputClass} !h-9 !w-auto min-w-[7rem] !text-[13px]`;
 
 /* ------------------------------------------------------------------
@@ -161,6 +167,7 @@ interface ApiLogEntry {
   latencyMs: number;
   errorMessage?: string;
   subagentId: string | null;
+  costCents?: number;
   createdAt: number;
 }
 
@@ -382,6 +389,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
                   <th className="pb-2 font-medium">Provider / action</th>
                   <th className="w-[6rem] pb-2 font-medium">Status</th>
                   <th className="hidden w-[5.5rem] pb-2 text-right font-medium sm:table-cell">Latency</th>
+                  <th className="hidden w-[5.5rem] pb-2 text-right font-medium sm:table-cell">Cost</th>
                   <th className="hidden w-[8rem] pb-2 pl-4 font-medium md:table-cell">Agent</th>
                 </tr>
               </thead>
@@ -415,11 +423,16 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
                         </td>
                         <td className="py-2.5 pr-2"><Status kind={ok ? "ok" : log.kind === "search" ? "warn" : "bad"}>{statusLabel}</Status></td>
                         <td className="hidden py-2.5 pr-2 text-right sm:table-cell"><span className="claw-mono text-[12.5px] text-[var(--text-secondary)]">{Math.round(latency)} ms</span></td>
+                        <td className="hidden py-2.5 pr-2 text-right sm:table-cell">
+                          <span className="claw-mono text-[12.5px] text-[var(--text-secondary)]">
+                            {log.kind === "call" ? (formatLogCostCents(log.costCents) ?? <span className="text-[var(--text-muted)]">-</span>) : <span className="text-[var(--text-muted)]">-</span>}
+                          </span>
+                        </td>
                         <td className="hidden truncate py-2.5 pl-4 text-[var(--text-muted)] md:table-cell">{agentLabel(log.subagentId)}</td>
                       </tr>
                       {open && (
                         <tr className="border-t border-[var(--border-subtle)] bg-[var(--surface)]">
-                          <td colSpan={6} className="px-3 pb-3">
+                          <td colSpan={7} className="px-3 pb-3">
                             <div className="max-w-[40rem]"><LogDetail log={log} /></div>
                           </td>
                         </tr>

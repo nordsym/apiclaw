@@ -588,6 +588,7 @@ interface InboundAnalyticsData {
   uniqueCallers: number;
   byDay: { date: string; calls: number; searches: number }[];
   byAction: { action: string; calls: number; success: number; type: string }[];
+  byCaller?: { callerKey: string; calls: number; errors: number; lastCallAt: number }[];
   successRate: number;
   avgLatency: number;
 }
@@ -600,6 +601,15 @@ const RANGES: Array<{ id: string; label: string; hours: number }> = [
 ];
 
 const tooltipStyle = { background: "var(--surface-elevated)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, color: "var(--text-primary)" };
+
+function relativeTime(ts: number) {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return "just now";
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  if (diff < 604_800_000) return `${Math.floor(diff / 86_400_000)}d ago`;
+  return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 function InboundAnalytics({ apis, sessionToken, onAdd }: { apis: ProviderAPI[]; sessionToken: string | null; onAdd: () => void }) {
   const [range, setRange] = useState("7d");
@@ -625,6 +635,7 @@ function InboundAnalytics({ apis, sessionToken, onAdd }: { apis: ProviderAPI[]; 
   const byAction = Array.isArray(data?.byAction) ? data!.byAction : [];
   const topCalls = byAction.filter((a) => a.type === "call").slice(0, 8);
   const topSearches = byAction.filter((a) => a.type === "discovery").map((a) => ({ ...a, action: a.action.replace(/^Search: /, "") })).slice(0, 8);
+  const byCaller = Array.isArray(data?.byCaller) ? data!.byCaller : [];
   const hasTraffic = calls > 0 || discoveries > 0;
 
   return (
@@ -707,6 +718,27 @@ function InboundAnalytics({ apis, sessionToken, onAdd }: { apis: ProviderAPI[]; 
               )}
             </Section>
           </div>
+
+          <Section title="Callers" description="Which workspaces are calling your APIs.">
+            {byCaller.length === 0 ? (
+              <Empty title="No callers yet" body="Per-caller traffic appears here once agents call your APIs." />
+            ) : (
+              byCaller.map((c) => (
+                <Row
+                  key={c.callerKey}
+                  right={
+                    <>
+                      <span>{c.calls} {c.calls === 1 ? "call" : "calls"}</span>
+                      {c.errors > 0 && <Status kind="bad">{c.errors} {c.errors === 1 ? "error" : "errors"}</Status>}
+                      <span className="text-[var(--text-muted)]">{relativeTime(c.lastCallAt)}</span>
+                    </>
+                  }
+                >
+                  <p className="truncate claw-mono text-[13px]">{c.callerKey === "you" ? "You" : c.callerKey}</p>
+                </Row>
+              ))
+            )}
+          </Section>
         </>
       )}
     </div>

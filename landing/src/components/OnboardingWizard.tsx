@@ -191,12 +191,17 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
           params: { query: FIRST_QUERY, count: 3 },
         }),
       });
-      // Receiving any HTTP response resolves the upstream ambiguity. A later
-      // user retry can use a fresh key. Network failures retain this key so a
-      // retry cannot accidentally dispatch a second paid provider call.
-      firstCallIdempotencyKeyRef.current = null;
       const payload = await response.json().catch(() => null);
       const succeeded = response.ok && payload?.success !== false;
+      // Only rotate the key on success or on a response that unambiguously
+      // means the call never dispatched (4xx, excluding 408/429 which can
+      // follow a real dispatch attempt). A 5xx leaves dispatch ambiguous, so
+      // a retry must reuse the same key rather than mint a new one.
+      const status = response.status;
+      const definitelyNotDispatched = status >= 400 && status < 500 && status !== 408 && status !== 429;
+      if (succeeded || definitelyNotDispatched) {
+        firstCallIdempotencyKeyRef.current = null;
+      }
       if (!succeeded) {
         const message = payload?.error?.message || payload?.error || "The live call did not complete.";
         throw new Error(typeof message === "string" ? message : "The live call did not complete.");

@@ -80,6 +80,7 @@ export interface ProviderAnalytics {
   callsByDay: { date: string; calls: number }[];
   topAgents: { agentId: string; calls: number }[];
   topActions: { actionName: string; calls: number }[];
+  byCaller?: { callerKey: string; calls: number; errors: number; lastCallAt: number }[];
 }
 
 export type TabType = WorkspaceSurfaceId;

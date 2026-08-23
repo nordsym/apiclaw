@@ -748,13 +748,16 @@ export default defineSchema({
     errorMessage: v.optional(v.string()),
     direction: v.optional(v.string()), // "outbound" (I called) or "inbound" (someone called my API)
     callerWorkspaceId: v.optional(v.string()), // who made the call (for inbound logs)
+    costCents: v.optional(v.number()), // patched in post-hoc from managedCallLedger via requestId
+    requestId: v.optional(v.string()), // shared key with managedCallLedger, when this call went through managed metering
     createdAt: v.number(),
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_createdAt", ["createdAt"])
     .index("by_workspaceId_createdAt", ["workspaceId", "createdAt"])
     .index("by_subagentId", ["subagentId"])
-    .index("by_provider", ["provider"]),
+    .index("by_provider", ["provider"])
+    .index("by_requestId", ["requestId"]),
 
   // ============================================
   // PROVIDER HEALTH (rolling success-rate scoring)
@@ -1062,8 +1065,8 @@ export default defineSchema({
     routingMode: v.string(), // "best_price" | "highest_quality" | "fastest" | "balanced"
     defaultModel: v.optional(v.string()), // e.g. "anthropic/claude-sonnet-4-6"
     // Budget controls
-    maxPricePerMTokens: v.optional(v.float64()), // max $/million tokens, null = no limit
-    monthlyBudgetLimit: v.optional(v.float64()), // monthly budget in USD, null = no limit
+    maxPricePerMTokens: v.optional(v.float64()), // deprecated, no reader; kept for existing documents
+    monthlyBudgetLimit: v.optional(v.float64()), // deprecated, no reader; kept for existing documents
     // Provider preferences
     preferredProviders: v.optional(v.array(v.string())), // e.g. ["groq", "mistral", "together"]
     blockedProviders: v.optional(v.array(v.string())), // providers to never use

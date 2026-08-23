@@ -13,6 +13,7 @@ for (const name of [
   "logProviderCall",
   "createLogWithSpend",
   "createProxyLog",
+  "attachCost",
   "scrubStoredSessionTokens",
 ]) {
   assert.match(
