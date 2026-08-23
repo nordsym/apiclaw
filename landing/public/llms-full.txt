@@ -134,9 +134,9 @@ curl https://api.apiclaw.cloud/v1/chat/completions \
 
 Model resolution order: an explicit request model always wins; otherwise APIClaw falls back to the calling agent's default model, then the workspace default. Per-agent default model only governs calls routed through APIClaw. It does not reach into an external harness's own config (for example openclaw.json), which stays out of scope.
 
-## Bring your own key
+## Bring your own key (escape hatch)
 
-A workspace can store its own OpenRouter key in Workspace, Connections, Your keys. Calls routed through that key are free: no card, no markup, OpenRouter bills the workspace directly instead of going through APIClaw's managed rail. This is separate from the APIClaw key (`sk-claw-...`) used to authenticate into the gateway, and separate from managed execution, which stays free for zero-cost providers and provider cost plus 15% for paid ones. Today this covers an OpenRouter key for `POST /v1/chat/completions`, not every provider.
+You do not need your own keys. APIClaw's point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can store it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills the workspace directly instead of going through APIClaw's managed rail. This is separate from the APIClaw key (`sk-claw-...`) used to authenticate into the gateway, and separate from managed execution, which stays free for zero-cost providers and provider cost plus 15% for paid ones. Today this covers an OpenRouter key for `POST /v1/chat/completions`, not every provider.
 
 Related: `X-APIClaw-OAuth` Codex passthrough is open to every authenticated workspace, free.
 

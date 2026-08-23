@@ -121,9 +121,9 @@ Use the live catalog, not stale docs, when current API counts matter.
 - No anonymous execution.
 - No fixed Pro or Scale subscription should be assumed unless the pricing page says so.
 
-## Bring your own key
+## Bring your own key (escape hatch)
 
-A workspace can store its own OpenRouter key in Workspace, Connections, Your keys, and route `POST /v1/chat/completions` calls through it. Those calls are free: no card, no markup, OpenRouter bills the workspace directly. This is separate from the APIClaw key used to authenticate into the gateway. Today it covers an OpenRouter key only, not every provider.
+You do not need your own keys. APIClaw's point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can store it in Workspace, Connections, Your keys, and route `POST /v1/chat/completions` calls through it. Those calls are free: no card, no markup, OpenRouter bills the workspace directly. This is separate from the APIClaw key used to authenticate into the gateway. Today it covers an OpenRouter key only, not every provider.
 
 Related: `X-APIClaw-OAuth` Codex passthrough is now open to every authenticated workspace, free (previously internal-only).
 

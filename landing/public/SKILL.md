@@ -149,13 +149,15 @@ Live catalog: `https://apiclaw.cloud/api/catalog?callable=true`.
 Then execute with `provider` / `action` on `POST /v1/execute`.
 Do not collect provider API keys from the user.
 
-## 5. Bring your own key
+## 5. Bring your own key (escape hatch)
 
-Bring your own key: add your own OpenRouter key in Workspace, Connections,
-Your keys, and route chat completions through it for free, no card. The
-provider bills the workspace directly. This is separate from the APIClaw
-key used to authenticate into the gateway. Today this covers an OpenRouter
-key for `POST /v1/chat/completions`, not every provider.
+You do not need your own keys. APIClaw's point is one sign-in, no key
+collecting. If your workspace already has its own OpenRouter key, you can
+add it in Workspace, Connections, Your keys, and route chat completions
+through it for free, no card. The provider bills the workspace directly.
+This is separate from the APIClaw key used to authenticate into the
+gateway. Today this covers an OpenRouter key for `POST /v1/chat/completions`,
+not every provider.
 
 ## Other doors (same workspace)
 

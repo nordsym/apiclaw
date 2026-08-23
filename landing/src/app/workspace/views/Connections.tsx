@@ -708,7 +708,7 @@ function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
   return (
     <Section
       title="Your keys"
-      description="Calls through your own key are free."
+      description="Optional. If you already have a provider key, calls through it are free."
       className="mt-8"
       action={!showAdd ? <button type="button" onClick={() => setShowAdd(true)} className={btnSolid}>Add key</button> : undefined}
     >

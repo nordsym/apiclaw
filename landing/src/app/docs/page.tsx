@@ -264,7 +264,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
             <section id="byok" className="scroll-mt-20">
               <h2 className="claw-h2">Bring your own key</h2>
               <p className={`${BODY} mt-4`}>
-                Add your own OpenRouter key in Workspace, Connections, Your keys. Calls routed through it are free: no card, no markup, OpenRouter bills your workspace directly instead of going through the managed rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
+                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the managed rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
               </p>
               <p className={`${BODY} mt-4`}>
                 An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.

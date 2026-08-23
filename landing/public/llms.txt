@@ -124,9 +124,9 @@ Use `call_api` or `POST /v1/execute` to run API calls through APIClaw. APIClaw h
 
 Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, DeepInfra, and others. An explicit request model always wins; otherwise resolution falls back to the calling agent's default model, then the workspace default.
 
-### Bring your own key
+### Bring your own key (escape hatch)
 
-A workspace can store its own OpenRouter key in Workspace, Connections, Your keys. Calls routed through it are free: no card, no markup, OpenRouter bills the workspace directly. This is separate from the APIClaw key used to authenticate into the gateway, and separate from managed execution, which stays free for zero-cost providers and card-plus-15% for paid ones.
+You do not need your own keys. APIClaw's point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can store it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills the workspace directly. This is separate from the APIClaw key used to authenticate into the gateway, and separate from managed execution, which stays free for zero-cost providers and card-plus-15% for paid ones.
 
 ### Run missions
 
