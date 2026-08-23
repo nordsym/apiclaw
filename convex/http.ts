@@ -5727,10 +5727,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           // until after the reservation is created.
           billingGradeCost: explicitOpenRouterExecution
             ? true
-            : isPublicCustomerExecutableAction(
-              explicitOpenRouterExecution?.provider ?? provider,
-              action,
-            )
+            : isPublicCustomerExecutableAction(provider, action)
               ? true
               : isLLMExecution
                 ? false
