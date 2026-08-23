@@ -24,8 +24,6 @@ import {
   CreditCard,
   Settings,
   Home,
-  Sun,
-  Moon,
   Menu,
   X,
   ArrowUpRight,
@@ -224,7 +222,6 @@ export default function WorkspacePage() {
   const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "logs");
   const [connectionsSection, setConnectionsSection] = useState(connectionSectionFromUrl);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   
   // Workspace data (consumer)
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -492,12 +489,6 @@ export default function WorkspacePage() {
       }
     };
 
-    // Theme: light-first canon; opt into dark explicitly.
-    const saved = localStorage.getItem("theme");
-    const dark = saved === "dark";
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-
     init();
   }, [router, fetchWorkspaceData, fetchProviderData, fetchApprovedAPIs, signInPath]);
 
@@ -507,13 +498,6 @@ export default function WorkspacePage() {
       router.replace("/workspace?tab=overview");
     }
   }, [activeTab, isLoading, isProvider, router]);
-
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    document.documentElement.classList.toggle("dark", newTheme);
-    localStorage.setItem("theme", newTheme ? "dark" : "light");
-  };
 
   const handleLogout = async () => {
     try {
@@ -653,12 +637,10 @@ export default function WorkspacePage() {
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#ef4444]/20 flex items-center justify-center text-lg">🦞</div>
-            <span className="font-bold">APIClaw</span>
+            <span className="text-lg leading-none">🦞</span>
+            <span className="font-semibold tracking-tight">APIClaw</span>
           </Link>
-          <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--surface)] transition">
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
+          <span className="w-9" aria-hidden="true" />
         </div>
       </header>
 
@@ -668,13 +650,13 @@ export default function WorkspacePage() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-[var(--surface-elevated)] border-r border-[var(--border)] transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-[var(--background)] border-r border-[var(--border-subtle)] transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#ef4444]/20 flex items-center justify-center text-2xl">🦞</div>
-              <span className="font-bold text-lg">APIClaw</span>
+              <span className="text-xl leading-none">🦞</span>
+              <span className="font-semibold tracking-tight">APIClaw</span>
             </Link>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-[var(--surface)] transition">
               <X className="w-5 h-5" />
@@ -686,7 +668,7 @@ export default function WorkspacePage() {
             <p className="text-sm text-[var(--text-muted)]">Workspace</p>
             <p className="font-medium truncate">{displayEmail}</p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium capitalize">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-medium capitalize">
                 {displayTier}
               </span>
               {workspace && (
@@ -723,7 +705,7 @@ export default function WorkspacePage() {
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
                   activeTab === tab.id
-                    ? "bg-[#ef4444] text-white"
+                    ? "bg-[var(--surface)] text-[var(--text-primary)] shadow-[inset_2px_0_0_var(--accent)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                 }`}
               >
@@ -744,13 +726,6 @@ export default function WorkspacePage() {
 
           {/* Bottom section */}
           <div className="p-4 border-t border-[var(--border)] space-y-2">
-            <button
-              onClick={toggleTheme}
-              className="hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)] transition"
-              title={isDark ? "Light Mode" : "Dark Mode"}
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-red-500 transition"
@@ -870,7 +845,7 @@ function SurfaceTabs({
           onClick={() => onChange(item.id)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
             active === item.id
-              ? "bg-[#ef4444] text-white"
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
               : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -921,12 +896,12 @@ function ConnectionsTab({
       {section === "remote" && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6">
           <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center shrink-0"><Globe className="w-5 h-5" /></div>
+            <div className="w-11 h-11 rounded-xl bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center shrink-0"><Globe className="w-5 h-5" /></div>
             <div className="flex-1">
               <h3 className="font-semibold">Remote MCP and integrations</h3>
               <p className="text-sm text-[var(--text-muted)] mt-1">Use APIClaw from hosted agents, automations, or any MCP client without exposing provider credentials.</p>
               <div className="flex flex-wrap gap-3 mt-4">
-                <Link href="/workspace/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+                <Link href="/workspace/integrations" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition">
                   Configure Remote MCP <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link href="/docs" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-medium hover:border-[#ef4444]/40 transition">
@@ -1074,7 +1049,7 @@ function OverviewTab({
             <p className="text-sm text-[var(--text-muted)] mt-2">The managed test uses your workspace identity, writes a real Activity log, and never exposes an upstream provider key.</p>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
-            <button type="button" onClick={() => navigateTo("api-catalog")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+            <button type="button" onClick={() => navigateTo("api-catalog")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition">
               Run a test call <PlayCircle className="w-4 h-4" />
             </button>
             <button type="button" onClick={() => navigateTo("connections")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] text-sm font-medium hover:border-[#ef4444]/40 transition">
@@ -1091,7 +1066,7 @@ function OverviewTab({
           <button onClick={() => navigateTo("connections")} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-5 text-left hover:border-[#ef4444]/40 transition">
             <div className="flex items-center justify-between mb-3">
               <Bot className="w-5 h-5 text-[#ef4444]" />
-              {agents.some((agent) => getAgentPresence(agent.lastUsedAt).state === "active") && <span className="flex items-center gap-1.5 text-xs text-green-400"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />Active now</span>}
+              {agents.some((agent) => getAgentPresence(agent.lastUsedAt).state === "active") && <span className="flex items-center gap-1.5 text-xs text-green-400"><span className="w-1.5 h-1.5 rounded-full bg-green-400" />Active now</span>}
             </div>
             <p className="text-2xl font-bold">{agents.length}</p>
             <p className="text-sm text-[var(--text-muted)] mt-0.5">{agents.length === 1 ? "agent" : "agents"} registered</p>
@@ -1197,7 +1172,7 @@ function OverviewTab({
               {providerApis.slice(0, 5).map(api => (
                 <div key={api._id} className="flex items-center justify-between px-5 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#ef4444]/10 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--surface)] flex items-center justify-center shrink-0">
                       <Zap className="w-3.5 h-3.5 text-[#ef4444]" />
                     </div>
                     <div>
@@ -1223,13 +1198,13 @@ function OverviewTab({
 
       {/* Upgrade nudge for free tier running low */}
       {!isPaid && workspace && usagePct > 80 && (
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5 flex items-start gap-4">
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface)] p-5 flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[#ef4444] shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-medium text-[#ef4444]">Running low on managed call usage</p>
             <p className="text-sm text-[var(--text-muted)] mt-1">Search and discovery always work. Managed API calls need usage credits.</p>
           </div>
-          <button onClick={() => navigateTo("billing")} className="px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition shrink-0">Upgrade</button>
+          <button onClick={() => navigateTo("billing")} className="px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition shrink-0">Upgrade</button>
         </div>
       )}
     </div>
@@ -1284,9 +1259,9 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
         {/* Direct Call */}
         <button
           onClick={() => setActiveSection("direct-call")}
-          className={`rounded-2xl border p-5 text-left transition ${activeSection === "direct-call" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "direct-call" ? "border-[#ef4444] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
-          <div className="w-10 h-10 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-3">
             <Zap className="w-5 h-5 text-[#ef4444]" />
           </div>
           <p className="font-semibold text-base">Managed APIs</p>
@@ -1301,7 +1276,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
         {/* Search Index */}
         <button
           onClick={() => setActiveSection("search")}
-          className={`rounded-2xl border p-5 text-left transition ${activeSection === "search" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "search" ? "border-[#ef4444] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3">
             <ScanSearch className="w-5 h-5 text-blue-400" />
@@ -1318,7 +1293,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
         {/* Open API */}
         <button
           onClick={() => setActiveSection("open-api")}
-          className={`rounded-2xl border p-5 text-left transition ${activeSection === "open-api" ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
+          className={`rounded-2xl border p-5 text-left transition ${activeSection === "open-api" ? "border-[#ef4444] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"}`}
         >
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3">
             <FileCode2 className="w-5 h-5 text-purple-400" />
@@ -1346,7 +1321,7 @@ function APICatalogTab({ apis }: { apis: ApprovedAPI[] }) {
             {filteredDc.map(provider => (
               <div key={provider.name} className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[#ef4444]/30 transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#ef4444]/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--surface)] flex items-center justify-center">
                     <Zap className="w-4 h-4 text-[#ef4444]" />
                   </div>
                   <div>
@@ -1662,7 +1637,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={onCloseForm} className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">Cancel</button>
               <button type="submit" disabled={submitting || !form.name || !form.description}
-                className="px-6 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-semibold hover:bg-[#dc2626] disabled:opacity-50 transition">
+                className="px-6 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--background)] text-sm font-semibold hover:bg-white disabled:opacity-50 transition">
                 {submitting ? "Listing..." : "List API"}
               </button>
             </div>
@@ -1686,7 +1661,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
       {/* Three integration options — always visible */}
       <div className="grid gap-4 md:grid-cols-3">
         <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
-          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[var(--surface)] transition">
             <Search className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
           </div>
           <h3 className="font-semibold text-lg mb-1">List API</h3>
@@ -1700,7 +1675,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
         </button>
 
         <button onClick={onAdd} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 hover:border-[#ef4444]/50 transition text-left">
-          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[#ef4444]/10 transition">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4 group-hover:bg-[var(--surface)] transition">
             <Globe className="w-6 h-6 text-[var(--text-muted)] group-hover:text-[#ef4444] transition" />
           </div>
           <h3 className="font-semibold text-lg mb-1">Open API</h3>
@@ -1714,7 +1689,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
         </button>
 
         <button onClick={onAdd} className="group rounded-2xl border border-[#ef4444]/30 bg-gradient-to-br from-[#ef4444]/5 to-transparent p-6 hover:border-[#ef4444]/50 transition text-left relative overflow-hidden">
-          <div className="w-12 h-12 rounded-xl bg-[#ef4444]/10 flex items-center justify-center mb-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center mb-4">
             <Zap className="w-6 h-6 text-[#ef4444]" />
           </div>
           <h3 className="font-semibold text-lg mb-1">Managed API</h3>
@@ -1849,7 +1824,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                           </div>
                         </div>
                         {!isManagedByAPIClaw && (
-                        <button onClick={saveDcConfig} disabled={dcSaving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">
+                        <button onClick={saveDcConfig} disabled={dcSaving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition disabled:opacity-50">
                           {dcSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : dcSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                           {dcSaving ? "Saving..." : dcSaved ? "Saved!" : "Save Config"}
                         </button>
@@ -1865,7 +1840,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                         {!dcConfigId && <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm text-yellow-400">Configure the Managed API tab first before adding actions.</div>}
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-[var(--text-muted)]">{actions.length} action{actions.length !== 1 ? "s" : ""} defined</p>
-                          {dcConfigId && <button onClick={() => setShowAddAction(v => !v)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef4444]/10 text-[#ef4444] text-sm font-medium hover:bg-[#ef4444]/20 transition"><Plus className="w-4 h-4" />Add Action</button>}
+                          {dcConfigId && <button onClick={() => setShowAddAction(v => !v)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface)] transition"><Plus className="w-4 h-4" />Add Action</button>}
                         </div>
                         {showAddAction && (
                           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 space-y-3">
@@ -1879,7 +1854,7 @@ function MyAPIsTab({ apis, onAdd, showAddForm, onCloseForm, sessionToken, provid
                               <input value={actionForm.description} onChange={e => setActionForm(p => ({...p, description: e.target.value}))} placeholder="Description" className="px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm col-span-2 focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
                             </div>
                             <div className="flex gap-2">
-                              <button onClick={saveAction} disabled={actionSaving || !actionForm.name || !actionForm.path} className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition disabled:opacity-50">{actionSaving ? "Saving..." : "Add"}</button>
+                              <button onClick={saveAction} disabled={actionSaving || !actionForm.name || !actionForm.path} className="px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition disabled:opacity-50">{actionSaving ? "Saving..." : "Add"}</button>
                               <button onClick={() => setShowAddAction(false)} className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text-muted)] hover:bg-[var(--surface)] transition">Cancel</button>
                             </div>
                           </div>
@@ -2252,7 +2227,7 @@ function AgentsTab({
                 className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[#ef4444]/30 transition"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center flex-shrink-0">
                     <Cpu className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -2354,7 +2329,7 @@ function AgentsTab({
             {/* Agent name with edit */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#ef4444] to-[#f97316] flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center flex-shrink-0">
                   <Cpu className="w-7 h-7 text-white" />
                 </div>
                 <div>
@@ -2383,7 +2358,7 @@ function AgentsTab({
                           onRename(primaryAgent.id, editName);
                           setEditingAgent(null);
                         }}
-                        className="px-3 py-1.5 bg-[#ef4444] text-white rounded-lg text-sm hover:bg-[#dc2626]"
+                        className="px-3 py-1.5 bg-[var(--text-primary)] text-[var(--background)] rounded-lg text-sm hover:bg-white"
                       >
                         Save
                       </button>
@@ -2412,7 +2387,7 @@ function AgentsTab({
                   )}
                   <div className="flex items-center gap-2 mt-1">
                     <span className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
-                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-green-500" />
                       Connected
                     </span>
                   </div>
@@ -2516,7 +2491,7 @@ const SubagentActivityLog = ({ token, subagentId }: { token: string; subagentId:
     const badges: Record<string, { bg: string; text: string; label: string }> = {
       search: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Search' },
       call: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Call' },
-      direct_call: { bg: 'bg-[#ef4444]/20', text: 'text-[#ef4444]', label: 'Direct' },
+      direct_call: { bg: 'bg-[var(--surface)]', text: 'text-[#ef4444]', label: 'Direct' },
       error: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Error' },
     };
     const badge = badges[type] || { bg: 'bg-gray-500/20', text: 'text-gray-400', label: type };
@@ -2635,7 +2610,7 @@ function EditSubagentModal({
           <button
             onClick={handleSave}
             disabled={isSaving || !name.trim()}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-[#ef4444] text-white hover:bg-[#dc2626] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--text-primary)] text-[var(--background)] hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
@@ -2664,7 +2639,7 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${accent ? "bg-[#ef4444]/10 border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
+    <div className={`rounded-xl sm:rounded-2xl border p-3 sm:p-5 ${accent ? "bg-[var(--surface)] border-[#ef4444]/30" : "bg-[var(--surface-elevated)] border-[var(--border)]"}`}>
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <span className="text-xs sm:text-sm text-[var(--text-muted)] truncate pr-2">{title}</span>
         <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${accent ? "text-[#ef4444]" : "text-[var(--text-muted)]"}`} />
@@ -2716,7 +2691,7 @@ function AnalyticsTab({
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeSubtab === "overview"
-              ? "bg-[#ef4444] text-white"
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
               : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -2730,7 +2705,7 @@ function AnalyticsTab({
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeSubtab === "usage"
-              ? "bg-[#ef4444] text-white"
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
               : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -2744,7 +2719,7 @@ function AnalyticsTab({
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeSubtab === "chains"
-              ? "bg-[#ef4444] text-white"
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
               : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -2758,7 +2733,7 @@ function AnalyticsTab({
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             activeSubtab === "logs"
-              ? "bg-[#ef4444] text-white"
+              ? "bg-[var(--text-primary)] text-[var(--background)]"
               : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
         >
@@ -2932,7 +2907,7 @@ function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
     <div className="space-y-6">
       {/* Preview Banner */}
       {!hasData && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl p-4 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
           <div>
             <p className="font-medium text-[#ef4444]">Preview Mode</p>
@@ -2958,7 +2933,7 @@ function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        <div className="rounded-xl sm:rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-3 sm:p-5">
+        <div className="rounded-xl sm:rounded-2xl border border-[#ef4444]/30 bg-[var(--surface)] p-3 sm:p-5">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-xs sm:text-sm text-[var(--text-muted)]">Total Searches</span>
             <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#ef4444]" />
@@ -3002,7 +2977,7 @@ function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
               {displayStats.topQueries.slice(0, 10).map((item, i) => (
                 <div key={item.query} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">
+                    <span className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center text-xs font-medium">
                       {i + 1}
                     </span>
                     <code className="text-sm font-mono">{item.query}</code>
@@ -3035,7 +3010,7 @@ function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
                     <span className="text-sm text-[var(--text-muted)]">{item.count}x</span>
                     <a
                       href={`/providers/register?suggested=${encodeURIComponent(item.query)}`}
-                      className="px-2 py-1 rounded bg-[#ef4444] text-white text-xs font-medium hover:bg-[#dc2626] transition"
+                      className="px-2 py-1 rounded bg-[var(--text-primary)] text-[var(--background)] text-xs font-medium hover:bg-white transition"
                     >
                       Request API
                     </a>
@@ -3061,7 +3036,7 @@ function SearchAnalyticsTab({ sessionToken }: { sessionToken: string | null }) {
               <div key={agent} className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    agent === "primary" ? "bg-[#ef4444]/20" : "bg-[var(--background)]"
+                    agent === "primary" ? "bg-[var(--surface)]" : "bg-[var(--background)]"
                   }`}>
                     {agent === "primary" ? (
                       <Cpu className="w-4 h-4 text-[#ef4444]" />
@@ -3526,7 +3501,7 @@ function ChainsTab({ sessionToken, isProvider }: { sessionToken: string | null; 
                         {chain.canResume && (
                           <button
                             onClick={() => handleResume(chain._id)}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#ef4444] hover:bg-[#ef4444]/80 text-white text-sm font-medium transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--text-primary)] hover:bg-white text-[var(--background)] text-sm font-medium transition-colors"
                           >
                             <Play className="w-3.5 h-3.5" />
                             Resume
@@ -3563,7 +3538,7 @@ function ChainsTab({ sessionToken, isProvider }: { sessionToken: string | null; 
                                   <div
                                     className={`absolute left-0 top-0 h-full rounded ${
                                       step.status === "completed" ? "bg-green-500" :
-                                      step.status === "running" ? "bg-blue-500 animate-pulse" :
+                                      step.status === "running" ? "bg-blue-500" :
                                       step.status === "failed" ? "bg-red-500" : "bg-gray-500"
                                     }`}
                                     style={{ width: `${widthPct}%` }}
@@ -3713,7 +3688,7 @@ function AnalyticsOverviewTab({
     <div className="space-y-8">
       {/* Preview Banner */}
       {analytics?.isPreview && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl p-4 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0" />
           <div>
             <p className="font-medium text-[#ef4444]">Preview Mode</p>
@@ -3801,7 +3776,7 @@ function AnalyticsOverviewTab({
             {analytics.topActions.slice(0, 8).map((action, i) => (
               <div key={action.actionName} className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface)]">
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-medium">{i + 1}</span>
+                  <span className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center text-xs font-medium">{i + 1}</span>
                   <span className="text-sm font-mono">{action.actionName}</span>
                 </div>
                 <span className="text-sm text-[var(--text-muted)]">{action.calls.toLocaleString()}</span>
@@ -3940,7 +3915,7 @@ function UsageTab({
     <div className="space-y-8">
       {/* Preview Banner */}
       {isPreview && (
-        <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 rounded-xl p-5 flex items-start gap-4">
+        <div className="bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl p-5 flex items-start gap-4">
           <AlertCircle className="w-5 h-5 text-[#ef4444] flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-[#ef4444]">No inbound traffic yet</p>
@@ -3950,7 +3925,7 @@ function UsageTab({
                 : "Real analytics will appear here when agents start using your listed APIs."}
             </p>
             {apis.length === 0 && (
-              <a href="/providers" className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">
+              <a href="/providers" className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition">
                 <Plus className="w-4 h-4" />
                 List your API
               </a>
@@ -3961,7 +3936,7 @@ function UsageTab({
 
       {/* Stats Grid - Now with 4 cards including Search */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-        <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/10 p-4 sm:p-6">
+        <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface)] p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-[#ef4444]" />
             <span className="text-sm sm:text-base text-[var(--text-muted)]">Total Calls</span>
@@ -4046,7 +4021,7 @@ function UsageTab({
             <div className="flex rounded-lg border border-[var(--border)] overflow-hidden text-xs">
               <button
                 onClick={() => setTopApiView?.("calls")}
-                className={`px-3 py-1.5 font-medium transition-colors ${topApiView === "calls" ? "bg-[#ef4444] text-white" : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                className={`px-3 py-1.5 font-medium transition-colors ${topApiView === "calls" ? "bg-[var(--text-primary)] text-[var(--background)]" : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               >
                 Top Called
               </button>
@@ -4068,7 +4043,7 @@ function UsageTab({
                 {liveTopAPIs.length > 0 ? liveTopAPIs.map((p: any, i: number) => (
                   <div key={p.action} className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface)]">
                     <div className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded-full bg-[#ef4444]/20 text-[#ef4444] flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                      <span className="w-7 h-7 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center text-xs font-bold">{i + 1}</span>
                       <div>
                         <span className="font-medium text-sm">{p.action}</span>
                         <span className="text-xs text-[var(--text-muted)] ml-2">{p.calls} call{p.calls !== 1 ? "s" : ""}</span>
@@ -4133,7 +4108,7 @@ function UsageTab({
                       </td>
                       <td className="py-3 text-center">
                         {callCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444] font-medium">{callCount}</span>
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-medium">{callCount}</span>
                         ) : (
                           <span className="text-xs text-[var(--text-muted)]">-</span>
                         )}
@@ -4455,7 +4430,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
           <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-3" />
           <p className="font-medium text-red-500">{loadError}</p>
           <p className="text-sm text-[var(--text-muted)] mt-1">No data was hidden or replaced with sample activity.</p>
-          <button type="button" onClick={() => fetchLogs(false)} className="mt-4 px-4 py-2 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition">Retry</button>
+          <button type="button" onClick={() => fetchLogs(false)} className="mt-4 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition">Retry</button>
         </div>
       ) : isLoading ? (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-12 text-center">
@@ -4786,9 +4761,9 @@ function BillingTab({
             ? currentTier === "usage_based" && workspace?.paygActive === true
             : currentTier === plan.id || (isPartner && plan.id === "free");
           return (
-            <div key={plan.id} className={`rounded-2xl border p-6 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[#ef4444]/5" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
+            <div key={plan.id} className={`rounded-2xl border p-6 flex flex-col transition ${plan.highlight ? "border-[#ef4444] bg-[var(--surface)]" : "border-[var(--border)] bg-[var(--surface-elevated)]"}`}>
               {plan.highlight && (
-                <span className="self-start text-xs font-semibold px-2.5 py-1 rounded-full bg-[#ef4444] text-white mb-3">Recommended</span>
+                <span className="self-start text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--text-primary)] text-[var(--background)] mb-3">Recommended</span>
               )}
               <p className="font-bold text-lg">{plan.name}</p>
               <div className="flex items-baseline gap-1 mt-1 mb-1">
@@ -5006,7 +4981,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
 
       {/* New key reveal modal */}
       {showNewKey && (
-        <div className="rounded-xl border-2 border-[#ef4444] bg-[#ef4444]/5 p-5">
+        <div className="rounded-xl border-2 border-[#ef4444] bg-[var(--surface)] p-5">
           <div className="flex items-center gap-2 mb-3">
             <Key className="w-5 h-5 text-[#ef4444]" />
             <p className="font-bold text-[#ef4444]">Key created: {showNewKey.name}</p>
@@ -5020,7 +4995,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
             </code>
             <button
               onClick={copyKey}
-              className="shrink-0 px-4 py-3 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition flex items-center gap-2"
+              className="shrink-0 px-4 py-3 rounded-lg bg-[var(--text-primary)] text-[var(--background)] font-medium text-sm hover:bg-white transition flex items-center gap-2"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Copied" : "Copy"}
@@ -5039,7 +5014,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
       {!showCreateForm ? (
         <button
           onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--text-primary)] text-[var(--background)] font-medium text-sm hover:bg-white transition"
         >
           <Plus className="w-4 h-4" />
           Generate new key
@@ -5065,7 +5040,7 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
             <button
               onClick={handleGenerate}
               disabled={generating || !newKeyName.trim()}
-              className="shrink-0 px-4 py-2.5 rounded-lg bg-[#ef4444] text-white font-medium text-sm hover:bg-[#dc2626] transition disabled:opacity-50"
+              className="shrink-0 px-4 py-2.5 rounded-lg bg-[var(--text-primary)] text-[var(--background)] font-medium text-sm hover:bg-white transition disabled:opacity-50"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate"}
             </button>
@@ -5350,7 +5325,7 @@ npx @nordsym/apiclaw setup --client codex`}</pre>
             { name: "agent_auth_required", desc: "Open secure browser auth and unlock managed API calls" },
           ].map((tool) => (
             <div key={tool.name} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)]">
-              <code className="px-2 py-1 rounded bg-[#ef4444]/20 text-[#ef4444] text-sm font-mono">{tool.name}</code>
+              <code className="px-2 py-1 rounded bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-mono">{tool.name}</code>
               <p className="text-sm text-[var(--text-muted)]">{tool.desc}</p>
             </div>
           ))}
@@ -5521,7 +5496,7 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
         <div className="flex items-center gap-3">
           <Zap className="w-5 h-5 text-[#ef4444]" />
           <span className="font-semibold">Gateway Routing</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-[#ef4444]/20 text-[#ef4444] font-medium">NEW</span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-medium">NEW</span>
         </div>
         {isOpen ? <ChevronUp className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />}
       </button>
@@ -5538,7 +5513,7 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
                   onClick={() => setRoutingMode(mode.id)}
                   className={`p-3 rounded-xl border text-left transition ${
                     routingMode === mode.id
-                      ? "border-[#ef4444] bg-[#ef4444]/10"
+                      ? "border-[#ef4444] bg-[var(--surface)]"
                       : "border-[var(--border)] hover:border-[var(--text-muted)]"
                   }`}
                 >
@@ -5727,7 +5702,7 @@ function GatewaySettingsSection({ sessionToken }: { sessionToken: string | null 
                 ? "bg-green-500/20 text-green-500 border border-green-500/30"
                 : saveStatus === "error"
                 ? "bg-red-500/20 text-red-500 border border-red-500/30"
-                : "bg-[#ef4444] text-white hover:bg-[#dc2626]"
+                : "bg-[var(--text-primary)] text-[var(--background)] hover:bg-white"
             } disabled:opacity-50`}
           >
             {saving ? (
@@ -5798,7 +5773,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
           {/* Owner - always shown */}
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#ef4444]/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-[var(--surface)] flex items-center justify-center">
                 <Crown className="w-5 h-5 text-[#ef4444]" />
               </div>
               <div>
@@ -5806,7 +5781,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
                 <p className="text-sm text-[var(--text-muted)]">Account owner</p>
               </div>
             </div>
-            <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-xs font-medium">
+            <span className="px-3 py-1 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-medium">
               Owner
             </span>
           </div>
@@ -5843,7 +5818,7 @@ function TeamSection({ workspace }: { workspace: Workspace | null }) {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                   notifyClicked
                     ? "bg-green-500/20 text-green-500"
-                    : "bg-[#ef4444] text-white hover:bg-[#dc2626]"
+                    : "bg-[var(--text-primary)] text-[var(--background)] hover:bg-white"
                 }`}
               >
                 {notifyClicked ? (
@@ -5942,7 +5917,7 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               />
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] transition"
+                className="px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white transition"
               >
                 Save
               </button>
@@ -5954,7 +5929,7 @@ function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace
               <p className="font-medium">Tier</p>
               <p className="text-sm text-[var(--text-muted)]">Current subscription plan</p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-[#ef4444]/20 text-[#ef4444] text-sm font-medium capitalize">
+            <span className="px-3 py-1 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-medium capitalize">
               {workspace?.tier === "partner" ? "Partner" : workspace?.tier === "scale" ? "Scale" : workspace?.tier === "pro" ? "Pro" : workspace?.tier === "usage_based" ? "Pay as you go" : workspace?.tier || "Free"}
             </span>
           </div>

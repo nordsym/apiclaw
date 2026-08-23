@@ -103,7 +103,7 @@ export function ChainTrace({ chain, executions, tokensSaved }: ChainTraceProps) 
       case "completed":
         return "bg-green-500";
       case "running":
-        return "bg-blue-500 animate-pulse";
+        return "bg-blue-500";
       case "failed":
         return "bg-red-500";
       case "skipped":

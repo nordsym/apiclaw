@@ -67,7 +67,7 @@ export function CheckoutButton({
 
   // Variant styles
   const variantStyles = {
-    primary: "px-6 py-3 rounded-xl bg-[#ef4444] text-white hover:bg-[#dc2626] hover:scale-[1.02] active:scale-[0.98]",
+    primary: "px-6 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--background)] hover:bg-white hover:scale-[1.02] active:scale-[0.98]",
     outline: "px-6 py-3 rounded-xl border-2 border-[#ef4444] text-[#ef4444] hover:bg-[#ef4444] hover:text-white",
     banner: "px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm",
   };
@@ -161,7 +161,7 @@ export function UsageExceededBanner({
     <div className="mb-6 rounded-xl bg-gradient-to-r from-[#ef4444]/20 to-red-600/20 border border-[#ef4444]/50 p-5">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#ef4444]/20 flex items-center justify-center flex-shrink-0 animate-pulse">
+          <div className="w-12 h-12 rounded-xl bg-[var(--surface)] flex items-center justify-center flex-shrink-0">
             <Zap className="w-6 h-6 text-[#ef4444]" />
           </div>
           <div>

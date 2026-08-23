@@ -1,22 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Download,
-  Terminal as TerminalIcon,
-  Check,
-  Copy,
-  AlertCircle,
-  ExternalLink,
-  ChevronDown,
-  Bot,
-  Code2,
-  KeyRound,
-  ShieldCheck,
-  Apple,
-} from "lucide-react";
+import { SiteHeader } from "@/components/home/SiteHeader";
+import { SiteFooter } from "@/components/home/SiteFooter";
+import { CopyLine } from "@/components/home/CopyLine";
 
 type OS = "mac" | "win" | "linux" | "unknown";
 
@@ -37,263 +25,230 @@ function detectOS(): OS {
   return "unknown";
 }
 
-function CopyableLine({
-  cmd,
-  prompt,
-  multiline = false,
-}: {
-  cmd: string;
-  prompt?: string;
-  multiline?: boolean;
-}) {
+const PRE_CLASS =
+  "claw-mono whitespace-pre-wrap break-words sm:whitespace-pre sm:overflow-x-auto rounded-[10px] border border-border-subtle bg-surface px-4 py-3.5 text-[12.5px] leading-[1.7] text-text-secondary";
+
+function CopyBlock({ cmd }: { cmd: string }) {
   const [copied, setCopied] = useState(false);
   const handle = () => {
     navigator.clipboard.writeText(cmd);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  if (multiline) {
-    return (
-      <div className="relative group">
-        <pre className="rounded-xl border border-border bg-surface px-4 py-3 font-mono text-xs sm:text-sm text-text-primary overflow-x-auto">
-          {cmd}
-        </pre>
-        <button
-          onClick={handle}
-          aria-label="Copy"
-          className="absolute top-2 right-2 p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition opacity-0 group-hover:opacity-100"
-        >
-          {copied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4" />}
-        </button>
-      </div>
-    );
-  }
   return (
-    <div className="group flex items-center gap-3 rounded-xl border border-border bg-surface px-3 sm:px-4 py-3 font-mono text-xs sm:text-sm overflow-hidden">
-      {prompt && <span className="text-accent select-none flex-shrink-0">{prompt}</span>}
-      <code className="flex-1 text-text-primary overflow-x-auto whitespace-nowrap scrollbar-none">
-        {cmd}
-      </code>
+    <div>
+      <pre className={PRE_CLASS}>{cmd}</pre>
       <button
+        type="button"
         onClick={handle}
-        aria-label="Copy"
-        className="flex-shrink-0 p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition"
+        className="claw-link mt-2 text-[13px]"
+        aria-label="Copy snippet"
       >
-        {copied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4" />}
+        {copied ? "Copied" : "Copy snippet"}
       </button>
     </div>
   );
 }
 
 function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border border-border bg-surface-elevated overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 text-left hover:bg-surface transition"
-      >
-        <span className="font-semibold text-text-primary text-sm sm:text-base">{title}</span>
-        <ChevronDown
-          className={`w-4 h-4 text-text-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      {open && (
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 space-y-3 text-sm text-text-secondary">
-          {children}
-        </div>
-      )}
-    </div>
+    <details className="claw-disclosure">
+      <summary>
+        {title}
+        <span className="mark" aria-hidden="true" />
+      </summary>
+      <div className="space-y-3">{children}</div>
+    </details>
   );
 }
 
+function Step({
+  n,
+  title,
+  children,
+}: {
+  n: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="grid gap-3 border-t border-border-subtle pt-5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-8">
+      <div>
+        <div className="claw-mono text-[12px] text-accent">{n}</div>
+        <h3 className="mt-1 text-[1.1rem] font-semibold tracking-[-0.02em] text-text-primary">{title}</h3>
+      </div>
+      <div className="min-w-0 space-y-3">{children}</div>
+    </li>
+  );
+}
+
+const OS_TABS: OS[] = ["mac", "win", "linux"];
+
 export default function InstallPage() {
   const [os, setOs] = useState<OS>("unknown");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const tabsId = useId();
 
   useEffect(() => {
     setOs(detectOS());
-    const saved = (typeof window !== "undefined" && localStorage.getItem("theme")) || "light";
-    const dark = saved === "dark";
-    setTheme(dark ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", dark);
   }, []);
 
+  const activeTab: OS = os === "unknown" ? "mac" : os;
+
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">
-              🦞
-            </div>
-            <span className="font-bold text-xl tracking-tight">APIClaw</span>
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-text-muted hover:text-text-primary transition text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-        </div>
-      </header>
+    <main className="claw min-h-screen overflow-x-hidden">
+      <SiteHeader />
 
       {/* Hero */}
-      <section className="pt-16 pb-12 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
-            <TerminalIcon className="w-4 h-4" />
-            Install · {OS_LABEL[os]} detected
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 tracking-tighter">
-            Install <span className="gradient-text">APIClaw</span>
-          </h1>
-          <p className="text-text-secondary text-lg max-w-xl mx-auto">
-            One layer for every AI agent. Pick the path that fits your machine — or skip
+      <section className="claw-container py-16 sm:py-20">
+        <div className="max-w-[38rem]">
+          <p className="claw-eyebrow mb-4">Install · {OS_LABEL[os]} detected</p>
+          <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">Install APIClaw.</h1>
+          <p className="claw-lede mt-5">
+            One layer for every AI agent. Pick the path that fits your machine, or skip
             install entirely with a workspace key.
           </p>
         </div>
       </section>
 
-      {/* OS Tabs */}
-      <section className="px-4 sm:px-6 mb-10">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex gap-1 mb-5 bg-surface rounded-xl p-1 border border-border">
-            {(["mac", "win", "linux"] as OS[]).map((o) => (
+      {/* Terminal path */}
+      <section className="claw-container">
+        <div className="claw-rule" />
+        <div className="py-16 sm:py-20">
+          <div className="max-w-[36rem]">
+            <p className="claw-eyebrow mb-4">Terminal</p>
+            <h2 className="claw-h2">Three steps.</h2>
+          </div>
+
+          <div className="mt-8 claw-segments w-max" role="tablist" aria-label="Operating system">
+            {OS_TABS.map((o) => (
               <button
                 key={o}
+                role="tab"
+                id={`${tabsId}-tab-${o}`}
+                aria-selected={activeTab === o}
+                aria-controls={`${tabsId}-panel`}
+                className="claw-segment"
                 onClick={() => setOs(o)}
-                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition ${
-                  os === o
-                    ? "bg-accent text-white shadow-md shadow-accent/20"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
               >
                 {OS_LABEL[o]}
               </button>
             ))}
           </div>
 
-          {os === "mac" && <MacInstall />}
-          {os === "linux" && <LinuxInstall />}
-          {os === "win" && <WinInstall />}
-          {os === "unknown" && <MacInstall />}
+          <ol
+            id={`${tabsId}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${tabsId}-tab-${activeTab}`}
+            className="mt-8 space-y-8"
+          >
+            <Step n="01" title="Install">
+              {activeTab === "mac" && <MacInstall />}
+              {activeTab === "linux" && <LinuxInstall />}
+              {activeTab === "win" && <WinInstall />}
+            </Step>
 
-          {/* Verify */}
-          <div className="mt-6">
-            <h3 className="text-base sm:text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
-              <Check className="w-5 h-5 text-accent" />
-              Verify the install
-            </h3>
-            <CopyableLine cmd="npx @nordsym/apiclaw auth login" prompt="$" />
-            <p className="text-xs text-text-muted mt-2 mb-3">
-              Required before any managed call. Opens a browser, writes{" "}
-              <code className="font-mono">~/.apiclaw.toml</code>. Headless? Open the printed URL
-              on another device.
-            </p>
-            <CopyableLine cmd="npx @nordsym/apiclaw auth whoami" prompt="$" />
-            <p className="text-xs text-text-muted mt-2">
-              Must print your email. Then restart Claude Desktop and try NASA APOD:{" "}
-              <code className="font-mono">call_api</code> with provider{" "}
-              <code className="font-mono">nasa</code>, action <code className="font-mono">apod</code>.
-            </p>
-          </div>
+            <Step n="02" title="Sign in">
+              <CopyLine text="npx @nordsym/apiclaw auth login" />
+              <p className="text-[13px] text-text-muted">
+                Required before any managed call. Opens a browser, writes{" "}
+                <code className="claw-mono">~/.apiclaw.toml</code>. Headless? Open the printed URL
+                on another device.
+              </p>
+            </Step>
+
+            <Step n="03" title="Verify">
+              <CopyLine text="npx @nordsym/apiclaw auth whoami" />
+              <p className="text-[13px] text-text-muted">
+                Must print your email. Then restart Claude Desktop and try NASA APOD:{" "}
+                <code className="claw-mono">call_api</code> with provider{" "}
+                <code className="claw-mono">nasa</code>, action <code className="claw-mono">apod</code>.
+              </p>
+            </Step>
+          </ol>
         </div>
       </section>
 
       {/* No-terminal path */}
-      <section className="px-4 sm:px-6 mb-12">
-        <div className="max-w-3xl mx-auto rounded-2xl border border-accent/30 bg-accent/5 p-5 sm:p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="inline-flex w-10 h-10 rounded-xl bg-accent text-white items-center justify-center">
-              <Download className="w-5 h-5" />
-            </span>
-            <div>
-              <div className="text-sm uppercase tracking-widest text-accent font-semibold">
-                No terminal? No problem.
-              </div>
-              <h3 className="text-xl font-bold text-text-primary">Install for Claude Desktop</h3>
-            </div>
+      <section className="claw-container">
+        <div className="claw-rule" />
+        <div className="grid gap-8 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+          <div>
+            <p className="claw-eyebrow mb-4">No terminal</p>
+            <h2 className="claw-h2">Install for Claude Desktop.</h2>
           </div>
-          <p className="text-sm text-text-secondary mb-4">
-            Download the <code className="font-mono">.mcpb</code> file. Double-click it.
-            Claude Desktop installs it as an extension. No Node.js, no terminal, no
-            config file editing.
-          </p>
-          <a
-            href="/apiclaw.mcpb"
-            download
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold shadow-lg shadow-accent/20 transition"
-          >
-            <Download className="w-4 h-4" />
-            Download apiclaw.mcpb
-          </a>
+          <div>
+            <p className="text-[15px] leading-[1.65] text-text-secondary">
+              Download the <code className="claw-mono text-[13px] text-text-primary">.mcpb</code> file. Double-click it.
+              Claude Desktop installs it as an extension. No Node.js, no terminal, no
+              config file editing.
+            </p>
+            <a href="/apiclaw.mcpb" download className="claw-btn claw-btn-solid mt-6">
+              Download apiclaw.mcpb
+            </a>
+          </div>
         </div>
       </section>
 
       {/* Workspace Key path */}
-      <section className="px-4 sm:px-6 mb-12">
-        <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-surface-elevated p-5 sm:p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="inline-flex w-10 h-10 rounded-xl bg-accent/10 text-accent items-center justify-center">
-              <KeyRound className="w-5 h-5" />
-            </span>
-            <div>
-              <div className="text-sm uppercase tracking-widest text-text-muted font-semibold">
-                Building an agent?
-              </div>
-              <h3 className="text-xl font-bold text-text-primary">
-                Skip install. Use a workspace key.
-              </h3>
-            </div>
+      <section className="claw-container">
+        <div className="claw-rule" />
+        <div className="grid gap-8 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+          <div>
+            <p className="claw-eyebrow mb-4">Building an agent?</p>
+            <h2 className="claw-h2">Skip install. Use a workspace key.</h2>
+            <p className="mt-4 text-[15px] leading-[1.65] text-text-secondary">
+              Sign up at <code className="claw-mono text-[13px] text-text-primary">/workspace</code>, get an{" "}
+              <code className="claw-mono text-[13px] text-text-primary">sk-claw-...</code> key, and call{" "}
+              <code className="claw-mono text-[13px] text-text-primary">/v1/execute</code> from any language. Your agent
+              handles the user. APIClaw handles the APIs.
+            </p>
           </div>
-          <p className="text-sm text-text-secondary mb-4">
-            Sign up at <code className="font-mono">/workspace</code>, get an{" "}
-            <code className="font-mono text-accent">sk-claw-…</code> key, and call{" "}
-            <code className="font-mono">/v1/execute</code> from any language. Your agent
-            handles the user. APIClaw handles the APIs.
-          </p>
-          <CopyableLine
-            multiline
-            cmd={`curl https://api.apiclaw.cloud/v1/execute \\
+          <div className="min-w-0">
+            <CopyBlock
+              cmd={`curl https://api.apiclaw.cloud/v1/execute \\
   -H "Authorization: Bearer sk-claw-..." \\
   -H "Idempotency-Key: first-managed-call" \\
   -H "Content-Type: application/json" \\
   -d '{"provider":"nasa","action":"apod","params":{}}'`}
-          />
-          <div className="flex flex-wrap gap-3 mt-4">
-            <Link
-              href="/workspace"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold shadow-lg shadow-accent/20 transition"
-            >
-              Get a workspace key
-            </Link>
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface hover:border-accent/40 text-text-primary text-sm font-medium transition"
-            >
-              API reference
-              <ExternalLink className="w-4 h-4" />
-            </Link>
+            />
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/workspace" className="claw-btn claw-btn-solid">
+                Get a workspace key
+              </Link>
+              <Link href="/docs" className="claw-btn claw-btn-quiet">
+                API reference
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Troubleshooting */}
-      <section className="px-4 sm:px-6 pb-20">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-accent" />
-            Troubleshooting
-          </h2>
-          <div className="space-y-3">
+      <section className="claw-container">
+        <div className="claw-rule" />
+        <div className="grid gap-8 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+          <div>
+            <h2 className="claw-h2">Troubleshooting.</h2>
+            <p className="mt-4 text-[15px] leading-[1.65] text-text-secondary">
+              <span className="text-text-primary">Still stuck?</span> File an issue at{" "}
+              <a
+                href="https://github.com/nordsym/apiclaw/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="claw-link underline"
+              >
+                github.com/nordsym/apiclaw/issues
+              </a>{" "}
+              with your OS, terminal output, and Node version. We respond fast.
+            </p>
+          </div>
+          <div className="divide-y divide-border-subtle border-y border-border-subtle">
             <Disclosure title="‘npx’ is not recognized (Windows)">
               <p>
                 Node.js is not installed. The install.ps1 script handles this
-                automatically — re-run it in PowerShell:
+                automatically. Re-run it in PowerShell:
               </p>
-              <CopyableLine cmd="iwr -useb https://apiclaw.cloud/install.ps1 | iex" prompt="PS>" />
+              <CopyLine text="iwr -useb https://apiclaw.cloud/install.ps1 | iex" prompt="PS>" />
               <p>
                 If that fails (locked-down corporate network), install Node.js LTS
                 manually from{" "}
@@ -301,7 +256,7 @@ export default function InstallPage() {
                   href="https://nodejs.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent underline"
+                  className="claw-link underline"
                 >
                   nodejs.org
                 </a>
@@ -310,10 +265,7 @@ export default function InstallPage() {
             </Disclosure>
             <Disclosure title="PowerShell execution policy blocks the script">
               <p>Run this once, then retry the install:</p>
-              <CopyableLine
-                cmd="Set-ExecutionPolicy -Scope Process Bypass -Force"
-                prompt="PS>"
-              />
+              <CopyLine text="Set-ExecutionPolicy -Scope Process Bypass -Force" prompt="PS>" />
             </Disclosure>
             <Disclosure title="winget is not available (Windows < 1809)">
               <p>
@@ -323,7 +275,7 @@ export default function InstallPage() {
                   href="https://nodejs.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent underline"
+                  className="claw-link underline"
                 >
                   nodejs.org
                 </a>{" "}
@@ -338,7 +290,7 @@ export default function InstallPage() {
                   href="https://nodejs.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent underline"
+                  className="claw-link underline"
                 >
                   nodejs.org
                 </a>{" "}
@@ -347,7 +299,7 @@ export default function InstallPage() {
                   href="https://github.com/nvm-sh/nvm"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-accent underline"
+                  className="claw-link underline"
                 >
                   nvm
                 </a>
@@ -359,19 +311,18 @@ export default function InstallPage() {
                 The installer covers apt / dnf / yum / pacman / zypper / apk. For
                 anything else, install Node.js 18+ via your package manager, then run:
               </p>
-              <CopyableLine cmd="npx -y @nordsym/apiclaw@latest mcp-install" prompt="$" />
+              <CopyLine text="npx -y @nordsym/apiclaw@latest mcp-install" />
             </Disclosure>
             <Disclosure title="Claude Desktop doesn't see APIClaw after install">
-              <ol className="list-decimal pl-5 space-y-1.5">
+              <ol className="list-decimal space-y-1.5 pl-5">
                 <li>Quit and relaunch Claude Desktop.</li>
                 <li>
-                  Open <code className="font-mono">~/Library/Application Support/Claude/claude_desktop_config.json</code>{" "}
+                  Open <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>{" "}
                   on macOS or{" "}
-                  <code className="font-mono">%APPDATA%\Claude\claude_desktop_config.json</code> on Windows.
+                  <code>%APPDATA%\Claude\claude_desktop_config.json</code> on Windows.
                 </li>
                 <li>
-                  Confirm an <code className="font-mono">apiclaw</code> entry under{" "}
-                  <code className="font-mono">mcpServers</code>.
+                  Confirm an <code>apiclaw</code> entry under <code>mcpServers</code>.
                 </li>
                 <li>
                   If missing, run the install one more time, or paste the snippet from{" "}
@@ -381,101 +332,64 @@ export default function InstallPage() {
             </Disclosure>
             <Disclosure title="Behind a corporate proxy / firewall">
               <p>Set npm to your proxy first:</p>
-              <CopyableLine cmd="npm config set proxy http://your-proxy:port" prompt="$" />
-              <CopyableLine cmd="npm config set https-proxy http://your-proxy:port" prompt="$" />
+              <CopyLine text="npm config set proxy http://your-proxy:port" />
+              <CopyLine text="npm config set https-proxy http://your-proxy:port" />
               <p>
                 Then run the installer. If outbound to{" "}
-                <code className="font-mono">api.apiclaw.cloud</code> is blocked, the MCP
-                client will install but calls will fail — talk to your IT to allowlist
-                <code className="font-mono"> apiclaw.cloud</code> and{" "}
-                <code className="font-mono">api.apiclaw.cloud</code>.
+                <code>api.apiclaw.cloud</code> is blocked, the MCP
+                client will install but calls will fail. Talk to your IT to allowlist
+                <code> apiclaw.cloud</code> and{" "}
+                <code>api.apiclaw.cloud</code>.
               </p>
             </Disclosure>
             <Disclosure title="Uninstall">
-              <CopyableLine cmd="npx @nordsym/apiclaw mcp-uninstall" prompt="$" />
+              <CopyLine text="npx @nordsym/apiclaw mcp-uninstall" />
             </Disclosure>
-          </div>
-
-          <div className="mt-10 rounded-2xl border border-border-subtle bg-surface p-5 flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-text-secondary">
-              <span className="font-semibold text-text-primary">Still stuck?</span> File
-              an issue at{" "}
-              <a
-                href="https://github.com/nordsym/apiclaw/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent underline"
-              >
-                github.com/nordsym/apiclaw/issues
-              </a>{" "}
-              with your OS, terminal output, and Node version. We respond fast.
-            </div>
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }
 
 function MacInstall() {
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-text-muted mb-2">
-          <Apple className="w-3.5 h-3.5" />
-          One-line install · macOS
-        </div>
-        <CopyableLine
-          cmd="curl -fsSL https://apiclaw.cloud/install.sh | bash"
-          prompt="$"
-        />
-        <p className="text-xs text-text-muted mt-2">
-          Detects Node.js. Installs via Homebrew, falls through to the official .pkg if
-          brew is missing. Then registers the APIClaw MCP server.
-        </p>
-      </div>
-    </div>
+    <>
+      <p className="text-[13px] text-text-muted">One-line install · macOS</p>
+      <CopyLine text="curl -fsSL https://apiclaw.cloud/install.sh | bash" />
+      <p className="text-[13px] text-text-muted">
+        Detects Node.js. Installs via Homebrew, falls through to the official .pkg if
+        brew is missing. Then registers the APIClaw MCP server.
+      </p>
+    </>
   );
 }
 
 function LinuxInstall() {
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          One-line install · Linux
-        </div>
-        <CopyableLine
-          cmd="curl -fsSL https://apiclaw.cloud/install.sh | bash"
-          prompt="$"
-        />
-        <p className="text-xs text-text-muted mt-2">
-          Detects your package manager: apt, dnf, yum, pacman, zypper, or apk. Installs
-          Node.js LTS, then registers the APIClaw MCP server.
-        </p>
-      </div>
-    </div>
+    <>
+      <p className="text-[13px] text-text-muted">One-line install · Linux</p>
+      <CopyLine text="curl -fsSL https://apiclaw.cloud/install.sh | bash" />
+      <p className="text-[13px] text-text-muted">
+        Detects your package manager: apt, dnf, yum, pacman, zypper, or apk. Installs
+        Node.js LTS, then registers the APIClaw MCP server.
+      </p>
+    </>
   );
 }
 
 function WinInstall() {
   return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-xs uppercase tracking-widest text-text-muted mb-2">
-          One-line install · Windows · PowerShell
-        </div>
-        <CopyableLine
-          cmd="iwr -useb https://apiclaw.cloud/install.ps1 | iex"
-          prompt="PS>"
-        />
-        <p className="text-xs text-text-muted mt-2">
-          Run in PowerShell (not Command Prompt). Detects Node.js. Installs via winget,
-          falls through to Chocolatey, then to a direct MSI. Triggers a UAC prompt only
-          if Node is being installed.
-        </p>
-      </div>
-    </div>
+    <>
+      <p className="text-[13px] text-text-muted">One-line install · Windows · PowerShell</p>
+      <CopyLine text="iwr -useb https://apiclaw.cloud/install.ps1 | iex" prompt="PS>" />
+      <p className="text-[13px] text-text-muted">
+        Run in PowerShell (not Command Prompt). Detects Node.js. Installs via winget,
+        falls through to Chocolatey, then to a direct MSI. Triggers a UAC prompt only
+        if Node is being installed.
+      </p>
+    </>
   );
 }

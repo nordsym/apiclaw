@@ -2,8 +2,13 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, ArrowRight, Sun, Moon, ChevronLeft } from "lucide-react";
+import { Check, ArrowRight, ChevronLeft } from "lucide-react";
 import { getWorkspaceSessionToken } from "@/lib/workspace-session";
+import { SiteHeader } from "@/components/home/SiteHeader";
+import { SiteFooter } from "@/components/home/SiteFooter";
+
+const INPUT = "h-11 w-full rounded-[10px] border border-border bg-surface px-3.5 text-[14.5px] text-text-primary placeholder:text-text-muted focus:border-text-muted focus:outline-none";
+const LABEL = "mb-1.5 block text-[13px] text-text-muted";
 
 const ALL_SLOTS = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
@@ -31,20 +36,6 @@ function BookForm() {
   const searchParams = useSearchParams();
   const now = new Date();
   const defaultDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3);
-
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const dark = saved === "dark";
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-  }, []);
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -114,8 +105,8 @@ function BookForm() {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Stockholm",
           source: "apiclaw-enterprise",
           bookedVia: "APIClaw Enterprise",
-          meetingTitle: `APIClaw Enterprise${company ? ` — ${company}` : ""}`,
-          // host omitted — Prepare Data default routes to Gustav
+          meetingTitle: `APIClaw Enterprise${company ? ` \u2014 ${company}` : ""}`,
+          // host omitted: Prepare Data default routes to Gustav
           timestamp: new Date().toISOString(),
         }),
       });
@@ -127,10 +118,10 @@ function BookForm() {
   };
 
   const calCells: React.ReactNode[] = DOWS.map((d, i) => (
-    <div key={`dow-${i}`} className="text-center text-xs text-[var(--text-muted)] font-medium py-1">{d}</div>
+    <div key={`dow-${i}`} className="py-1 text-center text-[12px] text-text-muted">{d}</div>
   ));
   for (let i = 0; i < firstDow; i++) {
-    calCells.push(<div key={`prev-${i}`} className="text-center text-xs text-[var(--text-muted)] opacity-30 py-1">{prevDays - firstDow + i + 1}</div>);
+    calCells.push(<div key={`prev-${i}`} className="py-1.5 text-center text-[13px] text-text-muted opacity-30">{prevDays - firstDow + i + 1}</div>);
   }
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(calYear, calMonth, day);
@@ -138,149 +129,141 @@ function BookForm() {
     const isSel = selectedDate?.toDateString() === d.toDateString();
     calCells.push(
       <button key={`day-${day}`} disabled={isPast} onClick={() => { setSelectedDate(d); setSelectedTime(null); }}
-        className={`w-full text-center text-xs py-1.5 rounded-lg transition-colors font-medium
-          ${isSel ? "bg-[#ef4444] text-white" : isPast ? "text-[var(--text-muted)] opacity-30 cursor-not-allowed" : "text-[var(--text-primary)] hover:bg-[#ef4444]/20 dark:hover:bg-[#ef4444]/30"}`}>
+        className={`w-full rounded-[8px] py-1.5 text-center text-[13px] transition-colors
+          ${isSel ? "bg-text-primary text-background font-medium" : isPast ? "text-text-muted opacity-30 cursor-not-allowed" : "text-text-primary hover:bg-surface-elevated"}`}>
         {day}
       </button>
     );
   }
   const trailing = (7 - ((firstDow + daysInMonth) % 7)) % 7;
   for (let i = 1; i <= trailing; i++) {
-    calCells.push(<div key={`next-${i}`} className="text-center text-xs text-[var(--text-muted)] opacity-30 py-1">{i}</div>);
+    calCells.push(<div key={`next-${i}`} className="py-1.5 text-center text-[13px] text-text-muted opacity-30">{i}</div>);
   }
 
   if (status === "done") {
     return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-            <Check className="w-8 h-8 text-green-400" />
+      <main className="claw min-h-screen overflow-x-hidden">
+        <SiteHeader />
+        <div className="claw-container">
+          <div className="mx-auto max-w-[32rem] py-16 sm:py-20">
+            <Check className="h-6 w-6 text-text-primary" aria-hidden="true" />
+            <h1 className="claw-display mt-6 text-[2.2rem] sm:text-[2.75rem]">Meeting booked</h1>
+            <p className="claw-lede mt-5">Check <strong className="font-semibold text-text-primary">{email}</strong> for confirmation.</p>
+            <p className="mt-3 text-[15px] leading-[1.65] text-text-secondary">The team will be in touch to confirm details.</p>
+            <a href="https://apiclaw.cloud" className="claw-link mt-8 inline-flex items-center gap-2 text-[14.5px]">
+              Back to APIClaw <ArrowRight className="w-3.5 h-3.5" />
+            </a>
           </div>
-          <h1 className="text-2xl font-bold mb-3">Meeting booked</h1>
-          <p className="text-[var(--text-muted)] mb-2">Check <strong>{email}</strong> for confirmation.</p>
-          <p className="text-sm text-[var(--text-muted)]">The team will be in touch to confirm details.</p>
-          <a href="https://apiclaw.cloud" className="inline-flex items-center gap-2 mt-8 text-[#ef4444] text-sm hover:underline">
-            Back to APIClaw <ArrowRight className="w-3.5 h-3.5" />
-          </a>
         </div>
-      </div>
+        <SiteFooter />
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
-      {/* Header */}
-      <header className="border-b border-[var(--border)] px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Back button — goes to workspace if came from there, else homepage */}
-            <a
-              href={searchParams?.get("email") ? "/workspace" : "/"}
-              className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition mr-1"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              {searchParams?.get("email") ? "Workspace" : "Home"}
-            </a>
-            <div className="w-px h-4 bg-[var(--border)]" />
-            <span className="text-2xl">🦞</span>
-            <span className="font-bold text-lg">APIClaw</span>
-            <span className="text-[var(--text-muted)] ml-1 text-sm">Enterprise</span>
-          </div>
-          <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-[var(--surface)] transition" aria-label="Toggle theme">
-            {isDark ? <Sun className="w-4 h-4 text-[var(--text-muted)]" /> : <Moon className="w-4 h-4 text-[var(--text-muted)]" />}
-          </button>
-        </div>
-      </header>
+    <main className="claw min-h-screen overflow-x-hidden">
+      <SiteHeader />
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-3">Book a call</h1>
-          <p className="text-[var(--text-muted)]">Tell us about your setup and pick a time. The team will reach out to confirm.</p>
-        </div>
+      <div className="claw-container">
+        <div className="mx-auto max-w-[32rem] py-16 sm:py-20">
+          {/* Back link: goes to workspace if came from there, else homepage */}
+          <a
+            href={searchParams?.get("email") ? "/workspace" : "/"}
+            className="claw-link inline-flex items-center gap-1 text-[13.5px]"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            {searchParams?.get("email") ? "Workspace" : "Home"}
+          </a>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Left — form */}
-          <div className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
+          <p className="claw-eyebrow mt-8">Enterprise</p>
+          <h1 className="claw-display mt-4 text-[2.2rem] sm:text-[2.75rem]">Book a call</h1>
+          <p className="claw-lede mt-5">Tell us about your setup and pick a time. The team will reach out to confirm.</p>
+
+          <div className="mt-12 space-y-5">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide">Name</label>
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name"
-                  className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                <label className={LABEL}>Name</label>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className={INPUT} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide">Email</label>
-                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" type="email"
-                  className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+                <label className={LABEL}>Email</label>
+                <input value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" type="email" className={INPUT} />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide">Company</label>
-              <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Your company"
-                className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444]" />
+              <label className={LABEL}>Company</label>
+              <input value={company} onChange={e => setCompany(e.target.value)} placeholder="Your company" className={INPUT} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide">What do you want to discuss?</label>
+              <label className={LABEL}>What do you want to discuss?</label>
               <textarea value={message} onChange={e => setMessage(e.target.value)} rows={4}
                 placeholder="Custom call limits, private deployment, API partnerships..."
-                className="w-full px-3 py-2.5 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] text-sm focus:outline-none focus:ring-1 focus:ring-[#ef4444] resize-none" />
+                className="w-full resize-none rounded-[10px] border border-border bg-surface px-3.5 py-3 text-[14.5px] leading-[1.55] text-text-primary placeholder:text-text-muted focus:border-text-muted focus:outline-none" />
             </div>
 
-            {status === "error" && (
-              <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-                Something went wrong. Email <a href="mailto:gustav@nordsym.com" className="underline">gustav@nordsym.com</a> directly.
-              </p>
-            )}
-          </div>
+            <div className="claw-rule" />
 
-          {/* Right — calendar + time */}
-          <div className="space-y-4">
             {/* Calendar */}
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-                <button onClick={() => changeMonth(-1)} className="w-7 h-7 rounded-lg border border-[var(--border)] text-sm hover:border-[#ef4444]/50 transition flex items-center justify-center text-[var(--text-muted)]">‹</button>
-                <span className="text-sm font-semibold">{monthName}</span>
-                <button onClick={() => changeMonth(1)} className="w-7 h-7 rounded-lg border border-[var(--border)] text-sm hover:border-[#ef4444]/50 transition flex items-center justify-center text-[var(--text-muted)]">›</button>
+            <div>
+              <p className={LABEL}>Date</p>
+              <div className="rounded-[14px] border border-border-subtle bg-surface">
+                <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+                  <button type="button" onClick={() => changeMonth(-1)} aria-label="Previous month" className="claw-link flex h-8 w-8 items-center justify-center rounded-[8px] text-[15px]">‹</button>
+                  <span className="text-[14px] font-medium text-text-primary">{monthName}</span>
+                  <button type="button" onClick={() => changeMonth(1)} aria-label="Next month" className="claw-link flex h-8 w-8 items-center justify-center rounded-[8px] text-[15px]">›</button>
+                </div>
+                <div className="grid grid-cols-7 gap-0.5 p-3">{calCells}</div>
               </div>
-              <div className="grid grid-cols-7 p-3 gap-0.5">{calCells}</div>
             </div>
 
             {/* Time slots */}
-            {selectedDate ? (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
-                <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide mb-3">
-                  Available times — {Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop()?.replace("_", " ")}
-                </p>
+            <div>
+              <p className={LABEL}>
+                {selectedDate
+                  ? <>Available times, {Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop()?.replace("_", " ")}</>
+                  : "Time"}
+              </p>
+              {selectedDate ? (
                 <div className="grid grid-cols-4 gap-2">
                   {ALL_SLOTS.map(slot => {
                     const isTaken = taken.has(slot);
                     const isSel = selectedTime === slot;
                     return (
-                      <button key={slot} disabled={isTaken} onClick={() => setSelectedTime(slot)}
-                        className={`py-2 text-xs rounded-xl border transition ${isSel ? "bg-[#ef4444] text-white border-[#ef4444] font-semibold" : isTaken ? "opacity-30 cursor-not-allowed border-[var(--border)] text-[var(--text-muted)]" : "border-[var(--border)] text-[var(--text-primary)] hover:border-[#ef4444]/50"}`}>
+                      <button key={slot} type="button" disabled={isTaken} onClick={() => setSelectedTime(slot)}
+                        className={`h-10 rounded-[10px] border text-[13.5px] transition-colors ${isSel ? "border-text-primary bg-text-primary text-background font-medium" : isTaken ? "cursor-not-allowed border-border-subtle text-text-muted opacity-30" : "border-border text-text-primary hover:border-text-muted"}`}>
                         {slot}
                       </button>
                     );
                   })}
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-8 text-center text-sm text-[var(--text-muted)]">
-                Select a date to see available times
-              </div>
+              ) : (
+                <p className="border-y border-border-subtle py-4 text-[14px] text-text-muted">
+                  Select a date to see available times
+                </p>
+              )}
+            </div>
+
+            {status === "error" && (
+              <p className="border-t border-border-subtle pt-4 text-[14px] leading-[1.6] text-text-secondary">
+                Something went wrong. Email <a href="mailto:gustav@nordsym.com" className="claw-link underline">gustav@nordsym.com</a> directly.
+              </p>
             )}
 
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={!name || !email || !selectedDate || !selectedTime || status === "loading"}
-              className="w-full py-3 rounded-2xl bg-[#ef4444] text-white font-semibold hover:bg-[#dc2626] transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="claw-btn claw-btn-solid w-full disabled:cursor-not-allowed disabled:opacity-40"
             >
               {status === "loading" ? "Booking..." : "Book call"}
               {status !== "loading" && <ArrowRight className="w-4 h-4" />}
             </button>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <SiteFooter />
+    </main>
   );
 }
 

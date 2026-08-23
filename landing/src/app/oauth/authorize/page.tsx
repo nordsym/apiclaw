@@ -51,7 +51,7 @@ export default function OAuthAuthorizePage() {
 function LoadingShell() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] flex items-center justify-center px-4">
-      <Loader2 className="w-8 h-8 animate-spin text-[#ef4444]" />
+      <Loader2 className="w-8 h-8 animate-spin text-[var(--text-muted)]" />
     </div>
   );
 }
@@ -191,7 +191,7 @@ function AuthorizeInner() {
         {/* Brand row */}
         <div className="flex items-center justify-center mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ef4444] to-[#b91c1c] flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-8 h-8 rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-primary)] font-semibold text-sm">
               A
             </div>
             <span className="font-semibold tracking-tight text-base">APIClaw</span>
@@ -202,7 +202,7 @@ function AuthorizeInner() {
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] p-7 shadow-sm">
           {phase === "loading" && (
             <div className="py-10 flex flex-col items-center text-[var(--text-muted)]">
-              <Loader2 className="w-6 h-6 animate-spin mb-3 text-[#ef4444]" />
+              <Loader2 className="w-6 h-6 animate-spin mb-3 text-[var(--text-muted)]" />
               <p className="text-sm">Loading authorization request…</p>
             </div>
           )}
@@ -228,8 +228,8 @@ function AuthorizeInner() {
           {(phase === "review" || phase === "authorizing" || phase === "redirecting") && client && (
             <>
               <div className="text-center mb-5">
-                <div className="w-12 h-12 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-3">
-                  <ShieldCheck className="w-6 h-6 text-[#ef4444]" />
+                <div className="w-12 h-12 rounded-full bg-[var(--surface)] border border-[var(--border-subtle)] flex items-center justify-center mx-auto mb-3">
+                  <ShieldCheck className="w-6 h-6 text-[var(--text-primary)]" />
                 </div>
                 <h1 className="text-lg font-semibold">Authorize {client.name}?</h1>
                 <p className="text-sm text-[var(--text-muted)] mt-1">
@@ -289,7 +289,7 @@ function AuthorizeInner() {
                 <ul className="space-y-2">
                   {reviewScope.split(/\s+/).filter(Boolean).map((s) => (
                     <li key={s} className="flex items-start gap-2.5 text-sm">
-                      <Sparkles className="w-3.5 h-3.5 text-[#ef4444] mt-1 flex-shrink-0" />
+                      <Sparkles className="w-3.5 h-3.5 text-[var(--text-muted)] mt-1 flex-shrink-0" />
                       <span className="text-[var(--text-secondary)]">
                         <code className="text-[11px] font-mono bg-[var(--surface)] border border-[var(--border)] px-1 py-0.5 rounded mr-1.5">
                           {s}
@@ -320,7 +320,7 @@ function AuthorizeInner() {
                 <button
                   onClick={onApprove}
                   disabled={phase !== "review"}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#ef4444] hover:bg-[#dc2626] active:bg-[#b91c1c] disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2.5 text-sm font-semibold shadow-sm transition"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--text-primary)] hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed text-[var(--background)] px-4 py-2.5 text-sm font-semibold shadow-sm transition"
                 >
                   {phase === "authorizing" ? (
                     <>

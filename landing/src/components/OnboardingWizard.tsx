@@ -277,7 +277,7 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
       >
         <header className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4 sm:px-7">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#ef4444]/10" aria-hidden="true">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--surface)]" aria-hidden="true">
               <Sparkles className="h-4 w-4 text-[#ef4444]" />
             </span>
             <span className="text-sm font-semibold">APIClaw quick start</span>
@@ -380,11 +380,11 @@ function ChooseDoor({
               onClick={() => onSelect(item.id)}
               className={`group flex min-h-[112px] items-start gap-3 rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] ${
                 active
-                  ? "border-[#ef4444] bg-[#ef4444]/[0.07] shadow-sm"
+                  ? "border-[#ef4444] bg-[var(--surface)] shadow-sm"
                   : "border-[var(--border)] bg-[var(--surface)] hover:border-[#ef4444]/40"
               }`}
             >
-              <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${active ? "bg-[#ef4444] text-white" : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"}`}>
+              <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${active ? "bg-[var(--text-primary)] text-[var(--background)]" : "bg-[var(--surface-elevated)] text-[var(--text-muted)]"}`}>
                 <Icon className="h-5 w-5" />
               </span>
               <span className="min-w-0">
@@ -404,7 +404,7 @@ function ChooseDoor({
       <button
         type="button"
         onClick={onContinue}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#ef4444]/15 transition hover:bg-[#dc2626] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)]"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#ef4444]/15 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)]"
       >
         Show me APIClaw live
         <ChevronRight className="h-4 w-4" />
@@ -449,7 +449,7 @@ function LaunchStep({
       </button>
 
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#ef4444]/10 text-[#ef4444]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]">
           <Icon className="h-5 w-5" />
         </span>
         <div>
@@ -486,7 +486,7 @@ function LaunchStep({
             type="button"
             onClick={onRun}
             disabled={runStatus === "running"}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#dc2626] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] disabled:cursor-wait disabled:opacity-70"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] disabled:cursor-wait disabled:opacity-70"
           >
             {runStatus === "running" ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Routing live call…</>
@@ -556,7 +556,7 @@ function SuccessStep({
           {results.map((result, index) => (
             <div key={`${result.url ?? result.title}-${index}`} className="px-4 py-3.5">
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ef4444]/10 text-[10px] font-bold text-[#ef4444]">{index + 1}</span>
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[10px] font-bold text-[#ef4444]">{index + 1}</span>
                 <div className="min-w-0">
                   {result.url ? (
                     <a
@@ -588,7 +588,7 @@ function SuccessStep({
         type="button"
         onClick={onFinish}
         disabled={busy}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#dc2626] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)] disabled:opacity-60"
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#ef4444] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)] disabled:opacity-60"
       >
         {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : <>Open my workspace <ChevronRight className="h-4 w-4" /></>}
       </button>
@@ -675,7 +675,7 @@ function HttpSetup() {
     return (
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
         <div className="flex items-start gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#ef4444]/10 text-[#ef4444]"><KeyRound className="h-4 w-4" /></span>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]"><KeyRound className="h-4 w-4" /></span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">Create your HTTP quick-start key</p>
             <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">Generated once for this tab, revealed only here, and never sent to analytics.</p>
@@ -684,7 +684,7 @@ function HttpSetup() {
               type="button"
               onClick={() => void generate()}
               disabled={generating}
-              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 bg-[#ef4444]/10 px-3 py-2 text-xs font-semibold text-[#ef4444] transition hover:border-[#ef4444] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] disabled:opacity-60"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[#ef4444] transition hover:border-[#ef4444] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef4444] disabled:opacity-60"
             >
               {generating ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Creating key…</> : <><KeyRound className="h-3.5 w-3.5" /> Generate key and curl</>}
             </button>

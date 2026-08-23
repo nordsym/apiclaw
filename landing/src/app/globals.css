@@ -4,32 +4,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --surface: #f5f5f5;
-  --surface-elevated: #ffffff;
-  --border: #e5e5e5;
-  --border-subtle: #f0f0f0;
-  --text-primary: #0a0a0a;
-  --text-secondary: #525252;
-  --text-muted: #737373;
+/* Site-wide tokens: APIClaw is dark-committed. Light palette retired. */
+:root,
+.dark,
+.light {
+  --background: #0b0b0c;
+  --foreground: #f5f5f6;
+  --surface: #111113;
+  --surface-elevated: #151517;
+  --border: #26262a;
+  --border-subtle: #1c1c20;
+  --text-primary: #f5f5f6;
+  --text-secondary: #a4a4ad;
+  --text-muted: #6f6f79;
   --accent: #ef4444;
-  --accent-glow: rgba(239, 68, 68, 0.4);
-}
-
-.dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --surface: #141414;
-  --surface-elevated: #1a1a1a;
-  --border: #262626;
-  --border-subtle: #1f1f1f;
-  --text-primary: #fafafa;
-  --text-secondary: #a3a3a3;
-  --text-muted: #737373;
-  --accent: #ef4444;
-  --accent-glow: rgba(239, 68, 68, 0.3);
+  --accent-glow: rgba(239, 68, 68, 0.2);
+  --accent-soft: rgba(239, 68, 68, 0.12);
+  --ok: #3ecf8e;
+  color-scheme: dark;
 }
 
 html {
@@ -77,20 +69,10 @@ h1, h2, h3 {
   51%, 100% { opacity: 0; }
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #ef4444 0%, #f87171 25%, #fca5a5 50%, #f87171 75%, #ef4444 100%);
-  background-size: 300% 300%;
-  animation: gradient 6s ease infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+/* Legacy hooks kept for routes not yet rebuilt: rendered as plain type. */
+.gradient-text,
 .gradient-text-static {
-  background: linear-gradient(135deg, #ef4444 0%, #f87171 50%, #dc2626 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .code-block {
@@ -100,9 +82,9 @@ h1, h2, h3 {
 
 /* Terminal styling - enhanced */
 .terminal {
-  background: #0d0d0d;
-  border: 1px solid #262626;
-  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
   overflow: hidden;
 }
 
@@ -111,19 +93,20 @@ h1, h2, h3 {
   align-items: center;
   gap: 8px;
   padding: 14px 18px;
-  border-bottom: 1px solid #262626;
-  background: #141414;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
 }
 
 .terminal-dot {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  background: var(--border);
 }
 
-.terminal-dot-red { background: #ff5f57; }
-.terminal-dot-yellow { background: #febc2e; }
-.terminal-dot-green { background: #28c840; }
+.terminal-dot-red,
+.terminal-dot-yellow,
+.terminal-dot-green { background: var(--border); }
 
 .terminal-title {
   margin-left: auto;
@@ -232,9 +215,8 @@ input[type="email"]::placeholder {
 }
 
 .integration-badge:hover {
-  border-color: var(--accent);
+  border-color: var(--text-muted);
   color: var(--text-primary);
-  transform: translateY(-2px);
 }
 
 /* Button base */
@@ -246,18 +228,16 @@ input[type="email"]::placeholder {
   padding: 14px 28px;
   font-weight: 600;
   font-size: 15px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: white;
+  border-radius: 10px;
+  background: var(--text-primary);
+  color: var(--background);
   transition: all 0.2s ease;
   border: none;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3);
+  background: #ffffff;
 }
 
 .btn-primary:active {
@@ -281,9 +261,8 @@ input[type="email"]::placeholder {
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent);
+  border-color: var(--text-muted);
   background: var(--surface-elevated);
-  transform: translateY(-2px);
 }
 
 .btn-secondary:active {
@@ -312,37 +291,19 @@ input[type="email"]::placeholder {
 
 /* Code preview */
 .code-preview {
-  background: linear-gradient(180deg, #0f1419 0%, #080b0e 100%);
-  border: 1px solid rgba(0, 212, 255, 0.3);
-  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
   overflow: hidden;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  box-shadow: 
-    0 0 40px rgba(0, 212, 255, 0.15),
-    0 0 80px rgba(0, 212, 255, 0.05),
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-}
-
-.code-preview:hover {
-  border-color: rgba(0, 212, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 0 60px rgba(0, 212, 255, 0.25),
-    0 0 100px rgba(0, 212, 255, 0.1),
-    0 16px 48px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .code-preview-header {
   padding: 10px 16px;
-  background: rgba(0, 212, 255, 0.05);
-  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
-  color: #00D4FF;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
   font-size: 12px;
-  font-weight: 500;
 }
 
 .code-preview-body {
@@ -356,10 +317,10 @@ input[type="email"]::placeholder {
 }
 
 .code-comment { color: #6b7280; }
-.code-string { color: #00D4FF; }
-.code-keyword { color: #9370DB; }
-.code-function { color: #FF8C00; }
-.code-property { color: #00D4FF; }
+.code-string { color: var(--ok); }
+.code-keyword { color: var(--text-primary); }
+.code-function { color: var(--accent); }
+.code-property { color: var(--text-secondary); }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
@@ -394,21 +355,8 @@ input[type="email"]::placeholder {
    html theme class. Other routes keep their own theme handling.
    ------------------------------------------------------------------ */
 .claw {
-  --background: #0b0b0c;
-  --surface: #111113;
-  --surface-elevated: #151517;
-  --border: #26262a;
-  --border-subtle: #1c1c20;
-  --text-primary: #f5f5f6;
-  --text-secondary: #a4a4ad;
-  --text-muted: #6f6f79;
-  --accent: #ef4444;
-  --accent-soft: rgba(239, 68, 68, 0.12);
-  --ok: #3ecf8e;
-
   background: var(--background);
   color: var(--text-primary);
-  color-scheme: dark;
   font-feature-settings: "cv11", "ss01", "tnum";
 }
 

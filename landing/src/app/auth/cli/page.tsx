@@ -1,5 +1,5 @@
 /**
- * /auth/cli — browser side of the agent-native auth handoff.
+ * /auth/cli : browser side of the agent-native auth handoff.
  *
  * Flow:
  *   1. CLI opens this URL with ?authId=<id>
@@ -9,12 +9,14 @@
  *   4. On success → redirect to http://localhost:<port>/callback?code=<code>&state=<state>
  *      where the CLI's loopback listener picks it up and closes the loop.
  *
- * Server component — runs on every request, Clerk session via auth().
+ * Server component : runs on every request, Clerk session via auth().
  */
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { SiteHeader } from "@/components/home/SiteHeader";
+import { SiteFooter } from "@/components/home/SiteFooter";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -77,26 +79,21 @@ export default async function CliAuthPage({
   if (!userId) {
     const here = `/auth/cli?authId=${encodeURIComponent(authId)}`;
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
-        <div className="max-w-md text-center space-y-6">
-          <div className="text-5xl">🦞</div>
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-            Sign in to authorize your CLI
-          </h1>
-          <p className="text-[var(--text-secondary)]">
-            You ran <code className="px-2 py-1 rounded bg-[var(--surface)] text-sm">npx @nordsym/apiclaw auth login</code> in your terminal. One click and you are back in the CLI.
-          </p>
-          <Link
-            href={`/sign-in?redirect_url=${encodeURIComponent(here)}`}
-            className="inline-block px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
-          >
-            Sign in to continue
-          </Link>
-          <p className="text-xs text-[var(--text-muted)]">
-            APIClaw never sees your password. Sign-in is handled by Clerk with Google / passwordless email.
-          </p>
-        </div>
-      </main>
+      <CliShell>
+        <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">Sign in to authorize your CLI.</h1>
+        <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
+          You ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code> in your terminal. One click and you are back in the CLI.
+        </p>
+        <Link
+          href={`/sign-in?redirect_url=${encodeURIComponent(here)}`}
+          className="claw-btn claw-btn-solid mt-8"
+        >
+          Sign in to continue
+        </Link>
+        <p className="mt-6 text-[13px] text-text-muted">
+          APIClaw never sees your password. Sign-in is handled by Clerk with Google / passwordless email.
+        </p>
+      </CliShell>
     );
   }
 
@@ -134,19 +131,26 @@ export default async function CliAuthPage({
   redirect(callback);
 }
 
+function CliShell({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="claw flex min-h-screen flex-col overflow-x-hidden">
+      <SiteHeader />
+      <section className="claw-container flex-1 py-16 sm:py-20">
+        <div className="mx-auto max-w-[28rem]">{children}</div>
+      </section>
+      <SiteFooter />
+    </main>
+  );
+}
+
 function ErrorView({ title, message }: { title: string; message: string }) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
-      <div className="max-w-md text-center space-y-4">
-        <div className="text-5xl">🦞</div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-          {title}
-        </h1>
-        <p className="text-[var(--text-secondary)]">{message}</p>
-        <p className="text-xs text-[var(--text-muted)]">
-          Need help? <a href="/docs#cli-auth" className="text-red-500 hover:underline">Read the CLI auth docs</a>.
-        </p>
-      </div>
-    </main>
+    <CliShell>
+      <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">{title}</h1>
+      <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">{message}</p>
+      <a href="/docs#cli-auth" className="claw-btn claw-btn-quiet mt-8">
+        Read the CLI auth docs
+      </a>
+    </CliShell>
   );
 }

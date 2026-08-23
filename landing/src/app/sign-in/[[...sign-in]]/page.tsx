@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { SignIn } from "@clerk/nextjs";
+import { clerkAppearance } from "@/lib/clerk-appearance";
+import { SiteHeader } from "@/components/home/SiteHeader";
 
 export default function SignInPage() {
   // Preserve referral attribution across the Clerk OAuth round-trip.
@@ -13,23 +15,14 @@ export default function SignInPage() {
   }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--background)] px-6">
+    <main className="claw min-h-screen flex flex-col">
+      <SiteHeader />
+      <div className="flex flex-1 items-center justify-center px-6 py-16">
       <SignIn
         signUpUrl="/sign-up"
-        appearance={{
-          elements: {
-            formButtonPrimary:
-              "bg-red-500 hover:bg-red-600 text-white normal-case",
-            card: "bg-[var(--background)] border border-[var(--border-subtle)]",
-            headerTitle: "text-[var(--text-primary)]",
-            headerSubtitle: "text-[var(--text-secondary)]",
-            socialButtonsBlockButton:
-              "border border-[var(--border-subtle)] text-[var(--text-primary)]",
-            formFieldLabel: "text-[var(--text-secondary)]",
-            footerActionLink: "text-red-500 hover:text-red-600",
-          },
-        }}
+        appearance={clerkAppearance}
       />
+      </div>
     </main>
   );
 }

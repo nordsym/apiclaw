@@ -240,7 +240,7 @@ export default function IntegrationsPage() {
             Back to workspace
           </Link>
           <div className="mt-3 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#ef4444]/10 text-[#ef4444] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] flex items-center justify-center">
               <Layers className="w-5 h-5" />
             </div>
             <div>
@@ -303,14 +303,14 @@ export default function IntegrationsPage() {
                   onClick={() => setPreset(p.key)}
                   className={`group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition text-left ${
                     active
-                      ? "border-[#ef4444] bg-[#ef4444]/5"
+                      ? "border-[#ef4444] bg-[var(--surface)]"
                       : "border-[var(--border)] hover:border-[var(--text-muted)] bg-[var(--surface)]"
                   }`}
                 >
                   <span
                     className={`w-7 h-7 rounded-md flex items-center justify-center font-semibold text-xs ${
                       active
-                        ? "bg-[#ef4444] text-white"
+                        ? "bg-[var(--text-primary)] text-[var(--background)]"
                         : "bg-[var(--background)] text-[var(--text-secondary)]"
                     }`}
                   >
@@ -378,7 +378,7 @@ export default function IntegrationsPage() {
             <button
               onClick={onGenerate}
               disabled={busy}
-              className="inline-flex items-center gap-2 rounded-md bg-[#ef4444] hover:bg-[#dc2626] active:bg-[#b91c1c] text-white px-4 py-2 text-sm font-semibold shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-md bg-[#ef4444] hover:bg-white active:bg-[#b91c1c] text-white px-4 py-2 text-sm font-semibold shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {busy ? (
                 <>

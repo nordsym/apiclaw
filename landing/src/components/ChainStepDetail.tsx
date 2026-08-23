@@ -128,7 +128,7 @@ export function ChainStepDetail({ step, stepDef, isExpanded, onToggle }: ChainSt
         <pre className="text-xs font-mono text-white/80 whitespace-pre-wrap break-all">
           {parts.map((part, i) =>
             part.startsWith("$") ? (
-              <span key={i} className="bg-[#ef4444]/20 text-[#ef4444] px-1 rounded">
+              <span key={i} className="bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)] px-1 rounded">
                 {part}
               </span>
             ) : (

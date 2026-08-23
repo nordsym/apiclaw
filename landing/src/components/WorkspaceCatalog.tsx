@@ -247,7 +247,7 @@ function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
   };
 
   return (
-    <div className="rounded-2xl border border-[#ef4444]/30 bg-[#ef4444]/5 p-5">
+    <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface)] p-5">
       <div className="flex flex-col lg:flex-row lg:items-end gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -263,7 +263,7 @@ function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
             className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/40"
           />
         </div>
-        <button type="button" onClick={runTest} disabled={!sessionToken || running || outcomeUnknown || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#ef4444] text-white text-sm font-medium hover:bg-[#dc2626] disabled:opacity-50 transition">
+        <button type="button" onClick={runTest} disabled={!sessionToken || running || outcomeUnknown || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white disabled:opacity-50 transition">
           {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
           {running ? "Running..." : outcomeUnknown ? "Check Activity" : "Run test call"}
         </button>
@@ -299,7 +299,7 @@ function SectionCard({
       data-section={id}
       className={`rounded-2xl border p-5 text-left transition ${
         active
-          ? "border-[#ef4444] bg-[#ef4444]/5"
+          ? "border-[#ef4444] bg-[var(--surface)]"
           : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"
       }`}
     >
@@ -499,7 +499,7 @@ function CatalogList({
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="h-[68px] rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] animate-pulse"
+            className="h-[68px] rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)]"
           />
         ))}
       </div>
@@ -532,7 +532,7 @@ function CatalogRow({
     <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[#ef4444]/30 transition">
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
         isManaged
-          ? "bg-[#ef4444]/10 text-[#ef4444]"
+          ? "bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]"
           : isOpen
             ? "bg-purple-500/10 text-purple-400"
             : "bg-[var(--surface)] text-[var(--text-muted)]"
@@ -543,7 +543,7 @@ function CatalogRow({
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-medium text-sm truncate">{api.name}</p>
           {isManaged && (
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-[#ef4444] bg-[#ef4444]/10 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] uppercase tracking-widest font-semibold text-[#ef4444] bg-[var(--surface)] px-1.5 py-0.5 rounded">
               Managed
             </span>
           )}
