@@ -89,6 +89,7 @@ https://apiclaw.cloud/.well-known/oauth-protected-resource
 - Signup is required for discovery and execution.
 - Browser-loopback auth is canonical.
 - A headless user can complete ownership verification from another device using the displayed sign-in URL.
+- On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `~/.apiclaw.toml` with `api_key`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment.
 - Workspace keys use the `sk-claw-...` bearer format.
 - Provider credentials remain server-side.
 

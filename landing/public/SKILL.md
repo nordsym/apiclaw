@@ -61,6 +61,11 @@ npx @nordsym/apiclaw auth whoami
 Headless or SSH: run the same login command, open the printed URL on
 another device, then confirm with `whoami`.
 
+Fully headless (no browser anywhere, e.g. CI): on a machine with a browser,
+`npx @nordsym/apiclaw auth login` writes `~/.apiclaw.toml` with `api_key`.
+On the headless machine itself, skip the CLI login and instead create a key
+in Workspace > Connections, then set `APICLAW_API_KEY` in the environment.
+
 Rules:
 
 - Do not ask the user to create an API key in a dashboard.

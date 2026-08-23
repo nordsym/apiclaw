@@ -94,6 +94,7 @@ apiclaw --help
 - Signup is required for discovery and execution.
 - Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`.
 - Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
+- No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.
 - Local auth writes `~/.apiclaw.toml`.
 - Remote MCP uses OAuth 2.1 + PKCE + Dynamic Client Registration.
 - Workspace keys use `sk-claw-...` bearer tokens.

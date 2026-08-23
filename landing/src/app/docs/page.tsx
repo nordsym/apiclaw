@@ -89,7 +89,8 @@ export default function DocsPage() {
                 <p className={META}>Auto-install to Claude Desktop</p>
                 <CopyLine text="curl -fsSL https://apiclaw.cloud/install.sh | bash" />
                 <p className={`${META} pt-2`}>Or run the MCP server directly</p>
-                <CopyLine text="npx @nordsym/apiclaw" />
+                <CopyLine text="npx @nordsym/apiclaw mcp" />
+                <p className={`${META} pt-1`}>Bare <code className={CODE}>npx @nordsym/apiclaw</code> (no subcommand) does the same thing.</p>
               </div>
               <p className={`${META} mt-5`}>
                 OS-specific commands for macOS, Windows, and Linux live in the install guide. Use this page as the hub, not the full manual.
@@ -133,7 +134,7 @@ export default function DocsPage() {
                 <div>
                   <h3 className={SUB}>Headless server or SSH</h3>
                   <p className={`${BODY} mt-3`}>
-                    Run the same login command and open the sign-in URL on a device where you can complete ownership verification.
+                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Connections and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
                   </p>
                 </div>
                 <div className="border-t border-border-subtle pt-6">
@@ -200,7 +201,7 @@ apiclaw balance`}</pre>
                   <dt className={META}>API key</dt>
                   <dd>
                     <span className={CODE}>sk-claw-...</span>
-                    <p className={`${META} mt-1.5`}>Run <code className="claw-mono">apiclaw auth login</code>: the key is written to ~/.apiclaw.toml. Or generate one manually in workspace, API Keys.</p>
+                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Connections and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
                   </dd>
                 </div>
               </dl>

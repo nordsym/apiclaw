@@ -163,6 +163,17 @@ program
     await authLoginCommand({ force: options.force });
   });
 
+// MCP — explicit alias for the stdio server that bare `apiclaw` (no args)
+// already runs (see src/bin.ts's dispatch table). Exists so `--help` and
+// docs can point at one unambiguous command instead of relying on users to
+// infer that no-args-at-all means "run the server".
+program
+  .command('mcp')
+  .description('Run as a local MCP server over stdio (same as bare `apiclaw`)')
+  .action(async () => {
+    await import('../index.js');
+  });
+
 // Demo command — fire a live API call in the terminal
 program
   .command('demo')
