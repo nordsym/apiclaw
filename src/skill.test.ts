@@ -50,7 +50,7 @@ assert.match(skill, /\/latest/, "Frankfurter fallback uses /latest");
 assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
 assert.match(skill, /1,?025/, "callable count is the live catalog card count");
 assert.match(skill, /26,?619/, "discoverable count is canon");
-assert.match(skill, /22 managed adapters/, "adapter inventory is canon");
+assert.match(skill, /22 built-in providers/, "built-in provider inventory is canon");
 assert.match(skill, /Do not invent metrics/);
 assert.match(skill, /Never ask the user to paste|Do not ask the user to paste a token/i);
 assert.doesNotMatch(skill, /paste (?:an? )?(?:API )?key/i);
@@ -68,7 +68,7 @@ assert.match(homepage, /curl -fsSL https:\/\/apiclaw\.cloud\/install\.sh \| bash
 assert.match(homepage, /npx @nordsym\/apiclaw auth login/, "CLI auth stays a first-class door");
 assert.match(homepage, /label: "callable now"/, "headline metric is callable, not installs");
 assert.doesNotMatch(homepage, /label: "managed adapters"/, "adapter count moved off the public homepage to /docs");
-assert.match(docsPage, /managed provider adapters/, "adapter inventory stays canon on /docs");
+assert.match(docsPage, /built-in providers/, "built-in provider inventory stays canon on /docs");
 assert.doesNotMatch(homepage, /label: "npm installs"/, "installs are not the metric that matters");
 
 assert.match(hero, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/, "hero doors show the skill one-liner");

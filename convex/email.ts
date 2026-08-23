@@ -1,10 +1,6 @@
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "../src/product-truth";
+import { PAYG_MARGIN_RATE } from "../src/product-truth";
 
 // ============================================
 // EMAIL TEMPLATES
@@ -13,7 +9,7 @@ import {
 const EMAIL_FROM = "APIClaw <noreply@apiclaw.cloud>";
 const APP_URL = "https://apiclaw.cloud";
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
-const FREE_MANAGED_ALLOWANCE_COPY = `${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap`;
+const FREE_MANAGED_ALLOWANCE_COPY = "Free APIs are free forever, no card. Paid APIs bill provider cost plus " + PAYG_MARGIN_PERCENT + "% after you add a card";
 
 // Base email wrapper - using string concat for Convex compatibility
 function wrapEmail(content: string): string {
@@ -73,7 +69,7 @@ function magicLinkEmailTemplate(verifyUrl: string): string {
   html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
   html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
   html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
+  html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>" + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
   html += "</td></tr></table>";
   html += "</td></tr></table></body></html>";
   return html;
@@ -111,11 +107,11 @@ function reminderEmailTemplate(verifyUrl: string): string {
 function limitReachedEmailTemplate(upgradeUrl: string): string {
   return wrapEmail(`
     <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #0a0a0a; text-align: center;">
-      Free Tier Limit Reached
+      Payment Method Required
     </h2>
 
     <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.6; color: #525252; text-align: center;">
-      Your AI agent has reached the free tier limit. Add a payment method to continue billing-ready managed actions with pay-as-you-go, no fixed subscription fee.
+      Your AI agent called an API with real provider cost. Free APIs stay free forever, no card. Add a payment method to keep calling Paid APIs, pay-as-you-go, no fixed subscription fee.
     </p>
 
     <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
@@ -231,13 +227,13 @@ export const sendMagicLinkEmail = internalAction({
     html += "<h2 style='margin:0 0 16px;font-size:20px;color:#0a0a0a;'>An AI Agent Wants to Connect</h2>";
     html += "<p style='margin:0 0 24px;color:#525252;'>Click below to verify your email and activate your workspace.</p>";
     html += "<a href='" + verifyUrl + "' style='display:inline-block;background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;'>Verify Email</a>";
-    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
+    html += "<p style='margin:24px 0 0;font-size:13px;color:#737373;'>" + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. This link expires in 1 hour.</p>";
     html += "</td></tr></table>";
     html += "</td></tr></table></body></html>";
     
     var textContent = "APIClaw - An AI Agent Wants to Connect\n\n";
     textContent += "Click the link: " + verifyUrl + "\n\n";
-    textContent += "Free tier: " + FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. Expires in 1 hour.";
+    textContent += FREE_MANAGED_ALLOWANCE_COPY + ". Discovery is free. Expires in 1 hour.";
     
     var response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -399,7 +395,7 @@ export const sendLimitReachedEmail = internalAction({
       body: JSON.stringify({
         from: EMAIL_FROM,
         to: args.email,
-        subject: "🦞 Free Tier Limit Reached — Upgrade to Continue",
+        subject: "🦞 Payment Method Required: Add a Card to Continue",
         html,
       }),
     });

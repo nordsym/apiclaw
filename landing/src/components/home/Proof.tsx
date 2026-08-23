@@ -41,7 +41,7 @@ export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div>
               <h3 className="text-[1.5rem] font-semibold tracking-[-0.025em]">Pricing</h3>
               <p className="mt-3 text-[15px] leading-[1.65] text-text-secondary">
-                Start free. Discovery is always free. Pay provider cost plus {PAYG_MARGIN_PERCENT}% only after the free calls.
+                Free APIs are free forever. Paid APIs bill provider cost plus {PAYG_MARGIN_PERCENT}% after you add a card.
               </p>
               <p className="mt-4 text-[13.5px] text-text-muted">
                 Need custom limits or an SLA? <a href="/book" className="claw-link text-text-primary">Talk to us</a>.

@@ -1,7 +1,6 @@
 import {
   FREE_MANAGED_CALLS_LIFETIME,
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  FREE_MANAGED_WARNING_AT,
   PAYG_MARGIN_RATE,
 } from "../src/product-truth";
 
@@ -30,7 +29,7 @@ export type ManagedUsageWorkspace = {
 
 export type ManagedUsageDecision = {
   allowed: boolean;
-  reason: null | "managed_call_limit_exceeded" | "provider_cost_cap_exceeded" | "payg_not_active" | "unpriced_managed_call" | "payg_cost_adapter_missing" | "managed_cost_hold";
+  reason: null | "payment_required" | "unpriced_managed_call" | "payg_cost_adapter_missing" | "managed_cost_hold";
   billingClass: ManagedBillingClass;
   trafficClass: ManagedTrafficClass;
   managedUsageCount: number;
@@ -88,10 +87,16 @@ export function managedUsageCount(workspace: ManagedUsageWorkspace): number {
 // lifetime managed/legacy count is deliberately conservative: a migration can
 // never accidentally grant a second free allowance. The value is capped at the
 // activation limit because paid/internal history must not grow this counter.
+// This counter is informational only now (see evaluateManagedUsage below);
+// it is kept for analytics/back-compat display, not for gating.
 export function activationManagedCallCount(workspace: ManagedUsageWorkspace): number {
   const explicit = workspace.activationManagedCallCount;
   if (explicit !== undefined) return Math.max(0, Math.min(FREE_MANAGED_CALLS_LIFETIME, explicit));
   return Math.max(0, Math.min(FREE_MANAGED_CALLS_LIFETIME, managedUsageCount(workspace)));
+}
+
+function hasStoredPaymentMethod(workspace: ManagedUsageWorkspace): boolean {
+  return workspace.hasPaymentMethod === true || workspace.hasCardAttached === true;
 }
 
 function baseDecision(
@@ -110,10 +115,13 @@ function baseDecision(
     trafficClass,
     managedUsageCount: totalUsed,
     activationManagedCallCount: activationUsed,
-    managedUsageLimit: billingClass === "activation" ? FREE_MANAGED_CALLS_LIFETIME : -1,
-    managedUsageRemaining: billingClass === "activation"
-      ? Math.max(0, FREE_MANAGED_CALLS_LIFETIME - activationUsed)
-      : -1,
+    // The lifetime call count and the $1 provider-cost cap no longer gate
+    // access. A call with provably zero provider cost is free forever and
+    // uncapped; a call with real cost is gated on hasPaymentMethod instead.
+    // These fields stay populated (as -1 / informational counters) for
+    // display and analytics back-compat, never for enforcement.
+    managedUsageLimit: -1,
+    managedUsageRemaining: -1,
     activationProviderCostUsd: activationCost,
     activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
     activationProviderCostRemainingUsd: Math.max(0, FREE_MANAGED_PROVIDER_COST_CAP_USD - activationCost),
@@ -147,7 +155,6 @@ export function evaluateManagedUsage(
     return { ...base, allowed: true, reason: null, warning: null };
   }
 
-  const activationBase = baseDecision(workspace, "activation", trafficClass);
   if (
     !Number.isSafeInteger(amount) ||
     amount <= 0 ||
@@ -155,64 +162,39 @@ export function evaluateManagedUsage(
     !Number.isFinite(estimatedProviderCostUsd) ||
     estimatedProviderCostUsd < 0
   ) {
-    return { ...activationBase, allowed: false, reason: "unpriced_managed_call", warning: null };
+    const base = baseDecision(workspace, "activation", trafficClass);
+    return { ...base, allowed: false, reason: "unpriced_managed_call", warning: null };
   }
 
-  const activationCallAvailable = activationBase.activationManagedCallCount + amount <= FREE_MANAGED_CALLS_LIFETIME;
-  const activationCostAvailable = activationBase.activationProviderCostUsd + estimatedProviderCostUsd <=
-    FREE_MANAGED_PROVIDER_COST_CAP_USD + Number.EPSILON;
-
-  // The lifetime activation allowance is always the first customer rail. A
-  // card/subscription only takes over after the call or provider-cost cap is
-  // exhausted, so attaching a card can never burn or silently skip free calls.
-  if (activationCallAvailable && activationCostAvailable) {
-    // A numeric reservation is not enough. Customer activation traffic is
-    // allowed only when the adapter can prove realized cost or enforces a
-    // request-specific upper bound. This keeps the advertised lifetime
-    // provider-cost cap from being bypassed by variable-cost guesses.
-    if (options.billingGradeCost !== true) {
-      return { ...activationBase, allowed: false, reason: "unpriced_managed_call", warning: null };
-    }
-    const nextUsed = activationBase.activationManagedCallCount + amount;
-    const nextRemaining = Math.max(0, FREE_MANAGED_CALLS_LIFETIME - nextUsed);
-    const warning = nextUsed >= FREE_MANAGED_WARNING_AT
-      ? {
-          type: "managed_allowance_warning" as const,
-          used: nextUsed,
-          limit: FREE_MANAGED_CALLS_LIFETIME,
-          remaining: nextRemaining,
-          message: `${nextRemaining} free managed calls remain. Add a payment method to continue at provider cost + ${Math.round(PAYG_MARGIN_RATE * 100)}%.`,
-          upgradeUrl: "https://apiclaw.cloud/upgrade",
-        }
-      : null;
-
-    return {
-      ...activationBase,
-      allowed: true,
-      reason: null,
-      managedUsageRemaining: nextRemaining,
-      warning,
-    };
+  // A call whose provider cost is provably zero is free forever, no card
+  // required, uncapped: a verified-zero provider (VERIFIED_ZERO_COST_PROVIDERS),
+  // the workspace-public keyless-origin path, or an explicit {input:0,output:0}
+  // model row. A zero-valued reservation/guess (billingGradeCost !== true)
+  // does not qualify; unknown or unproven cost is treated as paid.
+  const isProvenZeroCost = estimatedProviderCostUsd === 0 && options.billingGradeCost === true;
+  if (isProvenZeroCost) {
+    const base = baseDecision(workspace, "activation", trafficClass);
+    return { ...base, allowed: true, reason: null, warning: null };
   }
 
-  if (hasActivePaygEntitlement(workspace)) {
-    const paygBase = baseDecision(workspace, "payg", trafficClass);
-    if (options.billingGradeCost !== true) {
-      return { ...paygBase, allowed: false, reason: "payg_cost_adapter_missing", warning: null };
-    }
-    return { ...paygBase, allowed: true, reason: null, warning: null };
+  // Any call with real (or unproven) provider cost requires a card on file.
+  // The stored boolean is trusted here; there is no live Stripe check in
+  // this hot path.
+  if (!hasStoredPaymentMethod(workspace)) {
+    const base = baseDecision(workspace, "payg", trafficClass);
+    return { ...base, allowed: false, reason: "payment_required", warning: null };
   }
 
-  if (!activationCallAvailable) {
-    return { ...activationBase, allowed: false, reason: "managed_call_limit_exceeded", warning: null };
-  }
-  if (!activationCostAvailable) {
-    return { ...activationBase, allowed: false, reason: "provider_cost_cap_exceeded", warning: null };
+  // A numeric reservation is not enough once a card is on file either. The
+  // adapter must prove realized cost or enforce a request-specific upper
+  // bound before the call can be charged.
+  if (options.billingGradeCost !== true) {
+    const base = baseDecision(workspace, "payg", trafficClass);
+    return { ...base, allowed: false, reason: "payg_cost_adapter_missing", warning: null };
   }
 
-  // Unreachable for valid finite estimates, kept fail-closed for future policy
-  // changes that add another activation constraint.
-  return { ...activationBase, allowed: false, reason: "payg_not_active", warning: null };
+  const base = baseDecision(workspace, "payg", trafficClass);
+  return { ...base, allowed: true, reason: null, warning: null };
 }
 
 export function customerChargeForProviderCost(
@@ -230,14 +212,14 @@ export function managedQuotaMessage(reason: ManagedUsageDecision["reason"]): str
   if (reason === "managed_cost_hold") {
     return "Managed execution is temporarily paused because realized provider cost did not match the authorized ceiling.";
   }
-  if (reason === "provider_cost_cap_exceeded") {
-    return `The free activation provider-cost cap ($${FREE_MANAGED_PROVIDER_COST_CAP_USD.toFixed(2)} lifetime) has been reached. Add a payment method to continue at provider cost + ${Math.round(PAYG_MARGIN_RATE * 100)}%.`;
+  if (reason === "payment_required") {
+    return "This API has real provider cost. Add a card to continue; you pay provider cost plus 15 percent.";
   }
   if (reason === "unpriced_managed_call") {
     return "This managed action does not yet have a billing-grade cost adapter and is unavailable for customer traffic.";
   }
   if (reason === "payg_cost_adapter_missing") {
-    return "This managed action does not yet have an exact provider-cost adapter, so PAYG is blocked rather than estimated.";
+    return "This managed action does not yet have an exact provider-cost adapter, so it is blocked rather than estimated.";
   }
-  return `The free managed allowance is ${FREE_MANAGED_CALLS_LIFETIME} lifetime calls. Add a payment method to continue at provider cost + ${Math.round(PAYG_MARGIN_RATE * 100)}%.`;
+  return "Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card.";
 }

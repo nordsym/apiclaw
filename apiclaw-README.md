@@ -19,8 +19,8 @@ Your agent calls real APIs. You sign in once. APIClaw is the authenticated execu
 
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not APIClaw execution.
-- 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
-- 22 managed provider rails are customer-executable now. Reservation is the billing-grade realized cost where the adapter has no provider-reported usage.
+- 22 built-in providers are inventoried. Provider inventory is not an execution promise.
+- 22 built-in providers are customer-executable now. Reservation is the billing-grade realized cost where the provider has no provider-reported usage.
 - 1,003 workspace-authenticated public/no-key HTTPS origins are executable. Anonymous keyless public execution stays disabled.
 - Signup is required. There is no anonymous execution.
 - Internal NordSym communication infrastructure is not part of the public provider surface.
@@ -74,7 +74,7 @@ Use `discover_apis` to search by job-to-be-done. Results distinguish among:
 
 Use `call_api` only with a managed route returned as executable. Unknown-cost customer traffic fails closed. Public registry entries never become an open proxy.
 
-The managed adapter inventory spans model, search, voice, media, developer, and data providers. All 22 managed provider rails are customer-executable now. 1,003 workspace-authenticated public/no-key HTTPS origins are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
+The built-in provider inventory spans model, search, voice, media, developer, and data providers. All 22 built-in providers are customer-executable now. 1,003 workspace-authenticated public/no-key HTTPS origins are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
 
 ## Model routing
 
@@ -98,11 +98,9 @@ curl https://api.apiclaw.cloud/v1/chat/completions \
 
 ## Pricing
 
-- Free workspace: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap.
-- Discovery is free after signup.
-- Pay as you go: billing-ready managed usage at provider cost plus 15%.
-- Actions without an exact provider-cost adapter remain blocked after the activation allowance rather than being billed from an estimate.
-- Attaching a card does not skip unused activation calls.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs: add a card once, then provider cost plus 15%, metered per call.
+- Actions without an exact provider-cost adapter remain blocked rather than being billed from an estimate.
 
 Usage, provider cost, customer charge, and billing state are visible in the workspace.
 

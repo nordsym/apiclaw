@@ -3,11 +3,7 @@
  * Used by both BillingTab (workspace) and the landing page pricing section.
  */
 
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "@apiclaw/product-truth";
+import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 
@@ -29,16 +25,15 @@ export interface Plan {
 export const PLANS: Plan[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Free APIs",
     price: "$0",
     period: "forever",
-    calls: String(FREE_MANAGED_CALLS_LIFETIME),
-    callsSub: "managed calls for the lifetime of the workspace",
+    calls: "Free",
+    callsSub: "forever, every zero-cost API, no card",
     features: [
-      "Email signup required, no card",
-      `Up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider cost`,
-      "Discovery is free",
-      "1 workspace",
+      "Discovery and every zero-cost API",
+      "Free forever",
+      "No card, no counter",
     ],
     cta: "Get Started",
     ctaLoggedIn: "Current plan",
@@ -48,15 +43,15 @@ export const PLANS: Plan[] = [
   },
   {
     id: "usage_based",
-    name: "Pay as you go",
+    name: "Paid APIs",
     price: "Usage",
     period: "based",
-    calls: "Continue",
-    callsSub: "for billing-ready actions after the free tier",
+    calls: "Pay per call",
+    callsSub: `provider cost plus ${PAYG_MARGIN_PERCENT}%, after you add a card`,
     features: [
       "Everything in Free",
-      "Billing-ready managed actions continue after the free tier",
-      `Provider cost + ${PAYG_MARGIN_PERCENT}%, transparent margin`,
+      `Provider cost plus ${PAYG_MARGIN_PERCENT}%`,
+      "Add a card once, pay per call",
       "Unsupported variable-cost actions stay blocked until exactly billable",
       "No commitment, cancel anytime",
     ],

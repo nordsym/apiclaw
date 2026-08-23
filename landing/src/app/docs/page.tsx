@@ -377,7 +377,7 @@ call_api({
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
                   <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString("en-US")} callable now</span>
-                  <span className={BODY}>What a workspace can execute today, of which {statsData.managedProviderAdapterCount} are managed provider adapters.</span>
+                  <span className={BODY}>What a workspace can execute today, of which {statsData.managedProviderAdapterCount} are built-in providers. Keyless public origins are Free; built-in providers are Free when the upstream API is free and Paid otherwise.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
                   <span className={META}>{statsData.sourceVerifiedCount.toLocaleString("en-US")} source-verified</span>

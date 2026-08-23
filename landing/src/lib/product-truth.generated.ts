@@ -4,15 +4,27 @@
  * Keep this module dependency-free so the gateway, Convex functions, CLI,
  * website, tests, and lifecycle messages can all consume the same values.
  */
+// Deprecated 2026-08-23: the 25-lifetime-call / $1-cap activation allowance
+// no longer gates access. A call with provably zero provider cost is free
+// forever and uncapped (see FREE_FOREVER_ZERO_COST); a call with real cost
+// requires a card (see PAID_CALL_REQUIRES_CARD). These two constants are
+// kept exported, unchanged, so older callers/tests/generated mirrors that
+// still import them do not break; do not use them to gate new behavior.
 export const FREE_MANAGED_CALLS_LIFETIME = 25;
 export const FREE_MANAGED_PROVIDER_COST_CAP_USD = 1;
 export const PAYG_MARGIN_RATE = 0.15;
 export const FREE_MANAGED_WARNING_AT = 20;
 
+// Current policy flags (2026-08-23 pricing gate migration).
+export const FREE_FOREVER_ZERO_COST = true;
+export const PAID_CALL_REQUIRES_CARD = true;
+
 export const MANAGED_USAGE_POLICY = {
   freeManagedCallsLifetime: FREE_MANAGED_CALLS_LIFETIME,
   freeManagedProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
   freeManagedWarningAt: FREE_MANAGED_WARNING_AT,
+  freeForeverZeroCost: FREE_FOREVER_ZERO_COST,
+  paidCallRequiresCard: PAID_CALL_REQUIRES_CARD,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
   workspaceAuthenticatedPublicExecutionAvailable: true,

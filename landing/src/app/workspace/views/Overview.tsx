@@ -6,9 +6,6 @@ import {
   isUnlimitedWorkspace,
 } from "@/lib/workspace-truth";
 import {
-  FREE_MANAGED_CALLS_LIFETIME,
-} from "@apiclaw/product-truth";
-import {
   Workspace,
   Agent,
   ProviderAPI,
@@ -62,15 +59,16 @@ export function OverviewTab({
 
   const isPaid = isUnlimitedWorkspace(workspace || {});
   const usageCount = workspace?.usageCount ?? 0;
-  const usageLimit = workspace?.usageLimit && workspace.usageLimit > 0 ? workspace.usageLimit : FREE_MANAGED_CALLS_LIFETIME;
-  const usageRemaining = isPaid ? -1 : Math.max(0, workspace?.usageRemaining ?? usageLimit - usageCount);
-  const nearCap = !isPaid && usageLimit > 0 && usageRemaining / usageLimit <= 0.2;
+  const hasPlanLimit = Boolean(workspace?.usageLimit && workspace.usageLimit > 0);
+  const usageLimit = hasPlanLimit ? (workspace!.usageLimit as number) : 0;
+  const usageRemaining = isPaid || !hasPlanLimit ? -1 : Math.max(0, workspace?.usageRemaining ?? usageLimit - usageCount);
+  const nearCap = !isPaid && hasPlanLimit && usageRemaining / usageLimit <= 0.2;
 
   const next = agents.length === 0
     ? { title: "Connect an agent", body: "Nothing is connected to this workspace yet.", cta: "Connect an agent", tab: "connections" as TabType }
     : usageCount === 0
-      ? { title: "Make your first call", body: "Your agent is connected. Run one managed call to see it in Activity.", cta: "Make your first call", tab: "api-catalog" as TabType }
-      : { title: "See the last call", body: `${usageCount.toLocaleString()} managed ${usageCount === 1 ? "call" : "calls"} so far. Inspect the latest one.`, cta: "See the last call", tab: "activity" as TabType };
+      ? { title: "Make your first call", body: "Your agent is connected. Run one call to see it in Activity.", cta: "Make your first call", tab: "api-catalog" as TabType }
+      : { title: "See the last call", body: `${usageCount.toLocaleString()} ${usageCount === 1 ? "call" : "calls"} so far. Inspect the latest one.`, cta: "See the last call", tab: "activity" as TabType };
 
   const visibleAgents = agents.slice(0, 3);
 
@@ -94,13 +92,13 @@ export function OverviewTab({
         action={nearCap ? <button type="button" onClick={() => navigateTo("billing")} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">Upgrade</button> : undefined}
       >
         <StatGrid cols={3}>
-          <StatCard title="Managed calls used" value={usageCount.toLocaleString()} />
-          <StatCard title="Remaining" value={isPaid ? "Unlimited" : usageRemaining.toLocaleString()} hint={isPaid ? undefined : `of ${usageLimit.toLocaleString()} lifetime`} />
+          <StatCard title="Calls" value={usageCount.toLocaleString()} hint={hasPlanLimit ? undefined : "no cap on this plan"} />
+          <StatCard title="Remaining" value={isPaid || !hasPlanLimit ? "Unlimited" : usageRemaining.toLocaleString()} hint={isPaid || !hasPlanLimit ? undefined : `of ${usageLimit.toLocaleString()}`} />
           <StatCard title="Plan" value={tierLabel(workspace?.tier)} />
         </StatGrid>
         {nearCap && (
           <p className="mt-4 text-[13px] text-[var(--text-muted)]">
-            {usageRemaining === 0 ? "Free limit reached. Managed calls are blocked until you upgrade." : `${usageRemaining} free ${usageRemaining === 1 ? "call" : "calls"} left. Search and open APIs keep working.`}
+            {usageRemaining === 0 ? "Plan limit reached. Calls are blocked until you upgrade." : `${usageRemaining} ${usageRemaining === 1 ? "call" : "calls"} left on this plan. Search and open APIs keep working.`}
           </p>
         )}
       </Section>

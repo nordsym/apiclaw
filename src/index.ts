@@ -5,7 +5,7 @@
  * Tools:
  * - discover_apis: Search for APIs by capability
  * - get_api_details: Get full info about an API
- * - check_balance: Check activation allowance and PAYG readiness
+ * - check_balance: Check Free/Paid API status and PAYG readiness
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -22,8 +22,6 @@ import { getConnectedProviders } from './execute.js';
 import { isOpenAPI, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
 import { CANON_STATS } from './canon-stats.js';
 import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
   PAYG_MARGIN_RATE,
 } from './product-truth.js';
 import {
@@ -341,7 +339,7 @@ function checkAnonymousRateLimit(fingerprint: string): { allowed: boolean; error
       error: JSON.stringify({
         success: false,
         error: `You've hit the anonymous execution limit (${ANONYMOUS_WEEKLY_LIMIT} calls/week).`,
-        hint: `Authenticate for ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, then continue at provider cost + ${PAYG_MARGIN_PERCENT}% with pay-as-you-go.`,
+        hint: `Authenticate for free APIs forever, no card. Paid APIs need a card, then provider cost + ${PAYG_MARGIN_PERCENT}% per call.`,
         action: "Run in terminal: npx @nordsym/apiclaw auth login",
         upgrade_url: "https://apiclaw.cloud/upgrade",
         retry_after: nextAnonymousWeeklyResetUtc()
@@ -496,7 +494,7 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
           estimated_seconds: 15,
           fallback: 'Complete browser auth on a device that can open the sign-in URL.',
           legacy_action: 'register_owner is retired. Use the browser auth command above.',
-          free_tier: `${FREE_MANAGED_CALLS_LIFETIME} managed calls are included for the lifetime of the workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider-cost cap. Discovery is free. Billing-ready managed actions can continue at provider cost + ${PAYG_MARGIN_PERCENT}% with pay-as-you-go.`,
+          free_tier: `Free APIs are free forever, no card. Discovery included. Paid APIs need a card, then run at provider cost + ${PAYG_MARGIN_PERCENT}% per call.`,
           first_call_prompt: FIRST_CALL_PROMPT,
         }, null, 2),
         isAnonymous: true,
@@ -823,7 +821,7 @@ const tools: Tool[] = [
   },
   {
     name: 'check_balance',
-    description: 'Check the authenticated workspace tier, lifetime activation allowance, and verified PAYG status.',
+    description: 'Check the authenticated workspace tier, Free/Paid API status, and verified PAYG status.',
     inputSchema: {
       type: 'object',
       properties: {}
@@ -1228,7 +1226,7 @@ CALL APIs (requires free registration):
   call_api({ provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } })
   call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
 
-${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Discovery is free | Free tier: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider cost
+${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Free APIs: free forever, no card | Paid APIs: provider cost + ${PAYG_MARGIN_PERCENT}%, add a card once
 
 Docs: https://apiclaw.cloud
 `;
@@ -1987,7 +1985,7 @@ Docs: https://apiclaw.cloud
                     'Run `npx @nordsym/apiclaw auth login` in a terminal, finish the browser sign-in, then retry the original call.',
                   command: 'npx @nordsym/apiclaw auth login',
                   signup_url: ar.signupUrl,
-                  free_tier_calls: ar.freeTierCalls ?? FREE_MANAGED_CALLS_LIFETIME,
+                  free_tier_calls: ar.freeTierCalls,
                   provider,
                   action,
                 }, null, 2),
@@ -2044,7 +2042,7 @@ Docs: https://apiclaw.cloud
             managed: directProviders.length,
           },
           managed_providers: {
-            description: `APIClaw owns the keys. Free tier: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Billing-ready actions can then use pay-as-you-go at provider cost + ${PAYG_MARGIN_PERCENT}%.`,
+            description: `APIClaw owns the keys. Free APIs are free forever, no card. Paid APIs need a card, then run pay-as-you-go at provider cost + ${PAYG_MARGIN_PERCENT}%.`,
             providers: directProviders,
           },
           usage: 'Use discover_apis(query) for the wider catalog and call_api(provider, action, params) for managed execution.',

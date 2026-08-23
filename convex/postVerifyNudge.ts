@@ -8,11 +8,7 @@ import {
   nurtureUnsubscribeUrl,
   welcomeDeliveryIdempotencyKey,
 } from "./nurtureDeliveryKeys";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "../src/product-truth";
+import { PAYG_MARGIN_RATE } from "../src/product-truth";
 
 /**
  * A-15 - Post-verify onboarding nudge.
@@ -57,10 +53,10 @@ export function renderWelcomeHtml(_activated: boolean, unsubscribeUrl: string): 
   <p style="font-size:15px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">${intro}</p>
 
   <div style="background:#141414;border:1px solid #262626;border-radius:12px;padding:20px;margin-bottom:24px">
-    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw's managed Brave Search adapter with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#F5F5F5;margin:0;line-height:1.7">Use APIClaw's Brave Search API with the query "AI agent infrastructure news", then summarize the top 3 results with source links.</p>
   </div>
 
-  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Your workspace includes up to ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. Billing-ready actions can continue at provider cost + ${PAYG_MARGIN_PERCENT}% when the allowance is exhausted.</p>
+  <p style="font-size:14px;color:#A3A3A3;margin:0 0 24px;line-height:1.6">Free APIs are free forever, no card. Paid APIs bill provider cost plus ${PAYG_MARGIN_PERCENT}% after you add a card.</p>
 
   <p style="font-size:13px;color:#525252;margin:32px 0 0;border-top:1px solid #1F1F1F;padding-top:16px">Need help? Open <a href="https://apiclaw.cloud/docs" style="color:#EF4444;text-decoration:none">apiclaw.cloud/docs</a>.<br/><a href="${unsubscribeUrl}" style="color:#737373">Unsubscribe from lifecycle email</a>.</p>
 </div>

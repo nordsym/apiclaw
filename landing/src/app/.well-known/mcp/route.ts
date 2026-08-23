@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import statsData from "@/lib/stats.json";
 import { CANONICAL_MCP_TOOLS } from "@/lib/mcp-tools-canon";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "@apiclaw/product-truth";
+import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 
 // Discovery hint for MCP-aware clients and directories. There is no formal
 // /.well-known/mcp standard yet (as of 2026-05) but several emerging MCP
@@ -42,7 +38,7 @@ export async function GET() {
     tools: CANONICAL_MCP_TOOLS.map((tool) => tool.name),
     categories: ["api-gateway", "developer-tools", "llm", "infrastructure"],
     keywords: ["mcp", "api", "openrouter", "openai", "anthropic", "xai", "grok", "elevenlabs"],
-    pricing: `Free workspace: ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, up to $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total provider cost. Billing-ready adapters can then use provider cost + ${paygMarginPercent}% pay as you go.`,
+    pricing: `Free APIs: free forever, no card. Paid APIs: add a card once, then provider cost + ${paygMarginPercent}%, metered per call.`,
   };
   return NextResponse.json(meta, {
     headers: {

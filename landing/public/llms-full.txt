@@ -24,12 +24,12 @@ APIClaw is the authenticated execution and discovery layer for AI agents. An age
 - Managed provider adapter inventory: 22
 - Customer-executable provider rails: 22
 - Workspace-authenticated public/no-key origins: 1,003
-- Managed execution: available only where a server-side adapter is live
+- Managed execution: available only where a server-side provider is live
 - Anonymous keyless public execution: disabled
 - Discovery: free after signup
-- Free activation: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap
-- Pay as you go: billing-ready managed actions at provider cost plus 15%
-- Unknown-cost PAYG actions: blocked rather than estimated
+- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs: add a card once, then provider cost plus 15%, metered per call.
+- Unknown-cost paid actions: blocked rather than estimated
 - Anonymous execution: unavailable
 
 Source verification means a current public catalog entry maps to verification evidence by exact name. It does not mean APIClaw will proxy the definition. Runtime execution readiness is shown separately.
@@ -103,7 +103,7 @@ Use `discover_apis(query)` or `POST /v1/discover` to search the registry by capa
 
 Use `call_api` or `POST /v1/execute` with an execution-ready managed provider and action. The runtime checks workspace ownership, allowance, provider-cost reservation, action readiness, and payload bounds before it calls upstream.
 
-APIClaw inventories 22 managed provider adapters, all customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Adapter inventory is not an execution promise.
+APIClaw inventories 22 built-in providers, all customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Provider inventory is not an execution promise.
 
 Successful responses can include `_apiclaw` metadata for provider, route, latency, provider cost, auth mode, and quota notices.
 
@@ -137,12 +137,11 @@ Mission templates compose typed fetch, transform, decide, validate, and execute 
 
 ## Pricing and billing
 
-- Free workspaces receive up to 25 managed calls for the lifetime of the workspace, subject to a $1 underlying provider-cost cap.
+- Free APIs are free forever with no card: discovery plus every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs need a card on file, then bill exact provider cost plus 15%, metered per call.
 - Discovery stays free after signup.
-- The activation allowance is consumed before PAYG.
-- PAYG charges exact provider cost plus 15%.
-- PAYG requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
-- An action without a billing-grade exact cost adapter is blocked from PAYG.
+- Paid usage requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
+- An action without a billing-grade exact cost adapter is blocked from paid execution.
 
 ## Security and trust
 

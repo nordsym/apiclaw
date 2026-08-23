@@ -9,18 +9,13 @@ import {
   nurtureDeliveryIdempotencyKey,
   welcomeDeliveryIdempotencyKey,
 } from "./nurtureDeliveryKeys";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-} from "../src/product-truth";
 
 const unsubscribeUrl = "https://api.apiclaw.cloud/nurture/unsubscribe?token=test";
 const preActivationWelcome = renderWelcomeHtml(false, unsubscribeUrl);
 assert.match(preActivationWelcome, /workspace, gateway, and usage tracking are live/);
 assert.match(preActivationWelcome, /AI agent infrastructure news/);
-assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|managed calls? (?:per|\/)(?:week|month)/);
-assert.match(preActivationWelcome, new RegExp(`${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls`, "i"));
-assert.match(preActivationWelcome, new RegExp(`\\$${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap`, "i"));
+assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|managed calls? (?:per|\/)(?:week|month)|managed adapters?|25 lifetime managed calls|\$1 total underlying provider-cost cap/);
+assert.match(preActivationWelcome, /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./);
 
 assert.match(preActivationWelcome, /Unsubscribe from lifecycle email/);
 const activatedWelcome = renderWelcomeHtml(true, unsubscribeUrl);

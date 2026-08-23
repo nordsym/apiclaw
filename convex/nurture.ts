@@ -4,11 +4,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
 import { checkEmailAllowedSync } from "./emailGuards";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "../src/product-truth";
+import { PAYG_MARGIN_RATE } from "../src/product-truth";
 import { CANON_STATS } from "../src/canon-stats";
 import { findUsableAgentSession } from "./sessionSecurity";
 import {
@@ -305,21 +301,21 @@ export function bodyFor(
   unsubscribeUrl: string,
 ): { subject: string; html: string } {
   const hi = firstName ? `Hi ${firstName},` : "Hi,";
-  const prompt = `Use APIClaw's managed Brave Search adapter with provider "brave_search", action "search", and query "AI agent infrastructure news". Then summarize the top 3 results with source links.`;
+  const prompt = `Use APIClaw's Brave Search API with provider "brave_search", action "search", and query "AI agent infrastructure news". Then summarize the top 3 results with source links.`;
   const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
   const cta = `<p><a href="https://apiclaw.cloud/docs" style="display:inline-block;background:#dc2626;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Open the quickstart</a></p>`;
-  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - your agent calls real APIs. You sign in once. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Your workspace includes up to ${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. Billing-ready actions can use pay as you go at provider cost + ${PAYG_MARGIN_PERCENT}% when the allowance is exhausted.<br/><a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe from lifecycle email</a>.</p>`;
+  const footer = `<p style="font-size:11px;color:#999;margin-top:32px;">APIClaw - your agent calls real APIs. You sign in once. <a href="https://apiclaw.cloud" style="color:#dc2626;">apiclaw.cloud</a><br/>Free APIs are free forever, no card. Paid APIs bill provider cost plus ${PAYG_MARGIN_PERCENT}% after you add a card.<br/><a href="${unsubscribeUrl}" style="color:#999;">Unsubscribe from lifecycle email</a>.</p>`;
 
   switch (kind) {
     case "welcome":
       return {
         subject: "Welcome to APIClaw - your agent can call APIs now",
-        html: `<p>${hi}</p><p>Your APIClaw workspace is live. Your agent calls real APIs, discoverable across ${CANON_STATS.discoverable.toLocaleString()} APIs. ${CANON_STATS.source_verified.toLocaleString()} current catalog entries map to source-verification evidence by exact name. Source verification is not execution. APIClaw inventories ${CANON_STATS.managed_provider_adapters} managed adapters, and ${CANON_STATS.customer_executable_providers} provider rails are customer-executable now.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
+        html: `<p>${hi}</p><p>Your APIClaw workspace is live. Your agent calls real APIs, discoverable across ${CANON_STATS.discoverable.toLocaleString()} APIs. ${CANON_STATS.source_verified.toLocaleString()} current catalog entries map to source-verification evidence by exact name. Source verification is not execution. APIClaw has integrated ${CANON_STATS.managed_provider_adapters} providers, and ${CANON_STATS.customer_executable_providers} provider rails are customer-executable now.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
       };
     case "try-discover":
       return {
         subject: "Try one API search in APIClaw",
-        html: `<p>${hi}</p><p>If you have not tried discovery yet, run one search from your agent:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">discover_apis({ query: "web search" })</pre><p>APIClaw shows source verification and managed execution readiness separately. For a deterministic first call, use the managed Brave Search adapter from the prompt below.</p>${promptBlock}${cta}<p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>If you have not tried discovery yet, run one search from your agent:</p><pre style="background:#f5f5f5;padding:12px;border-radius:6px;font-size:12px;">discover_apis({ query: "web search" })</pre><p>APIClaw shows source verification and managed execution readiness separately. For a deterministic first call, use the Brave Search API from the prompt below.</p>${promptBlock}${cta}<p>- Gustav</p>${footer}`,
       };
     case "first-call":
       return {
@@ -328,13 +324,13 @@ export function bodyFor(
       };
     case "upgrade":
       return {
-        subject: "Keep your agent running beyond the free tier",
-        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Add a payment method when you want managed calls to continue after the lifetime free allowance is exhausted.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        subject: "Add a card when your agent calls a Paid API",
+        html: `<p>${hi}</p><p>Your agent has started using APIClaw. Free APIs stay free forever, no card. Add a payment method when your agent calls a Paid API, so those calls can continue at provider cost plus ${PAYG_MARGIN_PERCENT}%.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "power-upgrade":
       return {
         subject: "Your APIClaw workspace is getting real usage",
-        html: `<p>${hi}</p><p>Your workspace is making regular API calls. Add a payment method to continue billing-ready managed actions at provider cost + ${PAYG_MARGIN_PERCENT}% when free managed usage runs out.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
+        html: `<p>${hi}</p><p>Your workspace is making regular API calls. Free APIs keep working with no card, forever. Add a payment method to keep calling Paid APIs at provider cost + ${PAYG_MARGIN_PERCENT}%.</p><p><a href="https://apiclaw.cloud/upgrade" style="display:inline-block;background:#dc2626;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;">Add payment method</a></p><p>- Gustav</p>${footer}`,
       };
     case "reactivate-7d":
       return {

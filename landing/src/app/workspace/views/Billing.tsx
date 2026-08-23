@@ -4,11 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "@apiclaw/product-truth";
+import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 import { CONVEX_URL, Workspace } from "../_shared";
 import { PageHeader, Section, Panel, StatGrid, StatCard, Row, Status, Empty, Loading, btnSolid, btnQuiet } from "./ui";
 
@@ -65,7 +61,8 @@ export function BillingTab({
   const paygNeedsRecovery = currentTier === "usage_based" && workspace?.paygActive !== true;
   const hasStripeCustomer = Boolean(workspace?.stripeCustomerId);
   const usageCount = workspace?.usageCount ?? 0;
-  const usageLimit = workspace?.usageLimit ?? FREE_MANAGED_CALLS_LIFETIME;
+  const hasPlanLimit = Boolean(workspace?.usageLimit && workspace.usageLimit > 0);
+  const usageLimit = hasPlanLimit ? (workspace!.usageLimit as number) : 0;
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
@@ -127,7 +124,7 @@ export function BillingTab({
     <div className="space-y-10">
       <PageHeader
         title="Billing"
-        description={`Discovery is free. Managed calls cost provider price plus ${PAYG_MARGIN_PERCENT}% after the free allowance.`}
+        description={`Free APIs are free forever, no card. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}% after you add a card.`}
       />
 
       <Section title="Plan">
@@ -145,17 +142,17 @@ export function BillingTab({
         <StatGrid cols={3}>
           <StatCard title="Current plan" value={planLabel(currentTier)} />
           <StatCard
-            title="Managed calls"
+            title="Calls"
             value={usageCount.toLocaleString()}
-            hint={isUnlimited ? "No cap on this plan" : `of ${usageLimit.toLocaleString()} lifetime`}
+            hint={isUnlimited || !hasPlanLimit ? "No cap on this plan" : `of ${usageLimit.toLocaleString()}`}
           />
-          {isUnlimited ? (
+          {isUnlimited || !hasPlanLimit ? (
             <StatCard title="Billing" value={isPartner ? "By agreement" : "Active"} hint={isPartner ? undefined : "Usage reported to Stripe monthly"} />
           ) : (
             <StatCard
               title="Remaining"
               value={Math.max(0, usageLimit - usageCount).toLocaleString()}
-              hint={`Free tier also caps at $${FREE_MANAGED_PROVIDER_COST_CAP_USD} provider cost`}
+              hint="Calls left on this plan"
             />
           )}
         </StatGrid>
@@ -284,7 +281,7 @@ export function BillingTab({
         ) : (
           <Empty
             title="No payment method on file"
-            body="Add a card to continue past the free allowance."
+            body="Add a card to call Paid APIs. Free APIs never need one."
             action={currentTier === "free" ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
           />
         )}

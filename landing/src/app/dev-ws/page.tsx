@@ -71,7 +71,7 @@ function Harness() {
       onTabChange={(id) => setTab(id)}
       workspaceName={fx.workspace.workspaceName || fx.workspace.email}
       tierLabel={fx.workspace.tier}
-      usageLabel={`${fx.workspace.usageRemaining}/${fx.workspace.usageLimit} calls`}
+      usageLabel={fx.workspace.usageLimit === -1 ? "Unlimited calls" : `${fx.workspace.usageRemaining}/${fx.workspace.usageLimit} calls`}
       onLogout={() => {}}
     >
       {tab === "overview" && <OverviewTab workspace={fx.workspace} agents={fx.agents} providerApis={fx.providerApis} setActiveTab={setTab} />}

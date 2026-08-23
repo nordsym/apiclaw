@@ -27,6 +27,8 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   freeManagedCallsLifetime: 25,
   freeManagedProviderCostCapUsd: 1,
   freeManagedWarningAt: 20,
+  freeForeverZeroCost: true,
+  paidCallRequiresCard: true,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
   workspaceAuthenticatedPublicExecutionAvailable: true,
@@ -161,13 +163,18 @@ for (const file of activeTruthSurfaces) {
   assert.doesNotMatch(content, staleExecutionClaim, `${file} claims disabled keyless proxy execution`);
 }
 
-for (const file of ["convex/quota.ts", "convex/managedUsagePolicy.ts", "src/index.ts"]) {
+for (const file of ["convex/quota.ts", "convex/managedUsagePolicy.ts"]) {
   assert.match(
     readFileSync(file, "utf8"),
     /FREE_MANAGED_CALLS_LIFETIME/,
     `${file} must consume the canonical lifetime allowance`,
   );
 }
+assert.doesNotMatch(
+  readFileSync("src/index.ts", "utf8"),
+  /FREE_MANAGED_CALLS_LIFETIME|FREE_MANAGED_PROVIDER_COST_CAP_USD/,
+  "src/index.ts must derive Free/Paid API copy without importing the retired lifetime-call constants",
+);
 assert.match(
   readFileSync("convex/adminStats.ts", "utf8"),
   /getWorkspaceUsageDisplay[\s\S]*?FREE_MANAGED_PROVIDER_COST_CAP_USD/,
@@ -175,16 +182,25 @@ assert.match(
 );
 
 const planCopy = readFileSync("landing/src/lib/plans.ts", "utf8");
-assert.match(planCopy, /String\(FREE_MANAGED_CALLS_LIFETIME\)/);
-assert.match(planCopy, /lifetime of the workspace/);
-assert.match(planCopy, /FREE_MANAGED_PROVIDER_COST_CAP_USD/);
+assert.match(planCopy, /Free APIs/);
+assert.match(planCopy, /Paid APIs/);
 assert.match(planCopy, /PAYG_MARGIN_RATE/);
+assert.doesNotMatch(
+  planCopy,
+  /FREE_MANAGED_CALLS_LIFETIME|FREE_MANAGED_PROVIDER_COST_CAP_USD|lifetime of the workspace/,
+  "plans.ts must not reference the retired lifetime-call allowance",
+);
 
 for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md", "landing/public/SKILL.md"]) {
   const content = readFileSync(file, "utf8");
-  assert.match(content, /25[^\n]*lifetime|25 managed calls for the lifetime/i, `${file} must state the lifetime call allowance`);
-  assert.match(content, /\$1[^\n]*provider-cost|\$1[^\n]*provider cost/i, `${file} must state the provider-cost cap`);
+  assert.match(content, /Free APIs?[^\n]*free forever/i, `${file} must state Free APIs are free forever`);
+  assert.match(content, /add a card/i, `${file} must state Paid APIs require a card`);
   assert.match(content, /provider cost (?:plus|\+) 15%|API cost plus 15%/i, `${file} must state the PAYG margin`);
+  assert.doesNotMatch(
+    content,
+    /25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapter/i,
+    `${file} must not state the retired free-tier cap or "managed adapter"`,
+  );
 }
 
 const workspacePage = [
@@ -361,4 +377,4 @@ assert.doesNotMatch(
   "the desktop extension manifest must match the implemented MCP tool surface",
 );
 
-console.log("product truth: 25 lifetime managed calls, $1 provider-cost cap, and provider cost + 15% PAYG");
+console.log("product truth: Free APIs free forever no card, Paid APIs provider cost + 15% metered per call after a card");

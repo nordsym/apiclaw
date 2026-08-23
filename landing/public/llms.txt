@@ -38,14 +38,13 @@ APIClaw provides unified API access for AI agents across five access paths: SKIL
 - Positioning: Your agent calls real APIs. You sign in once.
 - Discoverable APIs: 26,619
 - Exact-name source-verified catalog entries: 689
-- Managed provider adapter inventory: 22
-- Customer-executable provider rails: 22
+- Built-in provider inventory: 22
+- Customer-executable providers: 22
 - Workspace-authenticated public/no-key origins: 1,003
 - npm package: @nordsym/apiclaw
-- Free tier: up to 25 lifetime managed calls, subject to a $1 total underlying provider-cost cap
-- Discovery: free after signup
+- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs: add a card once, then provider cost plus 15% margin, metered per call.
 - Anonymous keyless public execution: disabled. Workspace-authenticated public/no-key origins are executable.
-- Paid tier: billing-ready managed actions at API cost plus 15% margin
 - Auth: free email signup required for discovery and execution
 - Source verification is discovery evidence, not execution readiness
 - Source of truth for API counts: live `/api/catalog` response
@@ -134,18 +133,17 @@ Responses include `_apiclaw` metadata where applicable: provider, route, latency
 
 ## Managed provider boundary
 
-- APIClaw inventories 22 managed provider adapters. Inventory means server-side adapter support, not customer execution.
-- 22 managed provider rails are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- APIClaw inventories 22 built-in providers. Inventory means server-side provider support, not customer execution.
+- 22 built-in providers are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - Harvested apiKey/unknown registry rows stay discovery-only.
 
 Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.
 
 ## Pricing
 
-- Free: up to 25 managed calls for the lifetime of the workspace, subject to a $1 total underlying provider-cost cap.
-- Discovery is free after signup.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs: add a card once, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning and redirect rejection.
-- Pay as you go: billing-ready managed usage at underlying provider cost plus 15% margin. Actions without an exact cost adapter remain blocked.
 - Discovery is signup-gated and part of the same workspace model.
 - Workspace billing and usage are visible at https://apiclaw.cloud/workspace.
 

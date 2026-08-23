@@ -17,9 +17,9 @@ export const workspace: Workspace = {
   tier: "free",
   status: "active",
   usageCount: 9,
-  usageLimit: 25,
-  usageRemaining: 16,
-  usagePercentage: 36,
+  usageLimit: -1,
+  usageRemaining: -1,
+  usagePercentage: 0,
   createdAt: NOW - 12 * D,
 };
 

@@ -1,8 +1,4 @@
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-  PAYG_MARGIN_RATE,
-} from "@apiclaw/product-truth";
+import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 
@@ -29,7 +25,7 @@ const ITEMS: Array<{ q: string; a: React.ReactNode }> = [
   },
   {
     q: "What does it cost?",
-    a: `Free: ${FREE_MANAGED_CALLS_LIFETIME} managed calls for the lifetime of the workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. After that, billing-ready managed actions run at provider cost plus ${PAYG_MARGIN_PERCENT}%, billed through Stripe. Actions without an exact billing adapter remain blocked. No commitment.`,
+    a: `Free APIs are free forever, no card, including discovery and over 1,000 of the 1,025 callable now. Paid APIs need a card on file and bill provider cost plus ${PAYG_MARGIN_PERCENT}% per call, billed through Stripe.`,
   },
   {
     q: "What does Remote MCP expose?",

@@ -8,20 +8,21 @@ const free = getWorkspaceUsageDisplay({
 });
 assert.deepEqual(free, {
   usageCount: 12,
-  usageLimit: 25,
-  usageRemaining: 13,
-  usagePercentage: 48,
+  usageLimit: -1,
+  usageRemaining: -1,
+  usagePercentage: 0,
 });
 
-const noWeeklyReset = getWorkspaceUsageDisplay({
+const zeroCostContinuesAfterLegacyThreshold = getWorkspaceUsageDisplay({
   tier: "free",
   usageCount: 25,
   managedUsageCount: 25,
   weeklyUsageCount: 0,
   lastWeeklyResetAt: 0,
 }, Date.UTC(2030, 0, 1));
-assert.equal(noWeeklyReset.usageCount, 25);
-assert.equal(noWeeklyReset.usageRemaining, 0);
+assert.equal(zeroCostContinuesAfterLegacyThreshold.usageCount, 25);
+assert.equal(zeroCostContinuesAfterLegacyThreshold.usageLimit, -1, "zero-cost Free APIs have no lifetime cap");
+assert.equal(zeroCostContinuesAfterLegacyThreshold.usageRemaining, -1);
 
 const paid = getWorkspaceUsageDisplay({
   tier: "usage_based",

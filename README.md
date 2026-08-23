@@ -57,7 +57,7 @@ Route across supported models from OpenAI, Anthropic, [OpenRouter](https://openr
 
 - 26,619 discoverable API definitions
 - 689 exact-name source-verified entries. Source verification is discovery evidence, not proof of execution.
-- 22 managed provider adapters, 22 customer-executable provider rails
+- 22 built-in providers, 22 customer-executable provider rails
 - 1,003 workspace-authenticated public/no-key HTTPS origins
 - 1,025 total callable now
 - Source verification is not execution.
@@ -68,8 +68,8 @@ Route across supported models from OpenAI, Anthropic, [OpenRouter](https://openr
 
 | Plan | Price | Access |
 |------|-------|--------|
-| **Free** | $0, no card | 25 managed calls for the lifetime of the workspace, subject to a $1 total underlying provider-cost cap. Discovery is free. |
-| **Pay as you go** | Provider cost + 15% | Billing-ready managed actions continue after the free allowance. Actions without an exact billing adapter remain blocked. |
+| **Free APIs** | $0, no card | Free forever. Discovery and every zero-cost API, over 1,000 of the 1,025 callable. |
+| **Paid APIs** | Provider cost + 15% | Add a card once, then metered per call. Actions without an exact billing adapter remain blocked. |
 
 Pricing canon: underlying provider cost plus a 15% margin. Stripe metered billing live.
 

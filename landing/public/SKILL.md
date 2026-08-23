@@ -22,7 +22,7 @@ counts must be current. Do not invent metrics.
 
 - 1,025 callable
 - 26,619 discoverable
-- 22 managed adapters
+- 22 built-in providers
 
 Identity and product truth live at `https://apiclaw.cloud/llms.txt`.
 This file is the operational door: auth, then execute.
@@ -96,7 +96,7 @@ CLI slash form also maps to `POST /v1/execute`:
 npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key "apiclaw-first-nasa-$(date +%s)"
 ```
 
-A 200 with an APOD title is success.
+A 200 with an APOD title is success. nasa/apod is a Free API: no card needed.
 
 ### Fallback rail: Frankfurter /latest
 
@@ -154,10 +154,9 @@ Do not collect provider API keys from the user.
 
 ## Pricing (do not invent)
 
-- Free: up to 25 managed calls for the lifetime of the workspace,
-  subject to a $1 total underlying provider-cost cap.
-- Discovery is free after signup.
-- Pay as you go: billing-ready managed actions at provider cost plus 15%.
+- Free APIs: free forever, no card. Discovery and every zero-cost API,
+  over 1,000 of the 1,025 callable.
+- Paid APIs: add a card once, then provider cost plus 15%, metered per call.
 - Anonymous keyless public execution is disabled.
 
 ## What not to do

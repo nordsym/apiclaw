@@ -102,8 +102,8 @@ apiclaw --help
 
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not execution.
-- 22 managed provider adapters are inventoried. Adapter inventory is not an execution promise.
-- 22 managed provider rails are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- 22 built-in providers are inventoried. Built-in inventory is not an execution promise.
+- 22 built-in providers are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - OpenAI-compatible LLM gateway.
 - Remote MCP validated end to end.
 - Mission runtime with append-only events.
@@ -113,10 +113,9 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 ## Pricing
 
-- Free: up to 25 managed calls for the lifetime of the workspace, subject to a $1 total underlying provider-cost cap.
-- Discovery is free after signup.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Paid APIs: add a card once, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning.
-- Paid: billing-ready managed actions at API cost plus 15% margin. Actions without an exact cost adapter remain blocked.
 - No anonymous execution.
 - No fixed Pro or Scale subscription should be assumed unless the pricing page says so.
 
@@ -135,7 +134,7 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 - Do not claim “one key for everything” as the primary positioning. The current position is “Your agent calls real APIs. You sign in once.”
 - Do not claim free anonymous discovery.
-- Do not claim a recurring weekly or monthly managed-call allowance. Current free tier is up to 25 lifetime managed calls, subject to the $1 provider-cost cap.
+- Do not claim a recurring weekly or monthly free-call allowance. Free APIs are free forever with no counter; Paid APIs require a card and bill provider cost plus 15% per call.
 - Do not claim 30% margin. Current margin is 15%.
 - Do not claim anonymous keyless public APIs are proxied. Workspace-authenticated public/no-key origins are a separate, origin-pinned rail.
 - Do not claim old Pro or Scale pricing tiers unless the live pricing page says so.

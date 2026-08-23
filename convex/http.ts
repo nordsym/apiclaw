@@ -1087,7 +1087,7 @@ function unauthResponse(reason: string) {
     {
       error: {
         message:
-          "Workspace required. APIClaw includes 25 managed calls lifetime, subject to a $1 provider-cost cap. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
+          "Workspace required. Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
         type: "auth_error",
         code: "unauth",
         reason,
@@ -1334,6 +1334,7 @@ function internalOnlyResponse(_provider: string) {
 function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
   const unavailable = quota.reason === "managed_action_not_customer_executable";
   const costHold = quota.reason === "managed_cost_hold";
+  const paymentRequired = quota.reason === "payment_required";
   return jsonResponse(
     {
       error: {
@@ -1341,12 +1342,14 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
           ? "managed_action_not_available"
           : costHold
             ? "managed_cost_hold"
-            : "quota_exceeded",
+            : paymentRequired
+              ? "payment_required"
+              : "quota_exceeded",
         reason: quota.reason || "quota_exceeded",
         message:
           quota.message ||
-          "Free tier quota exceeded. Keep going at API cost + 15% with pay-as-you-go: https://apiclaw.cloud/upgrade",
-        type: unavailable ? "permission_error" : costHold ? "billing_error" : "quota_error",
+          "This API has real provider cost. Add a card to continue; you pay provider cost plus 15 percent: https://apiclaw.cloud/upgrade",
+        type: unavailable ? "permission_error" : costHold ? "billing_error" : paymentRequired ? "billing_error" : "quota_error",
         ...(costHold ? { retryable: false } : {}),
         tier: quota.tier,
         provider,
@@ -3570,7 +3573,7 @@ http.route({
 <h2>An AI Agent Wants to Connect</h2>
 <p>Click below to verify your email and activate your workspace.</p>
 <p><a href="${verifyUrl}" style="background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;display:inline-block;">Verify Email</a></p>
-<p style="color:#666;font-size:13px;">Free activation: 25 managed calls lifetime, subject to a $1 provider-cost cap. This link expires in 1 hour.</p>
+<p style="color:#666;font-size:13px;">Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. This link expires in 1 hour.</p>
 <p style="color:#999;font-size:11px;">Or copy this link: ${verifyUrl}</p>
 </div>`;
       

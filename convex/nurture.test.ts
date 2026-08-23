@@ -5,10 +5,6 @@ import {
   markNurtureEmailInTransaction,
   pickEmailKind,
 } from "./nurture";
-import {
-  FREE_MANAGED_CALLS_LIFETIME,
-  FREE_MANAGED_PROVIDER_COST_CAP_USD,
-} from "../src/product-truth";
 import { CANON_STATS } from "../src/canon-stats";
 
 const now = Date.now();
@@ -116,7 +112,8 @@ assert.match(welcome.html, /action "search"/);
 assert.match(welcome.html, new RegExp(`${CANON_STATS.discoverable.toLocaleString()} APIs`));
 assert.match(welcome.html, new RegExp(`${CANON_STATS.source_verified.toLocaleString()} current catalog entries`));
 assert.match(welcome.html, /Source verification is not execution/i);
-assert.match(welcome.html, new RegExp(`${CANON_STATS.managed_provider_adapters} managed adapters`));
+assert.match(welcome.html, new RegExp(`${CANON_STATS.managed_provider_adapters} providers`));
+assert.doesNotMatch(welcome.html, /managed adapters?/i, "welcome email must not use the retired 'managed adapter' phrase");
 assert.match(welcome.html, new RegExp(`${CANON_STATS.customer_executable_providers} provider rails are customer-executable`));
 assert.doesNotMatch(welcome.html, /source-verified (?:definitions|APIs).*callable/i);
 assert.match(welcome.html, /Unsubscribe from lifecycle email/);
@@ -126,9 +123,8 @@ assert.doesNotMatch(welcome.html, /Reply STOP/);
 for (const kind of ["welcome", "try-discover", "first-call", "upgrade", "power-upgrade"]) {
   const rendered = bodyFor(kind, "Gustav", unsubscribeUrl);
   assert.doesNotMatch(rendered.subject, /\b(Pro|Scale)\b/i, `${kind} subject should not use stale tier copy`);
-  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|managed calls? (?:per|\/)(?:week|month)|unlimited/i, `${kind} body should not use stale tier copy`);
-  assert.match(rendered.html, new RegExp(`${FREE_MANAGED_CALLS_LIFETIME} lifetime managed calls`, "i"), `${kind} body should state the lifetime allowance`);
-  assert.match(rendered.html, new RegExp(`\\$${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap`, "i"), `${kind} body should state the provider-cost cap`);
+  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|managed calls? (?:per|\/)(?:week|month)|unlimited|25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapters?/i, `${kind} body should not use stale tier or retired-phrase copy`);
+  assert.match(rendered.html, /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./, `${kind} body should state the new free/paid framing`);
   assert.doesNotMatch(rendered.html, /APILayer/i, `${kind} body should not mention APILayer in nurture`);
 }
 
