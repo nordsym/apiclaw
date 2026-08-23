@@ -61,7 +61,7 @@ export function getWorkspaceNavigation({
 }): WorkspaceNavigationItem[] {
   const navigation: WorkspaceNavigationItem[] = [
     { id: "overview", label: "Home" },
-    { id: "api-catalog", label: "Catalog & Test" },
+    { id: "api-catalog", label: "Catalog" },
     { id: "connections", label: "Connections" },
     { id: "activity", label: "Activity" },
     { id: "billing", label: "Billing" },

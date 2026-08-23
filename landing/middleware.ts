@@ -32,8 +32,7 @@ async function legacySessionValid(token: string): Promise<boolean> {
       }),
     });
     const result = await response.json();
-    const session = result.value || result;
-    return Boolean(session);
+    return Boolean(result?.value);
   } catch {
     return true;
   }

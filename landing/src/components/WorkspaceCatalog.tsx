@@ -2,27 +2,55 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Search,
-  Layers,
-  Sparkles,
-  Activity,
-  AlertTriangle,
-  CircleSlash,
-  Loader2,
-  PlayCircle,
-  ExternalLink,
-} from "lucide-react";
-import {
   useInfiniteCatalog,
   type CatalogItem,
   type FetchPage,
 } from "@/lib/useInfiniteCatalog";
+import {
+  Empty,
+  Field,
+  Loading,
+  PageHeader,
+  Panel,
+  Row,
+  Status,
+  SurfaceTabs,
+  btnQuiet,
+  btnSolid,
+  inputClass,
+  textareaClass,
+} from "@/app/workspace/views/ui";
 
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
-const GATEWAY_URL = process.env.NEXT_PUBLIC_APICLAW_GATEWAY_URL || "https://api.apiclaw.cloud";
+export const GATEWAY_URL = process.env.NEXT_PUBLIC_APICLAW_GATEWAY_URL || "https://api.apiclaw.cloud";
 const TEST_CALL_PENDING_STORAGE_KEY = "apiclaw.workspace.pending-test-call";
 
-type SectionId = "discover" | "callable";
+type SourceId = "managed" | "all";
+
+/** Catalog row as returned by either source. Extra fields are optional on the shared type. */
+type Item = CatalogItem & {
+  providerId?: string;
+  actions?: readonly string[];
+  managedAdapter?: boolean;
+  verified?: boolean;
+};
+
+/** A provider/action pair the user can run from the test panel. */
+type Target = { providerId: string; name: string; actions: readonly string[] };
+
+const DEFAULT_PARAMS: Record<string, string> = {
+  "brave_search/search": JSON.stringify({ query: "APIClaw agent infrastructure", count: 3 }, null, 2),
+};
+
+const AUTH_LABELS: Record<string, string> = {
+  managed: "managed",
+  apiKey: "api key",
+  oauth: "oauth",
+  none: "open",
+  open: "open",
+};
+
+const OUTCOME_UNKNOWN_MESSAGE =
+  "A previous test call was accepted but its response was unavailable. Do not rerun it. Open Activity and look for the recent call. Keep this browser tab open if support needs the saved operation key.";
 
 // ── /api/catalog source ──────────────────────────────────────────────────
 
@@ -45,159 +73,328 @@ const fetchFromCatalogApi: FetchPage = async ({
   if (!res.ok) throw new Error(`Catalog ${res.status}`);
   const data = await res.json();
   return {
-    items: data.items as CatalogItem[],
+    items: (data.items ?? []) as CatalogItem[],
     total: data.total ?? 0,
     hasMore: !!data.hasMore,
   };
 };
 
+// ── Gateway discover source (managed providers) ──────────────────────────
+
 function createManagedProvidersFetcher(sessionToken?: string | null): FetchPage {
   return async ({ page, pageSize, query, category, signal }) => {
-  const response = await fetch(`${GATEWAY_URL}/api/discover`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(sessionToken ? { "X-APIClaw-Session": sessionToken } : {}),
-    },
-    body: JSON.stringify({ query: "" }),
-    signal,
-  });
-  if (!response.ok) throw new Error(`Gateway catalog ${response.status}`);
-  const data = await response.json() as {
-    providers?: Array<{
-      providerId: string;
-      name: string;
-      description: string;
-      category: string;
-      pricing?: string;
-      customerExecutableActions?: string[];
-    }>;
-  };
-  const normalizedQuery = query.trim().toLowerCase();
-  const filtered = (data.providers || [])
-    .filter((provider) => (provider.customerExecutableActions?.length ?? 0) > 0)
-    .filter((provider) => !normalizedQuery || [provider.providerId, provider.name, provider.description].some((value) => value.toLowerCase().includes(normalizedQuery)))
-    .filter((provider) => !category || provider.category === category)
-    .map((provider) => ({
-      name: provider.name,
-      description: provider.description,
-      category: provider.category,
-      baseUrl: provider.providerId,
-      auth: "managed",
-      pricing: provider.pricing,
-      callable: true,
-      actions: provider.customerExecutableActions,
-    }));
-  const offset = (page - 1) * pageSize;
-  return {
-    items: filtered.slice(offset, offset + pageSize),
-    total: filtered.length,
-    hasMore: offset + pageSize < filtered.length,
-  };
+    const response = await fetch(`${GATEWAY_URL}/api/discover`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(sessionToken ? { "X-APIClaw-Session": sessionToken } : {}),
+      },
+      body: JSON.stringify({ query: "" }),
+      signal,
+    });
+    if (!response.ok) throw new Error(`Gateway catalog ${response.status}`);
+    const data = await response.json() as {
+      providers?: Array<{
+        providerId: string;
+        name: string;
+        description: string;
+        category: string;
+        pricing?: string;
+        customerExecutableActions?: string[];
+      }>;
+    };
+    const normalizedQuery = query.trim().toLowerCase();
+    const filtered: Item[] = (data.providers || [])
+      .filter((provider) => (provider.customerExecutableActions?.length ?? 0) > 0)
+      .filter((provider) => !normalizedQuery || [provider.providerId, provider.name, provider.description].some((value) => (value ?? "").toLowerCase().includes(normalizedQuery)))
+      .filter((provider) => !category || provider.category === category)
+      .map((provider) => ({
+        name: provider.name,
+        description: provider.description,
+        category: provider.category,
+        baseUrl: provider.providerId,
+        providerId: provider.providerId,
+        auth: "managed",
+        pricing: provider.pricing,
+        callable: true,
+        managedAdapter: true,
+        actions: provider.customerExecutableActions,
+      }));
+    const offset = (page - 1) * pageSize;
+    return {
+      items: filtered.slice(offset, offset + pageSize),
+      total: filtered.length,
+      hasMore: offset + pageSize < filtered.length,
+    };
   };
 }
 
-// Health is shown only when the source row contains a measured status.
-
-type HealthMap = Record<string, "healthy" | "degraded" | "down" | "unclassified" | "unknown">;
+function targetOf(item: Item): Target | null {
+  if (!item.callable || item.auth !== "managed") return null;
+  const providerId = item.providerId || item.baseUrl;
+  if (!providerId || !item.actions?.length) return null;
+  return { providerId, name: item.name, actions: item.actions };
+}
 
 // ── Component ────────────────────────────────────────────────────────────
 
 export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | null }) {
-  const [section, setSection] = useState<SectionId>("discover");
+  const [source, setSource] = useState<SourceId>("managed");
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [target, setTarget] = useState<Target | null>(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query.trim()), 250);
     return () => clearTimeout(id);
   }, [query]);
 
+  // A call whose outcome is unknown must stay visible until it is resolved,
+  // so reopen its panel on mount even before any row has loaded.
+  useEffect(() => {
+    const pending = readPendingTestCall();
+    if (!pending) return;
+    const providerId = pending.provider || "brave_search";
+    setTarget({ providerId, name: providerId, actions: [pending.action || "search"] });
+  }, []);
+
+  const fetchManaged = useMemo(() => createManagedProvidersFetcher(sessionToken), [sessionToken]);
+  const call = useTestCall(target, sessionToken);
+
+  const panel = target ? (
+    <TestCallPanel target={target} call={call} sessionToken={sessionToken} onClose={() => setTarget(null)} />
+  ) : null;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Catalog & Test</h2>
-        <p className="text-[var(--text-muted)] mt-1">
-          Discover indexed APIs or inspect the canonical public providers wired to the managed gateway.
+    <div>
+      <PageHeader title="Catalog" description="Search providers. Managed rows can be called from here." />
+
+      <input
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search by name or description"
+        aria-label="Search catalog"
+        className={inputClass}
+      />
+
+      <div className="mt-4">
+        <SurfaceTabs
+          items={[{ id: "managed", label: "Managed" }, { id: "all", label: "All" }]}
+          active={source}
+          onChange={(id) => { setSource(id as SourceId); setTarget(null); }}
+          label="Source"
+        />
+      </div>
+
+      {/* key forces a fresh list (and fetch) when the source changes */}
+      <Results
+        key={source}
+        fetchPage={source === "managed" ? fetchManaged : fetchFromCatalogApi}
+        query={debouncedQuery}
+        target={target}
+        onSelect={(next) => { if (!call.running) setTarget((current) => (current?.providerId === next.providerId ? null : next)); }}
+        panel={panel}
+      />
+    </div>
+  );
+}
+
+// ── Results list ─────────────────────────────────────────────────────────
+
+function Results({ fetchPage, query, target, onSelect, panel }: {
+  fetchPage: FetchPage;
+  query: string;
+  target: Target | null;
+  onSelect: (target: Target) => void;
+  panel: React.ReactNode;
+}) {
+  const { items, total, hasMore, loading, loadingMore, error, sentinelRef } = useInfiniteCatalog({
+    fetchPage,
+    pageSize: 60,
+    query,
+    category: "",
+    callableOnly: false,
+  });
+
+  const rows = items as Item[];
+  const targetVisible = Boolean(target && rows.some((item) => targetOf(item)?.providerId === target.providerId));
+
+  return (
+    <div className="mt-6">
+      {!loading && !error && (
+        <p className="mb-2 text-[13px] text-[var(--text-muted)]">
+          {total.toLocaleString("en-US")} {total === 1 ? "result" : "results"}{query ? ` for "${query}"` : ""}
         </p>
-      </div>
+      )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <SectionCard
-          id="discover"
-          active={section === "discover"}
-          onClick={() => { setSection("discover"); setCategory(""); }}
-          title="Discover"
-          subtitle="Every API in the registry"
-          accent="blue"
-          icon={<Search className="w-5 h-5" />}
-          hint="discover_apis(query)"
-        />
-        <SectionCard
-          id="callable"
-          active={section === "callable"}
-          onClick={() => { setSection("callable"); setCategory(""); }}
-          title="Managed Gateway"
-          subtitle="Canonical public provider routes"
-          accent="green"
-          icon={<Sparkles className="w-5 h-5" />}
-          hint="/v1/execute"
-        />
-      </div>
+      {/* Selected provider is not in this list: keep its panel reachable above the rows. */}
+      {panel && !targetVisible && <div className="mb-4">{panel}</div>}
 
-      <TestCallPanel sessionToken={sessionToken} />
+      {error && <p role="alert" className="border-t border-[var(--border-subtle)] py-4 text-[13.5px] text-[var(--accent)]">{error}</p>}
 
-      {section === "discover" ? (
-        <DiscoverSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} />
+      {loading && rows.length === 0 ? (
+        <Loading label="Loading catalog" />
+      ) : !loading && !error && rows.length === 0 ? (
+        <Empty title="No matches" body="Try a different search or switch source." />
       ) : (
-        <CallableSection query={query} setQuery={setQuery} category={category} setCategory={setCategory} debouncedQuery={debouncedQuery} sessionToken={sessionToken} />
+        <ul>
+          {rows.map((item, index) => {
+            const itemTarget = targetOf(item);
+            const selected = Boolean(itemTarget && target && itemTarget.providerId === target.providerId);
+            return (
+              <li key={`${item.name}-${item.baseUrl ?? ""}-${index}`}>
+                <CatalogRow item={item} target={itemTarget} selected={selected} onSelect={onSelect} />
+                {selected && <div className="mb-4 mt-1">{panel}</div>}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {!error && rows.length > 0 && (
+        <div ref={sentinelRef} className="py-6 text-center text-[12.5px] text-[var(--text-muted)]">
+          {loadingMore ? "Loading more" : !hasMore ? "End of list" : null}
+        </div>
       )}
     </div>
   );
 }
 
-function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
-  const [query, setQuery] = useState("APIClaw agent infrastructure");
+function CatalogRow({ item, target, selected, onSelect }: {
+  item: Item;
+  target: Target | null;
+  selected: boolean;
+  onSelect: (target: Target) => void;
+}) {
+  const authLabel = AUTH_LABELS[item.auth ?? ""] ?? "auth";
+  const right = (
+    <>
+      {item.callable ? (
+        <Status kind="ok">callable</Status>
+      ) : item.managedAdapter ? (
+        <Status kind="muted">not callable yet</Status>
+      ) : item.verified ? (
+        <Status kind="muted">source-verified</Status>
+      ) : null}
+      <span className="hidden sm:inline">{authLabel}</span>
+      {!target && item.docsUrl && (
+        <a href={item.docsUrl} target="_blank" rel="noopener noreferrer" className="claw-link">Docs</a>
+      )}
+    </>
+  );
+  const body = (
+    <>
+      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+        <span className="text-[14.5px] font-medium text-[var(--text-primary)]">{item.name}</span>
+        <span className="text-[12.5px] text-[var(--text-muted)]">{item.category}</span>
+        {target && (
+          <span className="claw-mono text-[12px] text-[var(--text-muted)]">
+            {target.providerId}{target.actions.length ? ` · ${target.actions.length} ${target.actions.length === 1 ? "action" : "actions"}` : ""}
+          </span>
+        )}
+      </div>
+      <span className="mt-0.5 block truncate text-[13.5px] text-[var(--text-secondary)]">{item.description || "No description."}</span>
+      {target && (
+        <span className="mt-1 block text-[12.5px] text-[var(--text-muted)]">{selected ? "Close test call" : "Run a test call"}</span>
+      )}
+    </>
+  );
+  if (target) {
+    return <Row onClick={() => onSelect(target)} right={right}>{body}</Row>;
+  }
+  return <Row right={right}>{body}</Row>;
+}
+
+// ── Test call ────────────────────────────────────────────────────────────
+
+type CallResult = {
+  ok: boolean;
+  status: number | null;
+  latencyMs: number | null;
+  body: string;
+};
+
+type PendingTestCall = { idempotencyKey?: string; provider?: string; action?: string; params?: string; query?: string };
+
+function readPendingTestCall(): PendingTestCall | null {
+  try {
+    const pending = sessionStorage.getItem(TEST_CALL_PENDING_STORAGE_KEY);
+    if (!pending) return null;
+    const parsed = JSON.parse(pending) as PendingTestCall;
+    return parsed.idempotencyKey ? parsed : null;
+  } catch {
+    sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
+    return null;
+  }
+}
+
+/**
+ * Test-call state lives with the catalog, not the panel, so the panel can move
+ * between "under the selected row" and "above the list" without losing a result.
+ */
+function useTestCall(target: Target | null, sessionToken?: string | null) {
+  const [action, setAction] = useState("");
+  const [params, setParams] = useState("{}");
   const [running, setRunning] = useState(false);
   const [outcomeUnknown, setOutcomeUnknown] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [result, setResult] = useState<CallResult | null>(null);
   const testCallIdempotencyKeyRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const pending = sessionStorage.getItem(TEST_CALL_PENDING_STORAGE_KEY);
-      if (!pending) return;
-      const parsed = JSON.parse(pending) as { idempotencyKey?: string; query?: string };
-      if (!parsed.idempotencyKey) return;
-      testCallIdempotencyKeyRef.current = parsed.idempotencyKey;
-      if (parsed.query) setQuery(parsed.query);
-      setOutcomeUnknown(true);
-      setResult({
-        ok: false,
-        message: "A previous test call was accepted but its response was unavailable. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
-      });
-    } catch {
-      sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
-    }
-  }, []);
+  const targetKey = target ? `${target.providerId}|${target.actions.join(",")}` : "";
 
-  const clearPendingTestCall = () => {
+  // Reset for the new target, then restore an unresolved call for it if one is saved.
+  useEffect(() => {
+    if (!target) return;
+    const firstAction = target.actions[0] ?? "";
+    setAction(firstAction);
+    setParams(DEFAULT_PARAMS[`${target.providerId}/${firstAction}`] ?? "{}");
+    setResult(null);
+    setNotice(null);
+    setOutcomeUnknown(false);
     testCallIdempotencyKeyRef.current = null;
-    sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
+
+    const pending = readPendingTestCall();
+    if (!pending || (pending.provider || "brave_search") !== target.providerId) return;
+    testCallIdempotencyKeyRef.current = pending.idempotencyKey ?? null;
+    if (pending.action) setAction(pending.action);
+    if (pending.params) setParams(pending.params);
+    else if (pending.query) setParams(JSON.stringify({ query: pending.query, count: 3 }, null, 2));
+    setOutcomeUnknown(true);
+    setNotice(OUTCOME_UNKNOWN_MESSAGE);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetKey]);
+
+  const parsedParams = useMemo<Record<string, unknown> | null>(() => {
+    try {
+      const value = JSON.parse(params || "{}");
+      return value && typeof value === "object" && !Array.isArray(value) ? value : null;
+    } catch {
+      return null;
+    }
+  }, [params]);
+
+  const changeAction = (next: string) => {
+    setAction(next);
+    const preset = target ? DEFAULT_PARAMS[`${target.providerId}/${next}`] : undefined;
+    if (preset) setParams(preset);
   };
 
-  const runTest = async () => {
-    if (!sessionToken || !query.trim()) return;
+  const run = async () => {
+    if (!target || !sessionToken || !action || !parsedParams || running || outcomeUnknown) return;
     setRunning(true);
     setResult(null);
+    setNotice(null);
+    const startedAt = performance.now();
     try {
-      const idempotencyKey = testCallIdempotencyKeyRef.current ??
-        `workspace-test-${crypto.randomUUID()}`;
+      const idempotencyKey = testCallIdempotencyKeyRef.current ?? `workspace-test-${crypto.randomUUID()}`;
       testCallIdempotencyKeyRef.current = idempotencyKey;
       sessionStorage.setItem(TEST_CALL_PENDING_STORAGE_KEY, JSON.stringify({
         idempotencyKey,
-        query: query.trim(),
+        provider: target.providerId,
+        action,
+        params,
       }));
       const response = await fetch(`${GATEWAY_URL}/v1/execute`, {
         method: "POST",
@@ -207,438 +404,114 @@ function TestCallPanel({ sessionToken }: { sessionToken?: string | null }) {
           "X-APIClaw-Session": sessionToken,
         },
         body: JSON.stringify({
-          provider: "brave_search",
-          action: "search",
-          params: { query: query.trim(), count: 3 },
+          provider: target.providerId,
+          action,
+          params: parsedParams,
         }),
       });
-      const data = await response.json();
-      const errorCode = typeof data?.error === "object" ? data.error.code : undefined;
+      const elapsed = Math.round(performance.now() - startedAt);
+      const data = await response.json().catch(() => null);
+      const errorCode = data && typeof data.error === "object" && data.error ? data.error.code : undefined;
       if (errorCode === "idempotency_conflict" || response.status >= 500) {
         setOutcomeUnknown(true);
-        setResult({
-          ok: false,
-          message: "This request was already accepted or may have completed, but its response is unavailable. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
-        });
+        setNotice("This request was already accepted or may have completed, but its response is unavailable. Do not rerun it. Open Activity and look for the recent call. Keep this browser tab open if support needs the saved operation key.");
+        setResult({ ok: false, status: response.status, latencyMs: elapsed, body: formatBody(data) });
         return;
       }
       // A successful response or a terminal client error makes this operation
       // unambiguous, so only then may a future click receive a fresh key.
-      clearPendingTestCall();
-      if (!response.ok || data.error || data.success === false) {
-        const message = data?.error?.message || data?.error || "The managed call failed.";
-        setResult({
-          ok: false,
-          message: typeof message === "string" ? message : "The managed call failed.",
-        });
-        return;
-      }
-      const count = data?.data?.web?.results?.length ?? data?.web?.results?.length ?? data?.result?.web?.results?.length ?? 0;
-      setResult({ ok: true, message: `Managed call succeeded${count ? ` with ${count} results` : ""}. Open Activity to inspect the log.` });
+      testCallIdempotencyKeyRef.current = null;
+      sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
+      const ok = response.ok && !data?.error && data?.success !== false;
+      const reported = typeof data?._apiclaw?.latencyMs === "number" ? data._apiclaw.latencyMs : null;
+      setResult({ ok, status: response.status, latencyMs: reported ?? elapsed, body: formatBody(data) });
     } catch {
       setOutcomeUnknown(true);
-      setResult({
-        ok: false,
-        message: "The gateway response was lost. This request may already have completed. Do not rerun it. Open Activity and look for the recent Brave Search call. Keep this browser tab open if support needs the saved operation key.",
-      });
+      setNotice("The gateway response was lost. This request may already have completed. Do not rerun it. Open Activity and look for the recent call. Keep this browser tab open if support needs the saved operation key.");
     } finally {
       setRunning(false);
     }
   };
 
+  return { action, changeAction, params, setParams, parsedParams, running, outcomeUnknown, notice, result, run };
+}
+
+type TestCall = ReturnType<typeof useTestCall>;
+
+function TestCallPanel({ target, call, sessionToken, onClose }: {
+  target: Target;
+  call: TestCall;
+  sessionToken?: string | null;
+  onClose: () => void;
+}) {
+  const { action, changeAction, params, setParams, parsedParams, running, outcomeUnknown, notice, result, run } = call;
+  const canRun = Boolean(sessionToken) && Boolean(action) && parsedParams !== null && !running && !outcomeUnknown;
+
   return (
-    <div className="rounded-2xl border border-[#ef4444]/30 bg-[var(--surface)] p-5">
-      <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <PlayCircle className="w-5 h-5 text-[#ef4444]" />
-            <h3 className="font-semibold">Run a real managed call</h3>
-          </div>
-          <p className="text-sm text-[var(--text-muted)] mb-3">Test the golden path with Brave Search. This uses one managed call and writes a real Activity log.</p>
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            disabled={outcomeUnknown}
-            placeholder="What should the agent search for?"
-            className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/40"
+    <Panel className="p-5">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+        <p className="text-[14.5px] font-medium">Test call</p>
+        <p className="claw-mono text-[12.5px] text-[var(--text-muted)]">{target.providerId}/{action || "?"}</p>
+      </div>
+      <p className="mt-1 text-[13px] text-[var(--text-muted)]">Uses one call from your allowance and writes an Activity entry.</p>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-[12rem_1fr]">
+        <Field label="Action">
+          {target.actions.length > 1 ? (
+            <select value={action} onChange={(event) => changeAction(event.target.value)} disabled={outcomeUnknown || running} className={inputClass}>
+              {target.actions.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          ) : (
+            <input value={action} readOnly className={`${inputClass} claw-mono`} />
+          )}
+        </Field>
+        <Field label="Params (JSON)" hint={parsedParams === null ? "Params must be a JSON object." : undefined}>
+          <textarea
+            value={params}
+            onChange={(event) => setParams(event.target.value)}
+            disabled={outcomeUnknown || running}
+            rows={4}
+            spellCheck={false}
+            className={`${textareaClass} claw-mono !text-[12.5px]`}
           />
-        </div>
-        <button type="button" onClick={runTest} disabled={!sessionToken || running || outcomeUnknown || !query.trim()} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--background)] text-sm font-medium hover:bg-white disabled:opacity-50 transition">
-          {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
-          {running ? "Running..." : outcomeUnknown ? "Check Activity" : "Run test call"}
-        </button>
+        </Field>
       </div>
-      {result && <p role={result.ok ? "status" : "alert"} className={`text-sm mt-3 ${result.ok ? "text-green-500" : "text-red-500"}`}>{result.message}</p>}
-    </div>
-  );
-}
 
-function SectionCard({
-  id,
-  active,
-  onClick,
-  title,
-  subtitle,
-  accent,
-  icon,
-  hint,
-}: {
-  id: SectionId;
-  active: boolean;
-  onClick: () => void;
-  title: string;
-  subtitle: string;
-  accent: "blue" | "green";
-  icon: React.ReactNode;
-  hint: string;
-}) {
-  const accentColor = accent === "blue" ? "text-blue-400 border-blue-500/20 bg-blue-500/5" : "text-green-400 border-green-500/20 bg-green-500/5";
-  return (
-    <button
-      onClick={onClick}
-      data-section={id}
-      className={`rounded-2xl border p-5 text-left transition ${
-        active
-          ? "border-[#ef4444] bg-[var(--surface)]"
-          : "border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[#ef4444]/40"
-      }`}
-    >
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${accent === "blue" ? "bg-blue-500/10 text-blue-400" : "bg-green-500/10 text-green-400"}`}>
-        {icon}
-      </div>
-      <p className="font-semibold text-base">{title}</p>
-      <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">{subtitle}</p>
-      <div className={`mt-3 flex items-center gap-1.5 text-xs font-mono rounded-lg px-2.5 py-1.5 border ${accentColor}`}>
-        <Layers className="w-3 h-3 shrink-0" />
-        {hint}
-      </div>
-    </button>
-  );
-}
-
-// ── Discover section: 26k+ APIs, search + category, infinite scroll ─────
-
-function DiscoverSection({ query, setQuery, category, setCategory, debouncedQuery }: CatalogSectionProps) {
-
-  const { items, total, hasMore, loading, loadingMore, error, sentinelRef } =
-    useInfiniteCatalog({
-      fetchPage: fetchFromCatalogApi,
-      pageSize: 60,
-      query: debouncedQuery,
-      category,
-      callableOnly: false,
-    });
-
-  return (
-    <div className="space-y-3">
-      <CatalogToolbar
-        query={query}
-        onQueryChange={setQuery}
-        category={category}
-        onCategoryChange={setCategory}
-        total={total}
-        loading={loading}
-        accent="blue"
-      />
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-400">
-          {error}
-        </div>
-      )}
-      <CatalogList items={items} healthByName={null} loading={loading} />
-      <Sentinel
-        sentinelRef={sentinelRef}
-        loadingMore={loadingMore}
-        hasMore={hasMore}
-        empty={!loading && items.length === 0}
-      />
-    </div>
-  );
-}
-
-// ── Managed gateway section: canonical provider registry ───────────────
-
-type CatalogSectionProps = {
-  query: string;
-  setQuery: (value: string) => void;
-  category: string;
-  setCategory: (value: string) => void;
-  debouncedQuery: string;
-};
-
-function CallableSection({ query, setQuery, category, setCategory, debouncedQuery, sessionToken }: CatalogSectionProps & { sessionToken?: string | null }) {
-  const fetchManagedProviders = useMemo(
-    () => createManagedProvidersFetcher(sessionToken),
-    [sessionToken],
-  );
-
-  const { items, total, hasMore, loading, loadingMore, error, sentinelRef } =
-    useInfiniteCatalog({
-      fetchPage: fetchManagedProviders,
-      pageSize: 60,
-      query: debouncedQuery,
-      category,
-      callableOnly: false,
-    });
-
-  return (
-    <div className="space-y-3">
-      <CatalogToolbar
-        query={query}
-        onQueryChange={setQuery}
-        category={category}
-        onCategoryChange={setCategory}
-        total={total}
-        loading={loading}
-        accent="green"
-      />
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-400">
-          {error}
-        </div>
-      )}
-      <CatalogList items={items} healthByName={null} loading={loading} />
-      <Sentinel
-        sentinelRef={sentinelRef}
-        loadingMore={loadingMore}
-        hasMore={hasMore}
-        empty={!loading && items.length === 0}
-      />
-    </div>
-  );
-}
-
-// ── Toolbar ──────────────────────────────────────────────────────────────
-
-const CATEGORIES = [
-  "all",
-  "AI & ML",
-  "Communication",
-  "Data & Analytics",
-  "Development",
-  "Finance",
-  "Utilities",
-  "Commerce",
-  "Health & Fitness",
-  "Entertainment",
-  "Location & Maps",
-  "Auth & Security",
-  "Travel & Aviation",
-];
-
-function CatalogToolbar({
-  query,
-  onQueryChange,
-  category,
-  onCategoryChange,
-  total,
-  loading,
-  accent,
-}: {
-  query: string;
-  onQueryChange: (v: string) => void;
-  category: string;
-  onCategoryChange: (v: string) => void;
-  total: number;
-  loading: boolean;
-  accent: "blue" | "green";
-}) {
-  const accentRing =
-    accent === "blue" ? "focus:ring-blue-500/40" : "focus:ring-green-500/40";
-  return (
-    <div className="flex items-center gap-3 flex-wrap">
-      <div className={`flex-1 min-w-[200px] flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] px-3 focus-within:ring-2 ${accentRing}`}>
-        <Search className="w-4 h-4 text-[var(--text-muted)]" />
-        <input
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Search by name, description, capability…"
-          className="flex-1 bg-transparent py-2.5 text-sm focus:outline-none"
-        />
-        {query && (
-          <button
-            onClick={() => onQueryChange("")}
-            className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-          >
-            Clear
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {outcomeUnknown ? (
+          <a href="/workspace?tab=activity&sub=logs" className={btnSolid}>Check Activity</a>
+        ) : (
+          <button type="button" onClick={() => void run()} disabled={!canRun} className={btnSolid}>
+            {running ? "Running" : "Run call"}
           </button>
         )}
+        <button type="button" onClick={onClose} disabled={running} className={btnQuiet}>Close</button>
+        {!sessionToken && <span className="text-[12.5px] text-[var(--text-muted)]">Sign in to run calls.</span>}
       </div>
-      <select
-        value={category}
-        onChange={(e) => onCategoryChange(e.target.value === "all" ? "" : e.target.value)}
-        className="px-3 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[#ef4444]/40"
-      >
-        {CATEGORIES.map((c) => (
-          <option key={c} value={c}>
-            {c === "all" ? "All Categories" : c}
-          </option>
-        ))}
-      </select>
-      <div className="text-sm text-[var(--text-muted)] tabular-nums shrink-0">
-        {loading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : `${total.toLocaleString()} APIs`}
-      </div>
-    </div>
-  );
-}
 
-// ── List + row ──────────────────────────────────────────────────────────
+      {notice && <p role="alert" className="mt-4 text-[13px] text-[var(--accent)]">{notice}</p>}
 
-function CatalogList({
-  items,
-  healthByName,
-  loading,
-}: {
-  items: CatalogItem[];
-  healthByName: HealthMap | null;
-  loading: boolean;
-}) {
-  if (loading && items.length === 0) {
-    return (
-      <div className="space-y-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[68px] rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)]"
-          />
-        ))}
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-2">
-      {items.map((api) => (
-        <CatalogRow
-          key={`${api.name}-${api.baseUrl ?? ""}`}
-          api={api}
-          health={healthByName?.[api.name.toLowerCase()] ?? api.healthStatus}
-        />
-      ))}
-    </div>
-  );
-}
-
-function CatalogRow({
-  api,
-  health,
-}: {
-  api: CatalogItem;
-  health?: "healthy" | "degraded" | "down" | "unclassified" | "unknown";
-}) {
-  const isManaged = api.auth === "managed";
-  const isOpen = api.auth === "none" || api.auth === "open";
-
-  return (
-    <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-[var(--surface-elevated)] border border-[var(--border)] hover:border-[#ef4444]/30 transition">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-        isManaged
-          ? "bg-[var(--surface)] border border-[var(--border-subtle)] text-[var(--text-secondary)]"
-          : isOpen
-            ? "bg-purple-500/10 text-purple-400"
-            : "bg-[var(--surface)] text-[var(--text-muted)]"
-      }`}>
-        <Layers className="w-4 h-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="font-medium text-sm truncate">{api.name}</p>
-          {isManaged && (
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-[#ef4444] bg-[var(--surface)] px-1.5 py-0.5 rounded">
-              Managed
-            </span>
-          )}
-          {isOpen && (
-            <span className="text-[10px] uppercase tracking-widest font-semibold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
-              Open
-            </span>
-          )}
-          {api.callable && health && <HealthBadge status={health} />}
-        </div>
-        <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
-          {api.description}
-        </p>
-        {api.callable && isManaged && (
-          <div className="mt-2 flex items-center gap-2">
-            <code className="text-[11px] font-mono text-[var(--text-secondary)] bg-[var(--surface)] border border-[var(--border)] rounded px-2 py-0.5 truncate">
-              provider: {api.baseUrl} · /v1/execute
-            </code>
+      {result && (
+        <div className="mt-4">
+          <div className="mb-2 flex flex-wrap items-center gap-3 text-[12.5px]">
+            <Status kind={result.ok ? "ok" : "bad"}>{result.ok ? "ok" : "failed"}</Status>
+            {result.status !== null && <span className="claw-mono text-[var(--text-muted)]">HTTP {result.status}</span>}
+            {result.latencyMs !== null && <span className="claw-mono text-[var(--text-muted)]">{result.latencyMs} ms</span>}
           </div>
-        )}
-      </div>
-      <div className="flex items-center gap-2 shrink-0 ml-2">
-        <span className="text-xs text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded">
-          {api.category}
-        </span>
-        {api.docsUrl && (
-          <a
-            href={api.docsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open docs"
-            className="text-[var(--text-muted)] hover:text-[#ef4444] transition"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        )}
-      </div>
-    </div>
+          <pre className="claw-mono max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-[10px] border border-[var(--border-subtle)] bg-[var(--background)] px-4 py-3.5 text-[12.5px] leading-[1.7] text-[var(--text-secondary)]">{result.body}</pre>
+        </div>
+      )}
+    </Panel>
   );
 }
 
-function HealthBadge({
-  status,
-}: {
-  status: "healthy" | "degraded" | "down" | "unclassified" | "unknown";
-}) {
-  if (status === "healthy") {
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded">
-        <Activity className="w-2.5 h-2.5" /> live
-      </span>
-    );
+function formatBody(data: unknown): string {
+  if (data === null || data === undefined) return "(no JSON body)";
+  let text: string;
+  try {
+    text = JSON.stringify(data, null, 2);
+  } catch {
+    text = String(data);
   }
-  if (status === "degraded") {
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">
-        <AlertTriangle className="w-2.5 h-2.5" /> degraded
-      </span>
-    );
-  }
-  if (status === "down") {
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">
-        <CircleSlash className="w-2.5 h-2.5" /> down
-      </span>
-    );
-  }
-  return null;
-}
-
-function Sentinel({
-  sentinelRef,
-  loadingMore,
-  hasMore,
-  empty,
-}: {
-  sentinelRef: React.RefObject<HTMLDivElement>;
-  loadingMore: boolean;
-  hasMore: boolean;
-  empty: boolean;
-}) {
-  if (empty) {
-    return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] p-6 text-center text-sm text-[var(--text-muted)]">
-        No matches. Try a different query or category.
-      </div>
-    );
-  }
-  return (
-    <div ref={sentinelRef} className="py-6 flex items-center justify-center">
-      {loadingMore ? (
-        <Loader2 className="w-4 h-4 animate-spin text-[var(--text-muted)]" />
-      ) : !hasMore ? (
-        <span className="text-xs text-[var(--text-muted)]">End of catalog</span>
-      ) : null}
-    </div>
-  );
+  return text.length > 6000 ? `${text.slice(0, 6000)}\n… truncated` : text;
 }
