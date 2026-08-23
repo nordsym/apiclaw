@@ -25,7 +25,11 @@ const ITEMS: Array<{ q: string; a: React.ReactNode }> = [
   },
   {
     q: "What does it cost?",
-    a: `Free APIs are free forever, no card, including discovery and over 1,000 of the 1,025 callable now. Paid APIs need a card on file and bill provider cost plus ${PAYG_MARGIN_PERCENT}% per call, billed through Stripe.`,
+    a: `Free APIs are free forever, no card, including discovery and over 1,000 of the 1,025 callable now. Paid APIs need a card on file and bill provider cost plus ${PAYG_MARGIN_PERCENT}% per call, billed through Stripe. Or bring your own key and skip the card entirely for that provider.`,
+  },
+  {
+    q: "Can I use my own API key instead of a card?",
+    a: "Yes. Add your own OpenRouter key in Workspace, Connections, Your keys. Calls routed through it are free: no card, no markup, OpenRouter bills you directly. Today this covers an OpenRouter key for chat completions, not every provider.",
   },
   {
     q: "What does Remote MCP expose?",

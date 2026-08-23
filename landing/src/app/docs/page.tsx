@@ -28,6 +28,11 @@ const docsNav = [
     note: "Sign in, then integrations",
   },
   {
+    label: "Your key",
+    href: "#byok",
+    note: "Bring your own key",
+  },
+  {
     label: "List your API",
     href: "#list-your-api",
     note: "Owner path",
@@ -251,6 +256,22 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
                   </li>
                 ))}
               </ol>
+            </section>
+
+            <div className="claw-rule my-16 sm:my-20" />
+
+            {/* Bring your own key */}
+            <section id="byok" className="scroll-mt-20">
+              <h2 className="claw-h2">Bring your own key</h2>
+              <p className={`${BODY} mt-4`}>
+                Add your own OpenRouter key in Workspace, Connections, Your keys. Calls routed through it are free: no card, no markup, OpenRouter bills your workspace directly instead of going through the managed rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
+              </p>
+              <p className={`${BODY} mt-4`}>
+                An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/workspace?tab=connections" className="claw-btn claw-btn-solid">Add your key</Link>
+              </div>
             </section>
 
             <div className="claw-rule my-16 sm:my-20" />

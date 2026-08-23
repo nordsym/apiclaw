@@ -132,6 +132,14 @@ curl https://api.apiclaw.cloud/v1/chat/completions \
 
 `apiclaw/openrouter/auto` is APIClaw's stable, priced OpenRouter default (`anthropic/claude-sonnet-4-6`), not OpenRouter's dynamic auto router. Reuse the same idempotency key after an ambiguous network failure.
 
+Model resolution order: an explicit request model always wins; otherwise APIClaw falls back to the calling agent's default model, then the workspace default. Per-agent default model only governs calls routed through APIClaw. It does not reach into an external harness's own config (for example openclaw.json), which stays out of scope.
+
+## Bring your own key
+
+A workspace can store its own OpenRouter key in Workspace, Connections, Your keys. Calls routed through that key are free: no card, no markup, OpenRouter bills the workspace directly instead of going through APIClaw's managed rail. This is separate from the APIClaw key (`sk-claw-...`) used to authenticate into the gateway, and separate from managed execution, which stays free for zero-cost providers and provider cost plus 15% for paid ones. Today this covers an OpenRouter key for `POST /v1/chat/completions`, not every provider.
+
+Related: `X-APIClaw-OAuth` Codex passthrough is open to every authenticated workspace, free.
+
 ## Missions
 
 Mission templates compose typed fetch, transform, decide, validate, and execute steps. Mission events are append-only and carry workspace, cost, and execution metadata. A mission cannot bypass managed-usage authorization or provider-origin policy.
@@ -140,6 +148,7 @@ Mission templates compose typed fetch, transform, decide, validate, and execute 
 
 - Free APIs are free forever with no card: discovery plus every zero-cost API, over 1,000 of the 1,025 callable now.
 - Paid APIs need a card on file, then bill exact provider cost plus 15%, metered per call.
+- Your key: bring your own OpenRouter key and route chat completions through it for free, no card, ever.
 - Discovery stays free after signup.
 - Paid usage requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
 - An action without a billing-grade exact cost adapter is blocked from paid execution.

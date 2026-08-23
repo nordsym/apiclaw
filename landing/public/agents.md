@@ -116,9 +116,20 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 - Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
 - Paid APIs: add a card once, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
+- Your key: bring your own OpenRouter key and route chat completions through it for free, no card, ever. Provider bills the workspace directly.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning.
 - No anonymous execution.
 - No fixed Pro or Scale subscription should be assumed unless the pricing page says so.
+
+## Bring your own key
+
+A workspace can store its own OpenRouter key in Workspace, Connections, Your keys, and route `POST /v1/chat/completions` calls through it. Those calls are free: no card, no markup, OpenRouter bills the workspace directly. This is separate from the APIClaw key used to authenticate into the gateway. Today it covers an OpenRouter key only, not every provider.
+
+Related: `X-APIClaw-OAuth` Codex passthrough is now open to every authenticated workspace, free (previously internal-only).
+
+## Per-agent default model
+
+Agents can be given a default model via `agents:setDefaultModel`. Resolution order: an explicit request model always wins; otherwise the agent's default model applies; otherwise the workspace default. This only governs calls routed through APIClaw. An external harness's own config (for example openclaw.json) is out of scope and unaffected.
 
 ## Recommended evaluation flow for agents
 

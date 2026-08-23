@@ -17,7 +17,7 @@ The metric that matters is a successful `POST /v1/execute`, not an install.
 Give an agent this file and it can install, sign in, and land one 200
 without guessing.
 
-Live catalog (2026-08-22). Use `https://apiclaw.cloud/api/catalog` if
+Live catalog (2026-08-24). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
 - 1,025 callable
@@ -149,6 +149,14 @@ Live catalog: `https://apiclaw.cloud/api/catalog?callable=true`.
 Then execute with `provider` / `action` on `POST /v1/execute`.
 Do not collect provider API keys from the user.
 
+## 5. Bring your own key
+
+Bring your own key: add your own OpenRouter key in Workspace, Connections,
+Your keys, and route chat completions through it for free, no card. The
+provider bills the workspace directly. This is separate from the APIClaw
+key used to authenticate into the gateway. Today this covers an OpenRouter
+key for `POST /v1/chat/completions`, not every provider.
+
 ## Other doors (same workspace)
 
 - Skill (this file): `https://apiclaw.cloud/SKILL.md`
@@ -162,6 +170,8 @@ Do not collect provider API keys from the user.
 - Free APIs: free forever, no card. Discovery and every zero-cost API,
   over 1,000 of the 1,025 callable.
 - Paid APIs: add a card once, then provider cost plus 15%, metered per call.
+- Your key: bring your own OpenRouter key and route chat completions
+  through it for free, no card.
 - Anonymous keyless public execution is disabled.
 
 ## What not to do
