@@ -731,8 +731,9 @@ export const createProxyLog = internalMutation({
     action: v.string(),
     subagentId: v.optional(v.string()),
     requestId: v.optional(v.string()),
+    keySource: v.optional(v.union(v.literal("byo"), v.literal("apiclaw"))),
   },
-  handler: async (ctx, { workspaceId, provider, action, subagentId, requestId }) => {
+  handler: async (ctx, { workspaceId, provider, action, subagentId, requestId, keySource }) => {
     await ctx.db.insert("apiLogs", {
       workspaceId,
       provider,
@@ -743,6 +744,7 @@ export const createProxyLog = internalMutation({
       latencyMs: 0,
       direction: "outbound",
       requestId,
+      keySource,
       createdAt: Date.now(),
     });
 

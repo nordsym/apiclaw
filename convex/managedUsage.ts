@@ -18,7 +18,7 @@ import {
   safeReplayTerminalCode,
 } from "./idempotencyBinding";
 
-const trafficClassValidator = v.union(v.literal("customer"), v.literal("internal"));
+const trafficClassValidator = v.union(v.literal("customer"), v.literal("internal"), v.literal("byok"));
 const costSourceValidator = v.union(
   v.literal("provider_response"),
   v.literal("token_price_table"),

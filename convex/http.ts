@@ -13,12 +13,14 @@ import {
   normalizeManagedLlmRequestForCost,
   providerReportedUsageCostUsd,
   resolveManagedResponseCost,
+  resolveEffectiveModel,
   resolveExplicitOpenRouterExecution,
   resolveExplicitOpenRouterTarget,
   UnsafeManagedOpenRouterRequestError,
   verifiedFixedManagedProviderCostUsd,
 } from "./managedCostPolicy";
 import { decorateOpenRouterRequest } from "./openRouterAttribution";
+import { decryptProviderKey } from "./providerKeys";
 import { hasActivePaygEntitlement, isInternalTier } from "./managedUsagePolicy";
 import { getWorkspaceUsageDisplay } from "./workspaces";
 import {
@@ -1472,7 +1474,7 @@ async function enforcePreCallQuota(
     estimatedInputTokens?: number;
     maxOutputTokens?: number;
     billingGradeCost?: boolean;
-    trafficClass?: "customer" | "internal";
+    trafficClass?: "customer" | "internal" | "byok";
     requestPayload?: unknown;
   } = {},
 ): Promise<Response | ManagedCallGate> {
@@ -3791,7 +3793,8 @@ http.route({
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
     }
 
-    const { model, messages, stream, ...rest } = body;
+    let { model } = body;
+    const { messages, stream, ...rest } = body;
     if (!messages || !Array.isArray(messages)) {
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
@@ -3803,6 +3806,25 @@ http.route({
       configuredDefaultModel = routingSettings?.defaultModel ?? null;
       configuredTier = routingSettings?.tier ?? "free";
     } catch {}
+    // BYOH B2 (2026-08-24): thread agent identity into routing. Fallback
+    // order (resolveEffectiveModel, managedCostPolicy.ts) is explicit
+    // request model > agent.defaultModel > workspace defaultModel. An
+    // explicit model always wins. Only covers X-APIClaw-Session auth (the
+    // only auth path that carries a per-request fingerprint today); other
+    // auth methods fall through to the existing workspace-level default
+    // unchanged.
+    {
+      let agentDefaultModel: string | null = null;
+      const sessionTokenHeader = request.headers.get("X-APIClaw-Session");
+      if ((!model || model === "apiclaw/auto") && authMethod === "session" && sessionTokenHeader) {
+        try {
+          agentDefaultModel = await ctx.runQuery(internal.agents.getDefaultModelForSessionToken, {
+            sessionToken: sessionTokenHeader,
+          });
+        } catch {}
+      }
+      model = resolveEffectiveModel(model, agentDefaultModel, configuredDefaultModel) ?? model;
+    }
     const explicitOpenRouterTarget = resolveExplicitOpenRouterTarget(model);
     const openRouterExecution = resolveExplicitOpenRouterExecution({
       provider: !isInternalTier(configuredTier) || explicitOpenRouterTarget ? "openrouter" : "auto",
@@ -3823,23 +3845,31 @@ http.route({
     const codexRoutableModel = /^(gpt-5\.|gpt-5-codex|codex-)/.test(bareModel) || bareModel === "gpt-5";
     const codexOAuthCandidate = isCodexJwt(codexOauth) && codexRoutableModel;
     const codexAuthorizedModel = bareModel || "gpt-5.4";
-    if (
-      codexOAuthCandidate &&
-      configuredTier !== "founder" &&
-      configuredTier !== "partner"
-    ) {
-      return jsonResponse({
-        error: {
-          message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must use apiclaw's managed routing.",
-          type: "permission_error",
-          code: "byok_not_permitted",
-        },
-      }, 403);
-    }
+    // Gate opened 2026-08-24 (BYOH decision): any authenticated workspace may
+    // pass through its own Codex OAuth JWT via X-APIClaw-OAuth. Previously
+    // restricted to founder/partner tier only; see canon comment below.
     const codexIdempotency = codexOAuthCandidate
       ? requireCodexOAuthIdempotency(request)
       : null;
     if (codexIdempotency instanceof Response) return codexIdempotency;
+
+    // BYOH A2 (2026-08-24): if the workspace has attached its own OpenRouter
+    // key, this call executes on that rail for free instead of apiclaw's
+    // managed key. `openRouterExecution` is truthy for effectively every
+    // non-internal-tier chat-completions request (customer traffic always
+    // routes through the openrouter provider today), so this check covers
+    // the realistic BYOK surface for this endpoint. Codex OAuth passthrough
+    // is a separate rail (A3) and is mutually exclusive with this branch.
+    let byokEncryptedKey: string | null = null;
+    if (!codexOAuthCandidate && openRouterExecution?.provider === "openrouter") {
+      try {
+        const keyRow = await ctx.runQuery(internal.providerKeys.getKeyForProviderInternal, {
+          workspaceId: workspaceId as any,
+          provider: "openrouter",
+        });
+        if (keyRow?.encryptedKey) byokEncryptedKey = keyRow.encryptedKey;
+      } catch {}
+    }
     let authorizedMaxOutputTokens: number;
     try {
       authorizedMaxOutputTokens = normalizeMaxOutputTokens(rest.max_completion_tokens ?? rest.max_tokens);
@@ -3891,6 +3921,7 @@ http.route({
         maxOutputTokens: authorizedMaxOutputTokens,
         billingGradeCost: codexOAuthCandidate ? true : undefined,
         requestPayload: normalizedRequestPayload,
+        trafficClass: byokEncryptedKey ? "byok" : undefined,
       },
     );
     if (quotaGate instanceof Response) return quotaGate;
@@ -3906,14 +3937,17 @@ http.route({
     }
 
     // PR3: Codex OAuth short-circuit. If caller supplied X-APIClaw-OAuth with a Codex JWT
-    // AND the requested model is Codex-routable (gpt-5.x, codex-*)
-    // AND their workspace tier permits it (founder/partner only), translate Chat
+    // AND the requested model is Codex-routable (gpt-5.x, codex-*), translate Chat
     // Completions → Responses and forward to chatgpt.com/backend-api/codex/responses.
     // Cost = $0 to apiclaw (caller's ChatGPT subscription pays).
     //
-    // Canon: BYOK is NOT a public concept in apiclaw. OAuth-passthrough is restricted to
-    // founder/partner workspaces so external customers can't pipe their own subs through
-    // the gateway. They go through apiclaw's managed keys + pass-through pricing instead.
+    // Canon (updated 2026-08-24, BYOH decision): BYOK/BYOH is now a public,
+    // supported concept in apiclaw. Any authenticated workspace may pass
+    // through its own Codex OAuth JWT, or attach its own provider API key
+    // (see convex/providerKeys.ts), and route calls for free — they pay their
+    // provider directly, no card, no markup. This replaces the old
+    // founder/partner-only restriction. apiclaw's managed keys + pass-through
+    // pricing remain available for workspaces that don't bring their own.
     // Codex backend serves gpt-5.x variants and codex-* slugs. Other models
     // fall through to normal managed routing.
     if (codexOAuthCandidate) {
@@ -4265,6 +4299,13 @@ http.route({
       }, 403);
     }
 
+    // BYOH A2 (2026-08-24): the earlier providerKeys lookup was keyed on the
+    // pre-routing provider guess; only trust it once the actual route also
+    // resolved to openrouter, otherwise a workspace's openrouter key must
+    // never be used for a call that ended up routed elsewhere.
+    const usesByokKey = !!byokEncryptedKey && route.provider === "openrouter";
+    const keySourceForLog: "byo" | "apiclaw" = usesByokKey ? "byo" : "apiclaw";
+
     // Log usage
     try {
       await ctx.runMutation(api.analytics.log, {
@@ -4278,6 +4319,7 @@ http.route({
           routedTo: route.provider,
           routeReason: route.reason,
           authMethod: "api-key",
+          keySource: keySourceForLog,
         },
       });
       await ctx.runMutation(internal.logs.createProxyLog, {
@@ -4286,6 +4328,7 @@ http.route({
         action: "chat_completions",
         subagentId: request.headers.get("X-APIClaw-Subagent") || "main",
         requestId: quotaGate.requestId,
+        keySource: keySourceForLog,
       });
     } catch (e: any) {
       console.error("[Gateway] Logging failed:", e.message);
@@ -4297,9 +4340,37 @@ http.route({
     const oauthPassthrough = request.headers.get("X-APIClaw-OAuth");
     const isPremiumTier = settings.tier === "founder" || settings.tier === "partner";
     const oauthPassthroughEligible = !!(oauthPassthrough && isPremiumTier && route.provider === "openai");
+
+    // BYOH A2 (2026-08-24): dispatch on the workspace's own OpenRouter key
+    // instead of apiclaw's managed key when one is on file. Fail closed on
+    // any decryption problem — never fall back to the managed key, since
+    // that would silently re-bill a call the workspace expected to be free.
+    let byokDecryptedKey: string | null = null;
+    if (usesByokKey) {
+      try {
+        byokDecryptedKey = await decryptProviderKey(byokEncryptedKey!);
+      } catch (e: any) {
+        console.error("[Gateway] BYOK key decryption failed:", e?.message);
+        await finalizeManagedCall(ctx, quotaGate, {
+          success: false,
+          provider: route.provider,
+          providerCostUsd: 0,
+          model: route.model,
+          costSource: "zero_cost",
+        });
+        return jsonResponse({
+          error: {
+            message: "Your stored provider key could not be decrypted. Re-add it and try again.",
+            type: "invalid_request_error",
+            code: "byok_key_unavailable",
+          },
+        }, 502);
+      }
+    }
+
     const effectiveApiKey = oauthPassthroughEligible
       ? oauthPassthrough!.replace(/^Bearer\s+/i, "")
-      : route.apiKey;
+      : byokDecryptedKey ?? route.apiKey;
 
     // Forward to the chosen provider
     let upstreamDispatchAttempted = false;
@@ -6700,15 +6771,9 @@ http.route({
       const ws = await ctx.runQuery(internal.workspaceSettings.getForRouting, { workspaceId });
       respTier = ws?.tier ?? "free";
     } catch {}
-    if (useCodex && respTier !== "founder" && respTier !== "partner") {
-      return jsonResponse({
-        error: {
-          message: "OAuth passthrough is restricted to founder/partner workspaces. External callers must omit X-APIClaw-OAuth.",
-          type: "permission_error",
-          code: "byok_not_permitted",
-        },
-      }, 403);
-    }
+    // Gate opened 2026-08-24 (BYOH decision): any authenticated workspace may
+    // pass through its own Codex OAuth JWT via X-APIClaw-OAuth. Previously
+    // restricted to founder/partner tier only.
     const codexIdempotency = useCodex
       ? requireCodexOAuthIdempotency(request)
       : null;
@@ -6739,7 +6804,9 @@ http.route({
     if (quotaGate instanceof Response) return quotaGate;
 
     // Route: Codex JWT in X-APIClaw-OAuth header → chatgpt.com, else api.openai.com.
-    // Canon: BYOK / OAuth-passthrough restricted to founder/partner workspaces.
+    // Canon (updated 2026-08-24, BYOH decision): OAuth-passthrough is open to
+    // any authenticated workspace, not just founder/partner. authMode literal
+    // name is kept as-is for now (label predates the BYOH opening).
     const authMode: ApiClawAuthMode = useCodex
       ? "founder_oauth_passthrough"
       : "managed_provider_key";
@@ -7391,7 +7458,12 @@ http.route({
 // through this endpoint when backed by a managed adapter. Branches by authType:
 //   "managed" → internal dispatch to existing /proxy/{providerName} adapter
 //   everything else → discovery_only
-// No BYOK. Ever.
+//
+// Canon (updated 2026-08-24, BYOH decision): the old "No BYOK. Ever." rule is
+// retired. BYOK is now a supported rail (see convex/providerKeys.ts and the
+// "byok" traffic class in convex/managedUsagePolicy.ts) — this specific
+// endpoint still only dispatches through managed adapters; BYOK execution
+// lives on the routed paths (chat completions, Codex OAuth passthrough).
 // ==============================================
 
 // Map of managed-provider names → /proxy/{adapter} internal forwarding.

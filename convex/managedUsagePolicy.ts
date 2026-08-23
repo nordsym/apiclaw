@@ -4,8 +4,8 @@ import {
   PAYG_MARGIN_RATE,
 } from "../src/product-truth";
 
-export type ManagedTrafficClass = "customer" | "internal";
-export type ManagedBillingClass = "activation" | "payg" | "internal" | "contract";
+export type ManagedTrafficClass = "customer" | "internal" | "byok";
+export type ManagedBillingClass = "activation" | "payg" | "internal" | "contract" | "byok";
 
 export type ManagedUsageWorkspace = {
   tier: string;
@@ -107,7 +107,9 @@ function baseDecision(
   const totalUsed = managedUsageCount(workspace);
   const activationUsed = activationManagedCallCount(workspace);
   const activationCost = (workspace.activationProviderCostMicros ?? 0) / 1_000_000;
-  const trafficClass = trafficClassOverride === "internal" || isInternalTier(workspace.tier)
+  const trafficClass = trafficClassOverride === "byok"
+    ? "byok"
+    : trafficClassOverride === "internal" || isInternalTier(workspace.tier)
     ? "internal"
     : "customer";
   return {
@@ -139,9 +141,20 @@ export function evaluateManagedUsage(
 ): ManagedUsageDecision {
   const amount = options.amount ?? 1;
   const estimatedProviderCostUsd = options.estimatedProviderCostUsd;
-  const trafficClass = options.trafficClass === "internal" || isInternalTier(workspace.tier)
+  const trafficClass = options.trafficClass === "byok"
+    ? "byok"
+    : options.trafficClass === "internal" || isInternalTier(workspace.tier)
     ? "internal"
     : "customer";
+  // BYOK: the workspace attached its own provider key for this call, so it
+  // pays the provider directly and never touches our billing. Evaluated
+  // before the card-required gate below — no card, no cost to the user,
+  // and unaffected by managedCostHold (that hold is about NordSym-managed
+  // spend, not the workspace's own key). Decision date 2026-08-24 (BYOH).
+  if (trafficClass === "byok") {
+    const base = baseDecision(workspace, "byok", trafficClass);
+    return { ...base, allowed: true, reason: null, warning: null };
+  }
   if (trafficClass === "internal") {
     const base = baseDecision(workspace, "internal", trafficClass);
     return { ...base, allowed: true, reason: null, warning: null };

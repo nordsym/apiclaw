@@ -76,6 +76,23 @@ export function resolveExplicitOpenRouterModel(requestedModel: unknown): string 
     : model;
 }
 
+// BYOH B2 (2026-08-24): resolve which model a chat-completions request
+// should actually use. Fallback order is explicit request model > agent's
+// per-agent defaultModel > workspace-level defaultModel. An explicit request
+// model always wins outright — this is a hard requirement, not a preference.
+// "apiclaw/auto" is treated the same as an unset model (it is apiclaw's own
+// placeholder for "let the platform choose", not a real target model).
+export function resolveEffectiveModel(
+  requestedModel: string | null | undefined,
+  agentDefaultModel: string | null | undefined,
+  workspaceDefaultModel: string | null | undefined,
+): string | null {
+  const isUnset = !requestedModel || requestedModel === "apiclaw/auto";
+  if (!isUnset) return requestedModel as string;
+  if (agentDefaultModel) return agentDefaultModel;
+  return workspaceDefaultModel ?? null;
+}
+
 export function resolveExplicitOpenRouterTarget(
   requestedModel: unknown,
 ): { provider: "openrouter"; model: string } | undefined {

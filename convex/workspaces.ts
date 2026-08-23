@@ -700,15 +700,31 @@ export const getConnectedAgents = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
-    return agentSessions.filter((s) => !isBrowserSession(s)).map((s) => ({
-      id: s._id,
-      fingerprint: s.fingerprint || "Unknown",
-      customName: s.customName || null,
-      name: s.customName || s.fingerprint || "Unknown",
-      lastUsedAt: s.lastUsedAt,
-      createdAt: s.createdAt,
-      isCurrent: s.sessionToken === token,
-    }));
+    // Best-effort join to the agents table (by fingerprint, within this
+    // workspace) so callers can see the per-agent default model alongside
+    // the login session. A session's fingerprint may match zero or more
+    // agents rows (mcpClient not tracked on agentSessions); first match wins.
+    const workspaceAgents = await ctx.db
+      .query("agents")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .collect();
+
+    return agentSessions.filter((s) => !isBrowserSession(s)).map((s) => {
+      const matchedAgent = s.fingerprint
+        ? workspaceAgents.find((a) => a.fingerprint === s.fingerprint)
+        : undefined;
+      return {
+        id: s._id,
+        fingerprint: s.fingerprint || "Unknown",
+        customName: s.customName || null,
+        name: s.customName || s.fingerprint || "Unknown",
+        lastUsedAt: s.lastUsedAt,
+        createdAt: s.createdAt,
+        isCurrent: s.sessionToken === token,
+        agentId: matchedAgent?._id ?? null,
+        defaultModel: matchedAgent?.defaultModel ?? null,
+      };
+    });
   },
 });
 

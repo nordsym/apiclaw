@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation, internalAction } from "./_generated/server";
+import { mutation, query, internalMutation, internalAction, internalQuery } from "./_generated/server";
 import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
@@ -759,7 +759,59 @@ export const getWorkspaceAgents = query({
       callCount: a.callCount,
       firstSeenAt: a.firstSeenAt,
       lastActiveAt: a.lastActiveAt,
+      defaultModel: a.defaultModel ?? null,
     }));
+  },
+});
+
+/**
+ * Set (or clear) an agent's default model. Workspace-scoped: the session
+ * must resolve to the same workspace that owns the agent. BYOH B1, 2026-08-24.
+ */
+export const setDefaultModel = mutation({
+  args: {
+    token: v.string(),
+    agentId: v.id("agents"),
+    defaultModel: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, { token, agentId, defaultModel }) => {
+    const session = await findUsableAgentSession(ctx.db, token);
+    if (!session) throw new Error("Invalid or expired session");
+
+    const agent = await ctx.db.get(agentId);
+    if (!agent) throw new Error("Agent not found");
+    if (agent.workspaceId !== session.workspaceId) {
+      throw new Error("Invalid or expired session");
+    }
+
+    await ctx.db.patch(agentId, {
+      defaultModel: defaultModel ?? undefined,
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Internal: resolve an agent's defaultModel from a raw session token, for
+ * threading agent identity into HTTP routing (BYOH B2, 2026-08-24). Chain:
+ * sessionToken → agentSessions (fingerprint) → agents row (best match within
+ * the same workspace). Only covers X-APIClaw-Session auth; api-key auth does
+ * not carry a fingerprint per request today. Returns null on any miss —
+ * callers must fall back to workspace-level defaultModel, never guess.
+ */
+export const getDefaultModelForSessionToken = internalQuery({
+  args: { sessionToken: v.string() },
+  handler: async (ctx, { sessionToken }) => {
+    const session = await findUsableAgentSession(ctx.db, sessionToken);
+    if (!session || !session.fingerprint) return null;
+
+    const agent = await ctx.db
+      .query("agents")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
+      .filter((q) => q.eq(q.field("fingerprint"), session.fingerprint))
+      .first();
+
+    return agent?.defaultModel ?? null;
   },
 });
 

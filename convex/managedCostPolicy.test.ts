@@ -8,6 +8,7 @@ import {
   normalizeManagedLlmRequestForCost,
   providerReportedUsageCostUsd,
   resolveManagedResponseCost,
+  resolveEffectiveModel,
   resolveExplicitOpenRouterExecution,
   resolveExplicitOpenRouterModel,
   resolveExplicitOpenRouterTarget,
@@ -207,4 +208,40 @@ assert.throws(
   /function tools only/,
 );
 
-console.log("managed cost policy: fixed providers are priced and variable providers fail closed");
+// BYOH B2 (2026-08-24): resolveEffectiveModel fallback order is
+// explicit request model > agent.defaultModel > workspace defaultModel. An
+// explicit model always wins outright, no matter what agent/workspace
+// defaults are set — this is a hard requirement (zero behavior change for
+// any request that already passes an explicit model).
+assert.equal(
+  resolveEffectiveModel("anthropic/claude-sonnet-4-6", "openai/gpt-5.4", "mistral/mistral-large"),
+  "anthropic/claude-sonnet-4-6",
+  "explicit request model always wins",
+);
+assert.equal(
+  resolveEffectiveModel("apiclaw/auto", "openai/gpt-5.4", "mistral/mistral-large"),
+  "openai/gpt-5.4",
+  "apiclaw/auto model falls through to the agent default",
+);
+assert.equal(
+  resolveEffectiveModel(undefined, "openai/gpt-5.4", "mistral/mistral-large"),
+  "openai/gpt-5.4",
+  "unset model falls through to the agent default",
+);
+assert.equal(
+  resolveEffectiveModel("", null, "mistral/mistral-large"),
+  "mistral/mistral-large",
+  "no agent default falls through to the workspace default",
+);
+assert.equal(
+  resolveEffectiveModel(null, null, null),
+  null,
+  "no explicit model, agent default, or workspace default resolves to null",
+);
+assert.equal(
+  resolveEffectiveModel("apiclaw/auto", null, undefined),
+  null,
+  "apiclaw/auto with nothing configured resolves to null, not the literal string",
+);
+
+console.log("managed cost policy: fixed providers are priced and variable providers fail closed, model resolution order is explicit > agent default > workspace default");

@@ -244,4 +244,38 @@ assert.deepEqual(customerChargeForProviderCost(1, "activation"), { customerCharg
 assert.deepEqual(customerChargeForProviderCost(1, "internal"), { customerChargeUsd: 0, marginUsd: 0 });
 assert.deepEqual(customerChargeForProviderCost(1, "payg"), { customerChargeUsd: 1.15, marginUsd: 0.1499999999999999 });
 
-console.log("managed usage policy: zero-cost calls are free forever, paid calls require a card, entitlement and traffic classes hold");
+// BYOH (2026-08-24): a "byok" traffic class call is always allowed, no card,
+// no cost to the workspace — evaluated before the card-required gate. It
+// applies even to a heavy-usage free-tier workspace with no payment method.
+const byokWorkspace = { tier: "free", managedUsageCount: 500 };
+const byokUnpriced = evaluateManagedUsage(byokWorkspace, { trafficClass: "byok" });
+assert.equal(byokUnpriced.allowed, true);
+assert.equal(byokUnpriced.reason, null);
+assert.equal(byokUnpriced.trafficClass, "byok");
+assert.equal(byokUnpriced.billingClass, "byok");
+
+const byokWithCost = evaluateManagedUsage(byokWorkspace, {
+  trafficClass: "byok",
+  estimatedProviderCostUsd: 5,
+  billingGradeCost: true,
+});
+assert.equal(byokWithCost.allowed, true, "byok is free regardless of estimated provider cost");
+assert.equal(byokWithCost.reason, null);
+
+// byok is evaluated before the card-required gate: no payment method on file
+// and a real, proven, non-zero cost would normally require a card, but the
+// byok branch short-circuits before that check is ever reached.
+assert.equal(
+  evaluateManagedUsage({ tier: "free", hasPaymentMethod: false }, {
+    trafficClass: "byok",
+    estimatedProviderCostUsd: 10,
+    billingGradeCost: true,
+  }).allowed,
+  true,
+);
+
+// A byok call never earns a customer charge (the workspace pays its own
+// provider directly, not through apiclaw's margin).
+assert.deepEqual(customerChargeForProviderCost(5, "byok"), { customerChargeUsd: 0, marginUsd: 0 });
+
+console.log("managed usage policy: zero-cost calls are free forever, paid calls require a card, entitlement and traffic classes hold, byok bypasses the card gate");

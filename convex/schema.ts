@@ -175,12 +175,13 @@ export default defineSchema({
     action: v.string(),
     model: v.optional(v.string()),
     path: v.string(),
-    trafficClass: v.union(v.literal("customer"), v.literal("internal")),
+    trafficClass: v.union(v.literal("customer"), v.literal("internal"), v.literal("byok")),
     billingClass: v.union(
       v.literal("activation"),
       v.literal("payg"),
       v.literal("internal"),
-      v.literal("contract")
+      v.literal("contract"),
+      v.literal("byok")
     ),
     status: v.union(
       v.literal("authorized"),
@@ -290,6 +291,7 @@ export default defineSchema({
     callCount: v.number(),
     firstSeenAt: v.number(),
     lastActiveAt: v.number(),
+    defaultModel: v.optional(v.string()), // per-agent default model override (BYOH B1, 2026-08-24)
   })
     .index("by_fingerprint_client", ["fingerprint", "mcpClient"])
     .index("by_workspaceId", ["workspaceId"])
@@ -750,6 +752,7 @@ export default defineSchema({
     callerWorkspaceId: v.optional(v.string()), // who made the call (for inbound logs)
     costCents: v.optional(v.number()), // patched in post-hoc from managedCallLedger via requestId
     requestId: v.optional(v.string()), // shared key with managedCallLedger, when this call went through managed metering
+    keySource: v.optional(v.union(v.literal("byo"), v.literal("apiclaw"))), // which rail's credential executed this call (BYOH, 2026-08-24)
     createdAt: v.number(),
   })
     .index("by_workspaceId", ["workspaceId"])
