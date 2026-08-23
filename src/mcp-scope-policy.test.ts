@@ -97,7 +97,10 @@ for (const brokenTool of ["list_capabilities", "capability", "get_chain_status",
 }
 assert.doesNotMatch(canonicalSource, /__list__|__chain_status__|__chain_resume__/);
 
-const homePage = readFileSync("landing/src/app/page.tsx", "utf8");
+// Homepage design reset (2026-08-23) split page.tsx into landing/src/components/home/*;
+// the Remote MCP surface disclosure now lives in Faq.tsx.
+const homePage = readFileSync("landing/src/app/page.tsx", "utf8")
+  + readFileSync("landing/src/components/home/Faq.tsx", "utf8");
 const copiedSurface = homePage.match(/Remote MCP surface \((\d+) tools\): ([^.\n]+)\./);
 assert.ok(copiedSurface, "homepage copy must declare the Remote MCP surface");
 const copiedNames = copiedSurface[2].split(",").map((name) => name.trim());

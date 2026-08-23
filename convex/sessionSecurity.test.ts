@@ -76,8 +76,13 @@ const oauthAuthorizeRouteSource = readFileSync(
   join(convexDir, "../landing/src/app/api/oauth/authorize/route.ts"),
   "utf8",
 );
+// Workspace rebuild (137d5c4, 2026-08-23) split page.tsx into views/*.tsx;
+// the API key mint call now lives in views/Connections.tsx.
 const workspacePageSource = readFileSync(
   join(convexDir, "../landing/src/app/workspace/page.tsx"),
+  "utf8",
+) + readFileSync(
+  join(convexDir, "../landing/src/app/workspace/views/Connections.tsx"),
   "utf8",
 );
 const integrationsPageSource = readFileSync(

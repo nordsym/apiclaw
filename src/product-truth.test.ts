@@ -192,7 +192,8 @@ const workspacePage = [
   readFileSync("landing/src/components/WorkspaceCatalog.tsx", "utf8"),
   readFileSync("landing/src/lib/workspace-truth.ts", "utf8"),
 ].join("\n");
-for (const label of ["Home", "Catalog & Test", "Connections", "Activity", "Billing", "Settings"]) {
+// Workspace rebuild (137d5c4, 2026-08-23) renamed the tab from "Catalog & Test" to "Catalog".
+for (const label of ["Home", "Catalog", "Connections", "Activity", "Billing", "Settings"]) {
   assert.match(workspacePage, new RegExp(`\\b${label.replace("&", "\\&")}\\b`), `workspace is missing ${label}`);
 }
 assert.doesNotMatch(workspacePage, /Together(?: AI)?/, "retired provider must not appear in workspace UI");

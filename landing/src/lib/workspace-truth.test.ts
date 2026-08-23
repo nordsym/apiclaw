@@ -50,7 +50,9 @@ assert.match(workspaceCatalogSource, /"Idempotency-Key": idempotencyKey/);
 assert.match(workspaceCatalogSource, /testCallIdempotencyKeyRef\.current = idempotencyKey/);
 assert.match(workspaceCatalogSource, /testCallIdempotencyKeyRef\.current = null/);
 assert.match(workspaceCatalogSource, /errorCode === "idempotency_conflict" \|\| response\.status >= 500/);
-assert.match(workspaceCatalogSource, /disabled=\{outcomeUnknown\}/);
+// Workspace rebuild (137d5c4, 2026-08-23) also disables the test-call controls
+// while a call is running, not only when its outcome is unknown.
+assert.match(workspaceCatalogSource, /disabled=\{outcomeUnknown \|\| running\}/);
 assert.match(workspaceCatalogSource, /sessionStorage\.setItem\(TEST_CALL_PENDING_STORAGE_KEY/);
 assert.match(workspaceCatalogSource, /customerExecutableActions\?\.length/);
 assert.match(workspaceCatalogSource, /actions: provider\.customerExecutableActions/);

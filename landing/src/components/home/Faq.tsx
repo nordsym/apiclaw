@@ -31,6 +31,10 @@ const ITEMS: Array<{ q: string; a: React.ReactNode }> = [
     q: "What does it cost?",
     a: `Free: ${FREE_MANAGED_CALLS_LIFETIME} managed calls for the lifetime of the workspace, subject to a $${FREE_MANAGED_PROVIDER_COST_CAP_USD} total underlying provider-cost cap. Discovery is free. After that, billing-ready managed actions run at provider cost plus ${PAYG_MARGIN_PERCENT}%, billed through Stripe. Actions without an exact billing adapter remain blocked. No commitment.`,
   },
+  {
+    q: "What does Remote MCP expose?",
+    a: "Remote MCP surface (14 tools): apiclaw_help, discover_apis, get_api_details, list_categories, list_connected, list_models, call_api, check_balance, check_workspace_status, list_mission_templates, start_mission, discover_missions, mission_status, list_missions.",
+  },
 ];
 
 export function Faq() {

@@ -5,7 +5,10 @@ const workspaces = readFileSync("convex/workspaces.ts", "utf8");
 const providers = readFileSync("convex/providers.ts", "utf8");
 const managedRouting = readFileSync("convex/managedRouting.ts", "utf8");
 const mcp = readFileSync("src/index.ts", "utf8");
-const workspacePage = readFileSync("landing/src/app/workspace/page.tsx", "utf8");
+// Workspace rebuild (137d5c4, 2026-08-23) split page.tsx into views/*.tsx;
+// the settings form (defaultModel etc) now lives in views/Settings.tsx.
+const workspacePage = readFileSync("landing/src/app/workspace/page.tsx", "utf8")
+  + readFileSync("landing/src/app/workspace/views/Settings.tsx", "utf8");
 const adminPage = readFileSync("landing/src/app/admin/page.tsx", "utf8");
 const workspaceSettings = readFileSync("convex/workspaceSettings.ts", "utf8");
 const workspaceCatalog = readFileSync("landing/src/components/WorkspaceCatalog.tsx", "utf8");

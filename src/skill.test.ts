@@ -14,8 +14,24 @@ assert.equal(existsSync("landing/public/llms.txt"), true, "llms.txt remains iden
 assert.equal(existsSync("landing/src/app/api/catalog/route.ts"), true, "/api/catalog remains the live count source");
 
 const skill = readFileSync(SKILL_PATH, "utf8");
-const homepage = readFileSync("landing/src/app/page.tsx", "utf8");
-const hero = readFileSync("landing/src/components/HeroDoorsPreview.tsx", "utf8");
+// Homepage design reset (2026-08-23, a819b6d/891f444/66ccb17) split page.tsx
+// into landing/src/components/home/*; HeroDoorsPreview.tsx no longer exists,
+// its content moved into Hero.tsx and Connect.tsx. Read the composed tree.
+const HOME_DIR = "landing/src/components/home";
+const homeFiles = [
+  "landing/src/app/page.tsx",
+  `${HOME_DIR}/Hero.tsx`,
+  `${HOME_DIR}/Connect.tsx`,
+  `${HOME_DIR}/Loop.tsx`,
+  `${HOME_DIR}/Proof.tsx`,
+  `${HOME_DIR}/Owners.tsx`,
+  `${HOME_DIR}/Faq.tsx`,
+  `${HOME_DIR}/SiteHeader.tsx`,
+  `${HOME_DIR}/SiteFooter.tsx`,
+  `${HOME_DIR}/truth.ts`,
+];
+const homepage = homeFiles.map((f) => readFileSync(f, "utf8")).join("\n");
+const hero = readFileSync(`${HOME_DIR}/Hero.tsx`, "utf8") + readFileSync(`${HOME_DIR}/truth.ts`, "utf8");
 const llms = readFileSync("landing/public/llms.txt", "utf8");
 const agents = readFileSync("landing/public/agents.md", "utf8");
 
@@ -41,11 +57,13 @@ assert.doesNotMatch(skill, /twilio|resend|46elks|together/i);
 assert.doesNotMatch(skill, /npm i -g @nordsym\/apiclaw/, "do not require a global install");
 
 assert.match(homepage, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/, "homepage shows the agent one-liner");
-assert.match(homepage, /Give this to your agent/);
+// The "Give this to your agent" section eyebrow was cut in the quiet-console
+// reset; Hero.tsx now carries the same directive as body copy.
+assert.match(homepage, /Paste one line to your agent/);
 assert.match(homepage, /curl -fsSL https:\/\/apiclaw\.cloud\/install\.sh \| bash/, "curl|bash stays a first-class door");
 assert.match(homepage, /npx @nordsym\/apiclaw auth login/, "CLI auth stays a first-class door");
-assert.match(homepage, /label: "Callable now"/, "headline metric is callable, not installs");
-assert.match(homepage, /label: "Managed adapters"/);
+assert.match(homepage, /label: "callable now"/, "headline metric is callable, not installs");
+assert.match(homepage, /label: "managed adapters"/);
 assert.doesNotMatch(homepage, /label: "npm installs"/, "installs are not the metric that matters");
 
 assert.match(hero, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/, "hero doors show the skill one-liner");
