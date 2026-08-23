@@ -42,7 +42,6 @@ export interface GatewayResponse {
     message: string;
     signupUrl: string;
     docsUrl?: string;
-    freeTierCalls?: number;
   };
   _apiclaw?: {
     latencyMs: number;
@@ -216,10 +215,6 @@ export class GatewayClient {
                   docsUrl: errObj.docsUrl
                     ? String(errObj.docsUrl)
                     : "https://apiclaw.cloud/install",
-                  freeTierCalls:
-                    typeof errObj.freeTierCalls === "number"
-                      ? errObj.freeTierCalls
-                      : 25,
                 },
               }
             : {}),

@@ -1972,7 +1972,6 @@ Docs: https://apiclaw.cloud
             message: string;
             signupUrl: string;
             docsUrl?: string;
-            freeTierCalls?: number;
           };
           return {
             content: [
@@ -1985,7 +1984,6 @@ Docs: https://apiclaw.cloud
                     'Run `npx @nordsym/apiclaw auth login` in a terminal, finish the browser sign-in, then retry the original call.',
                   command: 'npx @nordsym/apiclaw auth login',
                   signup_url: ar.signupUrl,
-                  free_tier_calls: ar.freeTierCalls,
                   provider,
                   action,
                 }, null, 2),

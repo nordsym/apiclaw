@@ -1093,7 +1093,6 @@ function unauthResponse(reason: string) {
         reason,
         signupUrl: "https://apiclaw.cloud/workspace",
         docsUrl: "https://apiclaw.cloud/install",
-        freeTierCalls: 25,
       },
     },
     401
