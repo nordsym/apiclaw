@@ -34,6 +34,10 @@ const homepage = homeFiles.map((f) => readFileSync(f, "utf8")).join("\n");
 const hero = readFileSync(`${HOME_DIR}/Hero.tsx`, "utf8") + readFileSync(`${HOME_DIR}/truth.ts`, "utf8");
 const llms = readFileSync("landing/public/llms.txt", "utf8");
 const agents = readFileSync("landing/public/agents.md", "utf8");
+// Polish pass (2026-08-23): the public homepage/catalog show only "discoverable"
+// and "callable now" to avoid an unexplained internal metric; the adapter count
+// and source-verified count moved to /docs's "Catalog numbers" block.
+const docsPage = readFileSync("landing/src/app/docs/page.tsx", "utf8");
 
 assert.match(skill, /npx @nordsym\/apiclaw auth login/, "auth is Clerk via auth login");
 assert.match(skill, /~\/\.apiclaw\.toml/, "existing toml session is enough");
@@ -63,7 +67,8 @@ assert.match(homepage, /Paste one line to your agent/);
 assert.match(homepage, /curl -fsSL https:\/\/apiclaw\.cloud\/install\.sh \| bash/, "curl|bash stays a first-class door");
 assert.match(homepage, /npx @nordsym\/apiclaw auth login/, "CLI auth stays a first-class door");
 assert.match(homepage, /label: "callable now"/, "headline metric is callable, not installs");
-assert.match(homepage, /label: "managed adapters"/);
+assert.doesNotMatch(homepage, /label: "managed adapters"/, "adapter count moved off the public homepage to /docs");
+assert.match(docsPage, /managed provider adapters/, "adapter inventory stays canon on /docs");
 assert.doesNotMatch(homepage, /label: "npm installs"/, "installs are not the metric that matters");
 
 assert.match(hero, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/, "hero doors show the skill one-liner");

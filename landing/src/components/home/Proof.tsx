@@ -2,10 +2,7 @@
 
 import statsData from "@/lib/stats.json";
 import { PLANS } from "@/lib/plans";
-import {
-  MANAGED_PROVIDER_ADAPTER_COUNT,
-  PAYG_MARGIN_RATE,
-} from "@apiclaw/product-truth";
+import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
@@ -19,10 +16,6 @@ const FIGURES = [
     value: (statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString("en-US"),
     label: "callable now",
   },
-  {
-    value: String(statsData.managedProviderAdapterCount ?? MANAGED_PROVIDER_ADAPTER_COUNT),
-    label: "managed adapters",
-  },
 ];
 
 export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
@@ -35,7 +28,7 @@ export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
             <h2 className="claw-h2">Live today.</h2>
           </div>
 
-          <dl className="mt-12 grid gap-8 sm:grid-cols-3 sm:gap-8">
+          <dl className="mt-12 grid gap-8 sm:grid-cols-2 sm:gap-8">
             {FIGURES.map((f) => (
               <div key={f.label} className="border-t border-border-subtle pt-5">
                 <dd className="claw-display text-[2.4rem] sm:text-[2.75rem] text-text-primary">{f.value}</dd>

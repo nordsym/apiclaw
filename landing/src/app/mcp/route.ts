@@ -237,7 +237,7 @@ async function handleRpc(rpc: JsonRpcRequest, ctx: WorkspaceContext) {
         version: "1.0.0",
       },
       instructions:
-        "APIClaw is the Control Plane for AI Agents. Discover 26,000+ APIs (discover_apis), execute managed providers (call_api), or run full multi-step missions (start_mission). Workspace observability lives in check_balance and mission_status. All state belongs to the email-verified workspace this token authorized.",
+        "APIClaw: authenticated execution and discovery layer for agents. Discover 26,000+ APIs (discover_apis), execute managed providers (call_api), or run full multi-step missions (start_mission). Workspace observability lives in check_balance and mission_status. All state belongs to the email-verified workspace this token authorized.",
     });
   }
 

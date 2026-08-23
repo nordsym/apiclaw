@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { WorkspaceSurfaceId } from "@/lib/workspace-truth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export type ShellTab = { id: WorkspaceSurfaceId; label: string };
 
@@ -50,11 +51,16 @@ export function WorkspaceShell({ tabs, activeTab, onTabChange, workspaceName, ti
 
   const identity = (
     <div className="border-t border-[var(--border-subtle)] px-4 py-3.5">
-      <p className="truncate text-[13px] text-[var(--text-primary)]">{workspaceName}</p>
-      <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
-        <span className="capitalize">{tierLabel}</span>
-        {usageLabel && <span> · <span className={usageLow ? "text-[var(--accent)]" : ""}>{usageLabel}</span></span>}
-      </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-[13px] text-[var(--text-primary)]">{workspaceName}</p>
+          <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">
+            <span className="capitalize">{tierLabel}</span>
+            {usageLabel && <span> · <span className={usageLow ? "text-[var(--accent)]" : ""}>{usageLabel}</span></span>}
+          </p>
+        </div>
+        <ThemeToggle className="!h-8 !w-8 shrink-0" />
+      </div>
       <button type="button" onClick={onLogout} className="mt-2 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Sign out</button>
     </div>
   );

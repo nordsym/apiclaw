@@ -4,10 +4,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* Site-wide tokens: APIClaw is dark-committed. Light palette retired. */
+/* Site-wide tokens. Dark is default/SSR; .light is applied client-side (see src/lib/theme.ts). */
 :root,
-.dark,
-.light {
+.dark {
   --background: #0b0b0c;
   --foreground: #f5f5f6;
   --surface: #111113;
@@ -20,8 +19,39 @@
   --accent: #ef4444;
   --accent-glow: rgba(239, 68, 68, 0.2);
   --accent-soft: rgba(239, 68, 68, 0.12);
+  --accent-faint: rgba(239, 68, 68, 0.05);
   --ok: #3ecf8e;
+  --btn-primary-bg: #f5f5f6;
+  --btn-primary-fg: #0b0b0c;
+  --btn-primary-hover: #ffffff;
+  --code-line: #e5e5e5;
+  --code-comment: #6b7280;
+  --shadow-session: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 30px 60px -40px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
+}
+
+.light {
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --surface: #ffffff;
+  --surface-elevated: #f4f4f5;
+  --border: #e4e4e7;
+  --border-subtle: #ececef;
+  --text-primary: #0a0a0a;
+  --text-secondary: #52525b;
+  --text-muted: #7c7c85;
+  --accent: #ef4444;
+  --accent-glow: rgba(239, 68, 68, 0.16);
+  --accent-soft: rgba(239, 68, 68, 0.08);
+  --accent-faint: rgba(239, 68, 68, 0.06);
+  --ok: #1f9d63;
+  --btn-primary-bg: #0a0a0a;
+  --btn-primary-fg: #ffffff;
+  --btn-primary-hover: #262626;
+  --code-line: #18181b;
+  --code-comment: #71717a;
+  --shadow-session: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 20px 40px -30px rgba(10, 10, 10, 0.16);
+  color-scheme: light;
 }
 
 html {
@@ -111,7 +141,7 @@ h1, h2, h3 {
 .terminal-title {
   margin-left: auto;
   font-size: 12px;
-  color: #525252;
+  color: var(--text-muted);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -124,24 +154,24 @@ h1, h2, h3 {
 }
 
 .terminal-prompt {
-  color: #ef4444;
+  color: var(--accent);
   user-select: none;
 }
 
 .terminal-command {
-  color: #f5f5f5;
+  color: var(--text-primary);
 }
 
 .terminal-output {
-  color: #737373;
+  color: var(--text-muted);
 }
 
 .terminal-success {
-  color: #22c55e;
+  color: var(--ok);
 }
 
 .terminal-accent {
-  color: #ef4444;
+  color: var(--accent);
 }
 
 /* Typing cursor */
@@ -149,7 +179,7 @@ h1, h2, h3 {
   display: inline-block;
   width: 10px;
   height: 20px;
-  background: #ef4444;
+  background: var(--accent);
   margin-left: 2px;
   animation: blink 1s step-end infinite;
   vertical-align: middle;
@@ -165,7 +195,7 @@ input[type="email"] {
 input[type="email"]:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 input[type="email"]::placeholder {
@@ -181,8 +211,8 @@ input[type="email"]::placeholder {
   font-size: 13px;
   font-weight: 600;
   border-radius: 9999px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-glow);
   color: var(--accent);
 }
 
@@ -195,7 +225,7 @@ input[type="email"]::placeholder {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #22c55e;
+  background: var(--ok);
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
@@ -229,15 +259,15 @@ input[type="email"]::placeholder {
   font-weight: 600;
   font-size: 15px;
   border-radius: 10px;
-  background: var(--text-primary);
-  color: var(--background);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
   transition: all 0.2s ease;
   border: none;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: #ffffff;
+  background: var(--btn-primary-hover);
 }
 
 .btn-primary:active {
@@ -286,7 +316,7 @@ input[type="email"]::placeholder {
 
 .btn-ghost:hover {
   color: var(--accent);
-  background: rgba(239, 68, 68, 0.05);
+  background: var(--accent-faint);
 }
 
 /* Code preview */
@@ -313,10 +343,10 @@ input[type="email"]::placeholder {
 
 .code-preview pre {
   margin: 0;
-  color: #e5e5e5;
+  color: var(--code-line);
 }
 
-.code-comment { color: #6b7280; }
+.code-comment { color: var(--code-comment); }
 .code-string { color: var(--ok); }
 .code-keyword { color: var(--text-primary); }
 .code-function { color: var(--accent); }
@@ -350,9 +380,10 @@ input[type="email"]::placeholder {
 }
 
 /* ------------------------------------------------------------------
-   APIClaw homepage design system ("the quiet console").
-   Scoped to .claw so the homepage is dark-committed regardless of the
-   html theme class. Other routes keep their own theme handling.
+   APIClaw design system ("the quiet console").
+   Scoped to .claw. Colors are token-driven, so it follows the html
+   theme class (.dark / .light, see src/lib/theme.ts) like every other
+   route.
    ------------------------------------------------------------------ */
 .claw {
   background: var(--background);
@@ -443,10 +474,10 @@ input[type="email"]::placeholder {
 .claw-btn:active { transform: translateY(1px); }
 
 .claw-btn-solid {
-  background: var(--text-primary);
-  color: var(--background);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
 }
-.claw-btn-solid:hover { background: #ffffff; }
+.claw-btn-solid:hover { background: var(--btn-primary-hover); }
 
 .claw-btn-quiet {
   background: transparent;
@@ -494,7 +525,7 @@ input[type="email"]::placeholder {
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 30px 60px -40px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--shadow-session);
 }
 .claw-session-bar {
   display: flex;
@@ -631,12 +662,12 @@ input[type="email"]::placeholder {
 
 /* Hero primary: the command line is the call to action. */
 .claw-cmd-primary {
-  background: var(--text-primary);
-  border-color: var(--text-primary);
-  color: var(--background);
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
   min-height: 52px;
   font-size: 14px;
 }
-.claw-cmd-primary:hover { background: #ffffff; border-color: #ffffff; }
-.claw-cmd-primary .state { color: var(--background); opacity: 0.6; font-weight: 500; }
-.claw-cmd-primary .state[data-copied="true"] { opacity: 1; color: var(--background); }
+.claw-cmd-primary:hover { background: var(--btn-primary-hover); border-color: var(--btn-primary-hover); }
+.claw-cmd-primary .state { color: var(--btn-primary-fg); opacity: 0.6; font-weight: 500; }
+.claw-cmd-primary .state[data-copied="true"] { opacity: 1; color: var(--btn-primary-fg); }

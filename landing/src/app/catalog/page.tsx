@@ -190,15 +190,12 @@ export default function CatalogPage() {
           <p className="claw-eyebrow mb-4">Catalog</p>
           <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">API Catalog</h1>
           <p className="claw-lede mt-5 max-w-2xl">
-            {indexedCount.toLocaleString("en-US")} APIs discoverable by agents. Source verification is not execution: the callable count is what a workspace can run today.
+            {indexedCount.toLocaleString("en-US")} APIs discoverable by agents.
           </p>
 
           <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-5">
             {[
               { n: indexedCount, label: "discoverable" },
-              { n: sourceVerifiedHeadline, label: "source-verified" },
-              { n: discoveryOnlyHeadline, label: "discovery-only" },
-              { n: managedProviderAdapterCount, label: "managed adapters" },
               { n: customerExecutionHeadline, label: "callable now" },
             ].map((s) => (
               <div key={s.label} className="border-t border-border-subtle pt-4">
@@ -242,7 +239,7 @@ export default function CatalogPage() {
           {/* Tier filter */}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="claw-segments w-max max-w-full" aria-label="View">
-              {tierOptions.map(({ id, label, count }) => {
+              {tierOptions.filter(({ id }) => id === "" || id === "callable").map(({ id, label, count }) => {
                 const active = tierFilter === id;
                 return (
                   <button
@@ -322,7 +319,7 @@ export default function CatalogPage() {
           {!loading && (
             <div className="mt-10 flex items-center justify-between gap-4 text-[13px] text-text-muted">
               <span>
-                {total.toLocaleString("en-US")} {callableOnly || tierFilter === "callable" ? "customer-callable " : tierFilter === "adapter" ? "managed-adapter " : tierFilter === "verified" ? "source-verified " : tierFilter === "discovery" ? "discovery-only " : ""}APIs{selectedCategory ? ` in ${selectedCategory}` : ""}{query ? ` matching "${query}"` : ""}
+                {total.toLocaleString("en-US")} {callableOnly || tierFilter === "callable" ? "callable " : ""}APIs{selectedCategory ? ` in ${selectedCategory}` : ""}{query ? ` matching "${query}"` : ""}
               </span>
               {selectedCategory && (
                 <button type="button" onClick={() => setSelectedCategory("")} className="claw-link inline-flex items-center gap-1">
@@ -427,18 +424,6 @@ function ApiRow({ api }: { api: ApiEntry }) {
             {api.actions?.length ? (
               <span>{api.actions.length} {api.actions.length === 1 ? "action" : "actions"}</span>
             ) : null}
-          </>
-        ) : api.managedAdapter ? (
-          <>
-            <span title="Credentialed adapter inventory. Customer execution is not enabled until billing-grade cost truth is verified.">managed adapter</span>
-            <span>not callable yet</span>
-          </>
-        ) : api.verified ? (
-          <>
-            <span title={api.latency_ms ? `Source verification passed, ${api.latency_ms} ms` : "Source verification passed; APIClaw execution is not enabled"}>
-              source-verified{api.latency_ms ? ` ${api.latency_ms}ms` : ""}
-            </span>
-            <span>not executable</span>
           </>
         ) : null}
         <span>{authLabel}</span>

@@ -366,6 +366,28 @@ call_api({
 
             <div className="claw-rule my-16 sm:my-20" />
 
+            {/* Catalog numbers */}
+            <section>
+              <h2 className="claw-h2">Catalog numbers</h2>
+              <p className={`${BODY} mt-4`}>Source verification is not execution: a source-verified entry passed a reachability check, not a customer call.</p>
+              <ul className="mt-5 border-t border-border-subtle">
+                <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
+                  <span className={META}>{statsData.apiCount.toLocaleString("en-US")} API definitions</span>
+                  <span className={BODY}>Discoverable by agents via the catalog.</span>
+                </li>
+                <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
+                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString("en-US")} callable now</span>
+                  <span className={BODY}>What a workspace can execute today, of which {statsData.managedProviderAdapterCount} are managed provider adapters.</span>
+                </li>
+                <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
+                  <span className={META}>{statsData.sourceVerifiedCount.toLocaleString("en-US")} source-verified</span>
+                  <span className={BODY}>Passed a live reachability check against the source. Not a claim of execution.</span>
+                </li>
+              </ul>
+            </section>
+
+            <div className="claw-rule my-16 sm:my-20" />
+
             {/* Support */}
             <section>
               <h2 className="claw-h2">Support</h2>

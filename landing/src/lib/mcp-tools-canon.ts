@@ -433,7 +433,7 @@ export async function dispatchCanonicalTool(
   switch (name) {
     case "apiclaw_help":
       return {
-        name: "APIClaw — The Control Plane for AI Agents",
+        name: "APIClaw: authenticated execution and discovery layer for agents.",
         tools: CANONICAL_MCP_TOOLS.map((t) => ({ name: t.name, description: t.description })),
         docs: "https://apiclaw.cloud/docs",
         catalog: "https://apiclaw.cloud/catalog",
