@@ -16,7 +16,6 @@ type Path = {
   label: string;
   title: string;
   body: string;
-  fit: string;
   snippet: React.ReactNode;
   doc: { href: string; label: string };
 };
@@ -25,18 +24,16 @@ const PATHS: Path[] = [
   {
     id: "skill",
     label: "Skill",
-    title: "Hand your agent one line.",
-    body: "The agent reads SKILL.md, signs in through your browser with Clerk, and lands its first POST /v1/execute on its own. It never asks you for a token.",
-    fit: "Any agent that can read a URL and run a shell.",
+    title: "For any agent that can read a URL.",
+    body: "It reads SKILL.md, signs you in through the browser, and makes its first call. It never asks for a token.",
     snippet: <CopyLine text={SKILL_SETUP_LINE} prompt="›" />,
     doc: { href: "/SKILL.md", label: "Read SKILL.md" },
   },
   {
     id: "mcp",
     label: "MCP",
-    title: "Local MCP server.",
-    body: "One script installs the server and opens sign-in. Claude Desktop can also take the one-click .mcpb bundle.",
-    fit: "Claude Desktop and other local MCP clients.",
+    title: "For Claude Desktop and local MCP clients.",
+    body: "One script installs the server and opens sign-in.",
     snippet: (
       <div className="space-y-2">
         <CopyLine text={INSTALL_LINE} />
@@ -50,9 +47,8 @@ const PATHS: Path[] = [
   {
     id: "cli",
     label: "CLI",
-    title: "Terminal, scripts, CI.",
-    body: "Sign in once, then call any provider as provider/action. The CLI maps straight onto POST /v1/execute.",
-    fit: "Agents that already live in a repo or pipeline.",
+    title: "For terminals, scripts and CI.",
+    body: "Sign in once, then call any provider as provider/action.",
     snippet: (
       <div className="space-y-2">
         <CopyLine text={AUTH_LINE} />
@@ -64,9 +60,8 @@ const PATHS: Path[] = [
   {
     id: "http",
     label: "HTTP",
-    title: "One endpoint for your own runtime.",
-    body: "Authenticate with a workspace key, send provider, action and params. Managed calls take one Idempotency-Key per logical operation.",
-    fit: "Server-side agents and custom runtimes.",
+    title: "For your own runtime.",
+    body: "One endpoint, one workspace key, one call shape.",
     snippet: (
       <pre className="claw-mono whitespace-pre-wrap break-words sm:whitespace-pre sm:overflow-x-auto rounded-[10px] border border-border-subtle bg-surface px-4 py-3.5 text-[12.5px] leading-[1.7] text-text-secondary">
         <span className="text-text-primary">POST</span> {HTTP_EXECUTE_URL}{"\n"}
@@ -81,9 +76,8 @@ const PATHS: Path[] = [
   {
     id: "remote",
     label: "Remote MCP",
-    title: "Connect without installing anything.",
-    body: "OAuth-capable clients connect to the hosted MCP endpoint through your workspace and get the same tools, logs and limits.",
-    fit: "Connected clients and OAuth-capable runtimes.",
+    title: "For connected clients. Nothing to install.",
+    body: "OAuth-capable clients connect to the hosted endpoint through your workspace.",
     snippet: <CopyLine text={REMOTE_MCP_URL} prompt="›" />,
     doc: { href: "/docs#remote-mcp", label: "Remote MCP docs" },
   },
@@ -116,10 +110,7 @@ export function Connect() {
         <div className="py-20 sm:py-28">
           <div className="max-w-[36rem]">
             <p className="claw-eyebrow mb-4">Connect</p>
-            <h2 className="claw-h2">Five ways in. One workspace.</h2>
-            <p className="claw-lede mt-4">
-              Pick the path that matches where your agent runs. The sign-in, the workspace and the logs are the same behind every one.
-            </p>
+            <h2 className="claw-h2">Choose how to connect.</h2>
           </div>
 
           <div className="mt-10">
@@ -150,7 +141,6 @@ export function Connect() {
               <div>
                 <h3 className="text-[1.25rem] font-semibold tracking-[-0.02em] text-text-primary">{path.title}</h3>
                 <p className="mt-3 text-[15px] leading-[1.65] text-text-secondary">{path.body}</p>
-                <p className="mt-4 text-[13px] text-text-muted">For: {path.fit}</p>
                 <a href={path.doc.href} className="claw-link mt-5 inline-flex items-center gap-1.5 text-[14px] text-text-primary">
                   {path.doc.label}
                   <span aria-hidden="true">→</span>
@@ -160,9 +150,7 @@ export function Connect() {
             </div>
           </div>
 
-          <p className="mt-12 text-[13px] text-text-muted">
-            Same Clerk sign-in, same workspace, same logs across all five. <span className="claw-mono text-text-secondary">{AUTH_LINE}</span> covers every path.
-          </p>
+          <p className="mt-10 text-[13px] text-text-muted">Same sign-in and workspace behind every path.</p>
         </div>
       </div>
     </section>

@@ -680,3 +680,15 @@ input[type="email"]::placeholder {
   font-size: 13px;
   color: var(--text-primary);
 }
+
+/* Hero primary: the command line is the call to action. */
+.claw-cmd-primary {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--background);
+  min-height: 52px;
+  font-size: 14px;
+}
+.claw-cmd-primary:hover { background: #ffffff; border-color: #ffffff; }
+.claw-cmd-primary .state { color: var(--background); opacity: 0.6; font-weight: 500; }
+.claw-cmd-primary .state[data-copied="true"] { opacity: 1; color: var(--background); }
