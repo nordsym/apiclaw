@@ -38,7 +38,7 @@ export async function callProxy(provider: string, params: any): Promise<any> {
 
   if (response.status === 401) {
     const errorData = await response.json().catch(() => ({})) as { error?: { message?: string; signupUrl?: string } };
-    const signupUrl = errorData.error?.signupUrl || "https://apiclaw.com/signup";
+    const signupUrl = errorData.error?.signupUrl || "https://apiclaw.cloud/signup";
     throw new Error(
       `APIClaw: authentication required. Run \`npx @nordsym/apiclaw auth login\` or sign up at ${signupUrl}.`
     );

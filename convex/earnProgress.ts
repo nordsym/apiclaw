@@ -290,7 +290,7 @@ export const getReferralStats = query({
       referralCode: workspace.referralCode,
       referralCount: referredUsers.length,
       referralUrl: workspace.referralCode
-        ? `https://apiclaw.com/join?ref=${workspace.referralCode}`
+        ? `https://apiclaw.cloud/join?ref=${workspace.referralCode}`
         : null,
       callsEarned: referredUsers.length * EARN_REWARDS.referral,
     };
