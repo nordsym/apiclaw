@@ -212,9 +212,9 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
   version: string;
   packages: Record<string, { version?: string; bin?: Record<string, string> }>;
 };
-assert.equal(packageMetadata.version, "2.8.7");
-assert.equal(packageLock.version, "2.8.7");
-assert.equal(packageLock.packages[""].version, "2.8.7");
+assert.equal(packageMetadata.version, "2.8.8");
+assert.equal(packageLock.version, "2.8.8");
+assert.equal(packageLock.packages[""].version, "2.8.8");
 assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
@@ -223,7 +223,7 @@ assert.match(packageMetadata.description, /22 provider rails customer-executable
 for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
   const health = readFileSync(healthFile, "utf8");
   assert.match(health, /service: 'apiclaw-gateway'/);
-  assert.match(health, /version: '2\.8\.7'/);
+  assert.match(health, /version: '2\.8\.8'/);
 }
 assert.deepEqual(packageMetadata.bin, { apiclaw: "./dist/bin.js" });
 assert.equal("start:http" in packageMetadata.scripts, false, "retired local HTTP server must not ship as an npm script");
@@ -354,7 +354,7 @@ const mcpbManifest = JSON.parse(readFileSync("landing/mcpb/manifest.json", "utf8
   version: string;
   tools: Array<{ name: string }>;
 };
-assert.equal(mcpbManifest.version, "2.8.7");
+assert.equal(mcpbManifest.version, "2.8.8");
 assert.doesNotMatch(
   mcpbManifest.tools.map((tool) => tool.name).join(" "),
   /\b(?:estimate_cost|get_usage_summary)\b/,

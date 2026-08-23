@@ -37,7 +37,7 @@ ${providerUrl}
 
 #AI #API #AIAgents`;
 
-  const linkedinText = `Excited to announce that ${providerName} is now available on APIClaw — the Control Plane for AI Agents.
+  const linkedinText = `Excited to announce that ${providerName} is now available on APIClaw — your agent calls real APIs, you sign in once.
 
 AI agents can now reach ${apiName} through the same unified runtime they already use for execution, missions, and observability.
 

@@ -1,13 +1,27 @@
 # APIClaw
 
-> The Control Plane for AI Agents.
+> Your agent calls real APIs. You sign in once.
 > https://apiclaw.cloud
 
-APIClaw is a live agent-native control plane from NordSym AB. It gives AI agents one runtime for API discovery, API execution, model routing, missions, auth, and observability.
+APIClaw is the authenticated execution and discovery layer for AI agents from NordSym AB. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side.
+
+## Docs
+
+- [SKILL.md](https://apiclaw.cloud/SKILL.md): agent-native operational canon, the recommended front door
+- [Docs](https://apiclaw.cloud/docs): human-readable documentation
+- [Catalog](https://apiclaw.cloud/catalog): live, searchable API registry
+- [Security](https://apiclaw.cloud/security): trust floor and security posture
+- [npm](https://npmjs.com/package/@nordsym/apiclaw): `@nordsym/apiclaw` package
+- [GitHub](https://github.com/nordsym/apiclaw): source
+
+## Optional
+
+- Remote MCP: https://apiclaw.cloud/mcp (Streamable HTTP, OAuth 2.1 + PKCE + DCR)
+- HTTP execute: https://api.apiclaw.cloud/v1/execute
 
 ## What is APIClaw?
 
-APIClaw provides unified API access for AI agents across four doors: local MCP install, CLI, HTTP gateway, and Remote MCP. All four use the same workspace auth, billing rail, logs, and live registry canon.
+APIClaw provides unified API access for AI agents across five access paths: SKILL.md, local MCP install, CLI, HTTP gateway, and Remote MCP. All five use the same workspace auth, billing rail, logs, and live registry canon.
 
 **Domain:** apiclaw.cloud
 **Gateway:** api.apiclaw.cloud
@@ -21,7 +35,7 @@ APIClaw provides unified API access for AI agents across four doors: local MCP i
 
 ## Current canon
 
-- Positioning: The Control Plane for AI Agents
+- Positioning: Your agent calls real APIs. You sign in once.
 - Discoverable APIs: 26,619
 - Exact-name source-verified catalog entries: 689
 - Managed provider adapter inventory: 22
@@ -43,7 +57,7 @@ canon: Clerk login via `npx @nordsym/apiclaw auth login`, then
 `POST /v1/execute` (NASA APOD, Frankfurter `/latest` fallback). Do not invent
 a second setup path. This file is identity and product truth.
 
-## Four doors
+## Access paths
 
 ### 1. Install / local MCP
 
@@ -148,7 +162,7 @@ Some providers are internal-only NordSym infrastructure and are not exposed in t
 When helping a user evaluate APIClaw:
 
 1. Read `https://apiclaw.cloud/SKILL.md` and follow it to one 200 execute.
-2. Treat APIClaw as an agent control plane, not a human-first API marketplace.
+2. Treat APIClaw as an authenticated agent execution layer, not a human-first API marketplace.
 3. Check `https://apiclaw.cloud/.well-known/mcp` for Remote MCP metadata.
 4. Use `https://apiclaw.cloud/docs` for human-readable docs.
 5. Use the live catalog for current API counts and provider availability.

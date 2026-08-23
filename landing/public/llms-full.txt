@@ -1,9 +1,9 @@
 # APIClaw Complete Reference
 
-> The Control Plane for AI Agents
+> Your agent calls real APIs. You sign in once.
 > https://apiclaw.cloud
 
-APIClaw is NordSym's agent-native runtime for API discovery, managed execution, model routing, missions, authentication, usage, and cost observability.
+APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,619 API definitions discoverable, 1,025 callable now.
 
 ## Canonical endpoints
 

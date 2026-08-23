@@ -140,7 +140,7 @@ export function InstallSection() {
             Up and running in 30 seconds.
           </h2>
           <p className="text-text-secondary text-base sm:text-lg mt-3 leading-relaxed">
-            One install, one auth. The same workspace works across all four doors — local MCP, CLI, HTTP, Remote MCP.
+            One install, one auth. The same workspace works across local MCP, CLI, HTTP, and Remote MCP.
           </p>
         </div>
 

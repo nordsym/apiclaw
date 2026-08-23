@@ -21,7 +21,7 @@ export async function GET() {
   const meta = {
     name: "APIClaw",
     description:
-      `The control plane for AI agents. ${apiCount} discoverable API definitions, including ${sourceVerified} source-verified definitions. Managed execution is available only where a verified server-side adapter is live.`,
+      `Your agent calls real APIs. You sign in once. ${apiCount} discoverable API definitions, including ${sourceVerified} source-verified definitions. Managed execution is available only where a verified server-side adapter is live.`,
     vendor: "NordSym AB",
     homepage: ISSUER,
     documentation: `${ISSUER}/docs`,

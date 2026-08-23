@@ -103,7 +103,7 @@ export default function DocsPage() {
 
             {/* Auth */}
             <section id="cli-auth" className="scroll-mt-20">
-              <h2 className="claw-h2">Auth (all four doors)</h2>
+              <h2 className="claw-h2">Auth</h2>
               <p className={`${BODY} mt-4`}>
                 One command, every door. Opens your browser, one-tap sign-in via Clerk (Google or passwordless email), writes <code className={CODE}>~/.apiclaw.toml</code> with mode 0600. The same file is read by the local MCP server, CLI, and HTTP gateway. Remote MCP uses its own OAuth 2.1 + DCR flow.
               </p>

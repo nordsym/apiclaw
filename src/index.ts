@@ -1054,7 +1054,7 @@ Example chain:
   // ============================================
   {
     name: 'start_mission',
-    description: 'Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw\'s runtime. Use this when the user wants to spin up a multi-step task rather than a single API call. Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.',
+    description: 'Start a mission — a structured, observable orchestration that runs on APIClaw\'s runtime. Use this when the user wants to spin up a multi-step task rather than a single API call. Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -1080,7 +1080,7 @@ Example chain:
   },
   {
     name: 'list_mission_templates',
-    description: 'List the Control Plane mission templates available to your agent and the parameters each one accepts.',
+    description: 'List the mission templates available to your agent and the parameters each one accepts.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -3126,7 +3126,7 @@ async function main() {
   
   // Welcome message with onboarding
   console.error(`
-🦞 APIClaw - The Control Plane for AI Agents
+🦞 APIClaw - Your agent calls real APIs. You sign in once.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✓ ${CANON_STATS.discoverable.toLocaleString()} APIs discoverable

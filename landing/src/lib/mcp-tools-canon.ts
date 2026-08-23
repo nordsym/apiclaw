@@ -97,13 +97,13 @@ export const CANONICAL_MCP_TOOLS = [
   // ----- CONTROL PLANE — MISSIONS -----
   {
     name: "list_mission_templates",
-    description: "List available Control Plane mission templates and the parameters each accepts.",
+    description: "List available mission templates and the parameters each accepts.",
     inputSchema: { type: "object", properties: {} },
   },
   {
     name: "start_mission",
     description:
-      "Start a Control Plane mission — a structured, observable orchestration that runs on APIClaw's runtime. Use for multi-step tasks (e.g. 'generate a PRD'). Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.",
+      "Start a mission — a structured, observable orchestration that runs on APIClaw's runtime. Use for multi-step tasks (e.g. 'generate a PRD'). Returns a missionId you can poll with mission_status. Legacy templates run through the hand-coded path; data-driven templates run through the v2 composition runner when template_version is pinned.",
     inputSchema: {
       type: "object",
       properties: {

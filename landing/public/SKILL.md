@@ -11,7 +11,7 @@ description: >-
 
 # APIClaw
 
-APIClaw is a live agent-native control plane. One workspace. Clerk auth.
+Your agent calls real APIs. You sign in once. One workspace. Clerk auth.
 The metric that matters is a successful `POST /v1/execute`, not an install.
 
 Give an agent this file and it can install, sign in, and land one 200

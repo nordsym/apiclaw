@@ -6,7 +6,7 @@ nord_status: LIVE
 
 # APIClaw
 
-The control plane for AI agents. APIClaw gives agents one workspace for API discovery, managed execution, model routing, missions, auth, usage, and cost observability.
+Your agent calls real APIs. You sign in once. APIClaw is the authenticated execution and discovery layer for AI agents, giving them one workspace for API discovery, managed execution, model routing, missions, auth, usage, and cost observability.
 
 - Website: [apiclaw.cloud](https://apiclaw.cloud)
 - Docs: [apiclaw.cloud/docs](https://apiclaw.cloud/docs)
@@ -36,7 +36,7 @@ The browser flow verifies workspace ownership and writes `~/.apiclaw.toml`. The 
 
 For a headless environment, open the displayed sign-in URL on a device where ownership can be verified.
 
-## Four access paths
+## Access paths
 
 | Access path | Best for | Auth |
 |---|---|---|

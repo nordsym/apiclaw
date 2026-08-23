@@ -18,7 +18,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.8.7';
+const VERSION = '2.8.8';
 
 const program = new Command();
 
@@ -218,7 +218,7 @@ program
 //   apiclaw mission list                          # recent missions
 program
   .command('mission [subcommand] [args...]')
-  .description('Control Plane: run, watch, and inspect missions on APIClaw\'s runtime')
+  .description('Run, watch, and inspect missions on APIClaw\'s runtime')
   .allowUnknownOption(true)
   .action(async (subcommand: string | undefined, args: string[]) => {
     const argv: string[] = [];

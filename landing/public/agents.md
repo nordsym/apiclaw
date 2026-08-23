@@ -1,6 +1,6 @@
 # APIClaw Agent Guide
 
-APIClaw is the control plane for AI agents from NordSym AB.
+APIClaw is the authenticated execution and discovery layer for AI agents, built by NordSym AB. Your agent calls real APIs. You sign in once.
 
 Use this file when an AI agent needs to understand how to evaluate, connect to, or use APIClaw.
 
@@ -16,7 +16,7 @@ Use this file when an AI agent needs to understand how to evaluate, connect to, 
 - Catalog: https://apiclaw.cloud/catalog
 - Workspace: https://apiclaw.cloud/workspace
 - npm: @nordsym/apiclaw
-- Positioning: The Control Plane for AI Agents
+- Positioning: Your agent calls real APIs. You sign in once.
 
 ## What APIClaw is
 
@@ -133,7 +133,7 @@ Use the live catalog, not stale docs, when current API counts matter.
 
 ## What not to claim
 
-- Do not claim “one key for everything” as the primary positioning. The current position is “The Control Plane for AI Agents.”
+- Do not claim “one key for everything” as the primary positioning. The current position is “Your agent calls real APIs. You sign in once.”
 - Do not claim free anonymous discovery.
 - Do not claim a recurring weekly or monthly managed-call allowance. Current free tier is up to 25 lifetime managed calls, subject to the $1 provider-cost cap.
 - Do not claim 30% margin. Current margin is 15%.
