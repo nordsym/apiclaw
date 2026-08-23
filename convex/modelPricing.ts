@@ -4,6 +4,10 @@ export type TokenPrice = { input: number; output: number };
 // intentionally exact and separately tested so an unknown premium model does
 // not silently inherit the generic low-cost fallback.
 const FRONTIER_MODEL_COSTS: Record<string, TokenPrice> = {
+  // OpenRouter's live catalog lists OX Alpha as $0 for both prompt and
+  // completion. Keep this exact entry so managed routing can stay fail-closed
+  // for every other unpriced model.
+  "stealth/ox-alpha": { input: 0, output: 0 },
   "gpt-5.6-sol": { input: 5, output: 30 },
   "gpt-5.6": { input: 5, output: 30 },
   "gpt-5.6-terra": { input: 2.5, output: 15 },

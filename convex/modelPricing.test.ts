@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { resolveFrontierModelCost } from "./modelPricing";
 
 assert.deepEqual(resolveFrontierModelCost("openai/gpt-5.6-sol"), { input: 5, output: 30 });
+assert.deepEqual(resolveFrontierModelCost("stealth/ox-alpha"), { input: 0, output: 0 });
 assert.deepEqual(resolveFrontierModelCost("openai/gpt-5.6"), { input: 5, output: 30 });
 assert.deepEqual(resolveFrontierModelCost("openai/gpt-5.4-mini"), { input: 0.75, output: 4.5 });
 assert.deepEqual(resolveFrontierModelCost("gpt-5.5-pro-2026-04-23"), { input: 30, output: 180 });

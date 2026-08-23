@@ -544,6 +544,8 @@ const PROVIDERS: Record<string, ProviderMeta> = {
 // PROVIDER COST TABLE (per million tokens, USD)
 // ==============================================
 const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  // OpenRouter live catalog verified 2026-08-23: free prompt and completion.
+  "stealth/ox-alpha":   { input: 0,     output: 0 },
   // OpenAI
   "gpt-5.4":             { input: 12.50, output: 50.00 },
   "gpt-5":               { input: 10.00, output: 40.00 },
