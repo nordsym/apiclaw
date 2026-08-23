@@ -49,6 +49,7 @@ npx @nordsym/apiclaw auth login
 
 That opens the browser, signs the user in with Clerk (Google or
 passwordless email), and writes `~/.apiclaw.toml`.
+That file also holds `api_key` (`sk-claw-…`), export it as `APICLAW_API_KEY` for non-interactive use.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and confirm:
@@ -87,6 +88,7 @@ curl -sS https://api.apiclaw.cloud/v1/execute \
 
 Set `$SESSION` from `session_token` in `~/.apiclaw.toml`. Do not ask
 the user to paste it.
+Equivalent: `Authorization: Bearer $APICLAW_API_KEY`
 
 CLI slash form also maps to `POST /v1/execute`:
 

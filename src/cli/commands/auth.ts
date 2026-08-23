@@ -241,7 +241,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
 
   console.log('');
   console.log(chalk.bold('  🦞 APIClaw — agent-native auth'));
-  console.log(chalk.dim('  Opening browser for one-tap sign-in...\n'));
+  console.log(chalk.dim('  Confirm in the browser to finish sign-in.\n'));
 
   // PKCE + state + fingerprint
   const { verifier, challenge } = generatePkcePair();
