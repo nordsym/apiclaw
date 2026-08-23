@@ -1,10 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  getAgentPresence,
-  isUnlimitedWorkspace,
-} from "@/lib/workspace-truth";
+import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
 import {
   Workspace,
   Agent,
@@ -12,6 +9,7 @@ import {
   TabType,
 } from "../_shared";
 import { PageHeader, Section, Panel, StatGrid, StatCard, Row, Status, btnSolid } from "./ui";
+import { AgentCardGrid } from "./AgentCards";
 
 const TIER_LABEL: Record<string, string> = {
   free: "Free",
@@ -35,21 +33,20 @@ function providerStatus(status: string): { kind: "ok" | "warn" | "bad" | "muted"
   return { kind: "muted", label: status };
 }
 
-function agentStatus(lastUsedAt: number): { kind: "ok" | "muted"; label: string } {
-  const presence = getAgentPresence(lastUsedAt);
-  return { kind: presence.state === "active" ? "ok" : "muted", label: presence.label };
-}
-
 export function OverviewTab({
   workspace,
   agents,
   providerApis,
   setActiveTab,
+  sessionToken,
+  onToast,
 }: {
   workspace: Workspace | null;
   agents: Agent[];
   providerApis: ProviderAPI[];
   setActiveTab: (tab: TabType) => void;
+  sessionToken?: string | null;
+  onToast?: (message: string, type: "success" | "error" | "info") => void;
 }) {
   const router = useRouter();
   const navigateTo = (tab: TabType) => {
@@ -69,8 +66,6 @@ export function OverviewTab({
     : usageCount === 0
       ? { title: "Make your first call", body: "Your agent is connected. Run one call to see it in Activity.", cta: "Make your first call", tab: "api-catalog" as TabType }
       : { title: "See the last call", body: `${usageCount.toLocaleString()} ${usageCount === 1 ? "call" : "calls"} so far. Inspect the latest one.`, cta: "See the last call", tab: "activity" as TabType };
-
-  const visibleAgents = agents.slice(0, 3);
 
   return (
     <div>
@@ -106,23 +101,13 @@ export function OverviewTab({
       <Section
         title="Agents"
         className="mt-8"
-        action={agents.length > 3 ? <button type="button" onClick={() => navigateTo("connections")} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">See all {agents.length}</button> : undefined}
+        action={agents.length > 0 ? <button type="button" onClick={() => navigateTo("connections")} className="text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">Connections</button> : undefined}
       >
-        {agents.length === 0 ? (
-          <p className="text-[13.5px] text-[var(--text-muted)]">No agents connected.</p>
-        ) : (
-          <div>
-            {visibleAgents.map((a) => {
-              const s = agentStatus(a.lastUsedAt);
-              return (
-                <Row key={a.id} onClick={() => navigateTo("connections")} right={<Status kind={s.kind}>{s.label}</Status>}>
-                  <p className="truncate text-[14px]">{a.customName || a.name || a.fingerprint}{a.isCurrent ? <span className="ml-2 text-[12px] text-[var(--text-muted)]">this session</span> : null}</p>
-                  {(a.customName || a.name) && <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">{a.fingerprint}</p>}
-                </Row>
-              );
-            })}
-          </div>
-        )}
+        <AgentCardGrid
+          sessionToken={sessionToken ?? null}
+          onToast={onToast}
+          onEmpty={<p className="text-[13.5px] text-[var(--text-muted)]">No agents connected.</p>}
+        />
       </Section>
 
       {providerApis.length > 0 && (

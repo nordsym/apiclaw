@@ -621,7 +621,142 @@ function APIKeysTab({ sessionToken }: { sessionToken: string | null }) {
         <KV k="Base URL" v="https://api.apiclaw.cloud/v1" mono />
         <KV k="Header" v="Authorization: Bearer sk-claw-..." mono />
       </Section>
+
+      <YourKeysSection sessionToken={sessionToken} />
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------
+   Your keys (BYOK, BYOH Phase 2, 2026-08-24)
+
+   An APIClaw key (above) authenticates a client into the gateway. A
+   provider key here is different: it's the workspace's own credential for
+   an upstream provider (OpenAI, Anthropic, ...). Calls that use it are
+   free: no card, no markup, the provider bills the workspace directly.
+   ------------------------------------------------------------------ */
+
+interface ProviderKeyRow {
+  id: string;
+  provider: string;
+  keyHint: string;
+  isCustom?: boolean;
+  customConfig?: { baseUrl: string; authType: string };
+  createdAt: number;
+  updatedAt: number;
+}
+
+function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
+  const [keys, setKeys] = useState<ProviderKeyRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [provider, setProvider] = useState("");
+  const [key, setKey] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const confirm = useArmed();
+
+  const fetchKeys = useCallback(async () => {
+    if (!sessionToken) { setLoading(false); return; }
+    try {
+      const res = await convexCall<ProviderKeyRow[]>("query", "providerKeys:listKeys", { token: sessionToken });
+      setKeys(Array.isArray(res) ? res : []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load keys");
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionToken]);
+
+  useEffect(() => { fetchKeys(); }, [fetchKeys]);
+
+  const add = async () => {
+    const p = provider.trim().toLowerCase();
+    const k = key.trim();
+    if (!sessionToken || !p || !k) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await convexCall("mutation", "providerKeys:setKey", { token: sessionToken, provider: p, key: k });
+      setProvider("");
+      setKey("");
+      setShowAdd(false);
+      fetchKeys();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save key");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (providerName: string) => {
+    if (!sessionToken) return;
+    if (confirm.armed !== providerName) { confirm.arm(providerName); return; }
+    confirm.disarm();
+    setRemoving(providerName);
+    try {
+      await convexCall("mutation", "providerKeys:removeKey", { token: sessionToken, provider: providerName });
+      setKeys((prev) => prev.filter((row) => row.provider !== providerName));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Remove failed");
+    } finally {
+      setRemoving(null);
+    }
+  };
+
+  return (
+    <Section
+      title="Your keys"
+      description="Calls through your own key are free."
+      className="mt-8"
+      action={!showAdd ? <button type="button" onClick={() => setShowAdd(true)} className={btnSolid}>Add key</button> : undefined}
+    >
+      {showAdd && (
+        <Panel className="mb-4 p-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Provider" hint="e.g. openai, anthropic, groq">
+              <input type="text" value={provider} onChange={(e) => setProvider(e.target.value)} className={`${inputClass} claw-mono`} maxLength={40} autoFocus />
+            </Field>
+            <Field label="Your key">
+              <input type="password" value={key} onChange={(e) => setKey(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} className={`${inputClass} claw-mono`} maxLength={400} autoComplete="off" />
+            </Field>
+          </div>
+          {error && <p className="mt-3 text-[13px] text-[var(--accent)]">{error}</p>}
+          <div className="mt-4 flex gap-2">
+            <button type="button" onClick={add} disabled={saving || !provider.trim() || !key.trim()} className={btnSolid}>{saving ? "Saving" : "Save key"}</button>
+            <button type="button" onClick={() => { setShowAdd(false); setError(null); }} className={btnQuiet}>Cancel</button>
+          </div>
+        </Panel>
+      )}
+      {!showAdd && error && <p className="mb-3 text-[13px] text-[var(--accent)]">{error}</p>}
+
+      {loading ? (
+        <Loading label="Loading keys" />
+      ) : keys.length === 0 ? (
+        <Empty
+          title="No keys of your own yet"
+          body="Add a provider key to route that provider's calls through it, free."
+          action={!showAdd ? <button type="button" onClick={() => setShowAdd(true)} className={btnSolid}>Add key</button> : undefined}
+        />
+      ) : (
+        <div>
+          {keys.map((row) => (
+            <Row
+              key={row.id}
+              right={<>
+                <button type="button" onClick={() => remove(row.provider)} disabled={removing === row.provider} className={`${btnDanger} !h-8`}>
+                  {removing === row.provider ? "Removing" : confirm.armed === row.provider ? "Confirm remove" : "Remove"}
+                </button>
+              </>}
+            >
+              <p className="truncate text-[14px]">{row.provider}</p>
+              <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">Your key · ending {row.keyHint}</p>
+            </Row>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }
 

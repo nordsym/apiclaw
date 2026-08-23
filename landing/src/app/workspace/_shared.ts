@@ -41,6 +41,8 @@ export interface ConnectedAgent {
   searchCount?: number;
   firstSeenAt: number;
   lastActiveAt: number;
+  /** Per-agent default model for apiclaw/-routed calls (BYOH B1, 2026-08-24). Null when unset. */
+  defaultModel?: string | null;
 }
 
 export interface UsageData {

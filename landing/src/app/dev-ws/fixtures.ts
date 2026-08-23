@@ -30,8 +30,9 @@ export const agents: Agent[] = [
 
 /** agents table rows as returned by agents:getWorkspaceAgents (Connections view). */
 export const connectedAgents: ConnectedAgent[] = [
-  { id: "ag_1", fingerprint: "mbp-gustav:gustav", mcpClient: "claude-desktop", name: "Claude Desktop", hostname: "mbp-gustav", aiBackend: "claude-sonnet-4", platform: "darwin", callCount: 7, firstSeenAt: NOW - 10 * D, lastActiveAt: NOW - 5 * 60_000 },
-  { id: "ag_2", fingerprint: "ci-runner:ci", mcpClient: "claude-code", name: undefined, hostname: "ci-runner", platform: "linux", callCount: 2, firstSeenAt: NOW - 8 * D, lastActiveAt: NOW - 2 * D },
+  { id: "ag_1", fingerprint: "mbp-gustav:gustav", mcpClient: "claude-desktop", name: "Claude Desktop", hostname: "mbp-gustav", aiBackend: "claude-sonnet-4", platform: "darwin", callCount: 7, firstSeenAt: NOW - 10 * D, lastActiveAt: NOW - 5 * 60_000, defaultModel: null },
+  { id: "ag_2", fingerprint: "ci-runner:ci", mcpClient: "claude-code", name: undefined, hostname: "ci-runner", platform: "linux", callCount: 2, firstSeenAt: NOW - 8 * D, lastActiveAt: NOW - 2 * D, defaultModel: "anthropic/claude-sonnet-5" },
+  { id: "ag_3", fingerprint: "worker-3:auto", mcpClient: "cursor", name: undefined, hostname: "worker-3", platform: "linux", callCount: 0, firstSeenAt: NOW - 1 * D, lastActiveAt: NOW - 6 * D, defaultModel: null },
 ];
 
 export const providerApis: ProviderAPI[] = [
@@ -120,6 +121,12 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
     { id: "sess_2", fingerprint: "ci-runner:ci", customName: "CI runner", name: "CI runner", lastUsedAt: NOW - 2 * D, createdAt: NOW - 8 * D, isCurrent: false },
   ],
   "apiKeys:listKeys": { keys: [{ id: "key_1", name: "CI runner", keyPrefix: "sk-claw-...7f3a", createdAt: NOW - 8 * D, lastUsedAt: NOW - 2 * D }] },
+  "providerKeys:listKeys": [
+    { id: "pk_1", provider: "openai", keyHint: "7f3a", isCustom: false, createdAt: NOW - 4 * D, updatedAt: NOW - 4 * D },
+  ],
+  "providerKeys:setKey": { id: "pk_2", provider: "anthropic", keyHint: "9c1d" },
+  "providerKeys:removeKey": { success: true },
+  "agents:setDefaultModel": { success: true },
   "logs:getLogs": (args: Record<string, unknown>) => {
     const status = args.status as string | undefined;
     const provider = args.provider as string | undefined;
@@ -226,6 +233,16 @@ export const gateway: Record<string, unknown> = {
       { providerId: "acme_pending", name: "Acme Pending", description: "Adapter without executable actions; must not be listed.", category: "Utilities", pricing: "free", tags: [], customerExecutableActions: [], customerExecutable: false },
     ],
     total: 4,
+  },
+  // Shape from convex/http.ts GET /v1/models.
+  "/v1/models": {
+    object: "list",
+    data: [
+      { id: "anthropic/claude-sonnet-5", object: "model", owned_by: "anthropic", via: "direct", served_by: "anthropic", endpoint: "/v1/chat/completions", name: "Claude Sonnet 5" },
+      { id: "anthropic/claude-opus-4-8", object: "model", owned_by: "anthropic", via: "direct", served_by: "anthropic", endpoint: "/v1/chat/completions", name: "Claude Opus 4.8" },
+      { id: "openai/gpt-5.6", object: "model", owned_by: "openai", via: "direct", served_by: "openai", endpoint: "/v1/chat/completions", name: "GPT-5.6" },
+    ],
+    _apiclaw: { gateway: "v1", catalog_source: "live", total: 3, by_owner: {}, by_via: {}, last_refreshed_at: null, note: "", non_llm_apis: "" },
   },
   // Shape from convex/http.ts handleManagedExecute success.
   "/v1/execute": {

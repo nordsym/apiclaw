@@ -74,7 +74,7 @@ function Harness() {
       usageLabel={fx.workspace.usageLimit === -1 ? "Unlimited calls" : `${fx.workspace.usageRemaining}/${fx.workspace.usageLimit} calls`}
       onLogout={() => {}}
     >
-      {tab === "overview" && <OverviewTab workspace={fx.workspace} agents={fx.agents} providerApis={fx.providerApis} setActiveTab={setTab} />}
+      {tab === "overview" && <OverviewTab workspace={fx.workspace} agents={fx.agents} providerApis={fx.providerApis} setActiveTab={setTab} sessionToken={TOKEN} onToast={() => {}} />}
       {tab === "connections" && (
         <ConnectionsTab agents={fx.agents} onRevoke={() => {}} onRename={() => {}} workspaceEmail={fx.workspace.email} sessionToken={TOKEN} isProvider={true} section={connSection} onSectionChange={setConnSection} />
       )}

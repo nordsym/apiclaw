@@ -456,6 +456,8 @@ export default function WorkspacePage() {
               agents={agents}
               providerApis={providerApis}
               setActiveTab={setActiveTab}
+              sessionToken={sessionToken}
+              onToast={showToast}
             />
           )}
           {activeTab === "api-catalog" && (
