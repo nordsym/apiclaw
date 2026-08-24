@@ -159,6 +159,9 @@ export default function DocsPage() {
               <p className={`${BODY} mt-4`}>
                 Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category. Run <code className={CODE}>apiclaw auth login</code> first (see Auth above), then use the direct commands below.
               </p>
+              <p className={`${META} mt-3`}>
+                Buzz and other ACP (Agent Client Protocol) clients spawn <code className="claw-mono">npx @nordsym/apiclaw acp</code> over stdio instead.
+              </p>
 
               <div className="mt-8 space-y-8">
                 <div>

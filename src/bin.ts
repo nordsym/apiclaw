@@ -9,7 +9,7 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 
-const cliCommands = ['auth', 'setup', 'login', 'demo', 'mcp', 'mcp-install', 'mcp-uninstall', 'doctor', 'restore', 'uninstall', 'mission', 'discover', 'call', 'details', 'balance', 'help', '--help', '-h', '--version', '-V'];
+const cliCommands = ['auth', 'setup', 'login', 'demo', 'mcp', 'mcp-install', 'mcp-uninstall', 'doctor', 'restore', 'uninstall', 'mission', 'discover', 'call', 'details', 'balance', 'acp', 'help', '--help', '-h', '--version', '-V'];
 
 const firstArg = process.argv[2];
 

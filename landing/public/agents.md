@@ -95,6 +95,25 @@ Best for terminal, scripts, and CI/CD.
 apiclaw --help
 ```
 
+### ACP (Agent Client Protocol)
+
+Best for Buzz (block.xyz) and other ACP-speaking clients. The ACP client spawns this over stdio - do not run it manually.
+
+```bash
+npx @nordsym/apiclaw acp
+```
+
+Same session-token auth as the CLI: run `apiclaw auth login` first. Prompt grammar (case-insensitive keyword, whitespace-separated):
+
+```text
+help
+discover <query>
+details <provider>[/<action>]
+call <provider>/<action> [json]
+balance
+status
+```
+
 ## Auth rules
 
 - Signup is required for discovery and execution.

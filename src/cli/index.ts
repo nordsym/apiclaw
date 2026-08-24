@@ -18,7 +18,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.8.9';
+const VERSION = '2.9.0';
 
 const program = new Command();
 
@@ -218,6 +218,14 @@ program
   .command('balance')
   .description('Workspace balance, tier, remaining calls')
   .action(balanceCommand);
+
+program
+  .command('acp')
+  .description('Run APIClaw as an ACP (Agent Client Protocol) agent over stdio - for Buzz and other ACP clients')
+  .action(async () => {
+    const { runAcpServer } = await import('../acp-server.js');
+    runAcpServer();
+  });
 
 // Control Plane — Missions
 //

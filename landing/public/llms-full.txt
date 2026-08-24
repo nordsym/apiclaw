@@ -53,6 +53,14 @@ apiclaw --help
 
 Best for terminal use, scripts, and CI/CD.
 
+### ACP (Agent Client Protocol)
+
+```bash
+npx @nordsym/apiclaw acp
+```
+
+Best for Buzz (block.xyz) and other ACP-speaking clients. The ACP client spawns this over stdio; same session-token auth as the CLI, run `apiclaw auth login` first. Prompt grammar: `help`, `discover <query>`, `details <provider>[/<action>]`, `call <provider>/<action> [json]`, `balance`, `status`.
+
 ### HTTP gateway
 
 ```text
