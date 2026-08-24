@@ -3,13 +3,15 @@
 /**
  * Agents: the default workspace view (2026-08-24 restructure). Buzz-style
  * card grid for connected MCP-client agents (AgentCardGrid, its own
- * detail side panel), a slim usage strip, an optional quiet next-step
- * card, and the main agent + subagents section folded in below since
- * their data shape differs from the card grid (no fingerprint session,
- * no model rail switcher parity). Everything here maps to real data;
- * nothing is decorative (INSPO BOUNDARY, BYOH-BUILD-PLAN.md Phase 2).
+ * detail side panel) with the workspace's main agent folded in as a
+ * regular card, a slim usage strip, an optional quiet next-step card,
+ * "Connect an agent" (the three real connection surfaces plus a
+ * collapsed connectors accordion folded in from the old
+ * /workspace/integrations page), and a subagents list. Everything here
+ * maps to real data; nothing is decorative (INSPO BOUNDARY,
+ * BYOH-BUILD-PLAN.md Phase 2).
  */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isUnlimitedWorkspace, getAgentPresence } from "@/lib/workspace-truth";
@@ -24,12 +26,17 @@ import {
   Empty,
   Loading,
   Field,
+  SurfaceTabs,
   inputClass,
+  textareaClass,
   btnSolid,
   btnQuiet,
   btnDanger,
 } from "./ui";
-import { AgentCardGrid } from "./AgentCards";
+import { AgentCardGrid, monogram } from "./AgentCards";
+
+const LOCAL_MCP_COMMAND = "npx @nordsym/apiclaw mcp";
+const ACP_COMMAND = "npx @nordsym/apiclaw acp";
 
 const TIER_LABEL: Record<string, string> = {
   free: "Free",
@@ -145,11 +152,14 @@ function presenceStatus(lastActiveAt?: number) {
 }
 
 /* ------------------------------------------------------------------
-   Main agent + subagents. Distinct shape from the card grid: the main
-   agent is the single workspace-token identity, subagents are task
-   agents identified by the X-APIClaw-Subagent header. Neither carries
-   a fingerprint session or model-rail switcher, so they render as a
-   plain list below the card grid rather than as cards.
+   Main agent identity + subagents. Distinct shape from the card grid:
+   the main agent is the single workspace-token identity, subagents are
+   task agents identified by the X-APIClaw-Subagent header. Neither
+   carries a fingerprint session or model-rail switcher. The main agent
+   renders as a regular card folded into the AgentCardGrid (2026-08-24:
+   the old standalone "Main agent" section was removed, UI only, the
+   underlying agents:getMainAgent data and mutations are unchanged);
+   subagents keep their own plain-list section below.
    ------------------------------------------------------------------ */
 
 interface MainAgentData {
@@ -171,7 +181,32 @@ interface SubagentData {
   lastActiveAt: number;
 }
 
-function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }) {
+/** Main agent rendered as a regular card in the AgentCardGrid, matching AgentCard's visual language. */
+function MainAgentCard({ mainAgent, onRename }: { mainAgent: MainAgentData; onRename: (name: string) => Promise<void> }) {
+  const label = mainAgent.mainAgentName || mainAgent.mainAgentId || "Workspace agent";
+  return (
+    <Panel className="flex flex-col gap-3 p-4">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-elevated)] text-[12px] font-semibold">
+          {monogram(label)}
+        </span>
+        <span className="min-w-0 flex-1">
+          <InlineName value={mainAgent.mainAgentName || ""} fallback={mainAgent.mainAgentId || "Workspace agent"} onSave={onRename} />
+          <span className="claw-mono block truncate text-[11.5px] text-[var(--text-muted)]">
+            {mainAgent.aiBackend ? `custom:${mainAgent.aiBackend}` : mainAgent.mainAgentId}
+          </span>
+        </span>
+      </div>
+      <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
+        <Status kind="muted">Workspace identity</Status>
+        <span>{(mainAgent.usageCount ?? 0).toLocaleString()} calls</span>
+      </div>
+    </Panel>
+  );
+}
+
+/** Fetches and manages both the main agent identity and subagents. Rendering is split: the caller folds the main agent into the card grid and renders subagents separately. */
+function useAgentsExtras(sessionToken: string | null) {
   const [loading, setLoading] = useState(true);
   const [mainAgent, setMainAgent] = useState<MainAgentData | null>(null);
   const [subagents, setSubagents] = useState<SubagentData[]>([]);
@@ -264,68 +299,78 @@ function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }
     }
   };
 
-  if (loading) return null;
-  if (!mainAgent?.mainAgentId && subagents.length === 0) return null;
+  return {
+    loading,
+    error,
+    mainAgent,
+    subagents,
+    renameMain,
+    renameSubagent,
+    removeSubagent,
+    subConfirm,
+    showRegister,
+    setShowRegister,
+    regId,
+    setRegId,
+    regName,
+    setRegName,
+    regBusy,
+    regError,
+    setRegError,
+    register,
+  };
+}
+
+type AgentsExtras = ReturnType<typeof useAgentsExtras>;
+
+/** Plain-list subagents section, unchanged from before except it no longer shares a component with "Main agent". */
+function SubagentsSection({ extras }: { extras: AgentsExtras }) {
+  const { subagents, renameSubagent, removeSubagent, subConfirm, showRegister, setShowRegister, regId, setRegId, regName, setRegName, regBusy, regError, setRegError, register } = extras;
+
+  if (subagents.length === 0) return null;
 
   return (
-    <>
-      {error && <p className="mb-4 text-[13px] text-[var(--accent)]">{error}</p>}
-
-      {mainAgent?.mainAgentId && (
-        <Section title="Main agent" className="mt-8">
-          <Row right={<span>{(mainAgent.usageCount ?? 0).toLocaleString()} calls</span>}>
-            <InlineName value={mainAgent.mainAgentName || ""} fallback="Main agent" onSave={renameMain} />
-            <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">
-              {mainAgent.mainAgentId}{mainAgent.aiBackend ? ` · custom:${mainAgent.aiBackend}` : ""}
-            </p>
-          </Row>
-        </Section>
-      )}
-
-      {subagents.length > 0 && (
-        <Section
-          title="Subagents"
-          description="Task agents identified by the X-APIClaw-Subagent header."
-          className="mt-8"
-          action={!showRegister ? <button type="button" onClick={() => setShowRegister(true)} className={btnQuiet}>Register</button> : undefined}
-        >
-          {showRegister && (
-            <Panel className="mb-4 p-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Subagent ID" hint="Must match the header value the agent sends.">
-                  <input type="text" value={regId} onChange={(e) => setRegId(e.target.value)} className={`${inputClass} claw-mono`} maxLength={100} autoFocus />
-                </Field>
-                <Field label="Name (optional)">
-                  <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && register()} className={inputClass} maxLength={50} />
-                </Field>
-              </div>
-              {regError && <p className="mt-3 text-[13px] text-[var(--accent)]">{regError}</p>}
-              <div className="mt-4 flex gap-2">
-                <button type="button" onClick={register} disabled={regBusy || !regId.trim()} className={btnSolid}>{regBusy ? "Registering" : "Register"}</button>
-                <button type="button" onClick={() => { setShowRegister(false); setRegError(null); }} className={btnQuiet}>Cancel</button>
-              </div>
-            </Panel>
-          )}
-          <div>
-            {subagents.map((s) => (
-              <Row
-                key={s.id}
-                right={<>
-                  {presenceStatus(s.lastActiveAt)}
-                  <span>{(s.callCount ?? 0).toLocaleString()} calls</span>
-                  <button type="button" onClick={() => removeSubagent(s.subagentId)} className={`${btnDanger} !h-8`}>
-                    {subConfirm.armed === s.subagentId ? "Confirm remove" : "Remove"}
-                  </button>
-                </>}
-              >
-                <InlineName value={s.name || ""} fallback={s.subagentId} onSave={(n) => renameSubagent(s.subagentId, n)} />
-                {s.name && s.name !== s.subagentId && <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">{s.subagentId}</p>}
-              </Row>
-            ))}
+    <Section
+      title="Subagents"
+      description="Task agents identified by the X-APIClaw-Subagent header."
+      className="mt-8"
+      action={!showRegister ? <button type="button" onClick={() => setShowRegister(true)} className={btnQuiet}>Register</button> : undefined}
+    >
+      {showRegister && (
+        <Panel className="mb-4 p-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Subagent ID" hint="Must match the header value the agent sends.">
+              <input type="text" value={regId} onChange={(e) => setRegId(e.target.value)} className={`${inputClass} claw-mono`} maxLength={100} autoFocus />
+            </Field>
+            <Field label="Name (optional)">
+              <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && register()} className={inputClass} maxLength={50} />
+            </Field>
           </div>
-        </Section>
+          {regError && <p className="mt-3 text-[13px] text-[var(--accent)]">{regError}</p>}
+          <div className="mt-4 flex gap-2">
+            <button type="button" onClick={register} disabled={regBusy || !regId.trim()} className={btnSolid}>{regBusy ? "Registering" : "Register"}</button>
+            <button type="button" onClick={() => { setShowRegister(false); setRegError(null); }} className={btnQuiet}>Cancel</button>
+          </div>
+        </Panel>
       )}
-    </>
+      <div>
+        {subagents.map((s) => (
+          <Row
+            key={s.id}
+            right={<>
+              {presenceStatus(s.lastActiveAt)}
+              <span>{(s.callCount ?? 0).toLocaleString()} calls</span>
+              <button type="button" onClick={() => removeSubagent(s.subagentId)} className={`${btnDanger} !h-8`}>
+                {subConfirm.armed === s.subagentId ? "Confirm remove" : "Remove"}
+              </button>
+            </>}
+          >
+            <InlineName value={s.name || ""} fallback={s.subagentId} onSave={(n) => renameSubagent(s.subagentId, n)} />
+            {s.name && s.name !== s.subagentId && <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">{s.subagentId}</p>}
+          </Row>
+        ))}
+      </div>
+    </Section>
   );
 }
 
@@ -358,24 +403,271 @@ function UsageStrip({ workspace, onUpgrade }: { workspace: Workspace | null; onU
 }
 
 /* ------------------------------------------------------------------
-   Connect an agent: a quiet pointer to Remote MCP, moved here from
-   Settings (2026-08-24) so the endpoint sits next to the agents it
-   connects. Full connector management (presets, OAuth registration)
-   stays at /workspace/integrations; this is signal, not a rebuild.
+   Connect an agent: the three real connection surfaces (hosted MCP,
+   local MCP over stdio via the CLI, ACP over stdio via `apiclaw acp`),
+   shown as quiet key-value rows. Connector management (OAuth client
+   registration, generate-a-connector) used to be its own page at
+   /workspace/integrations; it now lives here as a collapsed-by-default
+   accordion so the Agents view stays clean (2026-08-24).
    ------------------------------------------------------------------ */
 
-function ConnectAgentSection() {
+/** Labeled command/URL row: label above, monospace value + copy button below. */
+function SurfaceRow({ label, value }: { label: string; value: string }) {
   return (
-    <Section title="Connect an agent" description="Hosted clients connect over HTTP with workspace sign-in." className="mt-8">
+    <div className="border-t border-[var(--border-subtle)] py-3 first:border-t-0 first:pt-0">
+      <p className="mb-1.5 text-[12px] text-[var(--text-muted)]">{label}</p>
+      <CopyLine text={value} />
+    </div>
+  );
+}
+
+function ConnectAgentSection({ sessionToken }: { sessionToken: string | null }) {
+  const [connectorsOpen, setConnectorsOpen] = useState(false);
+  return (
+    <Section title="Connect an agent" description="Three ways to bring an agent into this workspace." className="mt-8">
       <Panel className="p-5">
-        <p className="mb-2 text-[13px] text-[var(--text-muted)]">Endpoint</p>
-        <CopyLine text={REMOTE_MCP_URL} />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/workspace/integrations" className={btnSolid}>Integrations</Link>
+        <SurfaceRow label="Hosted MCP" value={REMOTE_MCP_URL} />
+        <SurfaceRow label="Local MCP" value={LOCAL_MCP_COMMAND} />
+        <SurfaceRow label="ACP" value={ACP_COMMAND} />
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Link href="/docs#remote-mcp" className={btnQuiet}>Docs</Link>
+          <button type="button" onClick={() => setConnectorsOpen((v) => !v)} className="ml-auto text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+            {connectorsOpen ? "Hide connectors" : "Connectors"}
+          </button>
         </div>
       </Panel>
+      {connectorsOpen && <ConnectorsAccordion sessionToken={sessionToken} />}
     </Section>
+  );
+}
+
+/* ------------------------------------------------------------------
+   Connectors accordion: connected OAuth clients + generate-a-connector
+   form. Ported from the old standalone /workspace/integrations page
+   (now a redirect), same Convex paths and REST endpoint.
+   ------------------------------------------------------------------ */
+
+type Connector = {
+  clientId: string;
+  name: string;
+  redirectUris: string[];
+  registrationKind: "dashboard" | "dynamic";
+  clientSecretPrefix: string | null;
+  createdAt: number;
+  lastUsedAt: number | null;
+};
+
+type ConnectorPreset = {
+  key: string;
+  label: string;
+  redirectUris: string[];
+  guide?: string[];
+};
+
+// Seeds only. Users can edit the redirect URIs before generating.
+const CONNECTOR_PRESETS: ConnectorPreset[] = [
+  {
+    key: "grok",
+    label: "Grok",
+    redirectUris: ["https://grok.com/connectors-oauth/callback"],
+    guide: [
+      "Grok: Settings, Connectors, New connection.",
+      "Paste the MCP URL and add it as a custom connector.",
+      "Approve on the APIClaw consent screen.",
+    ],
+  },
+  { key: "cursor", label: "Cursor", redirectUris: ["cursor://oauth/callback"] },
+  { key: "chatgpt", label: "ChatGPT", redirectUris: ["https://chat.openai.com/connector_callback"] },
+  { key: "custom", label: "Custom", redirectUris: [""] },
+];
+
+async function connectorsQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${CONVEX_URL}/api/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args }),
+  });
+  const json = await res.json();
+  if (json?.status === "error") throw new Error(json?.errorMessage || "query_failed");
+  return (json?.value ?? json) as T;
+}
+
+async function connectorsMutate<T>(path: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args }),
+  });
+  const json = await res.json();
+  if (json?.status === "error") throw new Error(json?.errorMessage || "mutation_failed");
+  return (json?.value ?? json) as T;
+}
+
+/** Mono value with a copy affordance, tracked per-field. */
+function CopyField({ label, value, field, copiedField, onCopy }: { label?: string; value: string; field: string; copiedField: string | null; onCopy: (value: string, field: string) => void }) {
+  return (
+    <div className="flex items-center gap-4 border-t border-[var(--border-subtle)] py-2.5">
+      <div className="min-w-0 flex-1">
+        {label && <p className="text-[12px] text-[var(--text-muted)]">{label}</p>}
+        <p className="claw-mono truncate text-[12.5px] text-[var(--text-primary)]">{value}</p>
+      </div>
+      <button type="button" onClick={() => onCopy(value, field)} className="shrink-0 text-[12.5px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+        {copiedField === field ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+function ConnectorsAccordion({ sessionToken }: { sessionToken: string | null }) {
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [preset, setPreset] = useState<string>("grok");
+  const [customName, setCustomName] = useState("");
+  const [redirectInput, setRedirectInput] = useState("");
+  const [issued, setIssued] = useState<{ name: string; clientId: string; clientSecret: string; redirectUris: string[] } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const selected = CONNECTOR_PRESETS.find((p) => p.key === preset) ?? CONNECTOR_PRESETS[0];
+
+  useEffect(() => {
+    setRedirectInput(selected.redirectUris.join("\n"));
+    setCustomName(selected.key === "custom" ? "" : selected.label);
+  }, [selected]);
+
+  const refresh = useCallback(async (token: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const list = await connectorsQuery<Connector[]>("mcpOAuth:listConnectors", { sessionToken: token });
+      setConnectors(Array.isArray(list) ? list : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load connectors.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (sessionToken) void refresh(sessionToken);
+    else setLoading(false);
+  }, [sessionToken, refresh]);
+
+  const onGenerate = async () => {
+    if (!sessionToken) return;
+    const uris = redirectInput.split("\n").map((s) => s.trim()).filter((s) => s.length > 0);
+    if (uris.length === 0) {
+      setError("Add at least one redirect URI.");
+      return;
+    }
+    const name = (customName || selected.label).trim();
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/workspace/connectors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ name, redirectUris: uris }),
+      });
+      const result = await response.json() as { client_id: string; client_secret: string; name: string; redirect_uris: string[]; error?: string };
+      if (!response.ok) throw new Error(result.error || "Could not generate connector.");
+      setIssued({ name: result.name, clientId: result.client_id, clientSecret: result.client_secret, redirectUris: result.redirect_uris });
+      await refresh(sessionToken);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not generate connector.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRevoke = async (c: Connector) => {
+    if (!sessionToken) return;
+    if (!window.confirm(`Revoke ${c.name}? Its tokens stop working immediately.`)) return;
+    try {
+      await connectorsMutate("mcpOAuth:revokeConnector", { sessionToken, clientId: c.clientId });
+      await refresh(sessionToken);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Revoke failed.");
+    }
+  };
+
+  const copy = (text: string, field: string) => {
+    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopiedField(field);
+    window.setTimeout(() => setCopiedField((cur) => (cur === field ? null : cur)), 1500);
+  };
+
+  const fmtDate = (ts: number) => new Date(ts).toLocaleDateString();
+
+  return (
+    <>
+      {error && <p className="mt-4 text-[13px] text-[var(--accent)]">{error}</p>}
+
+      <Section title="Connected clients" description="Clients that registered with a client ID and secret." className="mt-6">
+        {loading && <Loading label="Loading clients" />}
+        {!loading && connectors.length === 0 && (
+          <Empty title="No connected clients" body="Paste the endpoint into your client, or generate a connector below if it asks for credentials." />
+        )}
+        {!loading && connectors.map((c) => (
+          <Row
+            key={c.clientId}
+            right={
+              <>
+                <span className="hidden sm:inline">{c.lastUsedAt ? `Used ${fmtDate(c.lastUsedAt)}` : `Never used, added ${fmtDate(c.createdAt)}`}</span>
+                <button type="button" onClick={() => onRevoke(c)} className={btnDanger}>Revoke</button>
+              </>
+            }
+          >
+            <div className="flex items-center gap-3">
+              <span className="truncate text-[14px] font-medium">{c.name}</span>
+              <Status kind="muted">{c.registrationKind === "dynamic" ? "Auto-registered" : "Dashboard"}</Status>
+            </div>
+            <p className="claw-mono mt-0.5 truncate text-[12px] text-[var(--text-muted)]">{c.clientId}</p>
+            <p className="mt-0.5 truncate text-[12px] text-[var(--text-muted)]">{c.redirectUris.join(", ")}</p>
+          </Row>
+        ))}
+      </Section>
+
+      <Section title="Generate a connector" description="Only for clients that require a pre-shared client ID and secret." className="mt-10">
+        <Panel className="p-5 sm:p-6">
+          <SurfaceTabs items={CONNECTOR_PRESETS.map((p) => ({ id: p.key, label: p.label }))} active={preset} onChange={setPreset} label="Client" />
+          <div className="mt-5 space-y-4">
+            <Field label="Name">
+              <input value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder={selected.label} className={inputClass} />
+            </Field>
+            <Field label="Redirect URIs, one per line" hint="HTTPS only, except http://localhost for development.">
+              <textarea value={redirectInput} onChange={(e) => setRedirectInput(e.target.value)} placeholder="https://your-client.com/oauth/callback" rows={3} className={`${textareaClass} claw-mono text-[12.5px]`} />
+            </Field>
+          </div>
+          {selected.guide && (
+            <ol className="mt-5 space-y-1 text-[13px] text-[var(--text-secondary)]">
+              {selected.guide.map((step, i) => (
+                <li key={i} className="flex gap-2.5"><span className="claw-mono text-[var(--text-muted)]">{i + 1}</span><span>{step}</span></li>
+              ))}
+            </ol>
+          )}
+          <div className="mt-6 flex items-center gap-3">
+            <button type="button" onClick={onGenerate} disabled={busy || !sessionToken} className={btnSolid}>
+              {busy ? "Generating" : `Generate ${selected.label} connector`}
+            </button>
+          </div>
+        </Panel>
+
+        {issued && (
+          <div className="mt-6">
+            <p className="text-[14px] font-medium">{issued.name} is ready</p>
+            <p className="mt-1 mb-3 text-[13px] text-[var(--text-muted)]">The client secret is shown once. Copy it now.</p>
+            <CopyField label="Client ID" value={issued.clientId} field="client-id" copiedField={copiedField} onCopy={copy} />
+            <CopyField label="Client secret" value={issued.clientSecret} field="client-secret" copiedField={copiedField} onCopy={copy} />
+            <CopyField label="MCP URL" value={REMOTE_MCP_URL} field="issued-mcp-url" copiedField={copiedField} onCopy={copy} />
+            <button type="button" onClick={() => setIssued(null)} className={`${btnQuiet} mt-4`}>Done</button>
+          </div>
+        )}
+      </Section>
+    </>
   );
 }
 
@@ -398,6 +690,11 @@ export function AgentsTab({
     setActiveTab(tab);
     router.push(tab === "activity" ? "/workspace?tab=activity&sub=logs" : `/workspace?tab=${tab}`);
   };
+
+  const extras = useAgentsExtras(sessionToken ?? null);
+  const leadingCard = extras.mainAgent?.mainAgentId
+    ? <MainAgentCard key="main-agent" mainAgent={extras.mainAgent} onRename={extras.renameMain} />
+    : undefined;
 
   const usageCount = workspace?.usageCount ?? 0;
   const next = !hasAgentsHint
@@ -428,6 +725,7 @@ export function AgentsTab({
         <AgentCardGrid
           sessionToken={sessionToken ?? null}
           onToast={onToast}
+          leadingCard={leadingCard}
           onEmpty={
             <Empty
               title="No agents connected"
@@ -438,9 +736,10 @@ export function AgentsTab({
         />
       </Section>
 
-      <ConnectAgentSection />
+      <ConnectAgentSection sessionToken={sessionToken ?? null} />
 
-      <MainAgentAndSubagents sessionToken={sessionToken ?? null} />
+      {extras.error && <p className="mt-4 text-[13px] text-[var(--accent)]">{extras.error}</p>}
+      <SubagentsSection extras={extras} />
     </div>
   );
 }

@@ -84,7 +84,7 @@ function timeAgo(ts?: number) {
   return new Date(ts).toLocaleDateString();
 }
 
-function monogram(label: string) {
+export function monogram(label: string) {
   const trimmed = label.trim();
   if (!trimmed) return "?";
   const parts = trimmed.split(/[\s·:]+/).filter(Boolean);
@@ -446,11 +446,13 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
   );
 }
 
-export function AgentCardGrid({ sessionToken, onToast, onEmpty }: {
+export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
   sessionToken: string | null;
   onToast?: (message: string, type: "success" | "error" | "info") => void;
   /** Rendered when there are zero connected agents. Keeps the empty-state copy owned by the caller. */
   onEmpty?: React.ReactNode;
+  /** Optional card rendered first in the grid, e.g. the workspace's main agent (2026-08-24: folded out of its own section). */
+  leadingCard?: React.ReactNode;
 }) {
   const [cards, setCards] = useState<CardAgent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -529,13 +531,14 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty }: {
 
   if (cards === null) return <Loading label="Loading agents" />;
   if (error) return <p className="text-[13px] text-[var(--accent)]">{error}</p>;
-  if (cards.length === 0) return <>{onEmpty}</>;
+  if (cards.length === 0 && !leadingCard) return <>{onEmpty}</>;
 
   const selectedAgent = selected ? cards.find((c) => c.id === selected) || null : null;
 
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {leadingCard}
         {cards.map((a) => (
           <AgentCard
             key={a.id}
