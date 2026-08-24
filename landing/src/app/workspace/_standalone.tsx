@@ -15,7 +15,6 @@ const SIGN_IN_PATH = "/sign-in";
 
 export function hrefForTab(id: WorkspaceSurfaceId): string {
   if (id === "activity") return "/workspace?tab=activity&sub=logs";
-  if (id === "connections") return "/workspace?tab=connections&section=agents";
   return `/workspace?tab=${id}`;
 }
 

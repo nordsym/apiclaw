@@ -3,14 +3,13 @@
 /**
  * DEV-ONLY harness to render workspace views with fixture data, no sign-in.
  * Guarded: production build returns 404. Remove nothing from here to "fix" prod.
- *   /dev-ws?view=overview|api-catalog|connections|activity|provider|billing|settings[&sub=..][&w=390]
+ *   /dev-ws?view=agents|api-catalog|activity|provider|billing|settings[&sub=..][&w=390]
  *   Add &wizard=1 to mount the first-run OnboardingWizard on top (fixture state: never completed).
  */
 import { notFound, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { WorkspaceShell } from "../workspace/views/Shell";
-import { OverviewTab } from "../workspace/views/Overview";
-import { ConnectionsTab } from "../workspace/views/Connections";
+import { AgentsTab } from "../workspace/views/Agents";
 import { ActivityTab } from "../workspace/views/Activity";
 import { ProviderConsoleTab } from "../workspace/views/Provider";
 import { BillingTab } from "../workspace/views/Billing";
@@ -47,20 +46,19 @@ function installFetchStub() {
 
 function Harness() {
   const sp = useSearchParams();
-  const view = (sp?.get("view") || "overview") as string;
+  const view = (sp?.get("view") || "agents") as string;
   const sub = sp?.get("sub") || "";
   const wizard = sp?.get("wizard") === "1";
   const [ready, setReady] = useState(false);
-  const [tab, setTab] = useState<TabType>(view === "provider" ? "provider-console" : (view as TabType));
+  const [tab, setTab] = useState<TabType>(view === "provider" ? "provider-console" : view === "overview" || view === "connections" ? "agents" : (view as TabType));
   const [analyticsSub, setAnalyticsSub] = useState<AnalyticsSubtab>((sub as AnalyticsSubtab) || "logs");
-  const [connSection, setConnSection] = useState(sub || "agents");
   const [showAddApi, setShowAddApi] = useState(false);
 
   useEffect(() => { installFetchStub(); setReady(true); }, []);
   if (!ready) return null;
 
   const tabs = [
-    { id: "overview", label: "Home" }, { id: "api-catalog", label: "Catalog" }, { id: "connections", label: "Connections" },
+    { id: "agents", label: "Agents" }, { id: "api-catalog", label: "Catalog" },
     { id: "activity", label: "Activity" }, { id: "billing", label: "Billing" }, { id: "settings", label: "Settings" }, { id: "provider-console", label: "Provider Console" },
   ] as const;
 
@@ -74,10 +72,7 @@ function Harness() {
       usageLabel={fx.workspace.usageLimit === -1 ? "Unlimited calls" : `${fx.workspace.usageRemaining}/${fx.workspace.usageLimit} calls`}
       onLogout={() => {}}
     >
-      {tab === "overview" && <OverviewTab workspace={fx.workspace} agents={fx.agents} providerApis={fx.providerApis} setActiveTab={setTab} sessionToken={TOKEN} onToast={() => {}} />}
-      {tab === "connections" && (
-        <ConnectionsTab agents={fx.agents} onRevoke={() => {}} onRename={() => {}} workspaceEmail={fx.workspace.email} sessionToken={TOKEN} isProvider={true} section={connSection} onSectionChange={setConnSection} />
-      )}
+      {tab === "agents" && <AgentsTab workspace={fx.workspace} hasAgentsHint={fx.agents.length > 0} setActiveTab={setTab} sessionToken={TOKEN} onToast={() => {}} />}
       {tab === "activity" && (
         <ActivityTab workspace={fx.workspace} agents={fx.agents} usage={fx.usage} activeSubtab={analyticsSub} setActiveSubtab={setAnalyticsSub} sessionToken={TOKEN} />
       )}

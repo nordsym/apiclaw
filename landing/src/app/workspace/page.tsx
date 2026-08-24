@@ -26,8 +26,7 @@ import {
 } from "@/lib/workspace-session";
 import { CONVEX_URL, CLERK_ENABLED, type Workspace, type Agent, type ConnectedAgent, type UsageData, type ProviderAPI, type TabType, type AnalyticsSubtab } from "./_shared";
 import { WorkspaceShell } from "./views/Shell";
-import { OverviewTab } from "./views/Overview";
-import { ConnectionsTab } from "./views/Connections";
+import { AgentsTab } from "./views/Agents";
 import { ActivityTab } from "./views/Activity";
 import { ProviderConsoleTab } from "./views/Provider";
 import { BillingTab } from "./views/Billing";
@@ -44,24 +43,26 @@ export default function WorkspacePage() {
   }
   
   const requestedTab = searchParams.get("tab");
+  // "connections" section=keys/remote both now live in Settings; section=agents (and
+  // the bare tab) map to the new Agents home. Deep links keep resolving, no 404s.
+  const requestedSection = searchParams.get("section");
   const legacyTabMap: Record<string, TabType> = {
-    "my-agents": "connections",
-    "api-keys": "connections",
-    integrations: "connections",
+    overview: "agents",
+    connections: requestedSection === "keys" || requestedSection === "remote" ? "settings" : "agents",
+    "my-agents": "agents",
+    "api-keys": "settings",
+    integrations: "settings",
     analytics: "activity",
     logs: "activity",
     "my-apis": "provider-console",
   };
   const tabFromUrl = (requestedTab && legacyTabMap[requestedTab]) || requestedTab as TabType | null;
   const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
-  const legacyConnectionSection = requestedTab === "api-keys" ? "keys" : requestedTab === "integrations" ? "remote" : "agents";
-  const connectionSectionFromUrl = searchParams.get("section") || legacyConnectionSection;
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "overview");
+  const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "agents");
   const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "logs");
-  const [connectionsSection, setConnectionsSection] = useState(connectionSectionFromUrl);
   
   // Workspace data (consumer)
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -153,19 +154,16 @@ export default function WorkspacePage() {
   }, [searchParams, sessionToken, showToast]);
 
   useEffect(() => {
-    const validTabs: TabType[] = ["overview", "api-catalog", "connections", "activity", "billing", "settings", "provider-console"];
+    const validTabs: TabType[] = ["agents", "api-catalog", "activity", "billing", "settings", "provider-console"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
-      if (tabFromUrl === "connections" && ["agents", "keys", "remote"].includes(connectionSectionFromUrl)) {
-        setConnectionsSection(connectionSectionFromUrl);
-      }
       if (tabFromUrl === "activity") {
         if (subFromUrl && ["overview", "usage", "logs", "chains"].includes(subFromUrl)) {
           setAnalyticsSubtab(subFromUrl);
         }
       }
     }
-  }, [tabFromUrl, subFromUrl, connectionSectionFromUrl]);
+  }, [tabFromUrl, subFromUrl]);
 
   const fetchWorkspaceData = useCallback(async (token: string) => {
     try {
@@ -294,8 +292,8 @@ export default function WorkspacePage() {
 
   useEffect(() => {
     if (!isLoading && activeTab === "provider-console" && !isProvider) {
-      setActiveTab("overview");
-      router.replace("/workspace?tab=overview");
+      setActiveTab("agents");
+      router.replace("/workspace?tab=agents");
     }
   }, [activeTab, isLoading, isProvider, router]);
 
@@ -339,43 +337,6 @@ export default function WorkspacePage() {
     }
   };
 
-  const handleRevokeAgent = async (agentId: string) => {
-    if (!sessionToken) return;
-    try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "workspaces:revokeAgentSession",
-          args: { token: sessionToken, sessionId: agentId },
-        }),
-      });
-      setAgents((prev) => prev.filter((a) => a.id !== agentId));
-      showToast("Agent revoked.", "success");
-    } catch (err) {
-      console.error("Revoke error:", err);
-      showToast("Could not revoke the agent. Try again.", "error");
-    }
-  };
-
-  const handleRenameAgent = async (agentId: string, name: string) => {
-    if (!sessionToken) return;
-    try {
-      await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "agents:renameAgent",
-          args: { token: sessionToken, agentId, name },
-        }),
-      });
-      setAgents((prev) => prev.map((a) => (a.id === agentId ? { ...a, name, customName: name } : a)));
-    } catch (err) {
-      console.error("Rename error:", err);
-      showToast("Could not rename the agent. Try again.", "error");
-    }
-  };
-
   const tabs = getWorkspaceNavigation({ isProvider });
 
   if (isLoading) {
@@ -416,14 +377,7 @@ export default function WorkspacePage() {
       onTabChange={(id) => {
         setActiveTab(id);
         if (id === "activity") setAnalyticsSubtab("logs");
-        if (id === "connections") setConnectionsSection("agents");
-        router.push(
-          id === "activity"
-            ? "/workspace?tab=activity&sub=logs"
-            : id === "connections"
-              ? "/workspace?tab=connections&section=agents"
-              : `/workspace?tab=${id}`,
-        );
+        router.push(id === "activity" ? "/workspace?tab=activity&sub=logs" : `/workspace?tab=${id}`);
       }}
       workspaceName={displayEmail}
       tierLabel={displayTier}
@@ -450,11 +404,10 @@ export default function WorkspacePage() {
             />
           )}
           
-          {activeTab === "overview" && (
-            <OverviewTab
+          {activeTab === "agents" && (
+            <AgentsTab
               workspace={workspace}
-              agents={agents}
-              providerApis={providerApis}
+              hasAgentsHint={agents.length > 0}
               setActiveTab={setActiveTab}
               sessionToken={sessionToken}
               onToast={showToast}
@@ -462,21 +415,6 @@ export default function WorkspacePage() {
           )}
           {activeTab === "api-catalog" && (
             <WorkspaceCatalog sessionToken={sessionToken} />
-          )}
-          {activeTab === "connections" && (
-            <ConnectionsTab
-              agents={agents}
-              onRevoke={handleRevokeAgent}
-              onRename={handleRenameAgent}
-              workspaceEmail={workspace?.email}
-              sessionToken={sessionToken}
-              isProvider={isProvider}
-              section={connectionsSection}
-              onSectionChange={(next) => {
-                setConnectionsSection(next);
-                router.push(`/workspace?tab=connections&section=${next}`);
-              }}
-            />
           )}
           {activeTab === "activity" && (
             <ActivityTab

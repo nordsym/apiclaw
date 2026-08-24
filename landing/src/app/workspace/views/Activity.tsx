@@ -376,7 +376,7 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
         filtersActive ? (
           <Empty title="No entries match these filters" action={<button type="button" onClick={clearFilters} className={btnQuiet}>Clear filters</button>} />
         ) : (
-          <Empty title="No activity yet" body="Calls and searches from connected agents appear here." action={<a href="/workspace?tab=connections" className={btnSolid}>Connect an agent</a>} />
+          <Empty title="No activity yet" body="Calls and searches from connected agents appear here." action={<a href="/workspace?tab=agents" className={btnSolid}>Connect an agent</a>} />
         )
       ) : (
         <>
@@ -550,7 +550,7 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
   const hasAny = totalCalls > 0 || totalSearches > 0;
 
   if (!hasAny) {
-    return <Empty title="No usage in the last 30 days" body="Totals, a calls-per-day chart and a per-provider breakdown appear after the first call." action={<a href="/workspace?tab=connections" className={btnSolid}>Connect an agent</a>} />;
+    return <Empty title="No usage in the last 30 days" body="Totals, a calls-per-day chart and a per-provider breakdown appear after the first call." action={<a href="/workspace?tab=agents" className={btnSolid}>Connect an agent</a>} />;
   }
 
   return (

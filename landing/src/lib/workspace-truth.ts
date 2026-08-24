@@ -1,7 +1,6 @@
 export type WorkspaceSurfaceId =
-  | "overview"
+  | "agents"
   | "api-catalog"
-  | "connections"
   | "activity"
   | "billing"
   | "settings"
@@ -60,9 +59,8 @@ export function getWorkspaceNavigation({
   isProvider: boolean;
 }): WorkspaceNavigationItem[] {
   const navigation: WorkspaceNavigationItem[] = [
-    { id: "overview", label: "Home" },
+    { id: "agents", label: "Agents" },
     { id: "api-catalog", label: "Catalog" },
-    { id: "connections", label: "Connections" },
     { id: "activity", label: "Activity" },
     { id: "billing", label: "Billing" },
     { id: "settings", label: "Settings" },

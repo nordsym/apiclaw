@@ -31,7 +31,7 @@ assert.deepEqual(getAgentPresence(now - 120 * 24 * 60 * 60_000, now), {
 
 assert.deepEqual(
   getWorkspaceNavigation({ isProvider: false }).map((item) => item.label),
-  ["Home", "Catalog", "Connections", "Activity", "Billing", "Settings"],
+  ["Agents", "Catalog", "Activity", "Billing", "Settings"],
 );
 assert.equal(
   getWorkspaceNavigation({ isProvider: false }).some((item) => item.id === "provider-console"),

@@ -183,7 +183,7 @@ export default function IntegrationsPage() {
   const fmtDate = (ts: number) => new Date(ts).toLocaleDateString();
 
   return (
-    <StandaloneShell activeTab="connections" sessionToken={sessionToken}>
+    <StandaloneShell activeTab="settings" sessionToken={sessionToken}>
       <PageHeader title="Remote MCP" description="Connect an OAuth-capable MCP client to this workspace." />
 
       {error && <p className="mb-6 text-[13px] text-[var(--accent)]">{error}</p>}
