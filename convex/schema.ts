@@ -285,7 +285,8 @@ export default defineSchema({
     fingerprint: v.string(), // hostname:username
     mcpClient: v.string(), // "claude-desktop" | "claude-code" | "cursor" | "windsurf" | "cline" | "continue" | "unknown"
     workspaceId: v.id("workspaces"), // always linked — auto-created on first call
-    name: v.optional(v.string()), // auto-generated or user-set
+    name: v.optional(v.string()), // auto-generated or user-set (see nameSetByUser)
+    nameSetByUser: v.optional(v.boolean()), // true once `name` was set via renameAgent, not auto-generated (real names, 2026-08-24)
     aiBackend: v.optional(v.string()), // "claude-3-opus" etc
     platform: v.optional(v.string()), // "darwin" | "linux" | "win32"
     callCount: v.number(),

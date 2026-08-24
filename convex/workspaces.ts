@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { FREE_LIFETIME_LIMIT, getQuotaState } from "./quota";
 import { recordWorkspaceAuthenticated } from "./funnel";
 import { hasActivePaygEntitlement } from "./managedUsagePolicy";
+import { resolveAgentDisplayName } from "./agentDisplay";
 import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
 } from "../src/product-truth";
@@ -713,11 +714,23 @@ export const getConnectedAgents = query({
       const matchedAgent = s.fingerprint
         ? workspaceAgents.find((a) => a.fingerprint === s.fingerprint)
         : undefined;
+      // Two independent places a user rename can live: the session's own
+      // customName (set via workspaces:renameAgent) and the matched
+      // agents row's name when nameSetByUser is true (set via
+      // agents:renameAgent). Either one is a real user choice and wins
+      // over the prettified mcpClient label.
+      const userSetName = s.customName || (matchedAgent?.nameSetByUser ? matchedAgent.name : null);
+      const displayName = resolveAgentDisplayName({
+        userSetName,
+        mcpClient: matchedAgent?.mcpClient,
+        fallbackName: matchedAgent?.name || s.fingerprint,
+      });
       return {
         id: s._id,
         fingerprint: s.fingerprint || "Unknown",
         customName: s.customName || null,
-        name: s.customName || s.fingerprint || "Unknown",
+        name: displayName,
+        displayName,
         lastUsedAt: s.lastUsedAt,
         createdAt: s.createdAt,
         isCurrent: s.sessionToken === token,

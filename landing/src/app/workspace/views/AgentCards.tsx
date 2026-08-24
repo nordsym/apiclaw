@@ -73,6 +73,8 @@ export interface CardAgent {
   id: string;
   fingerprint: string;
   name?: string;
+  /** Resolved label: user rename > prettified mcpClient > stored name > "Unknown agent". */
+  displayName: string;
   hostname: string;
   aiBackend?: string;
   mcpClient: string;
@@ -223,7 +225,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
   onRevoke: () => Promise<void>;
 }) {
   const [editingName, setEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState(agent.name || "");
+  const [nameDraft, setNameDraft] = useState(agent.displayName);
   const [editingModel, setEditingModel] = useState(initialEditModel);
   const [revokeArmed, setRevokeArmed] = useState(false);
   const rail = modelRail(agent);
@@ -231,7 +233,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
 
   const saveName = async () => {
     const next = nameDraft.trim();
-    if (next.length < 2 || next.length > 50 || next === (agent.name || "")) { setEditingName(false); return; }
+    if (next.length < 2 || next.length > 50 || next === agent.displayName) { setEditingName(false); return; }
     await onRename(next);
     setEditingName(false);
   };
@@ -246,13 +248,13 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
 
         <div className="flex items-center gap-3 pr-10">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-elevated)] text-[13px] font-semibold">
-            {monogram(agent.name || clientLabel(agent.mcpClient))}
+            {monogram(agent.displayName)}
           </span>
           {!editingName ? (
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
-                <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{agent.name || clientLabel(agent.mcpClient)}</p>
-                <button type="button" onClick={() => { setNameDraft(agent.name || ""); setEditingName(true); }} className="shrink-0 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Rename</button>
+                <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{agent.displayName}</p>
+                <button type="button" onClick={() => { setNameDraft(agent.displayName); setEditingName(true); }} className="shrink-0 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Rename</button>
               </div>
               <Status kind={presence.state === "active" ? "ok" : "muted"}>{presence.label}</Status>
             </div>
@@ -344,14 +346,14 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
   onRevoke: () => Promise<void>;
 }) {
   const [renaming, setRenaming] = useState(false);
-  const [nameDraft, setNameDraft] = useState(agent.name || "");
+  const [nameDraft, setNameDraft] = useState(agent.displayName);
   const rail = modelRail(agent);
   const presence = getAgentPresence(agent.lastActiveAt);
-  const label = agent.name || clientLabel(agent.mcpClient);
+  const label = agent.displayName;
 
   const saveName = async () => {
     const next = nameDraft.trim();
-    if (next.length >= 2 && next.length <= 50 && next !== (agent.name || "")) await onRename(next);
+    if (next.length >= 2 && next.length <= 50 && next !== agent.displayName) await onRename(next);
     setRenaming(false);
   };
 
@@ -388,7 +390,7 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
           canSetModel={rail.kind !== "custom"}
           canRevoke={Boolean(agent.sessionId) && !agent.isCurrentSession}
           onSetModel={onSetModel}
-          onRename={() => { setNameDraft(agent.name || ""); setRenaming(true); }}
+          onRename={() => { setNameDraft(agent.displayName); setRenaming(true); }}
           onRevoke={onRevoke}
         />
       </div>
@@ -434,6 +436,7 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty }: {
           id: a.id,
           fingerprint: a.fingerprint,
           name: a.name,
+          displayName: a.displayName || a.name || clientLabel(a.mcpClient),
           hostname: a.hostname,
           aiBackend: a.aiBackend,
           mcpClient: a.mcpClient,
@@ -458,7 +461,7 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty }: {
     if (!sessionToken) return;
     try {
       await convexCall("mutation", "agents:renameAgent", { token: sessionToken, agentId, name });
-      setCards((prev) => prev && prev.map((c) => (c.id === agentId ? { ...c, name } : c)));
+      setCards((prev) => prev && prev.map((c) => (c.id === agentId ? { ...c, name, displayName: name } : c)));
     } catch (err) {
       onToast?.(err instanceof Error ? err.message : "Rename failed", "error");
     }

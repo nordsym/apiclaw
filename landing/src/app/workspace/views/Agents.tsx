@@ -275,7 +275,7 @@ function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }
           <Row right={<span>{(mainAgent.usageCount ?? 0).toLocaleString()} calls</span>}>
             <InlineName value={mainAgent.mainAgentName || ""} fallback="Main agent" onSave={renameMain} />
             <p className="claw-mono truncate text-[12px] text-[var(--text-muted)]">
-              {mainAgent.mainAgentId}{mainAgent.aiBackend ? ` · ${mainAgent.aiBackend}` : ""}
+              {mainAgent.mainAgentId}{mainAgent.aiBackend ? ` · custom:${mainAgent.aiBackend}` : ""}
             </p>
           </Row>
         </Section>

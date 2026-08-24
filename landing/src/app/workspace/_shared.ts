@@ -34,6 +34,8 @@ export interface ConnectedAgent {
   fingerprint: string;
   mcpClient: string;
   name?: string;
+  /** Resolved: user rename > prettified mcpClient > stored name > "Unknown agent". */
+  displayName?: string;
   hostname: string;
   aiBackend?: string;
   platform?: string;

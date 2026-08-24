@@ -28,11 +28,16 @@ export const agents: Agent[] = [
   { id: "ag_2", fingerprint: "codex-cli · ci-runner", name: "Codex CLI", customName: "CI runner", lastUsedAt: NOW - 2 * D, createdAt: NOW - 8 * D, isCurrent: false },
 ];
 
-/** agents table rows as returned by agents:getWorkspaceAgents (Connections view). */
+/**
+ * agents table rows as returned by agents:getWorkspaceAgents (Connections view).
+ * ag_1 has a real user rename (displayName wins over the mcpClient label);
+ * ag_2/ag_3 have no user rename, so displayName is the prettified mcpClient,
+ * matching the backend's agentDisplay.ts resolution order.
+ */
 export const connectedAgents: ConnectedAgent[] = [
-  { id: "ag_1", fingerprint: "mbp-gustav:gustav", mcpClient: "claude-desktop", name: "Claude Desktop", hostname: "mbp-gustav", aiBackend: "claude-sonnet-4", platform: "darwin", callCount: 7, firstSeenAt: NOW - 10 * D, lastActiveAt: NOW - 5 * 60_000, defaultModel: null },
-  { id: "ag_2", fingerprint: "ci-runner:ci", mcpClient: "claude-code", name: undefined, hostname: "ci-runner", platform: "linux", callCount: 2, firstSeenAt: NOW - 8 * D, lastActiveAt: NOW - 2 * D, defaultModel: "anthropic/claude-sonnet-5" },
-  { id: "ag_3", fingerprint: "worker-3:auto", mcpClient: "cursor", name: undefined, hostname: "worker-3", platform: "linux", callCount: 0, firstSeenAt: NOW - 1 * D, lastActiveAt: NOW - 6 * D, defaultModel: null },
+  { id: "ag_1", fingerprint: "mbp-gustav:gustav", mcpClient: "claude-desktop", name: "Gustav's Mac", displayName: "Gustav's Mac", hostname: "mbp-gustav", aiBackend: "claude-sonnet-4", platform: "darwin", callCount: 7, firstSeenAt: NOW - 10 * D, lastActiveAt: NOW - 5 * 60_000, defaultModel: null },
+  { id: "ag_2", fingerprint: "ci-runner:ci", mcpClient: "claude-code", name: undefined, displayName: "Claude Code", hostname: "ci-runner", platform: "linux", callCount: 2, firstSeenAt: NOW - 8 * D, lastActiveAt: NOW - 2 * D, defaultModel: "anthropic/claude-sonnet-5" },
+  { id: "ag_3", fingerprint: "worker-3:auto", mcpClient: "cursor", name: undefined, displayName: "Cursor", hostname: "worker-3", platform: "linux", callCount: 0, firstSeenAt: NOW - 1 * D, lastActiveAt: NOW - 6 * D, defaultModel: null },
 ];
 
 export const providerApis: ProviderAPI[] = [
@@ -117,8 +122,8 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
   "agents:getMainAgent": { workspaceId: "ws_dev", email: workspace.email, mainAgentId: "agent_9f3a2c", mainAgentName: "Main", aiBackend: "claude-sonnet-4", usageCount: 9, createdAt: NOW - 12 * D },
   "agents:getSubagents": { subagents: [{ id: "sub_1", subagentId: "research", name: "research", callCount: 2, firstSeenAt: NOW - 3 * D, lastActiveAt: NOW - 1 * D }], total: 1 },
   "workspaces:getConnectedAgents": [
-    { id: "sess_1", fingerprint: "mbp-gustav:gustav", customName: null, name: "mbp-gustav:gustav", lastUsedAt: NOW - 5 * 60_000, createdAt: NOW - 10 * D, isCurrent: true },
-    { id: "sess_2", fingerprint: "ci-runner:ci", customName: "CI runner", name: "CI runner", lastUsedAt: NOW - 2 * D, createdAt: NOW - 8 * D, isCurrent: false },
+    { id: "sess_1", fingerprint: "mbp-gustav:gustav", customName: null, name: "Gustav's Mac", displayName: "Gustav's Mac", lastUsedAt: NOW - 5 * 60_000, createdAt: NOW - 10 * D, isCurrent: true },
+    { id: "sess_2", fingerprint: "ci-runner:ci", customName: "CI runner", name: "CI runner", displayName: "CI runner", lastUsedAt: NOW - 2 * D, createdAt: NOW - 8 * D, isCurrent: false },
   ],
   "apiKeys:listKeys": { keys: [{ id: "key_1", name: "CI runner", keyPrefix: "sk-claw-...7f3a", createdAt: NOW - 8 * D, lastUsedAt: NOW - 2 * D }] },
   "providerKeys:listKeys": [
