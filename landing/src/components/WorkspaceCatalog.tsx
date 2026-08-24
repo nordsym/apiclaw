@@ -167,7 +167,7 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
 
   return (
     <div>
-      <PageHeader title="Catalog" description="Search providers. Managed rows can be called from here." />
+      <PageHeader title="Catalog" description="Search providers. Callable rows can be called right now, the rest are discoverable." />
 
       <input
         type="search"
@@ -180,7 +180,7 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
 
       <div className="mt-4">
         <SurfaceTabs
-          items={[{ id: "managed", label: "Managed" }, { id: "all", label: "All" }]}
+          items={[{ id: "managed", label: "Callable" }, { id: "all", label: "All" }]}
           active={source}
           onChange={(id) => { setSource(id as SourceId); setTarget(null); }}
           label="Source"
@@ -277,7 +277,7 @@ function CatalogRow({ item, target, selected, onSelect }: {
       ) : item.verified ? (
         <Status kind="muted">source-verified</Status>
       ) : null}
-      <span className="hidden sm:inline">{authLabel}</span>
+      {item.auth !== "managed" && <span className="hidden sm:inline">{authLabel}</span>}
       {!target && item.docsUrl && (
         <a href={item.docsUrl} target="_blank" rel="noopener noreferrer" className="claw-link">Docs</a>
       )}

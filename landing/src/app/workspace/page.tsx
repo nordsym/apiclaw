@@ -117,7 +117,7 @@ export default function WorkspacePage() {
           if (!active) return;
           if (dashboard?.workspace) setWorkspace(dashboard.workspace);
           if (dashboard?.workspace?.paygActive === true) {
-            showToast("PAYG verified. Billing-ready managed calls can now continue at provider cost + 15%.", "success");
+            showToast("PAYG verified. Billing-ready calls can now continue at provider cost + 15%.", "success");
             cleanReturnParam("billing");
             return;
           }
@@ -131,7 +131,7 @@ export default function WorkspacePage() {
         }
 
         if (active) {
-          showToast("Payment method saved. PAYG is still pending verification, so managed billing remains off.", "info");
+          showToast("Payment method saved. PAYG is still pending verification, so billing-ready calls remain off.", "info");
           cleanReturnParam("billing");
         }
       };

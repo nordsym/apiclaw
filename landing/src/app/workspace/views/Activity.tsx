@@ -559,7 +559,7 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
         <StatCard title="Calls" value={totalCalls.toLocaleString()} hint="Last 30 days" />
         <StatCard title="Searches" value={totalSearches.toLocaleString()} hint="Last 30 days" />
         <StatCard title="Success rate" value={totalCalls > 0 ? `${Math.round(stats?.successRate || 0)}%` : "n/a"} hint={totalCalls > 0 ? `${stats?.errorCount || 0} failed` : "No calls yet"} />
-        <StatCard title="Avg latency" value={totalCalls > 0 ? `${Math.round(stats?.avgLatency || 0)} ms` : "n/a"} hint="Managed calls" />
+        <StatCard title="Avg latency" value={totalCalls > 0 ? `${Math.round(stats?.avgLatency || 0)} ms` : "n/a"} hint="Callable calls" />
       </StatGrid>
 
       <Section title="Calls per day">

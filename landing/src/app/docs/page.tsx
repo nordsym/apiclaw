@@ -267,7 +267,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
             <section id="byok" className="scroll-mt-20">
               <h2 className="claw-h2">Bring your own key</h2>
               <p className={`${BODY} mt-4`}>
-                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the managed rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
+                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
               </p>
               <p className={`${BODY} mt-4`}>
                 An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.
@@ -285,7 +285,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
               <div className="mt-8 space-y-8">
                 <div>
                   <h3 className={SUB}>NASA Astronomy Picture of the Day</h3>
-                  <pre className={`${PRE} mt-3`}>{`// First managed call: POST /v1/execute
+                  <pre className={`${PRE} mt-3`}>{`// First call: POST /v1/execute
 call_api({
   provider: "nasa",
   action: "apod",
@@ -355,7 +355,7 @@ call_api({
                 {/* get_connected_providers */}
                 <div>
                   <h3 className={`${SUB} claw-mono`}>get_connected_providers</h3>
-                  <p className={`${BODY} mt-2`}>List all managed providers (no API key needed).</p>
+                  <p className={`${BODY} mt-2`}>List all built-in providers (no API key needed).</p>
                   <pre className={`${PRE} mt-3`}>get_connected_providers()</pre>
                   <div className={`${META} mt-4`}>
                     <p className="font-medium text-text-primary">Currently available</p>
@@ -372,7 +372,7 @@ call_api({
                 {/* call_api */}
                 <div>
                   <h3 className={`${SUB} claw-mono`}>call_api</h3>
-                  <p className={`${BODY} mt-2`}>Execute an API call through a managed provider.</p>
+                  <p className={`${BODY} mt-2`}>Execute an API call through a built-in provider.</p>
                   <pre className={`${PRE} mt-3`}>{`call_api({
   provider: "brave_search",
   endpoint: "search",
@@ -435,7 +435,7 @@ call_api({
             <section id="list-your-api" className="scroll-mt-20">
               <h2 className="claw-h2">List your API on APIClaw</h2>
               <p className={`${BODY} mt-4`}>
-                APIClaw indexes {statsData.apiCount.toLocaleString("en-US")} APIs and {statsData.sourceVerifiedCount.toLocaleString("en-US")} have source-verified definitions. Managed execution readiness is shown separately. Adding yours takes one OpenAPI spec and a free email signup.
+                APIClaw indexes {statsData.apiCount.toLocaleString("en-US")} APIs and {statsData.sourceVerifiedCount.toLocaleString("en-US")} have source-verified definitions. Callable readiness is shown separately. Adding yours takes one OpenAPI spec and a free email signup.
               </p>
 
               <ol className="mt-8 border-t border-border-subtle">
@@ -462,7 +462,7 @@ call_api({
                   },
                   {
                     n: "05",
-                    t: "Optional: managed-partner upgrade",
+                    t: "Optional: partner upgrade",
                     d: <>Hand APIClaw the credential. We hold custody and agents call without keys. Commercial terms (flat fee, share, or hybrid) are agreed per partner.</>,
                   },
                 ].map((step) => (
@@ -479,7 +479,7 @@ call_api({
               <div className="mt-8 flex flex-col gap-5 rounded-[14px] border border-border-subtle bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
                   <p className="claw-eyebrow mb-1.5">Always free</p>
-                  <p className={BODY}>Listing your API is free. Always. The managed-partner upgrade is opt-in.</p>
+                  <p className={BODY}>Listing your API is free. Always. The partner upgrade is opt-in.</p>
                 </div>
                 <a href="/workspace" className="claw-btn claw-btn-solid flex-none">List your API</a>
               </div>

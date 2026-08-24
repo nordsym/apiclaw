@@ -40,8 +40,13 @@ export function Section({ title, description, action, children, className = "" }
 }
 
 /** The one elevated surface. Use sparingly: forms, a highlighted next action, a code sample. */
-export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-[14px] border border-[var(--border-subtle)] bg-[var(--surface)] ${className}`}>{children}</div>;
+export function Panel({ children, className = "", onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
+  const interactive = onClick ? "cursor-pointer transition-colors hover:border-[var(--border)] hover:bg-[var(--surface-elevated)]" : "";
+  return (
+    <div onClick={onClick} className={`rounded-[14px] border border-[var(--border-subtle)] bg-[var(--surface)] ${interactive} ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 /** Segmented control for sub-views. `icon` is accepted for compatibility and ignored. */

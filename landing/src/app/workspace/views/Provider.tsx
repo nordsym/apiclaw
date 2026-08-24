@@ -453,7 +453,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
     <div className="pb-6 pl-0 sm:pl-4">
       <div className="mb-6">
         <div className="mb-2 flex items-baseline justify-between gap-4">
-          <h3 className="text-[13.5px] font-semibold">Managed routing</h3>
+          <h3 className="text-[13.5px] font-semibold">Call routing</h3>
           {configId && <Status kind={config.status === "live" ? "ok" : "muted"}>{config.status === "live" ? "Live" : config.status === "testing" ? "Testing" : "Draft"}</Status>}
         </div>
         {operatedByApiclaw ? (

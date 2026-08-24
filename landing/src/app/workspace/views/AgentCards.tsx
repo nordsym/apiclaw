@@ -33,6 +33,8 @@ async function convexCall<T>(kind: "query" | "mutation", path: string, args: Rec
 const MCP_CLIENT_LABEL: Record<string, string> = {
   "claude-desktop": "Claude Desktop",
   "claude-code": "Claude Code",
+  openclaw: "OpenClaw",
+  codex: "Codex",
   cursor: "Cursor",
   windsurf: "Windsurf",
   cline: "Cline",
@@ -40,9 +42,36 @@ const MCP_CLIENT_LABEL: Record<string, string> = {
   vscode: "VS Code",
 };
 
+/** mcpClient values that mean "we could not detect a harness", not a real identity to prettify. */
+const UNKNOWN_MCP_CLIENT_VALUES = new Set(["unknown", ""]);
+
+/** Title-case a hyphen/underscore/space separated id, e.g. "some-tool" -> "Some Tool". */
+function titleCase(raw: string): string {
+  return raw
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 function clientLabel(client?: string) {
   if (!client) return "Unknown client";
   return MCP_CLIENT_LABEL[client] || client;
+}
+
+/**
+ * "claude-code" -> "Claude Code". Mirrors convex/agentDisplay.ts's
+ * prettifyMcpClient (that module runs server-side only, so this client
+ * component keeps its own copy rather than importing it). Falls back to
+ * title-casing an unrecognized mcpClient id; returns null only when
+ * there is no real harness identity to show (unset or "unknown").
+ */
+function prettifyMcpClient(mcpClient?: string | null): string | null {
+  if (!mcpClient) return null;
+  const key = mcpClient.trim().toLowerCase();
+  if (!key || UNKNOWN_MCP_CLIENT_VALUES.has(key)) return null;
+  if (MCP_CLIENT_LABEL[key]) return MCP_CLIENT_LABEL[key];
+  return titleCase(key);
 }
 
 function timeAgo(ts?: number) {
@@ -86,11 +115,20 @@ export interface CardAgent {
   isCurrentSession: boolean;
 }
 
-/** Rail shown as a card's mono subtitle and in the detail panel. */
-function modelRail(a: Pick<CardAgent, "defaultModel" | "aiBackend">): { text: string; kind: "apiclaw" | "custom" | "none" } {
+/**
+ * Rail shown as a card's mono subtitle and in the detail panel. Falls
+ * through defaultModel -> aiBackend -> prettified mcpClient -> a quiet
+ * "No default model" so two different agents never render identically
+ * unless they truly are (2026-08-24 differentiation fix; previously
+ * every agent without a defaultModel showed the literal placeholder
+ * "Default model").
+ */
+function modelRail(a: Pick<CardAgent, "defaultModel" | "aiBackend" | "mcpClient">): { text: string; kind: "apiclaw" | "custom" | "harness" | "none" } {
   if (a.defaultModel) return { text: a.defaultModel, kind: "apiclaw" };
   if (a.aiBackend) return { text: `custom:${a.aiBackend}`, kind: "custom" };
-  return { text: "Default model", kind: "none" };
+  const harness = prettifyMcpClient(a.mcpClient);
+  if (harness) return { text: harness, kind: "harness" };
+  return { text: "No default model", kind: "none" };
 }
 
 /* ------------------------------------------------------------------
@@ -285,7 +323,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
               <span className="text-[var(--text-muted)]">Model rail</span>
               {!editingModel ? (
                 <span className="flex min-w-0 items-center gap-2">
-                  <span className={`claw-mono truncate text-right text-[12.5px] ${rail.kind === "custom" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"}`}>{rail.text}</span>
+                  <span className={`claw-mono truncate text-right text-[12.5px] ${rail.kind === "apiclaw" ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}>{rail.text}</span>
                   {rail.kind !== "custom" && (
                     <button type="button" onClick={() => setEditingModel(true)} className="shrink-0 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Edit</button>
                   )}
@@ -293,7 +331,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
               ) : null}
             </div>
             {rail.kind === "custom" && (
-              <p className="mt-1.5 text-[12px] text-[var(--text-muted)]">Managed by your harness. APIClaw does not route or switch this agent&apos;s model.</p>
+              <p className="mt-1.5 text-[12px] text-[var(--text-muted)]">Set by your harness. APIClaw does not route or switch this agent&apos;s model.</p>
             )}
             {editingModel && (
               <div className="mt-2">
@@ -358,9 +396,9 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
   };
 
   return (
-    <Panel className="relative flex flex-col gap-3 p-4">
+    <Panel className="relative flex flex-col gap-3 p-4" onClick={onOpen}>
       <div className="flex items-start justify-between gap-2">
-        <button type="button" onClick={onOpen} className="flex min-w-0 items-center gap-3 text-left">
+        <div className="flex min-w-0 items-center gap-3 text-left">
           <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-elevated)] text-[12px] font-semibold">
             {monogram(label)}
             <span
@@ -383,9 +421,9 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
                 autoFocus
               />
             )}
-            <span className={`claw-mono block truncate text-[11.5px] ${rail.kind === "custom" ? "text-[var(--text-muted)]" : "text-[var(--text-secondary)]"}`}>{rail.text}</span>
+            <span className={`claw-mono block truncate text-[11.5px] ${rail.kind === "apiclaw" ? "text-[var(--text-secondary)]" : "text-[var(--text-muted)]"}`}>{rail.text}</span>
           </span>
-        </button>
+        </div>
         <CardMenu
           canSetModel={rail.kind !== "custom"}
           canRevoke={Boolean(agent.sessionId) && !agent.isCurrentSession}
@@ -395,7 +433,7 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
         />
       </div>
       {renaming && (
-        <div className="-mt-1 flex gap-2 pl-12">
+        <div onClick={(e) => e.stopPropagation()} className="-mt-1 flex gap-2 pl-12">
           <button type="button" onClick={saveName} className={`${btnSolid} !h-7`}>Save</button>
           <button type="button" onClick={() => setRenaming(false)} className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Cancel</button>
         </div>

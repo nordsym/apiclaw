@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import Link from "next/link";
-import { REMOTE_MCP_URL } from "@/components/home/truth";
 import { CONVEX_URL, Workspace } from "../_shared";
 import { PageHeader, Section, Panel, SurfaceTabs, Row, Status, Empty, KV, Field, Loading, inputClass, btnSolid, btnQuiet, btnDanger } from "./ui";
 
@@ -241,7 +239,7 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
   const modelInCatalog = !defaultModel || catalog.some((m) => m.id === defaultModel);
 
   return (
-    <Section title="Model routing" description="Applies to managed LLM calls that do not set a model or route. Override per request with the X-APIClaw-Route header.">
+    <Section title="Model routing" description="Applies to callable LLM calls that do not set a model or route. Override per request with the X-APIClaw-Route header.">
       {loadError ? (
         <p className="py-6 text-[13px] text-[var(--accent)]">Could not load routing settings. Reload to try again.</p>
       ) : !loaded ? (
@@ -602,37 +600,14 @@ function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
   );
 }
 
-/* ------------------------------------------------------------------
-   Remote MCP: a pointer, not a rebuild. Full connector management
-   (presets, OAuth registration) stays at /workspace/integrations,
-   which is the better-named home for that install-instructions
-   surface (2026-08-24 restructure note: Connections dissolved).
-   ------------------------------------------------------------------ */
-
-function RemoteMcpSection() {
-  return (
-    <Section title="Remote MCP" description="Hosted clients connect over HTTP with workspace sign-in.">
-      <Panel className="p-5">
-        <p className="mb-2 text-[13px] text-[var(--text-muted)]">Endpoint</p>
-        <CopyLine text={REMOTE_MCP_URL} />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/workspace/integrations" className={btnSolid}>Integrations</Link>
-          <Link href="/docs#remote-mcp" className={btnQuiet}>Docs</Link>
-        </div>
-      </Panel>
-    </Section>
-  );
-}
-
 export function SettingsTab({ workspace, sessionToken, onWorkspaceUpdate }: { workspace: Workspace | null; sessionToken: string | null; onWorkspaceUpdate?: (patch: Partial<Workspace>) => void }) {
   return (
     <div className="space-y-10">
-      <PageHeader title="Settings" description="Workspace name, routing, keys, and remote clients." />
+      <PageHeader title="Settings" description="Workspace name, routing, and keys." />
       <WorkspaceSection workspace={workspace} sessionToken={sessionToken} onWorkspaceUpdate={onWorkspaceUpdate} />
       <ModelRoutingSection sessionToken={sessionToken} />
       <APIKeysSection sessionToken={sessionToken} />
       <YourKeysSection sessionToken={sessionToken} />
-      <RemoteMcpSection />
     </div>
   );
 }

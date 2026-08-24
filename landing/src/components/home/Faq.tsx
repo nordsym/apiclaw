@@ -5,7 +5,7 @@ const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const ITEMS: Array<{ q: string; a: React.ReactNode }> = [
   {
     q: "What is APIClaw?",
-    a: "An authenticated discovery and execution layer for AI agents. One workspace covers API discovery, managed execution, missions and observability, reachable through a skill file, local MCP, CLI, HTTP and Remote MCP.",
+    a: "An authenticated discovery and execution layer for AI agents. One workspace covers API discovery, callable execution, missions and observability, reachable through a skill file, local MCP, CLI, HTTP and Remote MCP.",
   },
   {
     q: "How does my agent connect?",

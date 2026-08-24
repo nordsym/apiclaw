@@ -11,8 +11,9 @@
  */
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { isUnlimitedWorkspace, getAgentPresence } from "@/lib/workspace-truth";
-import { INSTALL_LINE } from "@/components/home/truth";
+import { INSTALL_LINE, REMOTE_MCP_URL } from "@/components/home/truth";
 import { CONVEX_URL, Workspace, TabType } from "../_shared";
 import {
   PageHeader,
@@ -356,6 +357,28 @@ function UsageStrip({ workspace, onUpgrade }: { workspace: Workspace | null; onU
   );
 }
 
+/* ------------------------------------------------------------------
+   Connect an agent: a quiet pointer to Remote MCP, moved here from
+   Settings (2026-08-24) so the endpoint sits next to the agents it
+   connects. Full connector management (presets, OAuth registration)
+   stays at /workspace/integrations; this is signal, not a rebuild.
+   ------------------------------------------------------------------ */
+
+function ConnectAgentSection() {
+  return (
+    <Section title="Connect an agent" description="Hosted clients connect over HTTP with workspace sign-in." className="mt-8">
+      <Panel className="p-5">
+        <p className="mb-2 text-[13px] text-[var(--text-muted)]">Endpoint</p>
+        <CopyLine text={REMOTE_MCP_URL} />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/workspace/integrations" className={btnSolid}>Integrations</Link>
+          <Link href="/docs#remote-mcp" className={btnQuiet}>Docs</Link>
+        </div>
+      </Panel>
+    </Section>
+  );
+}
+
 export function AgentsTab({
   workspace,
   hasAgentsHint,
@@ -414,6 +437,8 @@ export function AgentsTab({
           }
         />
       </Section>
+
+      <ConnectAgentSection />
 
       <MainAgentAndSubagents sessionToken={sessionToken ?? null} />
     </div>

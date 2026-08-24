@@ -14,7 +14,7 @@ const GATEWAY_URL =
 
 const FIRST_QUERY = "AI agent infrastructure news";
 const FIRST_CALL_PROMPT =
-  `Use APIClaw's managed Brave Search adapter with provider "brave_search", action "search", and query "${FIRST_QUERY}". Then summarize the top 3 results with source links.`;
+  `Use APIClaw's built-in Brave Search adapter with provider "brave_search", action "search", and query "${FIRST_QUERY}". Then summarize the top 3 results with source links.`;
 const INSTALL_COMMAND = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
 const CLI_DISCOVER = 'apiclaw discover "web search"';
 const CLI_CALL = `apiclaw call brave_search/search --params '{"query":"${FIRST_QUERY}"}'`;
