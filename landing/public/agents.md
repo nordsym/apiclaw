@@ -72,11 +72,17 @@ POST https://api.apiclaw.cloud/v1/embeddings
 POST https://api.apiclaw.cloud/v1/discover
 ```
 
-Auth header:
+Auth after `apiclaw auth login` (first execute):
+
+```text
+X-APIClaw-Session: <session_token from ~/.apiclaw.toml>
+Idempotency-Key: one-unique-id-per-managed-operation
+```
+
+HTTP/CI key door (not the first-execute path):
 
 ```text
 Authorization: Bearer sk-claw-...
-Idempotency-Key: one-unique-id-per-managed-operation
 ```
 
 The idempotency key is mandatory for customer managed calls. Reuse it after an ambiguous network failure.
@@ -95,7 +101,7 @@ apiclaw --help
 - Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`.
 - Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.
-- Local auth writes `~/.apiclaw.toml`.
+- Local auth writes `session_token` to `~/.apiclaw.toml`. Execute sends that value as `X-APIClaw-Session`.
 - Remote MCP uses OAuth 2.1 + PKCE + Dynamic Client Registration.
 - Workspace keys use `sk-claw-...` bearer tokens.
 

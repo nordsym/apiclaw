@@ -12,7 +12,8 @@ import {
   formatFirstCallResult,
   formatFrankfurterRate,
 } from "./first-call.js";
-import { completeFirstRunAuth, firstRunCompleteMessage } from "./first-run.js";
+import { EXECUTE_SESSION_HEADER } from "./execute-auth.js";
+import { completeFirstRunAuth, FIRST_CALL_CLI, firstRunCompleteMessage } from "./first-run.js";
 
 assert.equal(FIRST_EXECUTE_PATH, "/v1/execute");
 assert.deepEqual(FIRST_EXECUTE_NASA, { provider: "nasa", action: "apod", params: {} });
@@ -105,9 +106,13 @@ assert.deepEqual(JSON.parse(String(transport[0].init?.body)), {
   params: {},
 });
 const sentHeaders = transport[0].init?.headers as Record<string, string>;
-assert.equal(sentHeaders["X-APIClaw-Session"], "session-live");
+assert.equal(EXECUTE_SESSION_HEADER, "X-APIClaw-Session");
+assert.equal(sentHeaders[EXECUTE_SESSION_HEADER], "session-live");
+assert.equal(sentHeaders["Authorization"], undefined);
 assert.equal(sentHeaders["Idempotency-Key"], "apiclaw-first-nasa-test");
 assert.equal(sentHeaders["X-APIClaw-Internal"], undefined);
+assert.match(FIRST_CALL_CLI, /npx @nordsym\/apiclaw call nasa\/apod/);
+assert.match(FIRST_CALL_CLI, /--idempotency-key/);
 
 const whoamiOnly = await completeFirstRunAuth({
   whoami: () => true,
@@ -187,6 +192,8 @@ for (const file of firstCallFiles) {
 const authLogin = readFileSync("src/cli/commands/auth.ts", "utf8");
 assert.match(authLogin, /completeFirstExecute/);
 assert.match(authLogin, /authFirstCallCommand/);
+assert.match(authLogin, /session_token from that file as X-APIClaw-Session/);
+assert.doesNotMatch(authLogin, /export APICLAW_API_KEY=\$\{result\.apiKey\}/);
 
 const cli = readFileSync("src/cli/index.ts", "utf8");
 assert.match(cli, /authFirstCallCommand/);

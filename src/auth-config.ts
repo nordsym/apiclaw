@@ -12,11 +12,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+/** TOML key login writes and execute reads. Not api_key. */
+export const SESSION_TOKEN_TOML_KEY = "session_token";
+
 export interface AuthConfig {
   workspaceId: string;
   email: string;
   sessionToken: string;
-  apiKey?: string;          // sk-claw-* for HTTP
+  apiKey?: string;          // sk-claw-* for HTTP/CI, not the first-execute header
   mcpToken?: string;        // sk-mcp-* for Remote MCP fallback
   createdAt: number;
   lastUsedAt?: number;
@@ -38,7 +41,7 @@ function serializeToml(cfg: AuthConfig): string {
   const escape = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   lines.push(`workspace_id = "${escape(cfg.workspaceId)}"`);
   lines.push(`email = "${escape(cfg.email)}"`);
-  lines.push(`session_token = "${escape(cfg.sessionToken)}"`);
+  lines.push(`${SESSION_TOKEN_TOML_KEY} = "${escape(cfg.sessionToken)}"`);
   if (cfg.apiKey) lines.push(`api_key = "${escape(cfg.apiKey)}"`);
   if (cfg.mcpToken) lines.push(`mcp_token = "${escape(cfg.mcpToken)}"`);
   lines.push(`created_at = "${new Date(cfg.createdAt).toISOString()}"`);
@@ -70,13 +73,13 @@ function parseToml(text: string): AuthConfig | null {
     }
     out[key] = val;
   }
-  if (!out.workspace_id || !out.email || !out.session_token) return null;
+  if (!out.workspace_id || !out.email || !out[SESSION_TOKEN_TOML_KEY]) return null;
   const createdAt = out.created_at ? Date.parse(out.created_at) : Date.now();
   const lastUsedAt = out.last_used_at ? Date.parse(out.last_used_at) : createdAt;
   return {
     workspaceId: out.workspace_id,
     email: out.email,
-    sessionToken: out.session_token,
+    sessionToken: out[SESSION_TOKEN_TOML_KEY],
     apiKey: out.api_key,
     mcpToken: out.mcp_token,
     createdAt: Number.isNaN(createdAt) ? Date.now() : createdAt,

@@ -68,7 +68,7 @@ npm install -g @nordsym/apiclaw
 npx @nordsym/apiclaw auth login
 ```
 
-The auth flow opens the browser, signs the user in, and writes `~/.apiclaw.toml`. Agents do not need users to paste provider keys.
+The auth flow opens the browser, signs the user in, and writes `session_token` to `~/.apiclaw.toml`. The next `POST /v1/execute` reads that same value as `X-APIClaw-Session`. Agents do not need users to paste tokens.
 
 ### 2. CLI
 
@@ -88,7 +88,13 @@ POST https://api.apiclaw.cloud/v1/discover
 GET  https://api.apiclaw.cloud/api/balance
 ```
 
-Auth:
+Auth after `apiclaw auth login` (first execute):
+
+```text
+X-APIClaw-Session: <session_token from ~/.apiclaw.toml>
+```
+
+HTTP/CI key door (not the first-execute path):
 
 ```text
 Authorization: Bearer sk-claw-...

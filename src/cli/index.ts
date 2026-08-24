@@ -119,7 +119,7 @@ const authCmd = program
 
 authCmd
   .command('login')
-  .description('Open browser, sign in via Clerk, write ~/.apiclaw.toml')
+  .description('Open browser, sign in via Clerk, write session_token to ~/.apiclaw.toml')
   .option('-f, --force', 'Re-authenticate even if already signed in')
   .option('--print-mcp-token', 'Also issue an sk-mcp-* token for Remote MCP fallback (not yet implemented)')
   .option('--no-open', 'Print the URL instead of opening the browser')
@@ -201,7 +201,7 @@ program
 
 program
   .command('call <api>')
-  .description('Execute a callable API through APIClaw\'s gateway')
+  .description('POST /v1/execute using session_token from ~/.apiclaw.toml as X-APIClaw-Session')
   .option('-p, --path <path>', 'API path (default /)')
   .option('-m, --method <method>', 'HTTP method (GET/POST/PUT/PATCH/DELETE)')
   .option('--params <json>', 'Query string parameters as JSON')

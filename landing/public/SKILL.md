@@ -48,8 +48,10 @@ npx @nordsym/apiclaw auth login
 ```
 
 That opens the browser, signs the user in with Clerk (Google or
-passwordless email), and writes `~/.apiclaw.toml`.
-That file also holds `api_key` (`sk-claw-…`), export it as `APICLAW_API_KEY` for non-interactive use.
+passwordless email), and writes `session_token` to `~/.apiclaw.toml`.
+The next execute reads that same `session_token` and sends it as
+`X-APIClaw-Session`. Do not use `api_key` or `Authorization: Bearer`
+for this step.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and confirm:
@@ -59,20 +61,21 @@ npx @nordsym/apiclaw auth whoami
 ```
 
 Headless or SSH: run the same login command, open the printed URL on
-another device, then confirm with `whoami`.
+another device, then confirm with `whoami`. The file still holds
+`session_token`. Copy `~/.apiclaw.toml` to the headless machine, or
+run execute from the machine that finished login.
 
-Fully headless (no browser anywhere, e.g. CI): on a machine with a browser,
-`npx @nordsym/apiclaw auth login` writes `~/.apiclaw.toml` with `api_key`.
-On the headless machine itself, skip the CLI login and instead create a key
-in Workspace > Connections, then set `APICLAW_API_KEY` in the environment.
+Fully headless (no browser anywhere, e.g. CI): skip CLI login on that
+host. Create a key in Workspace > Connections and set `APICLAW_API_KEY`
+there. That is a separate HTTP door, not the first-execute path.
 
 Rules:
 
 - Do not ask the user to create an API key in a dashboard.
 - Do not ask the user to paste `session_token`, `sk-claw-…`, or any
   bearer into this chat.
-- Read credentials from `~/.apiclaw.toml` (`session_token`) or
-  `~/.apiclaw/session` when you need a header. Never print the raw
+- Read `session_token` from `~/.apiclaw.toml` (or `sessionToken` from
+  `~/.apiclaw/session`) when you need a header. Never print the raw
   token back to the user.
 
 ## 3. First execute — POST /v1/execute
@@ -83,22 +86,23 @@ NASA APOD, then Frankfurter `/latest`.
 
 ### Preferred rail: NASA APOD
 
+CLI slash form reads `session_token` from `~/.apiclaw.toml` and sends
+`X-APIClaw-Session`. Use this first. Do not ask the user to paste a token.
+
 ```bash
+npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key "apiclaw-first-nasa-$(date +%s)"
+```
+
+HTTP equivalent — same `session_token`, same `X-APIClaw-Session` header.
+Extract the value locally. Do not print it. Do not use `api_key`.
+
+```bash
+SESSION=$(node -e 'const fs=require("fs"),os=require("os"),p=require("path");const t=p.join(os.homedir(),".apiclaw.toml");const m=fs.existsSync(t)&&fs.readFileSync(t,"utf8").match(/session_token\s*=\s*"([^"]+)"/);if(!m)process.exit(1);process.stdout.write(m[1])')
 curl -sS https://api.apiclaw.cloud/v1/execute \
   -H "Content-Type: application/json" \
   -H "X-APIClaw-Session: $SESSION" \
   -H "Idempotency-Key: apiclaw-first-nasa-$(date +%s)" \
   -d '{"provider":"nasa","action":"apod","params":{}}'
-```
-
-Set `$SESSION` from `session_token` in `~/.apiclaw.toml`. Do not ask
-the user to paste it.
-Equivalent: `Authorization: Bearer $APICLAW_API_KEY`
-
-CLI slash form also maps to `POST /v1/execute`:
-
-```bash
-npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key "apiclaw-first-nasa-$(date +%s)"
 ```
 
 A 200 with an APOD title is success. nasa/apod is a Free API: no card needed.
@@ -116,6 +120,9 @@ curl -sS https://api.apiclaw.cloud/v1/execute \
   -d '{"provider":"frankfurter","action":"latest","params":{"path":"/latest"}}'
 ```
 
+`$SESSION` is still `session_token` from `~/.apiclaw.toml`, same extract
+as the NASA curl. Same header the CLI slash form sends.
+
 A 200 with a EUR FX rate is success.
 
 ### Execute rules
@@ -126,8 +133,9 @@ A 200 with a EUR FX rate is success.
   a slash hit legacy `POST /v1/call`.
 - Managed HTTP calls need one `Idempotency-Key` per logical operation.
   Reuse the same key after an ambiguous network failure.
-- After login, run the NASA curl above. If it is not 200, run Frankfurter.
-  Do not invent a third rail.
+- After login, run the NASA CLI slash form (or the curl that extracts
+  `session_token`). If it is not 200, run Frankfurter. Do not invent a
+  third rail.
 
 ## 4. After the first 200
 

@@ -353,12 +353,13 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
     console.log(chalk.dim(`     Tier: ${result.tier ?? 'free'}`));
   }
   console.log(chalk.dim(`     Config written to ${AUTH_CONFIG_PATH}`));
+  console.log(chalk.dim(`     Execute reads session_token from that file as X-APIClaw-Session.`));
 
   const firstCall = await runAndPrintFirstCall(cfg.sessionToken);
   if (result.apiKey) {
     console.log('');
-    console.log(chalk.bold('  For HTTP runtimes:'));
-    console.log(chalk.dim(`     export APICLAW_API_KEY=${result.apiKey}`));
+    console.log(chalk.dim(`  HTTP/CI door (not first execute): api_key is also in ${AUTH_CONFIG_PATH}.`));
+    console.log(chalk.dim('     Export it as APICLAW_API_KEY from the file. Do not paste it into chat.'));
   }
   console.log('');
 

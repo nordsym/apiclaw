@@ -29,7 +29,7 @@ export const FIRST_CALL_PROMPT =
   'Use APIClaw to fetch today\'s NASA Astronomy Picture of the Day: call_api with provider "nasa", action "apod", params {}. Then describe the image. Alternatives that also work live: apilayer fixer_latest with base EUR, or brave_search search for "AI agent infrastructure news".';
 
 export const FIRST_CALL_CLI =
-  "apiclaw call nasa/apod --params '{}'";
+  "npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key \"apiclaw-first-nasa-$(date +%s)\"";
 
 export interface LaunchAuthProbe {
   env?: NodeJS.ProcessEnv;
