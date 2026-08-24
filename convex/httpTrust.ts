@@ -42,10 +42,51 @@ export function requireManagedIdempotencyKey(
   return value;
 }
 
-export function hasCustomerManagedCredential(headers: Headers): boolean {
-  if (headers.get("X-APIClaw-Session") || headers.get("X-APIClaw-Api-Key")) return true;
+export const EXECUTE_SESSION_HEADER = "X-APIClaw-Session";
+export const EXECUTE_API_KEY_HEADER = "X-APIClaw-Api-Key";
+
+export type GatewayCredential =
+  | { method: "api-key"; rawKey: string }
+  | { method: "session"; sessionToken: string }
+  | { method: "mcp-oauth"; token: string }
+  | { method: "none" };
+
+function bearerToken(headers: Headers): string {
   const authorization = headers.get("Authorization") ?? "";
-  return /^(Bearer|Api-Key)\s+sk-(claw|mcp)-/i.test(authorization);
+  const match = /^(?:Bearer|Api-Key)\s+(\S+)/i.exec(authorization);
+  return match?.[1] ?? "";
+}
+
+/**
+ * Resolve the customer credential from request headers.
+ *
+ * Login writes session_token and execute sends X-APIClaw-Session. Agents
+ * following mixed docs also send api_key in the session header or the
+ * session token as Authorization Bearer. Accept both shapes so a post-login
+ * execute is authenticated without asking anyone to paste a token.
+ */
+export function extractGatewayCredential(headers: Headers): GatewayCredential {
+  const sessionHeader = headers.get(EXECUTE_SESSION_HEADER)?.trim() ?? "";
+  const apiKeyHeader = headers.get(EXECUTE_API_KEY_HEADER)?.trim() ?? "";
+  const bearer = bearerToken(headers);
+
+  const apiKeyCandidate = [sessionHeader, bearer, apiKeyHeader].find((value) =>
+    value.startsWith("sk-claw-"),
+  );
+  if (apiKeyCandidate) return { method: "api-key", rawKey: apiKeyCandidate };
+
+  if (bearer.startsWith("sk-mcp-")) return { method: "mcp-oauth", token: bearer };
+
+  const sessionCandidate = [sessionHeader, bearer].find((value) =>
+    value.length >= 20 && !value.startsWith("sk-"),
+  );
+  if (sessionCandidate) return { method: "session", sessionToken: sessionCandidate };
+
+  return { method: "none" };
+}
+
+export function hasCustomerManagedCredential(headers: Headers): boolean {
+  return extractGatewayCredential(headers).method !== "none";
 }
 
 export function synthesizeLegacyIdempotencyKey(): string {

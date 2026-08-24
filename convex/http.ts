@@ -46,6 +46,7 @@ import {
   rewriteLegacyProviderActionCall,
   synthesizeLegacyIdempotencyKey,
   hasCustomerManagedCredential,
+  extractGatewayCredential,
   LEGACY_CLIENT_MINIMUM_VERSION,
   LEGACY_CLIENT_UPGRADE_COMMANDS,
 } from "./httpTrust";
@@ -1089,12 +1090,12 @@ function unauthResponse(reason: string) {
     {
       error: {
         message:
-          "Workspace required. Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. Sign up at https://apiclaw.cloud/workspace and pass your sk-claw-... key as Authorization: Bearer.",
+          "Workspace required. Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. After `npx @nordsym/apiclaw auth login`, POST /v1/execute with X-APIClaw-Session from session_token in ~/.apiclaw.toml. Do not paste the token into chat.",
         type: "auth_error",
         code: "unauth",
         reason,
         signupUrl: "https://apiclaw.cloud/workspace",
-        docsUrl: "https://apiclaw.cloud/install",
+        docsUrl: "https://apiclaw.cloud/SKILL.md",
       },
     },
     401
@@ -1237,9 +1238,13 @@ async function readUpstreamJsonCapped(response: Response): Promise<any> {
 
 // ============================================
 // UNIFIED AUTH: resolves workspace from any auth method
-// Priority: 1) Authorization: Bearer sk-claw-... (API key)
-//           2) X-APIClaw-Identifier (legacy MCP workspace ID)
-//           3) Anonymous (still allowed, just untracked)
+// Priority: 1) sk-claw API key (Authorization, X-APIClaw-Api-Key, or
+//              X-APIClaw-Session when agents send the HTTP key in the
+//              CLI session header)
+//           2) Bearer sk-mcp-... (Remote MCP OAuth)
+//           3) session_token from login (X-APIClaw-Session, or Bearer
+//              when agents send the CLI session as Authorization)
+//           4) Anonymous
 // ============================================
 
 async function resolveWorkspaceFromRequest(
@@ -1254,20 +1259,11 @@ async function resolveWorkspaceFromRequest(
     return { workspaceId, authMethod: "internal" };
   }
 
-  // 1a. API key via Authorization: Bearer sk-claw-...
-  const authHeader = request.headers.get("Authorization");
-  let rawKey: string | null = null;
-  if (authHeader?.startsWith("Bearer sk-claw-")) {
-    rawKey = authHeader.slice(7);
-  }
-  // 1b. API key via X-APIClaw-Api-Key header (OpenClaw / server-to-server preferred form)
-  if (!rawKey) {
-    const headerKey = request.headers.get("X-APIClaw-Api-Key");
-    if (headerKey?.startsWith("sk-claw-")) rawKey = headerKey;
-  }
-  if (rawKey) {
+  const credential = extractGatewayCredential(request.headers);
+
+  if (credential.method === "api-key") {
     try {
-      const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey });
+      const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey: credential.rawKey });
       if (resolved) {
         ctx.runMutation(api.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
         return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key" };
@@ -1275,15 +1271,12 @@ async function resolveWorkspaceFromRequest(
     } catch (e: any) {
       console.error("[Auth] API key resolution failed:", e.message);
     }
-    // Invalid key → anonymous (do not fall through to other methods for this request)
     return { authMethod: "anonymous" };
   }
 
-  // 1c. Remote MCP OAuth bearer (Bearer sk-mcp-...)
-  if (authHeader?.startsWith("Bearer sk-mcp-")) {
-    const oauthToken = authHeader.slice(7);
+  if (credential.method === "mcp-oauth") {
     try {
-      const resolved = await ctx.runQuery(api.mcpOAuth.resolveBearerToken, { token: oauthToken });
+      const resolved = await ctx.runQuery(api.mcpOAuth.resolveBearerToken, { token: credential.token });
       if (resolved?.ok) {
         ctx.runMutation(api.mcpOAuth.touchToken, { tokenId: resolved.tokenId }).catch(() => {});
         return { workspaceId: resolved.workspaceId, authMethod: "mcp-oauth", mcpScope: resolved.scope };
@@ -1294,22 +1287,20 @@ async function resolveWorkspaceFromRequest(
     return { authMethod: "anonymous" };
   }
 
-  // 2. CLI session token (apiclaw auth login → ~/.apiclaw/session)
-  const sessionToken = request.headers.get("X-APIClaw-Session");
-  if (sessionToken && sessionToken.length >= 20) {
+  if (credential.method === "session") {
     try {
-      const session = await ctx.runQuery(api.workspaces.verifySession, { sessionToken });
+      const session = await ctx.runQuery(api.workspaces.verifySession, {
+        sessionToken: credential.sessionToken,
+      });
       if (session?.workspaceId) {
         return { workspaceId: session.workspaceId, authMethod: "session" };
       }
     } catch (e: any) {
       console.error("[Auth] Session resolution failed:", e.message);
     }
-    // Unknown/expired session → anonymous, do not fall through
     return { authMethod: "anonymous" };
   }
 
-  // 3. Anonymous
   return { authMethod: "anonymous" };
 }
 

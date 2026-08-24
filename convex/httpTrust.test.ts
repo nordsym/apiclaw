@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   deriveManagedRequestId,
   deriveRequestFingerprint,
+  extractGatewayCredential,
   githubContentsApiUrl,
   githubRepositoryApiUrl,
   InvalidIdempotencyKeyError,
@@ -56,6 +57,30 @@ assert.equal(
     Authorization: "Bearer sk-claw-published-latest",
   })),
   false,
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ "X-APIClaw-Session": "st_login_wrote_this_session" })),
+  { method: "session", sessionToken: "st_login_wrote_this_session" },
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ "X-APIClaw-Session": "sk-claw-sent-in-session-header" })),
+  { method: "api-key", rawKey: "sk-claw-sent-in-session-header" },
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ Authorization: "Bearer st_login_wrote_this_session" })),
+  { method: "session", sessionToken: "st_login_wrote_this_session" },
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ Authorization: "Bearer sk-claw-http-key" })),
+  { method: "api-key", rawKey: "sk-claw-http-key" },
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ "X-APIClaw-Session": "" })),
+  { method: "none" },
+);
+assert.deepEqual(
+  extractGatewayCredential(new Headers({ "X-APIClaw-Session": "$SESSION" })),
+  { method: "none" },
 );
 assert.equal(
   requiresLegacyClientUpgrade("/v1/execute", new Headers({

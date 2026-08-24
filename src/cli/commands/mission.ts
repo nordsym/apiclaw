@@ -1,13 +1,13 @@
 /**
  * `apiclaw mission ...` — Control Plane CLI surface.
  *
- * Reads the local session token (~/.apiclaw/session, written by
+ * Reads session_token from ~/.apiclaw.toml (written by
  * `apiclaw auth login`), routes through APIClaw's gateway, and reports
  * status / cost / events. Same workspace, same auth, same logs as MCP
  * and HTTP — fourth door, same control plane.
  */
 
-import { readSession } from "../../session.js";
+import { EXECUTE_SESSION_HEADER, readExecuteSessionToken } from "../../execute-auth.js";
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[2m";
@@ -26,8 +26,7 @@ function color(c: string, s: string): string {
 }
 
 function loadSession(): string | null {
-  const s = readSession();
-  return s?.sessionToken ?? null;
+  return readExecuteSessionToken();
 }
 
 function authError(): never {
@@ -45,7 +44,7 @@ async function fetchJson<T = any>(
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
-  if (token) headers["X-APIClaw-Session"] = token;
+  if (token) headers[EXECUTE_SESSION_HEADER] = token;
   let res: Response | undefined;
   let lastError: unknown;
   for (let attempt = 0; attempt <= transportRetries; attempt++) {

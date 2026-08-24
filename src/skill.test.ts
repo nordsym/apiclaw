@@ -34,6 +34,9 @@ const homepage = homeFiles.map((f) => readFileSync(f, "utf8")).join("\n");
 const hero = readFileSync(`${HOME_DIR}/Hero.tsx`, "utf8") + readFileSync(`${HOME_DIR}/truth.ts`, "utf8");
 const llms = readFileSync("landing/public/llms.txt", "utf8");
 const agents = readFileSync("landing/public/agents.md", "utf8");
+const httpAuth = readFileSync("convex/http.ts", "utf8");
+const cliDirect = readFileSync("src/cli/commands/direct.ts", "utf8");
+const cliHelp = readFileSync("src/cli/index.ts", "utf8");
 // Polish pass (2026-08-23): the public homepage/catalog show only "discoverable"
 // and "callable now" to avoid an unexplained internal metric; the adapter count
 // and source-verified count moved to /docs's "Catalog numbers" block.
@@ -42,6 +45,28 @@ const docsPage = readFileSync("landing/src/app/docs/page.tsx", "utf8");
 assert.match(skill, /npx @nordsym\/apiclaw auth login/, "auth is Clerk via auth login");
 assert.match(skill, /~\/\.apiclaw\.toml/, "existing toml session is enough");
 assert.match(skill, /~\/\.apiclaw\/session/, "existing session file is enough");
+assert.match(skill, /session_token/, "login writes session_token");
+assert.match(skill, /X-APIClaw-Session/, "execute sends X-APIClaw-Session");
+assert.match(
+  skill,
+  /session_token\\s\*=\\s\*"\(\[\^"\]\+\)"/,
+  "curl extracts session_token from ~/.apiclaw.toml",
+);
+assert.match(
+  skill,
+  /npx @nordsym\/apiclaw call nasa\/apod --params '\{\}' --idempotency-key/,
+  "CLI slash form uses the same login session",
+);
+assert.doesNotMatch(
+  skill,
+  /writes `~\/\.apiclaw\.toml` with `api_key`/,
+  "login must not be documented as writing api_key for execute",
+);
+assert.doesNotMatch(
+  skill,
+  /Equivalent: `Authorization: Bearer \$APICLAW_API_KEY`/,
+  "first execute must not swap in Bearer api_key",
+);
 assert.match(skill, /POST \/v1\/execute/, "execute is POST /v1/execute");
 assert.match(skill, /nasa/, "first research call is NASA APOD");
 assert.match(skill, /apod/, "first research call is NASA APOD");
@@ -80,5 +105,16 @@ assert.match(llms, /https:\/\/apiclaw\.cloud\/SKILL\.md/, "llms.txt points at th
 assert.match(agents, /https:\/\/apiclaw\.cloud\/SKILL\.md/, "agents.md points at the skill door");
 assert.match(llms, /Agent front door/);
 assert.match(llms, /operational[\s\S]{0,16}(?:canon|door)/i);
+assert.match(llms, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
+assert.match(agents, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
+assert.match(httpAuth, /X-APIClaw-Session from session_token in ~\/\.apiclaw\.toml/);
+assert.doesNotMatch(
+  httpAuth,
+  /pass your sk-claw-\.\.\. key as Authorization: Bearer/,
+  "401 must not send post-login agents to Bearer api_key",
+);
+assert.match(cliDirect, /readExecuteSessionHeaders/);
+assert.match(cliHelp, /write session_token to ~\/\.apiclaw\.toml/);
+assert.match(cliHelp, /session_token from ~\/\.apiclaw\.toml as X-APIClaw-Session/);
 
 console.log("skill: SKILL.md is the agent front door; homepage shows the one-liner; execute is /v1/execute");

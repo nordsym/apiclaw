@@ -8,7 +8,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { readAuthConfig } from "./auth-config.js";
+import { executeSessionHeaders, readExecuteSessionToken } from "./execute-auth.js";
 
 export const FIRST_EXECUTE_PATH = "/v1/execute";
 
@@ -111,7 +111,7 @@ export async function defaultFirstExecute(
 ): Promise<FirstExecuteTransportResult> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-APIClaw-Session": options.sessionToken,
+    ...executeSessionHeaders(options.sessionToken),
     "Idempotency-Key": options.idempotencyKey,
   };
   const init: RequestInit = {
@@ -142,7 +142,7 @@ export async function completeFirstExecute(options: {
   sessionToken?: string;
   execute?: FirstExecuteFn;
 } = {}): Promise<FirstExecuteResult> {
-  const sessionToken = options.sessionToken ?? readAuthConfig()?.sessionToken;
+  const sessionToken = options.sessionToken ?? readExecuteSessionToken();
   if (!sessionToken) {
     return { ok: false, error: "not_signed_in" };
   }

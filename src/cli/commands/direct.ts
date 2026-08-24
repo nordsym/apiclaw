@@ -4,8 +4,8 @@
  * same control plane as the MCP user.
  */
 
-import { readSession } from "../../session.js";
 import { randomUUID } from "node:crypto";
+import { EXECUTE_SESSION_HEADER, readExecuteSessionHeaders } from "../../execute-auth.js";
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[2m";
@@ -20,12 +20,12 @@ const GATEWAY =
 function color(c: string, s: string): string { return `${c}${s}${RESET}`; }
 
 function authHeader(): Record<string, string> {
-  const s = readSession();
-  if (!s?.sessionToken) {
+  const headers = readExecuteSessionHeaders();
+  if (!headers?.[EXECUTE_SESSION_HEADER]) {
     console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "npx @nordsym/apiclaw auth login"));
     process.exit(1);
   }
-  return { "X-APIClaw-Session": s.sessionToken };
+  return headers;
 }
 
 function parseJson(s: string | undefined, label: string): unknown {

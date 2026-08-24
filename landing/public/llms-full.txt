@@ -62,7 +62,13 @@ POST https://api.apiclaw.cloud/v1/chat/completions
 POST https://api.apiclaw.cloud/v1/embeddings
 ```
 
-Authentication:
+Authentication after `apiclaw auth login` (first execute):
+
+```text
+X-APIClaw-Session: <session_token from ~/.apiclaw.toml>
+```
+
+HTTP/CI key door (not the first-execute path):
 
 ```text
 Authorization: Bearer sk-claw-...
@@ -89,7 +95,7 @@ https://apiclaw.cloud/.well-known/oauth-protected-resource
 - Signup is required for discovery and execution.
 - Browser-loopback auth is canonical.
 - A headless user can complete ownership verification from another device using the displayed sign-in URL.
-- On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `~/.apiclaw.toml` with `api_key`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment.
+- On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `session_token` to `~/.apiclaw.toml`. The next `POST /v1/execute` sends that value as `X-APIClaw-Session`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment (HTTP/CI door, not first execute).
 - Workspace keys use the `sk-claw-...` bearer format.
 - Provider credentials remain server-side.
 

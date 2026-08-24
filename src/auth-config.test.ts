@@ -57,6 +57,9 @@ async function run() {
     });
     const got = readAuthConfig();
     assert(got, 'expected readAuthConfig to return a value');
+    const raw = fs.readFileSync(AUTH_CONFIG_PATH, 'utf8');
+    assert.match(raw, /session_token = "st_secret"/);
+    assert.doesNotMatch(raw.split('\n').find((line) => line.startsWith('session_token')) ?? '', /api_key/);
     assert.equal(got.workspaceId, 'ws_test123');
     assert.equal(got.email, 'agent@nordsym.com');
     assert.equal(got.sessionToken, 'st_secret');
