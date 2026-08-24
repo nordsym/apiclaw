@@ -5,6 +5,7 @@
  * Guarded: production build returns 404. Remove nothing from here to "fix" prod.
  *   /dev-ws?view=agents|api-catalog|activity|provider|billing|settings[&sub=..][&w=390]
  *   Add &wizard=1 to mount the first-run OnboardingWizard on top (fixture state: never completed).
+ *   Add &subagents=empty on view=agents to render the zero-subagents state (Subagents section hidden).
  */
 import { notFound, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -21,7 +22,7 @@ import * as fx from "./fixtures";
 
 const TOKEN = "dev-fixture-token";
 
-function installFetchStub() {
+function installFetchStub(emptySubagents: boolean) {
   const real = window.fetch.bind(window);
   const json = (value: unknown) => new Response(JSON.stringify(value), { status: 200, headers: { "Content-Type": "application/json" } });
   window.fetch = async (input, init) => {
@@ -30,6 +31,8 @@ function installFetchStub() {
       let path = "";
       let args: Record<string, unknown> = {};
       try { const body = JSON.parse(String(init?.body || "{}")); path = body.path; args = body.args || {}; } catch {}
+      // &subagents=empty drives the zero-subagents state for the Agents view.
+      if (path === "agents:getSubagents" && emptySubagents) return json({ status: "success", value: { subagents: [], total: 0 } });
       const hit = fx.convex[path];
       const value = typeof hit === "function" ? (hit as (a: Record<string, unknown>) => unknown)(args) : hit;
       return json({ status: "success", value: value === undefined ? null : value });
@@ -49,12 +52,13 @@ function Harness() {
   const view = (sp?.get("view") || "agents") as string;
   const sub = sp?.get("sub") || "";
   const wizard = sp?.get("wizard") === "1";
+  const emptySubagents = sp?.get("subagents") === "empty";
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<TabType>(view === "provider" ? "provider-console" : view === "overview" || view === "connections" ? "agents" : (view as TabType));
   const [analyticsSub, setAnalyticsSub] = useState<AnalyticsSubtab>((sub as AnalyticsSubtab) || "logs");
   const [showAddApi, setShowAddApi] = useState(false);
 
-  useEffect(() => { installFetchStub(); setReady(true); }, []);
+  useEffect(() => { installFetchStub(emptySubagents); setReady(true); }, [emptySubagents]);
   if (!ready) return null;
 
   const tabs = [

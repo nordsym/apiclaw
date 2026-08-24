@@ -264,7 +264,7 @@ function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }
   };
 
   if (loading) return null;
-  if (!mainAgent?.mainAgentId && subagents.length === 0 && !showRegister) return null;
+  if (!mainAgent?.mainAgentId && subagents.length === 0) return null;
 
   return (
     <>
@@ -281,32 +281,30 @@ function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }
         </Section>
       )}
 
-      <Section
-        title="Subagents"
-        description="Task agents identified by the X-APIClaw-Subagent header."
-        className="mt-8"
-        action={!showRegister ? <button type="button" onClick={() => setShowRegister(true)} className={btnQuiet}>Register</button> : undefined}
-      >
-        {showRegister && (
-          <Panel className="mb-4 p-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Subagent ID" hint="Must match the header value the agent sends.">
-                <input type="text" value={regId} onChange={(e) => setRegId(e.target.value)} className={`${inputClass} claw-mono`} maxLength={100} autoFocus />
-              </Field>
-              <Field label="Name (optional)">
-                <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && register()} className={inputClass} maxLength={50} />
-              </Field>
-            </div>
-            {regError && <p className="mt-3 text-[13px] text-[var(--accent)]">{regError}</p>}
-            <div className="mt-4 flex gap-2">
-              <button type="button" onClick={register} disabled={regBusy || !regId.trim()} className={btnSolid}>{regBusy ? "Registering" : "Register"}</button>
-              <button type="button" onClick={() => { setShowRegister(false); setRegError(null); }} className={btnQuiet}>Cancel</button>
-            </div>
-          </Panel>
-        )}
-        {subagents.length === 0 ? (
-          <p className="text-[13.5px] text-[var(--text-muted)]">None yet. A subagent appears after its first call, or register one ahead of time.</p>
-        ) : (
+      {subagents.length > 0 && (
+        <Section
+          title="Subagents"
+          description="Task agents identified by the X-APIClaw-Subagent header."
+          className="mt-8"
+          action={!showRegister ? <button type="button" onClick={() => setShowRegister(true)} className={btnQuiet}>Register</button> : undefined}
+        >
+          {showRegister && (
+            <Panel className="mb-4 p-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Subagent ID" hint="Must match the header value the agent sends.">
+                  <input type="text" value={regId} onChange={(e) => setRegId(e.target.value)} className={`${inputClass} claw-mono`} maxLength={100} autoFocus />
+                </Field>
+                <Field label="Name (optional)">
+                  <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && register()} className={inputClass} maxLength={50} />
+                </Field>
+              </div>
+              {regError && <p className="mt-3 text-[13px] text-[var(--accent)]">{regError}</p>}
+              <div className="mt-4 flex gap-2">
+                <button type="button" onClick={register} disabled={regBusy || !regId.trim()} className={btnSolid}>{regBusy ? "Registering" : "Register"}</button>
+                <button type="button" onClick={() => { setShowRegister(false); setRegError(null); }} className={btnQuiet}>Cancel</button>
+              </div>
+            </Panel>
+          )}
           <div>
             {subagents.map((s) => (
               <Row
@@ -324,8 +322,8 @@ function MainAgentAndSubagents({ sessionToken }: { sessionToken: string | null }
               </Row>
             ))}
           </div>
-        )}
-      </Section>
+        </Section>
+      )}
     </>
   );
 }
@@ -403,7 +401,7 @@ export function AgentsTab({
         </Section>
       )}
 
-      <Section title="Agents" className={next ? "mt-8" : ""}>
+      <Section className={next ? "mt-8" : ""}>
         <AgentCardGrid
           sessionToken={sessionToken ?? null}
           onToast={onToast}
