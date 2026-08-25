@@ -17,9 +17,15 @@ const { writeAuthConfig, readAuthConfig, clearAuthConfig, SESSION_TOKEN_TOML_KEY
 const {
   EXECUTE_SESSION_HEADER,
   EXECUTE_SESSION_TOML_KEY,
+  UnsignedExecuteError,
+  clearPendingLoginUrl,
   executeSessionHeaders,
-  readExecuteSessionToken,
   readExecuteSessionHeaders,
+  readExecuteSessionToken,
+  readPendingLoginUrl,
+  requireExecuteSession,
+  resolveExecuteAuthHeaders,
+  writePendingLoginUrl,
 } = await import("./execute-auth.js");
 
 assert.equal(EXECUTE_SESSION_TOML_KEY, "session_token");
@@ -27,8 +33,38 @@ assert.equal(SESSION_TOKEN_TOML_KEY, "session_token");
 assert.equal(EXECUTE_SESSION_HEADER, "X-APIClaw-Session");
 
 clearAuthConfig();
+clearPendingLoginUrl();
 assert.equal(readExecuteSessionToken(), null);
 assert.equal(readExecuteSessionHeaders(), null);
+assert.equal(requireExecuteSession().ok, false);
+assert.throws(() => executeSessionHeaders(""), (error: unknown) => error instanceof UnsignedExecuteError);
+assert.throws(() => executeSessionHeaders("   "), (error: unknown) => error instanceof UnsignedExecuteError);
+assert.throws(
+  () => resolveExecuteAuthHeaders({ "X-APIClaw-Session": "" }),
+  (error: unknown) => error instanceof UnsignedExecuteError,
+);
+assert.throws(
+  () => resolveExecuteAuthHeaders({}),
+  (error: unknown) => error instanceof UnsignedExecuteError,
+);
+
+writePendingLoginUrl("https://apiclaw.cloud/auth/cli?authId=pending-test");
+assert.equal(readPendingLoginUrl(), "https://apiclaw.cloud/auth/cli?authId=pending-test");
+const unsigned = requireExecuteSession();
+assert.equal(unsigned.ok, false);
+if (!unsigned.ok) {
+  assert.equal(unsigned.pendingLoginUrl, "https://apiclaw.cloud/auth/cli?authId=pending-test");
+}
+assert.throws(
+  () => resolveExecuteAuthHeaders(),
+  (error: unknown) =>
+    error instanceof UnsignedExecuteError &&
+    error.pendingLoginUrl === "https://apiclaw.cloud/auth/cli?authId=pending-test",
+);
+writePendingLoginUrl("http://localhost/not-https");
+assert.equal(readPendingLoginUrl(), "https://apiclaw.cloud/auth/cli?authId=pending-test");
+clearPendingLoginUrl();
+assert.equal(readPendingLoginUrl(), null);
 
 const now = Date.now();
 writeAuthConfig({
@@ -50,6 +86,14 @@ assert.equal(cfg.sessionToken, "st_login_wrote_this");
 assert.equal(cfg.apiKey, "sk-claw-not-for-execute");
 assert.equal(readExecuteSessionToken(), "st_login_wrote_this");
 assert.deepEqual(readExecuteSessionHeaders(), {
+  "X-APIClaw-Session": "st_login_wrote_this",
+});
+const signedIn = requireExecuteSession();
+assert.equal(signedIn.ok, true);
+if (signedIn.ok) {
+  assert.equal(signedIn.token, "st_login_wrote_this");
+}
+assert.deepEqual(resolveExecuteAuthHeaders(), {
   "X-APIClaw-Session": "st_login_wrote_this",
 });
 assert.deepEqual(executeSessionHeaders(cfg.sessionToken), {

@@ -1090,7 +1090,7 @@ function unauthResponse(reason: string) {
     {
       error: {
         message:
-          "Workspace required. Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. After `npx @nordsym/apiclaw auth login`, POST /v1/execute with X-APIClaw-Session from session_token in ~/.apiclaw.toml. Do not paste the token into chat.",
+          "Workspace required. Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. Run `npx @nordsym/apiclaw auth login`, finish Clerk in the browser, confirm with `npx @nordsym/apiclaw auth whoami`, then POST /v1/execute with X-APIClaw-Session from session_token in ~/.apiclaw.toml. Do not POST with an empty session header. Do not paste the token into chat.",
         type: "auth_error",
         code: "unauth",
         reason,

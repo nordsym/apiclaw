@@ -11,6 +11,7 @@ import {
   firstRunCompleteMessage,
   firstRunExecuteFailedMessage,
   firstRunIncompleteMessage,
+  unsignedExecuteMessage,
 } from "./first-run.js";
 import { requireVerifiedOwner } from "./registration-guard.js";
 import { MANAGED_USAGE_POLICY } from "./product-truth.js";
@@ -81,9 +82,19 @@ assert.equal(
 const incomplete = firstRunIncompleteMessage();
 assert.match(incomplete, /Not done/);
 assert.match(incomplete, /npx @nordsym\/apiclaw auth login/);
+assert.match(incomplete, /Do not POST \/v1\/execute until whoami succeeds/);
+assert.match(incomplete, /empty X-APIClaw-Session/);
 assert.doesNotMatch(incomplete, /\bDone\b/);
 assert.doesNotMatch(incomplete, /apiclaw login/);
 assert.doesNotMatch(incomplete, /@2\.8\.7/);
+
+const unsigned = unsignedExecuteMessage();
+assert.match(unsigned, /Not signed in/);
+assert.match(unsigned, /npx @nordsym\/apiclaw auth whoami/);
+assert.match(unsigned, /Do not POST \/v1\/execute until whoami succeeds/);
+assert.match(unsigned, /empty X-APIClaw-Session/);
+assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL/);
+assert.doesNotMatch(unsigned, /paste/i);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);

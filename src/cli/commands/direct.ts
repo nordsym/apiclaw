@@ -5,7 +5,11 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { EXECUTE_SESSION_HEADER, readExecuteSessionHeaders } from "../../execute-auth.js";
+import {
+  UnsignedExecuteError,
+  resolveExecuteAuthHeaders,
+} from "../../execute-auth.js";
+import { unsignedExecuteMessage } from "../../first-run.js";
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[2m";
@@ -19,13 +23,11 @@ const GATEWAY =
 
 function color(c: string, s: string): string { return `${c}${s}${RESET}`; }
 
-function authHeader(): Record<string, string> {
-  const headers = readExecuteSessionHeaders();
-  if (!headers?.[EXECUTE_SESSION_HEADER]) {
-    console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "npx @nordsym/apiclaw auth login"));
-    process.exit(1);
-  }
-  return headers;
+function refuseUnsignedExecute(error: UnsignedExecuteError, injected: boolean): never {
+  console.error(color(RED, "✗ Not signed in."));
+  console.error(unsignedExecuteMessage(error.pendingLoginUrl));
+  if (injected) throw error;
+  process.exit(1);
 }
 
 function parseJson(s: string | undefined, label: string): unknown {
@@ -136,7 +138,19 @@ export async function sendGatewayRequest<T = any>(
 ): Promise<T> {
   const { path, method, body } = request;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (auth) Object.assign(headers, transport.authHeaders ?? authHeader());
+  if (auth) {
+    try {
+      Object.assign(headers, resolveExecuteAuthHeaders(transport.authHeaders));
+    } catch (error) {
+      if (error instanceof UnsignedExecuteError) {
+        refuseUnsignedExecute(
+          error,
+          transport.authHeaders !== undefined || Boolean(transport.fetchImpl),
+        );
+      }
+      throw error;
+    }
+  }
   const idempotencyKey = method === "POST"
     ? transport.idempotencyKey ?? `apiclaw-cli-${randomUUID()}`
     : undefined;

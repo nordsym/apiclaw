@@ -6,7 +6,10 @@
  * already exist; SKILL.md is the operational door, not a second canon.
  */
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const SKILL_PATH = "landing/public/SKILL.md";
 assert.equal(existsSync(SKILL_PATH), true, "SKILL.md must ship as a landing static file");
@@ -43,10 +46,19 @@ const cliHelp = readFileSync("src/cli/index.ts", "utf8");
 const docsPage = readFileSync("landing/src/app/docs/page.tsx", "utf8");
 
 assert.match(skill, /npx @nordsym\/apiclaw auth login/, "auth is Clerk via auth login");
+assert.match(skill, /npx @nordsym\/apiclaw auth whoami/, "whoami is the execute gate");
 assert.match(skill, /~\/\.apiclaw\.toml/, "existing toml session is enough");
 assert.match(skill, /~\/\.apiclaw\/session/, "existing session file is enough");
 assert.match(skill, /session_token/, "login writes session_token");
 assert.match(skill, /X-APIClaw-Session/, "execute sends X-APIClaw-Session");
+assert.match(skill, /Do not send an empty `X-APIClaw-Session`/);
+assert.match(skill, /Show the human the login URL/);
+assert.match(skill, /Do not POST \/v1\/execute with an empty X-APIClaw-Session/);
+
+const whoamiGate = skill.indexOf("npx @nordsym/apiclaw auth whoami");
+const executeCurl = skill.indexOf("curl -sS https://api.apiclaw.cloud/v1/execute");
+assert.ok(whoamiGate >= 0, "SKILL.md must tell agents to run whoami");
+assert.ok(executeCurl > whoamiGate, "SKILL.md must order whoami before the execute curl");
 assert.match(
   skill,
   /session_token\\s\*=\\s\*"\(\[\^"\]\+\)"/,
@@ -108,13 +120,30 @@ assert.match(llms, /operational[\s\S]{0,16}(?:canon|door)/i);
 assert.match(llms, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
 assert.match(agents, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
 assert.match(httpAuth, /X-APIClaw-Session from session_token in ~\/\.apiclaw\.toml/);
+assert.match(httpAuth, /auth whoami/);
+assert.match(httpAuth, /Do not POST with an empty session header/);
 assert.doesNotMatch(
   httpAuth,
   /pass your sk-claw-\.\.\. key as Authorization: Bearer/,
   "401 must not send post-login agents to Bearer api_key",
 );
-assert.match(cliDirect, /readExecuteSessionHeaders/);
+assert.match(cliDirect, /resolveExecuteAuthHeaders/);
+assert.match(cliDirect, /UnsignedExecuteError/);
 assert.match(cliHelp, /write session_token to ~\/\.apiclaw\.toml/);
 assert.match(cliHelp, /session_token from ~\/\.apiclaw\.toml as X-APIClaw-Session/);
+assert.match(cliHelp, /Refuses locally until auth whoami succeeds/);
+
+const extractMatch = skill.match(
+  /node -e '([^']+)'/,
+);
+assert.ok(extractMatch, "SKILL.md must ship a session_token extract one-liner");
+const emptyHome = mkdtempSync(join(tmpdir(), "apiclaw-skill-extract-"));
+const extract = spawnSync(process.execPath, ["-e", extractMatch[1]], {
+  env: { ...process.env, HOME: emptyHome, USERPROFILE: emptyHome },
+  encoding: "utf8",
+});
+assert.notEqual(extract.status, 0, "SKILL.md extract must fail closed with no ~/.apiclaw.toml");
+assert.equal(extract.stdout, "", "unsigned extract must not print an empty session token");
+rmSync(emptyHome, { recursive: true, force: true });
 
 console.log("skill: SKILL.md is the agent front door; homepage shows the one-liner; execute is /v1/execute");

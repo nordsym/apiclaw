@@ -6,6 +6,7 @@
  */
 
 import { readAuthConfig } from "./auth-config.js";
+import { readPendingLoginUrl } from "./execute-auth.js";
 import {
   AUTH_FIRST_CALL_COMMAND,
   completeFirstExecute,
@@ -62,12 +63,32 @@ export function hasWorkingWhoami(): boolean {
   return Boolean(cfg?.email && cfg?.sessionToken && cfg?.workspaceId);
 }
 
+/**
+ * Printed by CLI call / whoami / first-call when session_token is missing.
+ * Prefer the pending Clerk URL from the in-flight `auth login` so the human
+ * can finish the already-started browser flow.
+ */
+export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string {
+  const url = pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl();
+  return [
+    "Not signed in. Finish Clerk in the browser before any execute.",
+    url ? `  Open this login URL: ${url}` : `  ${AUTH_LOGIN_COMMAND}`,
+    ...(url ? [`  Or run: ${AUTH_LOGIN_COMMAND}`] : []),
+    "Then confirm with:",
+    `  ${AUTH_WHOAMI_COMMAND}`,
+    "Do not POST /v1/execute until whoami succeeds. Do not send an empty X-APIClaw-Session.",
+  ].join("\n");
+}
+
 export function firstRunIncompleteMessage(): string {
+  const pending = readPendingLoginUrl();
   return [
     "Not done. Sign-in is required before any managed call.",
     `  ${AUTH_LOGIN_COMMAND}`,
+    ...(pending ? [`  Open this login URL and finish Clerk:\n  ${pending}`] : []),
     "Headless or SSH? Open the browser URL on another device, then confirm:",
     `  ${AUTH_WHOAMI_COMMAND}`,
+    "Do not POST /v1/execute until whoami succeeds. Do not send an empty X-APIClaw-Session.",
     `First managed call after sign-in: ${FIRST_CALL_CLI}`,
   ].join("\n");
 }

@@ -140,7 +140,7 @@ authCmd
 
 authCmd
   .command('whoami')
-  .description('Show the currently authenticated workspace')
+  .description('Show the currently authenticated workspace. Required before call / first execute. Prints the pending Clerk login URL if sign-in is incomplete')
   .action(async () => {
     const ok = await authWhoamiCommand();
     if (!ok) process.exit(1);
@@ -201,7 +201,7 @@ program
 
 program
   .command('call <api>')
-  .description('POST /v1/execute using session_token from ~/.apiclaw.toml as X-APIClaw-Session')
+  .description('POST /v1/execute using session_token from ~/.apiclaw.toml as X-APIClaw-Session. Refuses locally until auth whoami succeeds; never sends an empty session header')
   .option('-p, --path <path>', 'API path (default /)')
   .option('-m, --method <method>', 'HTTP method (GET/POST/PUT/PATCH/DELETE)')
   .option('--params <json>', 'Query string parameters as JSON')

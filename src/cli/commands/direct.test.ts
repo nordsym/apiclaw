@@ -5,6 +5,7 @@ import {
   GatewayOutcomeUnknownError,
   sendGatewayRequest,
 } from "./direct.js";
+import { UnsignedExecuteError } from "../../execute-auth.js";
 
 const brave = buildCallGatewayRequest("brave_search/search", {
   params: { query: "AI agent infrastructure news", count: 3 },
@@ -83,5 +84,34 @@ assert.throws(
   () => buildCallGatewayRequest("brave_search/search", { params: ["not", "an", "object"] }),
   /JSON object/,
 );
+
+const unsignedAttempts: Array<{ url: string }> = [];
+await assert.rejects(
+  sendGatewayRequest(brave, true, {
+    gatewayUrl: "https://gateway.test",
+    authHeaders: { "X-APIClaw-Session": "" },
+    idempotencyKey: "apiclaw-cli-unsigned-test",
+    fetchImpl: (async (url: string | URL | Request) => {
+      unsignedAttempts.push({ url: String(url) });
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch,
+  }),
+  (error: unknown) => error instanceof UnsignedExecuteError && error.code === "not_signed_in",
+);
+assert.equal(unsignedAttempts.length, 0, "unsigned CLI execute must not reach the gateway");
+
+await assert.rejects(
+  sendGatewayRequest(brave, true, {
+    gatewayUrl: "https://gateway.test",
+    authHeaders: {},
+    idempotencyKey: "apiclaw-cli-missing-session-test",
+    fetchImpl: (async (url: string | URL | Request) => {
+      unsignedAttempts.push({ url: String(url) });
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch,
+  }),
+  (error: unknown) => error instanceof UnsignedExecuteError,
+);
+assert.equal(unsignedAttempts.length, 0, "missing X-APIClaw-Session must not reach the gateway");
 
 console.log("CLI provider/action calls map to /v1/execute and stop on ambiguous outcomes");

@@ -21,7 +21,8 @@ import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
 import { completeFirstExecute, type FirstExecuteResult } from '../../first-call.js';
-import { AUTH_LOGIN_COMMAND, firstRunExecuteFailedMessage } from '../../first-run.js';
+import { firstRunExecuteFailedMessage, unsignedExecuteMessage } from '../../first-run.js';
+import { clearPendingLoginUrl, writePendingLoginUrl } from '../../execute-auth.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
@@ -42,6 +43,8 @@ async function runAndPrintFirstCall(sessionToken: string): Promise<FirstExecuteR
   const firstCall = await completeFirstExecute({ sessionToken });
   if (firstCall.ok && firstCall.summary) {
     console.log(firstCall.summary);
+  } else if (firstCall.error === "not_signed_in") {
+    console.log(unsignedExecuteMessage(firstCall.pendingLoginUrl));
   } else {
     console.log(firstRunExecuteFailedMessage());
   }
@@ -268,6 +271,8 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
     return null;
   }
 
+  writePendingLoginUrl(startResult.browserUrl);
+
   // Open browser (or print URL if --no-open / spawn fails)
   if (!options.noOpen) {
     const opened = openBrowser(startResult.browserUrl);
@@ -342,6 +347,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
     lastUsedAt: Date.now(),
   };
   writeAuthConfig(cfg);
+  clearPendingLoginUrl();
 
   // Success banner + next-step hints (CLI-first onboarding, not "go to workspace")
   console.log('');
@@ -369,7 +375,8 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
 export async function authFirstCallCommand(): Promise<boolean> {
   const cfg = readAuthConfig();
   if (!cfg) {
-    console.log(chalk.dim(`  Not signed in. Run: ${AUTH_LOGIN_COMMAND}\n`));
+    console.log(unsignedExecuteMessage());
+    console.log('');
     return false;
   }
   const firstCall = await runAndPrintFirstCall(cfg.sessionToken);
@@ -403,6 +410,7 @@ export async function authLogoutCommand(): Promise<void> {
   }
 
   clearAuthConfig();
+  clearPendingLoginUrl();
   spinner.succeed('Remote and local credentials revoked');
   console.log(chalk.green(`\n✓ Signed out (${existing.email})\n`));
 }
@@ -410,7 +418,8 @@ export async function authLogoutCommand(): Promise<void> {
 export async function authWhoamiCommand(): Promise<boolean> {
   const cfg = readAuthConfig();
   if (!cfg) {
-    console.log(chalk.dim(`  Not signed in. Run: ${AUTH_LOGIN_COMMAND}\n`));
+    console.log(unsignedExecuteMessage());
+    console.log('');
     return false;
   }
   console.log('');
