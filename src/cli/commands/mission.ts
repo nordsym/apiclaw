@@ -8,6 +8,7 @@
  */
 
 import { EXECUTE_SESSION_HEADER, readExecuteSessionToken } from "../../execute-auth.js";
+import { unsignedExecuteMessage } from "../../first-run.js";
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[2m";
@@ -30,7 +31,8 @@ function loadSession(): string | null {
 }
 
 function authError(): never {
-  console.error(color(RED, "✗ Not signed in.") + " Run: " + color(CYAN, "npx @nordsym/apiclaw auth login"));
+  console.error(color(RED, "✗ Not signed in."));
+  console.error(unsignedExecuteMessage());
   process.exit(1);
 }
 

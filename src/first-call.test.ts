@@ -85,6 +85,29 @@ const unsigned = await completeFirstExecute({
   },
 });
 assert.equal(unsigned.ok, false);
+assert.equal(unsigned.error, "not_signed_in");
+
+const unsignedWs = await completeFirstExecute({
+  sessionToken: "   ",
+  execute: async () => {
+    throw new Error("must not execute with a whitespace session");
+  },
+});
+assert.equal(unsignedWs.ok, false);
+assert.equal(unsignedWs.error, "not_signed_in");
+
+const emptyTransport: Array<{ url: string }> = [];
+const unsignedDefault = await defaultFirstExecute(
+  FIRST_EXECUTE_NASA,
+  { sessionToken: "", idempotencyKey: "apiclaw-first-nasa-unsigned", path: FIRST_EXECUTE_PATH },
+  (async (url: string | URL | Request) => {
+    emptyTransport.push({ url: String(url) });
+    return new Response("{}", { status: 200 });
+  }) as typeof fetch,
+  "https://gateway.test",
+);
+assert.equal(unsignedDefault.status, 0);
+assert.equal(emptyTransport.length, 0, "unsigned defaultFirstExecute must not hit the gateway");
 
 const transport: Array<{ url: string; init?: RequestInit }> = [];
 const posted = await defaultFirstExecute(

@@ -4,7 +4,8 @@ description: >-
   Set up APIClaw and land one live API execute. When a user says
   "set up https://apiclaw.cloud/SKILL.md", or you need a research API
   call without collecting provider keys, follow this file. Auth is
-  Clerk via `npx @nordsym/apiclaw auth login`. Execution is
+  Clerk via `npx @nordsym/apiclaw auth login`. Confirm with
+  `npx @nordsym/apiclaw auth whoami` before any execute. Execution is
   POST /v1/execute with provider/action. Never ask the user to paste
   a token into chat. Never pass a catalog display name to `apiclaw call`.
 ---
@@ -17,7 +18,7 @@ The metric that matters is a successful `POST /v1/execute`, not an install.
 Give an agent this file and it can install, sign in, and land one 200
 without guessing.
 
-Live catalog (2026-08-24). Use `https://apiclaw.cloud/api/catalog` if
+Live catalog (2026-08-25). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
 - 1,025 callable
@@ -25,7 +26,7 @@ counts must be current. Do not invent metrics.
 - 22 built-in providers
 
 Identity and product truth live at `https://apiclaw.cloud/llms.txt`.
-This file is the operational door: auth, then execute.
+This file is the operational door: auth, then whoami, then execute.
 
 ## 1. Install
 
@@ -53,12 +54,12 @@ The next execute reads that same `session_token` and sends it as
 `X-APIClaw-Session`. Do not use `api_key` or `Authorization: Bearer`
 for this step.
 
-If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
-skip login and confirm:
+Wait here. Do not continue until Clerk finishes in the browser.
+`auth login` prints a login URL. If the browser did not open, show
+that URL to the human and stop.
 
-```bash
-npx @nordsym/apiclaw auth whoami
-```
+If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
+skip login and go to whoami.
 
 Headless or SSH: run the same login command, open the printed URL on
 another device, then confirm with `whoami`. The file still holds
@@ -77,17 +78,40 @@ Rules:
 - Read `session_token` from `~/.apiclaw.toml` (or `sessionToken` from
   `~/.apiclaw/session`) when you need a header. Never print the raw
   token back to the user.
+- Do not run `apiclaw call` or curl `POST /v1/execute` until whoami
+  succeeds. An empty `X-APIClaw-Session` is a failed first-run.
 
-## 3. First execute — POST /v1/execute
+## 3. Confirm with whoami. Do not skip this.
 
+```bash
+npx @nordsym/apiclaw auth whoami
+```
+
+whoami must print an email and workspace before any execute.
 whoami is not Done. Done is HTTP 200 from `POST /v1/execute`.
-This is the same first research call `install.sh` uses after sign-in:
-NASA APOD, then Frankfurter `/latest`.
+But whoami is the gate. Skip it and the execute will be unauthenticated.
+
+If whoami prints "Not signed in":
+
+- STOP.
+- Show the human the login URL from `auth login` (whoami reprints
+  the pending URL if login already started).
+- Do not run `npx @nordsym/apiclaw call`.
+- Do not curl `POST /v1/execute`.
+- Do not send an empty `X-APIClaw-Session`.
+
+## 4. First execute — POST /v1/execute
+
+Only after whoami prints an email. This is the same first research
+call `install.sh` uses after sign-in: NASA APOD, then Frankfurter
+`/latest`.
 
 ### Preferred rail: NASA APOD
 
 CLI slash form reads `session_token` from `~/.apiclaw.toml` and sends
 `X-APIClaw-Session`. Use this first. Do not ask the user to paste a token.
+The CLI refuses locally if whoami would fail. It will not POST an empty
+session header.
 
 ```bash
 npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key "apiclaw-first-nasa-$(date +%s)"
@@ -95,9 +119,12 @@ npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key "apiclaw-fir
 
 HTTP equivalent — same `session_token`, same `X-APIClaw-Session` header.
 Extract the value locally. Do not print it. Do not use `api_key`.
+Refuse if the extract is empty. Do not POST an empty header.
 
 ```bash
-SESSION=$(node -e 'const fs=require("fs"),os=require("os"),p=require("path");const t=p.join(os.homedir(),".apiclaw.toml");const m=fs.existsSync(t)&&fs.readFileSync(t,"utf8").match(/session_token\s*=\s*"([^"]+)"/);if(!m)process.exit(1);process.stdout.write(m[1])')
+npx @nordsym/apiclaw auth whoami || { echo "Stop. Finish Clerk. Show the human the login URL. Do not POST /v1/execute."; exit 1; }
+SESSION=$(node -e 'const fs=require("fs"),os=require("os"),p=require("path");const t=p.join(os.homedir(),".apiclaw.toml");const m=fs.existsSync(t)&&fs.readFileSync(t,"utf8").match(/session_token\s*=\s*"([^"]+)"/);if(!m||!m[1].trim())process.exit(1);process.stdout.write(m[1])')
+if [ -z "$SESSION" ]; then echo "Stop. No session_token. Do not POST /v1/execute with an empty X-APIClaw-Session."; exit 1; fi
 curl -sS https://api.apiclaw.cloud/v1/execute \
   -H "Content-Type: application/json" \
   -H "X-APIClaw-Session: $SESSION" \
@@ -110,9 +137,11 @@ A 200 with an APOD title is success. nasa/apod is a Free API: no card needed.
 ### Fallback rail: Frankfurter /latest
 
 If NASA is not 200, call Frankfurter. Keep `provider` / `action`.
-Pass the relative path in `params`.
+Pass the relative path in `params`. Same whoami gate. Same nonempty
+`$SESSION`. Do not curl if `$SESSION` is empty.
 
 ```bash
+if [ -z "$SESSION" ]; then echo "Stop. No session_token. Do not POST /v1/execute with an empty X-APIClaw-Session."; exit 1; fi
 curl -sS https://api.apiclaw.cloud/v1/execute \
   -H "Content-Type: application/json" \
   -H "X-APIClaw-Session: $SESSION" \
@@ -133,11 +162,11 @@ A 200 with a EUR FX rate is success.
   a slash hit legacy `POST /v1/call`.
 - Managed HTTP calls need one `Idempotency-Key` per logical operation.
   Reuse the same key after an ambiguous network failure.
-- After login, run the NASA CLI slash form (or the curl that extracts
-  `session_token`). If it is not 200, run Frankfurter. Do not invent a
-  third rail.
+- After login, run whoami. Only then run the NASA CLI slash form (or
+  the curl that extracts `session_token`). If it is not 200, run
+  Frankfurter. Do not invent a third rail.
 
-## 4. After the first 200
+## 5. After the first 200
 
 Discover only what is callable now:
 
@@ -148,7 +177,7 @@ npx @nordsym/apiclaw discover "exchange rates" --callable
 Or:
 
 ```text
-POST https://api.apiclaw.cloud/v1/discover
+POST https://apiclaw.cloud/v1/discover
 { "query": "exchange rates", "callable_only": true }
 ```
 
@@ -157,7 +186,7 @@ Live catalog: `https://apiclaw.cloud/api/catalog?callable=true`.
 Then execute with `provider` / `action` on `POST /v1/execute`.
 Do not collect provider API keys from the user.
 
-## 5. Bring your own key (escape hatch)
+## 6. Bring your own key (escape hatch)
 
 You do not need your own keys. APIClaw's point is one sign-in, no key
 collecting. If your workspace already has its own OpenRouter key, you can
@@ -192,3 +221,5 @@ not every provider.
   read from `/api/catalog` or this file.
 - Do not expose internal-only providers. Public catalog cards are the
   source of truth for what a customer can call.
+- Do not POST `/v1/execute` before whoami succeeds.
+- Do not send an empty `X-APIClaw-Session`.

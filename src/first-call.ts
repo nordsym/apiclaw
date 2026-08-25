@@ -8,7 +8,12 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { executeSessionHeaders, readExecuteSessionToken } from "./execute-auth.js";
+import {
+  executeSessionHeaders,
+  readExecuteSessionToken,
+  readPendingLoginUrl,
+  usableSessionToken,
+} from "./execute-auth.js";
 
 export const FIRST_EXECUTE_PATH = "/v1/execute";
 
@@ -52,6 +57,7 @@ export type FirstExecuteResult = {
   summary?: string;
   status?: number;
   error?: string;
+  pendingLoginUrl?: string | null;
 };
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -109,9 +115,13 @@ export async function defaultFirstExecute(
   fetchImpl: typeof fetch = fetch,
   gatewayUrl: string = DEFAULT_GATEWAY,
 ): Promise<FirstExecuteTransportResult> {
+  const sessionToken = usableSessionToken(options.sessionToken);
+  if (!sessionToken) {
+    return { status: 0, body: { error: { message: "not_signed_in" } } };
+  }
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...executeSessionHeaders(options.sessionToken),
+    ...executeSessionHeaders(sessionToken),
     "Idempotency-Key": options.idempotencyKey,
   };
   const init: RequestInit = {
@@ -142,9 +152,15 @@ export async function completeFirstExecute(options: {
   sessionToken?: string;
   execute?: FirstExecuteFn;
 } = {}): Promise<FirstExecuteResult> {
-  const sessionToken = options.sessionToken ?? readExecuteSessionToken();
+  const sessionToken = options.sessionToken !== undefined
+    ? usableSessionToken(options.sessionToken)
+    : readExecuteSessionToken();
   if (!sessionToken) {
-    return { ok: false, error: "not_signed_in" };
+    return {
+      ok: false,
+      error: "not_signed_in",
+      pendingLoginUrl: readPendingLoginUrl(),
+    };
   }
 
   const execute = options.execute ?? defaultFirstExecute;
