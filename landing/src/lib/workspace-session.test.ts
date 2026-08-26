@@ -62,10 +62,12 @@ assert.match(
   "Clerk sign-out must not continue after failed APIClaw revocation",
 );
 
+// Session-owning workspace routes. /workspace/integrations was retired
+// (2026-08-24): it now redirects to /workspace?tab=agents. Connector UI
+// lives in views/Agents.tsx, which receives the token from page.tsx.
 for (const page of [
   "../app/workspace/page.tsx",
   "../app/workspace/chains/page.tsx",
-  "../app/workspace/integrations/page.tsx",
 ]) {
   const source = readFileSync(fileURLToPath(new URL(page, import.meta.url)), "utf8");
   assert.match(
@@ -74,5 +76,20 @@ for (const page of [
     `${page} must replace its in-memory token when the browser child rotates`,
   );
 }
+
+const integrationsRedirect = readFileSync(
+  fileURLToPath(new URL("../app/workspace/integrations/page.tsx", import.meta.url)),
+  "utf8",
+);
+assert.match(
+  integrationsRedirect,
+  /router\.replace\("\/workspace\?tab=agents"\)/,
+  "retired /workspace/integrations must redirect to Agents, not own session calls",
+);
+assert.doesNotMatch(
+  integrationsRedirect,
+  /subscribeWorkspaceSessionToken/,
+  "retired /workspace/integrations must not own a browser session subscription",
+);
 
 console.log("browser bootstrap returns only rotating child tokens and refreshes before expiry");

@@ -78,7 +78,9 @@ const oauthAuthorizeRouteSource = readFileSync(
 );
 // Workspace rebuild (137d5c4, 2026-08-23) split page.tsx into views/*.tsx.
 // Agents-home restructure (2026-08-24) dissolved views/Connections.tsx; the
-// API key mint call now lives in views/Settings.tsx.
+// API key mint call now lives in views/Settings.tsx. The same day's
+// Integrations fold moved connector minting into views/Agents.tsx;
+// /workspace/integrations is a bookmark redirect only.
 const workspacePageSource = readFileSync(
   join(convexDir, "../landing/src/app/workspace/page.tsx"),
   "utf8",
@@ -86,7 +88,11 @@ const workspacePageSource = readFileSync(
   join(convexDir, "../landing/src/app/workspace/views/Settings.tsx"),
   "utf8",
 );
-const integrationsPageSource = readFileSync(
+const agentsViewSource = readFileSync(
+  join(convexDir, "../landing/src/app/workspace/views/Agents.tsx"),
+  "utf8",
+);
+const integrationsRedirectSource = readFileSync(
   join(convexDir, "../landing/src/app/workspace/integrations/page.tsx"),
   "utf8",
 );
@@ -127,8 +133,18 @@ for (const [source, mutation] of [
 }
 assert.doesNotMatch(workspacePageSource, /apiKeys:generateKey/);
 assert.match(workspacePageSource, /fetch\("\/api\/workspace\/api-keys"/);
-assert.doesNotMatch(integrationsPageSource, /mcpOAuth:createDashboardConnector/);
-assert.match(integrationsPageSource, /fetch\("\/api\/workspace\/connectors"/);
+assert.doesNotMatch(agentsViewSource, /mcpOAuth:createDashboardConnector/);
+assert.match(agentsViewSource, /fetch\("\/api\/workspace\/connectors"/);
+assert.match(
+  integrationsRedirectSource,
+  /router\.replace\("\/workspace\?tab=agents"\)/,
+  "retired /workspace/integrations must redirect to Agents, not own connector calls",
+);
+assert.doesNotMatch(
+  integrationsRedirectSource,
+  /fetch\("\/api\/workspace\/connectors"/,
+  "retired /workspace/integrations must not mint connectors",
+);
 assert.match(
   workspacesSource,
   /export const verifySession[\s\S]*?findUsableAgentSession\(ctx\.db, sessionToken\);/,
