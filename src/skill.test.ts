@@ -53,6 +53,13 @@ assert.match(skill, /session_token/, "login writes session_token");
 assert.match(skill, /X-APIClaw-Session/, "execute sends X-APIClaw-Session");
 assert.match(skill, /Do not send an empty `X-APIClaw-Session`/);
 assert.match(skill, /Show the human the login URL/);
+assert.match(skill, /Keep `auth login` in the foreground/);
+assert.match(skill, /not success/);
+assert.match(skill, /every few seconds/);
+assert.match(skill, /[Ll]oop whoami/);
+assert.match(skill, /each miss/i);
+assert.match(skill, /Do not stop after one miss/);
+assert.match(skill, /Only after whoami prints an email, execute NASA APOD/);
 assert.match(skill, /Do not POST \/v1\/execute with an empty X-APIClaw-Session/);
 
 const whoamiGate = skill.indexOf("npx @nordsym/apiclaw auth whoami");
@@ -129,7 +136,8 @@ assert.doesNotMatch(
 );
 assert.match(cliDirect, /resolveExecuteAuthHeaders/);
 assert.match(cliDirect, /UnsignedExecuteError/);
-assert.match(cliHelp, /write session_token to ~\/\.apiclaw\.toml/);
+assert.match(cliHelp, /writes? session_token to ~\/\.apiclaw\.toml/);
+assert.match(cliHelp, /stay in front until Clerk writes session_token/);
 assert.match(cliHelp, /session_token from ~\/\.apiclaw\.toml as X-APIClaw-Session/);
 assert.match(cliHelp, /Refuses locally until auth whoami succeeds/);
 
