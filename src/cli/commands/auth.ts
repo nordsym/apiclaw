@@ -6,7 +6,9 @@
  *   2. Start ephemeral HTTP listener on an OS-assigned port.
  *   3. POST cliAuth:start to Convex → get {authId, browserUrl}.
  *   4. Open browserUrl in default browser (open / xdg-open / start).
- *   5. Wait for /callback?code=X&state=Y on loopback (max 5 min).
+ *   5. Stay in front of the human: poll whoami / the session file, reprint
+ *      the login URL every few seconds, and wait for /callback on loopback
+ *      (max 5 min). Printing the URL is not success.
  *   6. Validate state, POST cliAuth:exchange with {code, codeVerifier} → session+key.
  *   7. Write ~/.apiclaw.toml, verify, then POST /v1/execute (provider nasa
  *      action apod, Frankfurter /latest fallback). Print a one-line result, not Done.
@@ -21,14 +23,20 @@ import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
 import { getMachineFingerprint } from '../../session.js';
 import { completeFirstExecute, type FirstExecuteResult } from '../../first-call.js';
-import { firstRunExecuteFailedMessage, unsignedExecuteMessage } from '../../first-run.js';
+import { firstRunExecuteFailedMessage, hasWorkingWhoami, unsignedExecuteMessage } from '../../first-run.js';
 import { clearPendingLoginUrl, writePendingLoginUrl } from '../../execute-auth.js';
+import {
+  LOGIN_URL_REPRINT_MS,
+  LOGIN_WAIT_TIMEOUT_MS,
+  isFreshLoginSession,
+  waitUntilSessionOrCallback,
+} from '../../login-wait.js';
 
 const CONVEX_URL =
   process.env.APICLAW_CONVEX_URL ||
   'https://adventurous-avocet-799.convex.cloud';
 const APP_URL = process.env.APICLAW_APP_URL || 'https://apiclaw.cloud';
-const LOOPBACK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+const LOOPBACK_TIMEOUT_MS = LOGIN_WAIT_TIMEOUT_MS;
 const PREFERRED_PORT = 41789;
 
 interface AuthLoginOptions {
@@ -280,37 +288,66 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
       console.log(chalk.yellow('  Could not open your browser automatically.'));
     }
   }
-  console.log(chalk.dim('  Visit this URL if your browser did not open:'));
-  console.log(`  ${chalk.cyan(startResult.browserUrl)}\n`);
+  console.log(chalk.bold('  Open this login URL. Keep this command running.'));
+  console.log(`  ${chalk.cyan(startResult.browserUrl)}`);
+  console.log(chalk.dim('  Printing the URL is not success. Waiting for Clerk to write session_token.\n'));
 
-  // Wait for callback
-  const waitSpinner = ora('Waiting for browser sign-in...').start();
-  let timedOut = false;
-  const timeout = setTimeout(() => {
-    timedOut = true;
-    waitSpinner.fail('Timed out after 5 minutes');
-    loop.server.close();
-  }, LOOPBACK_TIMEOUT_MS);
+  const previousToken = options.force ? existing?.sessionToken : undefined;
+  const wait = await waitUntilSessionOrCallback({
+    loginUrl: startResult.browserUrl,
+    timeoutMs: LOOPBACK_TIMEOUT_MS,
+    reprintMs: LOGIN_URL_REPRINT_MS,
+    reprintImmediately: false,
+    hasSession: () => hasWorkingWhoami() && isFreshLoginSession(readAuthConfig(), previousToken),
+    callback: loop.result,
+    onReprint: (lines) => {
+      console.log('');
+      for (const line of lines) {
+        console.log(line.includes('https://') ? chalk.cyan(line) : line);
+      }
+      console.log('');
+    },
+  });
 
-  let callback: { code: string; state: string };
-  try {
-    callback = await loop.result;
-  } catch (err) {
-    clearTimeout(timeout);
-    waitSpinner.fail(`Callback failed: ${(err as Error).message}`);
+  if (!wait.ok) {
     loop.server.close();
-    await emitFailure(timedOut ? 'timeout' : 'callback_error', fingerprint);
+    await emitFailure(wait.reason === 'timeout' ? 'timeout' : 'callback_error', fingerprint);
+    if (wait.reason === 'timeout') {
+      console.log(chalk.red('  Timed out after 5 minutes. Clerk did not write session_token.'));
+    } else {
+      console.log(chalk.red(`  Callback failed: ${wait.error?.message ?? wait.reason}`));
+    }
     return null;
   }
-  clearTimeout(timeout);
+
+  if (wait.source === 'session') {
+    loop.server.close();
+    const live = readAuthConfig();
+    if (!live?.sessionToken) {
+      return null;
+    }
+    clearPendingLoginUrl();
+    console.log(chalk.bold(`  ✅ Authenticated as ${chalk.green(live.email)}`));
+    console.log(chalk.dim(`     Config written to ${AUTH_CONFIG_PATH}`));
+    console.log(chalk.dim(`     Execute reads session_token from that file as X-APIClaw-Session.`));
+    const firstCall = await runAndPrintFirstCall(live.sessionToken);
+    console.log('');
+    return { ...live, firstCall };
+  }
+
+  const callback = wait.callback;
   loop.server.close();
+  if (!callback) {
+    await emitFailure('callback_error', fingerprint);
+    return null;
+  }
 
   if (callback.state !== state) {
-    waitSpinner.fail('State mismatch — possible CSRF, aborting');
+    console.log(chalk.red('  State mismatch — possible CSRF, aborting'));
     await emitFailure('state_mismatch', fingerprint);
     return null;
   }
-  waitSpinner.succeed('Browser sign-in received');
+  console.log(chalk.green('  Browser sign-in received'));
 
   // Exchange code+verifier for session+key
   const exchSpinner = ora('Exchanging credentials...').start();

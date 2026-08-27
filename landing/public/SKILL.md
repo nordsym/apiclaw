@@ -54,9 +54,11 @@ The next execute reads that same `session_token` and sends it as
 `X-APIClaw-Session`. Do not use `api_key` or `Authorization: Bearer`
 for this step.
 
-Wait here. Do not continue until Clerk finishes in the browser.
-`auth login` prints a login URL. If the browser did not open, show
-that URL to the human and stop.
+Keep `auth login` in the foreground until it exits 0. Printing the
+login URL is not success. The command reprints that URL every few seconds
+and polls `~/.apiclaw.toml` / `~/.apiclaw/session` until Clerk writes
+`session_token`. Show the human the login URL on every reprint. Do not
+background the command. Do not continue until it writes the token.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and go to whoami.
@@ -81,7 +83,7 @@ Rules:
 - Do not run `apiclaw call` or curl `POST /v1/execute` until whoami
   succeeds. An empty `X-APIClaw-Session` is a failed first-run.
 
-## 3. Confirm with whoami. Do not skip this.
+## 3. Confirm with whoami. Loop until it prints an email.
 
 ```bash
 npx @nordsym/apiclaw auth whoami
@@ -91,14 +93,18 @@ whoami must print an email and workspace before any execute.
 whoami is not Done. Done is HTTP 200 from `POST /v1/execute`.
 But whoami is the gate. Skip it and the execute will be unauthenticated.
 
-If whoami prints "Not signed in":
+Loop whoami. Each miss:
 
-- STOP.
 - Show the human the login URL from `auth login` (whoami reprints
   the pending URL if login already started).
+- Keep `auth login` running if it is still waiting.
+- Run whoami again. Do not stop after one miss.
 - Do not run `npx @nordsym/apiclaw call`.
 - Do not curl `POST /v1/execute`.
 - Do not send an empty `X-APIClaw-Session`.
+
+Only after whoami prints an email, execute NASA APOD, then
+Frankfurter if NASA is not 200.
 
 ## 4. First execute — POST /v1/execute
 

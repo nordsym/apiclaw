@@ -96,6 +96,13 @@ assert.match(unsigned, /empty X-APIClaw-Session/);
 assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL/);
 assert.doesNotMatch(unsigned, /paste/i);
 
+const skill = readFileSync("landing/public/SKILL.md", "utf8");
+assert.match(skill, /[Ll]oop whoami/);
+assert.match(skill, /each miss/i);
+assert.match(skill, /Show the human the login URL/);
+assert.match(skill, /NASA APOD/);
+assert.match(skill, /Frankfurter/);
+
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
 assert.match(complete, /ada@example.com/);

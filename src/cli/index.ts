@@ -119,16 +119,17 @@ const authCmd = program
 
 authCmd
   .command('login')
-  .description('Open browser, sign in via Clerk, write session_token to ~/.apiclaw.toml')
+  .description('Open browser, stay in front until Clerk writes session_token to ~/.apiclaw.toml')
   .option('-f, --force', 'Re-authenticate even if already signed in')
   .option('--print-mcp-token', 'Also issue an sk-mcp-* token for Remote MCP fallback (not yet implemented)')
   .option('--no-open', 'Print the URL instead of opening the browser')
   .action(async (options) => {
-    await authLoginCommand({
+    const result = await authLoginCommand({
       force: options.force,
       printMcpToken: options.printMcpToken,
       noOpen: !options.open, // commander inverts --no-open
     });
+    if (!result?.sessionToken) process.exit(1);
   });
 
 authCmd
@@ -160,7 +161,8 @@ program
   .description('Sign in or create a free APIClaw workspace (alias of `auth login`)')
   .option('-f, --force', 'Force re-login even if already signed in')
   .action(async (options) => {
-    await authLoginCommand({ force: options.force });
+    const result = await authLoginCommand({ force: options.force });
+    if (!result?.sessionToken) process.exit(1);
   });
 
 // MCP — explicit alias for the stdio server that bare `apiclaw` (no args)
