@@ -116,6 +116,9 @@ export default defineSchema({
     // Internal-only activation watchdog marker. Set after the operator alert
     // is accepted by Inbound Net so a stalled signup is reported once.
     activationStalledAlertSentAt: v.optional(v.number()),
+    // One-shot first managed execute after Clerk session establish. Set when
+    // the server claims the NASA/Frankfurter rail so a workspace cannot loop.
+    firstExecuteAttemptedAt: v.optional(v.number()),
     // Onboarding wizard state
     onboardingCompletedAt: v.optional(v.number()), // null = wizard pending
     onboardingDismissedAt: v.optional(v.number()), // Tracks "skip for now" -- toast instead of full wizard on next visit
