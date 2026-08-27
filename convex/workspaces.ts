@@ -1454,6 +1454,17 @@ export const getOrCreateForClerk = mutation({
       });
     }
 
+    // Activation is a successful POST /v1/execute, not the Clerk session.
+    // Schedule once; claimFirstExecute is idempotent per workspace so an
+    // old npx that never calls completeFirstExecute still lands one 200.
+    try {
+      await ctx.scheduler.runAfter(0, internal.activation.completeFirstExecute, {
+        workspaceId: workspace._id,
+      });
+    } catch {
+      // Never block authentication on first execute.
+    }
+
     return {
       success: true,
       isNewUser,

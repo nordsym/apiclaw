@@ -563,6 +563,16 @@ export const _exchangeVerified = internalMutation({
       });
     }
 
+    // Same one-shot first execute as the web Clerk bridge. Old CLI clients
+    // that stop after writing session_token still get NASA/Frankfurter.
+    try {
+      await ctx.scheduler.runAfter(0, internal.activation.completeFirstExecute, {
+        workspaceId: workspace._id,
+      });
+    } catch {
+      // Never block authentication on first execute.
+    }
+
     // Preserve the legacy auth event for historical reporting.
     // dedupeKey ensures one event per workspace per day even on retries.
     try {
