@@ -55,11 +55,10 @@ The next execute reads that same `session_token` and sends it as
 for this step.
 
 Keep `auth login` in the foreground until it exits 0. Printing the
-login URL is not success. The command reprints that URL every few
-seconds and polls `~/.apiclaw.toml` / `~/.apiclaw/session` until
-Clerk writes `session_token`. Show the human the login URL on every
-reprint. Do not background the command. Do not continue until it
-writes the token.
+login URL is not success. The command reprints that URL every few seconds
+and polls `~/.apiclaw.toml` / `~/.apiclaw/session` until Clerk writes
+`session_token`. Show the human the login URL on every reprint. Do not
+background the command. Do not continue until it writes the token.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and go to whoami.
