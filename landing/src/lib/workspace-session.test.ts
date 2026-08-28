@@ -9,11 +9,20 @@ const now = Date.UTC(2026, 6, 19, 12);
 assert.equal(getBrowserSessionRefreshDelay(now + 15 * 60_000, now), 13 * 60_000);
 assert.equal(getBrowserSessionRefreshDelay(now + 1_500, now), 1_000);
 assert.equal(safeAuthContinuation("/auth/cli?authId=abc123"), "/auth/cli?authId=abc123");
-assert.equal(clerkForcedRedirectUrl("/auth/cli?authId=abc123"), "/auth/cli?authId=abc123");
-assert.equal(clerkForcedRedirectUrl(null), "/workspace");
+assert.equal(
+  clerkForcedRedirectUrl("/auth/cli?authId=abc123"),
+  "/api/workspace-auth/clerk-bridge?next=%2Fauth%2Fcli%3FauthId%3Dabc123",
+);
+assert.equal(clerkForcedRedirectUrl(null), "/api/workspace-auth/clerk-bridge");
+assert.equal(clerkForcedRedirectUrl("https://attacker.invalid"), "/api/workspace-auth/clerk-bridge");
 assert.equal(
   clerkCompanionAuthUrl("/sign-up", "/auth/cli?authId=abc123"),
   "/sign-up?redirect_url=%2Fauth%2Fcli%3FauthId%3Dabc123",
+);
+assert.equal(clerkCompanionAuthUrl("/sign-in", null), "/sign-in");
+assert.equal(
+  clerkCompanionAuthUrl("/sign-up", "/api/workspace-auth/clerk-bridge?next=%2Fauth%2Fcli"),
+  "/sign-up",
 );
 assert.equal(safeAuthContinuation(undefined, "/sign-in"), "/sign-in");
 assert.equal(safeAuthContinuation("https://attacker.invalid", "/sign-in"), "/sign-in");

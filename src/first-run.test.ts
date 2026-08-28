@@ -125,6 +125,12 @@ if (!noSession.ok) {
   assert.equal(noSession.payload.action, "agent_auth_required");
   assert.equal(noSession.payload.command, AUTH_LOGIN_COMMAND);
   assert.equal(noSession.payload.first_call_prompt, FIRST_CALL_PROMPT);
+  assert.equal(noSession.payload.signup_url, undefined);
+  assert.doesNotMatch(
+    JSON.stringify(noSession.payload),
+    /apiclaw\.cloud\/sign-in/,
+    "auth payload must not send agents to bare /sign-in (skips CLI authId)",
+  );
   assert.doesNotMatch(String(noSession.payload.command), /apiclaw login/);
   assert.doesNotMatch(String(noSession.payload.fallback_for_headless), /email-fallback/);
 }

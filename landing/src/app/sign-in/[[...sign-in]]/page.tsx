@@ -11,8 +11,9 @@ import { clerkCompanionAuthUrl, clerkForcedRedirectUrl } from "@/lib/auth-contin
 function SignInForm() {
   const params = useSearchParams();
   const [appearance, setAppearance] = useState(() => getClerkAppearance("dark"));
-  const redirectUrl = clerkForcedRedirectUrl(params.get("redirect_url"));
-  const signUpUrl = clerkCompanionAuthUrl("/sign-up", redirectUrl);
+  const requested = params.get("redirect_url") ?? params.get("next");
+  const redirectUrl = clerkForcedRedirectUrl(requested);
+  const signUpUrl = clerkCompanionAuthUrl("/sign-up", requested);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

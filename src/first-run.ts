@@ -99,7 +99,6 @@ export function agentAuthRequiredPayload(
       "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
     fallback_for_headless:
       `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
-    signup_url: "https://apiclaw.cloud/sign-in",
     first_call_prompt: FIRST_CALL_PROMPT,
     ...extra,
   };
