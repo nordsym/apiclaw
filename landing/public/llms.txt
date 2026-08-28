@@ -53,10 +53,12 @@ APIClaw provides unified API access for AI agents across five access paths: SKIL
 ## Agent front door
 
 Give an agent `https://apiclaw.cloud/SKILL.md`. That file is the operational
-canon: Clerk login via `npx @nordsym/apiclaw auth login`, confirm
-with `npx @nordsym/apiclaw auth whoami`, then `POST /v1/execute`
-(NASA APOD, Frankfurter `/latest` fallback). Do not invent
-a second setup path. This file is identity and product truth.
+canon: Clerk login via `npx @nordsym/apiclaw auth login` (keep it in
+the foreground; after Clerk the human must click Authorize), confirm
+with `npx @nordsym/apiclaw auth whoami` until it prints an email, then
+`POST /v1/execute` (NASA APOD, Brave search fallback). Printing the
+login URL is not ready. Do not invent a second setup path. This file
+is identity and product truth.
 
 ## Access paths
 
@@ -67,9 +69,15 @@ Install APIClaw in Claude Desktop via the `.mcpb` extension, or install the npm 
 ```bash
 npm install -g @nordsym/apiclaw
 npx @nordsym/apiclaw auth login
+npx @nordsym/apiclaw auth whoami
 ```
 
-The auth flow opens the browser, signs the user in, and writes `session_token` to `~/.apiclaw.toml`. The next `POST /v1/execute` reads that same value as `X-APIClaw-Session`. Agents do not need users to paste tokens.
+The auth flow opens the browser. Clerk sign-in is not enough — the
+human must click Authorize. Then the CLI writes `session_token` to
+`~/.apiclaw.toml`. Confirm with whoami before any execute. The next
+`POST /v1/execute` reads that same value as `X-APIClaw-Session`.
+Agents do not need users to paste tokens. Do not declare ready until
+whoami prints an email.
 
 ### 2. CLI
 

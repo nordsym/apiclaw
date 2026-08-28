@@ -29,6 +29,7 @@ import {
   LOGIN_URL_REPRINT_MS,
   LOGIN_WAIT_TIMEOUT_MS,
   isFreshLoginSession,
+  loopbackCallbackSuccessHtml,
   waitUntilSessionOrCallback,
 } from '../../login-wait.js';
 
@@ -133,18 +134,7 @@ function startLoopbackListener(): Promise<{
         return;
       }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(`<!doctype html><html><head><meta charset="utf-8"><title>APIClaw — Authenticated</title><style>
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0a0a;color:#fafafa;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center}
-        .box{max-width:420px;padding:32px}
-        .lobster{font-size:48px;margin-bottom:16px}
-        h1{font-weight:600;font-size:20px;margin:0 0 8px}
-        p{color:#a3a3a3;font-size:14px;line-height:1.5;margin:8px 0}
-        code{background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#ef4444;font-size:13px}
-      </style></head><body><div class="box">
-        <div class="lobster">🦞</div>
-        <h1>Authenticated</h1>
-        <p>You can close this tab and return to your terminal.</p>
-      </div></body></html>`);
+      res.end(loopbackCallbackSuccessHtml());
       resolveResult({ code, state });
     });
 

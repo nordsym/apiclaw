@@ -3,12 +3,18 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { getBrowserSessionRefreshDelay } from "./workspace-session";
-import { safeAuthContinuation } from "./auth-continuation";
+import { clerkCompanionAuthUrl, clerkForcedRedirectUrl, safeAuthContinuation } from "./auth-continuation";
 
 const now = Date.UTC(2026, 6, 19, 12);
 assert.equal(getBrowserSessionRefreshDelay(now + 15 * 60_000, now), 13 * 60_000);
 assert.equal(getBrowserSessionRefreshDelay(now + 1_500, now), 1_000);
 assert.equal(safeAuthContinuation("/auth/cli?authId=abc123"), "/auth/cli?authId=abc123");
+assert.equal(clerkForcedRedirectUrl("/auth/cli?authId=abc123"), "/auth/cli?authId=abc123");
+assert.equal(clerkForcedRedirectUrl(null), "/workspace");
+assert.equal(
+  clerkCompanionAuthUrl("/sign-up", "/auth/cli?authId=abc123"),
+  "/sign-up?redirect_url=%2Fauth%2Fcli%3FauthId%3Dabc123",
+);
 assert.equal(safeAuthContinuation(undefined, "/sign-in"), "/sign-in");
 assert.equal(safeAuthContinuation("https://attacker.invalid", "/sign-in"), "/sign-in");
 assert.equal(

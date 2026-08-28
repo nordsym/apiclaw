@@ -107,7 +107,11 @@ test('guard: no workspace → no_session', () => {
     assert.equal(r.reason, 'no_session');
     assert.equal(r.payload.command, 'npx @nordsym/apiclaw auth login');
     assert.equal(r.payload.action, 'agent_auth_required');
-    assert.match(String(r.payload.first_call_prompt), /nasa|fixer_latest|brave_search/);
+    assert.match(String(r.payload.first_call_prompt), /nasa/);
+    assert.match(String(r.payload.first_call_prompt), /brave_search/);
+    assert.doesNotMatch(String(r.payload.first_call_prompt), /fixer_latest|Frankfurter/);
+    assert.equal(r.payload.confirm_command, "npx @nordsym/apiclaw auth whoami");
+    assert.doesNotMatch(String(r.payload.after_signin), /picked up automatically/);
   }
 });
 

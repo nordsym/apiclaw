@@ -57,8 +57,23 @@ for (const [name, source] of [
   );
   assert.match(
     source,
+    /clerkForcedRedirectUrl\(params\.get\("redirect_url"\)\)/,
+    `${name}/page.tsx must resolve redirect_url before Clerk mounts`,
+  );
+  assert.match(
+    source,
+    /forceRedirectUrl=\{redirectUrl\}/,
+    `${name}/page.tsx must force Clerk back to the continuation (CLI /auth/cli or OAuth)`,
+  );
+  assert.match(
+    source,
     /fallbackRedirectUrl=\{redirectUrl\}/,
     `${name}/page.tsx must pass redirect_url through to Clerk as fallbackRedirectUrl`,
+  );
+  assert.match(
+    source,
+    /clerkCompanionAuthUrl/,
+    `${name}/page.tsx must keep redirect_url when bouncing between sign-in and sign-up`,
   );
 }
 

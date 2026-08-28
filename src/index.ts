@@ -41,7 +41,7 @@ import {
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
-import { FIRST_CALL_PROMPT, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -485,18 +485,10 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     } else {
       return {
         allowed: false,
-        error: JSON.stringify({
-          status: 'agent_auth_required',
-          error: 'Authentication required to call APIs.',
-          message: 'APIClaw uses an agent-native auth flow. Run the CLI command below in the user\'s terminal. A browser opens, the user signs in with one click, and the CLI writes ~/.apiclaw.toml. Then re-call this tool.',
-          action: 'agent_auth_required',
-          command: 'npx @nordsym/apiclaw auth login',
-          estimated_seconds: 15,
-          fallback: 'Complete browser auth on a device that can open the sign-in URL.',
+        error: JSON.stringify(agentAuthRequiredPayload({
           legacy_action: 'register_owner is retired. Use the browser auth command above.',
           free_tier: `Free APIs are free forever, no card. Discovery included. Paid APIs need a card, then run at provider cost + ${PAYG_MARGIN_PERCENT}% per call.`,
-          first_call_prompt: FIRST_CALL_PROMPT,
-        }, null, 2),
+        }), null, 2),
         isAnonymous: true,
       };
     }
@@ -513,16 +505,9 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
   if (!workspaceContext.email) {
     return {
       allowed: false,
-      error: JSON.stringify({
-        status: 'agent_auth_required',
+      error: JSON.stringify(agentAuthRequiredPayload({
         error: 'An account is required to use APIClaw.',
-        message: 'Run `npx @nordsym/apiclaw auth login` in the user\'s terminal. Browser opens, user clicks once, CLI writes ~/.apiclaw.toml. Then re-call this tool.',
-        action: 'agent_auth_required',
-        command: 'npx @nordsym/apiclaw auth login',
-        estimated_seconds: 15,
-        fallback: 'Browser auth is the supported ownership-verification path.',
-        first_call_prompt: FIRST_CALL_PROMPT,
-      }, null, 2),
+      }), null, 2),
       isAnonymous: true,
     };
   }
@@ -844,7 +829,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace; if not authenticated, the response will return action="agent_auth_required" with the CLI command to run (npx @nordsym/apiclaw auth login).
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace. If not authenticated, the response returns action="agent_auth_required". Run npx @nordsym/apiclaw auth login in the foreground, show the human the URL, click Authorize after Clerk, then loop npx @nordsym/apiclaw auth whoami until it prints an email. Do not retry this tool and do not declare ready before whoami.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -1211,9 +1196,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 🦞 APIClaw -- The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${!isAuthenticated ? `
-GET STARTED (free):
-  Run: npx @nordsym/apiclaw auth login
-  Complete the browser sign-in, then call check_workspace_status.
+NOT READY (no session):
+  1. Run in the foreground: npx @nordsym/apiclaw auth login
+  2. Show the human the login URL. After Clerk, click Authorize on apiclaw.cloud.
+  3. Loop: npx @nordsym/apiclaw auth whoami
+  Do not declare ready. Do not call_api until whoami prints an email.
 ` : `
 STATUS: Authenticated as ${workspaceContext!.email} (${workspaceContext!.tier} tier)
 `}
@@ -1221,10 +1208,9 @@ DISCOVER APIs (signup required, free):
   discover_apis({ query: "send SMS to Sweden" })
   discover_apis({ query: "text to speech", category: "ai" })
 
-CALL APIs (requires free registration):
+CALL APIs (only after whoami prints an email):
   call_api({ provider: "nasa", action: "apod", params: {} })
-  call_api({ provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } })
-  call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
+  call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
 
 ${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Free APIs: free forever, no card | Paid APIs: provider cost + ${PAYG_MARGIN_PERCENT}%, add a card once
 
@@ -1981,7 +1967,7 @@ Docs: https://apiclaw.cloud
                   status: 'auth_required',
                   message: ar.message,
                   action_required:
-                    'Run `npx @nordsym/apiclaw auth login` in a terminal, finish the browser sign-in, then retry the original call.',
+                    'Run `npx @nordsym/apiclaw auth login` in the foreground, show the human the URL, click Authorize after Clerk, then loop `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not retry execute before whoami.',
                   command: 'npx @nordsym/apiclaw auth login',
                   signup_url: ar.signupUrl,
                   provider,
@@ -2226,7 +2212,7 @@ Docs: https://apiclaw.cloud
               action: 'legacy_auth_retired',
               message: 'Email-only registration has been retired because it did not provide a safe ownership proof.',
               command: 'npx @nordsym/apiclaw auth login',
-              next_step: 'Run the command in the user terminal, complete browser sign-in, then retry the API call.',
+              next_step: 'Run the command in the foreground, click Authorize after Clerk, then loop auth whoami until it prints an email. Do not retry execute before whoami.',
             }, null, 2),
           }],
           isError: true,
@@ -3136,12 +3122,20 @@ async function main() {
 ✓ ${CANON_STATS.discoverable.toLocaleString()} APIs discoverable
 ✓ ${CANON_STATS.source_verified.toLocaleString()} exact-name source-verified catalog entries
 ✓ Managed execution readiness is explicit
-${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not authenticated - run: npx @nordsym/apiclaw auth login'}
+${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not ready. No session. Do not call_api. Do not declare ready.'}
 
-Quick Start:
-  ${!hasValidSession ? 'npx @nordsym/apiclaw auth login  # First, authenticate\n  ' : ''}call_api({ provider: "nasa", action: "apod", params: {} })
-  call_api({ provider: "apilayer", action: "fixer_latest", params: { base: "EUR" } })
-  call_api({ provider: "brave_search", action: "search", params: { query: "AI agents" } })
+${!hasValidSession ? `Next steps (in order):
+  1. npx @nordsym/apiclaw auth login
+     Keep it in the foreground. Show the human the URL on every reprint.
+     After Clerk, click Authorize on apiclaw.cloud.
+  2. npx @nordsym/apiclaw auth whoami
+     Loop until it prints an email. Only then continue.
+  3. call_api({ provider: "nasa", action: "apod", params: {} })
+     If NASA is not 200: call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
+` : `Quick Start:
+  call_api({ provider: "nasa", action: "apod", params: {} })
+  call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
+`}
 
 Managed routes (provider keys stay server-side):
   list_connected()

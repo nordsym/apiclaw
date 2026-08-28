@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "Your agent calls real APIs. You sign in once. Authenticated execution and discovery layer for AI agents, reachable via SKILL.md, local MCP, CLI, HTTP gateway, or Remote MCP. Discover 26,619 API definitions, including 689 exact-name source-verified entries. Source verification is not execution. APIClaw inventories 22 built-in providers, all customer-executable today, plus 1,003 workspace-authenticated public/no-key HTTPS origins (1,025 callable now). Anonymous keyless proxy stays disabled. Agent-native auth: `apiclaw auth login` opens your browser, signs you in, and writes ~/.apiclaw.toml.",
   "type": "module",
   "main": "dist/index.js",

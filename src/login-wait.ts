@@ -13,12 +13,32 @@ export const LOGIN_WAIT_TIMEOUT_MS = 5 * 60 * 1000;
 
 export function loginWaitReprintLines(loginUrl: string): string[] {
   return [
-    "Still waiting for Clerk. Printing this URL is not success.",
+    "Not ready. Printing this URL is not success.",
     "  Open this login URL:",
     `  ${loginUrl}`,
+    "  After Clerk, click Authorize on apiclaw.cloud or the terminal stays unsigned.",
     "  Keep this command running until session_token exists.",
     "  Then confirm with: npx @nordsym/apiclaw auth whoami",
+    "  Do not execute until whoami prints an email.",
   ];
+}
+
+/** Loopback tab after Authorize. Session is not written until the CLI exchanges. */
+export function loopbackCallbackSuccessHtml(): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>APIClaw — Sign-in received</title><style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0a0a;color:#fafafa;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center}
+        .box{max-width:440px;padding:32px}
+        .lobster{font-size:48px;margin-bottom:16px}
+        h1{font-weight:600;font-size:20px;margin:0 0 8px}
+        p{color:#a3a3a3;font-size:14px;line-height:1.5;margin:8px 0}
+        code{background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#ef4444;font-size:13px}
+      </style></head><body><div class="box">
+        <div class="lobster">🦞</div>
+        <h1>Sign-in received</h1>
+        <p>Not ready yet. Return to the terminal and wait until it prints your email.</p>
+        <p>Then confirm with <code>npx @nordsym/apiclaw auth whoami</code>.</p>
+        <p>Do not execute until whoami prints an email.</p>
+      </div></body></html>`;
 }
 
 /**

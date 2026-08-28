@@ -6,6 +6,25 @@ const AUTH_CONTINUATION_PREFIXES = [
   "/workspace",
 ];
 
+/**
+ * Post-Clerk destination for <SignIn/> / <SignUp/>.
+ * Must be computed before Clerk mounts. A missing or delayed value falls
+ * through to ClerkProvider's /api/workspace-auth/clerk-bridge default,
+ * which lands on /workspace and never returns to /auth/cli?authId=…
+ */
+export function clerkForcedRedirectUrl(
+  value: string | null | undefined,
+): string {
+  return safeAuthContinuation(value, "/workspace");
+}
+
+export function clerkCompanionAuthUrl(
+  path: "/sign-in" | "/sign-up",
+  redirectUrl: string,
+): string {
+  return `${path}?redirect_url=${encodeURIComponent(redirectUrl)}`;
+}
+
 export function safeAuthContinuation(
   value: string | null | undefined,
   fallback: "/workspace" | "/sign-in" = "/workspace",

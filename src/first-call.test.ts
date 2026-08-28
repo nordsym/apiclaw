@@ -203,7 +203,12 @@ for (const file of firstCallFiles) {
   assert.match(source, /\/v1\/execute/, `${file} must issue POST /v1/execute`);
   assert.match(source, /nasa/, `${file} must prefer NASA APOD`);
   assert.match(source, /apod/, `${file} must prefer NASA APOD`);
-  assert.match(source, /frankfurter/i, `${file} must fall back to Frankfurter`);
+  if (file === "landing/public/SKILL.md" || file === "src/first-run.ts") {
+    assert.match(source, /brave_search/, `${file} must document Brave as the research fallback`);
+    assert.doesNotMatch(source, /frankfurter/i, `${file} must not lead agents with FX`);
+  } else {
+    assert.match(source, /frankfurter/i, `${file} must fall back to Frankfurter`);
+  }
   assert.doesNotMatch(source, /apiclaw call CoinGecko/, `${file} must not use catalog-name /v1/call`);
   assert.doesNotMatch(
     source,

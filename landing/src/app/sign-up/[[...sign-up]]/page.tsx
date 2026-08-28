@@ -1,37 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { SignUp } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 import { getClerkAppearance } from "@/lib/clerk-appearance";
 import { getCurrentTheme } from "@/lib/theme";
 import { SiteHeader } from "@/components/home/SiteHeader";
+import { clerkCompanionAuthUrl, clerkForcedRedirectUrl } from "@/lib/auth-continuation";
 
-export default function SignUpPage() {
+function SignUpForm() {
+  const params = useSearchParams();
   const [appearance, setAppearance] = useState(() => getClerkAppearance("dark"));
-  const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
+  const redirectUrl = clerkForcedRedirectUrl(params.get("redirect_url"));
+  const signInUrl = clerkCompanionAuthUrl("/sign-in", redirectUrl);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
     if (ref) localStorage.setItem("apiclaw_referral_code", ref);
-    // Same redirect_url handoff as /sign-in — /sign-in's own "Sign up" link
-    // forwards it here, so a signed-out user finishing an OAuth request via
-    // sign-up also lands back on /oauth/authorize.
-    const target = params.get("redirect_url");
-    if (target) setRedirectUrl(target);
     setAppearance(getClerkAppearance(getCurrentTheme()));
-  }, []);
+  }, [params]);
 
+  return (
+    <SignUp
+      signInUrl={signInUrl}
+      appearance={appearance}
+      forceRedirectUrl={redirectUrl}
+      fallbackRedirectUrl={redirectUrl}
+    />
+  );
+}
+
+export default function SignUpPage() {
   return (
     <main className="claw min-h-screen flex flex-col">
       <SiteHeader />
       <div className="flex flex-1 items-center justify-center px-6 py-16">
-      <SignUp
-        signInUrl="/sign-in"
-        appearance={appearance}
-        fallbackRedirectUrl={redirectUrl}
-      />
+        <Suspense fallback={<p className="text-[15px] text-text-secondary">Loading sign-up…</p>}>
+          <SignUpForm />
+        </Suspense>
       </div>
     </main>
   );
