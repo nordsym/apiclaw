@@ -52,7 +52,7 @@ for (const [name, source] of [
 ] as const) {
   assert.match(
     source,
-    /params\.get\("redirect_url"\) \?\? params\.get\("next"\)/,
+    /params\?\.get\("redirect_url"\) \?\? params\?\.get\("next"\)/,
     `${name}/page.tsx must read redirect_url or next before Clerk mounts`,
   );
   assert.match(
