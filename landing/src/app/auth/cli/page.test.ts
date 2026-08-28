@@ -71,6 +71,16 @@ assert.doesNotMatch(
   /One click and you are back/,
   "page.tsx must not claim one-click success before Authorize",
 );
+assert.match(
+  pageSource,
+  /signInHref=\{signInHref\}/,
+  "unsigned CLI page must keep header Sign in on the authId continuation",
+);
+assert.match(
+  pageSource,
+  /signInHref=\{null\}/,
+  "signed-in CLI page must hide header Sign in so Authorize is the only next step",
+);
 
 // Identity used by the action must come from the server session, not the
 // submitted form fields.
