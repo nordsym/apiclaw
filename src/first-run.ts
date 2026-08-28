@@ -23,11 +23,10 @@ export const AUTH_WHOAMI_COMMAND = "npx @nordsym/apiclaw auth whoami";
 
 /**
  * First managed call after sign-in. Must be a rail that is customer-executable
- * today: NASA APOD, APILayer fixer_latest EUR, or Brave search.
- * Never lead with ElevenLabs or Replicate.
+ * today: NASA APOD or Brave search. Never lead with FX, ElevenLabs, or Replicate.
  */
 export const FIRST_CALL_PROMPT =
-  'Use APIClaw to fetch today\'s NASA Astronomy Picture of the Day: call_api with provider "nasa", action "apod", params {}. Then describe the image. Alternatives that also work live: apilayer fixer_latest with base EUR, or brave_search search for "AI agent infrastructure news".';
+  'Not ready until whoami prints an email. Then fetch today\'s NASA Astronomy Picture of the Day: call_api with provider "nasa", action "apod", params {}. If NASA is not 200, call_api with provider "brave_search", action "search", params { query: "AI agent infrastructure news" }. Do not lead with FX.';
 
 export const FIRST_CALL_CLI =
   "npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key \"apiclaw-first-nasa-$(date +%s)\"";
@@ -71,24 +70,50 @@ export function hasWorkingWhoami(): boolean {
 export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string {
   const url = pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl();
   return [
-    "Not signed in. Finish Clerk in the browser before any execute.",
+    "Not ready. whoami has no session. Do not execute.",
     url ? `  Open this login URL: ${url}` : `  ${AUTH_LOGIN_COMMAND}`,
     ...(url ? [`  Or run: ${AUTH_LOGIN_COMMAND}`] : []),
+    "Keep login in the foreground. After Clerk, click Authorize on apiclaw.cloud.",
     "Then confirm with:",
     `  ${AUTH_WHOAMI_COMMAND}`,
-    "Do not POST /v1/execute until whoami succeeds. Do not send an empty X-APIClaw-Session.",
+    "Do not declare ready. Do not POST /v1/execute until whoami prints an email.",
+    "Do not send an empty X-APIClaw-Session.",
   ].join("\n");
+}
+
+/** Shared MCP / CLI payload when execute is refused for no session. */
+export function agentAuthRequiredPayload(
+  extra: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    status: "auth_required",
+    action: "agent_auth_required",
+    error: "Not ready. whoami has no session. Do not execute.",
+    instruction:
+      "Show the human the login URL. Keep auth login in the foreground. After Clerk, they must click Authorize on apiclaw.cloud. Printing the URL is not success. Do not declare ready. Do not retry execute.",
+    command: AUTH_LOGIN_COMMAND,
+    confirm_command: AUTH_WHOAMI_COMMAND,
+    what_happens:
+      "Opens the browser. User signs in with Clerk, then must click Authorize. Login reprints the URL until session_token exists. Clerk sign-in alone does not write the session.",
+    after_signin:
+      "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
+    fallback_for_headless:
+      `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
+    first_call_prompt: FIRST_CALL_PROMPT,
+    ...extra,
+  };
 }
 
 export function firstRunIncompleteMessage(): string {
   const pending = readPendingLoginUrl();
   return [
-    "Not done. Sign-in is required before any managed call.",
+    "Not done. Sign-in is required before any managed call. Do not declare ready.",
     `  ${AUTH_LOGIN_COMMAND}`,
-    ...(pending ? [`  Open this login URL and finish Clerk:\n  ${pending}`] : []),
+    ...(pending ? [`  Open this login URL and finish Clerk, then click Authorize:\n  ${pending}`] : []),
+    "After Clerk, click Authorize on apiclaw.cloud or the terminal stays unsigned.",
     "Headless or SSH? Open the browser URL on another device, then confirm:",
     `  ${AUTH_WHOAMI_COMMAND}`,
-    "Do not POST /v1/execute until whoami succeeds. Do not send an empty X-APIClaw-Session.",
+    "Do not POST /v1/execute until whoami prints an email. Do not send an empty X-APIClaw-Session.",
     `First managed call after sign-in: ${FIRST_CALL_CLI}`,
   ].join("\n");
 }
@@ -102,7 +127,7 @@ export function firstRunCompleteMessage(email?: string, summary?: string): strin
 export function firstRunExecuteFailedMessage(): string {
   return [
     "Not done. Sign-in worked, but the first execute did not succeed.",
-    "NASA APOD via POST /v1/execute, then Frankfurter /latest.",
+    "NASA APOD via POST /v1/execute, then Brave search.",
     `  ${AUTH_FIRST_CALL_COMMAND}`,
   ].join("\n");
 }
@@ -134,7 +159,7 @@ export interface CompleteFirstRunAuthOptions {
   } | null>;
   /** Injected for tests. Defaults to reading ~/.apiclaw.toml. */
   whoami?: () => boolean;
-  /** Injected for tests. Defaults to NASA APOD then Frankfurter via /v1/execute. */
+  /** Injected for tests. Defaults to NASA APOD then the first-execute fallback. */
   firstExecute?: () => Promise<FirstExecuteResult>;
 }
 

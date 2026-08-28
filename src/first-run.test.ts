@@ -24,7 +24,8 @@ assert.doesNotMatch(AUTH_LOGIN_COMMAND, /apiclaw login(?! )/);
 assert.match(FIRST_CALL_PROMPT, /call_api/);
 assert.match(FIRST_CALL_PROMPT, /nasa/);
 assert.match(FIRST_CALL_PROMPT, /apod/);
-assert.match(FIRST_CALL_PROMPT, /fixer_latest|brave_search/);
+assert.match(FIRST_CALL_PROMPT, /brave_search/);
+assert.doesNotMatch(FIRST_CALL_PROMPT, /fixer_latest|Frankfurter|EUR/);
 assert.doesNotMatch(FIRST_CALL_PROMPT, /elevenlabs|replicate|ElevenLabs|Replicate/i);
 assert.match(FIRST_CALL_CLI, /nasa\/apod/);
 
@@ -82,16 +83,18 @@ assert.equal(
 const incomplete = firstRunIncompleteMessage();
 assert.match(incomplete, /Not done/);
 assert.match(incomplete, /npx @nordsym\/apiclaw auth login/);
-assert.match(incomplete, /Do not POST \/v1\/execute until whoami succeeds/);
+assert.match(incomplete, /Do not POST \/v1\/execute until whoami prints an email/);
+assert.match(incomplete, /Authorize/);
 assert.match(incomplete, /empty X-APIClaw-Session/);
 assert.doesNotMatch(incomplete, /\bDone\b/);
 assert.doesNotMatch(incomplete, /apiclaw login/);
 assert.doesNotMatch(incomplete, /@2\.8\.7/);
 
 const unsigned = unsignedExecuteMessage();
-assert.match(unsigned, /Not signed in/);
+assert.match(unsigned, /Not ready/);
+assert.match(unsigned, /Authorize/);
 assert.match(unsigned, /npx @nordsym\/apiclaw auth whoami/);
-assert.match(unsigned, /Do not POST \/v1\/execute until whoami succeeds/);
+assert.match(unsigned, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(unsigned, /empty X-APIClaw-Session/);
 assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL/);
 assert.doesNotMatch(unsigned, /paste/i);
@@ -101,7 +104,8 @@ assert.match(skill, /[Ll]oop whoami/);
 assert.match(skill, /each miss/i);
 assert.match(skill, /Show the human the login URL/);
 assert.match(skill, /NASA APOD/);
-assert.match(skill, /Frankfurter/);
+assert.match(skill, /Brave search/);
+assert.doesNotMatch(skill, /Frankfurter/);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
@@ -121,6 +125,12 @@ if (!noSession.ok) {
   assert.equal(noSession.payload.action, "agent_auth_required");
   assert.equal(noSession.payload.command, AUTH_LOGIN_COMMAND);
   assert.equal(noSession.payload.first_call_prompt, FIRST_CALL_PROMPT);
+  assert.equal(noSession.payload.signup_url, undefined);
+  assert.doesNotMatch(
+    JSON.stringify(noSession.payload),
+    /apiclaw\.cloud\/sign-in/,
+    "auth payload must not send agents to bare /sign-in (skips CLI authId)",
+  );
   assert.doesNotMatch(String(noSession.payload.command), /apiclaw login/);
   assert.doesNotMatch(String(noSession.payload.fallback_for_headless), /email-fallback/);
 }

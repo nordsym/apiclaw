@@ -48,17 +48,17 @@ curl -fsSL https://apiclaw.cloud/install.sh | bash
 npx @nordsym/apiclaw auth login
 ```
 
-That opens the browser, signs the user in with Clerk (Google or
-passwordless email), and writes `session_token` to `~/.apiclaw.toml`.
-The next execute reads that same `session_token` and sends it as
-`X-APIClaw-Session`. Do not use `api_key` or `Authorization: Bearer`
-for this step.
+That opens the browser. Clerk sign-in is not enough. After Google or
+email the user must click Authorize on apiclaw.cloud. Only then does
+the CLI write `session_token` to `~/.apiclaw.toml`. Printing the URL
+is not success. Do not declare ready. Do not execute.
 
-Keep `auth login` in the foreground until it exits 0. Printing the
-login URL is not success. The command reprints that URL every few seconds
-and polls `~/.apiclaw.toml` / `~/.apiclaw/session` until Clerk writes
-`session_token`. Show the human the login URL on every reprint. Do not
-background the command. Do not continue until it writes the token.
+Keep `auth login` in the foreground until it exits 0. The command
+reprints that URL every few seconds and polls `~/.apiclaw.toml` /
+`~/.apiclaw/session` until Clerk writes `session_token`. Show the
+human the login URL on every reprint. Tell them to click Authorize
+after Clerk. Do not background the command. Do not continue until
+whoami prints an email.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and go to whoami.
@@ -81,7 +81,8 @@ Rules:
   `~/.apiclaw/session`) when you need a header. Never print the raw
   token back to the user.
 - Do not run `apiclaw call` or curl `POST /v1/execute` until whoami
-  succeeds. An empty `X-APIClaw-Session` is a failed first-run.
+  prints an email. An empty `X-APIClaw-Session` is a failed first-run.
+- Install, first_run, or a printed login URL is not ready.
 
 ## 3. Confirm with whoami. Loop until it prints an email.
 
@@ -104,13 +105,12 @@ Loop whoami. Each miss:
 - Do not send an empty `X-APIClaw-Session`.
 
 Only after whoami prints an email, execute NASA APOD, then
-Frankfurter if NASA is not 200.
+Brave search if NASA is not 200.
 
 ## 4. First execute — POST /v1/execute
 
-Only after whoami prints an email. This is the same first research
-call `install.sh` uses after sign-in: NASA APOD, then Frankfurter
-`/latest`.
+Only after whoami prints an email. Preferred research call:
+NASA APOD, then Brave search. Do not lead with FX.
 
 ### Preferred rail: NASA APOD
 
@@ -140,25 +140,28 @@ curl -sS https://api.apiclaw.cloud/v1/execute \
 
 A 200 with an APOD title is success. nasa/apod is a Free API: no card needed.
 
-### Fallback rail: Frankfurter /latest
+### Fallback rail: Brave search
 
-If NASA is not 200, call Frankfurter. Keep `provider` / `action`.
-Pass the relative path in `params`. Same whoami gate. Same nonempty
-`$SESSION`. Do not curl if `$SESSION` is empty.
+If NASA is not 200, search the live web. Same whoami gate. Same
+nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
+
+```bash
+npx @nordsym/apiclaw call brave_search/search --params '{"query":"AI agent infrastructure news"}' --idempotency-key "apiclaw-first-brave-$(date +%s)"
+```
 
 ```bash
 if [ -z "$SESSION" ]; then echo "Stop. No session_token. Do not POST /v1/execute with an empty X-APIClaw-Session."; exit 1; fi
 curl -sS https://api.apiclaw.cloud/v1/execute \
   -H "Content-Type: application/json" \
   -H "X-APIClaw-Session: $SESSION" \
-  -H "Idempotency-Key: apiclaw-first-fx-$(date +%s)" \
-  -d '{"provider":"frankfurter","action":"latest","params":{"path":"/latest"}}'
+  -H "Idempotency-Key: apiclaw-first-brave-$(date +%s)" \
+  -d '{"provider":"brave_search","action":"search","params":{"query":"AI agent infrastructure news"}}'
 ```
 
 `$SESSION` is still `session_token` from `~/.apiclaw.toml`, same extract
 as the NASA curl. Same header the CLI slash form sends.
 
-A 200 with a EUR FX rate is success.
+A 200 with search results is success.
 
 ### Execute rules
 
@@ -170,7 +173,7 @@ A 200 with a EUR FX rate is success.
   Reuse the same key after an ambiguous network failure.
 - After login, run whoami. Only then run the NASA CLI slash form (or
   the curl that extracts `session_token`). If it is not 200, run
-  Frankfurter. Do not invent a third rail.
+  Brave search. Do not invent a third rail. Do not lead with FX.
 
 ## 5. After the first 200
 

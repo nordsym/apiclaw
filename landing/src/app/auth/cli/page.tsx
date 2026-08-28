@@ -51,23 +51,25 @@ export default async function CliAuthPage({
 
   const { userId } = await auth();
 
+  const here = `/auth/cli?authId=${encodeURIComponent(authId)}`;
+  const signInHref = `/sign-in?redirect_url=${encodeURIComponent(here)}`;
+
   // Not signed in → punt to /sign-in with redirect_url back to here
   if (!userId) {
-    const here = `/auth/cli?authId=${encodeURIComponent(authId)}`;
     return (
-      <CliShell>
+      <CliShell signInHref={signInHref}>
         <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">Sign in to authorize your CLI.</h1>
         <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-          You ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code> in your terminal. One click and you are back in the CLI.
+          You ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code>. Printing this URL is not success. After Google or email you must return here and click Authorize. Clerk sign-in alone does not write <code className="claw-mono text-[13px] text-text-primary">session_token</code>.
         </p>
         <Link
-          href={`/sign-in?redirect_url=${encodeURIComponent(here)}`}
+          href={signInHref}
           className="claw-btn claw-btn-solid mt-8"
         >
           Sign in to continue
         </Link>
         <p className="mt-6 text-[13px] text-text-muted">
-          APIClaw never sees your password. Sign-in is handled by Clerk with Google / passwordless email.
+          Keep the terminal command running. After Clerk, this page asks you to Authorize. That click finishes the CLI session. Then confirm with <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth whoami</code>.
         </p>
       </CliShell>
     );
@@ -88,11 +90,11 @@ export default async function CliAuthPage({
   }
 
   return (
-    <CliShell>
-      <p className="claw-eyebrow">CLI sign-in</p>
-      <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal?</h1>
+    <CliShell signInHref={null}>
+      <p className="claw-eyebrow">CLI sign-in — not ready yet</p>
+      <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Clerk sign-in is not done.</h1>
       <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-        You are signing in as <span className="text-text-primary">{email}</span>. The terminal that printed this link gets a session for your workspace.
+        You are signed in to Clerk as <span className="text-text-primary">{email}</span>. Click Authorize or the terminal stays unsigned — no <code className="claw-mono text-[13px] text-text-primary">session_token</code>, whoami fails, execute stays blocked.
       </p>
       <form action={authorizeCli} method="post" className="mt-8 flex items-center gap-4">
         <input type="hidden" name="authId" value={authId} />
@@ -107,10 +109,16 @@ export default async function CliAuthPage({
   );
 }
 
-function CliShell({ children }: { children: React.ReactNode }) {
+function CliShell({
+  children,
+  signInHref,
+}: {
+  children: React.ReactNode;
+  signInHref?: string | null;
+}) {
   return (
     <main className="claw flex min-h-screen flex-col overflow-x-hidden">
-      <SiteHeader />
+      <SiteHeader signInHref={signInHref} />
       <section className="claw-container flex-1 py-16 sm:py-20">
         <div className="mx-auto max-w-[28rem]">{children}</div>
       </section>

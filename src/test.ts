@@ -32,7 +32,12 @@ if (!noSessionResult.ok) {
   assert.equal(typeof noSessionResult.payload.first_call_prompt, "string");
   assert.equal(noSessionResult.payload.command, "npx @nordsym/apiclaw auth login");
   assert.match(noSessionResult.payload.first_call_prompt as string, /call_api/);
-  assert.match(noSessionResult.payload.first_call_prompt as string, /nasa|fixer_latest|brave_search/);
+  assert.match(noSessionResult.payload.first_call_prompt as string, /nasa/);
+  assert.match(noSessionResult.payload.first_call_prompt as string, /brave_search/);
+  assert.doesNotMatch(noSessionResult.payload.first_call_prompt as string, /fixer_latest|Frankfurter/);
+  assert.equal(noSessionResult.payload.confirm_command, "npx @nordsym/apiclaw auth whoami");
+  assert.match(String(noSessionResult.payload.after_signin), /whoami/);
+  assert.doesNotMatch(String(noSessionResult.payload.after_signin), /picked up automatically/);
   assert.doesNotMatch(noSessionResult.payload.first_call_prompt as string, /elevenlabs|replicate/i);
 }
 assert.equal(requireVerifiedOwner(activeContext()).ok, true);

@@ -11,6 +11,7 @@ import {
   LOGIN_WAIT_TIMEOUT_MS,
   isFreshLoginSession,
   loginWaitReprintLines,
+  loopbackCallbackSuccessHtml,
   waitUntilSessionOrCallback,
 } from "./login-wait.js";
 
@@ -28,7 +29,15 @@ assert.match(reprint.join("\n"), /not success/i);
 assert.match(reprint.join("\n"), /https:\/\/apiclaw\.cloud\/auth\/cli\?authId=wait-test/);
 assert.match(reprint.join("\n"), /session_token/);
 assert.match(reprint.join("\n"), /npx @nordsym\/apiclaw auth whoami/);
+assert.match(reprint.join("\n"), /Authorize/);
+assert.match(reprint.join("\n"), /Not ready/);
 assert.doesNotMatch(reprint.join("\n"), /paste/i);
+
+const callbackHtml = loopbackCallbackSuccessHtml();
+assert.match(callbackHtml, /Sign-in received/);
+assert.match(callbackHtml, /Not ready yet/);
+assert.match(callbackHtml, /npx @nordsym\/apiclaw auth whoami/);
+assert.doesNotMatch(callbackHtml, /<h1>Authenticated<\/h1>/);
 
 assert.equal(isFreshLoginSession(null), false);
 assert.equal(isFreshLoginSession({ sessionToken: "" }), false);
@@ -122,6 +131,7 @@ if (!errorResult.ok) {
 }
 
 const auth = readFileSync("src/cli/commands/auth.ts", "utf8");
+assert.match(auth, /loopbackCallbackSuccessHtml/, "loopback must not claim Authenticated before session_token");
 assert.match(auth, /waitUntilSessionOrCallback/, "login must wait/poll, not return after printing the URL");
 assert.match(auth, /LOGIN_URL_REPRINT_MS|onReprint/, "login must reprint the Clerk URL");
 assert.match(auth, /isFreshLoginSession|hasWorkingWhoami/, "login must poll whoami / the session file");

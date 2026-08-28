@@ -52,13 +52,33 @@ for (const [name, source] of [
 ] as const) {
   assert.match(
     source,
-    /params\.get\("redirect_url"\)/,
-    `${name}/page.tsx must read the redirect_url query param`,
+    /params\?\.get\("redirect_url"\) \?\? params\?\.get\("next"\)/,
+    `${name}/page.tsx must read redirect_url or next before Clerk mounts`,
+  );
+  assert.match(
+    source,
+    /clerkForcedRedirectUrl\(requested\)/,
+    `${name}/page.tsx must resolve the continuation before Clerk mounts`,
+  );
+  assert.match(
+    source,
+    /clerkCompanionAuthUrl\("\/sign-(?:in|up)", requested\)/,
+    `${name}/page.tsx must forward the original continuation, not the clerk-bridge wrapper`,
+  );
+  assert.match(
+    source,
+    /forceRedirectUrl=\{redirectUrl\}/,
+    `${name}/page.tsx must force Clerk onto clerk-bridge (with next=continuation) on first paint`,
   );
   assert.match(
     source,
     /fallbackRedirectUrl=\{redirectUrl\}/,
     `${name}/page.tsx must pass redirect_url through to Clerk as fallbackRedirectUrl`,
+  );
+  assert.match(
+    source,
+    /clerkCompanionAuthUrl/,
+    `${name}/page.tsx must keep redirect_url when bouncing between sign-in and sign-up`,
   );
 }
 

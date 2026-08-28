@@ -53,8 +53,33 @@ assert.match(
 );
 assert.match(
   pageSource,
-  /Authorize this terminal\?/,
-  "page.tsx must ask the user to explicitly authorize",
+  /Clerk sign-in is not done/,
+  "page.tsx must say Clerk sign-in is not enough without Authorize",
+);
+assert.match(
+  pageSource,
+  /Authorize or the terminal stays unsigned/,
+  "page.tsx must tell the user the CLI is still waiting",
+);
+assert.match(
+  pageSource,
+  /npx @nordsym\/apiclaw auth whoami/,
+  "page.tsx must point at whoami after Authorize",
+);
+assert.doesNotMatch(
+  pageSource,
+  /One click and you are back/,
+  "page.tsx must not claim one-click success before Authorize",
+);
+assert.match(
+  pageSource,
+  /signInHref=\{signInHref\}/,
+  "unsigned CLI page must keep header Sign in on the authId continuation",
+);
+assert.match(
+  pageSource,
+  /signInHref=\{null\}/,
+  "signed-in CLI page must hide header Sign in so Authorize is the only next step",
 );
 
 // Identity used by the action must come from the server session, not the

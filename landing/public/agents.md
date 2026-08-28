@@ -43,6 +43,7 @@ Best for Claude Desktop, Cursor, Windsurf, OpenClaw, and local MCP-compatible ag
 ```bash
 npm install -g @nordsym/apiclaw@latest
 npx @nordsym/apiclaw auth login
+npx @nordsym/apiclaw auth whoami
 ```
 
 ### Remote MCP
@@ -117,7 +118,8 @@ status
 ## Auth rules
 
 - Signup is required for discovery and execution.
-- Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`.
+- Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`. Keep it in the foreground. After Clerk, click Authorize. Printing the URL is not ready.
+- Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not execute before that.
 - Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.
 - Local auth writes `session_token` to `~/.apiclaw.toml`. Execute sends that value as `X-APIClaw-Session`.

@@ -60,6 +60,8 @@ assert.match(skill, /[Ll]oop whoami/);
 assert.match(skill, /each miss/i);
 assert.match(skill, /Do not stop after one miss/);
 assert.match(skill, /Only after whoami prints an email, execute NASA APOD/);
+assert.match(skill, /click Authorize/);
+assert.match(skill, /Do not declare ready/);
 assert.match(skill, /Do not POST \/v1\/execute with an empty X-APIClaw-Session/);
 
 const whoamiGate = skill.indexOf("npx @nordsym/apiclaw auth whoami");
@@ -89,8 +91,9 @@ assert.doesNotMatch(
 assert.match(skill, /POST \/v1\/execute/, "execute is POST /v1/execute");
 assert.match(skill, /nasa/, "first research call is NASA APOD");
 assert.match(skill, /apod/, "first research call is NASA APOD");
-assert.match(skill, /frankfurter/i, "Frankfurter /latest is the fallback");
-assert.match(skill, /\/latest/, "Frankfurter fallback uses /latest");
+assert.match(skill, /brave_search/, "Brave search is the research fallback");
+assert.match(skill, /AI agent infrastructure news/, "Brave fallback uses a research query");
+assert.doesNotMatch(skill, /frankfurter/i, "SKILL.md must not lead first execute with FX");
 assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
 assert.match(skill, /1,?025/, "callable count is the live catalog card count");
 assert.match(skill, /26,?619/, "discoverable count is canon");
@@ -124,6 +127,10 @@ assert.match(llms, /https:\/\/apiclaw\.cloud\/SKILL\.md/, "llms.txt points at th
 assert.match(agents, /https:\/\/apiclaw\.cloud\/SKILL\.md/, "agents.md points at the skill door");
 assert.match(llms, /Agent front door/);
 assert.match(llms, /operational[\s\S]{0,16}(?:canon|door)/i);
+assert.match(llms, /click Authorize/);
+assert.match(llms, /auth whoami/);
+assert.match(llms, /Brave search/);
+assert.doesNotMatch(llms, /Frankfurter/);
 assert.match(llms, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
 assert.match(agents, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
 assert.match(httpAuth, /X-APIClaw-Session from session_token in ~\/\.apiclaw\.toml/);
