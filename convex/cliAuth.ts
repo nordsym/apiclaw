@@ -24,6 +24,7 @@ import { internal } from "./_generated/api";
 import { recordWorkspaceAuthenticated } from "./funnel";
 import { FREE_MANAGED_CALLS_LIFETIME } from "../src/product-truth";
 import { findUsableAgentSession } from "./sessionSecurity";
+import { scheduleCompleteFirstExecute } from "./activation";
 
 const AUTHID_LENGTH = 32;
 const CODE_LENGTH = 48;
@@ -565,13 +566,7 @@ export const _exchangeVerified = internalMutation({
 
     // Same one-shot first execute as the web Clerk bridge. Old CLI clients
     // that stop after writing session_token still get NASA/Frankfurter.
-    try {
-      await ctx.scheduler.runAfter(0, internal.activation.completeFirstExecute, {
-        workspaceId: workspace._id,
-      });
-    } catch {
-      // Never block authentication on first execute.
-    }
+    await scheduleCompleteFirstExecute(ctx, workspace._id);
 
     // Preserve the legacy auth event for historical reporting.
     // dedupeKey ensures one event per workspace per day even on retries.

@@ -4,7 +4,11 @@ import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { EXECUTE_SESSION_HEADER } from "./httpTrust";
-import { isBrowserSession, isSessionUsable } from "./sessionSecurity";
+import {
+  isBrowserSession,
+  isSessionUsable,
+  type SessionSecurityFields,
+} from "./sessionSecurity";
 
 const INTERNAL_EMAIL_DOMAINS = new Set(["nordsym.com", "apiclaw.cloud"]);
 const INTERNAL_EMAILS = new Set(["gustav@nordsym.com", "gustavnordsync@gmail.com"]);
@@ -236,6 +240,54 @@ export const claimFirstExecute = internalMutation({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, { workspaceId }) => claimFirstExecuteInTransaction(ctx, workspaceId),
 });
+
+/** Durable owner/CLI sessions may claim. Browser children never do. */
+export function shouldScheduleFirstExecute(
+  session: SessionSecurityFields | null,
+  now = Date.now(),
+): boolean {
+  return Boolean(session && !isBrowserSession(session) && isSessionUsable(session, now));
+}
+
+/**
+ * Same one-shot schedule as Clerk mint. Never throws — callers must not
+ * block authentication or execute if the scheduler write fails.
+ */
+export async function scheduleCompleteFirstExecute(
+  ctx: Pick<MutationCtx, "scheduler">,
+  workspaceId: Id<"workspaces">,
+): Promise<void> {
+  try {
+    await ctx.scheduler.runAfter(0, internal.activation.completeFirstExecute, {
+      workspaceId,
+    });
+  } catch {
+    // Never block the request on first execute.
+  }
+}
+
+/**
+ * Session-reuse door for workspaces that already have a durable session
+ * and no first_call yet. Skips browser children, inactive workspaces, and
+ * any workspace that already claimed or activated (no scheduler loop).
+ */
+export async function scheduleCompleteFirstExecuteForSession(
+  ctx: Pick<MutationCtx, "db" | "scheduler">,
+  session: SessionSecurityFields | null,
+  workspaceId: Id<"workspaces">,
+  now = Date.now(),
+): Promise<boolean> {
+  if (!shouldScheduleFirstExecute(session, now)) return false;
+  try {
+    const workspace = await ctx.db.get(workspaceId);
+    if (!workspace || workspace.status !== "active") return false;
+    if (workspace.firstExecuteAttemptedAt) return false;
+    await scheduleCompleteFirstExecute(ctx, workspaceId);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const completeFirstExecute = internalAction({
   args: { workspaceId: v.id("workspaces") },

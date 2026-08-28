@@ -18,6 +18,10 @@ import {
   isSessionUsable,
   shouldDeleteBrowserSession,
 } from "./sessionSecurity";
+import {
+  scheduleCompleteFirstExecute,
+  scheduleCompleteFirstExecuteForSession,
+} from "./activation";
 
 // Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
 // Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
@@ -549,8 +553,9 @@ export const mintBrowserSession = mutation({
   },
 });
 
-// Get session from token
-export const getSession = query({
+// Get session from token. Mutation so a durable reuse can schedule the
+// one-shot first execute; browser children still authenticate but never claim.
+export const getSession = mutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const session = await findUsableAgentSession(ctx.db, token);
@@ -561,6 +566,8 @@ export const getSession = query({
 
     const workspace = await ctx.db.get(session.workspaceId);
     if (!workspace) return null;
+
+    await scheduleCompleteFirstExecuteForSession(ctx, session, session.workspaceId);
 
     const usage = getWorkspaceUsageDisplay(workspace);
 
@@ -988,8 +995,9 @@ export const updateTier = mutation({
   },
 });
 
-// Verify session token (for HTTP API)
-export const verifySession = query({
+// Verify session token (for HTTP API). Accepts browser children so the
+// golden managed first call can run; only durable sessions schedule claim.
+export const verifySession = mutation({
   args: { sessionToken: v.string() },
   handler: async (ctx, { sessionToken }) => {
     const session = await findUsableAgentSession(ctx.db, sessionToken);
@@ -1002,6 +1010,8 @@ export const verifySession = query({
     if (!workspace || workspace.status !== "active") {
       return null;
     }
+
+    await scheduleCompleteFirstExecuteForSession(ctx, session, session.workspaceId);
 
     return {
       workspaceId: workspace._id,
@@ -1037,7 +1047,8 @@ export const getByEmail = internalQuery({
   },
 });
 
-// Touch session (update lastUsedAt)
+// Touch session (update lastUsedAt). Durable reuse — whoami / MCP startup —
+// also schedules the one-shot first execute when the workspace has none.
 export const touchSession = mutation({
   args: { sessionToken: v.string() },
   handler: async (ctx, { sessionToken }) => {
@@ -1045,6 +1056,7 @@ export const touchSession = mutation({
 
     if (isSessionUsable(session)) {
       await ctx.db.patch(session._id, { lastUsedAt: Date.now() });
+      await scheduleCompleteFirstExecuteForSession(ctx, session, session.workspaceId);
     }
   },
 });
@@ -1457,13 +1469,7 @@ export const getOrCreateForClerk = mutation({
     // Activation is a successful POST /v1/execute, not the Clerk session.
     // Schedule once; claimFirstExecute is idempotent per workspace so an
     // old npx that never calls completeFirstExecute still lands one 200.
-    try {
-      await ctx.scheduler.runAfter(0, internal.activation.completeFirstExecute, {
-        workspaceId: workspace._id,
-      });
-    } catch {
-      // Never block authentication on first execute.
-    }
+    await scheduleCompleteFirstExecute(ctx, workspace._id);
 
     return {
       success: true,

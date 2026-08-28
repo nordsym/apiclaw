@@ -459,6 +459,11 @@ export async function authWhoamiCommand(): Promise<boolean> {
     console.log('');
     return false;
   }
+  try {
+    await convexMutation('workspaces:touchSession', { sessionToken: cfg.sessionToken });
+  } catch {
+    // Never block whoami on first-execute scheduling.
+  }
   console.log('');
   console.log(`  ${chalk.bold('Email:')}       ${cfg.email}`);
   console.log(`  ${chalk.bold('Workspace:')}   ${cfg.workspaceId}`);

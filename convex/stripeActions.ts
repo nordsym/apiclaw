@@ -65,7 +65,7 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
       return jsonResponse({ error: "Only secure payment-method setup is supported" }, 400);
     }
 
-    const verified = await ctx.runQuery(api.workspaces.verifySession, { sessionToken: token });
+    const verified = await ctx.runMutation(api.workspaces.verifySession, { sessionToken: token });
     if (!verified?.workspaceId) return jsonResponse({ error: "Invalid session" }, 401);
     const workspaceId = verified.workspaceId;
 
@@ -134,7 +134,7 @@ export const createPortalSession = httpAction(async (ctx, request) => {
       return jsonResponse({ error: "session token required" }, 401);
     }
 
-    const verified = await ctx.runQuery(api.workspaces.verifySession, { sessionToken: token });
+    const verified = await ctx.runMutation(api.workspaces.verifySession, { sessionToken: token });
     if (!verified?.workspaceId) return jsonResponse({ error: "Invalid session" }, 401);
     const workspaceId = verified.workspaceId;
 

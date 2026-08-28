@@ -2583,6 +2583,14 @@ Docs: https://apiclaw.cloud
               }]
             };
           }
+
+          try {
+            await convex.mutation("workspaces:touchSession" as any, {
+              sessionToken: session.sessionToken,
+            });
+          } catch {
+            // Never block whoami on first-execute scheduling.
+          }
           
           // Update global context
           workspaceContext = {
