@@ -23,7 +23,7 @@ const isPublicMcpRoute = createRouteMatcher([
 
 async function legacySessionValid(token: string): Promise<boolean> {
   try {
-    const response = await fetch(`${CONVEX_URL}/api/query`, {
+    const response = await fetch(`${CONVEX_URL}/api/mutation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

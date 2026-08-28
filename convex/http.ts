@@ -1289,7 +1289,7 @@ async function resolveWorkspaceFromRequest(
 
   if (credential.method === "session") {
     try {
-      const session = await ctx.runQuery(api.workspaces.verifySession, {
+      const session = await ctx.runMutation(api.workspaces.verifySession, {
         sessionToken: credential.sessionToken,
       });
       if (session?.workspaceId) {

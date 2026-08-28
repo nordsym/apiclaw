@@ -14,6 +14,9 @@ import {
   isFirstExecuteSuccess,
   postFirstExecuteRails,
   recordFirstCallApiSuccessInTransaction,
+  scheduleCompleteFirstExecute,
+  scheduleCompleteFirstExecuteForSession,
+  shouldScheduleFirstExecute,
 } from "./activation";
 import {
   FIRST_EXECUTE_FRANKFURTER as CLI_FRANKFURTER,
@@ -258,6 +261,86 @@ assert.deepEqual(
 );
 assert.equal(noSession.workspace.firstExecuteAttemptedAt, undefined);
 
+const ownerSession = { sessionKind: "owner" as const, sessionToken: "owner-session-token-value" };
+const browserChild = {
+  sessionKind: "browser" as const,
+  parentSessionId: "owner-id",
+  expiresAt: Date.now() + 60_000,
+  sessionToken: "browser-child",
+};
+assert.equal(shouldScheduleFirstExecute(ownerSession), true);
+assert.equal(shouldScheduleFirstExecute(browserChild), false, "browser children must not schedule first execute");
+assert.equal(shouldScheduleFirstExecute(null), false);
+
+function scheduleCtx(options: { workspace?: Row; throwOnSchedule?: boolean } = {}) {
+  const scheduled: Array<{ workspaceId: string }> = [];
+  const workspace = options.workspace ?? {
+    _id: "ws1",
+    email: "user@example.com",
+    status: "active",
+    updatedAt: 1,
+  };
+  const ctx = {
+    db: {
+      async get() {
+        return workspace;
+      },
+    },
+    scheduler: {
+      async runAfter(_ms: number, _ref: unknown, args: { workspaceId: string }) {
+        if (options.throwOnSchedule) throw new Error("scheduler unavailable");
+        scheduled.push(args);
+      },
+    },
+  };
+  return { ctx: ctx as any, workspace, scheduled };
+}
+
+const reuse = scheduleCtx();
+assert.equal(
+  await scheduleCompleteFirstExecuteForSession(reuse.ctx, ownerSession, "ws1" as any),
+  true,
+);
+assert.deepEqual(reuse.scheduled, [{ workspaceId: "ws1" }]);
+
+const browserReuse = scheduleCtx();
+assert.equal(
+  await scheduleCompleteFirstExecuteForSession(browserReuse.ctx, browserChild, "ws1" as any),
+  false,
+);
+assert.equal(browserReuse.scheduled.length, 0, "browser session reuse must not schedule");
+
+const alreadyAttemptedReuse = scheduleCtx({
+  workspace: { _id: "ws1", status: "active", updatedAt: 1, firstExecuteAttemptedAt: 4000 },
+});
+assert.equal(
+  await scheduleCompleteFirstExecuteForSession(alreadyAttemptedReuse.ctx, ownerSession, "ws1" as any),
+  false,
+);
+assert.equal(alreadyAttemptedReuse.scheduled.length, 0, "already_attempted must not loop");
+
+const alreadyActivatedReuse = scheduleCtx({
+  workspace: { _id: "ws1", status: "active", updatedAt: 1, firstExecuteAttemptedAt: 4000 },
+});
+assert.equal(
+  await scheduleCompleteFirstExecuteForSession(alreadyActivatedReuse.ctx, ownerSession, "ws1" as any),
+  false,
+);
+assert.equal(alreadyActivatedReuse.scheduled.length, 0, "already_activated must not loop");
+
+const inactiveReuse = scheduleCtx({
+  workspace: { _id: "ws1", status: "unclaimed", updatedAt: 1 },
+});
+assert.equal(
+  await scheduleCompleteFirstExecuteForSession(inactiveReuse.ctx, ownerSession, "ws1" as any),
+  false,
+);
+assert.equal(inactiveReuse.scheduled.length, 0);
+
+const scheduleFailure = scheduleCtx({ throwOnSchedule: true });
+await scheduleCompleteFirstExecute(scheduleFailure.ctx, "ws1" as any);
+assert.equal(scheduleFailure.scheduled.length, 0, "scheduler failure must not throw");
+
 const posts: Array<{ url: string; init?: RequestInit }> = [];
 const nasaOk = await postFirstExecuteRails({
   sessionToken: "owner-session-token-value",
@@ -327,8 +410,28 @@ assert.doesNotMatch(activationSource, /\/v1\/call|CoinGecko|apiclaw call/);
 const clerkWeb = source("./workspaces.ts");
 assert.match(
   clerkWeb,
-  /export const getOrCreateForClerk = mutation\([\s\S]*internal\.activation\.completeFirstExecute[\s\S]*workspaceId: workspace\._id/,
+  /export const getOrCreateForClerk = mutation\([\s\S]*scheduleCompleteFirstExecute\(ctx, workspace\._id\)/,
   "web Clerk session mint must schedule the one-shot first execute",
+);
+assert.match(
+  clerkWeb,
+  /export const verifySession = mutation\([\s\S]*scheduleCompleteFirstExecuteForSession\(ctx, session, session\.workspaceId\)/,
+  "HTTP execute session reuse must schedule the one-shot first execute",
+);
+assert.match(
+  clerkWeb,
+  /export const getSession = mutation\([\s\S]*scheduleCompleteFirstExecuteForSession\(ctx, session, session\.workspaceId\)/,
+  "workspace session read must schedule the one-shot first execute",
+);
+assert.match(
+  clerkWeb,
+  /export const touchSession = mutation\([\s\S]*audience: "durable"[\s\S]*scheduleCompleteFirstExecuteForSession\(ctx, session, session\.workspaceId\)/,
+  "whoami / lastUsed durable reuse must schedule the one-shot first execute",
+);
+assert.match(
+  clerkWeb,
+  /export const getWorkspaceStatus = query\([\s\S]*audience: "durable"/,
+  "legacy MCP whoami stays a query; touchSession is the schedule door",
 );
 const mintBrowser = clerkWeb.slice(
   clerkWeb.indexOf("export const mintBrowserSession"),
@@ -336,17 +439,57 @@ const mintBrowser = clerkWeb.slice(
 );
 assert.doesNotMatch(
   mintBrowser,
-  /completeFirstExecute/,
+  /completeFirstExecute|scheduleCompleteFirstExecute/,
   "browser child mint is not a Clerk session door and must not loop first execute",
 );
 
 const cliAuth = source("./cliAuth.ts");
 assert.match(
   cliAuth,
-  /export const _exchangeVerified = internalMutation\([\s\S]*internal\.activation\.completeFirstExecute[\s\S]*workspaceId: workspace\._id/,
+  /export const _exchangeVerified = internalMutation\([\s\S]*scheduleCompleteFirstExecute\(ctx, workspace\._id\)/,
   "CLI Clerk exchange must schedule the one-shot first execute",
 );
 assert.match(cliAuth, /event: "cli_browser_callback_success"/);
+
+const httpAuth = source("./http.ts");
+assert.match(
+  httpAuth,
+  /credential\.method === "session"[\s\S]*runMutation\(api\.workspaces\.verifySession/,
+  "HTTP execute must accept an existing session through the scheduling mutation",
+);
+assert.doesNotMatch(
+  httpAuth.slice(httpAuth.indexOf("credential.method === \"session\"")),
+  /runQuery\(api\.workspaces\.verifySession/,
+);
+
+const middleware = source("../landing/middleware.ts");
+assert.match(
+  middleware,
+  /\/api\/mutation[\s\S]*workspaces:getSession/,
+  "workspace session read must hit the scheduling mutation",
+);
+
+const cliWhoami = source("../src/cli/commands/auth.ts");
+assert.match(
+  cliWhoami,
+  /export async function authWhoamiCommand[\s\S]*workspaces:touchSession/,
+  "CLI whoami reuses the durable session lastUsed door",
+);
+const whoamiFn = cliWhoami.slice(cliWhoami.indexOf("export async function authWhoamiCommand"));
+assert.doesNotMatch(
+  whoamiFn.slice(0, whoamiFn.indexOf("export async function authFirstCallCommand") === -1
+    ? whoamiFn.length
+    : whoamiFn.indexOf("export async function authLogoutCommand")),
+  /console\.(log|error|info|debug).*sessionToken/,
+  "whoami must not log the session token",
+);
+
+const mcpWhoami = source("../src/index.ts");
+assert.match(
+  mcpWhoami,
+  /case 'check_workspace_status':[\s\S]*workspaces:touchSession/,
+  "MCP whoami reuses the durable session lastUsed door",
+);
 
 const clerkCallback = source("../landing/src/app/auth/clerk-callback/page.tsx");
 assert.match(clerkCallback, /redirect\("\/workspace"\)/);
@@ -354,3 +497,4 @@ assert.doesNotMatch(clerkCallback, /\/v1\/execute|completeFirstExecute/);
 
 console.log("convex activation: first successful gateway call is classified and deduped");
 console.log("convex activation: Clerk session mint runs NASA then Frankfurter once per workspace");
+console.log("convex activation: session reuse schedules first execute; browser sessions do not");
