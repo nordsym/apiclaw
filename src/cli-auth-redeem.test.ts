@@ -26,6 +26,35 @@ assert.equal(pendingLoginStillOpen({ ...pending, codeVerifier: "" }), false);
 assert.equal(pendingLoginStillOpen(pending, pending.expiresAt), false);
 assert.equal(pendingLoginStillOpen(pending, pending.startedAt + 1_000), true);
 
+const nullPending = await redeemPendingLogin({
+  pending: null,
+  poll: async () => {
+    throw new Error("must not poll when pending is null");
+  },
+  exchange: async () => {
+    throw new Error("must not exchange when pending is null");
+  },
+  write: () => {
+    throw new Error("must not write when pending is null");
+  },
+  clearPending: () => {
+    throw new Error("must not clear when pending is null");
+  },
+});
+assert.equal(nullPending, null);
+
+const redeemSource = readFileSync("src/cli-auth-redeem.ts", "utf8");
+assert.match(
+  redeemSource,
+  /pending is PendingLogin/,
+  "pendingLoginStillOpen must be a type predicate so tsc narrows pending before authId",
+);
+assert.match(
+  redeemSource,
+  /if \(!pending \|\| !pendingLoginStillOpen\(pending/,
+  "redeemPendingLogin must null-guard pending before use",
+);
+
 assert.equal(
   claimedCodeFromPoll(pending, { status: "pending" }),
   null,
