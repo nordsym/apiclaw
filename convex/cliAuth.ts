@@ -8,16 +8,17 @@
  *   2. claim (mutation)    — /auth/cli page server-action (Clerk-gated) POSTs
  *                           {authId, clerkUserId, email}. Server validates,
  *                           generates one-time `code`, returns {code, port, state}.
- *                           Page 302s to http://localhost:<port>/callback.
- *   3. exchange (action)   — CLI loopback receives code, POSTs {code, codeVerifier}.
- *                           Action verifies sha256(codeVerifier) === challenge,
- *                           then calls internal mutation to mint session + key.
+ *                           Page lands on /auth/cli/done and best-effort pings
+ *                           localhost; CLI/whoami also poll() for the code.
+ *   3. exchange (action)   — CLI receives code via loopback or poll, POSTs
+ *                           {code, codeVerifier}. Action verifies
+ *                           sha256(codeVerifier) === challenge, then mints session.
  *
  * PKCE: base64url(sha256(verifier)). Web Crypto used (Convex actions support it).
  */
 
 import { v } from "convex/values";
-import { mutation, action, internalMutation } from "./_generated/server";
+import { mutation, action, internalMutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
@@ -104,6 +105,48 @@ export const start = mutation({
       browserUrl: `${appUrl}/auth/cli?authId=${authId}`,
       expiresAt: now + EXPIRES_MS,
     };
+  },
+});
+
+/**
+ * CLI / whoami polls this after Authorize. Returns the one-time code only when
+ * the caller presents the PKCE challenge from the machine that started login.
+ * The browser URL alone is not enough — that keeps a leaked authId from
+ * redeeming someone else's terminal.
+ */
+export const poll = query({
+  args: {
+    authId: v.string(),
+    challenge: v.string(),
+  },
+  returns: v.object({
+    status: v.union(
+      v.literal("pending"),
+      v.literal("claimed"),
+      v.literal("exchanged"),
+      v.literal("expired"),
+      v.literal("not_found"),
+    ),
+    code: v.optional(v.string()),
+    state: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    if (!args.authId || args.authId.length < 16 || !args.challenge || args.challenge.length < 32) {
+      return { status: "not_found" as const };
+    }
+    const row = await ctx.db
+      .query("cliAuthCodes")
+      .withIndex("by_authId", (q) => q.eq("authId", args.authId))
+      .first();
+    if (!row || row.challenge !== args.challenge) {
+      return { status: "not_found" as const };
+    }
+    if (row.expiresAt < Date.now()) return { status: "expired" as const };
+    if (row.status === "claimed" && row.code && row.state) {
+      return { status: "claimed" as const, code: row.code, state: row.state };
+    }
+    if (row.status === "exchanged") return { status: "exchanged" as const };
+    return { status: "pending" as const };
   },
 });
 

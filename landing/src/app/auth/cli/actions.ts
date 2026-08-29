@@ -86,8 +86,14 @@ export async function authorizeCli(formData: FormData): Promise<void> {
     redirect(`/auth/cli?authId=${encodeURIComponent(authId)}&error=${encodeURIComponent(result.error ?? "unknown")}`);
   }
 
-  // Hand off to the CLI's loopback listener.
-  // The CLI server returns its own "you may close this tab" page.
-  const callback = `http://127.0.0.1:${result.port}/callback?code=${encodeURIComponent(result.code)}&state=${encodeURIComponent(result.state)}`;
-  redirect(callback);
+  // Land on a success page. Best-effort ping localhost for a live CLI on
+  // the same machine. New CLIs / whoami poll Convex for the claimed code,
+  // so a connection-refused loopback is no longer a dead end.
+  const done = new URLSearchParams({
+    authId,
+    port: String(result.port),
+    code: result.code,
+    state: result.state,
+  });
+  redirect(`/auth/cli/done?${done.toString()}`);
 }

@@ -51,6 +51,23 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.next();
   }
 
+  // Persist the CLI authId so a Clerk drop of ?next= still returns to
+  // /auth/cli?authId=… (Authorize), not /workspace.
+  if (pathname === "/auth/cli") {
+    const authId = request.nextUrl.searchParams.get("authId");
+    const response = NextResponse.next();
+    if (authId && /^[A-Za-z0-9]{16,64}$/.test(authId)) {
+      response.cookies.set("apiclaw_cli_auth", authId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 5 * 60,
+        path: "/",
+      });
+    }
+    return response;
+  }
+
   if (!isProtectedDashboard(request)) {
     return NextResponse.next();
   }

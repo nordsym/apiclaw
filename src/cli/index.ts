@@ -18,7 +18,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.9.3';
+const VERSION = '2.9.4';
 
 const program = new Command();
 
@@ -141,7 +141,7 @@ authCmd
 
 authCmd
   .command('whoami')
-  .description('Show the currently authenticated workspace. Required before call / first execute. Prints the pending Clerk login URL if sign-in is incomplete')
+  .description('Show the currently authenticated workspace. Redeems Authorize if login was killed. Required before call / first execute')
   .action(async () => {
     const ok = await authWhoamiCommand();
     if (!ok) process.exit(1);

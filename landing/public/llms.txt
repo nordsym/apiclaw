@@ -57,7 +57,8 @@ canon: Clerk login via `npx @nordsym/apiclaw auth login` (keep it in
 the foreground; after Clerk the human must click Authorize), confirm
 with `npx @nordsym/apiclaw auth whoami` until it prints an email, then
 `POST /v1/execute` (NASA APOD, Brave search fallback). Printing the
-login URL is not ready. Do not invent a second setup path. This file
+login URL is not ready. Connection refused on localhost is OK — whoami
+redeems Authorize. Do not invent a second setup path. This file
 is identity and product truth.
 
 ## Access paths
@@ -74,8 +75,9 @@ npx @nordsym/apiclaw auth whoami
 
 The auth flow opens the browser. Clerk sign-in is not enough — the
 human must click Authorize. Then the CLI writes `session_token` to
-`~/.apiclaw.toml`. Confirm with whoami before any execute. The next
-`POST /v1/execute` reads that same value as `X-APIClaw-Session`.
+`~/.apiclaw.toml`. Confirm with whoami before any execute. whoami
+redeems Authorize even if `auth login` exited or localhost failed.
+The next `POST /v1/execute` reads that same value as `X-APIClaw-Session`.
 Agents do not need users to paste tokens. Do not declare ready until
 whoami prints an email.
 

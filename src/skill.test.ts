@@ -61,6 +61,8 @@ assert.match(skill, /each miss/i);
 assert.match(skill, /Do not stop after one miss/);
 assert.match(skill, /Only after whoami prints an email, execute NASA APOD/);
 assert.match(skill, /click Authorize/);
+assert.match(skill, /connection refused/i);
+assert.match(skill, /redeems/);
 assert.match(skill, /Do not declare ready/);
 assert.match(skill, /Do not POST \/v1\/execute with an empty X-APIClaw-Session/);
 
@@ -129,6 +131,7 @@ assert.match(llms, /Agent front door/);
 assert.match(llms, /operational[\s\S]{0,16}(?:canon|door)/i);
 assert.match(llms, /click Authorize/);
 assert.match(llms, /auth whoami/);
+assert.match(llms, /redeems Authorize/);
 assert.match(llms, /Brave search/);
 assert.doesNotMatch(llms, /Frankfurter/);
 assert.match(llms, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);

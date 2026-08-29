@@ -43,6 +43,11 @@ assert.match(
   /cliAuth:claim/,
   "actions.ts must be the one talking to Convex cliAuth:claim",
 );
+assert.match(
+  actionsSource,
+  /\/auth\/cli\/done/,
+  "Authorize must land on the done page, not only raw localhost",
+);
 
 // The confirmation view must require an explicit form submission (POST) to
 // authorize, not render-time redirect logic.
