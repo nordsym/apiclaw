@@ -52,7 +52,10 @@ export function pkceChallengeFromVerifier(verifier: string): string {
   return digest.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-export function pendingLoginStillOpen(pending: PendingLogin | null | undefined, now = Date.now()): boolean {
+export function pendingLoginStillOpen(
+  pending: PendingLogin | null | undefined,
+  now = Date.now(),
+): pending is PendingLogin {
   if (!pending) return false;
   if (!pending.authId || !pending.codeVerifier || !pending.state) return false;
   if (!pending.browserUrl.startsWith("https://")) return false;
@@ -100,7 +103,7 @@ export async function redeemPendingLogin(options: {
   now?: number;
 }): Promise<AuthConfig | null> {
   const pending = options.pending;
-  if (!pendingLoginStillOpen(pending, options.now)) return null;
+  if (!pending || !pendingLoginStillOpen(pending, options.now)) return null;
   const poll = await options.poll(pending.authId, pkceChallengeFromVerifier(pending.codeVerifier));
   const claimed = claimedCodeFromPoll(pending, poll);
   if (!claimed) return null;
