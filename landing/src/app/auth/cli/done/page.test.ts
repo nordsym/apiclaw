@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { loopbackCallbackUrl } from "./LocalhostHandoff";
+import { loopbackCallbackUrl } from "./loopback";
 
 assert.equal(
   loopbackCallbackUrl("41789", "one-time-code", "csrf-state"),
@@ -27,6 +27,8 @@ assert.doesNotMatch(
 
 const handoff = readFileSync(new URL("./LocalhostHandoff.tsx", import.meta.url), "utf8");
 assert.match(handoff, /mode: "no-cors"/);
-assert.match(handoff, /127\.0\.0\.1/);
+assert.match(handoff, /loopbackCallbackUrl/);
+const loopback = readFileSync(new URL("./loopback.ts", import.meta.url), "utf8");
+assert.match(loopback, /127\.0\.0\.1/);
 
 console.log("auth/cli/done: Authorize stays on apiclaw.cloud; localhost is a background ping");

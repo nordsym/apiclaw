@@ -119,7 +119,7 @@ assert.match(auth, /cliAuth:poll/, "login must not depend on localhost alone");
 assert.match(auth, /writePendingLogin\(/, "login must persist verifier so whoami can finish");
 assert.match(
   auth,
-  /authWhoamiCommand[\s\S]*redeemPendingLogin/,
+  /export async function authWhoamiCommand[\s\S]*redeemPendingIfClaimed/,
   "whoami must finish Authorize after auth login is killed",
 );
 

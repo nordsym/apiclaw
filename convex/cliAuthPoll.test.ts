@@ -13,8 +13,12 @@ assert.match(
   /code: row\.code/,
   "poll returns the one-time code only after Authorize claimed the authId",
 );
+const pollSource = source.slice(
+  source.indexOf("export const poll = query"),
+  source.indexOf("export const claim = mutation"),
+);
 assert.doesNotMatch(
-  source.slice(source.indexOf("export const poll = query")),
+  pollSource,
   /internalSecret/,
   "poll is the CLI redeem surface; it must not take the server bridge secret",
 );
