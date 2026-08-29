@@ -6,9 +6,10 @@
  *   2. Start ephemeral HTTP listener on an OS-assigned port.
  *   3. POST cliAuth:start to Convex → get {authId, browserUrl}.
  *   4. Open browserUrl in default browser (open / xdg-open / start).
- *   5. Stay in front of the human: poll whoami / the session file, reprint
- *      the login URL every few seconds, and wait for /callback on loopback
- *      (max 5 min). Printing the URL is not success.
+ *   5. Stay in front of the human: poll whoami / the session file / cliAuth:poll,
+ *      reprint the login URL every few seconds, and wait for /callback on
+ *      loopback (max 5 min). Printing the URL is not success. Localhost is
+ *      optional — whoami redeems a claimed authId from pending-login.
  *   6. Validate state, POST cliAuth:exchange with {code, codeVerifier} → session+key.
  *   7. Write ~/.apiclaw.toml, verify, then POST /v1/execute (provider nasa
  *      action apod, Frankfurter /latest fallback). Print a one-line result, not Done.
@@ -24,8 +25,19 @@ import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, typ
 import { getMachineFingerprint } from '../../session.js';
 import { completeFirstExecute, type FirstExecuteResult } from '../../first-call.js';
 import { firstRunExecuteFailedMessage, hasWorkingWhoami, unsignedExecuteMessage } from '../../first-run.js';
-import { clearPendingLoginUrl, writePendingLoginUrl } from '../../execute-auth.js';
 import {
+  clearPendingLoginUrl,
+  readPendingLogin,
+  writePendingLogin,
+} from '../../execute-auth.js';
+import {
+  CLI_AUTH_POLL_PATH,
+  pkceChallengeFromVerifier,
+  redeemPendingLogin,
+  type CliAuthPollResult,
+} from '../../cli-auth-redeem.js';
+import {
+  LOGIN_SESSION_POLL_MS,
   LOGIN_URL_REPRINT_MS,
   LOGIN_WAIT_TIMEOUT_MS,
   isFreshLoginSession,
@@ -191,6 +203,56 @@ async function emitFailure(reason: string, fingerprint?: string): Promise<void> 
   }
 }
 
+async function convexQuery<T = unknown>(path: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${CONVEX_URL}/api/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, args }),
+  });
+  if (!res.ok) throw new Error(`convex query ${path} ${res.status}`);
+  const data = await res.json() as { status?: string; value?: T; errorMessage?: string };
+  if (data.status === 'error') throw new Error(data.errorMessage || `convex query ${path} error`);
+  return (data.value ?? data) as T;
+}
+
+async function pollCliAuthClaim(authId: string, challenge: string): Promise<CliAuthPollResult | null> {
+  try {
+    return await convexQuery<CliAuthPollResult>(CLI_AUTH_POLL_PATH, { authId, challenge });
+  } catch {
+    return null;
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForClaimedCode(
+  authId: string,
+  challenge: string,
+  expectedState: string,
+  shouldStop: () => boolean,
+): Promise<{ code: string; state: string }> {
+  while (!shouldStop()) {
+    const polled = await pollCliAuthClaim(authId, challenge);
+    if (polled?.status === 'claimed' && polled.code && polled.state === expectedState) {
+      return { code: polled.code, state: polled.state };
+    }
+    await sleep(LOGIN_SESSION_POLL_MS);
+  }
+  return new Promise(() => {});
+}
+
+async function redeemPendingIfClaimed(): Promise<AuthConfig | null> {
+  return redeemPendingLogin({
+    pending: readPendingLogin(),
+    poll: pollCliAuthClaim,
+    exchange: (args) => convexAction<ExchangeResult>('cliAuth:exchange', args),
+    write: writeAuthConfig,
+    clearPending: clearPendingLoginUrl,
+  });
+}
+
 async function convexAction<T = unknown>(path: string, args: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${CONVEX_URL}/api/action`, {
     method: 'POST',
@@ -269,7 +331,15 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
     return null;
   }
 
-  writePendingLoginUrl(startResult.browserUrl);
+  writePendingLogin({
+    browserUrl: startResult.browserUrl,
+    authId: startResult.authId,
+    codeVerifier: verifier,
+    state,
+    fingerprint,
+    startedAt: Date.now(),
+    expiresAt: startResult.expiresAt,
+  });
 
   // Open browser (or print URL if --no-open / spawn fails)
   if (!options.noOpen) {
@@ -283,13 +353,17 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log(chalk.dim('  Printing the URL is not success. Waiting for Clerk to write session_token.\n'));
 
   const previousToken = options.force ? existing?.sessionToken : undefined;
+  let stopClaimPoll = false;
   const wait = await waitUntilSessionOrCallback({
     loginUrl: startResult.browserUrl,
     timeoutMs: LOOPBACK_TIMEOUT_MS,
     reprintMs: LOGIN_URL_REPRINT_MS,
     reprintImmediately: false,
     hasSession: () => hasWorkingWhoami() && isFreshLoginSession(readAuthConfig(), previousToken),
-    callback: loop.result,
+    callback: Promise.race([
+      loop.result,
+      waitForClaimedCode(startResult.authId, challenge, state, () => stopClaimPoll),
+    ]),
     onReprint: (lines) => {
       console.log('');
       for (const line of lines) {
@@ -298,6 +372,7 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
       console.log('');
     },
   });
+  stopClaimPoll = true;
 
   if (!wait.ok) {
     loop.server.close();
@@ -443,7 +518,10 @@ export async function authLogoutCommand(): Promise<void> {
 }
 
 export async function authWhoamiCommand(): Promise<boolean> {
-  const cfg = readAuthConfig();
+  let cfg = readAuthConfig();
+  if (!cfg) {
+    cfg = await redeemPendingIfClaimed();
+  }
   if (!cfg) {
     console.log(unsignedExecuteMessage());
     console.log('');

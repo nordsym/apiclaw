@@ -54,11 +54,14 @@ the CLI write `session_token` to `~/.apiclaw.toml`. Printing the URL
 is not success. Do not declare ready. Do not execute.
 
 Keep `auth login` in the foreground until it exits 0. The command
-reprints that URL every few seconds and polls `~/.apiclaw.toml` /
-`~/.apiclaw/session` until Clerk writes `session_token`. Show the
-human the login URL on every reprint. Tell them to click Authorize
-after Clerk. Do not background the command. Do not continue until
-whoami prints an email.
+reprints that URL every few seconds and polls Convex / `~/.apiclaw.toml`
+until Clerk writes `session_token`. Show the human the login URL on
+every reprint. Tell them to click Authorize after Clerk. Do not
+background the command. Do not continue until whoami prints an email.
+
+If the browser says connection refused after Authorize, that is OK.
+Stay on apiclaw.cloud. Loop whoami — it redeems the Authorize click
+even if `auth login` was killed or localhost never answered.
 
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and go to whoami.
@@ -99,6 +102,8 @@ Loop whoami. Each miss:
 - Show the human the login URL from `auth login` (whoami reprints
   the pending URL if login already started).
 - Keep `auth login` running if it is still waiting.
+- If they already clicked Authorize, run whoami again. It redeems
+  the claim and writes `session_token` without localhost.
 - Run whoami again. Do not stop after one miss.
 - Do not run `npx @nordsym/apiclaw call`.
 - Do not curl `POST /v1/execute`.

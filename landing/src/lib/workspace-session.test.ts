@@ -40,6 +40,25 @@ for (const unsafe of [
   assert.equal(safeAuthContinuation(unsafe), "/workspace");
 }
 
+const clerkBridge = readFileSync(
+  fileURLToPath(new URL("../app/api/workspace-auth/clerk-bridge/route.ts", import.meta.url)),
+  "utf8",
+);
+assert.match(clerkBridge, /explicitAuthContinuation/);
+assert.match(clerkBridge, /apiclaw_cli_auth/);
+assert.match(
+  clerkBridge,
+  /\/auth\/cli\?authId=/,
+  "clerk-bridge must return a dropped CLI continuation to Authorize, not only /workspace",
+);
+
+const middleware = readFileSync(
+  fileURLToPath(new URL("../../middleware.ts", import.meta.url)),
+  "utf8",
+);
+assert.match(middleware, /apiclaw_cli_auth/);
+assert.match(middleware, /pathname === "\/auth\/cli"/);
+
 const routePath = fileURLToPath(new URL("../app/api/workspace-auth/session/route.ts", import.meta.url));
 const route = readFileSync(routePath, "utf8");
 assert.match(route, /path: "workspaces:mintBrowserSession"/);

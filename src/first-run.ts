@@ -74,6 +74,7 @@ export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string 
     url ? `  Open this login URL: ${url}` : `  ${AUTH_LOGIN_COMMAND}`,
     ...(url ? [`  Or run: ${AUTH_LOGIN_COMMAND}`] : []),
     "Keep login in the foreground. After Clerk, click Authorize on apiclaw.cloud.",
+    "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
     "Then confirm with:",
     `  ${AUTH_WHOAMI_COMMAND}`,
     "Do not declare ready. Do not POST /v1/execute until whoami prints an email.",
@@ -96,7 +97,7 @@ export function agentAuthRequiredPayload(
     what_happens:
       "Opens the browser. User signs in with Clerk, then must click Authorize. Login reprints the URL until session_token exists. Clerk sign-in alone does not write the session.",
     after_signin:
-      "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
+      "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. whoami redeems Authorize even if auth login was killed or localhost failed. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
     fallback_for_headless:
       `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
     first_call_prompt: FIRST_CALL_PROMPT,
@@ -111,6 +112,7 @@ export function firstRunIncompleteMessage(): string {
     `  ${AUTH_LOGIN_COMMAND}`,
     ...(pending ? [`  Open this login URL and finish Clerk, then click Authorize:\n  ${pending}`] : []),
     "After Clerk, click Authorize on apiclaw.cloud or the terminal stays unsigned.",
+    "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
     "Headless or SSH? Open the browser URL on another device, then confirm:",
     `  ${AUTH_WHOAMI_COMMAND}`,
     "Do not POST /v1/execute until whoami prints an email. Do not send an empty X-APIClaw-Session.",

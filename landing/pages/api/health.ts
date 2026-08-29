@@ -15,7 +15,7 @@ export default async function handler(
   return res.status(200).json({
     status: 'ok',
     service: 'apiclaw-gateway',
-    version: '2.9.3',
+    version: '2.9.4',
     timestamp: new Date().toISOString(),
   });
 }

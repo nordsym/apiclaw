@@ -94,6 +94,7 @@ const unsigned = unsignedExecuteMessage();
 assert.match(unsigned, /Not ready/);
 assert.match(unsigned, /Authorize/);
 assert.match(unsigned, /npx @nordsym\/apiclaw auth whoami/);
+assert.match(unsigned, /whoami — it redeems Authorize|whoami redeems/);
 assert.match(unsigned, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(unsigned, /empty X-APIClaw-Session/);
 assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL/);

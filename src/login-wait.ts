@@ -18,6 +18,7 @@ export function loginWaitReprintLines(loginUrl: string): string[] {
     `  ${loginUrl}`,
     "  After Clerk, click Authorize on apiclaw.cloud or the terminal stays unsigned.",
     "  Keep this command running until session_token exists.",
+    "  Connection refused on localhost is OK. whoami redeems Authorize.",
     "  Then confirm with: npx @nordsym/apiclaw auth whoami",
     "  Do not execute until whoami prints an email.",
   ];
@@ -37,6 +38,7 @@ export function loopbackCallbackSuccessHtml(): string {
         <h1>Sign-in received</h1>
         <p>Not ready yet. Return to the terminal and wait until it prints your email.</p>
         <p>Then confirm with <code>npx @nordsym/apiclaw auth whoami</code>.</p>
+        <p>Connection refused on localhost is OK. whoami redeems Authorize.</p>
         <p>Do not execute until whoami prints an email.</p>
       </div></body></html>`;
 }

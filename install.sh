@@ -187,8 +187,10 @@ async function execute(token, provider, action, params) {
 NODE
 }
 
+# whoami redeems a claimed Authorize even if auth login timed out or
+# localhost never answered. Always run it before trusting the session file.
+npx -y @nordsym/apiclaw@latest auth whoami || true
 if apiclaw_whoami_ok; then
-    npx -y @nordsym/apiclaw@latest auth whoami || true
     echo ""
     FIRST_LINE=""
     if FIRST_LINE=$(apiclaw_first_execute); then

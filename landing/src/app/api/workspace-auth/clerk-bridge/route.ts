@@ -7,7 +7,8 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { safeAuthContinuation } from "@/lib/auth-continuation";
+import { explicitAuthContinuation } from "@/lib/auth-continuation";
+import { AUTHID_FORMAT } from "@/app/auth/cli/shared";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -63,12 +64,19 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
 
   // Keep the bearer in an HttpOnly cookie. Never place it in a URL, browser
   // history, referrer, analytics payload, or persistent JavaScript storage.
-  const continuation = safeAuthContinuation(
-    req.nextUrl.searchParams.get("next") || req.nextUrl.searchParams.get("redirect_url"),
-  );
+  const requested =
+    req.nextUrl.searchParams.get("next") || req.nextUrl.searchParams.get("redirect_url");
+  const explicit = explicitAuthContinuation(requested);
+  const pendingCli = req.cookies.get("apiclaw_cli_auth")?.value;
+  const continuation =
+    explicit ??
+    (pendingCli && AUTHID_FORMAT.test(pendingCli)
+      ? `/auth/cli?authId=${pendingCli}`
+      : "/workspace");
   const res = NextResponse.redirect(new URL(continuation, req.url));
   res.headers.set("Cache-Control", "no-store, private");
   res.headers.set("Referrer-Policy", "no-referrer");
+  if (pendingCli) res.cookies.delete("apiclaw_cli_auth");
   res.cookies.set("apiclaw_workspace_session", result.sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

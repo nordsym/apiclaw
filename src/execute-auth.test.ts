@@ -22,9 +22,11 @@ const {
   executeSessionHeaders,
   readExecuteSessionHeaders,
   readExecuteSessionToken,
+  readPendingLogin,
   readPendingLoginUrl,
   requireExecuteSession,
   resolveExecuteAuthHeaders,
+  writePendingLogin,
   writePendingLoginUrl,
 } = await import("./execute-auth.js");
 
@@ -50,6 +52,17 @@ assert.throws(
 
 writePendingLoginUrl("https://apiclaw.cloud/auth/cli?authId=pending-test");
 assert.equal(readPendingLoginUrl(), "https://apiclaw.cloud/auth/cli?authId=pending-test");
+assert.equal(readPendingLogin(), null, "URL-only pending cannot redeem without the PKCE verifier");
+writePendingLogin({
+  browserUrl: "https://apiclaw.cloud/auth/cli?authId=pending-test",
+  authId: "pending-test-authid12",
+  codeVerifier: "verifier-on-this-machine",
+  state: "csrf-state",
+  startedAt: Date.now(),
+  expiresAt: Date.now() + 60_000,
+});
+assert.equal(readPendingLogin()?.authId, "pending-test-authid12");
+assert.equal(readPendingLogin()?.codeVerifier, "verifier-on-this-machine");
 const unsigned = requireExecuteSession();
 assert.equal(unsigned.ok, false);
 if (!unsigned.ok) {

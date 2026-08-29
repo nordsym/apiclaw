@@ -234,8 +234,10 @@ function Invoke-ApiclawFirstExecute {
     return $null
 }
 
+# whoami redeems a claimed Authorize even if auth login timed out or
+# localhost never answered. Always run it before trusting the session file.
+& npx -y @nordsym/apiclaw@latest auth whoami
 if (Test-ApiclawWhoami) {
-    & npx -y @nordsym/apiclaw@latest auth whoami
     Write-Host ""
     $firstLine = Invoke-ApiclawFirstExecute
     if ($firstLine) {

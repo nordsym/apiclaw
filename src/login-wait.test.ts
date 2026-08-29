@@ -31,6 +31,7 @@ assert.match(reprint.join("\n"), /session_token/);
 assert.match(reprint.join("\n"), /npx @nordsym\/apiclaw auth whoami/);
 assert.match(reprint.join("\n"), /Authorize/);
 assert.match(reprint.join("\n"), /Not ready/);
+assert.match(reprint.join("\n"), /whoami redeems|connection refused/i);
 assert.doesNotMatch(reprint.join("\n"), /paste/i);
 
 const callbackHtml = loopbackCallbackSuccessHtml();
