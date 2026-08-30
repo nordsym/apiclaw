@@ -54,8 +54,9 @@ APIClaw provides unified API access for AI agents across five access paths: SKIL
 
 Give an agent `https://apiclaw.cloud/SKILL.md`. That file is the operational
 canon: Clerk login via `npx @nordsym/apiclaw auth login` (keep it in
-the foreground; after Clerk the human must click Authorize), confirm
-with `npx @nordsym/apiclaw auth whoami` until it prints an email, then
+the foreground; completing Clerk on the login URL Authorizes; if
+already signed in, click Authorize), confirm with
+`npx @nordsym/apiclaw auth whoami` until it prints an email, then
 `POST /v1/execute` (NASA APOD, Brave search fallback). Printing the
 login URL is not ready. Connection refused on localhost is OK — whoami
 redeems Authorize. Do not invent a second setup path. This file
@@ -73,8 +74,9 @@ npx @nordsym/apiclaw auth login
 npx @nordsym/apiclaw auth whoami
 ```
 
-The auth flow opens the browser. Clerk sign-in is not enough — the
-human must click Authorize. Then the CLI writes `session_token` to
+The auth flow opens the browser. Completing Clerk on the CLI login
+URL Authorizes the terminal. If you are already signed in, click
+Authorize. Then the CLI writes `session_token` to
 `~/.apiclaw.toml`. Confirm with whoami before any execute. whoami
 redeems Authorize even if `auth login` exited or localhost failed.
 The next `POST /v1/execute` reads that same value as `X-APIClaw-Session`.

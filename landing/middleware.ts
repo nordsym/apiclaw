@@ -52,18 +52,26 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // Persist the CLI authId so a Clerk drop of ?next= still returns to
-  // /auth/cli?authId=… (Authorize), not /workspace.
+  // /auth/cli?authId=… (Authorize), not /workspace. The clerk-intent
+  // cookie is only set when this visit is unsigned — completing Clerk
+  // then is the Authorize consent. Already-signed-in visitors must
+  // still click Authorize (login CSRF).
   if (pathname === "/auth/cli") {
     const authId = request.nextUrl.searchParams.get("authId");
     const response = NextResponse.next();
     if (authId && /^[A-Za-z0-9]{16,64}$/.test(authId)) {
-      response.cookies.set("apiclaw_cli_auth", authId, {
+      const cookie = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "lax" as const,
         maxAge: 5 * 60,
         path: "/",
-      });
+      };
+      response.cookies.set("apiclaw_cli_auth", authId, cookie);
+      const { userId } = await auth();
+      if (!userId) {
+        response.cookies.set("apiclaw_cli_clerk_intent", authId, cookie);
+      }
     }
     return response;
   }

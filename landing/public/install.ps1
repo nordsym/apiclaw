@@ -166,10 +166,12 @@ function Test-ApiclawCanLaunchAuth {
 Write-Host ""
 Write-Host "Next step: sign in so a managed call can succeed." -ForegroundColor Cyan
 Write-Host "  $AuthLoginCmd"
-Write-Host ""
+Write-Host "Finish Clerk on the login URL — that Authorizes the terminal." -ForegroundColor DarkGray
+Write-Host "If you are already signed in, click Authorize. Then:" -ForegroundColor DarkGray
+Write-Host "  $AuthWhoamiCmd"
 
 if (Test-ApiclawCanLaunchAuth) {
-    Write-Host "Opening browser sign-in..." -ForegroundColor DarkGray
+    Write-Host "Opening browser sign-in. Keep this in the foreground until whoami prints an email." -ForegroundColor DarkGray
     try {
         & npx -y @nordsym/apiclaw@latest auth login
     } catch {

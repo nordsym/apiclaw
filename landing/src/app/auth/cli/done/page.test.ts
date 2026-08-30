@@ -18,7 +18,7 @@ assert.match(page, /Do not declare ready/);
 assert.match(page, /LocalhostHandoff/);
 
 const actions = readFileSync(new URL("../actions.ts", import.meta.url), "utf8");
-assert.match(actions, /\/auth\/cli\/done\?/);
+assert.match(actions, /cliAuthDonePath\(/);
 assert.doesNotMatch(
   actions,
   /redirect\(callback\)/,

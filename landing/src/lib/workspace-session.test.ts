@@ -51,12 +51,20 @@ assert.match(
   /\/auth\/cli\?authId=/,
   "clerk-bridge must return a dropped CLI continuation to Authorize, not only /workspace",
 );
+assert.match(
+  clerkBridge,
+  /shouldCollapseClerkConsent/,
+  "fresh Clerk from /auth/cli must claim Authorize instead of a second screen",
+);
+assert.match(clerkBridge, /cliAuthDonePath/);
+assert.match(clerkBridge, /CLI_CLERK_INTENT_COOKIE/);
 
 const middleware = readFileSync(
   fileURLToPath(new URL("../../middleware.ts", import.meta.url)),
   "utf8",
 );
 assert.match(middleware, /apiclaw_cli_auth/);
+assert.match(middleware, /apiclaw_cli_clerk_intent/);
 assert.match(middleware, /pathname === "\/auth\/cli"/);
 
 const routePath = fileURLToPath(new URL("../app/api/workspace-auth/session/route.ts", import.meta.url));

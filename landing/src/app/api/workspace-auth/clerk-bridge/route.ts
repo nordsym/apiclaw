@@ -9,6 +9,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { explicitAuthContinuation } from "@/lib/auth-continuation";
 import { AUTHID_FORMAT } from "@/app/auth/cli/shared";
+import {
+  CLI_CLERK_INTENT_COOKIE,
+  claimCliAuthId,
+  cliAuthClaimErrorPath,
+  cliAuthDonePath,
+  cliAuthIdFromPath,
+  shouldCollapseClerkConsent,
+} from "@/app/auth/cli/claim";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL ||
@@ -73,10 +81,32 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
     (pendingCli && AUTHID_FORMAT.test(pendingCli)
       ? `/auth/cli?authId=${pendingCli}`
       : "/workspace");
-  const res = NextResponse.redirect(new URL(continuation, req.url));
+
+  // Fresh Clerk that started on unsigned /auth/cli is the Authorize
+  // consent. Collapse it here so the human does not get a second screen.
+  // Missing intent (already signed in, or /sign-in?redirect= CSRF) still
+  // lands on /auth/cli and requires the Authorize button.
+  const authId = cliAuthIdFromPath(continuation);
+  const intent = req.cookies.get(CLI_CLERK_INTENT_COOKIE)?.value;
+  let destination = continuation;
+  if (shouldCollapseClerkConsent(authId, intent) && authId) {
+    const claimed = await claimCliAuthId(authId, userId, email);
+    destination =
+      claimed.success && claimed.code && claimed.port && claimed.state
+        ? cliAuthDonePath({
+            authId,
+            port: claimed.port,
+            code: claimed.code,
+            state: claimed.state,
+          })
+        : cliAuthClaimErrorPath(authId, claimed.error);
+  }
+
+  const res = NextResponse.redirect(new URL(destination, req.url));
   res.headers.set("Cache-Control", "no-store, private");
   res.headers.set("Referrer-Policy", "no-referrer");
   if (pendingCli) res.cookies.delete("apiclaw_cli_auth");
+  res.cookies.delete(CLI_CLERK_INTENT_COOKIE);
   res.cookies.set("apiclaw_workspace_session", result.sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
