@@ -145,7 +145,7 @@ assert.equal(skipped, null);
 const auth = readFileSync("src/cli/commands/auth.ts", "utf8");
 assert.match(auth, /redeemPendingLogin/, "whoami / login must redeem a claimed authId");
 assert.match(auth, /cliAuth:poll/, "login must not depend on localhost alone");
-assert.match(auth, /writePendingLogin\(/, "login must persist verifier so whoami can finish");
+assert.match(auth, /ensurePendingLogin/, "login must persist verifier so whoami can finish");
 assert.match(
   auth,
   /export async function authWhoamiCommand[\s\S]*redeemPendingIfClaimed/,

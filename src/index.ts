@@ -41,7 +41,9 @@ import {
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
-import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { ensurePendingLogin } from './pending-login-start.js';
+import { hasWorkingWhoami } from './first-run.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -521,13 +523,19 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
  * Single enforcement entry point for every paying call path.
  * Returns either a verified workspace context or an MCP-formatted block response.
  */
-function enforceOwner(channel: string):
-  | { ok: true; ctx: WorkspaceContextLike }
-  | { ok: false; response: { content: { type: 'text'; text: string }[]; isError: true } } {
+async function enforceOwner(channel: string):
+  Promise<
+    | { ok: true; ctx: WorkspaceContextLike }
+    | { ok: false; response: { content: { type: 'text'; text: string }[]; isError: true } }
+  > {
   const result = requireVerifiedOwner(workspaceContext as WorkspaceContextLike | null);
   if (result.ok) {
     return { ok: true, ctx: result.ctx };
   }
+  const payload =
+    result.reason === "no_session"
+      ? await agentAuthRequiredPayloadAfterMint(result.payload)
+      : result.payload;
   // Diagnostic: record why the call was blocked.
   try {
     emitFunnelEvent({
@@ -544,7 +552,7 @@ function enforceOwner(channel: string):
   return {
     ok: false,
     response: {
-      content: [{ type: 'text', text: JSON.stringify(result.payload, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
       isError: true,
     },
   };
@@ -829,7 +837,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace. If not authenticated, the response returns action="agent_auth_required". Run npx @nordsym/apiclaw auth login in the foreground, show the human the URL, click Authorize after Clerk, then loop npx @nordsym/apiclaw auth whoami until it prints an email. Do not retry this tool and do not declare ready before whoami.
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace. If not authenticated, the response returns action="agent_auth_required" with a live login_url (https://apiclaw.cloud/auth/cli?authId=…). Show the human that URL. Finish Google or email on it — that Authorizes (one action). If already signed in, click Authorize. Then loop npx @nordsym/apiclaw auth whoami until it prints an email. Do not only print npx @nordsym/apiclaw auth login. Do not retry this tool and do not declare ready before whoami.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -1192,18 +1200,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
       case 'apiclaw_help': {
         const isAuthenticated = !!workspaceContext;
+        if (!isAuthenticated) {
+          const payload = await agentAuthRequiredPayloadAfterMint({ tool: "apiclaw_help" });
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({
+                ...payload,
+                next: "Show the human login_url. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Loop whoami until it prints an email. Then NASA APOD.",
+              }, null, 2),
+            }],
+          };
+        }
         const helpText = `
 🦞 APIClaw -- The API Layer for AI Agents
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${!isAuthenticated ? `
-NOT READY (no session):
-  1. Run in the foreground: npx @nordsym/apiclaw auth login
-  2. Show the human the login URL. After Clerk, click Authorize on apiclaw.cloud.
-  3. Loop: npx @nordsym/apiclaw auth whoami
-  Do not declare ready. Do not call_api until whoami prints an email.
-` : `
 STATUS: Authenticated as ${workspaceContext!.email} (${workspaceContext!.tier} tier)
-`}
 DISCOVER APIs (signup required, free):
   discover_apis({ query: "send SMS to Sweden" })
   discover_apis({ query: "text to speech", category: "ai" })
@@ -1223,7 +1235,7 @@ Docs: https://apiclaw.cloud
       }
 
       case 'discover_apis': {
-        const _discoverGate = enforceOwner("mcp:discover_apis");
+        const _discoverGate = await enforceOwner("mcp:discover_apis");
         if (!_discoverGate.ok) return _discoverGate.response;
 
         const query = args?.query as string;
@@ -1522,10 +1534,9 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
-                status: 'auth_required',
-                message: 'Run `npx @nordsym/apiclaw auth login`, then call check_balance again.',
-              }),
+              text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
+                tool: "check_balance",
+              }), null, 2),
             }],
           };
         }
@@ -1603,7 +1614,7 @@ Docs: https://apiclaw.cloud
         // ============================================
         // REGISTRATION GATE: requireVerifiedOwner (single source of truth)
         // ============================================
-        const gate = enforceOwner("mcp:call_api");
+        const gate = await enforceOwner("mcp:call_api");
         if (!gate.ok) return gate.response;
 
         const provider = args?.provider as string;
@@ -1963,16 +1974,11 @@ Docs: https://apiclaw.cloud
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  status: 'auth_required',
+                text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
                   message: ar.message,
-                  action_required:
-                    'Run `npx @nordsym/apiclaw auth login` in the foreground, show the human the URL, click Authorize after Clerk, then loop `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not retry execute before whoami.',
-                  command: 'npx @nordsym/apiclaw auth login',
-                  signup_url: ar.signupUrl,
                   provider,
                   action,
-                }, null, 2),
+                }), null, 2),
               },
             ],
             isError: true,
@@ -2046,7 +2052,7 @@ Docs: https://apiclaw.cloud
 
       case 'capability': {
         // Registration gate: requireVerifiedOwner (single source of truth)
-        const capGate = enforceOwner("mcp:capability");
+        const capGate = await enforceOwner("mcp:capability");
         if (!capGate.ok) return capGate.response;
 
         const capabilityId = args?.capability as string;
@@ -2207,13 +2213,10 @@ Docs: https://apiclaw.cloud
         if (legacyAuthRetired()) return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
-              status: 'agent_auth_required',
-              action: 'legacy_auth_retired',
-              message: 'Email-only registration has been retired because it did not provide a safe ownership proof.',
-              command: 'npx @nordsym/apiclaw auth login',
-              next_step: 'Run the command in the foreground, click Authorize after Clerk, then loop auth whoami until it prints an email. Do not retry execute before whoami.',
-            }, null, 2),
+            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
+              action: "legacy_auth_retired",
+              message: "Email-only registration has been retired because it did not provide a safe ownership proof.",
+            }), null, 2),
           }],
           isError: true,
         };
@@ -2385,12 +2388,10 @@ Docs: https://apiclaw.cloud
         if (legacyAuthRetired()) return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
-              status: 'agent_auth_required',
-              action: 'legacy_auth_retired',
-              message: 'Legacy email codes are no longer accepted.',
-              command: 'npx @nordsym/apiclaw auth login',
-            }, null, 2),
+            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
+              action: "legacy_auth_retired",
+              message: "Legacy email codes are no longer accepted.",
+            }), null, 2),
           }],
           isError: true,
         };
@@ -2542,10 +2543,9 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
-                status: 'not_authenticated',
-                message: 'No active session. Use register_owner to authenticate.',
-              }, null, 2)
+              text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
+                tool: "check_workspace_status",
+              }), null, 2)
             }]
           };
         }
@@ -2627,11 +2627,9 @@ Docs: https://apiclaw.cloud
         if (legacyAuthRetired()) return {
           content: [{
             type: 'text',
-            text: JSON.stringify({
-              status: 'agent_auth_required',
-              action: 'legacy_auth_retired',
-              command: 'npx @nordsym/apiclaw auth login',
-            }, null, 2),
+            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
+              action: "legacy_auth_retired",
+            }), null, 2),
           }],
           isError: true,
         };
@@ -2951,7 +2949,7 @@ Docs: https://apiclaw.cloud
         }
         
         // Registration gate: requireVerifiedOwner (single source of truth)
-        const resumeGate = enforceOwner("mcp:resume_chain");
+        const resumeGate = await enforceOwner("mcp:resume_chain");
         if (!resumeGate.ok) return resumeGate.response;
 
         try {
@@ -3069,6 +3067,16 @@ Docs: https://apiclaw.cloud
 // Start server
 async function main() {
   const transport = new StdioServerTransport();
+  // Mint before connect so the first tool result already has a live authId URL.
+  let firstRunLoginUrl: string | null = null;
+  if (!hasWorkingWhoami()) {
+    try {
+      const pending = await ensurePendingLogin({ openBrowser: false });
+      firstRunLoginUrl = pending?.browserUrl ?? null;
+    } catch {
+      /* tool calls will retry mint */
+    }
+  }
   await server.connect(transport);
   trackStartup();
 
@@ -3125,9 +3133,12 @@ async function main() {
 ${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not ready. No session. Do not call_api. Do not declare ready.'}
 
 ${!hasValidSession ? `Next steps (in order):
-  1. npx @nordsym/apiclaw auth login
-     Keep it in the foreground. Show the human the URL on every reprint.
-     After Clerk, click Authorize on apiclaw.cloud.
+  1. ${firstRunLoginUrl
+    ? `Open this login URL: ${firstRunLoginUrl}`
+    : "First unsigned tool returns login_url (https://apiclaw.cloud/auth/cli?authId=…). Show that."}
+     Finish Google or email on that URL — that Authorizes (one action).
+     If already signed in, click Authorize.
+     Do not only print npx @nordsym/apiclaw auth login.
   2. npx @nordsym/apiclaw auth whoami
      Loop until it prints an email. Only then continue.
   3. call_api({ provider: "nasa", action: "apod", params: {} })

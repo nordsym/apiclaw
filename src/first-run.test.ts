@@ -103,7 +103,9 @@ assert.doesNotMatch(unsigned, /paste/i);
 const skill = readFileSync("landing/public/SKILL.md", "utf8");
 assert.match(skill, /[Ll]oop whoami/);
 assert.match(skill, /each miss/i);
-assert.match(skill, /Show the human the login URL/);
+assert.match(skill, /Show the human the login URL|Show the human the live `login_url`/);
+assert.match(skill, /auth\/cli\?authId=/);
+assert.match(skill, /Do not only print/);
 assert.match(skill, /NASA APOD/);
 assert.match(skill, /Brave search/);
 assert.doesNotMatch(skill, /Frankfurter/);
@@ -127,6 +129,8 @@ if (!noSession.ok) {
   assert.equal(noSession.payload.command, AUTH_LOGIN_COMMAND);
   assert.equal(noSession.payload.first_call_prompt, FIRST_CALL_PROMPT);
   assert.equal(noSession.payload.signup_url, undefined);
+  assert.ok("login_url" in noSession.payload, "payload must expose login_url as the primary agent-visible field");
+  assert.match(String(noSession.payload.what_happens), /without a TTY|auth\/cli\?authId=/);
   assert.doesNotMatch(
     JSON.stringify(noSession.payload),
     /apiclaw\.cloud\/sign-in/,
@@ -145,12 +149,28 @@ assert.equal(
 const skipped = await completeFirstRunAuth({
   skipLaunch: true,
   whoami: () => false,
+  ensurePending: async () => {
+    throw new Error("ensurePending must not run when skipLaunch is set");
+  },
   launch: async () => {
     throw new Error("launch must not run when skipLaunch is set");
   },
 });
 assert.equal(skipped.complete, false);
 assert.equal(skipped.launched, false);
+
+const noTtyMint = await completeFirstRunAuth({
+  whoami: () => false,
+  canLaunch: () => false,
+  ensurePending: async () => ({
+    browserUrl: "https://apiclaw.cloud/auth/cli?authId=headlessmintheadlessmint12",
+  }),
+  launch: async () => {
+    throw new Error("launch must not run when there is no TTY");
+  },
+});
+assert.equal(noTtyMint.complete, false);
+assert.equal(noTtyMint.launched, false);
 
 const already = await completeFirstRunAuth({
   whoami: () => true,

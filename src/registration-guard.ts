@@ -8,7 +8,11 @@
 
 import { agentAuthRequiredPayload } from "./first-run.js";
 
-export { FIRST_CALL_PROMPT, agentAuthRequiredPayload } from "./first-run.js";
+export {
+  FIRST_CALL_PROMPT,
+  agentAuthRequiredPayload,
+  agentAuthRequiredPayloadAfterMint,
+} from "./first-run.js";
 
 export interface WorkspaceContextLike {
   sessionToken: string;

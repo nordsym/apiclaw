@@ -12,6 +12,7 @@ import {
   completeFirstExecute,
   type FirstExecuteResult,
 } from "./first-call.js";
+import { ensurePendingLogin, type StartedPendingLogin } from "./pending-login-start.js";
 
 export { AUTH_FIRST_CALL_COMMAND } from "./first-call.js";
 
@@ -73,7 +74,8 @@ export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string 
     "Not ready. whoami has no session. Do not execute.",
     url ? `  Open this login URL: ${url}` : `  ${AUTH_LOGIN_COMMAND}`,
     ...(url ? [`  Or run: ${AUTH_LOGIN_COMMAND}`] : []),
-    "Keep login in the foreground. After Clerk, click Authorize on apiclaw.cloud.",
+    "Finish Google or email on that URL — that Authorizes (one action).",
+    "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
     "Then confirm with:",
     `  ${AUTH_WHOAMI_COMMAND}`,
@@ -86,32 +88,57 @@ export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string 
 export function agentAuthRequiredPayload(
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
+  const extraUrl = typeof extra.login_url === "string" ? extra.login_url : undefined;
+  const url = extraUrl || readPendingLoginUrl();
+  const { login_url: _ignoredLoginUrl, ...rest } = extra;
   return {
     status: "auth_required",
     action: "agent_auth_required",
     error: "Not ready. whoami has no session. Do not execute.",
-    instruction:
-      "Show the human the login URL. Keep auth login in the foreground. After Clerk, they must click Authorize on apiclaw.cloud. Printing the URL is not success. Do not declare ready. Do not retry execute.",
     command: AUTH_LOGIN_COMMAND,
     confirm_command: AUTH_WHOAMI_COMMAND,
-    what_happens:
-      "Opens the browser. User signs in with Clerk, then must click Authorize. Login reprints the URL until session_token exists. Clerk sign-in alone does not write the session.",
     after_signin:
       "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. whoami redeems Authorize even if auth login was killed or localhost failed. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
-    fallback_for_headless:
-      `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
     first_call_prompt: FIRST_CALL_PROMPT,
-    ...extra,
+    ...rest,
+    login_url: url ?? null,
+    instruction: url
+      ? `Show the human this login URL: ${url}. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute.`
+      : "Show the human the login URL from login_url. Do not only print `npx @nordsym/apiclaw auth login`. Printing a command without /auth/cli?authId= is not enough.",
+    what_happens:
+      "A live /auth/cli?authId= URL is minted even without a TTY. A new Clerk finishes Authorize in that one action. Already signed in: click Authorize. Loop whoami until it prints an email. Clerk alone does not write session_token.",
+    fallback_for_headless: url
+      ? `Open ${url} on another device. Then ${AUTH_WHOAMI_COMMAND}.`
+      : `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
   };
 }
 
-export function firstRunIncompleteMessage(): string {
-  const pending = readPendingLoginUrl();
+/** Mint or reuse pending login, then build the host-visible auth payload. */
+export async function agentAuthRequiredPayloadAfterMint(
+  extra: Record<string, unknown> = {},
+  options: {
+    openBrowser?: boolean;
+    ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
+  } = {},
+): Promise<Record<string, unknown>> {
+  const pending = await (options.ensurePending ?? (() => ensurePendingLogin({
+    openBrowser: options.openBrowser ?? false,
+  })))();
+  return agentAuthRequiredPayload({
+    ...extra,
+    login_url: pending?.browserUrl ?? readPendingLoginUrl(),
+  });
+}
+
+export function firstRunIncompleteMessage(pendingLoginUrl?: string | null): string {
+  const pending = pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl();
   return [
     "Not done. Sign-in is required before any managed call. Do not declare ready.",
-    `  ${AUTH_LOGIN_COMMAND}`,
-    ...(pending ? [`  Open this login URL and finish Clerk, then click Authorize:\n  ${pending}`] : []),
-    "After Clerk, click Authorize on apiclaw.cloud or the terminal stays unsigned.",
+    ...(pending
+      ? [`  Open this login URL: ${pending}`, `  Or run: ${AUTH_LOGIN_COMMAND}`]
+      : [`  ${AUTH_LOGIN_COMMAND}`]),
+    "Finish Google or email on that URL — that Authorizes (one action).",
+    "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
     "Headless or SSH? Open the browser URL on another device, then confirm:",
     `  ${AUTH_WHOAMI_COMMAND}`,
@@ -134,9 +161,9 @@ export function firstRunExecuteFailedMessage(): string {
   ].join("\n");
 }
 
-export function printFirstRunIncomplete(): void {
+export function printFirstRunIncomplete(pendingLoginUrl?: string | null): void {
   console.log("");
-  console.log(firstRunIncompleteMessage());
+  console.log(firstRunIncompleteMessage(pendingLoginUrl));
   console.log("");
 }
 
@@ -163,6 +190,13 @@ export interface CompleteFirstRunAuthOptions {
   whoami?: () => boolean;
   /** Injected for tests. Defaults to NASA APOD then the first-execute fallback. */
   firstExecute?: () => Promise<FirstExecuteResult>;
+  /**
+   * Mint or reuse pending login. Defaults to ensurePendingLogin.
+   * Must run even when there is no TTY — opening the browser is optional.
+   */
+  ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
+  /** Injected for tests. Defaults to canLaunchInteractiveAuth(). */
+  canLaunch?: () => boolean;
 }
 
 export interface CompleteFirstRunAuthResult {
@@ -188,22 +222,33 @@ async function finishFirstRun(
 }
 
 /**
- * After MCP/config install: launch login when a TTY/browser is available,
- * then refuse to claim Done until whoami works and the first execute returns 200.
+ * After MCP/config install: mint a pending /auth/cli?authId= URL even
+ * without a TTY, optionally wait on interactive login, then refuse Done
+ * until whoami works and the first execute returns 200.
  */
 export async function completeFirstRunAuth(
   options: CompleteFirstRunAuthOptions = {},
 ): Promise<CompleteFirstRunAuthResult> {
   const whoami = options.whoami ?? hasWorkingWhoami;
   const firstExecute = options.firstExecute ?? (() => completeFirstExecute());
+  const canLaunch = options.canLaunch ?? canLaunchInteractiveAuth;
   if (whoami()) {
     return finishFirstRun(readAuthConfig()?.email, false, firstExecute);
   }
 
+  let pendingUrl: string | null = null;
+  if (!options.skipLaunch) {
+    const minted = await (options.ensurePending ?? (() => ensurePendingLogin()))();
+    pendingUrl = minted?.browserUrl ?? readPendingLoginUrl();
+  }
+
   let launched = false;
-  if (!options.skipLaunch && canLaunchInteractiveAuth() && options.launch) {
+  if (!options.skipLaunch && canLaunch() && options.launch) {
     console.log("");
     console.log("Next step: sign in so a managed call can succeed.");
+    if (pendingUrl) {
+      console.log(`  Open this login URL: ${pendingUrl}`);
+    }
     console.log(`  ${AUTH_LOGIN_COMMAND}`);
     console.log("");
     launched = true;
@@ -213,6 +258,6 @@ export async function completeFirstRunAuth(
     }
   }
 
-  printFirstRunIncomplete();
+  printFirstRunIncomplete(pendingUrl);
   return { complete: false, launched };
 }
