@@ -101,9 +101,9 @@ https://apiclaw.cloud/.well-known/oauth-protected-resource
 ## Authentication
 
 - Signup is required for discovery and execution.
-- Browser-loopback auth is canonical.
+- Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`. Completing Clerk on the login URL Authorizes. If already signed in, click Authorize. Confirm with `npx @nordsym/apiclaw auth whoami` — it redeems Authorize without localhost.
 - A headless user can complete ownership verification from another device using the displayed sign-in URL.
-- On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `session_token` to `~/.apiclaw.toml`. The next `POST /v1/execute` sends that value as `X-APIClaw-Session`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment (HTTP/CI door, not first execute).
+- On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `session_token` to `~/.apiclaw.toml` only after Authorize. The next `POST /v1/execute` sends that value as `X-APIClaw-Session`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment (HTTP/CI door, not first execute).
 - Workspace keys use the `sk-claw-...` bearer format.
 - Provider credentials remain server-side.
 

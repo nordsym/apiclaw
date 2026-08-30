@@ -18,16 +18,14 @@ const actionsSource = readFileSync(
   "utf8",
 );
 
-// The page (server component, runs on every GET) must not call claimAuthId
-// itself — that logic now lives only in actions.ts.
+// The page (server component, runs on every GET) must not claim.
+// Existing sessions POST authorizeCli. Fresh Clerk claims in clerk-bridge.
 assert.doesNotMatch(
   pageSource,
-  /claimAuthId\(/,
-  "page.tsx must not call claimAuthId on render; the claim belongs to the server action",
+  /claimCliAuthId\(|claimAuthId\(/,
+  "page.tsx must not claim on render; the claim belongs to the server action or clerk-bridge",
 );
 
-// actions.ts must be a server action module and must be the one calling
-// claimAuthId.
 assert.match(
   actionsSource,
   /^"use server";/m,
@@ -35,17 +33,12 @@ assert.match(
 );
 assert.match(
   actionsSource,
-  /claimAuthId\(/,
-  "actions.ts must call claimAuthId",
+  /claimCliAuthId\(/,
+  "actions.ts must call claimCliAuthId",
 );
 assert.match(
   actionsSource,
-  /cliAuth:claim/,
-  "actions.ts must be the one talking to Convex cliAuth:claim",
-);
-assert.match(
-  actionsSource,
-  /\/auth\/cli\/done/,
+  /cliAuthDonePath\(/,
   "Authorize must land on the done page, not only raw localhost",
 );
 
@@ -58,13 +51,23 @@ assert.match(
 );
 assert.match(
   pageSource,
-  /Clerk sign-in is not done/,
-  "page.tsx must say Clerk sign-in is not enough without Authorize",
+  /Authorize this terminal/,
+  "page.tsx must make Authorize the one labeled action",
 );
 assert.match(
   pageSource,
-  /Authorize or the terminal stays unsigned/,
-  "page.tsx must tell the user the CLI is still waiting",
+  /Authorize with Google or email/,
+  "unsigned CLI page must treat Clerk as the Authorize consent",
+);
+assert.match(
+  pageSource,
+  /does not ask for a second click/,
+  "unsigned copy must not promise a second Authorize screen after Clerk",
+);
+assert.match(
+  pageSource,
+  /Click Authorize to bind this CLI or the terminal stays unsigned/,
+  "already-signed-in page must still require the Authorize button",
 );
 assert.match(
   pageSource,

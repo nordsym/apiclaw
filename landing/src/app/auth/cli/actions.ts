@@ -1,56 +1,16 @@
 "use server";
 
 /**
- * Server action behind the "Authorize" button on /auth/cli. This is the only
- * place cliAuth:claim is ever called — it never runs on a bare GET, so a
- * signed-in browser navigated here by a hostile page cannot bind a CLI
- * session without the user explicitly submitting this form.
+ * Server action behind the "Authorize" button on /auth/cli. This is the
+ * existing-session consent path — claim never runs on a bare GET. Fresh
+ * Clerk from an unsigned /auth/cli visit is claimed in clerk-bridge
+ * instead (one human action: complete Google/email).
  */
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { AUTHID_FORMAT } from "./shared";
-
-const CONVEX_URL =
-  process.env.NEXT_PUBLIC_CONVEX_URL ||
-  "https://adventurous-avocet-799.convex.cloud";
-
-type ClaimResult = {
-  success: boolean;
-  error?: string;
-  code?: string;
-  port?: number;
-  state?: string;
-};
-
-async function claimAuthId(
-  authId: string,
-  clerkUserId: string,
-  email: string
-): Promise<ClaimResult> {
-  try {
-    const internalSecret = process.env.APICLAW_INTERNAL_SECRET;
-    if (!internalSecret) return { success: false, error: "server_not_configured" };
-    const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        path: "cliAuth:claim",
-        args: { authId, clerkUserId, email, internalSecret },
-      }),
-      // Convex needs no caching; this is a one-shot mutation
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      return { success: false, error: `convex_http_${res.status}` };
-    }
-    const data = await res.json();
-    const raw = (data?.value ?? data) as ClaimResult;
-    return raw;
-  } catch {
-    return { success: false, error: "convex_unreachable" };
-  }
-}
+import { claimCliAuthId, cliAuthClaimErrorPath, cliAuthDonePath } from "./claim";
 
 export async function authorizeCli(formData: FormData): Promise<void> {
   const rawAuthId = formData.get("authId");
@@ -80,20 +40,19 @@ export async function authorizeCli(formData: FormData): Promise<void> {
     redirect(`/auth/cli?authId=${encodeURIComponent(authId)}&error=no_email`);
   }
 
-  const result = await claimAuthId(authId, userId, email);
+  const result = await claimCliAuthId(authId, userId, email);
 
   if (!result.success || !result.code || !result.port || !result.state) {
-    redirect(`/auth/cli?authId=${encodeURIComponent(authId)}&error=${encodeURIComponent(result.error ?? "unknown")}`);
+    redirect(cliAuthClaimErrorPath(authId, result.error));
   }
 
   // Land on a success page. Best-effort ping localhost for a live CLI on
   // the same machine. New CLIs / whoami poll Convex for the claimed code,
   // so a connection-refused loopback is no longer a dead end.
-  const done = new URLSearchParams({
+  redirect(cliAuthDonePath({
     authId,
-    port: String(result.port),
+    port: result.port,
     code: result.code,
     state: result.state,
-  });
-  redirect(`/auth/cli/done?${done.toString()}`);
+  }));
 }

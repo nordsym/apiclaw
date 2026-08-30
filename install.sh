@@ -104,10 +104,13 @@ apiclaw_can_launch_auth() {
 echo ""
 echo -e "${CYAN}Next step: sign in so a managed call can succeed.${NC}"
 echo -e "  ${BOLD}${AUTH_LOGIN_CMD}${NC}"
+echo -e "${DIM}Finish Clerk on the login URL — that Authorizes the terminal.${NC}"
+echo -e "${DIM}If you are already signed in, click Authorize. Then:${NC}"
+echo -e "  ${AUTH_WHOAMI_CMD}"
 echo ""
 
 if apiclaw_can_launch_auth && { [ -t 1 ] || [ -t 0 ]; }; then
-    echo -e "${DIM}Opening browser sign-in...${NC}"
+    echo -e "${DIM}Opening browser sign-in. Keep this in the foreground until whoami prints an email.${NC}"
     npx -y @nordsym/apiclaw@latest auth login || true
 fi
 

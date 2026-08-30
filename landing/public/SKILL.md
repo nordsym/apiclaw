@@ -48,15 +48,17 @@ curl -fsSL https://apiclaw.cloud/install.sh | bash
 npx @nordsym/apiclaw auth login
 ```
 
-That opens the browser. Clerk sign-in is not enough. After Google or
-email the user must click Authorize on apiclaw.cloud. Only then does
-the CLI write `session_token` to `~/.apiclaw.toml`. Printing the URL
-is not success. Do not declare ready. Do not execute.
+That opens the browser. Finish Google or email on that URL — completing
+Clerk there Authorizes the terminal (one action). If you are already
+signed in, click Authorize. Only then does the CLI write `session_token`
+to `~/.apiclaw.toml`. Printing the URL is not success. Do not declare ready.
+Do not execute.
 
 Keep `auth login` in the foreground until it exits 0. The command
 reprints that URL every few seconds and polls Convex / `~/.apiclaw.toml`
 until Clerk writes `session_token`. Show the human the login URL on
-every reprint. Tell them to click Authorize after Clerk. Do not
+every reprint. Tell them to finish Clerk on that URL (that Authorizes).
+If already signed in, tell them to click Authorize. Do not
 background the command. Do not continue until whoami prints an email.
 
 If the browser says connection refused after Authorize, that is OK.
