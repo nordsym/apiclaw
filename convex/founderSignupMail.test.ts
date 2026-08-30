@@ -197,7 +197,12 @@ const clerkBridge = readFileSync(
 );
 assert.match(
   clerkBridge,
-  /firstName:\s*user\?\.firstName/,
+  /const firstName = user\?\.firstName/,
+  "clerk-bridge must read Clerk first name",
+);
+assert.match(
+  clerkBridge,
+  /firstName,/,
   "clerk-bridge must pass Clerk first name into the first-mint mutation",
 );
 assert.match(clerkBridge, /path:\s*"workspaces:getOrCreateForClerk"/);
