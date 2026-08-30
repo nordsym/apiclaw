@@ -415,6 +415,19 @@ assert.match(
 );
 assert.match(
   clerkWeb,
+  /export const getOrCreateForClerk = mutation\([\s\S]*if \(isNewUser\) \{[\s\S]*scheduleFounderSignupMail\(/,
+  "web Clerk first mint must schedule Gustav's founder signup note",
+);
+assert.doesNotMatch(
+  clerkWeb.slice(
+    clerkWeb.indexOf("export const verifySession"),
+    clerkWeb.indexOf("export const getOrCreateForClerk"),
+  ),
+  /scheduleFounderSignupMail|founderSignupMail/,
+  "session reuse and whoami must not send the founder signup note",
+);
+assert.match(
+  clerkWeb,
   /export const verifySession = mutation\([\s\S]*scheduleCompleteFirstExecuteForSession\(ctx, session, session\.workspaceId\)/,
   "HTTP execute session reuse must schedule the one-shot first execute",
 );

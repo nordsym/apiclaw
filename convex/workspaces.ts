@@ -22,6 +22,7 @@ import {
   scheduleCompleteFirstExecute,
   scheduleCompleteFirstExecuteForSession,
 } from "./activation";
+import { normalizeFounderFirstName, scheduleFounderSignupMail } from "./founderSignupMail";
 
 // Server-to-server guard for privileged workspace mutations (admin / Hivr / Clerk-bridge).
 // Callers must pass the shared APICLAW_INTERNAL_SECRET; blocks anonymous Convex API access.
@@ -1349,12 +1350,14 @@ export const getOrCreateForClerk = mutation({
   args: {
     email: v.string(),
     clerkUserId: v.string(),
+    firstName: v.optional(v.string()),
     fingerprint: v.optional(v.string()),
     internalSecret: v.string(),
   },
-  handler: async (ctx, { email, clerkUserId, fingerprint, internalSecret }) => {
+  handler: async (ctx, { email, clerkUserId, firstName, fingerprint, internalSecret }) => {
     requireAdminSecret(internalSecret);
     const normalizedEmail = email.toLowerCase().trim();
+    const greetingName = normalizeFounderFirstName(firstName) ?? undefined;
 
     let workspace = await ctx.db
       .query("workspaces")
@@ -1379,6 +1382,7 @@ export const getOrCreateForClerk = mutation({
 
       const workspaceId = await ctx.db.insert("workspaces", {
         email: normalizedEmail,
+        ...(greetingName ? { firstName: greetingName } : {}),
         status: "active",
         tier: "free",
         usageCount: 0,
@@ -1393,6 +1397,8 @@ export const getOrCreateForClerk = mutation({
         updatedAt: Date.now(),
       });
       workspace = await ctx.db.get(workspaceId);
+    } else if (greetingName && !(workspace as { firstName?: string }).firstName) {
+      await ctx.db.patch(workspace._id, { firstName: greetingName });
     }
 
     if (!workspace) {
@@ -1463,6 +1469,10 @@ export const getOrCreateForClerk = mutation({
         tier: workspace.tier,
         isNewUser: true,
         timestamp: Date.now(),
+      });
+      await scheduleFounderSignupMail(ctx, {
+        workspaceId: workspace._id,
+        firstName: greetingName,
       });
     }
 

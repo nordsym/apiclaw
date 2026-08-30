@@ -45,6 +45,7 @@ export default defineSchema({
   workspaces: defineTable({
     email: v.string(),
     workspaceName: v.optional(v.string()), // Display name (e.g., "APILayer", "My Team")
+    firstName: v.optional(v.string()), // Clerk given name for the founder signup note
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
     tier: v.string(), // "free" | "pro" | "scale" | "usage_based" | "enterprise" | "partner"
