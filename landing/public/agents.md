@@ -118,7 +118,7 @@ status
 ## Auth rules
 
 - Signup is required for discovery and execution.
-- Browser-loopback auth is canonical: `npx @nordsym/apiclaw auth login`. Keep it in the foreground. Completing Clerk on the login URL Authorizes. If already signed in, click Authorize. Printing the URL is not ready.
+- Unsigned MCP/CLI first_run returns a live `https://apiclaw.cloud/auth/cli?authId=…` `login_url` even with no TTY. Show that URL. Do not only print `npx @nordsym/apiclaw auth login`. Completing Clerk on the login URL Authorizes (one action). If already signed in, click Authorize. Printing the URL is not ready.
 - Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not execute before that.
 - Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.

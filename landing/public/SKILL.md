@@ -44,22 +44,34 @@ curl -fsSL https://apiclaw.cloud/install.sh | bash
 
 ## 2. Auth (Clerk). Never paste a token into chat.
 
+Unsigned MCP / CLI first_run mints a pending login even with no TTY and
+returns the exact URL as `login_url` in the tool payload:
+
+```text
+https://apiclaw.cloud/auth/cli?authId=…
+```
+
+Show the human that URL. Do not only print `npx @nordsym/apiclaw auth login`.
+A command without `/auth/cli?authId=` is not enough.
+
 ```bash
 npx @nordsym/apiclaw auth login
 ```
 
-That opens the browser. Finish Google or email on that URL — completing
-Clerk there Authorizes the terminal (one action). If you are already
-signed in, click Authorize. Only then does the CLI write `session_token`
-to `~/.apiclaw.toml`. Printing the URL is not success. Do not declare ready.
+That opens the same browser URL (or reuses the pending one). Finish
+Google or email on that URL — completing Clerk there Authorizes the
+terminal (one action). If you are already signed in, click Authorize.
+Do not tell a new Clerk user they still need a second click after
+Clerk. Only then does the CLI write `session_token` to
+`~/.apiclaw.toml`. Printing the URL is not success. Do not declare ready.
 Do not execute.
 
-Keep `auth login` in the foreground until it exits 0. The command
-reprints that URL every few seconds and polls Convex / `~/.apiclaw.toml`
-until Clerk writes `session_token`. Show the human the login URL on
-every reprint. Tell them to finish Clerk on that URL (that Authorizes).
-If already signed in, tell them to click Authorize. Do not
-background the command. Do not continue until whoami prints an email.
+Keep `auth login` in the foreground until it exits 0 if you ran it.
+The command reprints that URL every few seconds and polls Convex /
+`~/.apiclaw.toml` until Clerk writes `session_token`. Show the human
+the login URL on every reprint. Tell them to finish Clerk on that URL
+(that Authorizes). If already signed in, tell them to click Authorize.
+Do not background the command. Do not continue until whoami prints an email.
 
 If the browser says connection refused after Authorize, that is OK.
 Stay on apiclaw.cloud. Loop whoami — it redeems the Authorize click
@@ -101,8 +113,9 @@ But whoami is the gate. Skip it and the execute will be unauthenticated.
 
 Loop whoami. Each miss:
 
-- Show the human the login URL from `auth login` (whoami reprints
-  the pending URL if login already started).
+- Show the human the live `login_url` (`/auth/cli?authId=`). whoami
+  reprints the pending URL if login already started. Do not only
+  print `npx @nordsym/apiclaw auth login`.
 - Keep `auth login` running if it is still waiting.
 - If they already clicked Authorize, run whoami again. It redeems
   the claim and writes `session_token` without localhost.

@@ -16,9 +16,6 @@
  */
 
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
-import { randomBytes, createHash } from 'node:crypto';
-import { spawn } from 'node:child_process';
-import * as os from 'node:os';
 import ora from 'ora';
 import chalk from 'chalk';
 import { writeAuthConfig, readAuthConfig, clearAuthConfig, AUTH_CONFIG_PATH, type AuthConfig } from '../../auth-config.js';
@@ -28,7 +25,6 @@ import { firstRunExecuteFailedMessage, hasWorkingWhoami, unsignedExecuteMessage 
 import {
   clearPendingLoginUrl,
   readPendingLogin,
-  writePendingLogin,
 } from '../../execute-auth.js';
 import {
   CLI_AUTH_POLL_PATH,
@@ -36,6 +32,10 @@ import {
   redeemPendingLogin,
   type CliAuthPollResult,
 } from '../../cli-auth-redeem.js';
+import {
+  PENDING_LOGIN_LOOPBACK_PORT,
+  ensurePendingLogin,
+} from '../../pending-login-start.js';
 import {
   LOGIN_SESSION_POLL_MS,
   LOGIN_URL_REPRINT_MS,
@@ -50,7 +50,7 @@ const CONVEX_URL =
   'https://adventurous-avocet-799.convex.cloud';
 const APP_URL = process.env.APICLAW_APP_URL || 'https://apiclaw.cloud';
 const LOOPBACK_TIMEOUT_MS = LOGIN_WAIT_TIMEOUT_MS;
-const PREFERRED_PORT = 41789;
+const PREFERRED_PORT = PENDING_LOGIN_LOOPBACK_PORT;
 
 interface AuthLoginOptions {
   printMcpToken?: boolean;
@@ -70,47 +70,6 @@ async function runAndPrintFirstCall(sessionToken: string): Promise<FirstExecuteR
     console.log(firstRunExecuteFailedMessage());
   }
   return firstCall;
-}
-
-function base64url(buf: Buffer): string {
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-}
-
-function generatePkcePair(): { verifier: string; challenge: string } {
-  const verifier = base64url(randomBytes(48));
-  const challenge = base64url(createHash('sha256').update(verifier).digest());
-  return { verifier, challenge };
-}
-
-function generateState(): string {
-  return base64url(randomBytes(24));
-}
-
-/**
- * Open URL in the user's default browser.
- * Returns true if the OS command was spawned, false if no opener is available.
- */
-function openBrowser(url: string): boolean {
-  const platform = process.platform;
-  let cmd: string;
-  let args: string[];
-  if (platform === 'darwin') {
-    cmd = 'open';
-    args = [url];
-  } else if (platform === 'win32') {
-    cmd = 'cmd';
-    args = ['/c', 'start', '', url];
-  } else {
-    cmd = 'xdg-open';
-    args = [url];
-  }
-  try {
-    const child = spawn(cmd, args, { detached: true, stdio: 'ignore' });
-    child.unref();
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 /**
@@ -265,12 +224,6 @@ async function convexAction<T = unknown>(path: string, args: Record<string, unkn
   return (data.value ?? data) as T;
 }
 
-interface StartResult {
-  authId: string;
-  browserUrl: string;
-  expiresAt: number;
-}
-
 interface ExchangeResult {
   success: boolean;
   error?: string;
@@ -306,63 +259,49 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   console.log(chalk.bold('  🦞 APIClaw — agent-native auth'));
   console.log(chalk.dim('  Confirm in the browser to finish sign-in.\n'));
 
-  // PKCE + state + fingerprint
-  const { verifier, challenge } = generatePkcePair();
-  const state = generateState();
-  const fingerprint = getMachineFingerprint();
+  if (options.force) {
+    clearPendingLoginUrl();
+  }
 
-  // Start loopback FIRST so the port is known when we register with Convex
+  // Start loopback FIRST so a new mint can register that port. Reuse of an
+  // already-minted authId keeps the original port; localhost refused is OK.
   const loop = await startLoopbackListener();
-
-  let startResult: StartResult;
+  const fingerprint = getMachineFingerprint();
   const startSpinner = ora('Registering session...').start();
-  try {
-    startResult = await convexMutation<StartResult>('cliAuth:start', {
-      state,
-      challenge,
-      port: loop.port,
-      fingerprint,
-      appUrl: APP_URL,
-    });
-    startSpinner.succeed('Session registered');
-  } catch (err) {
-    startSpinner.fail(`Failed to register session: ${(err as Error).message}`);
+  const pending = await ensurePendingLogin({
+    openBrowser: !options.noOpen,
+    port: loop.port,
+    fingerprint,
+    appUrl: APP_URL,
+  });
+  if (!pending) {
+    startSpinner.fail('Failed to register session');
     loop.server.close();
     return null;
   }
+  startSpinner.succeed(pending.reused ? 'Session reused' : 'Session registered');
 
-  writePendingLogin({
-    browserUrl: startResult.browserUrl,
-    authId: startResult.authId,
-    codeVerifier: verifier,
-    state,
-    fingerprint,
-    startedAt: Date.now(),
-    expiresAt: startResult.expiresAt,
-  });
+  const challenge = pkceChallengeFromVerifier(pending.codeVerifier);
+  const state = pending.state;
+  const verifier = pending.codeVerifier;
 
-  // Open browser (or print URL if --no-open / spawn fails)
-  if (!options.noOpen) {
-    const opened = openBrowser(startResult.browserUrl);
-    if (!opened) {
-      console.log(chalk.yellow('  Could not open your browser automatically.'));
-    }
-  }
   console.log(chalk.bold('  Open this login URL. Keep this command running.'));
-  console.log(`  ${chalk.cyan(startResult.browserUrl)}`);
+  console.log(`  ${chalk.cyan(pending.browserUrl)}`);
+  console.log(chalk.dim('  Finish Google or email on that URL — that Authorizes (one action).'));
+  console.log(chalk.dim('  If you are already signed in, click Authorize.'));
   console.log(chalk.dim('  Printing the URL is not success. Waiting for Clerk to write session_token.\n'));
 
   const previousToken = options.force ? existing?.sessionToken : undefined;
   let stopClaimPoll = false;
   const wait = await waitUntilSessionOrCallback({
-    loginUrl: startResult.browserUrl,
+    loginUrl: pending.browserUrl,
     timeoutMs: LOOPBACK_TIMEOUT_MS,
     reprintMs: LOGIN_URL_REPRINT_MS,
     reprintImmediately: false,
     hasSession: () => hasWorkingWhoami() && isFreshLoginSession(readAuthConfig(), previousToken),
     callback: Promise.race([
       loop.result,
-      waitForClaimedCode(startResult.authId, challenge, state, () => stopClaimPoll),
+      waitForClaimedCode(pending.authId, challenge, state, () => stopClaimPoll),
     ]),
     onReprint: (lines) => {
       console.log('');

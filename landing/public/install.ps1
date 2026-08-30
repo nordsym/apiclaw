@@ -166,7 +166,9 @@ function Test-ApiclawCanLaunchAuth {
 Write-Host ""
 Write-Host "Next step: sign in so a managed call can succeed." -ForegroundColor Cyan
 Write-Host "  $AuthLoginCmd"
-Write-Host "Finish Clerk on the login URL — that Authorizes the terminal." -ForegroundColor DarkGray
+Write-Host "MCP/CLI first_run prints a live https://apiclaw.cloud/auth/cli?authId= URL." -ForegroundColor DarkGray
+Write-Host "Show that URL. Do not only print the login command." -ForegroundColor DarkGray
+Write-Host "Finish Google or email on that URL — that Authorizes (one action)." -ForegroundColor DarkGray
 Write-Host "If you are already signed in, click Authorize. Then:" -ForegroundColor DarkGray
 Write-Host "  $AuthWhoamiCmd"
 

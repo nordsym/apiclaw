@@ -13,6 +13,7 @@ import {
   AUTH_LOGIN_COMMAND,
   completeFirstRunAuth,
 } from '../../first-run.js';
+import { readPendingLoginUrl } from '../../execute-auth.js';
 // Printed next step: npx @nordsym/apiclaw auth login
 import { authLoginCommand } from './auth.js';
 
@@ -381,7 +382,14 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
     }
 
     console.log(chalk.bold('MCP is installed. Sign-in is still required.\n'));
-    console.log(`  ${AUTH_LOGIN_COMMAND}`);
+    const pendingUrl = readPendingLoginUrl();
+    if (pendingUrl) {
+      console.log(`  Open this login URL: ${pendingUrl}`);
+      console.log('  Finish Google or email on that URL — that Authorizes (one action).');
+      console.log('  If already signed in, click Authorize.');
+    } else {
+      console.log(`  ${AUTH_LOGIN_COMMAND}`);
+    }
     console.log('Then confirm with:');
     console.log(`  npx @nordsym/apiclaw auth whoami`);
     // MCP config wrote successfully. Leave exit 0 so install.sh can run its
