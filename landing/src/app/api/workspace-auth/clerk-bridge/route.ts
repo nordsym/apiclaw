@@ -36,6 +36,7 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
     (address) => address.verification?.status === "verified",
   )?.emailAddress;
   const email = verifiedPrimary || verifiedFallback;
+  const firstName = user?.firstName?.trim() || undefined;
 
   if (!email) {
     return NextResponse.redirect(new URL("/sign-in?error=no_email", req.url));
@@ -49,6 +50,7 @@ async function bridge(req: NextRequest): Promise<NextResponse> {
       args: {
         email,
         clerkUserId: userId,
+        firstName,
         fingerprint: `clerk:${userId}`,
         internalSecret: process.env.APICLAW_INTERNAL_SECRET,
       },

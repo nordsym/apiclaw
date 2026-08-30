@@ -1,27 +1,22 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import {
-  markPostAuthWelcomeInTransaction,
-  renderWelcomeHtml,
-} from "./postVerifyNudge";
+import { markPostAuthWelcomeInTransaction } from "./postVerifyNudge";
 import {
   nurtureDeliveryIdempotencyKey,
   welcomeDeliveryIdempotencyKey,
 } from "./nurtureDeliveryKeys";
+import { renderFounderSignupText } from "./founderSignupMail";
 
-const unsubscribeUrl = "https://api.apiclaw.cloud/nurture/unsubscribe?token=test";
-const preActivationWelcome = renderWelcomeHtml(false, unsubscribeUrl);
-assert.match(preActivationWelcome, /workspace, gateway, and usage tracking are live/);
-assert.match(preActivationWelcome, /AI agent infrastructure news/);
-assert.doesNotMatch(preActivationWelcome, /SMS to Sweden|managed calls? (?:per|\/)(?:week|month)|managed adapters?|25 lifetime managed calls|\$1 total underlying provider-cost cap/);
-assert.match(preActivationWelcome, /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./);
-
-assert.match(preActivationWelcome, /Unsubscribe from lifecycle email/);
-const activatedWelcome = renderWelcomeHtml(true, unsubscribeUrl);
-assert.equal(activatedWelcome, preActivationWelcome, "welcome payload must stay stable across idempotent retries");
 const source = readFileSync(fileURLToPath(new URL("./postVerifyNudge.ts", import.meta.url)), "utf8");
-assert.match(source, /"Idempotency-Key": welcomeDeliveryIdempotencyKey\(String\(w\._id\)\)/);
+assert.match(source, /sendFounderSignupMailViaResend/);
+assert.match(source, /welcomeDeliveryIdempotencyKey\(String\(w\._id\)\)/);
+assert.doesNotMatch(source, /html:|renderWelcomeHtml|Unsubscribe from lifecycle email/);
+assert.equal(
+  renderFounderSignupText("Ada"),
+  renderFounderSignupText("Ada"),
+  "welcome payload must stay stable across idempotent retries",
+);
 assert.equal(
   welcomeDeliveryIdempotencyKey("workspace-1"),
   nurtureDeliveryIdempotencyKey("workspace-1", "welcome"),

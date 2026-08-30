@@ -5,7 +5,7 @@ import {
   markNurtureEmailInTransaction,
   pickEmailKind,
 } from "./nurture";
-import { CANON_STATS } from "../src/canon-stats";
+import { renderFounderSignupText } from "./founderSignupMail";
 
 const now = Date.now();
 
@@ -105,27 +105,18 @@ assert.equal(
 );
 
 const unsubscribeUrl = "https://api.apiclaw.cloud/nurture/unsubscribe?token=test";
-const welcome = bodyFor("welcome", "Gustav", unsubscribeUrl);
-assert.match(welcome.subject, /Welcome to APIClaw/);
-assert.match(welcome.html, /brave_search/);
-assert.match(welcome.html, /action "search"/);
-assert.match(welcome.html, new RegExp(`${CANON_STATS.discoverable.toLocaleString()} APIs`));
-assert.match(welcome.html, new RegExp(`${CANON_STATS.source_verified.toLocaleString()} current catalog entries`));
-assert.match(welcome.html, /Source verification is not execution/i);
-assert.match(welcome.html, new RegExp(`${CANON_STATS.managed_provider_adapters} providers`));
-assert.doesNotMatch(welcome.html, /managed adapters?/i, "welcome email must not use the retired 'managed adapter' phrase");
-assert.match(welcome.html, new RegExp(`${CANON_STATS.customer_executable_providers} provider rails are customer-executable`));
-assert.doesNotMatch(welcome.html, /source-verified (?:definitions|APIs).*callable/i);
-assert.match(welcome.html, /Unsubscribe from lifecycle email/);
-assert.match(welcome.html, /nurture\/unsubscribe/);
-assert.doesNotMatch(welcome.html, /Reply STOP/);
+const welcome = bodyFor("welcome", "Ada", unsubscribeUrl);
+assert.equal(welcome.subject, "Saw you signed up");
+assert.equal(welcome.text, renderFounderSignupText("Ada"));
+assert.equal(welcome.html, undefined, "default signup mail is plaintext, no HTML part");
+assert.doesNotMatch(welcome.text || "", /unsubscribe|apiclaw\.cloud|—|&mdash;/i);
 
-for (const kind of ["welcome", "try-discover", "first-call", "upgrade", "power-upgrade"]) {
+for (const kind of ["try-discover", "first-call", "upgrade", "power-upgrade"]) {
   const rendered = bodyFor(kind, "Gustav", unsubscribeUrl);
   assert.doesNotMatch(rendered.subject, /\b(Pro|Scale)\b/i, `${kind} subject should not use stale tier copy`);
   assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|managed calls? (?:per|\/)(?:week|month)|unlimited|25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapters?/i, `${kind} body should not use stale tier or retired-phrase copy`);
-  assert.match(rendered.html, /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./, `${kind} body should state the new free/paid framing`);
-  assert.doesNotMatch(rendered.html, /APILayer/i, `${kind} body should not mention APILayer in nurture`);
+  assert.match(rendered.html || "", /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./, `${kind} body should state the new free/paid framing`);
+  assert.doesNotMatch(rendered.html || "", /APILayer/i, `${kind} body should not mention APILayer in nurture`);
 }
 
 const patches: Array<Record<string, unknown>> = [];

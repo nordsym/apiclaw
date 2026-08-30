@@ -26,6 +26,7 @@ import { recordWorkspaceAuthenticated } from "./funnel";
 import { FREE_MANAGED_CALLS_LIFETIME } from "../src/product-truth";
 import { findUsableAgentSession } from "./sessionSecurity";
 import { scheduleCompleteFirstExecute } from "./activation";
+import { scheduleFounderSignupMail } from "./founderSignupMail";
 
 const AUTHID_LENGTH = 32;
 const CODE_LENGTH = 48;
@@ -604,6 +605,10 @@ export const _exchangeVerified = internalMutation({
         tier: workspace.tier,
         isNewUser: true,
         timestamp: Date.now(),
+      });
+      await scheduleFounderSignupMail(ctx, {
+        workspaceId: workspace._id,
+        firstName: (workspace as { firstName?: string }).firstName,
       });
     }
 

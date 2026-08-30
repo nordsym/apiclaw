@@ -133,10 +133,10 @@ crons.weekly(
   internal.scorecardEmail.sendWeeklyScorecard,
 );
 
-// A-15 - Post-auth welcome. Every 10 min, scans for new canonical
-// workspace_authenticated events and sends one activation-aware welcome.
-// The successful send is recorded in the shared nurture ledger so daily
-// lifecycle spacing, frequency caps, and opt-out rules remain authoritative.
+// Fallback for Gustav's plaintext founder signup note. The honest send is
+// getOrCreateForClerk first mint. This cron covers a temporary Resend miss.
+// Success is recorded in the shared nurture ledger so daily spacing and
+// the three-email cap stay authoritative.
 crons.interval(
   "post-verify-nudge",
   { minutes: 10 },

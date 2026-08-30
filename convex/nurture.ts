@@ -5,12 +5,16 @@ import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
 import { checkEmailAllowedSync } from "./emailGuards";
 import { PAYG_MARGIN_RATE } from "../src/product-truth";
-import { CANON_STATS } from "../src/canon-stats";
 import { findUsableAgentSession } from "./sessionSecurity";
 import {
   nurtureDeliveryIdempotencyKey,
   nurtureUnsubscribeUrl,
 } from "./nurtureDeliveryKeys";
+import {
+  FOUNDER_SUBJECT,
+  renderFounderSignupText,
+  sendFounderSignupMailViaResend,
+} from "./founderSignupMail";
 
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const EMAIL_FROM = process.env.RESEND_FROM || "APIClaw <hello@apiclaw.cloud>";
@@ -19,6 +23,7 @@ type NurtureSendCandidate = {
   nurtureId: Id<"nurture">;
   workspaceId: Id<"workspaces">;
   email: string;
+  firstName?: string;
   kind: string;
 };
 
@@ -299,7 +304,7 @@ export function bodyFor(
   kind: string,
   firstName: string,
   unsubscribeUrl: string,
-): { subject: string; html: string } {
+): { subject: string; html?: string; text?: string } {
   const hi = firstName ? `Hi ${firstName},` : "Hi,";
   const prompt = `Use APIClaw's Brave Search API with provider "brave_search", action "search", and query "AI agent infrastructure news". Then summarize the top 3 results with source links.`;
   const promptBlock = `<pre style="background:#111827;color:#f9fafb;padding:14px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;">${prompt}</pre>`;
@@ -309,8 +314,8 @@ export function bodyFor(
   switch (kind) {
     case "welcome":
       return {
-        subject: "Welcome to APIClaw - your agent can call APIs now",
-        html: `<p>${hi}</p><p>Your APIClaw workspace is live. Your agent calls real APIs, discoverable across ${CANON_STATS.discoverable.toLocaleString()} APIs. ${CANON_STATS.source_verified.toLocaleString()} current catalog entries map to source-verification evidence by exact name. Source verification is not execution. APIClaw has integrated ${CANON_STATS.managed_provider_adapters} providers, and ${CANON_STATS.customer_executable_providers} provider rails are customer-executable now.</p><p>Best first step: paste this into your agent:</p>${promptBlock}${cta}<p>- Gustav, APIClaw</p>${footer}`,
+        subject: FOUNDER_SUBJECT,
+        text: renderFounderSignupText(firstName),
       };
     case "try-discover":
       return {
@@ -453,7 +458,13 @@ export const getSendCandidates = internalQuery({
       considered++;
       if (!kind) continue;
 
-      candidates.push({ nurtureId: n._id, workspaceId: n.workspaceId, email: n.email, kind });
+      candidates.push({
+        nurtureId: n._id,
+        workspaceId: n.workspaceId,
+        email: n.email,
+        firstName: (ws as { firstName?: string }).firstName,
+        kind,
+      });
     }
 
     return { considered, candidates };
@@ -516,8 +527,43 @@ export const sendDailyNurture = internalAction({
 
       const kind = candidate.kind;
       const email = candidate.email;
-      const firstName = (email.split("@")[0] || "").split(/[._-]/)[0];
-      const firstNamePretty = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+      const clerkFirstName = candidate.firstName;
+      const emailGuess = (email.split("@")[0] || "").split(/[._-]/)[0];
+      const firstNamePretty = clerkFirstName
+        || (emailGuess ? emailGuess.charAt(0).toUpperCase() + emailGuess.slice(1) : "");
+
+      if (kind === "welcome") {
+        if (dryRun) {
+          sentLog.push({ email, kind });
+          sent++;
+          continue;
+        }
+        const delivery = await sendFounderSignupMailViaResend({
+          apiKey: resendApiKey,
+          to: email,
+          firstName: clerkFirstName,
+          idempotencyKey: nurtureDeliveryIdempotencyKey(String(candidate.workspaceId), kind),
+        });
+        if (!delivery.ok) {
+          skipped++;
+          skipReasons[delivery.reason] = (skipReasons[delivery.reason] ?? 0) + 1;
+          continue;
+        }
+        const mark = await ctx.runMutation(internal.nurture.markEmailSent, {
+          nurtureId: candidate.nurtureId,
+          kind,
+        }) as { success: boolean; alreadyMarked?: boolean; reason?: string };
+        if (mark.success && !mark.alreadyMarked) {
+          sentLog.push({ email, kind });
+          sent++;
+        } else {
+          skipped++;
+          const reason = mark.alreadyMarked ? "already_marked" : mark.reason || "mark_failed";
+          skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+        }
+        continue;
+      }
+
       if (!unsubscribeSecret) {
         skipped++;
         skipReasons.missing_unsubscribe_secret = (skipReasons.missing_unsubscribe_secret ?? 0) + 1;
@@ -539,7 +585,7 @@ export const sendDailyNurture = internalAction({
         apiKey: resendApiKey,
         to: email,
         subject,
-        html,
+        html: html || "",
         idempotencyKey: nurtureDeliveryIdempotencyKey(String(candidate.workspaceId), kind),
         unsubscribeUrl,
       });
