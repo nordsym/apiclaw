@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import posthog from "posthog-js";
 import { CopyLine } from "@/components/home/CopyLine";
 import { Panel, Status, btnQuiet, btnSolid } from "@/app/workspace/views/ui";
@@ -111,6 +112,11 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
   const firstCallIdempotencyKeyRef = useRef<string | null>(null);
   const settlingRef = useRef(false);
   const liftTimerRef = useRef<number | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   useEffect(() => {
     if (!sessionToken) return;
@@ -178,10 +184,13 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
     if (liftTimerRef.current) window.clearTimeout(liftTimerRef.current);
   }, []);
 
-  if (!sessionToken || !state) return null;
+  if (!sessionToken || !state || !portalReady) return null;
 
   if (!open && state.dismissedAt && !state.completedAt && !state.firstCallAt) {
-    return <ResumeToast onResume={() => { setOpen(true); setView("choose"); }} />;
+    return createPortal(
+      <ResumeToast onResume={() => { setOpen(true); setView("choose"); }} />,
+      document.body,
+    );
   }
 
   if (!open) return null;
@@ -301,7 +310,7 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
   const locked = busy || runStatus === "running";
   const step = stepOf(view, door);
 
-  return (
+  return createPortal(
     <div className={ONBOARDING_OVERLAY_CLASS}>
       <Panel className="flex max-h-[96dvh] w-full max-w-[32rem] flex-col overflow-hidden rounded-b-none sm:max-h-[90vh] sm:rounded-b-[14px]">
         <section role="dialog" aria-modal="true" aria-labelledby="onboarding-title" className="overflow-y-auto p-6 sm:p-7">
@@ -456,7 +465,8 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
           )}
         </section>
       </Panel>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

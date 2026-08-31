@@ -28,7 +28,8 @@ assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: 1, firstCall
 assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: null, firstCallAt: null }), "open");
 
 assert.match(ONBOARDING_OVERLAY_CLASS, /backdrop-blur-2xl/);
-assert.match(ONBOARDING_OVERLAY_CLASS, /bg-\[var\(--background\)\]\/40/);
+assert.match(ONBOARDING_OVERLAY_CLASS, /bg-\[var\(--background\)\]\/15/);
+assert.match(ONBOARDING_OVERLAY_CLASS, /backdrop-saturate-150/);
 assert.doesNotMatch(ONBOARDING_OVERLAY_CLASS, /bg-black\/70/);
 
 assert.equal(WAITING_FOR_FIRST_CALL, "Waiting for your first tool call");
@@ -79,7 +80,8 @@ assert.equal(
 
 const wizard = readFileSync(new URL("../components/OnboardingWizard.tsx", import.meta.url), "utf8");
 assert.match(wizard, /ONBOARDING_OVERLAY_CLASS/);
-assert.match(wizard, /backdrop-blur-2xl|ONBOARDING_OVERLAY_CLASS/);
+assert.match(wizard, /createPortal/);
+assert.match(wizard, /document\.body/);
 assert.match(wizard, /WAITING_FOR_FIRST_CALL|Waiting for your first tool call/);
 assert.match(wizard, /AGENT_FIRST_CALL_PROMPT/);
 assert.match(wizard, /Send this to your agent/);
