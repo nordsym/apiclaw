@@ -2,6 +2,13 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
+import {
+  billingCardRequired,
+  billingStatusLabel,
+  paymentMethodEmptyCopy,
+  paygNeedsRecovery as workspacePaygNeedsRecovery,
+  planCardCta,
+} from "@/lib/billing-plan";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
 import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
@@ -41,13 +48,6 @@ async function convexQuery<T>(path: string, args: Record<string, unknown>): Prom
   return (data.value ?? data) as T;
 }
 
-function planLabel(tier: string): string {
-  if (tier === "partner") return "Partner";
-  if (tier === "usage_based") return "Pay as you go";
-  if (tier === "free") return "Free";
-  return tier.charAt(0).toUpperCase() + tier.slice(1);
-}
-
 export function BillingTab({
   workspace,
   sessionToken,
@@ -55,11 +55,14 @@ export function BillingTab({
   workspace: Workspace | null;
   sessionToken: string | null;
 }) {
+  const billingWorkspace = workspace || {};
   const currentTier = workspace?.tier || "free";
   const isPartner = currentTier === "partner";
-  const isUnlimited = isUnlimitedWorkspace(workspace || {});
-  const paygNeedsRecovery = currentTier === "usage_based" && workspace?.paygActive !== true;
+  const isUnlimited = isUnlimitedWorkspace(billingWorkspace);
+  const cardRequired = billingCardRequired(billingWorkspace);
+  const paygNeedsRecovery = workspacePaygNeedsRecovery(billingWorkspace);
   const hasStripeCustomer = Boolean(workspace?.stripeCustomerId);
+  const emptyPayment = paymentMethodEmptyCopy(billingWorkspace);
   const usageCount = workspace?.usageCount ?? 0;
   const hasPlanLimit = Boolean(workspace?.usageLimit && workspace.usageLimit > 0);
   const usageLimit = hasPlanLimit ? (workspace!.usageLimit as number) : 0;
@@ -140,14 +143,18 @@ export function BillingTab({
           </Row>
         )}
         <StatGrid cols={3}>
-          <StatCard title="Current plan" value={planLabel(currentTier)} />
+          <StatCard title="Current plan" value={billingStatusLabel(billingWorkspace)} />
           <StatCard
             title="Calls"
             value={usageCount.toLocaleString()}
             hint={isUnlimited || !hasPlanLimit ? "No cap on this plan" : `of ${usageLimit.toLocaleString()}`}
           />
           {isUnlimited || !hasPlanLimit ? (
-            <StatCard title="Billing" value={isPartner ? "By agreement" : "Active"} hint={isPartner ? undefined : "Usage reported to Stripe monthly"} />
+            <StatCard
+              title="Billing"
+              value={cardRequired ? "Active" : "No card required"}
+              hint={cardRequired ? "Usage reported to Stripe monthly" : undefined}
+            />
           ) : (
             <StatCard
               title="Remaining"
@@ -161,24 +168,22 @@ export function BillingTab({
       <Section title="Plans">
         <Panel className="grid gap-px overflow-hidden !bg-[var(--border-subtle)] sm:grid-cols-2">
           {PLANS.map((plan) => {
-            const isPaygPlan = plan.id === "usage_based";
-            const isCurrent = isPaygPlan
-              ? currentTier === "usage_based" && workspace?.paygActive === true
-              : currentTier === plan.id || (isPartner && plan.id === "free");
+            const planId = plan.id === "usage_based" ? "usage_based" : "free";
+            const cardCta = planCardCta(planId, billingWorkspace);
 
             let cta: ReactNode;
-            if (isCurrent) {
+            if (cardCta.kind === "current") {
               cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>Current plan</button>;
-            } else if (isPaygPlan && paygNeedsRecovery && hasStripeCustomer) {
+            } else if (cardCta.kind === "portal") {
               cta = <div className="mt-7 self-start">{portalButton(btnSolid)}</div>;
-            } else if (isPaygPlan && currentTier === "free") {
+            } else if (cardCta.kind === "checkout") {
               cta = (
                 <CheckoutButton sessionToken={sessionToken || ""} variant="primary" className="mt-7">
                   Add payment method
                 </CheckoutButton>
               );
             } else {
-              cta = <a href="/book" className={`${btnQuiet} mt-7 self-start`}>Talk to us</a>;
+              cta = null;
             }
 
             return (
@@ -280,9 +285,9 @@ export function BillingTab({
           </Row>
         ) : (
           <Empty
-            title="No payment method on file"
-            body="Add a card to call Paid APIs. Free APIs never need one."
-            action={currentTier === "free" ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
+            title={emptyPayment.title}
+            body={emptyPayment.body}
+            action={emptyPayment.showCheckout ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
           />
         )}
       </Section>
