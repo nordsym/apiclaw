@@ -43,7 +43,7 @@ import { executeCapability, listCapabilities, hasCapability } from './capability
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
 import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, authRequiredToolResult, unsignedFirstRunToolResult, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { ensurePendingLogin } from './pending-login-start.js';
-import { hasWorkingWhoami } from './first-run.js';
+import { canOpenAuthBrowser, hasWorkingWhoami } from './first-run.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -3052,7 +3052,7 @@ async function main() {
   let firstRunLoginUrl: string | null = null;
   if (!hasWorkingWhoami()) {
     try {
-      const pending = await ensurePendingLogin({ openBrowser: false });
+      const pending = await ensurePendingLogin({ openBrowser: canOpenAuthBrowser() });
       firstRunLoginUrl = pending?.browserUrl ?? null;
     } catch {
       /* tool calls will retry mint */

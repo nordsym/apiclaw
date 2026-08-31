@@ -7,6 +7,7 @@ import {
   FIRST_CALL_CLI,
   FIRST_CALL_PROMPT,
   canLaunchInteractiveAuth,
+  canOpenAuthBrowser,
   completeFirstRunAuth,
   firstRunCompleteMessage,
   firstRunExecuteFailedMessage,
@@ -79,6 +80,75 @@ assert.equal(
     stdinIsTTY: false,
   }),
   false,
+  "interactive wait still requires a TTY; opening the browser does not",
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: {},
+    platform: "darwin",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  true,
+  "macOS MCP has a GUI and no TTY — open Clerk",
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: {},
+    platform: "win32",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  true,
+  "Windows MCP has a GUI and no TTY — open Clerk",
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: { CI: "true" },
+    platform: "win32",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  false,
+  "CI must mint login_url without spawning a browser",
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: { GITHUB_ACTIONS: "true" },
+    platform: "darwin",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  false,
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: { APICLAW_SKIP_AUTH: "1" },
+    platform: "darwin",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  false,
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: {},
+    platform: "linux",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  false,
+  "headless Linux without DISPLAY must not spawn xdg-open",
+);
+assert.equal(
+  canOpenAuthBrowser({
+    env: { DISPLAY: ":0" },
+    platform: "linux",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+  }),
+  true,
+  "Linux with DISPLAY may open the browser without a TTY",
 );
 
 const incomplete = firstRunIncompleteMessage();

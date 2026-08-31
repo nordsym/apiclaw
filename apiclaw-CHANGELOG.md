@@ -10,6 +10,13 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+## [2.9.9] — 2026-08-31
+
+### Fixed — unsigned MCP first_run opens Clerk on a GUI
+
+- **Desktop / GUI machines open the minted `/auth/cli?authId=` URL** on unsigned first_run and unsigned execute (`unsignedFirstRunToolResult`, `agentAuthRequiredPayloadAfterMint`). MCP on Cursor / Claude Desktop has no TTY; darwin, win32, or `DISPLAY` / `WAYLAND_DISPLAY` is enough. CI, GitHub Actions, and `APICLAW_SKIP_AUTH` still mint `login_url` and return `isError` without spawning a browser.
+- Reuse of an open pending login still opens the browser when the GUI rule matches, so a later tool call pops Clerk again.
+
 ## [2.9.8] — 2026-08-31
 
 ### Fixed — honest funnel classification
