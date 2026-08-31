@@ -189,7 +189,7 @@ export const convex: Record<string, unknown | ((args: Record<string, unknown>) =
   "agents:deleteSubagent": { success: true },
   "agents:registerTaskAgent": { id: "sub_new", created: true },
   "workspaces:revokeAgentSession": { success: true },
-  "onboarding:getState": { completedAt: null, dismissedAt: null, source: null, building: null },
+  "onboarding:getState": { completedAt: null, dismissedAt: null, source: null, building: null, firstCallAt: null },
   "onboarding:complete": { ok: true },
   "onboarding:dismiss": { ok: true },
   "billing:getBillingInfo": billingInfo,
@@ -252,13 +252,9 @@ export const gateway: Record<string, unknown> = {
   // Shape from convex/http.ts handleManagedExecute success.
   "/v1/execute": {
     success: true,
-    provider: "brave_search",
-    action: "search",
-    data: { web: { results: [
-      { title: "APIClaw: agent infrastructure", url: "https://apiclaw.cloud", description: "One gateway for agents." },
-      { title: "Managed providers", url: "https://apiclaw.cloud/catalog", description: "Callable now." },
-      { title: "Docs", url: "https://apiclaw.cloud/docs", description: "Install and call." },
-    ] } },
+    provider: "nasa",
+    action: "apod",
+    data: { title: "Helix Nebula", url: "https://apod.nasa.gov/apod/image/2608/helix.jpg", explanation: "Today's astronomy picture." },
     _apiclaw: { latencyMs: 212, route: "managed", gateway: true },
   },
 };

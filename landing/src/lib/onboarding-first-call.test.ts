@@ -1,0 +1,106 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import {
+  AGENT_FIRST_CALL_PROMPT,
+  BROWSER_FIRST_EXECUTE_RAILS,
+  CLI_CALL,
+  ONBOARDING_OVERLAY_CLASS,
+  WAITING_FOR_FIRST_CALL,
+  decideOnboardingGate,
+  formatOnboardingExecuteResult,
+  httpFirstCallCurl,
+  isOnboardingExecuteSuccess,
+} from "./onboarding-first-call";
+
+assert.equal(decideOnboardingGate({ completedAt: 1, dismissedAt: null, firstCallAt: null }), "closed");
+assert.equal(decideOnboardingGate({ completedAt: 1, dismissedAt: 2, firstCallAt: 3 }), "closed");
+assert.equal(
+  decideOnboardingGate({ completedAt: null, dismissedAt: null, firstCallAt: 1 }),
+  "complete",
+  "first_call already landed must auto-complete, not trap",
+);
+assert.equal(
+  decideOnboardingGate({ completedAt: null, dismissedAt: 1, firstCallAt: 2 }),
+  "complete",
+  "first_call wins over a prior dismiss",
+);
+assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: 1, firstCallAt: null }), "resume");
+assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: null, firstCallAt: null }), "open");
+
+assert.match(ONBOARDING_OVERLAY_CLASS, /backdrop-blur-2xl/);
+assert.match(ONBOARDING_OVERLAY_CLASS, /bg-\[var\(--background\)\]\/40/);
+assert.doesNotMatch(ONBOARDING_OVERLAY_CLASS, /bg-black\/70/);
+
+assert.equal(WAITING_FOR_FIRST_CALL, "Waiting for your first tool call");
+assert.doesNotMatch(WAITING_FOR_FIRST_CALL, /—|–/);
+
+assert.match(AGENT_FIRST_CALL_PROMPT, /apiclaw\.cloud\/SKILL\.md/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /install\.sh|npx @nordsym\/apiclaw@latest/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /whoami/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /nasa/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /apod/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /frankfurter/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /Do not paste a token/);
+assert.match(AGENT_FIRST_CALL_PROMPT, /Do not add a card/);
+assert.doesNotMatch(AGENT_FIRST_CALL_PROMPT, /brave_search/);
+assert.doesNotMatch(AGENT_FIRST_CALL_PROMPT, /provider "brave/);
+
+assert.match(CLI_CALL, /nasa\/apod/);
+assert.doesNotMatch(CLI_CALL, /brave_search/);
+
+const curl = httpFirstCallCurl("sk-claw-test");
+assert.match(curl, /\/v1\/execute/);
+assert.match(curl, /"provider":"nasa"/);
+assert.match(curl, /"action":"apod"/);
+assert.doesNotMatch(curl, /brave_search/);
+
+assert.deepEqual(
+  BROWSER_FIRST_EXECUTE_RAILS.map((rail) => rail.provider),
+  ["nasa", "frankfurter"],
+);
+assert.equal(
+  BROWSER_FIRST_EXECUTE_RAILS.some((rail) =>
+    ["brave_search", "serper", "firecrawl"].includes(rail.provider),
+  ),
+  false,
+);
+
+assert.equal(isOnboardingExecuteSuccess(200, { success: true }), true);
+assert.equal(isOnboardingExecuteSuccess(200, { success: false }), false);
+assert.equal(isOnboardingExecuteSuccess(402, { success: true }), false);
+assert.equal(
+  formatOnboardingExecuteResult("nasa", { data: { title: "Helix Nebula" } }),
+  "NASA APOD: Helix Nebula",
+);
+assert.equal(
+  formatOnboardingExecuteResult("frankfurter", { rates: { USD: 1.17 } }),
+  "EUR/USD 1.17",
+);
+
+const wizard = readFileSync(new URL("../components/OnboardingWizard.tsx", import.meta.url), "utf8");
+assert.match(wizard, /ONBOARDING_OVERLAY_CLASS/);
+assert.match(wizard, /backdrop-blur-2xl|ONBOARDING_OVERLAY_CLASS/);
+assert.match(wizard, /WAITING_FOR_FIRST_CALL|Waiting for your first tool call/);
+assert.match(wizard, /AGENT_FIRST_CALL_PROMPT/);
+assert.match(wizard, /Send this to your agent/);
+assert.match(wizard, /Cursor/);
+assert.match(wizard, /Codex/);
+assert.match(wizard, /Claude Code/);
+assert.match(wizard, /ChatGPT/);
+assert.match(wizard, /Grok/);
+assert.match(wizard, /Other MCP/);
+assert.match(wizard, /Later/);
+assert.match(wizard, /onboarding:dismiss/);
+assert.match(wizard, /decideOnboardingGate/);
+assert.match(wizard, /gate === "complete"/);
+assert.match(wizard, /firstCallAt/);
+assert.match(
+  wizard,
+  /door === "agent"/,
+  "agent door must be gated so the browser does not POST the first execute",
+);
+assert.doesNotMatch(wizard, /provider:\s*"brave_search"|brave_search\/search/);
+assert.doesNotMatch(wizard, /What do you want to try first/);
+assert.doesNotMatch(wizard, /I already have a prompt in mind/);
+
+console.log("onboarding first-call: frost overlay, SKILL.md NASA prompt, wait/auto-complete, skip stays quiet");

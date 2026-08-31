@@ -197,6 +197,7 @@ const firstCallFiles = [
   "landing/public/install.sh",
   "landing/public/install.ps1",
   "landing/public/SKILL.md",
+  "landing/src/lib/onboarding-first-call.ts",
 ];
 for (const file of firstCallFiles) {
   const source = readFileSync(file, "utf8");

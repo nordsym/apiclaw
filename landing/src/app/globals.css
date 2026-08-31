@@ -518,6 +518,12 @@ input[type="email"]::placeholder {
 }
 .claw-cmd .state { flex: none; align-self: center; font-family: Inter, system-ui, sans-serif; font-size: 12px; color: var(--text-muted); }
 .claw-cmd .state[data-copied="true"] { color: var(--ok); }
+.claw-cmd-wrap { align-items: flex-start; min-height: auto; }
+.claw-cmd-wrap .text { white-space: normal; overflow-x: visible; padding: 12px 0; }
+@media (min-width: 640px) {
+  .claw-cmd-wrap .text { white-space: normal; overflow-x: visible; padding: 12px 0; }
+}
+.claw-cmd-wrap .state { padding-top: 12px; }
 
 /* Session artifact: the one hero object. */
 .claw-session {

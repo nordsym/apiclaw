@@ -362,10 +362,21 @@ assert.match(
   /Access-Control-Allow-Headers[^\n]+Idempotency-Key/,
   "browser managed calls must be allowed to send their idempotency key",
 );
+const onboardingWizard = readFileSync("landing/src/components/OnboardingWizard.tsx", "utf8");
 assert.match(
-  readFileSync("landing/src/components/OnboardingWizard.tsx", "utf8"),
+  onboardingWizard,
   /"Idempotency-Key": idempotencyKey/,
   "the golden first managed call must be idempotent",
+);
+assert.match(
+  onboardingWizard,
+  /ONBOARDING_OVERLAY_CLASS|backdrop-blur-2xl/,
+  "onboarding must frost the workspace, not only dim it",
+);
+assert.doesNotMatch(
+  onboardingWizard,
+  /provider:\s*"brave_search"|brave_search\/search/,
+  "onboarding must not send first execute to billed Brave",
 );
 
 const mcpbManifest = JSON.parse(readFileSync("landing/mcpb/manifest.json", "utf8")) as {
