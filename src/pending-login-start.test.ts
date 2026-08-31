@@ -19,6 +19,7 @@ const {
   completeFirstRunAuth,
   firstRunIncompleteMessage,
   unsignedExecuteMessage,
+  unsignedFirstRunToolResult,
 } = await import("./first-run.js");
 const { ensurePendingLogin } = await import("./pending-login-start.js");
 
@@ -68,7 +69,11 @@ assert.equal(reused.browserUrl, minted.browserUrl);
 assert.equal(startCalls, 1);
 
 const payload = agentAuthRequiredPayload({ login_url: minted.browserUrl });
+assert.equal(Object.keys(payload)[0], "login_url", "login_url is the primary visible field");
 assert.equal(payload.login_url, minted.browserUrl);
+assert.match(String(payload.login_url), /\/auth\/cli\?authId=/);
+assert.equal(payload.status, "auth_required");
+assert.notEqual(payload.status, "success");
 assert.match(String(payload.instruction), /auth\/cli\?authId=mintedauthidmintedauthidmint12/);
 assert.match(String(payload.instruction), /one action/);
 assert.doesNotMatch(String(payload.instruction), /must click Authorize after Clerk/);
@@ -78,8 +83,24 @@ const afterMint = await agentAuthRequiredPayloadAfterMint(
   { tool: "call_api" },
   { ensurePending: async () => minted },
 );
+assert.equal(Object.keys(afterMint)[0], "login_url");
 assert.equal(afterMint.login_url, minted.browserUrl);
+assert.match(String(afterMint.login_url), /\/auth\/cli\?authId=/);
+assert.equal(afterMint.status, "auth_required");
+assert.notEqual(afterMint.status, "success");
 assert.match(String(afterMint.instruction), /Show the human this login URL/);
+
+const firstRunTool = await unsignedFirstRunToolResult(
+  { tool: "apiclaw_help" },
+  { ensurePending: async () => minted },
+);
+assert.equal(firstRunTool.isError, true, "unsigned first_run must be an error the host must show");
+const firstRunPayload = JSON.parse(firstRunTool.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(firstRunPayload)[0], "login_url");
+assert.equal(firstRunPayload.login_url, minted.browserUrl);
+assert.match(String(firstRunPayload.login_url), /\/auth\/cli\?authId=/);
+assert.equal(firstRunPayload.status, "auth_required");
+assert.notEqual(firstRunPayload.status, "success");
 
 const unsigned = unsignedExecuteMessage(minted.browserUrl);
 assert.match(unsigned, /Open this login URL: https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);

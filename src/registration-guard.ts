@@ -12,6 +12,8 @@ export {
   FIRST_CALL_PROMPT,
   agentAuthRequiredPayload,
   agentAuthRequiredPayloadAfterMint,
+  authRequiredToolResult,
+  unsignedFirstRunToolResult,
 } from "./first-run.js";
 
 export interface WorkspaceContextLike {

@@ -131,6 +131,51 @@ export function getMachineFingerprint(): string {
   return `${hostname}:${username}`;
 }
 
+/** hostname:username — username is after the last colon. */
+export function splitMachineFingerprint(fingerprint: string): {
+  hostname: string;
+  username: string;
+} {
+  const i = fingerprint.lastIndexOf(":");
+  if (i === -1) return { hostname: fingerprint, username: "" };
+  return { hostname: fingerprint.slice(0, i), username: fingerprint.slice(i + 1) };
+}
+
+/**
+ * Scanner / GitHub Actions fingerprints that must not count as human.
+ * Keep in sync with convex/funnel.ts classifyFingerprint.
+ * DESKTOP-* is a real machine — never bot.
+ */
+export function classifyMachineFingerprint(
+  fingerprint?: string | null,
+): "bot" | "ci" | null {
+  const raw = (fingerprint || "").trim();
+  if (!raw) return null;
+  const lower = raw.toLowerCase();
+  const { hostname, username } = splitMachineFingerprint(raw);
+  const host = hostname.toLowerCase();
+  const user = username.toLowerCase();
+
+  if (lower.startsWith("scan-") || host === "scan" || user === "scan") {
+    return "bot";
+  }
+  if (host.startsWith("detonation-server-")) return "bot";
+  if (host === "instance") return "bot";
+
+  if (user === "runner" || lower.endsWith(":runner")) return "ci";
+  if (
+    host === "runner" ||
+    host.startsWith("runner-") ||
+    host.startsWith("github-runner") ||
+    host.startsWith("actions-runner") ||
+    host.startsWith("github-actions")
+  ) {
+    return "ci";
+  }
+
+  return null;
+}
+
 /**
  * Detect which MCP client is running the server
  * Priority: explicit env (set by mcp-install) → known env hints → fallback

@@ -12,8 +12,8 @@
  *
  * Classification (source):
  *   human    — real user, reasonable UA, interactive MCP client
- *   ci       — CI/CD runner (CI env var family, GITHUB_ACTIONS, headless UAs)
- *   bot      — scanner/crawler (User-Agent matches crawler list)
+ *   ci       — CI/CD runner (CI env var family, GITHUB_ACTIONS, :runner fingerprints)
+ *   bot      — scanner/crawler (UA list, scan-/detonation-server-/instance: fingerprints)
  *   internal — NordSym test traffic (fingerprint prefix, allowlisted emails)
  *
  * Truth metrics are built from (event=workspace_authenticated AND source=human) and
@@ -108,6 +108,58 @@ const INTERNAL_EMAIL_EXACT = ["gustav@nordsym.com", "gustavnordsync@gmail.com"];
 // Fingerprint prefix(es) used by internal test machines.
 const INTERNAL_FINGERPRINT_PREFIXES: string[] = [];
 
+/**
+ * hostname:username from getMachineFingerprint. Username is after the last
+ * colon so IPv6-ish hostnames still parse.
+ */
+export function splitFingerprint(fingerprint: string): {
+  hostname: string;
+  username: string;
+} {
+  const i = fingerprint.lastIndexOf(":");
+  if (i === -1) return { hostname: fingerprint, username: "" };
+  return { hostname: fingerprint.slice(0, i), username: fingerprint.slice(i + 1) };
+}
+
+/**
+ * Classify scanner / GitHub Actions fingerprints that have no CI=true and no
+ * bot UA. Live 7d rows labeled "human" that are not people:
+ *   scan-<hex>:scan
+ *   detonation-server-*:nonroot
+ *   <hex>:runner
+ *   instance:<id>
+ * DESKTOP-*:devuser is a real machine — do not mark bot.
+ */
+export function classifyFingerprint(
+  fingerprint?: string | null,
+): Classification | null {
+  const raw = (fingerprint || "").trim();
+  if (!raw) return null;
+  const lower = raw.toLowerCase();
+  const { hostname, username } = splitFingerprint(raw);
+  const host = hostname.toLowerCase();
+  const user = username.toLowerCase();
+
+  if (lower.startsWith("scan-") || host === "scan" || user === "scan") {
+    return "bot";
+  }
+  if (host.startsWith("detonation-server-")) return "bot";
+  if (host === "instance") return "bot";
+
+  if (user === "runner" || lower.endsWith(":runner")) return "ci";
+  if (
+    host === "runner" ||
+    host.startsWith("runner-") ||
+    host.startsWith("github-runner") ||
+    host.startsWith("actions-runner") ||
+    host.startsWith("github-actions")
+  ) {
+    return "ci";
+  }
+
+  return null;
+}
+
 export function classifySource(input: {
   userAgent?: string | null;
   envFlags?: Record<string, string | undefined>;
@@ -135,6 +187,9 @@ export function classifySource(input: {
     if (val && val !== "false" && val !== "0") return "ci";
   }
 
+  const fromFingerprint = classifyFingerprint(fp);
+  if (fromFingerprint) return fromFingerprint;
+
   const ua = (input.userAgent || "").toLowerCase();
   if (ua) {
     for (const m of BOT_UA_MARKERS) {
@@ -142,6 +197,28 @@ export function classifySource(input: {
     }
   }
 
+  return "human";
+}
+
+/**
+ * Recompute classification so a stale stored "human" on a scanner fingerprint
+ * cannot inflate scorecard / getFunnel. Stored ci/bot/internal is kept when
+ * the fingerprint has no scanner signal (e.g. 100.64.x.x:root already ci).
+ */
+export function resolvedClassification(event: {
+  classification?: string | null;
+  fingerprint?: string | null;
+  userAgent?: string | null;
+  email?: string | null;
+}): Classification {
+  const recomputed = classifySource({
+    fingerprint: event.fingerprint,
+    userAgent: event.userAgent,
+    email: event.email,
+  });
+  if (recomputed !== "human") return recomputed;
+  const stored = event.classification;
+  if (stored === "ci" || stored === "bot" || stored === "internal") return stored;
   return "human";
 }
 
@@ -227,6 +304,12 @@ export const recordEvent = mutation({
     if (!allowedClass.includes(args.classification as Classification)) {
       return { success: false, error: `unknown_classification:${args.classification}` };
     }
+    const classification = resolvedClassification({
+      classification: args.classification,
+      fingerprint: args.fingerprint,
+      userAgent: args.userAgent,
+      email: args.email,
+    });
 
     if (args.dedupeKey) {
       const existing = await ctx.db
@@ -240,7 +323,7 @@ export const recordEvent = mutation({
 
     const id = await ctx.db.insert("funnelEvents", {
       event: args.event,
-      classification: args.classification,
+      classification,
       workspaceId: args.workspaceId,
       fingerprint: args.fingerprint,
       email: args.email,
@@ -282,6 +365,11 @@ export const recordEventInternal = internalMutation({
     }
     return await ctx.db.insert("funnelEvents", {
       ...args,
+      classification: resolvedClassification({
+        classification: args.classification,
+        fingerprint: args.fingerprint,
+        email: args.email,
+      }),
       dedupeKey,
       timestamp: Date.now(),
     });
@@ -389,14 +477,17 @@ export const getFunnel = internalQuery({
       .withIndex("by_timestamp", (q) => q.gte("timestamp", since))
       .collect();
 
-    const filtered = events.filter((e) => includes.includes(e.classification));
+    const filtered = events.filter((e) =>
+      includes.includes(resolvedClassification(e)),
+    );
 
     const rollup = rollupCanonicalFunnel(filtered);
 
     // Classification breakdown across all events in window.
     const byClass: Record<string, number> = { human: 0, ci: 0, bot: 0, internal: 0 };
     for (const e of events) {
-      byClass[e.classification] = (byClass[e.classification] || 0) + 1;
+      const cls = resolvedClassification(e);
+      byClass[cls] = (byClass[cls] || 0) + 1;
     }
 
     return {
@@ -437,13 +528,15 @@ export const getScorecard = internalQuery({
       .withIndex("by_timestamp", (q) => q.gte("timestamp", args.compare ? priorSince : since))
       .collect();
 
-    const window = events.filter((e) => e.timestamp >= since && e.classification === cls);
+    const window = events.filter(
+      (e) => e.timestamp >= since && resolvedClassification(e) === cls,
+    );
     const prior = args.compare
       ? events.filter(
           (e) =>
             e.timestamp >= priorSince &&
             e.timestamp < since &&
-            e.classification === cls
+            resolvedClassification(e) === cls
         )
       : null;
 
@@ -615,7 +708,9 @@ export const getDiagnostics = internalQuery({
       .collect();
 
     const filtered = events.filter(
-      (e) => e.classification === cls && DIAGNOSTIC_EVENTS.includes(e.event as DiagnosticEvent)
+      (e) =>
+        resolvedClassification(e) === cls &&
+        DIAGNOSTIC_EVENTS.includes(e.event as DiagnosticEvent)
     );
 
     const breakdown: Record<string, Record<string, number>> = {};

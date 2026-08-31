@@ -86,15 +86,35 @@ export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string 
   ].join("\n");
 }
 
+export type AuthRequiredToolResult = {
+  content: { type: "text"; text: string }[];
+  isError: true;
+};
+
+/** MCP/CLI host-visible error. isError must be true so agents cannot treat this as success. */
+export function authRequiredToolResult(
+  payload: Record<string, unknown>,
+): AuthRequiredToolResult {
+  return {
+    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+    isError: true,
+  };
+}
+
 /** Shared MCP / CLI payload when execute is refused for no session. */
 export function agentAuthRequiredPayload(
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
   const extraUrl = typeof extra.login_url === "string" ? extra.login_url : undefined;
   const url = extraUrl || readPendingLoginUrl();
-  const { login_url: _ignoredLoginUrl, ...rest } = extra;
+  const { login_url: _ignoredLoginUrl, status: extraStatus, ...rest } = extra;
+  const status =
+    typeof extraStatus === "string" && extraStatus !== "success"
+      ? extraStatus
+      : "auth_required";
   return {
-    status: "auth_required",
+    login_url: url ?? null,
+    status,
     action: "agent_auth_required",
     error: "Not ready. whoami has no session. Do not execute.",
     command: AUTH_LOGIN_COMMAND,
@@ -103,7 +123,6 @@ export function agentAuthRequiredPayload(
       "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. whoami redeems Authorize even if auth login was killed or localhost failed. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
     first_call_prompt: FIRST_CALL_PROMPT,
     ...rest,
-    login_url: url ?? null,
     instruction: url
       ? `Show the human this login URL: ${url}. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute.`
       : "Show the human the login URL from login_url. Do not only print `npx @nordsym/apiclaw auth login`. Printing a command without /auth/cli?authId= is not enough.",
@@ -130,6 +149,17 @@ export async function agentAuthRequiredPayloadAfterMint(
     ...extra,
     login_url: pending?.browserUrl ?? readPendingLoginUrl(),
   });
+}
+
+/** Unsigned first_run / execute: mint, then return an isError tool result. */
+export async function unsignedFirstRunToolResult(
+  extra: Record<string, unknown> = {},
+  options: {
+    openBrowser?: boolean;
+    ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
+  } = {},
+): Promise<AuthRequiredToolResult> {
+  return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint(extra, options));
 }
 
 export function firstRunIncompleteMessage(pendingLoginUrl?: string | null): string {
