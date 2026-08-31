@@ -16,11 +16,16 @@ export const getState = query({
   handler: async (ctx, { token }) => {
     const ws = await workspaceFromToken(ctx, token);
     if (!ws) return null;
+    const firstCall = await ctx.db
+      .query("funnelEvents")
+      .withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", `first_call:${ws._id}`))
+      .first();
     return {
       completedAt: ws.onboardingCompletedAt ?? null,
       dismissedAt: ws.onboardingDismissedAt ?? null,
       source: ws.onboardingSource ?? null,
       building: ws.onboardingBuilding ?? null,
+      firstCallAt: firstCall?.timestamp ?? null,
     };
   },
 });
