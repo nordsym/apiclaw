@@ -28,7 +28,7 @@ assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: 1, firstCall
 assert.equal(decideOnboardingGate({ completedAt: null, dismissedAt: null, firstCallAt: null }), "open");
 
 assert.match(ONBOARDING_OVERLAY_CLASS, /backdrop-blur-2xl/);
-assert.match(ONBOARDING_OVERLAY_CLASS, /bg-\[var\(--background\)\]\/15/);
+assert.match(ONBOARDING_OVERLAY_CLASS, /bg-white\/10/);
 assert.match(ONBOARDING_OVERLAY_CLASS, /backdrop-saturate-150/);
 assert.doesNotMatch(ONBOARDING_OVERLAY_CLASS, /bg-black\/70/);
 

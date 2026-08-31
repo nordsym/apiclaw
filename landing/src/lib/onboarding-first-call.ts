@@ -8,7 +8,7 @@
  */
 
 export const ONBOARDING_OVERLAY_CLASS =
-  "fixed inset-0 z-[60] flex items-end justify-center bg-[var(--background)]/15 backdrop-blur-2xl backdrop-saturate-150 p-0 sm:items-center sm:p-4";
+  "fixed inset-0 z-[60] flex items-end justify-center bg-white/10 backdrop-blur-2xl backdrop-saturate-150 p-0 sm:items-center sm:p-4";
 
 export const WAITING_FOR_FIRST_CALL = "Waiting for your first tool call";
 
