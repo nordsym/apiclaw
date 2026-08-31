@@ -7,6 +7,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
+import { classifyMachineFingerprint } from "./session.js";
 
 const CONVEX_URL = process.env.CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
 
@@ -76,6 +77,8 @@ export function classifyLocalSource(input: {
     const val = env[key];
     if (val && val !== "false" && val !== "0") return "ci";
   }
+  const fromFingerprint = classifyMachineFingerprint(input.fingerprint);
+  if (fromFingerprint) return fromFingerprint;
   const ua = (input.userAgent || "").toLowerCase();
   if (ua) {
     for (const m of BOT_UA_MARKERS) {

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "apiclaw",
   "display_name": "APIClaw",
-  "version": "2.9.7",
+  "version": "2.9.8",
   "description": "Your agent calls real APIs. You sign in once. Discover 26,619 API definitions, including 689 exact-name source-verified entries. Source verification is not execution.",
   "long_description": "APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,619 API definitions discoverable, 1,025 callable now. Of the current catalog entries, 689 map to source-verification evidence by exact name. Source verification is not a promise of proxy execution. APIClaw inventories 22 managed provider adapters, all customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless proxy stays disabled. Provider keys stay server-side. After this extension installs, sign in with `npx @nordsym/apiclaw auth login` before the first managed call. Confirm with `npx @nordsym/apiclaw auth whoami`. The same credential works across local MCP, CLI, HTTP gateway, and Remote MCP. First live rail: NASA APOD (`call_api` provider nasa action apod). Free APIs stay free forever, no card required. Add a card to unlock Paid APIs, billed at provider cost plus 15%.",
   "author": {

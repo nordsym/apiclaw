@@ -12,6 +12,7 @@ import {
   firstRunExecuteFailedMessage,
   firstRunIncompleteMessage,
   unsignedExecuteMessage,
+  unsignedFirstRunToolResult,
 } from "./first-run.js";
 import { requireVerifiedOwner } from "./registration-guard.js";
 import { MANAGED_USAGE_POLICY } from "./product-truth.js";
@@ -129,7 +130,9 @@ if (!noSession.ok) {
   assert.equal(noSession.payload.command, AUTH_LOGIN_COMMAND);
   assert.equal(noSession.payload.first_call_prompt, FIRST_CALL_PROMPT);
   assert.equal(noSession.payload.signup_url, undefined);
-  assert.ok("login_url" in noSession.payload, "payload must expose login_url as the primary agent-visible field");
+  assert.equal(Object.keys(noSession.payload)[0], "login_url", "payload must expose login_url as the primary agent-visible field");
+  assert.equal(noSession.payload.status, "auth_required");
+  assert.notEqual(noSession.payload.status, "success");
   assert.match(String(noSession.payload.what_happens), /without a TTY|auth\/cli\?authId=/);
   assert.doesNotMatch(
     JSON.stringify(noSession.payload),
@@ -171,6 +174,21 @@ const noTtyMint = await completeFirstRunAuth({
 });
 assert.equal(noTtyMint.complete, false);
 assert.equal(noTtyMint.launched, false);
+
+const unsignedFirstRun = await unsignedFirstRunToolResult(
+  { tool: "call_api" },
+  {
+    ensurePending: async () => ({
+      browserUrl: "https://apiclaw.cloud/auth/cli?authId=headlessmintheadlessmint12",
+    }),
+  },
+);
+assert.equal(unsignedFirstRun.isError, true);
+const unsignedPayload = JSON.parse(unsignedFirstRun.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(unsignedPayload)[0], "login_url");
+assert.match(String(unsignedPayload.login_url), /\/auth\/cli\?authId=/);
+assert.equal(unsignedPayload.status, "auth_required");
+assert.notEqual(unsignedPayload.status, "success");
 
 const already = await completeFirstRunAuth({
   whoami: () => true,

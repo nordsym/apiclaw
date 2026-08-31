@@ -41,7 +41,7 @@ import {
 } from './confirmation.js';
 import { executeCapability, listCapabilities, hasCapability } from './capability-router.js';
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
-import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
+import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, authRequiredToolResult, unsignedFirstRunToolResult, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { ensurePendingLogin } from './pending-login-start.js';
 import { hasWorkingWhoami } from './first-run.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
@@ -551,10 +551,7 @@ async function enforceOwner(channel: string):
   } catch { /* non-blocking */ }
   return {
     ok: false,
-    response: {
-      content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
-      isError: true,
-    },
+    response: authRequiredToolResult(payload),
   };
 }
 
@@ -1201,16 +1198,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'apiclaw_help': {
         const isAuthenticated = !!workspaceContext;
         if (!isAuthenticated) {
-          const payload = await agentAuthRequiredPayloadAfterMint({ tool: "apiclaw_help" });
-          return {
-            content: [{
-              type: "text",
-              text: JSON.stringify({
-                ...payload,
-                next: "Show the human login_url. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Loop whoami until it prints an email. Then NASA APOD, Frankfurter latest if NASA is not 200.",
-              }, null, 2),
-            }],
-          };
+          return unsignedFirstRunToolResult({
+            tool: "apiclaw_help",
+            next: "Show the human login_url. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Loop whoami until it prints an email. Then NASA APOD, Frankfurter latest if NASA is not 200.",
+          });
         }
         const helpText = `
 🦞 APIClaw -- The API Layer for AI Agents
@@ -1531,14 +1522,9 @@ Docs: https://apiclaw.cloud
 
       case 'check_balance': {
         if (!workspaceContext?.sessionToken) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-                tool: "check_balance",
-              }), null, 2),
-            }],
-          };
+          return unsignedFirstRunToolResult({
+            tool: "check_balance",
+          });
         }
 
         const response = await fetch(`${CONVEX_URL}/api/balance`, {
@@ -2540,14 +2526,9 @@ Docs: https://apiclaw.cloud
         const session = readSession();
         
         if (!session) {
-          return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-                tool: "check_workspace_status",
-              }), null, 2)
-            }]
-          };
+          return unsignedFirstRunToolResult({
+            tool: "check_workspace_status",
+          });
         }
         
         try {

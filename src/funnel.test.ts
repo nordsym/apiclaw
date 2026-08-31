@@ -33,6 +33,15 @@ test('classify: human is default', () => {
   assert.equal(classifyLocalSource({ env: {} }), 'human');
 });
 
+test('classify: live scanner fingerprints are not human', () => {
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'scan-a1b2c3d4e5f67890:scan' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'detonation-server-1:nonroot' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: '9f3a2b1c4d5e6f70:runner' }), 'ci');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'instance:i-0abc123def456' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:devuser' }), 'human');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: '100.64.12.34:root' }), 'human');
+});
+
 test('classify: CI env flag → ci', () => {
   assert.equal(classifyLocalSource({ env: { CI: 'true' } }), 'ci');
   assert.equal(classifyLocalSource({ env: { GITHUB_ACTIONS: '1' } }), 'ci');

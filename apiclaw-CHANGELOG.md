@@ -10,6 +10,16 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+## [2.9.8] — 2026-08-31
+
+### Fixed — honest funnel classification
+
+- **`classifySource` treats scanner / GitHub Actions fingerprints as bot or ci**, not human. Live rows that were inflating human installs: `scan-<hex>:scan`, `detonation-server-*:nonroot`, `<hex>:runner`, `instance:<id>`. `DESKTOP-*:devuser` stays human. `getFunnel` / `getScorecard` re-resolve classification on read so existing scanner rows stop counting as users.
+
+### Fixed — unsigned first_run is an error with a live Clerk URL
+
+- **MCP/CLI unsigned first_run and execute return `isError` + `status: auth_required`**. The primary visible field is `login_url` (`https://apiclaw.cloud/auth/cli?authId=…`). Agents cannot treat first_run as success. Minting still happens without a TTY.
+
 ## [2.9.7] — 2026-08-31
 
 ### Changed — first execute after Authorize
