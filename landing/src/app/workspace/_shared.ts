@@ -16,6 +16,7 @@ export interface Workspace {
   stripeCustomerId?: string;
   stripeSubscriptionStatus?: string;
   paygActive?: boolean;
+  hasPaymentMethod?: boolean;
   createdAt: number;
 }
 
