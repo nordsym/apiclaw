@@ -10,8 +10,15 @@ import {
   formatOnboardingExecuteResult,
   httpFirstCallCurl,
   isOnboardingExecuteSuccess,
+  UNKNOWN_ONBOARDING_STATE,
 } from "./onboarding-first-call";
 
+assert.equal(
+  decideOnboardingGate(null),
+  "open",
+  "unknown getState must fail-open so a new Clerk user cannot wander",
+);
+assert.equal(decideOnboardingGate(UNKNOWN_ONBOARDING_STATE), "open");
 assert.equal(decideOnboardingGate({ completedAt: 1, dismissedAt: null, firstCallAt: null }), "closed");
 assert.equal(decideOnboardingGate({ completedAt: 1, dismissedAt: 2, firstCallAt: 3 }), "closed");
 assert.equal(
@@ -94,8 +101,19 @@ assert.match(wizard, /Other MCP/);
 assert.match(wizard, /Later/);
 assert.match(wizard, /onboarding:dismiss/);
 assert.match(wizard, /decideOnboardingGate/);
+assert.match(wizard, /UNKNOWN_ONBOARDING_STATE/);
+assert.match(
+  wizard,
+  /next \?\? UNKNOWN_ONBOARDING_STATE/,
+  "getState failure must fail-open, not keep the wizard closed",
+);
 assert.match(wizard, /gate === "complete"/);
 assert.match(wizard, /firstCallAt/);
+assert.match(
+  wizard,
+  /view === "launch" && door === "agent"[\s\S]*Send this to your agent[\s\S]*AGENT_FIRST_CALL_PROMPT[\s\S]*WAITING_FOR_FIRST_CALL/,
+  "agent prompt must appear on the waiting step, before any browser call",
+);
 assert.match(
   wizard,
   /door === "agent"/,

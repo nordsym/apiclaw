@@ -36,13 +36,22 @@ export type OnboardingState = {
   firstCallAt: number | null;
 };
 
+/** Used when getState fails or is unknown. first_call is missing, so fail-open. */
+export const UNKNOWN_ONBOARDING_STATE: OnboardingState = {
+  completedAt: null,
+  dismissedAt: null,
+  firstCallAt: null,
+};
+
 export type OnboardingGate = "closed" | "complete" | "resume" | "open";
 
 /**
  * first_call already landed (completeFirstExecute or the agent) must not
  * trap the user in the wizard. Dismissed without a first call can resume.
+ * Unknown / failed getState fails open so a new Clerk user cannot wander.
  */
-export function decideOnboardingGate(state: OnboardingState): OnboardingGate {
+export function decideOnboardingGate(state: OnboardingState | null): OnboardingGate {
+  if (!state) return "open";
   if (state.completedAt) return "closed";
   if (state.firstCallAt) return "complete";
   if (state.dismissedAt) return "resume";

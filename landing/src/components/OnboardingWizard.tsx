@@ -18,6 +18,7 @@ import {
   formatOnboardingExecuteResult,
   httpFirstCallCurl,
   isOnboardingExecuteSuccess,
+  UNKNOWN_ONBOARDING_STATE,
   type OnboardingState,
 } from "@/lib/onboarding-first-call";
 
@@ -75,7 +76,8 @@ async function callMutation(path: string, args: Record<string, unknown>) {
   }
 }
 
-/** Returns the onboarding state, or null when the session is unknown or the query failed. */
+/** Returns the onboarding state, or null when the session is unknown or the query failed.
+ *  Null is unknown, not "already done". The wizard fail-opens on null. */
 async function fetchOnboardingState(token: string): Promise<OnboardingState | null> {
   try {
     const res = await fetch(`${CONVEX_URL}/api/query`, {
@@ -122,15 +124,16 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
     if (!sessionToken) return;
     let cancelled = false;
     fetchOnboardingState(sessionToken).then(async (next) => {
-      if (cancelled || !next) return;
-      const gate = decideOnboardingGate(next);
+      if (cancelled) return;
+      const resolved = next ?? UNKNOWN_ONBOARDING_STATE;
+      const gate = decideOnboardingGate(resolved);
       if (gate === "complete") {
         await callMutation("onboarding:complete", { token: sessionToken });
         if (cancelled) return;
-        setState({ ...next, completedAt: next.completedAt ?? Date.now() });
+        setState({ ...resolved, completedAt: resolved.completedAt ?? Date.now() });
         return;
       }
-      setState(next);
+      setState(resolved);
       if (gate === "open") {
         setOpen(true);
         setView("choose");
