@@ -23,6 +23,12 @@ import {
   FIRST_EXECUTE_NASA as CLI_NASA,
   FIRST_EXECUTE_PATH as CLI_PATH,
 } from "../src/first-call.js";
+import { FIRST_EXECUTE_BILLED_RESEARCH_PROVIDERS } from "../src/first-execute-rails.js";
+import {
+  estimateManagedProviderCostUsd,
+  hasBillingGradeManagedCost,
+} from "./managedCostPolicy";
+import { evaluateManagedUsage } from "./managedUsagePolicy";
 
 type Row = Record<string, any> & { _id: string };
 
@@ -172,10 +178,38 @@ assert.deepEqual(FIRST_EXECUTE_NASA, CLI_NASA);
 assert.deepEqual(FIRST_EXECUTE_FRANKFURTER, CLI_FRANKFURTER);
 assert.deepEqual(FIRST_EXECUTE_RAILS, [FIRST_EXECUTE_NASA, FIRST_EXECUTE_FRANKFURTER]);
 assert.equal(
-  FIRST_EXECUTE_RAILS.some((rail) => ["brave_search", "serper", "firecrawl"].includes(rail.provider)),
+  FIRST_EXECUTE_RAILS.some((rail) =>
+    (FIRST_EXECUTE_BILLED_RESEARCH_PROVIDERS as readonly string[]).includes(rail.provider),
+  ),
   false,
   "billed research must not be an automatic first-execute rail",
 );
+
+const newWorkspace = { tier: "free" };
+const nasaCost = estimateManagedProviderCostUsd({ provider: "nasa", action: "apod" });
+assert.equal(nasaCost, 0);
+assert.equal(hasBillingGradeManagedCost({ provider: "nasa", action: "apod" }), true);
+assert.equal(
+  evaluateManagedUsage(newWorkspace, { estimatedProviderCostUsd: nasaCost, billingGradeCost: true }).allowed,
+  true,
+  "NASA APOD must activate a workspace with no card",
+);
+assert.equal(
+  evaluateManagedUsage(newWorkspace, { estimatedProviderCostUsd: 0, billingGradeCost: true }).allowed,
+  true,
+  "Frankfurter must activate a workspace with no card",
+);
+for (const billed of FIRST_EXECUTE_BILLED_RESEARCH_PROVIDERS) {
+  const action = billed === "firecrawl" ? "scrape" : "search";
+  const cost = estimateManagedProviderCostUsd({ provider: billed, action });
+  assert.ok(cost !== undefined && cost > 0, `${billed} must have real provider cost`);
+  const billedUsage = evaluateManagedUsage(newWorkspace, {
+    estimatedProviderCostUsd: cost,
+    billingGradeCost: hasBillingGradeManagedCost({ provider: billed, action }),
+  });
+  assert.equal(billedUsage.allowed, false, `${billed} must not activate a workspace with no card`);
+  assert.equal(billedUsage.reason, "payment_required", `${billed} is why Frankfurter stays as the free fallback`);
+}
 assert.equal(firstExecuteIdempotencyKey("ws1", "nasa"), "apiclaw-first:ws1:nasa");
 assert.equal(isFirstExecuteSuccess(200, { success: true }), true);
 assert.equal(isFirstExecuteSuccess(200, { success: false }), false);
