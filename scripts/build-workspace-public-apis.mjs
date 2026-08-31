@@ -39,7 +39,7 @@ const DOCS_OR_SPEC_HOSTS = new Set([
 const DOCS_HOST_SUFFIXES = [".github.io", ".readme.io", ".gitbook.io", ".notion.site"];
 
 const CURATED = [
-  { id: "frankfurter", name: "Frankfurter", baseUrl: "https://api.frankfurter.app", origin: "https://api.frankfurter.app" },
+  { id: "frankfurter", name: "Frankfurter", baseUrl: "https://api.frankfurter.dev/v1", origin: "https://api.frankfurter.dev" },
   { id: "coingecko", name: "CoinGecko", baseUrl: "https://api.coingecko.com/api/v3", origin: "https://api.coingecko.com" },
   { id: "kroki", name: "Kroki", baseUrl: "https://kroki.io", origin: "https://kroki.io" },
 ];

@@ -125,12 +125,14 @@ Loop whoami. Each miss:
 - Do not send an empty `X-APIClaw-Session`.
 
 Only after whoami prints an email, execute NASA APOD, then
-Brave search if NASA is not 200.
+Frankfurter latest if NASA is not 200.
 
 ## 4. First execute — POST /v1/execute
 
 Only after whoami prints an email. Preferred research call:
-NASA APOD, then Brave search. Do not lead with FX.
+NASA APOD. Fallback is Frankfurter latest (free, no key, no
+card) so the first 200 still lands if NASA is down. Do not
+lead with billed research (Brave, Serper, Firecrawl).
 
 ### Preferred rail: NASA APOD
 
@@ -160,13 +162,18 @@ curl -sS https://api.apiclaw.cloud/v1/execute \
 
 A 200 with an APOD title is success. nasa/apod is a Free API: no card needed.
 
-### Fallback rail: Brave search
+### Fallback rail: Frankfurter latest
 
-If NASA is not 200, search the live web. Same whoami gate. Same
-nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
+If NASA is not 200, fetch today's ECB FX rates. Same whoami gate.
+Same nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
+This is the same last-resort rail the automatic first execute
+uses after Authorize. It is free forever, no card, no key.
+Brave / Serper / Firecrawl are paid research APIs and will
+return payment_required on a new workspace — do not use them
+for first execute.
 
 ```bash
-npx @nordsym/apiclaw call brave_search/search --params '{"query":"AI agent infrastructure news"}' --idempotency-key "apiclaw-first-brave-$(date +%s)"
+npx @nordsym/apiclaw call frankfurter/latest --params '{"path":"/latest"}' --idempotency-key "apiclaw-first-frankfurter-$(date +%s)"
 ```
 
 ```bash
@@ -174,14 +181,14 @@ if [ -z "$SESSION" ]; then echo "Stop. No session_token. Do not POST /v1/execute
 curl -sS https://api.apiclaw.cloud/v1/execute \
   -H "Content-Type: application/json" \
   -H "X-APIClaw-Session: $SESSION" \
-  -H "Idempotency-Key: apiclaw-first-brave-$(date +%s)" \
-  -d '{"provider":"brave_search","action":"search","params":{"query":"AI agent infrastructure news"}}'
+  -H "Idempotency-Key: apiclaw-first-frankfurter-$(date +%s)" \
+  -d '{"provider":"frankfurter","action":"latest","params":{"path":"/latest"}}'
 ```
 
 `$SESSION` is still `session_token` from `~/.apiclaw.toml`, same extract
 as the NASA curl. Same header the CLI slash form sends.
 
-A 200 with search results is success.
+A 200 with a EUR/USD rate is success.
 
 ### Execute rules
 
@@ -193,7 +200,7 @@ A 200 with search results is success.
   Reuse the same key after an ambiguous network failure.
 - After login, run whoami. Only then run the NASA CLI slash form (or
   the curl that extracts `session_token`). If it is not 200, run
-  Brave search. Do not invent a third rail. Do not lead with FX.
+  Frankfurter latest. Do not invent a billed-research rail.
 
 ## 5. After the first 200
 

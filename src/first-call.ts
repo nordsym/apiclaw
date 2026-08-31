@@ -1,10 +1,9 @@
 /**
- * First managed execute after sign-in.
+ * First managed execute after sign-in (CLI / MCP).
  *
- * Activation is a successful POST /v1/execute, not an npm install and not
- * whoami. NASA APOD is the preferred research rail. Frankfurter GET /latest
- * is the workspace-public fallback. Catalog names without a slash (CoinGecko)
- * must never be used here — the CLI maps those to legacy POST /v1/call.
+ * Rails live in first-execute-rails.ts — POST /v1/execute nasa/apod,
+ * then frankfurter latest. See that file for why NASA wins and why billed
+ * research stays out.
  */
 
 import { randomUUID } from "node:crypto";
@@ -14,31 +13,34 @@ import {
   readPendingLoginUrl,
   usableSessionToken,
 } from "./execute-auth.js";
+import {
+  FIRST_EXECUTE_FRANKFURTER,
+  FIRST_EXECUTE_NASA,
+  FIRST_EXECUTE_PATH,
+  FIRST_EXECUTE_RAILS,
+  firstExecuteFallbackSummary,
+  formatApodTitle,
+  formatFirstCallResult,
+  formatFrankfurterRate,
+  isFirstExecuteSuccess,
+  type FirstExecuteAttempt,
+} from "./first-execute-rails.js";
 
-export const FIRST_EXECUTE_PATH = "/v1/execute";
-
-export const FIRST_EXECUTE_NASA = {
-  provider: "nasa",
-  action: "apod",
-  params: {} as Record<string, unknown>,
-} as const;
-
-export const FIRST_EXECUTE_FRANKFURTER = {
-  provider: "frankfurter",
-  action: "latest",
-  params: { path: "/latest" } as Record<string, unknown>,
-} as const;
+export {
+  FIRST_EXECUTE_FRANKFURTER,
+  FIRST_EXECUTE_NASA,
+  FIRST_EXECUTE_PATH,
+  FIRST_EXECUTE_RAILS,
+  formatApodTitle,
+  formatFirstCallResult,
+  formatFrankfurterRate,
+};
+export type { FirstExecuteAttempt };
 
 export const AUTH_FIRST_CALL_COMMAND = "npx @nordsym/apiclaw auth first-call";
 
 const DEFAULT_GATEWAY =
   process.env.APICLAW_GATEWAY_URL || "https://adventurous-avocet-799.convex.site";
-
-export type FirstExecuteAttempt = {
-  provider: string;
-  action: string;
-  params: Record<string, unknown>;
-};
 
 export type FirstExecuteTransportResult = {
   status: number;
@@ -59,55 +61,6 @@ export type FirstExecuteResult = {
   error?: string;
   pendingLoginUrl?: string | null;
 };
-
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
-  return value as Record<string, unknown>;
-}
-
-function payloadData(body: unknown): Record<string, unknown> | undefined {
-  const root = asRecord(body);
-  if (!root) return undefined;
-  return asRecord(root.data) ?? root;
-}
-
-export function formatApodTitle(body: unknown): string | undefined {
-  const data = payloadData(body);
-  const title = data?.title;
-  if (typeof title === "string" && title.trim()) return title.trim();
-  return undefined;
-}
-
-export function formatFrankfurterRate(body: unknown): string | undefined {
-  const data = payloadData(body);
-  const rates = asRecord(data?.rates);
-  const usd = rates?.USD;
-  if (typeof usd === "number" && Number.isFinite(usd)) {
-    return `EUR/USD ${usd}`;
-  }
-  if (typeof usd === "string" && usd.trim()) {
-    return `EUR/USD ${usd.trim()}`;
-  }
-  return undefined;
-}
-
-export function formatFirstCallResult(provider: string, body: unknown): string | undefined {
-  if (provider === "nasa") {
-    const title = formatApodTitle(body);
-    return title ? `NASA APOD: ${title}` : undefined;
-  }
-  if (provider === "frankfurter") {
-    return formatFrankfurterRate(body);
-  }
-  return undefined;
-}
-
-function isExecuteSuccess(result: FirstExecuteTransportResult): boolean {
-  if (result.status !== 200) return false;
-  const root = asRecord(result.body);
-  if (root && root.success === false) return false;
-  return true;
-}
 
 export async function defaultFirstExecute(
   attempt: FirstExecuteAttempt,
@@ -164,7 +117,7 @@ export async function completeFirstExecute(options: {
   }
 
   const execute = options.execute ?? defaultFirstExecute;
-  const rails: FirstExecuteAttempt[] = [FIRST_EXECUTE_NASA, FIRST_EXECUTE_FRANKFURTER];
+  const rails: FirstExecuteAttempt[] = [...FIRST_EXECUTE_RAILS];
 
   for (const attempt of rails) {
     const result = await execute(attempt, {
@@ -172,10 +125,10 @@ export async function completeFirstExecute(options: {
       idempotencyKey: `apiclaw-first-${attempt.provider}-${randomUUID()}`,
       path: FIRST_EXECUTE_PATH,
     });
-    if (!isExecuteSuccess(result)) continue;
+    if (!isFirstExecuteSuccess(result.status, result.body)) continue;
     const summary =
       formatFirstCallResult(attempt.provider, result.body) ??
-      (attempt.provider === "nasa" ? "NASA APOD received" : "EUR FX rate received");
+      firstExecuteFallbackSummary(attempt.provider);
     return {
       ok: true,
       provider: attempt.provider,

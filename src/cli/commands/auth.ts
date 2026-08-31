@@ -12,7 +12,7 @@
  *      optional — whoami redeems a claimed authId from pending-login.
  *   6. Validate state, POST cliAuth:exchange with {code, codeVerifier} → session+key.
  *   7. Write ~/.apiclaw.toml, verify, then POST /v1/execute (provider nasa
- *      action apod, Frankfurter /latest fallback). Print a one-line result, not Done.
+ *      action apod, frankfurter /latest fallback). Print a one-line result, not Done.
  */
 
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';

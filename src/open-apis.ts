@@ -26,7 +26,7 @@ export const openAPIs: Record<string, OpenAPIConfig> = {
   frankfurter: {
     name: 'Frankfurter',
     description: 'Free currency exchange rates from European Central Bank',
-    baseUrl: 'https://api.frankfurter.app',
+    baseUrl: 'https://api.frankfurter.dev/v1',
     actions: {
       convert: {
         method: 'GET',

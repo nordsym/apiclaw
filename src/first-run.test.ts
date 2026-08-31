@@ -24,8 +24,8 @@ assert.doesNotMatch(AUTH_LOGIN_COMMAND, /apiclaw login(?! )/);
 assert.match(FIRST_CALL_PROMPT, /call_api/);
 assert.match(FIRST_CALL_PROMPT, /nasa/);
 assert.match(FIRST_CALL_PROMPT, /apod/);
-assert.match(FIRST_CALL_PROMPT, /brave_search/);
-assert.doesNotMatch(FIRST_CALL_PROMPT, /fixer_latest|Frankfurter|EUR/);
+assert.match(FIRST_CALL_PROMPT, /frankfurter/);
+assert.doesNotMatch(FIRST_CALL_PROMPT, /brave_search|fixer_latest/);
 assert.doesNotMatch(FIRST_CALL_PROMPT, /elevenlabs|replicate|ElevenLabs|Replicate/i);
 assert.match(FIRST_CALL_CLI, /nasa\/apod/);
 
@@ -107,8 +107,8 @@ assert.match(skill, /Show the human the login URL|Show the human the live `login
 assert.match(skill, /auth\/cli\?authId=/);
 assert.match(skill, /Do not only print/);
 assert.match(skill, /NASA APOD/);
-assert.match(skill, /Brave search/);
-assert.doesNotMatch(skill, /Frankfurter/);
+assert.match(skill, /Frankfurter/);
+assert.doesNotMatch(skill, /brave_search/);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);

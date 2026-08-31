@@ -23,11 +23,13 @@ export const AUTH_LOGIN_COMMAND = "npx @nordsym/apiclaw auth login";
 export const AUTH_WHOAMI_COMMAND = "npx @nordsym/apiclaw auth whoami";
 
 /**
- * First managed call after sign-in. Must be a rail that is customer-executable
- * today: NASA APOD or Brave search. Never lead with FX, ElevenLabs, or Replicate.
+ * First managed call after sign-in. NASA APOD is the research rail
+ * (zero-cost, no card). Frankfurter is the last-resort free fallback so
+ * first_call still lands. Brave / Serper / Firecrawl need a card — not
+ * this path. Never lead with ElevenLabs or Replicate.
  */
 export const FIRST_CALL_PROMPT =
-  'Not ready until whoami prints an email. Then fetch today\'s NASA Astronomy Picture of the Day: call_api with provider "nasa", action "apod", params {}. If NASA is not 200, call_api with provider "brave_search", action "search", params { query: "AI agent infrastructure news" }. Do not lead with FX.';
+  'Not ready until whoami prints an email. Then fetch today\'s NASA Astronomy Picture of the Day: call_api with provider "nasa", action "apod", params {}. If NASA is not 200, call_api with provider "frankfurter", action "latest", params { path: "/latest" }. Do not lead with billed research (Brave, Serper, Firecrawl).';
 
 export const FIRST_CALL_CLI =
   "npx @nordsym/apiclaw call nasa/apod --params '{}' --idempotency-key \"apiclaw-first-nasa-$(date +%s)\"";
@@ -156,7 +158,7 @@ export function firstRunCompleteMessage(email?: string, summary?: string): strin
 export function firstRunExecuteFailedMessage(): string {
   return [
     "Not done. Sign-in worked, but the first execute did not succeed.",
-    "NASA APOD via POST /v1/execute, then Brave search.",
+    "NASA APOD via POST /v1/execute, then Frankfurter latest.",
     `  ${AUTH_FIRST_CALL_COMMAND}`,
   ].join("\n");
 }
@@ -188,7 +190,7 @@ export interface CompleteFirstRunAuthOptions {
   } | null>;
   /** Injected for tests. Defaults to reading ~/.apiclaw.toml. */
   whoami?: () => boolean;
-  /** Injected for tests. Defaults to NASA APOD then the first-execute fallback. */
+  /** Injected for tests. Defaults to NASA APOD then Frankfurter. */
   firstExecute?: () => Promise<FirstExecuteResult>;
   /**
    * Mint or reuse pending login. Defaults to ensurePendingLogin.
