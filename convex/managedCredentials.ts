@@ -19,5 +19,12 @@ export function resolveManagedCredential(
     const token = env.TWILIO_AUTH_TOKEN;
     return sid && token ? `${sid}:${token}` : undefined;
   }
+  // NASA documents DEMO_KEY as the public rate-limited key (30 req/hour/IP).
+  // Prefer NASA_API_KEY when set so production is not capped; fall back so
+  // first-execute APOD still lands if the managed key is missing.
+  if (provider === "nasa") {
+    const configured = env.NASA_API_KEY?.trim();
+    return configured || "DEMO_KEY";
+  }
   return env[fallbackEnvKey];
 }

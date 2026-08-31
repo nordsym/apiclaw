@@ -9,6 +9,13 @@ import {
   isSessionUsable,
   type SessionSecurityFields,
 } from "./sessionSecurity";
+import {
+  FIRST_EXECUTE_FRANKFURTER,
+  FIRST_EXECUTE_NASA,
+  FIRST_EXECUTE_PATH,
+  FIRST_EXECUTE_RAILS,
+  isFirstExecuteSuccess,
+} from "../src/first-execute-rails";
 
 const INTERNAL_EMAIL_DOMAINS = new Set(["nordsym.com", "apiclaw.cloud"]);
 const INTERNAL_EMAILS = new Set(["gustav@nordsym.com", "gustavnordsync@gmail.com"]);
@@ -95,26 +102,18 @@ export const recordFirstCallApiSuccess = internalMutation({
 /**
  * First managed execute after a Clerk session is established.
  *
- * Same rails as src/first-call.ts: NASA APOD, then Frankfurter /latest.
+ * Same rails as src/first-execute-rails.ts: NASA APOD, then Frankfurter.
  * Always POST /v1/execute with provider/action. The 200 is recorded by the
  * existing gateway first_call_api_success path — this module does not emit
  * that event itself.
  */
-export const FIRST_EXECUTE_PATH = "/v1/execute";
-
-export const FIRST_EXECUTE_NASA = {
-  provider: "nasa",
-  action: "apod",
-  params: {} as Record<string, unknown>,
-} as const;
-
-export const FIRST_EXECUTE_FRANKFURTER = {
-  provider: "frankfurter",
-  action: "latest",
-  params: { path: "/latest" } as Record<string, unknown>,
-} as const;
-
-export const FIRST_EXECUTE_RAILS = [FIRST_EXECUTE_NASA, FIRST_EXECUTE_FRANKFURTER] as const;
+export {
+  FIRST_EXECUTE_FRANKFURTER,
+  FIRST_EXECUTE_NASA,
+  FIRST_EXECUTE_PATH,
+  FIRST_EXECUTE_RAILS,
+  isFirstExecuteSuccess,
+};
 
 export function firstExecuteGatewayUrl(
   env: NodeJS.ProcessEnv = process.env,
@@ -126,14 +125,6 @@ export function firstExecuteGatewayUrl(
 
 export function firstExecuteIdempotencyKey(workspaceId: string, provider: string): string {
   return `apiclaw-first:${workspaceId}:${provider}`;
-}
-
-export function isFirstExecuteSuccess(status: number, body: unknown): boolean {
-  if (status !== 200) return false;
-  if (body && typeof body === "object" && !Array.isArray(body) && (body as { success?: unknown }).success === false) {
-    return false;
-  }
-  return true;
 }
 
 export type FirstExecuteRailResult = {

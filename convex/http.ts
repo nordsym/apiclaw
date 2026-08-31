@@ -3458,7 +3458,7 @@ http.route({
     const __gate = await validateAndLogProxyCall(ctx, request, "nasa", "call");
     if (__gate instanceof Response) return __gate;
 
-    const NASA_KEY = process.env.NASA_API_KEY;
+    const NASA_KEY = resolveManagedCredential("nasa", "NASA_API_KEY", process.env);
     if (!NASA_KEY) {
       return rejectProxyBeforeUpstream(ctx, __gate.managedGate, { error: "NASA not configured" }, 500);
     }

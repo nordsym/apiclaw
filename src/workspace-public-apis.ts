@@ -54,8 +54,8 @@ export const CURATED_WORKSPACE_PUBLIC_APIS: readonly WorkspacePublicApi[] = [
   {
     id: "frankfurter",
     name: "Frankfurter",
-    baseUrl: "https://api.frankfurter.app",
-    origin: "https://api.frankfurter.app",
+    baseUrl: "https://api.frankfurter.dev/v1",
+    origin: "https://api.frankfurter.dev",
   },
   {
     id: "coingecko",

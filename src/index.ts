@@ -1207,7 +1207,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 ...payload,
-                next: "Show the human login_url. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Loop whoami until it prints an email. Then NASA APOD.",
+                next: "Show the human login_url. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Loop whoami until it prints an email. Then NASA APOD, Frankfurter latest if NASA is not 200.",
               }, null, 2),
             }],
           };
@@ -1222,7 +1222,7 @@ DISCOVER APIs (signup required, free):
 
 CALL APIs (only after whoami prints an email):
   call_api({ provider: "nasa", action: "apod", params: {} })
-  call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
+  call_api({ provider: "frankfurter", action: "latest", params: { path: "/latest" } })
 
 ${CANON_STATS.discoverable.toLocaleString()} DISCOVERABLE | ${CANON_STATS.source_verified.toLocaleString()} EXACT-NAME SOURCE-VERIFIED | Free APIs: free forever, no card | Paid APIs: provider cost + ${PAYG_MARGIN_PERCENT}%, add a card once
 
@@ -3142,10 +3142,10 @@ ${!hasValidSession ? `Next steps (in order):
   2. npx @nordsym/apiclaw auth whoami
      Loop until it prints an email. Only then continue.
   3. call_api({ provider: "nasa", action: "apod", params: {} })
-     If NASA is not 200: call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
+     If NASA is not 200: call_api({ provider: "frankfurter", action: "latest", params: { path: "/latest" } })
 ` : `Quick Start:
   call_api({ provider: "nasa", action: "apod", params: {} })
-  call_api({ provider: "brave_search", action: "search", params: { query: "AI agent infrastructure news" } })
+  call_api({ provider: "frankfurter", action: "latest", params: { path: "/latest" } })
 `}
 
 Managed routes (provider keys stay server-side):

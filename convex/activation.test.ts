@@ -171,6 +171,11 @@ assert.equal(FIRST_EXECUTE_PATH, CLI_PATH);
 assert.deepEqual(FIRST_EXECUTE_NASA, CLI_NASA);
 assert.deepEqual(FIRST_EXECUTE_FRANKFURTER, CLI_FRANKFURTER);
 assert.deepEqual(FIRST_EXECUTE_RAILS, [FIRST_EXECUTE_NASA, FIRST_EXECUTE_FRANKFURTER]);
+assert.equal(
+  FIRST_EXECUTE_RAILS.some((rail) => ["brave_search", "serper", "firecrawl"].includes(rail.provider)),
+  false,
+  "billed research must not be an automatic first-execute rail",
+);
 assert.equal(firstExecuteIdempotencyKey("ws1", "nasa"), "apiclaw-first:ws1:nasa");
 assert.equal(isFirstExecuteSuccess(200, { success: true }), true);
 assert.equal(isFirstExecuteSuccess(200, { success: false }), false);
@@ -509,5 +514,5 @@ assert.match(clerkCallback, /redirect\("\/workspace"\)/);
 assert.doesNotMatch(clerkCallback, /\/v1\/execute|completeFirstExecute/);
 
 console.log("convex activation: first successful gateway call is classified and deduped");
-console.log("convex activation: Clerk session mint runs NASA then Frankfurter once per workspace");
+console.log("convex activation: Clerk session mint runs NASA APOD then Frankfurter once per workspace");
 console.log("convex activation: session reuse schedules first execute; browser sessions do not");

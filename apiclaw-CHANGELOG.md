@@ -10,6 +10,14 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+## [2.9.7] — 2026-08-31
+
+### Changed — first execute after Authorize
+
+- **NASA APOD stays the default first execute** (research-shaped, verified zero-cost, no card). Convex injects `NASA_API_KEY` when set and falls back to NASA's public `DEMO_KEY` so APOD still lands if the managed key is missing.
+- **Frankfurter latest stays the last-resort fallback** (workspace-public, no key, no card). The live catalog origin is `api.frankfurter.dev/v1`; path `/latest` pins to `/v1/latest` (200, no redirect). Brave / Serper / Firecrawl are billed and card-gated — they are not first-execute rails.
+- **SKILL.md / llms.txt / MCP first-call copy** now match the automatic rails: after Authorize, whoami, then NASA APOD, then Frankfurter. Agents are no longer sent to Brave for first execute.
+
 ---
 
 ## [2.7.0] — 2026-05-17

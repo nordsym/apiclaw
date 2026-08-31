@@ -58,8 +58,8 @@ and returns it as `login_url` even with no TTY. Show that URL. Do not
 only print `npx @nordsym/apiclaw auth login`. Completing Clerk on the
 login URL Authorizes (one action); if already signed in, click
 Authorize. Confirm with `npx @nordsym/apiclaw auth whoami` until it
-prints an email, then `POST /v1/execute` (NASA APOD, Brave search
-fallback). Printing the login URL is not ready. Connection refused on
+prints an email, then `POST /v1/execute` (NASA APOD, Frankfurter
+latest fallback). Printing the login URL is not ready. Connection refused on
 localhost is OK — whoami redeems Authorize. Do not invent a second
 setup path. This file is identity and product truth.
 

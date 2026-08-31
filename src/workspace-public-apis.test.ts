@@ -29,7 +29,7 @@ assert.equal(isNoKeyPublicAuth("None"), true);
 assert.equal(isNoKeyPublicAuth("apiKey"), false);
 assert.equal(isNoKeyPublicAuth("unknown"), false);
 assert.equal(isJunkPublicApiName("${title}"), true);
-assert.equal(isSafePublicApiBaseUrl("https://api.frankfurter.app/latest")?.origin, "https://api.frankfurter.app");
+assert.equal(isSafePublicApiBaseUrl("https://api.frankfurter.dev/v1/latest")?.origin, "https://api.frankfurter.dev");
 assert.equal(isSafePublicApiBaseUrl("http://ip-api.com/json"), undefined);
 assert.equal(isSafePublicApiBaseUrl("https://api.apis.guru/v2/specs/x.json"), undefined);
 assert.equal(isSafePublicApiBaseUrl("https://github.com/public-apis/public-apis"), undefined);
@@ -69,10 +69,11 @@ assert.equal(buildPinnedPublicApiUrl(frankfurter, `${frankfurter.origin}/latest`
 
 const curatedFrankfurter = CURATED_WORKSPACE_PUBLIC_APIS.find((api) => api.id === "frankfurter");
 assert.ok(curatedFrankfurter);
-assert.equal(curatedFrankfurter.baseUrl, "https://api.frankfurter.app");
+assert.equal(curatedFrankfurter.baseUrl, "https://api.frankfurter.dev/v1");
+assert.equal(curatedFrankfurter.origin, "https://api.frankfurter.dev");
 assert.equal(
   buildPinnedPublicApiUrl(curatedFrankfurter, "/latest")?.toString(),
-  "https://api.frankfurter.app/latest",
+  "https://api.frankfurter.dev/v1/latest",
 );
 
 const coingecko = getWorkspacePublicApi("CoinGecko");
