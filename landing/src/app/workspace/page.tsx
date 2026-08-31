@@ -18,6 +18,10 @@ import { Toast, useToast } from "@/components/Toast";
 import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import {
+  BILLING_RETURN_PENDING_TOAST,
+  decideBillingReturnPoll,
+} from "@/lib/billing-plan";
+import {
   getWorkspaceNavigation,
 } from "@/lib/workspace-truth";
 import {
@@ -80,8 +84,8 @@ export default function WorkspacePage() {
   // Toast notifications
   const { toast, showToast, hideToast } = useToast();
 
-  // Treat the Stripe return as pending until the owner-scoped workspace state
-  // confirms an active subscription, attached card, and exact meter contract.
+  // Treat the Stripe return as pending until the owner-scoped workspace
+  // shows a stored card (the execute gate) or an active PAYG entitlement.
   useEffect(() => {
     const billingParam = searchParams.get("billing");
     const portalParam = searchParams.get("portal");
@@ -98,7 +102,7 @@ export default function WorkspacePage() {
       let active = true;
       let attempts = 0;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      showToast("Payment method received. Verifying PAYG billing before activation.", "info");
+      showToast("Payment method received. Confirming card on file.", "info");
 
       const pollBillingReadiness = async () => {
         attempts += 1;
@@ -116,8 +120,9 @@ export default function WorkspacePage() {
           const dashboard = payload.value || payload;
           if (!active) return;
           if (dashboard?.workspace) setWorkspace(dashboard.workspace);
-          if (dashboard?.workspace?.paygActive === true) {
-            showToast("PAYG verified. Billing-ready calls can now continue at provider cost + 15%.", "success");
+          const decision = decideBillingReturnPoll(dashboard?.workspace || {});
+          if (decision.action === "success") {
+            showToast(decision.toast, "success");
             cleanReturnParam("billing");
             return;
           }
@@ -131,7 +136,7 @@ export default function WorkspacePage() {
         }
 
         if (active) {
-          showToast("Payment method saved. PAYG is still pending verification, so billing-ready calls remain off.", "info");
+          showToast(BILLING_RETURN_PENDING_TOAST, "info");
           cleanReturnParam("billing");
         }
       };

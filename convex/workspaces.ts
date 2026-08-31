@@ -663,6 +663,7 @@ export const getWorkspaceDashboard = query({
         stripeCustomerId: workspace.stripeCustomerId,
         stripeSubscriptionStatus: workspace.stripeSubscriptionStatus,
         paygActive: hasActivePaygEntitlement(workspace),
+        hasPaymentMethod: workspace.hasPaymentMethod === true || workspace.hasCardAttached === true,
         createdAt: workspace.createdAt,
         mainAgentName: workspace.mainAgentName,
         mainAgentId: workspace.mainAgentId,

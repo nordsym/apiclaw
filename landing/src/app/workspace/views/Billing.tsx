@@ -178,9 +178,14 @@ export function BillingTab({
               cta = <div className="mt-7 self-start">{portalButton(btnSolid)}</div>;
             } else if (cardCta.kind === "checkout") {
               cta = (
-                <CheckoutButton sessionToken={sessionToken || ""} variant="primary" className="mt-7">
-                  Add payment method
-                </CheckoutButton>
+                <div className="mt-7 self-start">
+                  <CheckoutButton sessionToken={sessionToken || ""} variant="primary">
+                    Add payment method
+                  </CheckoutButton>
+                  {cardCta.note && (
+                    <p className="mt-2 max-w-[18rem] text-[12.5px] text-[var(--text-muted)]">{cardCta.note}</p>
+                  )}
+                </div>
               );
             } else {
               cta = null;
