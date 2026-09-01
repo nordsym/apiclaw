@@ -10,6 +10,14 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+## [2.9.10] — 2026-09-01
+
+### Fixed — unsigned first contact always shows a clickable login URL
+
+- **MCP/CLI/ACP/SKILL unsigned responses lead with the absolute https login URL on its own line**, then JSON. Agents can no longer bury `login_url` inside a JSON-only tool result. Desktop auto-open on darwin/win32 is unchanged.
+- **Every unsigned MCP tool call hard-stops** until whoami has a session. `list_categories`, `get_api_details`, `list_connected`, and other first-contact tools no longer succeed silently without showing a login URL.
+- If Convex mint fails, the fallback URL is still `https://apiclaw.cloud/auth/cli` (never bare `/sign-in`). After sign-in, first execute stays NASA APOD then Frankfurter.
+
 ## [2.9.9] — 2026-08-31
 
 ### Fixed — unsigned MCP first_run opens Clerk on a GUI

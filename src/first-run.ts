@@ -29,6 +29,24 @@ export const AUTH_LOGIN_COMMAND = "npx @nordsym/apiclaw auth login";
 export const AUTH_WHOAMI_COMMAND = "npx @nordsym/apiclaw auth whoami";
 
 /**
+ * Last-resort clickable auth URL when Convex mint fails.
+ * Prefer a live `/auth/cli?authId=` URL. Never send agents to bare /sign-in.
+ */
+export const FALLBACK_LOGIN_URL = "https://apiclaw.cloud/auth/cli";
+
+/** Absolute https auth URL the human can click. Never return empty or a command. */
+export function clickableLoginUrl(pending?: string | null): string {
+  if (
+    typeof pending === "string" &&
+    pending.startsWith("https://") &&
+    pending.includes("/auth/")
+  ) {
+    return pending;
+  }
+  return FALLBACK_LOGIN_URL;
+}
+
+/**
  * First managed call after sign-in. NASA APOD is the research rail
  * (zero-cost, no card). Frankfurter is the last-resort free fallback so
  * first_call still lands. Brave / Serper / Firecrawl need a card — not
@@ -93,11 +111,14 @@ export function hasWorkingWhoami(): boolean {
  * can finish the already-started browser flow.
  */
 export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string {
-  const url = pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl();
+  const url = clickableLoginUrl(
+    pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl(),
+  );
   return [
     "Not ready. whoami has no session. Do not execute.",
-    url ? `  Open this login URL: ${url}` : `  ${AUTH_LOGIN_COMMAND}`,
-    ...(url ? [`  Or run: ${AUTH_LOGIN_COMMAND}`] : []),
+    "  Open this login URL:",
+    `  ${url}`,
+    `  Or run: ${AUTH_LOGIN_COMMAND}`,
     "Finish Google or email on that URL — that Authorizes (one action).",
     "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
@@ -113,12 +134,37 @@ export type AuthRequiredToolResult = {
   isError: true;
 };
 
+/**
+ * Human/agent-visible auth text. The https URL sits on its own line so
+ * chat clients make it clickable. JSON follows for structured agents.
+ * Never bury the URL inside JSON-only text.
+ */
+export function formatAuthRequiredVisibleText(payload: Record<string, unknown>): string {
+  const url = clickableLoginUrl(
+    typeof payload.login_url === "string" ? payload.login_url : null,
+  );
+  return [
+    "Open this login URL:",
+    url,
+    "",
+    "Sign-in is not done. Open the link, then retry. Do not execute until whoami prints an email.",
+    "",
+    JSON.stringify({ ...payload, login_url: url }, null, 2),
+  ].join("\n");
+}
+
+/** Parse the trailing JSON object from formatAuthRequiredVisibleText. */
+export function extractAuthRequiredPayload(text: string): Record<string, unknown> {
+  const start = text.indexOf("\n{");
+  return JSON.parse(start === -1 ? text : text.slice(start + 1)) as Record<string, unknown>;
+}
+
 /** MCP/CLI host-visible error. isError must be true so agents cannot treat this as success. */
 export function authRequiredToolResult(
   payload: Record<string, unknown>,
 ): AuthRequiredToolResult {
   return {
-    content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+    content: [{ type: "text", text: formatAuthRequiredVisibleText(payload) }],
     isError: true,
   };
 }
@@ -128,14 +174,14 @@ export function agentAuthRequiredPayload(
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
   const extraUrl = typeof extra.login_url === "string" ? extra.login_url : undefined;
-  const url = extraUrl || readPendingLoginUrl();
+  const url = clickableLoginUrl(extraUrl || readPendingLoginUrl());
   const { login_url: _ignoredLoginUrl, status: extraStatus, ...rest } = extra;
   const status =
     typeof extraStatus === "string" && extraStatus !== "success"
       ? extraStatus
       : "auth_required";
   return {
-    login_url: url ?? null,
+    login_url: url,
     status,
     action: "agent_auth_required",
     error: "Not ready. whoami has no session. Do not execute.",
@@ -145,14 +191,11 @@ export function agentAuthRequiredPayload(
       "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. whoami redeems Authorize even if auth login was killed or localhost failed. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
     first_call_prompt: FIRST_CALL_PROMPT,
     ...rest,
-    instruction: url
-      ? `Show the human this login URL: ${url}. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute.`
-      : "Show the human the login URL from login_url. Do not only print `npx @nordsym/apiclaw auth login`. Printing a command without /auth/cli?authId= is not enough.",
+    instruction:
+      `Show the human this login URL on its own line: ${url}. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute.`,
     what_happens:
       "A live /auth/cli?authId= URL is minted even without a TTY. A new Clerk finishes Authorize in that one action. Already signed in: click Authorize. Loop whoami until it prints an email. Clerk alone does not write session_token.",
-    fallback_for_headless: url
-      ? `Open ${url} on another device. Then ${AUTH_WHOAMI_COMMAND}.`
-      : `${AUTH_LOGIN_COMMAND} (open the printed URL on another device). Then ${AUTH_WHOAMI_COMMAND}.`,
+    fallback_for_headless: `Open ${url} on another device. Then ${AUTH_WHOAMI_COMMAND}.`,
   };
 }
 
@@ -207,12 +250,14 @@ export async function unsignedFirstRunToolResult(
 }
 
 export function firstRunIncompleteMessage(pendingLoginUrl?: string | null): string {
-  const pending = pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl();
+  const url = clickableLoginUrl(
+    pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl(),
+  );
   return [
     "Not done. Sign-in is required before any managed call. Do not declare ready.",
-    ...(pending
-      ? [`  Open this login URL: ${pending}`, `  Or run: ${AUTH_LOGIN_COMMAND}`]
-      : [`  ${AUTH_LOGIN_COMMAND}`]),
+    "  Open this login URL:",
+    `  ${url}`,
+    `  Or run: ${AUTH_LOGIN_COMMAND}`,
     "Finish Google or email on that URL — that Authorizes (one action).",
     "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",

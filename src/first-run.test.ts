@@ -12,6 +12,9 @@ import {
   firstRunCompleteMessage,
   firstRunExecuteFailedMessage,
   firstRunIncompleteMessage,
+  extractAuthRequiredPayload,
+  formatAuthRequiredVisibleText,
+  FALLBACK_LOGIN_URL,
   unsignedExecuteMessage,
   unsignedFirstRunToolResult,
 } from "./first-run.js";
@@ -157,6 +160,7 @@ assert.match(incomplete, /npx @nordsym\/apiclaw auth login/);
 assert.match(incomplete, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(incomplete, /Authorize/);
 assert.match(incomplete, /empty X-APIClaw-Session/);
+assert.match(incomplete, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli/);
 assert.doesNotMatch(incomplete, /\bDone\b/);
 assert.doesNotMatch(incomplete, /apiclaw login/);
 assert.doesNotMatch(incomplete, /@2\.8\.7/);
@@ -168,7 +172,8 @@ assert.match(unsigned, /npx @nordsym\/apiclaw auth whoami/);
 assert.match(unsigned, /whoami — it redeems Authorize|whoami redeems/);
 assert.match(unsigned, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(unsigned, /empty X-APIClaw-Session/);
-assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL/);
+assert.match(unsigned, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli/);
+assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli\?authId=pending/);
 assert.doesNotMatch(unsigned, /paste/i);
 
 const skill = readFileSync("landing/public/SKILL.md", "utf8");
@@ -177,9 +182,18 @@ assert.match(skill, /each miss/i);
 assert.match(skill, /Show the human the login URL|Show the human the live `login_url`/);
 assert.match(skill, /auth\/cli\?authId=/);
 assert.match(skill, /Do not only print/);
+assert.match(skill, /own line|on its own line/);
 assert.match(skill, /NASA APOD/);
 assert.match(skill, /Frankfurter/);
 assert.doesNotMatch(skill, /brave_search/);
+
+const mcpIndex = readFileSync("src/index.ts", "utf8");
+assert.match(
+  mcpIndex,
+  /if \(!workspaceContext && !hasWorkingWhoami\(\)\) \{\s*return unsignedFirstRunToolResult\(\{ tool: name \}\);/,
+  "unsigned first contact must hard-stop every MCP tool with a login URL",
+);
+assert.match(mcpIndex, /Open this login URL:\n\s+\$\{firstRunLoginUrl/);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
@@ -201,9 +215,17 @@ if (!noSession.ok) {
   assert.equal(noSession.payload.first_call_prompt, FIRST_CALL_PROMPT);
   assert.equal(noSession.payload.signup_url, undefined);
   assert.equal(Object.keys(noSession.payload)[0], "login_url", "payload must expose login_url as the primary agent-visible field");
+  assert.equal(noSession.payload.login_url, FALLBACK_LOGIN_URL);
+  assert.match(String(noSession.payload.login_url), /^https:\/\//);
   assert.equal(noSession.payload.status, "auth_required");
   assert.notEqual(noSession.payload.status, "success");
   assert.match(String(noSession.payload.what_happens), /without a TTY|auth\/cli\?authId=/);
+  const visibleNoSession = formatAuthRequiredVisibleText(noSession.payload);
+  assert.match(visibleNoSession, /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\n/);
+  assert.ok(
+    visibleNoSession.indexOf("https://") < visibleNoSession.indexOf("{"),
+    "clickable URL must appear before the JSON payload",
+  );
   assert.doesNotMatch(
     JSON.stringify(noSession.payload),
     /apiclaw\.cloud\/sign-in/,
@@ -254,7 +276,14 @@ const unsignedFirstRun = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(unsignedFirstRun.isError, true);
-const unsignedPayload = JSON.parse(unsignedFirstRun.content[0].text) as Record<string, unknown>;
+const unsignedVisible = unsignedFirstRun.content[0].text;
+assert.match(unsignedVisible, /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\?authId=headlessmintheadlessmint12\n/);
+assert.match(unsignedVisible, /Sign-in is not done/);
+assert.ok(
+  unsignedVisible.indexOf("https://") < unsignedVisible.indexOf("{"),
+  "tool text must lead with the clickable URL, not bury it in JSON",
+);
+const unsignedPayload = extractAuthRequiredPayload(unsignedVisible);
 assert.equal(Object.keys(unsignedPayload)[0], "login_url");
 assert.match(String(unsignedPayload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(unsignedPayload.status, "auth_required");

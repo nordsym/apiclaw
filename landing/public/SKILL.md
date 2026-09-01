@@ -45,14 +45,20 @@ curl -fsSL https://apiclaw.cloud/install.sh | bash
 ## 2. Auth (Clerk). Never paste a token into chat.
 
 Unsigned MCP / CLI first_run mints a pending login even with no TTY and
-returns the exact URL as `login_url` in the tool payload:
+prints the exact https URL on its own line in the tool/CLI response
+(then repeats it as `login_url` in JSON). The first lines look like:
 
 ```text
+Open this login URL:
 https://apiclaw.cloud/auth/cli?authId=…
 ```
 
-Show the human that URL. Do not only print `npx @nordsym/apiclaw auth login`.
-A command without `/auth/cli?authId=` is not enough.
+Show the human that URL on its own line so they can click it. Do not
+bury it. Do not only print `npx @nordsym/apiclaw auth login`.
+A command without `/auth/cli?authId=` is not enough. If you are running
+on a machine the human cannot see (headless agent, cloud VM), the
+desktop browser will not open for them — the URL in this response is
+the only door.
 
 ```bash
 npx @nordsym/apiclaw auth login
