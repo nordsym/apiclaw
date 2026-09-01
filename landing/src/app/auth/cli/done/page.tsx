@@ -7,6 +7,8 @@
 
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
+import Link from "next/link";
+import { WORKSPACE_AFTER_CLI_AUTH } from "@/lib/onboarding-first-call";
 import { LocalhostHandoff } from "./LocalhostHandoff";
 
 export default async function CliAuthDonePage({
@@ -24,11 +26,16 @@ export default async function CliAuthDonePage({
           <p className="claw-eyebrow">CLI sign-in</p>
           <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorized. Return to the terminal.</h1>
           <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-            Clerk and Authorize are done. The terminal writes{" "}
-            <code className="claw-mono text-[13px] text-text-primary">session_token</code> next.
-            Connection refused on localhost is OK. Loop{" "}
+            This terminal is now signed in to your APIClaw workspace. Connection refused on localhost is OK.
+            The terminal confirms with{" "}
             <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth whoami</code>{" "}
-            until it prints your email. Do not declare ready before that.
+            until it prints your email, then your agent makes its first call.
+          </p>
+          <Link href={WORKSPACE_AFTER_CLI_AUTH} className="claw-btn claw-btn-solid mt-8">
+            Open workspace
+          </Link>
+          <p className="mt-6 text-[13px] text-text-muted">
+            The workspace waits for that first call and shows it when it lands.
           </p>
           <LocalhostHandoff port={port} code={code} state={state} />
         </div>

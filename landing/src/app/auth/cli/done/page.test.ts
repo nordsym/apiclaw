@@ -14,7 +14,12 @@ const page = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 assert.match(page, /Authorized\. Return to the terminal/);
 assert.match(page, /Connection refused on localhost is OK/);
 assert.match(page, /npx @nordsym\/apiclaw auth whoami/);
-assert.match(page, /Do not declare ready/);
+assert.match(page, /then your agent makes its first call/);
+assert.match(page, /Open workspace/, "done page must hand the human to the workspace");
+assert.match(page, /href=\{WORKSPACE_AFTER_CLI_AUTH\}/, "workspace link must come from the shared constant");
+const pageWithoutComments = page.replace(/\/\*[\s\S]*?\*\//g, "");
+assert.doesNotMatch(pageWithoutComments, /Clerk|session_token/, "human-facing copy must not name Clerk or session_token");
+assert.doesNotMatch(pageWithoutComments, /—|–/, "no em dashes in user-facing copy");
 assert.match(page, /LocalhostHandoff/);
 
 const actions = readFileSync(new URL("../actions.ts", import.meta.url), "utf8");

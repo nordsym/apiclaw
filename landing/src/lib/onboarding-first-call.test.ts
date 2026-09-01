@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import {
   AGENT_FIRST_CALL_PROMPT,
   BROWSER_FIRST_EXECUTE_RAILS,
+  CLI_ARRIVAL_LINE,
   CLI_CALL,
+  WORKSPACE_AFTER_CLI_AUTH,
   ONBOARDING_OVERLAY_CLASS,
   WAITING_FOR_FIRST_CALL,
   decideOnboardingGate,
@@ -41,6 +43,20 @@ assert.doesNotMatch(ONBOARDING_OVERLAY_CLASS, /bg-black\/70/);
 
 assert.equal(WAITING_FOR_FIRST_CALL, "Waiting for your first tool call");
 assert.doesNotMatch(WAITING_FOR_FIRST_CALL, /—|–/);
+
+assert.equal(WORKSPACE_AFTER_CLI_AUTH, "/workspace?from=cli");
+assert.match(CLI_ARRIVAL_LINE, /whoami/);
+assert.match(CLI_ARRIVAL_LINE, /NASA APOD/);
+assert.doesNotMatch(CLI_ARRIVAL_LINE, /—|–/);
+
+// Arriving from /auth/cli/done must open the wizard on the agent launch
+// step (waiting for the first call), not the door chooser.
+const workspacePage = readFileSync(new URL("../app/workspace/page.tsx", import.meta.url), "utf8");
+assert.match(workspacePage, /searchParams\.get\("from"\) === "cli"/);
+assert.match(workspacePage, /<OnboardingWizard sessionToken=\{sessionToken\} arrival=\{arrival\} \/>/);
+const wizardArrival = readFileSync(new URL("../components/OnboardingWizard.tsx", import.meta.url), "utf8");
+assert.match(wizardArrival, /if \(arrival === "cli"\) \{\s*\/\/[^\n]*\n\s*\/\/[^\n]*\n\s*setDoor\("agent"\);\s*setView\("launch"\);/);
+assert.match(wizardArrival, /arrival === "cli"\s*\? CLI_ARRIVAL_LINE/);
 
 assert.match(AGENT_FIRST_CALL_PROMPT, /apiclaw\.cloud\/SKILL\.md/);
 assert.match(AGENT_FIRST_CALL_PROMPT, /install\.sh|npx @nordsym\/apiclaw@latest/);
