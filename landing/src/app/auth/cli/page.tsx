@@ -59,9 +59,10 @@ export default async function CliAuthPage({
   if (!userId) {
     return (
       <CliShell signInHref={signInHref}>
-        <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal</h1>
+        <p className="claw-eyebrow">CLI sign-in</p>
+        <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal</h1>
         <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-          You ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code>. Printing this URL is not success. Sign in with Google or email here — completing Clerk on this URL Authorizes the CLI. Clerk sign-in on other pages does not write <code className="claw-mono text-[13px] text-text-primary">session_token</code>.
+          A terminal on your machine ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code> and is waiting for you. Signing in to APIClaw with Google or email on this page is the authorization. There is no separate step.
         </p>
         <Link
           href={signInHref}
@@ -70,7 +71,7 @@ export default async function CliAuthPage({
           Authorize with Google or email
         </Link>
         <p className="mt-6 text-[13px] text-text-muted">
-          Keep the terminal command running. After Clerk, this page does not ask for a second click. Then confirm with <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth whoami</code>.
+          Keep the terminal command running. After you sign in, this page does not ask for a second click. The terminal confirms with <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth whoami</code>.
         </p>
       </CliShell>
     );
@@ -92,10 +93,10 @@ export default async function CliAuthPage({
 
   return (
     <CliShell signInHref={null}>
-      <p className="claw-eyebrow">CLI sign-in — Authorize required</p>
+      <p className="claw-eyebrow">CLI sign-in</p>
       <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal</h1>
       <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-        You are signed in as <span className="text-text-primary">{email}</span>. Click Authorize to bind this CLI or the terminal stays unsigned — no <code className="claw-mono text-[13px] text-text-primary">session_token</code>, whoami fails, execute stays blocked.
+        You are signed in to APIClaw as <span className="text-text-primary">{email}</span>. Click Authorize to connect the waiting terminal to your workspace. Until then the terminal stays signed out.
       </p>
       <form action={authorizeCli} method="post" className="mt-8 flex items-center gap-4">
         <input type="hidden" name="authId" value={authId} />

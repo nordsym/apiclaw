@@ -12,6 +12,13 @@ export const ONBOARDING_OVERLAY_CLASS =
 
 export const WAITING_FOR_FIRST_CALL = "Waiting for your first tool call";
 
+/** Where /auth/cli/done sends the human. The wizard reads ?from=cli. */
+export const WORKSPACE_AFTER_CLI_AUTH = "/workspace?from=cli";
+
+/** Launch-step line when the human arrives from a CLI / agent login. */
+export const CLI_ARRIVAL_LINE =
+  "Your agent just signed in from the terminal. It confirms with whoami, then runs NASA APOD (Frankfurter if NASA is not 200). If it stalls, paste this prompt.";
+
 export const INSTALL_COMMAND = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
 
 export const CLI_DISCOVER = 'npx @nordsym/apiclaw discover "astronomy" --callable';

@@ -8,6 +8,7 @@ import { Panel, Status, btnQuiet, btnSolid } from "@/app/workspace/views/ui";
 import {
   AGENT_FIRST_CALL_PROMPT,
   BROWSER_FIRST_EXECUTE_RAILS,
+  CLI_ARRIVAL_LINE,
   CLI_CALL,
   CLI_DISCOVER,
   INSTALL_COMMAND,
@@ -100,7 +101,7 @@ async function fetchOnboardingState(token: string): Promise<OnboardingState | nu
   }
 }
 
-export function OnboardingWizard({ sessionToken }: { sessionToken: string | null }) {
+export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: string | null; arrival?: "cli" }) {
   const [state, setState] = useState<OnboardingState | null>(null);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("choose");
@@ -136,11 +137,18 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
       setState(resolved);
       if (gate === "open") {
         setOpen(true);
-        setView("choose");
+        if (arrival === "cli") {
+          // The agent already holds the terminal session. Skip the door
+          // chooser and wait for its first call.
+          setDoor("agent");
+          setView("launch");
+        } else {
+          setView("choose");
+        }
       }
     });
     return () => { cancelled = true; };
-  }, [sessionToken]);
+  }, [sessionToken, arrival]);
 
   useEffect(() => {
     if (!open || !sessionToken) return;
@@ -401,7 +409,9 @@ export function OnboardingWizard({ sessionToken }: { sessionToken: string | null
             <Step
               headingRef={headingRef}
               title="Send this to your agent"
-              line={`Paste into ${selectedClient.title}. The prompt follows SKILL.md, finishes login until whoami prints an email, then runs NASA APOD (Frankfurter if NASA is not 200).`}
+              line={arrival === "cli"
+                ? CLI_ARRIVAL_LINE
+                : `Paste into ${selectedClient.title}. The prompt follows SKILL.md, finishes login until whoami prints an email, then runs NASA APOD (Frankfurter if NASA is not 200).`}
               action={<button type="button" onClick={() => setView("client")} className={btnQuiet}>Back</button>}
             >
               <div className="mt-5">

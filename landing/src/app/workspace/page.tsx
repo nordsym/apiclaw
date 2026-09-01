@@ -58,6 +58,7 @@ export default function WorkspacePage() {
   };
   const tabFromUrl = (requestedTab && legacyTabMap[requestedTab]) || requestedTab as TabType | null;
   const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
+  const arrival = searchParams.get("from") === "cli" ? "cli" : undefined;
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -385,7 +386,7 @@ export default function WorkspacePage() {
       usageLow={Boolean(workspace && workspace.usagePercentage > 80)}
       onLogout={handleLogout}
     >
-      <OnboardingWizard sessionToken={sessionToken} />
+      <OnboardingWizard sessionToken={sessionToken} arrival={arrival} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
           {/* Usage warning/exceeded banners */}
           {showUsageWarning && sessionToken && (

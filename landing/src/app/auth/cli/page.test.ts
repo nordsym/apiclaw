@@ -66,9 +66,21 @@ assert.match(
 );
 assert.match(
   pageSource,
-  /Click Authorize to bind this CLI or the terminal stays unsigned/,
+  /Click Authorize to connect the waiting terminal to your workspace/,
   "already-signed-in page must still require the Authorize button",
 );
+assert.match(
+  pageSource,
+  /Signing in to APIClaw with Google or email on this page is the authorization/,
+  "unsigned copy must tell a human that sign-in and Authorize are one action",
+);
+const pageWithoutComments = pageSource.replace(/\/\*[\s\S]*?\*\//g, "");
+assert.doesNotMatch(
+  pageWithoutComments,
+  /completing Clerk|After Clerk|Clerk sign-in on other pages|session_token/,
+  "Authorize copy must not lean on Clerk or session_token jargon",
+);
+assert.doesNotMatch(pageWithoutComments, /—|–/, "no em dashes in user-facing copy");
 assert.match(
   pageSource,
   /npx @nordsym\/apiclaw auth whoami/,
