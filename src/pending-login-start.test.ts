@@ -16,12 +16,30 @@ const { clearPendingLoginUrl, readPendingLogin, writePendingLogin } = await impo
 const {
   agentAuthRequiredPayload,
   agentAuthRequiredPayloadAfterMint,
+  canOpenAuthBrowser,
   completeFirstRunAuth,
   firstRunIncompleteMessage,
   unsignedExecuteMessage,
   unsignedFirstRunToolResult,
 } = await import("./first-run.js");
 const { ensurePendingLogin } = await import("./pending-login-start.js");
+
+function mockSpawn() {
+  const calls: { command: string; args: readonly string[] }[] = [];
+  const spawn = (command: string, args: readonly string[]) => {
+    calls.push({ command, args });
+    return { unref() {} };
+  };
+  return { calls, spawn };
+}
+
+function mintedStart(authId: string, nowMs: number) {
+  return {
+    authId,
+    browserUrl: `https://apiclaw.cloud/auth/cli?authId=${authId}`,
+    expiresAt: nowMs + 5 * 60 * 1000,
+  };
+}
 
 clearPendingLoginUrl();
 
@@ -150,6 +168,120 @@ writePendingLogin({
 });
 const fromFile = agentAuthRequiredPayload();
 assert.equal(fromFile.login_url, "https://apiclaw.cloud/auth/cli?authId=waittestwaittestwaittestwait12");
+
+clearPendingLoginUrl();
+
+const win32Spawn = mockSpawn();
+const win32Tool = await unsignedFirstRunToolResult(
+  { tool: "apiclaw_help" },
+  {
+    env: {},
+    platform: "win32",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+    spawn: win32Spawn.spawn,
+    now: now + 10_000,
+    fingerprint: "fp-win32",
+    start: async () => mintedStart("win32authidwin32authidwin32aut12", now + 10_000),
+  },
+);
+assert.equal(win32Tool.isError, true);
+const win32Payload = JSON.parse(win32Tool.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(win32Payload)[0], "login_url");
+assert.match(String(win32Payload.login_url), /\/auth\/cli\?authId=/);
+assert.equal(win32Spawn.calls.length, 1, "desktop win32 with no TTY must attempt openBrowser");
+assert.equal(win32Spawn.calls[0]?.command, "cmd");
+assert.deepEqual(win32Spawn.calls[0]?.args, [
+  "/c",
+  "start",
+  "",
+  "https://apiclaw.cloud/auth/cli?authId=win32authidwin32authidwin32aut12",
+]);
+
+const darwinReuse = mockSpawn();
+const reusedTool = await unsignedFirstRunToolResult(
+  { tool: "call_api" },
+  {
+    env: {},
+    platform: "darwin",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+    spawn: darwinReuse.spawn,
+    now: now + 11_000,
+    start: async () => {
+      throw new Error("must reuse an open pending login and still open the browser");
+    },
+  },
+);
+assert.equal(reusedTool.isError, true);
+const reusedPayload = JSON.parse(reusedTool.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(reusedPayload)[0], "login_url");
+assert.equal(darwinReuse.calls.length, 1, "reuse on a GUI machine must pop Clerk again");
+assert.equal(darwinReuse.calls[0]?.command, "open");
+
+clearPendingLoginUrl();
+const ciSpawn = mockSpawn();
+const ciTool = await unsignedFirstRunToolResult(
+  { tool: "check_balance" },
+  {
+    env: { CI: "true" },
+    platform: "win32",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+    spawn: ciSpawn.spawn,
+    now: now + 20_000,
+    fingerprint: "fp-ci",
+    start: async () => mintedStart("ciauthidciauthidciauthidciaut12", now + 20_000),
+  },
+);
+assert.equal(ciTool.isError, true);
+const ciPayload = JSON.parse(ciTool.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(ciPayload)[0], "login_url");
+assert.match(String(ciPayload.login_url), /\/auth\/cli\?authId=/);
+assert.equal(ciSpawn.calls.length, 0, "CI must mint login_url without spawning a browser");
+
+clearPendingLoginUrl();
+const headlessLinux = mockSpawn();
+const linuxTool = await unsignedFirstRunToolResult(
+  { tool: "check_workspace_status" },
+  {
+    env: {},
+    platform: "linux",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+    spawn: headlessLinux.spawn,
+    now: now + 30_000,
+    fingerprint: "fp-linux",
+    start: async () => mintedStart("linuxauthidlinuxauthidlinuxau12", now + 30_000),
+  },
+);
+assert.equal(linuxTool.isError, true);
+const linuxPayload = JSON.parse(linuxTool.content[0].text) as Record<string, unknown>;
+assert.equal(Object.keys(linuxPayload)[0], "login_url");
+assert.equal(headlessLinux.calls.length, 0, "Linux without DISPLAY must not spawn xdg-open");
+
+clearPendingLoginUrl();
+const displayLinux = mockSpawn();
+const displayTool = await agentAuthRequiredPayloadAfterMint(
+  { tool: "call_api" },
+  {
+    env: { DISPLAY: ":0" },
+    platform: "linux",
+    stdoutIsTTY: false,
+    stdinIsTTY: false,
+    spawn: displayLinux.spawn,
+    now: now + 40_000,
+    fingerprint: "fp-display",
+    start: async () => mintedStart("displayauthiddisplayauthidd12", now + 40_000),
+  },
+);
+assert.equal(Object.keys(displayTool)[0], "login_url");
+assert.equal(displayLinux.calls.length, 1, "Linux with DISPLAY may open the browser without a TTY");
+assert.equal(displayLinux.calls[0]?.command, "xdg-open");
+assert.equal(
+  canOpenAuthBrowser({ env: {}, platform: "win32", stdoutIsTTY: false, stdinIsTTY: false }),
+  true,
+);
 
 clearPendingLoginUrl();
 fs.rmSync(tmpHome, { recursive: true, force: true });

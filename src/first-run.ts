@@ -12,7 +12,13 @@ import {
   completeFirstExecute,
   type FirstExecuteResult,
 } from "./first-call.js";
-import { ensurePendingLogin, type StartedPendingLogin } from "./pending-login-start.js";
+import {
+  ensurePendingLogin,
+  type CliAuthStartArgs,
+  type CliAuthStartResult,
+  type OpenBrowserSpawn,
+  type StartedPendingLogin,
+} from "./pending-login-start.js";
 
 export { AUTH_FIRST_CALL_COMMAND } from "./first-call.js";
 
@@ -54,6 +60,22 @@ export function canLaunchInteractiveAuth(probe: LaunchAuthProbe = {}): boolean {
   const stdoutIsTTY = probe.stdoutIsTTY ?? Boolean(process.stdout.isTTY);
   const stdinIsTTY = probe.stdinIsTTY ?? Boolean(process.stdin.isTTY);
   if (!stdoutIsTTY && !stdinIsTTY) return false;
+
+  const platform = probe.platform ?? process.platform;
+  if (platform === "darwin" || platform === "win32") return true;
+  return Boolean(env.DISPLAY || env.WAYLAND_DISPLAY);
+}
+
+/**
+ * Open the minted Clerk URL when this machine can show a browser.
+ * MCP on Cursor / Claude Desktop has a GUI and no TTY — do not require one.
+ * Headless CI still mints login_url; it must not spawn open/start/xdg-open.
+ */
+export function canOpenAuthBrowser(probe: LaunchAuthProbe = {}): boolean {
+  const env = probe.env ?? process.env;
+  if (env.CI === "true" || env.CI === "1") return false;
+  if (env.GITHUB_ACTIONS === "true" || env.GITHUB_ACTIONS === "1") return false;
+  if (env.APICLAW_SKIP_AUTH === "1" || env.APICLAW_SKIP_AUTH === "true") return false;
 
   const platform = probe.platform ?? process.platform;
   if (platform === "darwin" || platform === "win32") return true;
@@ -134,16 +156,41 @@ export function agentAuthRequiredPayload(
   };
 }
 
+export type AgentAuthMintOptions = {
+  openBrowser?: boolean;
+  ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
+  /** Injected for tests. Defaults to canOpenAuthBrowser(options). */
+  canOpen?: (probe?: LaunchAuthProbe) => boolean;
+  env?: NodeJS.ProcessEnv;
+  platform?: NodeJS.Platform;
+  stdinIsTTY?: boolean;
+  stdoutIsTTY?: boolean;
+  start?: (args: CliAuthStartArgs) => Promise<CliAuthStartResult>;
+  spawn?: OpenBrowserSpawn;
+  now?: number;
+  fingerprint?: string;
+};
+
 /** Mint or reuse pending login, then build the host-visible auth payload. */
 export async function agentAuthRequiredPayloadAfterMint(
   extra: Record<string, unknown> = {},
-  options: {
-    openBrowser?: boolean;
-    ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
-  } = {},
+  options: AgentAuthMintOptions = {},
 ): Promise<Record<string, unknown>> {
+  const openBrowser =
+    options.openBrowser ??
+    (options.canOpen ?? canOpenAuthBrowser)({
+      env: options.env,
+      platform: options.platform,
+      stdinIsTTY: options.stdinIsTTY,
+      stdoutIsTTY: options.stdoutIsTTY,
+    });
   const pending = await (options.ensurePending ?? (() => ensurePendingLogin({
-    openBrowser: options.openBrowser ?? false,
+    openBrowser,
+    start: options.start,
+    spawn: options.spawn,
+    platform: options.platform,
+    now: options.now,
+    fingerprint: options.fingerprint,
   })))();
   return agentAuthRequiredPayload({
     ...extra,
@@ -154,10 +201,7 @@ export async function agentAuthRequiredPayloadAfterMint(
 /** Unsigned first_run / execute: mint, then return an isError tool result. */
 export async function unsignedFirstRunToolResult(
   extra: Record<string, unknown> = {},
-  options: {
-    openBrowser?: boolean;
-    ensurePending?: () => Promise<StartedPendingLogin | { browserUrl: string } | null>;
-  } = {},
+  options: AgentAuthMintOptions = {},
 ): Promise<AuthRequiredToolResult> {
   return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint(extra, options));
 }

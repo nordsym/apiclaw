@@ -37,6 +37,12 @@ export type CliAuthStartResult = {
   expiresAt: number;
 };
 
+export type OpenBrowserSpawn = (
+  command: string,
+  args: readonly string[],
+  options: { detached?: boolean; stdio?: "ignore" },
+) => { unref: () => void };
+
 export type EnsurePendingLoginOptions = {
   /** Best-effort browser open. Default false — minting must not require a TTY. */
   openBrowser?: boolean;
@@ -46,6 +52,10 @@ export type EnsurePendingLoginOptions = {
   appUrl?: string;
   convexUrl?: string;
   start?: (args: CliAuthStartArgs) => Promise<CliAuthStartResult>;
+  /** Injected for tests. Defaults to process.platform. */
+  platform?: NodeJS.Platform;
+  /** Injected for tests. Defaults to node:child_process spawn. */
+  spawn?: OpenBrowserSpawn;
 };
 
 function base64url(buf: Buffer): string {
@@ -62,8 +72,12 @@ export function generateCliAuthState(): string {
   return base64url(randomBytes(24));
 }
 
-function openBrowserBestEffort(url: string): boolean {
-  const platform = process.platform;
+export function openBrowserBestEffort(
+  url: string,
+  options: { platform?: NodeJS.Platform; spawn?: OpenBrowserSpawn } = {},
+): boolean {
+  const platform = options.platform ?? process.platform;
+  const spawnFn = options.spawn ?? spawn;
   let cmd: string;
   let args: string[];
   if (platform === "darwin") {
@@ -77,7 +91,7 @@ function openBrowserBestEffort(url: string): boolean {
     args = [url];
   }
   try {
-    const child = spawn(cmd, args, { detached: true, stdio: "ignore" });
+    const child = spawnFn(cmd, args, { detached: true, stdio: "ignore" });
     child.unref();
     return true;
   } catch {
@@ -116,7 +130,12 @@ export async function ensurePendingLogin(
   const now = options.now ?? Date.now();
   const existing = readPendingLogin();
   if (existing && pendingLoginStillOpen(existing, now)) {
-    if (options.openBrowser) openBrowserBestEffort(existing.browserUrl);
+    if (options.openBrowser) {
+      openBrowserBestEffort(existing.browserUrl, {
+        platform: options.platform,
+        spawn: options.spawn,
+      });
+    }
     return { ...existing, reused: true };
   }
 
@@ -158,6 +177,11 @@ export async function ensurePendingLogin(
     expiresAt: started.expiresAt,
   };
   writePendingLogin(pending);
-  if (options.openBrowser) openBrowserBestEffort(pending.browserUrl);
+  if (options.openBrowser) {
+    openBrowserBestEffort(pending.browserUrl, {
+      platform: options.platform,
+      spawn: options.spawn,
+    });
+  }
   return { ...pending, reused: false };
 }
