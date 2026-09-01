@@ -65,17 +65,23 @@ npx @nordsym/apiclaw auth login
 ```
 
 That opens the same browser URL (or reuses the pending one). Finish
-Google or email on that URL — completing Clerk there Authorizes the
-terminal (one action). If you are already signed in, click Authorize.
-Do not tell a new Clerk user they still need a second click after
-Clerk. Only then does the CLI write `session_token` to
+Google or email on that URL. Completing sign-in there Authorizes this
+agent (one action). If you are already signed in, click Authorize.
+Do not tell a new user they still need a second click after sign-in.
+Only then does the CLI write `session_token` to
 `~/.apiclaw.toml`. Printing the URL is not success. Do not declare ready.
 Do not execute.
 
+After the human finishes Authorize, stay in this chat. You confirm
+with whoami and you execute NASA APOD (Frankfurter latest if NASA is
+not 200) in this same session. Do not send the human to a terminal.
+Do not tell them to open Terminal.app. Workspace is optional. The
+first call is not made in the workspace.
+
 Keep `auth login` in the foreground until it exits 0 if you ran it.
 The command reprints that URL every few seconds and polls Convex /
-`~/.apiclaw.toml` until Clerk writes `session_token`. Show the human
-the login URL on every reprint. Tell them to finish Clerk on that URL
+`~/.apiclaw.toml` until sign-in writes `session_token`. Show the human
+the login URL on every reprint. Tell them to finish sign-in on that URL
 (that Authorizes). If already signed in, tell them to click Authorize.
 Do not background the command. Do not continue until whoami prints an email.
 
@@ -265,3 +271,5 @@ not every provider.
   source of truth for what a customer can call.
 - Do not POST `/v1/execute` before whoami succeeds.
 - Do not send an empty `X-APIClaw-Session`.
+- Do not tell the human to open Terminal.app or go back to a shell.
+- After Authorize, continue in this chat and land NASA APOD yourself.

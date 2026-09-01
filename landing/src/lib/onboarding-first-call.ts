@@ -17,7 +17,7 @@ export const WORKSPACE_AFTER_CLI_AUTH = "/workspace?from=cli";
 
 /** Launch-step line when the human arrives from a CLI / agent login. */
 export const CLI_ARRIVAL_LINE =
-  "Your agent just signed in from the terminal. It confirms with whoami, then runs NASA APOD (Frankfurter if NASA is not 200). If it stalls, paste this prompt.";
+  "Your agent just signed in. It confirms with whoami, then runs NASA APOD (Frankfurter if NASA is not 200). If it stalls, paste this prompt.";
 
 export const INSTALL_COMMAND = "curl -fsSL https://apiclaw.cloud/install.sh | bash";
 

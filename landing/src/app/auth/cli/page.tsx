@@ -3,11 +3,11 @@
  *
  * Flow:
  *   1. CLI opens this URL with ?authId=<id>
- *   2. If user is not signed in to Clerk → render "Authorize this terminal"
+ *   2. If user is not signed in to Clerk → render "Authorize this agent"
  *      that links to /sign-in?redirect_url=/auth/cli?authId=<id>. Middleware
  *      sets apiclaw_cli_clerk_intent. Completing Clerk hits clerk-bridge,
  *      which claims the authId (that Clerk click is the consent).
- *   3. If already signed in → render an explicit "Authorize this terminal"
+ *   3. If already signed in → render an explicit "Authorize this agent"
  *      confirmation. Nothing is claimed until the user submits that form
  *      (login CSRF: a hostile ?authId= must not silently bind).
  *   4. Form POST → authorizeCli server action → POST to Convex cliAuth:claim
@@ -39,7 +39,7 @@ export default async function CliAuthPage({
   if (error) {
     return (
       <ErrorView
-        title={error === "no_email" ? "No email on Clerk account" : "Could not complete CLI authentication"}
+        title={error === "no_email" ? "No email on this account" : "Could not complete sign-in"}
         message={claimErrorMessage(error)}
       />
     );
@@ -47,7 +47,7 @@ export default async function CliAuthPage({
 
   // Validate authId format before doing anything
   if (!authId || !AUTHID_FORMAT.test(authId)) {
-    return <ErrorView title="Invalid auth link" message="The CLI authentication link is malformed or missing. Run the login command again to get a fresh link." />;
+    return <ErrorView title="Invalid auth link" message="This login link is malformed or missing. Ask your agent to show a fresh login URL." />;
   }
 
   const { userId } = await auth();
@@ -59,10 +59,10 @@ export default async function CliAuthPage({
   if (!userId) {
     return (
       <CliShell signInHref={signInHref}>
-        <p className="claw-eyebrow">CLI sign-in</p>
-        <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal</h1>
+        <p className="claw-eyebrow">Agent sign-in</p>
+        <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this agent</h1>
         <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-          A terminal on your machine ran <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code> and is waiting for you. Signing in to APIClaw with Google or email on this page is the authorization. There is no separate step.
+          An agent in Claude, Codex, Cursor, Grok, or similar asked you to sign in. Signing in to APIClaw with Google or email on this page is the authorization. There is no separate step.
         </p>
         <Link
           href={signInHref}
@@ -71,7 +71,7 @@ export default async function CliAuthPage({
           Authorize with Google or email
         </Link>
         <p className="mt-6 text-[13px] text-text-muted">
-          Keep the terminal command running. After you sign in, this page does not ask for a second click. The terminal confirms with <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth whoami</code>.
+          After you sign in, go back to that same chat. This page does not ask for a second click. Your agent confirms and makes the first call.
         </p>
       </CliShell>
     );
@@ -88,15 +88,15 @@ export default async function CliAuthPage({
   const email = verifiedPrimary || verifiedFallback;
 
   if (!email) {
-    return <ErrorView title="No email on Clerk account" message={claimErrorMessage("no_email")} />;
+    return <ErrorView title="No email on this account" message={claimErrorMessage("no_email")} />;
   }
 
   return (
     <CliShell signInHref={null}>
-      <p className="claw-eyebrow">CLI sign-in</p>
-      <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this terminal</h1>
+      <p className="claw-eyebrow">Agent sign-in</p>
+      <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorize this agent</h1>
       <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-        You are signed in to APIClaw as <span className="text-text-primary">{email}</span>. Click Authorize to connect the waiting terminal to your workspace. Until then the terminal stays signed out.
+        You are signed in to APIClaw as <span className="text-text-primary">{email}</span>. Click Authorize to connect that agent to your workspace. Until then the agent stays signed out.
       </p>
       <form action={authorizeCli} method="post" className="mt-8 flex items-center gap-4">
         <input type="hidden" name="authId" value={authId} />

@@ -47,7 +47,9 @@ assert.doesNotMatch(WAITING_FOR_FIRST_CALL, /—|–/);
 assert.equal(WORKSPACE_AFTER_CLI_AUTH, "/workspace?from=cli");
 assert.match(CLI_ARRIVAL_LINE, /whoami/);
 assert.match(CLI_ARRIVAL_LINE, /NASA APOD/);
+assert.match(CLI_ARRIVAL_LINE, /Your agent just signed in/);
 assert.doesNotMatch(CLI_ARRIVAL_LINE, /—|–/);
+assert.doesNotMatch(CLI_ARRIVAL_LINE, /terminal/i, "CLI arrival must not sound like a waiting terminal");
 
 // Arriving from /auth/cli/done must open the wizard on the agent launch
 // step (waiting for the first call), not the door chooser.

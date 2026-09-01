@@ -11,15 +11,21 @@ assert.equal(loopbackCallbackUrl("80", "one-time-code", "csrf-state"), null);
 assert.equal(loopbackCallbackUrl("41789", "bad code", "csrf-state"), null);
 
 const page = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
-assert.match(page, /Authorized\. Return to the terminal/);
+assert.match(page, /Authorized\. Go back to your agent/);
+assert.match(page, /Claude/);
+assert.match(page, /Codex/);
+assert.match(page, /Cursor/);
+assert.match(page, /Grok/);
 assert.match(page, /Connection refused on localhost is OK/);
-assert.match(page, /npx @nordsym\/apiclaw auth whoami/);
-assert.match(page, /then your agent makes its first call/);
-assert.match(page, /Open workspace/, "done page must hand the human to the workspace");
+assert.match(page, /Your agent confirms the sign-in and makes the first call there/);
+assert.match(page, /Open workspace is optional/, "workspace is optional, not where the call is made");
+assert.match(page, /The first call happens in that chat, not here/);
+assert.match(page, /Open workspace/, "done page may still offer the workspace");
 assert.match(page, /href=\{WORKSPACE_AFTER_CLI_AUTH\}/, "workspace link must come from the shared constant");
 const pageWithoutComments = page.replace(/\/\*[\s\S]*?\*\//g, "");
 assert.doesNotMatch(pageWithoutComments, /Clerk|session_token/, "human-facing copy must not name Clerk or session_token");
 assert.doesNotMatch(pageWithoutComments, /—|–/, "no em dashes in user-facing copy");
+assert.doesNotMatch(pageWithoutComments, /Return to the terminal|this terminal|waiting terminal/i);
 assert.match(page, /LocalhostHandoff/);
 
 const actions = readFileSync(new URL("../actions.ts", import.meta.url), "utf8");

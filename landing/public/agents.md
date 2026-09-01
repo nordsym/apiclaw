@@ -118,7 +118,8 @@ status
 ## Auth rules
 
 - Signup is required for discovery and execution.
-- Unsigned MCP/CLI first_run returns a live `https://apiclaw.cloud/auth/cli?authId=…` URL on its own line in the tool/CLI text (and as `login_url`). Show that URL. Do not bury it. Do not only print `npx @nordsym/apiclaw auth login`. Completing Clerk on the login URL Authorizes (one action). If already signed in, click Authorize. Printing the URL is not ready. Headless / agent machines cannot open the human's browser — the printed URL is the door.
+- Unsigned MCP/CLI first_run returns a live `https://apiclaw.cloud/auth/cli?authId=…` URL on its own line in the tool/CLI text (and as `login_url`). Show that URL. Do not bury it. Do not only print `npx @nordsym/apiclaw auth login`. Completing sign-in on the login URL Authorizes (one action). If already signed in, click Authorize. Printing the URL is not ready. Headless / agent machines cannot open the human's browser. The printed URL is the door.
+- After Authorize, continue in this same chat. Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email, then execute NASA APOD (Frankfurter if NASA is not 200). Do not send the human to a terminal or Terminal.app. Workspace is optional.
 - Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not execute before that.
 - Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.

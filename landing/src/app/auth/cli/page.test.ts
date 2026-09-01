@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { claimErrorMessage } from "./shared";
 
 /**
  * /auth/cli claims a pending CLI login into the signed-in Clerk user's
@@ -51,22 +52,22 @@ assert.match(
 );
 assert.match(
   pageSource,
-  /Authorize this terminal/,
+  /Authorize this agent/,
   "page.tsx must make Authorize the one labeled action",
 );
 assert.match(
   pageSource,
   /Authorize with Google or email/,
-  "unsigned CLI page must treat Clerk as the Authorize consent",
+  "unsigned CLI page must treat sign-in as the Authorize consent",
 );
 assert.match(
   pageSource,
   /does not ask for a second click/,
-  "unsigned copy must not promise a second Authorize screen after Clerk",
+  "unsigned copy must not promise a second Authorize screen after sign-in",
 );
 assert.match(
   pageSource,
-  /Click Authorize to connect the waiting terminal to your workspace/,
+  /Click Authorize to connect that agent to your workspace/,
   "already-signed-in page must still require the Authorize button",
 );
 assert.match(
@@ -74,17 +75,31 @@ assert.match(
   /Signing in to APIClaw with Google or email on this page is the authorization/,
   "unsigned copy must tell a human that sign-in and Authorize are one action",
 );
+assert.match(
+  pageSource,
+  /go back to that same chat/,
+  "unsigned copy must send the human back to the agent, not a terminal",
+);
+assert.match(pageSource, /Claude/);
+assert.match(pageSource, /Codex/);
+assert.match(pageSource, /Cursor/);
+assert.match(pageSource, /Grok/);
 const pageWithoutComments = pageSource.replace(/\/\*[\s\S]*?\*\//g, "");
 assert.doesNotMatch(
   pageWithoutComments,
-  /completing Clerk|After Clerk|Clerk sign-in on other pages|session_token/,
+  /completing Clerk|After Clerk|Clerk sign-in on other pages|session_token|No email on Clerk/,
   "Authorize copy must not lean on Clerk or session_token jargon",
 );
 assert.doesNotMatch(pageWithoutComments, /—|–/, "no em dashes in user-facing copy");
+assert.doesNotMatch(
+  pageWithoutComments,
+  /Authorize this terminal|waiting terminal|Keep the terminal|A terminal on your machine/,
+  "auth/cli copy must not sound like a waiting terminal",
+);
 assert.match(
   pageSource,
-  /npx @nordsym\/apiclaw auth whoami/,
-  "page.tsx must point at whoami after Authorize",
+  /Your agent confirms and makes the first call/,
+  "page.tsx must say the agent continues after Authorize",
 );
 assert.doesNotMatch(
   pageSource,
@@ -101,6 +116,14 @@ assert.match(
   /signInHref=\{null\}/,
   "signed-in CLI page must hide header Sign in so Authorize is the only next step",
 );
+
+assert.match(claimErrorMessage("expired"), /Ask your agent to show a fresh login URL/);
+assert.match(claimErrorMessage("already_used"), /Ask your agent to show a fresh login URL/);
+assert.match(claimErrorMessage("auth_id_not_found"), /Ask your agent to show a fresh login URL/);
+assert.match(claimErrorMessage("no_email"), /Sign in again with Google or email/);
+for (const code of ["expired", "already_used", "auth_id_not_found", "no_email"] as const) {
+  assert.doesNotMatch(claimErrorMessage(code), /Clerk|session_token|Run the login command|terminal/i);
+}
 
 // Identity used by the action must come from the server session, not the
 // submitted form fields.
