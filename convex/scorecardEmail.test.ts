@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
+  renderDailyScorecardHtml,
   renderDailyScorecardSubject,
   renderDailyScorecardText,
   windowFromQueries,
@@ -23,6 +24,24 @@ const week = {
 
 const leakBody = renderDailyScorecardText({ yesterday, week });
 const leakSubject = renderDailyScorecardSubject(yesterday);
+assert.equal(
+  leakBody,
+  [
+    "Igår",
+    "- Installerade: 4",
+    "- Startade appen: 3",
+    "- Loggade in: 0",
+    "- Gjorde ett anrop: 0",
+    "",
+    "Senaste 7 dagarna",
+    "- Installerade: 12",
+    "- Startade appen: 10",
+    "- Loggade in: 5",
+    "- Gjorde ett anrop: 2",
+    "",
+    "Alla 3 som startade appen igår misslyckades med att logga in.",
+  ].join("\n"),
+);
 
 assert.match(leakBody, /Installerade/);
 assert.match(leakBody, /Startade appen/);
@@ -84,6 +103,70 @@ for (const sample of [leakBody, loggedInBody, allInBody, noneStarted, leakSubjec
   assert.doesNotMatch(sample, /🦞|lobster/i);
 }
 
+const leakHtml = renderDailyScorecardHtml({ yesterday, week }, Date.UTC(2026, 8, 1));
+assert.match(leakHtml, /Installerade/);
+assert.match(leakHtml, /Startade appen/);
+assert.match(leakHtml, /Loggade in/);
+assert.match(leakHtml, /Gjorde ett anrop/);
+assert.match(
+  leakHtml,
+  /Alla 3 som startade appen igår misslyckades med att logga in/,
+);
+assert.match(leakHtml, /#ef4444/i);
+assert.match(leakHtml, /Inter/);
+assert.match(leakHtml, /JetBrains Mono/);
+assert.match(leakHtml, /Igår/);
+assert.match(leakHtml, /Senaste 7 dagarna/);
+assert.match(leakHtml, /color:#6f6f78[^>]*>Igår/);
+assert.match(leakHtml, /color:#6f6f78[^>]*>Senaste 7 dagarna/);
+assert.match(leakHtml, /#111113/);
+assert.match(leakHtml, /#151517/);
+assert.match(leakHtml, /#0b0b0c/);
+assert.match(leakHtml, /apiclaw\.cloud/);
+assert.match(leakHtml, /2026-09-01/);
+assert.match(leakHtml, /<table/i);
+assert.doesNotMatch(leakHtml, /display\s*:\s*flex/i);
+assert.doesNotMatch(leakHtml, /display\s*:\s*grid/i);
+assert.doesNotMatch(leakHtml, /linear-gradient/i);
+assert.doesNotMatch(leakHtml, /#58A6FF/i);
+assert.doesNotMatch(leakHtml, /#161B22/i);
+assert.doesNotMatch(leakHtml, /Control Plane/i);
+assert.doesNotMatch(leakHtml, /#f87171|#dc2626/i);
+assert.doesNotMatch(leakHtml, /Clerk/);
+assert.doesNotMatch(leakHtml, /first_run/);
+assert.doesNotMatch(leakHtml, /first_call/);
+assert.doesNotMatch(leakHtml, /verify_code/);
+assert.doesNotMatch(leakHtml, /activated owners/i);
+assert.doesNotMatch(leakHtml, /activated/i);
+assert.doesNotMatch(leakHtml, /funnel/i);
+assert.doesNotMatch(leakHtml, /backfill/i);
+assert.doesNotMatch(leakHtml, /\$0\./);
+assert.doesNotMatch(leakHtml, /🦞|lobster/i);
+
+const allInHtml = renderDailyScorecardHtml({
+  yesterday: { installs: 2, started: 2, loggedIn: 2, calls: 1 },
+  week,
+});
+assert.match(allInHtml, /Alla 2 som startade appen igår loggade in/);
+assert.match(allInHtml, /#3ecf8e/);
+assert.doesNotMatch(
+  allInHtml,
+  /#ef4444/i,
+  "red is a failure signature, not chrome, when someone logged in",
+);
+
+const noneStartedHtml = renderDailyScorecardHtml({
+  yesterday: { installs: 0, started: 0, loggedIn: 0, calls: 0 },
+  week: { installs: 1, started: 1, loggedIn: 1, calls: 0 },
+});
+assert.match(noneStartedHtml, /Ingen startade appen igår/);
+
+assert.equal(
+  renderDailyScorecardText({ yesterday, week }),
+  leakBody,
+  "plaintext renderer must stay unchanged when HTML is added",
+);
+
 const mapped = windowFromQueries(
   {
     truth: {
@@ -124,8 +207,9 @@ assert.match(daily, /internal\.funnel\.getScorecard/);
 assert.match(daily, /internal\.funnel\.getFunnel/);
 assert.match(daily, /from:\s*EMAIL_FROM/);
 assert.match(daily, /to:\s*RECIPIENT/);
+assert.match(daily, /html,/);
 assert.match(daily, /text,/);
-assert.doesNotMatch(daily, /\bhtml\b/);
+assert.match(src, /renderDailyScorecardHtml/);
 assert.match(daily, /if \(!apiKey\)/);
 assert.match(daily, /sent:\s*false/);
 assert.doesNotMatch(daily, /fetch\([\s\S]*process\.env/);
@@ -142,4 +226,4 @@ assert.match(crons, /weekly-usage-report/);
 assert.match(crons, /nurture-classify/);
 assert.match(crons, /nurture-send/);
 
-console.log("daily operator mail is plaintext Swedish and encodes login failures");
+console.log("daily operator mail is APIClaw HTML + unchanged Swedish plaintext");

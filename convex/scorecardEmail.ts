@@ -2,6 +2,7 @@
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import {
+  renderDailyScorecardHtml,
   renderDailyScorecardSubject,
   renderDailyScorecardText,
   windowFromQueries,
@@ -187,6 +188,7 @@ export const sendDailyScorecard = internalAction({
     const week = windowFromQueries(scorecard168, funnel168);
     const subject = renderDailyScorecardSubject(yesterday);
     const text = renderDailyScorecardText({ yesterday, week });
+    const html = renderDailyScorecardHtml({ yesterday, week });
     const failedLogin = Math.max(0, yesterday.started - yesterday.loggedIn);
 
     const response: Response = await fetch("https://api.resend.com/emails", {
@@ -199,6 +201,7 @@ export const sendDailyScorecard = internalAction({
         from: EMAIL_FROM,
         to: RECIPIENT,
         subject,
+        html,
         text,
       }),
     });
