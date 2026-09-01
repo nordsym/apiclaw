@@ -1,6 +1,11 @@
 "use node";
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
+import {
+  renderDailyScorecardSubject,
+  renderDailyScorecardText,
+  windowFromQueries,
+} from "./dailyScorecard";
 
 /**
  * A-13 — Weekly scorecard email.
@@ -145,6 +150,72 @@ export const sendWeeklyScorecard = internalAction({
       activatedUsers: activated,
       providerCostUsd30d: operating.managedLedger30d?.cost?.providerCostUsd ?? 0,
       billingExceptions30d: operating.managedLedger30d?.billingExceptions ?? 0,
+    };
+  },
+});
+
+export const sendDailyScorecard = internalAction({
+  args: {},
+  handler: async (ctx): Promise<any> => {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error("[scorecardEmail] RESEND_API_KEY not set");
+      return { sent: false, reason: "missing_api_key" };
+    }
+
+    const [scorecard24, scorecard168, funnel24, funnel168]: [any, any, any, any] =
+      await Promise.all([
+        ctx.runQuery(internal.funnel.getScorecard, {
+          hoursBack: 24,
+          classification: "human",
+        }),
+        ctx.runQuery(internal.funnel.getScorecard, {
+          hoursBack: 168,
+          classification: "human",
+        }),
+        ctx.runQuery(internal.funnel.getFunnel, {
+          hoursBack: 24,
+          includeClassifications: ["human"],
+        }),
+        ctx.runQuery(internal.funnel.getFunnel, {
+          hoursBack: 168,
+          includeClassifications: ["human"],
+        }),
+      ]);
+
+    const yesterday = windowFromQueries(scorecard24, funnel24);
+    const week = windowFromQueries(scorecard168, funnel168);
+    const subject = renderDailyScorecardSubject(yesterday);
+    const text = renderDailyScorecardText({ yesterday, week });
+    const failedLogin = Math.max(0, yesterday.started - yesterday.loggedIn);
+
+    const response: Response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: EMAIL_FROM,
+        to: RECIPIENT,
+        subject,
+        text,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[scorecardEmail] Resend ${response.status}:`, errorText);
+      return { sent: false, reason: `resend_${response.status}`, error: errorText };
+    }
+
+    const result = (await response.json()) as { id?: string };
+    return {
+      sent: true,
+      resendId: result.id,
+      started: yesterday.started,
+      loggedIn: yesterday.loggedIn,
+      failedLogin,
     };
   },
 });
