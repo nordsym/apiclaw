@@ -117,11 +117,21 @@ assert.match(leakHtml, /Inter/);
 assert.match(leakHtml, /JetBrains Mono/);
 assert.match(leakHtml, /Igår/);
 assert.match(leakHtml, /Senaste 7 dagarna/);
+assert.match(leakHtml, /color:#6f6f78[^>]*>Igår/);
+assert.match(leakHtml, /color:#6f6f78[^>]*>Senaste 7 dagarna/);
+assert.match(leakHtml, /#111113/);
+assert.match(leakHtml, /#151517/);
+assert.match(leakHtml, /#0b0b0c/);
 assert.match(leakHtml, /apiclaw\.cloud/);
 assert.match(leakHtml, /2026-09-01/);
 assert.match(leakHtml, /<table/i);
 assert.doesNotMatch(leakHtml, /display\s*:\s*flex/i);
 assert.doesNotMatch(leakHtml, /display\s*:\s*grid/i);
+assert.doesNotMatch(leakHtml, /linear-gradient/i);
+assert.doesNotMatch(leakHtml, /#58A6FF/i);
+assert.doesNotMatch(leakHtml, /#161B22/i);
+assert.doesNotMatch(leakHtml, /Control Plane/i);
+assert.doesNotMatch(leakHtml, /#f87171|#dc2626/i);
 assert.doesNotMatch(leakHtml, /Clerk/);
 assert.doesNotMatch(leakHtml, /first_run/);
 assert.doesNotMatch(leakHtml, /first_call/);
@@ -139,6 +149,11 @@ const allInHtml = renderDailyScorecardHtml({
 });
 assert.match(allInHtml, /Alla 2 som startade appen igår loggade in/);
 assert.match(allInHtml, /#3ecf8e/);
+assert.doesNotMatch(
+  allInHtml,
+  /#ef4444/i,
+  "red is a failure signature, not chrome, when someone logged in",
+);
 
 const noneStartedHtml = renderDailyScorecardHtml({
   yesterday: { installs: 0, started: 0, loggedIn: 0, calls: 0 },

@@ -3,11 +3,18 @@
  * internal event names in the copy. A person who started the app and did
  * not log in is a failure. HTML is visual only; the plaintext body stays
  * the source of truth for mail clients without HTML.
+ *
+ * Visual canon is the live quiet-console tokens (landing globals.css),
+ * not the retired light-mode red-CTA / glow / terminal-card mail.
+ * Accent red is a signature mark only: the failure sentence and a
+ * Loggade-in count of 0.
  */
 
 const PAGE_BG = "#0b0b0c";
 const SURFACE = "#111113";
+const SURFACE_ELEVATED = "#151517";
 const BORDER = "#26262a";
+const BORDER_SUBTLE = "#1c1c20";
 const TEXT_PRIMARY = "#f5f5f6";
 const TEXT_SECONDARY = "#a4a4ad";
 const TEXT_MUTED = "#6f6f78";
@@ -129,10 +136,10 @@ function metricCard(title: string, w: DailyScorecardWindow): string {
   return [
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${SURFACE}" style="width:100%;background-color:${SURFACE};border:1px solid ${BORDER};border-radius:14px;margin:0 0 16px">`,
     "<tr>",
-    `<td style="padding:20px 24px 4px;font-family:${FONT_UI};font-size:12px;font-weight:600;letter-spacing:0.04em;color:${ACCENT}">${title}</td>`,
+    `<td bgcolor="${SURFACE_ELEVATED}" style="padding:12px 24px;background-color:${SURFACE_ELEVATED};border-bottom:1px solid ${BORDER_SUBTLE};border-radius:14px 14px 0 0;font-family:${FONT_UI};font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:${TEXT_MUTED}">${title}</td>`,
     "</tr>",
     "<tr>",
-    `<td style="padding:0 24px 8px">`,
+    `<td style="padding:4px 24px 8px">`,
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%">`,
     metricRow("Installerade", w.installs, TEXT_PRIMARY, false),
     metricRow("Startade appen", w.started, TEXT_PRIMARY, false),
@@ -167,7 +174,7 @@ export function renderDailyScorecardHtml(
     `<table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px">`,
     "<tr>",
     `<td style="padding:0 0 28px">`,
-    `<p style="margin:0;font-family:${FONT_UI};font-size:18px;font-weight:600;letter-spacing:-0.03em;color:${TEXT_PRIMARY};line-height:24px">APIClaw</p>`,
+    `<p style="margin:0;font-family:${FONT_UI};font-size:15px;font-weight:600;letter-spacing:-0.02em;color:${TEXT_PRIMARY};line-height:20px">APIClaw</p>`,
     `<p style="margin:6px 0 0;font-family:${FONT_UI};font-size:12px;color:${TEXT_MUTED};line-height:18px">${date}</p>`,
     "</td>",
     "</tr>",
