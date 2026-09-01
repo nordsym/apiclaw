@@ -55,6 +55,7 @@ assert.match(skill, /Do not send an empty `X-APIClaw-Session`/);
 assert.match(skill, /Show the human the login URL|Show the human that URL|Show the human the live/);
 assert.match(skill, /auth\/cli\?authId=/);
 assert.match(skill, /Do not only print/);
+assert.match(skill, /own line|on its own line/);
 assert.match(skill, /one action/);
 assert.match(skill, /Keep `auth login` in the foreground/);
 assert.match(skill, /not success/);

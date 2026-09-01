@@ -16,6 +16,7 @@ import * as acp from "@zed-industries/agent-client-protocol";
 
 import { AUTH_CONFIG_PATH, readAuthConfig } from "./auth-config.js";
 import { readExecuteSessionHeaders } from "./execute-auth.js";
+import { unsignedExecuteMessage } from "./first-run.js";
 import {
   buildCallGatewayRequest,
   GatewayNonRetryableError,
@@ -27,9 +28,9 @@ import { GRAMMAR_HELP_TEXT, parseAcpCommand, type ParsedAcpCommand } from "./acp
 
 const AUTH_METHOD_ID = "apiclaw-session";
 
-const AUTH_REQUIRED_TEXT =
-  "Not signed in. APIClaw uses an agent-native auth flow: run `apiclaw auth login` " +
-  "in a terminal, sign in with one click, then retry this command.";
+function authRequiredText(): string {
+  return unsignedExecuteMessage();
+}
 
 interface AcpSession {
   pendingPrompt: AbortController | null;
@@ -101,8 +102,9 @@ class ApiclawAcpAgent implements acp.Agent {
           id: AUTH_METHOD_ID,
           name: "APIClaw account",
           description:
-            "Session-token auth written by `apiclaw auth login`. Run it in a terminal first " +
-            "(browser opens, one click, writes ~/.apiclaw.toml) - APIClaw reads that session here.",
+            "Session-token auth written by `apiclaw auth login`. The CLI prints a clickable " +
+            "https://apiclaw.cloud/auth/cli?authId=… URL. Show that URL to the human. " +
+            "After whoami prints an email, retry this command.",
         },
       ],
     };
@@ -111,9 +113,7 @@ class ApiclawAcpAgent implements acp.Agent {
   async authenticate(_params: acp.AuthenticateRequest): Promise<acp.AuthenticateResponse | void> {
     if (readAuthConfig()) return {};
     throw acp.RequestError.authRequired({
-      detail:
-        "ACP's authenticate method cannot run an interactive browser login. " +
-        "Run `apiclaw auth login` in a terminal first, then restart this ACP session.",
+      detail: authRequiredText(),
     });
   }
 
@@ -166,6 +166,9 @@ class ApiclawAcpAgent implements acp.Agent {
     switch (parsed.kind) {
       case "help":
       case "unparseable":
+        if (!readAuthConfig()) {
+          return `${authRequiredText()}\n\n${GRAMMAR_HELP_TEXT}`;
+        }
         return GRAMMAR_HELP_TEXT;
       case "status":
         return this.statusReply();
@@ -182,7 +185,7 @@ class ApiclawAcpAgent implements acp.Agent {
 
   private statusReply(): string {
     const cfg = readAuthConfig();
-    if (!cfg) return `Not signed in. Run \`apiclaw auth login\` in a terminal.`;
+    if (!cfg) return authRequiredText();
     return [
       "Signed in.",
       `  email:        ${cfg.email}`,
@@ -207,7 +210,7 @@ class ApiclawAcpAgent implements acp.Agent {
 
   private async discoverReply(query: string): Promise<string> {
     const headers = readExecuteSessionHeaders();
-    if (!headers) return AUTH_REQUIRED_TEXT;
+    if (!headers) return authRequiredText();
     const request: DirectGatewayRequest = {
       path: "/v1/discover",
       method: "POST",
@@ -218,7 +221,7 @@ class ApiclawAcpAgent implements acp.Agent {
 
   private async detailsReply(provider: string, action?: string): Promise<string> {
     const headers = readExecuteSessionHeaders();
-    if (!headers) return AUTH_REQUIRED_TEXT;
+    if (!headers) return authRequiredText();
     const name = action ? `${provider}/${action}` : provider;
     const request: DirectGatewayRequest = { path: "/api/details", method: "POST", body: { name } };
     return this.runGatewayRequest(request, headers, (data) => JSON.stringify(data, null, 2));
@@ -227,7 +230,7 @@ class ApiclawAcpAgent implements acp.Agent {
   private async callReply(parsed: Extract<ParsedAcpCommand, { kind: "call" }>): Promise<string> {
     if (parsed.paramsError) return `Invalid call: ${parsed.paramsError}`;
     const headers = readExecuteSessionHeaders();
-    if (!headers) return AUTH_REQUIRED_TEXT;
+    if (!headers) return authRequiredText();
     let request: DirectGatewayRequest;
     try {
       request = buildCallGatewayRequest(parsed.target, { params: parsed.params });
@@ -239,7 +242,7 @@ class ApiclawAcpAgent implements acp.Agent {
 
   private async balanceReply(): Promise<string> {
     const headers = readExecuteSessionHeaders();
-    if (!headers) return AUTH_REQUIRED_TEXT;
+    if (!headers) return authRequiredText();
     const request: DirectGatewayRequest = { path: "/api/balance", method: "POST", body: {} };
     return this.runGatewayRequest(request, headers, formatBalance);
   }

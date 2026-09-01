@@ -43,7 +43,7 @@ import { executeCapability, listCapabilities, hasCapability } from './capability
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
 import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, authRequiredToolResult, unsignedFirstRunToolResult, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { ensurePendingLogin } from './pending-login-start.js';
-import { canOpenAuthBrowser, hasWorkingWhoami } from './first-run.js';
+import { canOpenAuthBrowser, formatAuthRequiredVisibleText, hasWorkingWhoami } from './first-run.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -487,10 +487,10 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
     } else {
       return {
         allowed: false,
-        error: JSON.stringify(agentAuthRequiredPayload({
+        error: formatAuthRequiredVisibleText(agentAuthRequiredPayload({
           legacy_action: 'register_owner is retired. Use the browser auth command above.',
           free_tier: `Free APIs are free forever, no card. Discovery included. Paid APIs need a card, then run at provider cost + ${PAYG_MARGIN_PERCENT}% per call.`,
-        }), null, 2),
+        })),
         isAnonymous: true,
       };
     }
@@ -507,9 +507,9 @@ function checkWorkspaceAccess(providerId?: string): { allowed: boolean; error?: 
   if (!workspaceContext.email) {
     return {
       allowed: false,
-      error: JSON.stringify(agentAuthRequiredPayload({
+      error: formatAuthRequiredVisibleText(agentAuthRequiredPayload({
         error: 'An account is required to use APIClaw.',
-      }), null, 2),
+      })),
       isAnonymous: true,
     };
   }
@@ -1193,6 +1193,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     };
   }
 
+  // Unsigned first contact: every tool must show a clickable https login URL
+  // in the text the human's agent will display. Do not silently continue
+  // list/discover/help on the assistant's machine — that is the start→login leak.
+  if (!workspaceContext && !hasWorkingWhoami()) {
+    return unsignedFirstRunToolResult({ tool: name });
+  }
+
   try {
     switch (name) {
       case 'apiclaw_help': {
@@ -1791,11 +1798,7 @@ Docs: https://apiclaw.cloud
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
-                status: 'error',
-                error: access.error,
-                hint: 'Run `npx @nordsym/apiclaw auth login` to authenticate your workspace.',
-              }, null, 2)
+              text: access.error || formatAuthRequiredVisibleText(agentAuthRequiredPayload()),
             }],
             isError: true
           };
@@ -1956,19 +1959,11 @@ Docs: https://apiclaw.cloud
             signupUrl: string;
             docsUrl?: string;
           };
-          return {
-            content: [
-              {
-                type: 'text',
-                text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-                  message: ar.message,
-                  provider,
-                  action,
-                }), null, 2),
-              },
-            ],
-            isError: true,
-          };
+          return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint({
+            message: ar.message,
+            provider,
+            action,
+          }));
         }
 
         // Build response with signup nudge for unregistered users
@@ -2196,16 +2191,10 @@ Docs: https://apiclaw.cloud
       // ============================================
       
       case 'register_owner': {
-        if (legacyAuthRetired()) return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-              action: "legacy_auth_retired",
-              message: "Email-only registration has been retired because it did not provide a safe ownership proof.",
-            }), null, 2),
-          }],
-          isError: true,
-        };
+        if (legacyAuthRetired()) return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint({
+          action: "legacy_auth_retired",
+          message: "Email-only registration has been retired because it did not provide a safe ownership proof.",
+        }));
 
         const email = args?.email as string;
 
@@ -2371,16 +2360,10 @@ Docs: https://apiclaw.cloud
       }
 
       case 'verify_code': {
-        if (legacyAuthRetired()) return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-              action: "legacy_auth_retired",
-              message: "Legacy email codes are no longer accepted.",
-            }), null, 2),
-          }],
-          isError: true,
-        };
+        if (legacyAuthRetired()) return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint({
+          action: "legacy_auth_retired",
+          message: "Legacy email codes are no longer accepted.",
+        }));
 
         const email = (args?.email as string) || pendingRegistrationEmail;
         const code = args?.code as string;
@@ -2605,15 +2588,9 @@ Docs: https://apiclaw.cloud
       }
       
       case 'remind_owner': {
-        if (legacyAuthRetired()) return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(await agentAuthRequiredPayloadAfterMint({
-              action: "legacy_auth_retired",
-            }), null, 2),
-          }],
-          isError: true,
-        };
+        if (legacyAuthRetired()) return authRequiredToolResult(await agentAuthRequiredPayloadAfterMint({
+          action: "legacy_auth_retired",
+        }));
 
         const session = readSession();
         
@@ -2734,10 +2711,7 @@ Docs: https://apiclaw.cloud
         }
         const ctx = workspaceContext;
         if (!ctx?.sessionToken) {
-          return {
-            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated', hint: 'register_owner first' }, null, 2) }],
-            isError: true,
-          };
+          return unsignedFirstRunToolResult({ tool: "start_mission" });
         }
         const baseUrl = process.env.APICLAW_GATEWAY_URL ||
           (CONVEX_URL.includes('convex.cloud')
@@ -2805,10 +2779,7 @@ Docs: https://apiclaw.cloud
         }
         const ctx = workspaceContext;
         if (!ctx?.sessionToken) {
-          return {
-            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated' }, null, 2) }],
-            isError: true,
-          };
+          return unsignedFirstRunToolResult({ tool: "mission_status" });
         }
         const baseUrl = process.env.APICLAW_GATEWAY_URL ||
           (CONVEX_URL.includes('convex.cloud')
@@ -2828,10 +2799,7 @@ Docs: https://apiclaw.cloud
         const limit = (args?.limit as number) ?? 20;
         const ctx = workspaceContext;
         if (!ctx?.sessionToken) {
-          return {
-            content: [{ type: 'text', text: JSON.stringify({ error: 'unauthenticated' }, null, 2) }],
-            isError: true,
-          };
+          return unsignedFirstRunToolResult({ tool: "list_missions" });
         }
         const baseUrl = process.env.APICLAW_GATEWAY_URL ||
           (CONVEX_URL.includes('convex.cloud')
@@ -3114,9 +3082,8 @@ async function main() {
 ${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not ready. No session. Do not call_api. Do not declare ready.'}
 
 ${!hasValidSession ? `Next steps (in order):
-  1. ${firstRunLoginUrl
-    ? `Open this login URL: ${firstRunLoginUrl}`
-    : "First unsigned tool returns login_url (https://apiclaw.cloud/auth/cli?authId=…). Show that."}
+  1. Open this login URL:
+     ${firstRunLoginUrl || "https://apiclaw.cloud/auth/cli"}
      Finish Google or email on that URL — that Authorizes (one action).
      If already signed in, click Authorize.
      Do not only print npx @nordsym/apiclaw auth login.

@@ -2,7 +2,8 @@
  * Client-side registration guard — single source of truth for "does this
  * workspaceContext pass the verified-owner check before an API call".
  *
- * Free paths (discover_apis, list_* , *_help) do NOT call this.
+ * Free paths (discover_apis, list_* , *_help) do NOT call this for billing.
+ * The MCP handler still hard-stops every unsigned tool with a login URL.
  * Paying paths (call_api single + chain, capability, resume_chain) DO.
  */
 
