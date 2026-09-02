@@ -30,11 +30,14 @@ export default async function CliAuthDonePage({
             You are signed in. Return to Claude, Codex, Cursor, Grok, or whichever chat you used.
             Your agent confirms the sign-in and makes the first call there. Connection refused on localhost is OK.
           </p>
-          <Link href={WORKSPACE_AFTER_CLI_AUTH} className="claw-btn claw-btn-solid mt-8">
-            Open workspace
-          </Link>
+          <p className="mt-8 text-[15px] leading-[1.65] text-text-primary">
+            Go back to that chat and retry. Do not wait here.
+          </p>
           <p className="mt-6 text-[13px] text-text-muted">
-            Open workspace is optional. The first call happens in that chat, not here.
+            Workspace is optional. The first call happens in that chat, not here.{" "}
+            <Link href={WORKSPACE_AFTER_CLI_AUTH} className="underline underline-offset-2">
+              Open workspace
+            </Link>
           </p>
           <LocalhostHandoff port={port} code={code} state={state} />
         </div>

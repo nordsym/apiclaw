@@ -45,6 +45,13 @@ assert.equal(WAITING_FOR_FIRST_CALL, "Waiting for your first tool call");
 assert.doesNotMatch(WAITING_FOR_FIRST_CALL, /—|–/);
 
 assert.equal(WORKSPACE_AFTER_CLI_AUTH, "/workspace?from=cli");
+const donePage = readFileSync(new URL("../app/auth/cli/done/page.tsx", import.meta.url), "utf8");
+assert.match(donePage, /Go back to that chat and retry/);
+assert.doesNotMatch(
+  donePage,
+  /claw-btn-solid[\s\S]{0,80}Open workspace|Open workspace[\s\S]{0,80}claw-btn-solid/,
+  "/auth/cli/done must not send the human into workspace as the solid next step",
+);
 assert.match(CLI_ARRIVAL_LINE, /whoami/);
 assert.match(CLI_ARRIVAL_LINE, /NASA APOD/);
 assert.match(CLI_ARRIVAL_LINE, /Your agent just signed in/);

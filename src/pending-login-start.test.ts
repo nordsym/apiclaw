@@ -114,11 +114,16 @@ const firstRunTool = await unsignedFirstRunToolResult(
   { ensurePending: async () => minted },
 );
 assert.equal(firstRunTool.isError, true, "unsigned first_run must be an error the host must show");
-assert.match(
+assert.equal(
   firstRunTool.content[0].text,
-  /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\?authId=mintedauthidmintedauthidmint12\n/,
+  "https://apiclaw.cloud/auth/cli?authId=mintedauthidmintedauthidmint12",
 );
-const firstRunPayload = extractAuthRequiredPayload(firstRunTool.content[0].text);
+assert.match(
+  firstRunTool.content[1].text,
+  /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=mintedauthidmintedauthidmint12\n/,
+);
+assert.doesNotMatch(firstRunTool.content[1].text, /\{/, "visible text must not include JSON");
+const firstRunPayload = extractAuthRequiredPayload(firstRunTool.content[2].text);
 assert.equal(Object.keys(firstRunPayload)[0], "login_url");
 assert.equal(firstRunPayload.login_url, minted.browserUrl);
 assert.match(String(firstRunPayload.login_url), /\/auth\/cli\?authId=/);
@@ -126,15 +131,16 @@ assert.equal(firstRunPayload.status, "auth_required");
 assert.notEqual(firstRunPayload.status, "success");
 
 const unsigned = unsignedExecuteMessage(minted.browserUrl);
-assert.match(unsigned, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
+assert.match(unsigned, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
+assert.match(unsigned, /STOP\. Show the human the login URL on the first line/);
 assert.match(unsigned, /one action/);
 assert.doesNotMatch(unsigned, /After Clerk, click Authorize/);
 
 const incomplete = firstRunIncompleteMessage(minted.browserUrl);
-assert.match(incomplete, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
+assert.match(incomplete, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
 assert.ok(
-  incomplete.indexOf("Open this login URL") < incomplete.indexOf("npx @nordsym/apiclaw auth login"),
-  "URL must be the primary line, not only the login command",
+  incomplete.indexOf("https://") < incomplete.indexOf("npx @nordsym/apiclaw auth login"),
+  "URL must be the first line, not only the login command",
 );
 
 let mintedOnFirstRun = false;
@@ -191,8 +197,9 @@ const win32Tool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(win32Tool.isError, true);
-assert.match(win32Tool.content[0].text, /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
-const win32Payload = extractAuthRequiredPayload(win32Tool.content[0].text);
+assert.match(win32Tool.content[0].text, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
+assert.match(win32Tool.content[1].text, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
+const win32Payload = extractAuthRequiredPayload(win32Tool.content[2].text);
 assert.equal(Object.keys(win32Payload)[0], "login_url");
 assert.match(String(win32Payload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(win32Spawn.calls.length, 1, "desktop win32 with no TTY must attempt openBrowser");
@@ -220,7 +227,7 @@ const reusedTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(reusedTool.isError, true);
-const reusedPayload = extractAuthRequiredPayload(reusedTool.content[0].text);
+const reusedPayload = extractAuthRequiredPayload(reusedTool.content[2].text);
 assert.equal(Object.keys(reusedPayload)[0], "login_url");
 assert.equal(darwinReuse.calls.length, 1, "reuse on a GUI machine must pop Clerk again");
 assert.equal(darwinReuse.calls[0]?.command, "open");
@@ -241,7 +248,7 @@ const ciTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(ciTool.isError, true);
-const ciPayload = extractAuthRequiredPayload(ciTool.content[0].text);
+const ciPayload = extractAuthRequiredPayload(ciTool.content[2].text);
 assert.equal(Object.keys(ciPayload)[0], "login_url");
 assert.match(String(ciPayload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(ciSpawn.calls.length, 0, "CI must mint login_url without spawning a browser");
@@ -262,7 +269,7 @@ const linuxTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(linuxTool.isError, true);
-const linuxPayload = extractAuthRequiredPayload(linuxTool.content[0].text);
+const linuxPayload = extractAuthRequiredPayload(linuxTool.content[2].text);
 assert.equal(Object.keys(linuxPayload)[0], "login_url");
 assert.equal(headlessLinux.calls.length, 0, "Linux without DISPLAY must not spawn xdg-open");
 

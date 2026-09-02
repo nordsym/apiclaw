@@ -14,6 +14,9 @@ import {
   firstRunIncompleteMessage,
   extractAuthRequiredPayload,
   formatAuthRequiredVisibleText,
+  formatAuthRequiredJson,
+  formatLeadingLoginUrl,
+  unsignedToolDescriptionPrefix,
   FALLBACK_LOGIN_URL,
   unsignedExecuteMessage,
   unsignedFirstRunToolResult,
@@ -160,7 +163,11 @@ assert.match(incomplete, /npx @nordsym\/apiclaw auth login/);
 assert.match(incomplete, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(incomplete, /Authorize/);
 assert.match(incomplete, /empty X-APIClaw-Session/);
-assert.match(incomplete, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli/);
+assert.match(incomplete, /^https:\/\/apiclaw\.cloud\/auth\/cli/);
+assert.ok(
+  incomplete.indexOf("https://") < incomplete.indexOf("npx @nordsym/apiclaw auth login"),
+  "URL must be the first line, not after the login command",
+);
 assert.doesNotMatch(incomplete, /\bDone\b/);
 assert.doesNotMatch(incomplete, /apiclaw login/);
 assert.doesNotMatch(incomplete, /@2\.8\.7/);
@@ -172,9 +179,17 @@ assert.match(unsigned, /npx @nordsym\/apiclaw auth whoami/);
 assert.match(unsigned, /whoami — it redeems Authorize|whoami redeems/);
 assert.match(unsigned, /Do not POST \/v1\/execute until whoami prints an email/);
 assert.match(unsigned, /empty X-APIClaw-Session/);
-assert.match(unsigned, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli/);
-assert.match(unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"), /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\/cli\?authId=pending/);
+assert.match(unsigned, /^https:\/\/apiclaw\.cloud\/auth\/cli/);
+assert.match(unsigned, /STOP\. Show the human the login URL on the first line/);
+assert.match(
+  unsignedExecuteMessage("https://apiclaw.cloud/auth/cli?authId=pending"),
+  /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=pending\n/,
+);
 assert.doesNotMatch(unsigned, /paste/i);
+assert.match(
+  formatLeadingLoginUrl("https://apiclaw.cloud/auth/cli?authId=lead", ["body"]),
+  /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=lead\n\nSTOP\./,
+);
 
 const skill = readFileSync("landing/public/SKILL.md", "utf8");
 assert.match(skill, /[Ll]oop whoami/);
@@ -193,7 +208,21 @@ assert.match(
   /if \(!workspaceContext && !hasWorkingWhoami\(\)\) \{\s*return unsignedFirstRunToolResult\(\{ tool: name \}\);/,
   "unsigned first contact must hard-stop every MCP tool with a login URL",
 );
-assert.match(mcpIndex, /Open this login URL:\n\s+\$\{firstRunLoginUrl/);
+assert.match(
+  mcpIndex,
+  /\$\{firstRunLoginUrl \|\| "https:\/\/apiclaw\.cloud\/auth\/cli"\}/,
+  "unsigned MCP stderr must print the minted https login URL on its own line",
+);
+assert.match(mcpIndex, /STOP\. Show the human the login URL on the first line/);
+assert.match(
+  mcpIndex,
+  /unsignedToolDescriptionPrefix\(readPendingLoginUrl\(\)\)/,
+  "unsigned tools/list must prefix every description with the login URL",
+);
+assert.match(
+  unsignedToolDescriptionPrefix("https://apiclaw.cloud/auth/cli?authId=list"),
+  /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=list\n/,
+);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
@@ -221,11 +250,15 @@ if (!noSession.ok) {
   assert.notEqual(noSession.payload.status, "success");
   assert.match(String(noSession.payload.what_happens), /without a TTY|auth\/cli\?authId=/);
   const visibleNoSession = formatAuthRequiredVisibleText(noSession.payload);
-  assert.match(visibleNoSession, /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\n/);
-  assert.ok(
-    visibleNoSession.indexOf("https://") < visibleNoSession.indexOf("{"),
-    "clickable URL must appear before the JSON payload",
+  assert.match(visibleNoSession, /^https:\/\/apiclaw\.cloud\/auth\/cli\n/);
+  assert.match(visibleNoSession, /STOP\. Show the human the login URL on the first line/);
+  assert.doesNotMatch(
+    visibleNoSession,
+    /\{/,
+    "visible auth text must not include JSON — URL stays alone before any payload",
   );
+  const jsonNoSession = formatAuthRequiredJson(noSession.payload);
+  assert.match(jsonNoSession, /"login_url"/);
   assert.doesNotMatch(
     JSON.stringify(noSession.payload),
     /apiclaw\.cloud\/sign-in/,
@@ -276,14 +309,22 @@ const unsignedFirstRun = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(unsignedFirstRun.isError, true);
-const unsignedVisible = unsignedFirstRun.content[0].text;
-assert.match(unsignedVisible, /^Open this login URL:\nhttps:\/\/apiclaw\.cloud\/auth\/cli\?authId=headlessmintheadlessmint12\n/);
-assert.match(unsignedVisible, /Sign-in is not done/);
-assert.ok(
-  unsignedVisible.indexOf("https://") < unsignedVisible.indexOf("{"),
-  "tool text must lead with the clickable URL, not bury it in JSON",
+assert.equal(
+  unsignedFirstRun.content[0].text,
+  "https://apiclaw.cloud/auth/cli?authId=headlessmintheadlessmint12",
+  "first MCP content block must be the bare https login URL",
 );
-const unsignedPayload = extractAuthRequiredPayload(unsignedVisible);
+const unsignedVisible = unsignedFirstRun.content[1].text;
+assert.match(unsignedVisible, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=headlessmintheadlessmint12\n/);
+assert.match(unsignedVisible, /STOP\. Show the human the login URL on the first line/);
+assert.match(unsignedVisible, /retry this same tool in this chat/);
+assert.doesNotMatch(
+  unsignedVisible,
+  /\{/,
+  "human-visible tool text must not include JSON",
+);
+assert.equal(unsignedFirstRun.content.length, 3, "JSON must be a separate third content block");
+const unsignedPayload = extractAuthRequiredPayload(unsignedFirstRun.content[2].text);
 assert.equal(Object.keys(unsignedPayload)[0], "login_url");
 assert.match(String(unsignedPayload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(unsignedPayload.status, "auth_required");

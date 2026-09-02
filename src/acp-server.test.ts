@@ -60,13 +60,15 @@ async function main() {
   for (const keyword of ["discover", "details", "call", "balance", "status"]) {
     assert.ok(helpReply.includes(keyword), `help reply must mention "${keyword}"`);
   }
-  assert.match(helpReply, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\//, "unsigned ACP help must show a clickable https login URL");
+  assert.match(helpReply, /^https:\/\/apiclaw\.cloud\/auth\//, "unsigned ACP help must lead with a clickable https login URL");
+  assert.match(helpReply, /STOP\. Show the human the login URL on the first line/);
 
   // (c) "call nasa/apod" against the unauthenticated scratch HOME returns
   // auth-required guidance and never touches the network.
   const callReply = await promptText(session.sessionId, "call nasa/apod");
   assert.ok(callReply.includes("apiclaw auth login"), "unauthenticated call must guide toward apiclaw auth login");
-  assert.match(callReply, /Open this login URL:\n\s+https:\/\/apiclaw\.cloud\/auth\//, "unsigned ACP call must show a clickable https login URL");
+  assert.match(callReply, /^https:\/\/apiclaw\.cloud\/auth\//, "unsigned ACP call must lead with a clickable https login URL");
+  assert.match(callReply, /STOP\. Show the human the login URL on the first line/);
 
   console.log("acp-server: initialize/newSession/prompt handshake verified over real stdio, no network call made");
 }

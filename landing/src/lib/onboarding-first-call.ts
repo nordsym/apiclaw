@@ -12,7 +12,7 @@ export const ONBOARDING_OVERLAY_CLASS =
 
 export const WAITING_FOR_FIRST_CALL = "Waiting for your first tool call";
 
-/** Where /auth/cli/done sends the human. The wizard reads ?from=cli. */
+/** Optional workspace link after Authorize. The first call happens in the agent chat. The wizard still reads ?from=cli. */
 export const WORKSPACE_AFTER_CLI_AUTH = "/workspace?from=cli";
 
 /** Launch-step line when the human arrives from a CLI / agent login. */
