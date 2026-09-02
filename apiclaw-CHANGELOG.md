@@ -17,6 +17,7 @@ All notable changes to APIClaw.
 - **Every unsigned MCP/CLI/ACP result now starts with the absolute `https://apiclaw.cloud/auth/cli…` URL as line 1** (and as its own first MCP content block). The old "Open this login URL:" label plus a large JSON blob let Grok Bot / cloud / headless agents summarize the URL away.
 - **Hard-stop copy is explicit:** `STOP. Show the human the login URL on the first line. Do not summarize it away. Do not execute.` After Authorize, retry in this same chat (whoami, then NASA APOD / Frankfurter). Do not send the human to a terminal.
 - **SKILL.md / agents.md / llms.txt:** do not run `auth login` on a machine the human cannot see. The first-line URL is the door. `call_api` no longer says "do not retry this tool" without "until they Authorize, then retry here."
+- **`/auth/cli/done` leftover from #36:** the solid "Open workspace" button no longer owns the post-Authorize step. Headline stays "Go back to your agent"; workspace is a quiet optional link. The first call happens in that chat.
 
 ## [2.9.10] — 2026-09-01
 
