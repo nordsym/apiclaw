@@ -285,11 +285,11 @@ export async function authLoginCommand(options: AuthLoginOptions = {}): Promise<
   const state = pending.state;
   const verifier = pending.codeVerifier;
 
-  console.log(chalk.bold('  Open this login URL. Keep this command running.'));
-  console.log(`  ${chalk.cyan(pending.browserUrl)}`);
-  console.log(chalk.dim('  Finish Google or email on that URL — that Authorizes (one action).'));
-  console.log(chalk.dim('  If you are already signed in, click Authorize.'));
-  console.log(chalk.dim('  Printing the URL is not success. Waiting for Clerk to write session_token.\n'));
+  console.log(chalk.cyan(pending.browserUrl));
+  console.log(chalk.bold('STOP. Show the human the login URL above. Keep this command running.'));
+  console.log(chalk.dim('Finish Google or email on that URL — that Authorizes (one action).'));
+  console.log(chalk.dim('If you are already signed in, click Authorize.'));
+  console.log(chalk.dim('Printing the URL is not success. Waiting for Clerk to write session_token.\n'));
 
   const previousToken = options.force ? existing?.sessionToken : undefined;
   let stopClaimPoll = false;

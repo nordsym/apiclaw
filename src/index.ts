@@ -834,7 +834,7 @@ const tools: Tool[] = [
   },
   {
     name: 'call_api',
-    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace. If not authenticated, the response returns action="agent_auth_required" with a live login_url (https://apiclaw.cloud/auth/cli?authId=…). Show the human that URL. Finish Google or email on it — that Authorizes (one action). If already signed in, click Authorize. Then loop npx @nordsym/apiclaw auth whoami until it prints an email. Do not only print npx @nordsym/apiclaw auth login. Do not retry this tool and do not declare ready before whoami.
+    description: `Primary execution tool. Use this to actually do the job through APIClaw: live web search, scraping, speech, LLM calls, invoices, screenshots, currency, weather, and other external API work. Requires a free workspace. If not authenticated, the first line of the response is a live https://apiclaw.cloud/auth/cli?authId=… URL. Show the human that first line verbatim. Do not summarize it away. Finish Google or email on it — that Authorizes (one action). If already signed in, click Authorize. Do not retry this tool until they Authorize. Then retry in this chat: whoami, then this tool with NASA APOD (Frankfurter latest if NASA is not 200). Do not only print npx @nordsym/apiclaw auth login. Do not send the human to a terminal. Do not declare ready before whoami.
 
 SINGLE CALL: Provide provider + action + params
 CHAIN: Provide chain array to execute multiple APIs in sequence/parallel with cross-step references.
@@ -3081,15 +3081,15 @@ async function main() {
 ✓ Managed execution readiness is explicit
 ${hasValidSession ? `✓ Authenticated as ${workspaceContext?.email}` : '⚠ Not ready. No session. Do not call_api. Do not declare ready.'}
 
-${!hasValidSession ? `Next steps (in order):
-  1. Open this login URL:
-     ${firstRunLoginUrl || "https://apiclaw.cloud/auth/cli"}
-     Finish Google or email on that URL — that Authorizes (one action).
-     If already signed in, click Authorize.
-     Do not only print npx @nordsym/apiclaw auth login.
-  2. npx @nordsym/apiclaw auth whoami
-     Loop until it prints an email. Only then continue.
-  3. call_api({ provider: "nasa", action: "apod", params: {} })
+${!hasValidSession ? `${firstRunLoginUrl || "https://apiclaw.cloud/auth/cli"}
+
+STOP. Show the human the login URL on the first line. Do not summarize it away.
+Finish Google or email on that URL — that Authorizes (one action).
+If already signed in, click Authorize.
+Do not only print npx @nordsym/apiclaw auth login.
+After Authorize, retry in this chat:
+  1. npx @nordsym/apiclaw auth whoami — loop until it prints an email
+  2. call_api({ provider: "nasa", action: "apod", params: {} })
      If NASA is not 200: call_api({ provider: "frankfurter", action: "latest", params: { path: "/latest" } })
 ` : `Quick Start:
   call_api({ provider: "nasa", action: "apod", params: {} })

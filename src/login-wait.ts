@@ -13,15 +13,16 @@ export const LOGIN_WAIT_TIMEOUT_MS = 5 * 60 * 1000;
 
 export function loginWaitReprintLines(loginUrl: string): string[] {
   return [
-    "Not ready. Printing this URL is not success.",
-    "  Open this login URL:",
-    `  ${loginUrl}`,
-    "  Finish Google or email on that URL — that Authorizes (one action).",
-    "  If already signed in, click Authorize on apiclaw.cloud.",
-    "  Keep this command running until session_token exists.",
-    "  Connection refused on localhost is OK. whoami redeems Authorize.",
-    "  Then confirm with: npx @nordsym/apiclaw auth whoami",
-    "  Do not execute until whoami prints an email.",
+    loginUrl,
+    "",
+    "STOP. Show the human the login URL on the first line. Printing it is not success.",
+    "Not ready. whoami has no session. Do not execute.",
+    "Finish Google or email on that URL — that Authorizes (one action).",
+    "If already signed in, click Authorize on apiclaw.cloud.",
+    "Keep this command running until session_token exists.",
+    "Connection refused on localhost is OK. whoami redeems Authorize.",
+    "After Authorize, stay in this chat. Then confirm with: npx @nordsym/apiclaw auth whoami",
+    "Do not execute until whoami prints an email.",
   ];
 }
 
@@ -37,7 +38,7 @@ export function loopbackCallbackSuccessHtml(): string {
       </style></head><body><div class="box">
         <div class="lobster">🦞</div>
         <h1>Sign-in received</h1>
-        <p>Not ready yet. Return to the terminal and wait until it prints your email.</p>
+        <p>Not ready yet. Go back to your agent chat. Your agent confirms whoami and makes the first call there.</p>
         <p>Then confirm with <code>npx @nordsym/apiclaw auth whoami</code>.</p>
         <p>Connection refused on localhost is OK. whoami redeems Authorize.</p>
         <p>Do not execute until whoami prints an email.</p>

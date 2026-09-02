@@ -384,11 +384,13 @@ export async function mcpInstallCommand(options: MCPInstallOptions): Promise<voi
     console.log(chalk.bold('MCP is installed. Sign-in is still required.\n'));
     const pendingUrl = readPendingLoginUrl();
     if (pendingUrl) {
-      console.log(`  Open this login URL: ${pendingUrl}`);
-      console.log('  Finish Google or email on that URL — that Authorizes (one action).');
-      console.log('  If already signed in, click Authorize.');
+      console.log(pendingUrl);
+      console.log('STOP. Show the human the login URL above. Do not summarize it away.');
+      console.log('Finish Google or email on that URL — that Authorizes (one action).');
+      console.log('If already signed in, click Authorize.');
+      console.log('After Authorize, stay in this chat. Retry whoami then NASA APOD.');
     } else {
-      console.log(`  ${AUTH_LOGIN_COMMAND}`);
+      console.log(`Human shell on this machine only: ${AUTH_LOGIN_COMMAND}`);
     }
     console.log('Then confirm with:');
     console.log(`  npx @nordsym/apiclaw auth whoami`);

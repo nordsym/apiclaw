@@ -106,6 +106,28 @@ export function hasWorkingWhoami(): boolean {
 }
 
 /**
+ * First line is always the bare https login URL so chat clients link it
+ * and summarizers cannot bury it in JSON or a label. Body follows. JSON last.
+ */
+export function formatLeadingLoginUrl(
+  pending: string | null | undefined,
+  body: readonly string[],
+  payload?: Record<string, unknown>,
+): string {
+  const url = clickableLoginUrl(pending);
+  const lines = [
+    url,
+    "",
+    "STOP. Show the human the login URL on the first line. Do not summarize it away. Do not execute.",
+    ...body,
+  ];
+  if (payload) {
+    lines.push("", JSON.stringify({ ...payload, login_url: url }, null, 2));
+  }
+  return lines.join("\n");
+}
+
+/**
  * Printed by CLI call / whoami / first-call when session_token is missing.
  * Prefer the pending Clerk URL from the in-flight `auth login` so the human
  * can finish the already-started browser flow.
@@ -114,19 +136,18 @@ export function unsignedExecuteMessage(pendingLoginUrl?: string | null): string 
   const url = clickableLoginUrl(
     pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl(),
   );
-  return [
+  return formatLeadingLoginUrl(url, [
     "Not ready. whoami has no session. Do not execute.",
-    "  Open this login URL:",
-    `  ${url}`,
-    `  Or run: ${AUTH_LOGIN_COMMAND}`,
+    `Human shell on this machine only: ${AUTH_LOGIN_COMMAND}`,
     "Finish Google or email on that URL — that Authorizes (one action).",
     "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
+    "After Authorize, stay in this chat. Retry here — whoami then NASA APOD (Frankfurter if NASA is not 200).",
     "Then confirm with:",
     `  ${AUTH_WHOAMI_COMMAND}`,
     "Do not declare ready. Do not POST /v1/execute until whoami prints an email.",
     "Do not send an empty X-APIClaw-Session.",
-  ].join("\n");
+  ]);
 }
 
 export type AuthRequiredToolResult = {
@@ -135,22 +156,24 @@ export type AuthRequiredToolResult = {
 };
 
 /**
- * Human/agent-visible auth text. The https URL sits on its own line so
- * chat clients make it clickable. JSON follows for structured agents.
- * Never bury the URL inside JSON-only text.
+ * Human/agent-visible auth text. The https URL is the first line so
+ * chat clients make it clickable even when the host truncates or the
+ * agent summarizes. JSON follows for structured agents. Never bury
+ * the URL inside JSON-only text or behind a label.
  */
 export function formatAuthRequiredVisibleText(payload: Record<string, unknown>): string {
   const url = clickableLoginUrl(
     typeof payload.login_url === "string" ? payload.login_url : null,
   );
-  return [
-    "Open this login URL:",
+  return formatLeadingLoginUrl(
     url,
-    "",
-    "Sign-in is not done. Open the link, then retry. Do not execute until whoami prints an email.",
-    "",
-    JSON.stringify({ ...payload, login_url: url }, null, 2),
-  ].join("\n");
+    [
+      "Sign-in is not done. Open the first-line URL, then retry this same tool in this chat.",
+      "After Authorize: whoami, then NASA APOD (Frankfurter latest if NASA is not 200).",
+      "Do not send the human to a terminal. Workspace is optional.",
+    ],
+    payload,
+  );
 }
 
 /** Parse the trailing JSON object from formatAuthRequiredVisibleText. */
@@ -163,8 +186,15 @@ export function extractAuthRequiredPayload(text: string): Record<string, unknown
 export function authRequiredToolResult(
   payload: Record<string, unknown>,
 ): AuthRequiredToolResult {
+  const text = formatAuthRequiredVisibleText(payload);
+  const url = clickableLoginUrl(
+    typeof payload.login_url === "string" ? payload.login_url : null,
+  );
   return {
-    content: [{ type: "text", text: formatAuthRequiredVisibleText(payload) }],
+    content: [
+      { type: "text", text: url },
+      { type: "text", text },
+    ],
     isError: true,
   };
 }
@@ -188,14 +218,14 @@ export function agentAuthRequiredPayload(
     command: AUTH_LOGIN_COMMAND,
     confirm_command: AUTH_WHOAMI_COMMAND,
     after_signin:
-      "Loop `npx @nordsym/apiclaw auth whoami` until it prints an email. whoami redeems Authorize even if auth login was killed or localhost failed. Only then retry this tool. Do not POST /v1/execute with an empty X-APIClaw-Session.",
+      "After the human Authorizes, retry this same tool in this chat. Confirm whoami prints an email, then NASA APOD (Frankfurter latest if NASA is not 200). whoami redeems Authorize even if auth login was killed or localhost failed. Do not send the human to a terminal. Do not POST /v1/execute with an empty X-APIClaw-Session.",
     first_call_prompt: FIRST_CALL_PROMPT,
     ...rest,
     instruction:
-      `Show the human this login URL on its own line: ${url}. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute.`,
+      `The first line of this result is the login URL: ${url}. Show the human this login URL on its own line. Do not summarize it away. Finish Google or email on that URL — that Authorizes (one action). If already signed in, click Authorize. Printing the URL is not success. Do not declare ready. Do not retry execute until they Authorize, then retry in this chat.`,
     what_happens:
-      "A live /auth/cli?authId= URL is minted even without a TTY. A new Clerk finishes Authorize in that one action. Already signed in: click Authorize. Loop whoami until it prints an email. Clerk alone does not write session_token.",
-    fallback_for_headless: `Open ${url} on another device. Then ${AUTH_WHOAMI_COMMAND}.`,
+      "A live /auth/cli?authId= URL is minted even without a TTY. A new Clerk finishes Authorize in that one action. Already signed in: click Authorize. Then retry in this chat: whoami until it prints an email, then NASA APOD. Clerk alone does not write session_token.",
+    fallback_for_headless: `Show the human ${url}. Open it on their device. Then retry this tool in this chat. Or ${AUTH_WHOAMI_COMMAND}.`,
   };
 }
 
@@ -253,19 +283,18 @@ export function firstRunIncompleteMessage(pendingLoginUrl?: string | null): stri
   const url = clickableLoginUrl(
     pendingLoginUrl !== undefined ? pendingLoginUrl : readPendingLoginUrl(),
   );
-  return [
+  return formatLeadingLoginUrl(url, [
     "Not done. Sign-in is required before any managed call. Do not declare ready.",
-    "  Open this login URL:",
-    `  ${url}`,
-    `  Or run: ${AUTH_LOGIN_COMMAND}`,
+    `Human shell on this machine only: ${AUTH_LOGIN_COMMAND}`,
     "Finish Google or email on that URL — that Authorizes (one action).",
     "If you are already signed in, click Authorize on apiclaw.cloud.",
     "Connection refused on localhost is OK. Loop whoami — it redeems Authorize.",
-    "Headless or SSH? Open the browser URL on another device, then confirm:",
+    "After Authorize, stay in this chat. Retry here — whoami then NASA APOD (Frankfurter if NASA is not 200).",
+    "Headless or SSH? Show the human the first-line URL. Then confirm:",
     `  ${AUTH_WHOAMI_COMMAND}`,
     "Do not POST /v1/execute until whoami prints an email. Do not send an empty X-APIClaw-Session.",
     `First managed call after sign-in: ${FIRST_CALL_CLI}`,
-  ].join("\n");
+  ]);
 }
 
 export function firstRunCompleteMessage(email?: string, summary?: string): string {
@@ -368,9 +397,10 @@ export async function completeFirstRunAuth(
     console.log("");
     console.log("Next step: sign in so a managed call can succeed.");
     if (pendingUrl) {
-      console.log(`  Open this login URL: ${pendingUrl}`);
+      console.log(pendingUrl);
+      console.log("STOP. Show the human the login URL above. Do not summarize it away.");
     }
-    console.log(`  ${AUTH_LOGIN_COMMAND}`);
+    console.log(`Human shell on this machine only: ${AUTH_LOGIN_COMMAND}`);
     console.log("");
     launched = true;
     const result = await options.launch({});

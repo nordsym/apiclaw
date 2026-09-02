@@ -45,26 +45,31 @@ curl -fsSL https://apiclaw.cloud/install.sh | bash
 ## 2. Auth (Clerk). Never paste a token into chat.
 
 Unsigned MCP / CLI first_run mints a pending login even with no TTY and
-prints the exact https URL on its own line in the tool/CLI response
+prints the exact https URL as the **first line** of the tool/CLI response
 (then repeats it as `login_url` in JSON). The first lines look like:
 
 ```text
-Open this login URL:
 https://apiclaw.cloud/auth/cli?authId=…
+
+STOP. Show the human the login URL on the first line. Do not summarize it away. Do not execute.
 ```
 
-Show the human that URL on its own line so they can click it. Do not
-bury it. Do not only print `npx @nordsym/apiclaw auth login`.
-A command without `/auth/cli?authId=` is not enough. If you are running
-on a machine the human cannot see (headless agent, cloud VM), the
-desktop browser will not open for them — the URL in this response is
-the only door.
+Show the human that first-line URL on its own line so they can click it.
+Do not bury it. Do not summarize the tool result. Do not only print
+`npx @nordsym/apiclaw auth login`. A command without `/auth/cli?authId=`
+is not enough.
+
+If you are running on a machine the human cannot see (Grok Bot, cloud
+VM, headless agent), do not run `auth login` there — that opens a
+browser they will never get. The first-line URL in the tool response
+is the only door. Show it. Stop. Wait.
 
 ```bash
 npx @nordsym/apiclaw auth login
 ```
 
-That opens the same browser URL (or reuses the pending one). Finish
+That command is the human-shell door on a machine they can see. It
+opens the same browser URL (or reuses the pending one). Finish
 Google or email on that URL. Completing sign-in there Authorizes this
 agent (one action). If you are already signed in, click Authorize.
 Do not tell a new user they still need a second click after sign-in.
@@ -72,11 +77,11 @@ Only then does the CLI write `session_token` to
 `~/.apiclaw.toml`. Printing the URL is not success. Do not declare ready.
 Do not execute.
 
-After the human finishes Authorize, stay in this chat. You confirm
-with whoami and you execute NASA APOD (Frankfurter latest if NASA is
-not 200) in this same session. Do not send the human to a terminal.
-Do not tell them to open Terminal.app. Workspace is optional. The
-first call is not made in the workspace.
+After the human finishes Authorize, stay in this chat. Retry here.
+You confirm with whoami and you execute NASA APOD (Frankfurter latest
+if NASA is not 200) in this same session. Do not send the human to a
+terminal. Do not tell them to open Terminal.app. Workspace is optional.
+The first call is not made in the workspace.
 
 Keep `auth login` in the foreground until it exits 0 if you ran it.
 The command reprints that URL every few seconds and polls Convex /
@@ -92,10 +97,11 @@ even if `auth login` was killed or localhost never answered.
 If `~/.apiclaw.toml` or `~/.apiclaw/session` already has a session,
 skip login and go to whoami.
 
-Headless or SSH: run the same login command, open the printed URL on
+Headless or SSH: show the human the first-line URL. They open it on
 another device, then confirm with `whoami`. The file still holds
 `session_token`. Copy `~/.apiclaw.toml` to the headless machine, or
-run execute from the machine that finished login.
+run execute from the machine that finished login. Do not run
+`auth login` on a machine they cannot see.
 
 Fully headless (no browser anywhere, e.g. CI): skip CLI login on that
 host. Create a key in Workspace > Connections and set `APICLAW_API_KEY`
