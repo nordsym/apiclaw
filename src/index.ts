@@ -43,7 +43,8 @@ import { executeCapability, listCapabilities, hasCapability } from './capability
 import { readSession, writeSession, clearSession, getMachineFingerprint, detectMCPClient, SessionData } from './session.js';
 import { FIRST_CALL_PROMPT, agentAuthRequiredPayload, agentAuthRequiredPayloadAfterMint, authRequiredToolResult, unsignedFirstRunToolResult, requireVerifiedOwner, type WorkspaceContextLike } from './registration-guard.js';
 import { ensurePendingLogin } from './pending-login-start.js';
-import { canOpenAuthBrowser, formatAuthRequiredVisibleText, hasWorkingWhoami } from './first-run.js';
+import { canOpenAuthBrowser, formatAuthRequiredVisibleText, hasWorkingWhoami, unsignedToolDescriptionPrefix } from './first-run.js';
+import { readPendingLoginUrl } from './execute-auth.js';
 import { emitFunnelEvent, hasLocalMarker, setLocalMarker } from './funnel-client.js';
 import { ConvexHttpClient } from 'convex/browser';
 import { 
@@ -1179,6 +1180,18 @@ const canonicalTools = tools.filter((tool) => LOCAL_CANONICAL_TOOL_NAMES.has(too
 
 // Handle list tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+  // Unsigned connect: tools/list is often the only MCP request a harness
+  // makes after first_run. Prefix every description with the bare https
+  // login URL so the model sees it without a tool call.
+  if (!workspaceContext && !hasWorkingWhoami()) {
+    const prefix = unsignedToolDescriptionPrefix(readPendingLoginUrl());
+    return {
+      tools: canonicalTools.map((tool) => ({
+        ...tool,
+        description: `${prefix}${tool.description}`,
+      })),
+    };
+  }
   return { tools: canonicalTools };
 });
 

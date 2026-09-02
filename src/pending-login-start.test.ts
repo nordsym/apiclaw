@@ -122,7 +122,8 @@ assert.match(
   firstRunTool.content[1].text,
   /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=mintedauthidmintedauthidmint12\n/,
 );
-const firstRunPayload = extractAuthRequiredPayload(firstRunTool.content[1].text);
+assert.doesNotMatch(firstRunTool.content[1].text, /\{/, "visible text must not include JSON");
+const firstRunPayload = extractAuthRequiredPayload(firstRunTool.content[2].text);
 assert.equal(Object.keys(firstRunPayload)[0], "login_url");
 assert.equal(firstRunPayload.login_url, minted.browserUrl);
 assert.match(String(firstRunPayload.login_url), /\/auth\/cli\?authId=/);
@@ -198,7 +199,7 @@ const win32Tool = await unsignedFirstRunToolResult(
 assert.equal(win32Tool.isError, true);
 assert.match(win32Tool.content[0].text, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
 assert.match(win32Tool.content[1].text, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=/);
-const win32Payload = extractAuthRequiredPayload(win32Tool.content[1].text);
+const win32Payload = extractAuthRequiredPayload(win32Tool.content[2].text);
 assert.equal(Object.keys(win32Payload)[0], "login_url");
 assert.match(String(win32Payload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(win32Spawn.calls.length, 1, "desktop win32 with no TTY must attempt openBrowser");
@@ -226,7 +227,7 @@ const reusedTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(reusedTool.isError, true);
-const reusedPayload = extractAuthRequiredPayload(reusedTool.content[1].text);
+const reusedPayload = extractAuthRequiredPayload(reusedTool.content[2].text);
 assert.equal(Object.keys(reusedPayload)[0], "login_url");
 assert.equal(darwinReuse.calls.length, 1, "reuse on a GUI machine must pop Clerk again");
 assert.equal(darwinReuse.calls[0]?.command, "open");
@@ -247,7 +248,7 @@ const ciTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(ciTool.isError, true);
-const ciPayload = extractAuthRequiredPayload(ciTool.content[1].text);
+const ciPayload = extractAuthRequiredPayload(ciTool.content[2].text);
 assert.equal(Object.keys(ciPayload)[0], "login_url");
 assert.match(String(ciPayload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(ciSpawn.calls.length, 0, "CI must mint login_url without spawning a browser");
@@ -268,7 +269,7 @@ const linuxTool = await unsignedFirstRunToolResult(
   },
 );
 assert.equal(linuxTool.isError, true);
-const linuxPayload = extractAuthRequiredPayload(linuxTool.content[1].text);
+const linuxPayload = extractAuthRequiredPayload(linuxTool.content[2].text);
 assert.equal(Object.keys(linuxPayload)[0], "login_url");
 assert.equal(headlessLinux.calls.length, 0, "Linux without DISPLAY must not spawn xdg-open");
 

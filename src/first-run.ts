@@ -158,25 +158,38 @@ export type AuthRequiredToolResult = {
 /**
  * Human/agent-visible auth text. The https URL is the first line so
  * chat clients make it clickable even when the host truncates or the
- * agent summarizes. JSON follows for structured agents. Never bury
- * the URL inside JSON-only text or behind a label.
+ * agent summarizes. JSON is a separate MCP content block — never in
+ * this string. Never bury the URL inside JSON-only text or behind a label.
  */
 export function formatAuthRequiredVisibleText(payload: Record<string, unknown>): string {
   const url = clickableLoginUrl(
     typeof payload.login_url === "string" ? payload.login_url : null,
   );
-  return formatLeadingLoginUrl(
-    url,
-    [
-      "Sign-in is not done. Open the first-line URL, then retry this same tool in this chat.",
-      "After Authorize: whoami, then NASA APOD (Frankfurter latest if NASA is not 200).",
-      "Do not send the human to a terminal. Workspace is optional.",
-    ],
-    payload,
-  );
+  return formatLeadingLoginUrl(url, [
+    "Sign-in is not done. Open the first-line URL, then retry this same tool in this chat.",
+    "After Authorize: whoami, then NASA APOD (Frankfurter latest if NASA is not 200).",
+    "Do not send the human to a terminal. Workspace is optional.",
+  ]);
 }
 
-/** Parse the trailing JSON object from formatAuthRequiredVisibleText. */
+/** Structured payload only. Do not put this in the same text block as the URL. */
+export function formatAuthRequiredJson(payload: Record<string, unknown>): string {
+  const url = clickableLoginUrl(
+    typeof payload.login_url === "string" ? payload.login_url : null,
+  );
+  return JSON.stringify({ ...payload, login_url: url }, null, 2);
+}
+
+/**
+ * Prefix every unsigned tools/list description so a harness that never
+ * calls a tool still sees a pasteable https login URL at connect time.
+ */
+export function unsignedToolDescriptionPrefix(pending?: string | null): string {
+  const url = clickableLoginUrl(pending);
+  return `${url}\n\nSTOP. Show the human the login URL on the first line. Do not summarize it away. Do not execute.\n\n`;
+}
+
+/** Parse a JSON auth payload, or the trailing JSON object from older combined text. */
 export function extractAuthRequiredPayload(text: string): Record<string, unknown> {
   const start = text.indexOf("\n{");
   return JSON.parse(start === -1 ? text : text.slice(start + 1)) as Record<string, unknown>;
@@ -194,6 +207,7 @@ export function authRequiredToolResult(
     content: [
       { type: "text", text: url },
       { type: "text", text },
+      { type: "text", text: formatAuthRequiredJson(payload) },
     ],
     isError: true,
   };

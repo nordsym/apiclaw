@@ -14,7 +14,9 @@ import {
   firstRunIncompleteMessage,
   extractAuthRequiredPayload,
   formatAuthRequiredVisibleText,
+  formatAuthRequiredJson,
   formatLeadingLoginUrl,
+  unsignedToolDescriptionPrefix,
   FALLBACK_LOGIN_URL,
   unsignedExecuteMessage,
   unsignedFirstRunToolResult,
@@ -212,6 +214,15 @@ assert.match(
   "unsigned MCP stderr must print the minted https login URL on its own line",
 );
 assert.match(mcpIndex, /STOP\. Show the human the login URL on the first line/);
+assert.match(
+  mcpIndex,
+  /unsignedToolDescriptionPrefix\(readPendingLoginUrl\(\)\)/,
+  "unsigned tools/list must prefix every description with the login URL",
+);
+assert.match(
+  unsignedToolDescriptionPrefix("https://apiclaw.cloud/auth/cli?authId=list"),
+  /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=list\n/,
+);
 
 const complete = firstRunCompleteMessage("ada@example.com", "NASA APOD: Helix Nebula");
 assert.match(complete, /Done/);
@@ -241,10 +252,13 @@ if (!noSession.ok) {
   const visibleNoSession = formatAuthRequiredVisibleText(noSession.payload);
   assert.match(visibleNoSession, /^https:\/\/apiclaw\.cloud\/auth\/cli\n/);
   assert.match(visibleNoSession, /STOP\. Show the human the login URL on the first line/);
-  assert.ok(
-    visibleNoSession.indexOf("https://") < visibleNoSession.indexOf("{"),
-    "clickable URL must appear before the JSON payload",
+  assert.doesNotMatch(
+    visibleNoSession,
+    /\{/,
+    "visible auth text must not include JSON — URL stays alone before any payload",
   );
+  const jsonNoSession = formatAuthRequiredJson(noSession.payload);
+  assert.match(jsonNoSession, /"login_url"/);
   assert.doesNotMatch(
     JSON.stringify(noSession.payload),
     /apiclaw\.cloud\/sign-in/,
@@ -304,11 +318,13 @@ const unsignedVisible = unsignedFirstRun.content[1].text;
 assert.match(unsignedVisible, /^https:\/\/apiclaw\.cloud\/auth\/cli\?authId=headlessmintheadlessmint12\n/);
 assert.match(unsignedVisible, /STOP\. Show the human the login URL on the first line/);
 assert.match(unsignedVisible, /retry this same tool in this chat/);
-assert.ok(
-  unsignedVisible.indexOf("https://") < unsignedVisible.indexOf("{"),
-  "tool text must lead with the clickable URL, not bury it in JSON",
+assert.doesNotMatch(
+  unsignedVisible,
+  /\{/,
+  "human-visible tool text must not include JSON",
 );
-const unsignedPayload = extractAuthRequiredPayload(unsignedVisible);
+assert.equal(unsignedFirstRun.content.length, 3, "JSON must be a separate third content block");
+const unsignedPayload = extractAuthRequiredPayload(unsignedFirstRun.content[2].text);
 assert.equal(Object.keys(unsignedPayload)[0], "login_url");
 assert.match(String(unsignedPayload.login_url), /\/auth\/cli\?authId=/);
 assert.equal(unsignedPayload.status, "auth_required");
