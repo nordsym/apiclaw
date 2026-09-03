@@ -13,7 +13,7 @@
  * Classification (source):
  *   human    — real user, reasonable UA, interactive MCP client
  *   ci       — CI/CD runner (CI env var family, GITHUB_ACTIONS, :runner fingerprints)
- *   bot      — scanner/crawler (UA list, scan-/detonation-server-/instance: fingerprints)
+ *   bot      — scanner/crawler (UA list, scan-/detonation-server-/instance:/DESKTOP-<hex>:devuser fingerprints)
  *   internal — NordSym test traffic (fingerprint prefix, allowlisted emails)
  *
  * Truth metrics are built from (event=workspace_authenticated AND source=human) and
@@ -121,6 +121,15 @@ export function splitFingerprint(fingerprint: string): {
   return { hostname: fingerprint.slice(0, i), username: fingerprint.slice(i + 1) };
 }
 
+function isLinuxPlatform(platform?: string | null): boolean {
+  return (platform || "").toLowerCase() === "linux";
+}
+
+/** Windows-looking sandbox hostname: DESKTOP- followed by hex only. */
+function isDesktopHexHostname(host: string): boolean {
+  return /^desktop-[0-9a-f]+$/.test(host);
+}
+
 /**
  * Classify scanner / GitHub Actions fingerprints that have no CI=true and no
  * bot UA. Live 7d rows labeled "human" that are not people:
@@ -128,10 +137,13 @@ export function splitFingerprint(fingerprint: string): {
  *   detonation-server-*:nonroot
  *   <hex>:runner
  *   instance:<id>
- * DESKTOP-*:devuser is a real machine — do not mark bot.
+ *   DESKTOP-<hex>:devuser (linux sandbox with a Windows-looking hostname)
+ *   *:devuser on platform linux
+ * Real Darwin/Windows desktops with a human username stay unclassified here.
  */
 export function classifyFingerprint(
   fingerprint?: string | null,
+  platform?: string | null,
 ): Classification | null {
   const raw = (fingerprint || "").trim();
   if (!raw) return null;
@@ -157,6 +169,11 @@ export function classifyFingerprint(
     return "ci";
   }
 
+  // Sandbox scanners: Windows-looking DESKTOP-<hex> + user devuser, and/or
+  // username exactly `devuser` on linux. Do not mark Darwin/Windows humans.
+  if (isDesktopHexHostname(host) && user === "devuser") return "bot";
+  if (user === "devuser" && isLinuxPlatform(platform)) return "bot";
+
   return null;
 }
 
@@ -165,6 +182,7 @@ export function classifySource(input: {
   envFlags?: Record<string, string | undefined>;
   email?: string | null;
   fingerprint?: string | null;
+  platform?: string | null;
   forcedInternal?: boolean;
 }): Classification {
   if (input.forcedInternal) return "internal";
@@ -187,7 +205,7 @@ export function classifySource(input: {
     if (val && val !== "false" && val !== "0") return "ci";
   }
 
-  const fromFingerprint = classifyFingerprint(fp);
+  const fromFingerprint = classifyFingerprint(fp, input.platform);
   if (fromFingerprint) return fromFingerprint;
 
   const ua = (input.userAgent || "").toLowerCase();
@@ -210,11 +228,13 @@ export function resolvedClassification(event: {
   fingerprint?: string | null;
   userAgent?: string | null;
   email?: string | null;
+  platform?: string | null;
 }): Classification {
   const recomputed = classifySource({
     fingerprint: event.fingerprint,
     userAgent: event.userAgent,
     email: event.email,
+    platform: event.platform,
   });
   if (recomputed !== "human") return recomputed;
   const stored = event.classification;
@@ -309,6 +329,7 @@ export const recordEvent = mutation({
       fingerprint: args.fingerprint,
       userAgent: args.userAgent,
       email: args.email,
+      platform: args.platform,
     });
 
     if (args.dedupeKey) {
@@ -348,6 +369,7 @@ export const recordEventInternal = internalMutation({
     workspaceId: v.optional(v.id("workspaces")),
     fingerprint: v.optional(v.string()),
     email: v.optional(v.string()),
+    platform: v.optional(v.string()),
     dedupeKey: v.optional(v.string()),
     props: v.optional(v.any()),
   },
@@ -369,6 +391,7 @@ export const recordEventInternal = internalMutation({
         classification: args.classification,
         fingerprint: args.fingerprint,
         email: args.email,
+        platform: args.platform,
       }),
       dedupeKey,
       timestamp: Date.now(),

@@ -38,8 +38,44 @@ test('classify: live scanner fingerprints are not human', () => {
   assert.equal(classifyLocalSource({ env: {}, fingerprint: 'detonation-server-1:nonroot' }), 'bot');
   assert.equal(classifyLocalSource({ env: {}, fingerprint: '9f3a2b1c4d5e6f70:runner' }), 'ci');
   assert.equal(classifyLocalSource({ env: {}, fingerprint: 'instance:i-0abc123def456' }), 'bot');
-  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:devuser' }), 'human');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:alice' }), 'human');
   assert.equal(classifyLocalSource({ env: {}, fingerprint: '100.64.12.34:root' }), 'human');
+});
+
+test('classify: DESKTOP-<hex>:devuser and linux devuser are sandbox bots', () => {
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-57D618:devuser' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-2B6CD7:devuser' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-980F3E:devuser' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-A25E24:devuser' }), 'bot');
+  assert.equal(classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-ABC123:devuser' }), 'bot');
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'builder:devuser', platform: 'linux' }),
+    'bot',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:devuser', platform: 'linux' }),
+    'bot',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:devuser', platform: 'darwin' }),
+    'human',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:devuser', platform: 'win32' }),
+    'human',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:alice', platform: 'linux' }),
+    'human',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:alice', platform: 'darwin' }),
+    'human',
+  );
+  assert.equal(
+    classifyLocalSource({ env: {}, fingerprint: 'DESKTOP-7QK9X2:alice', platform: 'win32' }),
+    'human',
+  );
 });
 
 test('classify: CI env flag → ci', () => {

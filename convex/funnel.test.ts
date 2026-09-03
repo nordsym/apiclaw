@@ -16,14 +16,51 @@ const LIVE_SCAN = "scan-a1b2c3d4e5f67890:scan";
 const LIVE_DETONATION = "detonation-server-1:nonroot";
 const LIVE_HEX_RUNNER = "9f3a2b1c4d5e6f70:runner";
 const LIVE_INSTANCE = "instance:i-0abc123def456";
-const LIVE_DESKTOP = "DESKTOP-7QK9X2:devuser";
+const LIVE_DESKTOP_HUMAN = "DESKTOP-7QK9X2:alice";
+const LIVE_SANDBOX_HEX = "DESKTOP-57D618:devuser";
+const LIVE_SANDBOX_HEX_2 = "DESKTOP-2B6CD7:devuser";
+const LIVE_SANDBOX_HEX_3 = "DESKTOP-980F3E:devuser";
+const LIVE_SANDBOX_HEX_4 = "DESKTOP-A25E24:devuser";
 const LIVE_CGNAT_ROOT = "100.64.12.34:root";
 
 assert.equal(classifySource({ fingerprint: LIVE_SCAN }), "bot");
 assert.equal(classifySource({ fingerprint: LIVE_DETONATION }), "bot");
 assert.equal(classifySource({ fingerprint: LIVE_HEX_RUNNER }), "ci");
 assert.equal(classifySource({ fingerprint: LIVE_INSTANCE }), "bot");
-assert.equal(classifySource({ fingerprint: LIVE_DESKTOP }), "human");
+assert.equal(classifySource({ fingerprint: LIVE_DESKTOP_HUMAN }), "human");
+assert.equal(classifySource({ fingerprint: LIVE_SANDBOX_HEX }), "bot");
+assert.equal(classifySource({ fingerprint: LIVE_SANDBOX_HEX_2 }), "bot");
+assert.equal(classifySource({ fingerprint: LIVE_SANDBOX_HEX_3 }), "bot");
+assert.equal(classifySource({ fingerprint: LIVE_SANDBOX_HEX_4 }), "bot");
+assert.equal(
+  classifySource({ fingerprint: "builder:devuser", platform: "linux" }),
+  "bot",
+);
+assert.equal(
+  classifySource({ fingerprint: "DESKTOP-7QK9X2:devuser", platform: "linux" }),
+  "bot",
+);
+assert.equal(
+  classifySource({ fingerprint: "DESKTOP-7QK9X2:devuser", platform: "darwin" }),
+  "human",
+);
+assert.equal(
+  classifySource({ fingerprint: "DESKTOP-7QK9X2:devuser", platform: "win32" }),
+  "human",
+);
+assert.equal(
+  classifySource({ fingerprint: LIVE_DESKTOP_HUMAN, platform: "darwin" }),
+  "human",
+);
+assert.equal(
+  classifySource({ fingerprint: LIVE_DESKTOP_HUMAN, platform: "win32" }),
+  "human",
+);
+assert.equal(
+  classifySource({ fingerprint: LIVE_DESKTOP_HUMAN, platform: "linux" }),
+  "human",
+  "human username on linux DESKTOP-* is not the sandbox pattern",
+);
 assert.equal(
   classifySource({ fingerprint: LIVE_CGNAT_ROOT }),
   "human",
@@ -40,24 +77,33 @@ assert.equal(classifyFingerprint("detonation-server-abc:nonroot"), "bot");
 assert.equal(classifyFingerprint("c0ffee12:runner"), "ci");
 assert.equal(classifyFingerprint("runner-8:ubuntu"), "ci");
 assert.equal(classifyFingerprint("github-runner-1:ubuntu"), "ci");
-assert.equal(classifyFingerprint(LIVE_DESKTOP), null);
-assert.equal(classifySource({ fingerprint: "DESKTOP-ABC123:devuser" }), "human");
+assert.equal(classifyFingerprint(LIVE_DESKTOP_HUMAN), null);
+assert.equal(classifyFingerprint(LIVE_SANDBOX_HEX), "bot");
+assert.equal(classifyFingerprint("DESKTOP-ABC123:devuser"), "bot");
+assert.equal(classifyFingerprint("DESKTOP-7QK9X2:devuser"), null);
+assert.equal(classifyFingerprint("DESKTOP-7QK9X2:devuser", "linux"), "bot");
+assert.equal(classifyFingerprint("builder:devuser", "linux"), "bot");
+assert.equal(classifyFingerprint("builder:devuser", "darwin"), null);
+assert.equal(classifySource({ fingerprint: "DESKTOP-ABC123:devuser" }), "bot");
 
 const scannerInstalls = [
   { _id: "1", event: "install", fingerprint: LIVE_SCAN, classification: "human" },
   { _id: "2", event: "install", fingerprint: LIVE_DETONATION, classification: "human" },
   { _id: "3", event: "install", fingerprint: LIVE_HEX_RUNNER, classification: "human" },
   { _id: "4", event: "install", fingerprint: LIVE_INSTANCE, classification: "human" },
-  { _id: "5", event: "install", fingerprint: LIVE_DESKTOP, classification: "human" },
+  { _id: "5", event: "install", fingerprint: LIVE_DESKTOP_HUMAN, classification: "human" },
   { _id: "6", event: "first_run", fingerprint: LIVE_SCAN, classification: "human" },
-  { _id: "7", event: "first_run", fingerprint: LIVE_DESKTOP, classification: "human" },
+  { _id: "7", event: "first_run", fingerprint: LIVE_DESKTOP_HUMAN, classification: "human" },
   { _id: "8", event: "install", fingerprint: LIVE_CGNAT_ROOT, classification: "ci" },
+  { _id: "9", event: "install", fingerprint: LIVE_SANDBOX_HEX, classification: "human" },
+  { _id: "10", event: "first_run", fingerprint: LIVE_SANDBOX_HEX, classification: "human", platform: "linux" },
+  { _id: "11", event: "install", fingerprint: "builder:devuser", classification: "human", platform: "linux" },
 ];
 
 const humanOnly = scannerInstalls.filter((e) => resolvedClassification(e) === "human");
 assert.deepEqual(
   humanOnly.map((e) => e.fingerprint),
-  [LIVE_DESKTOP, LIVE_DESKTOP],
+  [LIVE_DESKTOP_HUMAN, LIVE_DESKTOP_HUMAN],
   "scorecard/getFunnel human installs must drop scanners",
 );
 assert.equal(computeMetrics(humanOnly).unique.install, 1);
@@ -65,6 +111,9 @@ assert.equal(computeMetrics(humanOnly).unique.first_run, 1);
 assert.equal(resolvedClassification(scannerInstalls[0]), "bot");
 assert.equal(resolvedClassification(scannerInstalls[2]), "ci");
 assert.equal(resolvedClassification(scannerInstalls[7]), "ci");
+assert.equal(resolvedClassification(scannerInstalls[8]), "bot");
+assert.equal(resolvedClassification(scannerInstalls[9]), "bot");
+assert.equal(resolvedClassification(scannerInstalls[10]), "bot");
 
 console.log("convex funnel classifySource: live scanner fingerprints are not human");
 

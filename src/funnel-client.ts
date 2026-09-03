@@ -64,6 +64,7 @@ export function classifyLocalSource(input: {
   userAgent?: string | null;
   email?: string | null;
   fingerprint?: string | null;
+  platform?: string | null;
   env?: NodeJS.ProcessEnv;
 }): Classification {
   const email = (input.email || "").toLowerCase().trim();
@@ -77,7 +78,10 @@ export function classifyLocalSource(input: {
     const val = env[key];
     if (val && val !== "false" && val !== "0") return "ci";
   }
-  const fromFingerprint = classifyMachineFingerprint(input.fingerprint);
+  const fromFingerprint = classifyMachineFingerprint(
+    input.fingerprint,
+    input.platform,
+  );
   if (fromFingerprint) return fromFingerprint;
   const ua = (input.userAgent || "").toLowerCase();
   if (ua) {
@@ -138,6 +142,7 @@ export function emitFunnelEvent(args: EmitArgs): void {
   const classification = classifyLocalSource({
     email: args.email,
     fingerprint: args.fingerprint,
+    platform: args.platform || process.platform,
   });
 
   const payload = {
