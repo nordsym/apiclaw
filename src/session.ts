@@ -144,10 +144,12 @@ export function splitMachineFingerprint(fingerprint: string): {
 /**
  * Scanner / GitHub Actions fingerprints that must not count as human.
  * Keep in sync with convex/funnel.ts classifyFingerprint.
- * DESKTOP-* is a real machine — never bot.
+ * DESKTOP-<hex>:devuser and linux user `devuser` are sandbox scanners.
+ * Real Darwin/Windows desktops with a human username stay unclassified.
  */
 export function classifyMachineFingerprint(
   fingerprint?: string | null,
+  platform?: string | null,
 ): "bot" | "ci" | null {
   const raw = (fingerprint || "").trim();
   if (!raw) return null;
@@ -172,6 +174,9 @@ export function classifyMachineFingerprint(
   ) {
     return "ci";
   }
+
+  if (/^desktop-[0-9a-f]+$/.test(host) && user === "devuser") return "bot";
+  if (user === "devuser" && (platform || "").toLowerCase() === "linux") return "bot";
 
   return null;
 }
