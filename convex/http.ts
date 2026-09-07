@@ -3,6 +3,7 @@ import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { resolveVerifiedOwnerByWorkspaceId } from "./guards";
 import { resolveDirectModelRoute } from "./modelRouting";
+import { isWebsiteServiceScope, websiteServiceEndpointAllowed, websiteServiceBodyAllowed, websiteServiceRouteAllowed, type WebsiteServiceScope } from "./websiteServicePolicy";
 import { resolveManagedCredential } from "./managedCredentials";
 import { resolveFrontierModelCost } from "./modelPricing";
 import {
@@ -1163,6 +1164,7 @@ async function recordLegacyClientUpgrade(
 }
 
 type ResolvedWorkspaceAuth = {
+  serviceScope?: WebsiteServiceScope;
   workspaceId?: string;
   keyId?: string;
   authMethod: "api-key" | "session" | "identifier" | "mcp-oauth" | "internal" | "anonymous";
@@ -1250,7 +1252,7 @@ async function readUpstreamJsonCapped(response: Response): Promise<any> {
 async function resolveWorkspaceFromRequest(
   ctx: any,
   request: Request
-): Promise<ResolvedWorkspaceAuth> {
+): Promise<ResolvedWorkspaceAuth | Response> {
   const internalHeader = request.headers.get("X-APIClaw-Internal");
   if (internalHeader) {
     const expected = process.env.APICLAW_INTERNAL_SECRET;
@@ -1265,8 +1267,9 @@ async function resolveWorkspaceFromRequest(
     try {
       const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey: credential.rawKey });
       if (resolved) {
+        if (resolved.serviceScope && !websiteServiceEndpointAllowed(resolved.workspaceId, resolved.serviceScope, request)) return jsonResponse({ error: { code: "service_key_scope_denied", message: "This service key is restricted to the NordSym website model endpoint." } }, 403);
         ctx.runMutation(api.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
-        return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key" };
+        return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key", ...(resolved.serviceScope ? { serviceScope: resolved.serviceScope } : {}) };
       }
     } catch (e: any) {
       console.error("[Auth] API key resolution failed:", e.message);
@@ -1920,6 +1923,7 @@ async function validateAndLogProxyCall(
 
   // Resolve workspace from any auth method
   const auth = await resolveWorkspaceFromRequest(ctx, request);
+  if (auth instanceof Response) return auth;
   const scopeDenied = mcpScopeDenial(auth, "call");
   if (scopeDenied) return scopeDenied;
   const resolvedWorkspaceId = auth.workspaceId;
@@ -2325,6 +2329,7 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth instanceof Response) return auth;
     const scopeDenied = mcpScopeDenial(auth, "billing");
     if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
@@ -3738,10 +3743,11 @@ async function requireApiKeyAuth(
   ctx: any,
   request: Request,
   requiredMcpCapability: McpCapability = "call",
-): Promise<{ workspaceId: string; keyId?: string; authMethod: "api-key" | "session" | "mcp-oauth" } | Response> {
+): Promise<{ workspaceId: string; keyId?: string; serviceScope?: WebsiteServiceScope; authMethod: "api-key" | "session" | "mcp-oauth" } | Response> {
   const auth = await resolveWorkspaceFromRequest(ctx, request);
+  if (auth instanceof Response) return auth;
   if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
-    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
+    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key", ...(auth.serviceScope ? { serviceScope: auth.serviceScope } : {}) };
   }
   if (auth.authMethod === "session" && auth.workspaceId) {
     return { workspaceId: auth.workspaceId, authMethod: "session" };
@@ -3775,6 +3781,7 @@ http.route({
     const authResult = await requireApiKeyAuth(ctx, request);
     if (authResult instanceof Response) return authResult;
     const { workspaceId, authMethod } = authResult;
+    const websiteService = isWebsiteServiceScope(workspaceId, authResult.serviceScope);
 
     // Parse body
     let body: any;
@@ -3784,8 +3791,10 @@ http.route({
       return jsonResponse({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
     }
 
+    if (websiteService && !websiteServiceBodyAllowed(body)) return jsonResponse({ error: { code: "service_key_scope_denied", message: "Website service requests must use the approved exact model and bounded non-streaming format." } }, 403);
     let { model } = body;
     const { messages, stream, ...rest } = body;
+    if (websiteService) delete rest.model;
     if (!messages || !Array.isArray(messages)) {
       return jsonResponse({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
     }
@@ -3818,7 +3827,7 @@ http.route({
     }
     const explicitOpenRouterTarget = resolveExplicitOpenRouterTarget(model);
     const openRouterExecution = resolveExplicitOpenRouterExecution({
-      provider: !isInternalTier(configuredTier) || explicitOpenRouterTarget ? "openrouter" : "auto",
+      provider: !websiteService && (!isInternalTier(configuredTier) || explicitOpenRouterTarget) ? "openrouter" : "auto",
       action: "chat",
       requestedModel: model || configuredDefaultModel || "auto",
     });
@@ -4256,10 +4265,10 @@ http.route({
 
     // Route the request. Advisor mode is deterministic and performs no hidden provider call.
     const route = await routeLLMRequest(effectiveModel, {
-      routingMode: effectiveRoutingMode,
-      preferredProviders: effectivePreferred,
+      routingMode: websiteService ? "balanced" : effectiveRoutingMode,
+      preferredProviders: websiteService ? ["openai"] : effectivePreferred,
       blockedProviders: settings.blockedProviders,
-      allowOpenRouterFallback: settings.allowOpenRouterFallback,
+      allowOpenRouterFallback: websiteService ? false : settings.allowOpenRouterFallback,
     }, messages);
 
     if (!route) {
@@ -4267,10 +4276,14 @@ http.route({
       return jsonResponse({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
     }
 
+    if (websiteService && !websiteServiceRouteAllowed(route)) {
+      await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+      return jsonResponse({ error: { code: "service_key_route_denied", message: "The approved website model route is unavailable." } }, 503);
+    }
     const isFounderOrPartner = settings.tier === "founder" || settings.tier === "partner";
     const requestedModelForGuard = String(effectiveModel || route.model || "");
     const codexSubscriptionModel = /^(openai\/|openai-codex\/)?(gpt-5(\.|-|$)|codex-)/i.test(requestedModelForGuard);
-    if (isFounderOrPartner && route.provider === "openai" && codexSubscriptionModel) {
+    if (isFounderOrPartner && route.provider === "openai" && codexSubscriptionModel && !websiteService) {
       await finalizeManagedCall(ctx, quotaGate, { success: false, provider: route.provider, providerCostUsd: 0, model: route.model, costSource: "zero_cost" });
       return jsonResponse({
         error: {
@@ -5637,8 +5650,9 @@ async function resolveExecuteAuth(
 
   // 2. API key or CLI session (unified resolver handles both new header forms)
   const auth = await resolveWorkspaceFromRequest(ctx, request);
+  if (auth instanceof Response) return auth;
   if (auth.authMethod === "api-key" && auth.workspaceId && auth.keyId) {
-    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key" };
+    return { workspaceId: auth.workspaceId, keyId: auth.keyId, authMethod: "api-key", ...(auth.serviceScope ? { serviceScope: auth.serviceScope } : {}) };
   }
   if (auth.authMethod === "session" && auth.workspaceId) {
     return { workspaceId: auth.workspaceId, authMethod: "session" };
@@ -7497,6 +7511,7 @@ http.route({
 
     // Auth — accepts Bearer sk-claw, X-APIClaw-Api-Key, or X-APIClaw-Session.
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth instanceof Response) return auth;
     const workspaceId = auth.workspaceId;
 
     // Enforce gate: anonymous /v1/call is rejected when AUTH_ENFORCEMENT=enforce.
@@ -7838,6 +7853,7 @@ http.route({
   method: "POST",
   handler: httpAction(async (ctx, request): Promise<Response> => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth instanceof Response) return auth;
     const scopeDenied = mcpScopeDenial(auth, "call");
     if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
@@ -7942,6 +7958,7 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx, request) => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth instanceof Response) return auth;
     const scopeDenied = mcpScopeDenial(auth, "read");
     if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {
@@ -7970,6 +7987,7 @@ http.route({
   method: "GET",
   handler: httpAction(async (ctx, request) => {
     const auth = await resolveWorkspaceFromRequest(ctx, request);
+    if (auth instanceof Response) return auth;
     const scopeDenied = mcpScopeDenial(auth, "read");
     if (scopeDenied) return scopeDenied;
     if (auth.authMethod === "anonymous" || !auth.workspaceId) {

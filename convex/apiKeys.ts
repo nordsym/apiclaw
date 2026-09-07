@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query, internalQuery } from "./_generated/server";
+import { mutation, query, internalQuery, internalMutation } from "./_generated/server";
 import { findUsableAgentSession } from "./sessionSecurity";
+import { WEBSITE_WORKSPACE_ID, WEBSITE_SERVICE_SCOPE } from "./websiteServicePolicy";
 
 // ============================================
 // WORKSPACE API KEYS
@@ -71,7 +72,7 @@ export const generateKey = mutation({
       .collect();
 
     const activeKeys = existingKeys.filter((k) => !k.revokedAt);
-    if (activeKeys.length >= 5) {
+    if (activeKeys.filter(k => !k.serviceScope).length >= 5) {
       throw new Error("Maximum 5 active keys per workspace. Revoke an existing key first.");
     }
 
@@ -101,6 +102,29 @@ export const generateKey = mutation({
       keyPrefix: getKeyPrefix(rawKey),
       name: args.name,
     };
+  },
+});
+
+// Admin-only provisioning, never exposed through a workspace session or generateKey.
+// The operator supplies a freshly generated key privately, retaining it across a lost
+// acknowledgement. Only its hash is stored; repeating the same request is idempotent.
+export const provisionWebsiteServiceKey = internalMutation({
+  args: { workspaceId: v.id("workspaces"), rawKey: v.string() },
+  handler: async (ctx, args) => {
+    if (args.workspaceId !== WEBSITE_WORKSPACE_ID || !/^sk-claw-[A-Za-z0-9_-]{48}$/.test(args.rawKey)) throw new Error("website_key_scope_invalid");
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace || workspace.status !== "active") throw new Error("website_workspace_unavailable");
+    const keyHash = await hashKey(args.rawKey);
+    const collision = await ctx.db.query("workspaceApiKeys").withIndex("by_keyHash", q => q.eq("keyHash", keyHash)).first();
+    if (collision) {
+      if (collision.workspaceId !== args.workspaceId || collision.revokedAt || collision.serviceScope?.purpose !== "nordsym-website") throw new Error("website_key_conflict");
+      return { keyId: collision._id, keyPrefix: collision.keyPrefix, created: false };
+    }
+    const keys = await ctx.db.query("workspaceApiKeys").withIndex("by_workspaceId", q => q.eq("workspaceId", args.workspaceId)).collect();
+    if (keys.some(key => !key.revokedAt && key.serviceScope?.purpose === "nordsym-website")) throw new Error("website_service_slot_occupied");
+    const keyPrefix = getKeyPrefix(args.rawKey);
+    const keyId = await ctx.db.insert("workspaceApiKeys", { workspaceId: args.workspaceId, key: "", keyHash, keyPrefix, name: "NordSym website", serviceScope: WEBSITE_SERVICE_SCOPE, createdAt: Date.now() });
+    return { keyId, keyPrefix, created: true };
   },
 });
 
@@ -204,6 +228,7 @@ export const resolveKey = internalQuery({
       workspaceId: keyDoc.workspaceId,
       keyId: keyDoc._id,
       name: keyDoc.name,
+      serviceScope: keyDoc.serviceScope,
     };
   },
 });

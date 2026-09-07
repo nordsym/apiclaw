@@ -264,10 +264,12 @@ function firstExecuteCtx(options: {
 
 const claimed = firstExecuteCtx({
   sessions: [{
+    _id: "owner-id",
     sessionToken: "owner-session-token-value",
     sessionKind: "owner",
     lastUsedAt: 20,
   }, {
+    _id: "browser-id",
     sessionToken: "browser-child",
     sessionKind: "browser",
     parentSessionId: "owner-id",
@@ -285,7 +287,7 @@ assert.deepEqual(replay, { claimed: false, reason: "already_attempted" });
 
 const alreadyActivated = firstExecuteCtx({
   firstCall: { _id: "event-existing" },
-  sessions: [{ sessionToken: "owner-session-token-value", sessionKind: "owner", lastUsedAt: 1 }],
+  sessions: [{ _id: "owner-id", sessionToken: "owner-session-token-value", sessionKind: "owner", lastUsedAt: 1 }],
 });
 assert.deepEqual(
   await claimFirstExecuteInTransaction(alreadyActivated.ctx, "ws1" as any, 4000),

@@ -114,7 +114,8 @@ assert.doesNotMatch(welcome.text || "", /unsubscribe|apiclaw\.cloud|—|&mdash;/
 for (const kind of ["try-discover", "first-call", "upgrade", "power-upgrade"]) {
   const rendered = bodyFor(kind, "Gustav", unsubscribeUrl);
   assert.doesNotMatch(rendered.subject, /\b(Pro|Scale)\b/i, `${kind} subject should not use stale tier copy`);
-  assert.doesNotMatch(rendered.html, /\b(Pro|Scale)\b|managed calls? (?:per|\/)(?:week|month)|unlimited|25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapters?/i, `${kind} body should not use stale tier or retired-phrase copy`);
+  assert.equal(typeof rendered.html, "string");
+  assert.doesNotMatch(rendered.html!, /\b(Pro|Scale)\b|managed calls? (?:per|\/)(?:week|month)|unlimited|25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapters?/i, `${kind} body should not use stale tier or retired-phrase copy`);
   assert.match(rendered.html || "", /Free APIs are free forever, no card\. Paid APIs bill provider cost plus \d+% after you add a card\./, `${kind} body should state the new free/paid framing`);
   assert.doesNotMatch(rendered.html || "", /APILayer/i, `${kind} body should not mention APILayer in nurture`);
 }
