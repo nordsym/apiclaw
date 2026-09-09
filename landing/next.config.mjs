@@ -1,3 +1,5 @@
+import { DISCOVERY_DOOR_ALIASES } from "./src/lib/discovery-aliases.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -7,6 +9,13 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Agents request case-variant / well-known discovery doors. permanent: true
+      // is a 308 so SKILL.md, agents.md, and llms.txt stay the canonical URLs.
+      ...DISCOVERY_DOOR_ALIASES.map(({ source, destination }) => ({
+        source,
+        destination,
+        permanent: true,
+      })),
       // /docs is a public page; no redirect to /workspace.
       {
         source: '/faq',

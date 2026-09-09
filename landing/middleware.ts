@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { canonicalDiscoveryPath } from "./src/lib/discovery-aliases.mjs";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
@@ -40,6 +41,16 @@ async function legacySessionValid(token: string): Promise<boolean> {
 
 export default clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
+
+  // Exact-pathname aliases. Linux/Vercel static matching is case-sensitive, so
+  // /AGENTS.md and /skill.md 404 today. Use === in canonicalDiscoveryPath so
+  // the canonical doors themselves are never redirected.
+  const discoveryDestination = canonicalDiscoveryPath(pathname);
+  if (discoveryDestination) {
+    const target = request.nextUrl.clone();
+    target.pathname = discoveryDestination;
+    return NextResponse.redirect(target, 308);
+  }
 
   if (pathname.startsWith("/dashboard/verify")) {
     return NextResponse.next();
