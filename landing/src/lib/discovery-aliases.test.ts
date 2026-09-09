@@ -41,6 +41,7 @@ assert.doesNotMatch(nextConfig, /source:\s*['"]\/skill\.md['"]/);
 const middleware = readFileSync(new URL("../../middleware.ts", import.meta.url), "utf8");
 assert.match(middleware, /canonicalDiscoveryPath/);
 assert.match(middleware, /NextResponse\.redirect\(target,\s*308\)/);
+assert.match(middleware, /Resolve aliases before Clerk/);
 
 const agentsRoute = readFileSync(new URL("../app/AGENTS.md/route.ts", import.meta.url), "utf8");
 const skillRoute = readFileSync(new URL("../app/skill.md/route.ts", import.meta.url), "utf8");
