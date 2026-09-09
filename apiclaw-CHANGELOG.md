@@ -10,6 +10,10 @@ All notable changes to APIClaw.
 
 ## [Unreleased]
 
+### Fixed — secondary discovery copy is URL-first
+
+- **mcpb long_description, README, package.json, agents.md, llms.txt, llms-full.txt** now match SKILL.md: show the first-line `https://apiclaw.cloud/auth/cli?authId=…` URL in chat, human Authorizes, then whoami + first call in the same harness. `auth login` is the human-shell door on a machine they can see. On Grok/cloud/headless, show the URL and stop. Workspace is optional. Terminal.app is not the product.
+
 ## [2.9.11] — 2026-09-02
 
 ### Fixed — unsigned first contact leads with the bare https login URL

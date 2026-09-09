@@ -71,14 +71,17 @@ is identity and product truth.
 
 Install APIClaw in Claude Desktop via the `.mcpb` extension, or install the npm package for Cursor, Windsurf, OpenClaw, or any MCP-compatible agent.
 
+`auth login` is the human-shell door on a machine they can see:
+
 ```bash
 npm install -g @nordsym/apiclaw
 npx @nordsym/apiclaw auth login
 npx @nordsym/apiclaw auth whoami
 ```
 
-Unsigned first_run returns a live `/auth/cli?authId=` URL as the first
-line of the tool text. Completing Clerk on that URL Authorizes (one
+On Grok, cloud, or headless: do not run `auth login` there. Show the
+first-line `https://apiclaw.cloud/auth/cli?authId=…` URL from unsigned
+first_run and stop. Completing Clerk on that URL Authorizes (one
 action). If you are already signed in, click Authorize. Then retry in
 this chat: whoami writes `session_token` to
 `~/.apiclaw.toml`. Confirm with whoami before any execute. whoami
@@ -86,6 +89,7 @@ redeems Authorize even if `auth login` exited or localhost failed.
 The next `POST /v1/execute` reads that same value as `X-APIClaw-Session`.
 Agents do not need users to paste tokens. Do not declare ready until
 whoami prints an email. Do not send the human to a terminal.
+Workspace is optional. Terminal.app is not the product.
 
 ### 2. CLI
 

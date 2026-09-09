@@ -40,11 +40,15 @@ It is not a human-first API marketplace. It is infrastructure for agents and age
 
 Best for Claude Desktop, Cursor, Windsurf, OpenClaw, and local MCP-compatible agents.
 
+On a machine the human can see:
+
 ```bash
 npm install -g @nordsym/apiclaw@latest
 npx @nordsym/apiclaw auth login
 npx @nordsym/apiclaw auth whoami
 ```
+
+On Grok, cloud, or headless: do not run `auth login`. Show the first-line `https://apiclaw.cloud/auth/cli?authId=…` URL from unsigned first_run and stop. After Authorize, whoami + first call in this same chat.
 
 ### Remote MCP
 
@@ -104,7 +108,7 @@ Best for Buzz (block.xyz) and other ACP-speaking clients. The ACP client spawns 
 npx @nordsym/apiclaw acp
 ```
 
-Same session-token auth as the CLI: run `apiclaw auth login` first. Prompt grammar (case-insensitive keyword, whitespace-separated):
+Same session-token auth as the CLI. Show the first-line login URL; do not only run `apiclaw auth login`. On a machine the human can see, `apiclaw auth login` is the shell door. Prompt grammar (case-insensitive keyword, whitespace-separated):
 
 ```text
 help
@@ -121,7 +125,7 @@ status
 - Unsigned MCP/CLI first_run returns a live `https://apiclaw.cloud/auth/cli?authId=…` URL as the **first line** of the tool/CLI text (and as `login_url`). Show that first line. Do not bury it. Do not summarize it away. Do not only print `npx @nordsym/apiclaw auth login`. Completing sign-in on the login URL Authorizes (one action). If already signed in, click Authorize. Printing the URL is not ready. Headless / Grok Bot / cloud machines cannot open the human's browser. Do not run `auth login` on those machines. The first-line URL is the door.
 - After Authorize, continue in this same chat. Retry the same tool. Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email, then execute NASA APOD (Frankfurter if NASA is not 200). Do not send the human to a terminal or Terminal.app. Workspace is optional.
 - Confirm with `npx @nordsym/apiclaw auth whoami` until it prints an email. Do not execute before that.
-- Headless or SSH: run the same command and open the printed browser URL on another device, then confirm with `npx @nordsym/apiclaw auth whoami`.
+- Headless or SSH: show the first-line URL. They open it on another device. Do not run `auth login` on a machine they cannot see. Then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.
 - Local auth writes `session_token` to `~/.apiclaw.toml`. Execute sends that value as `X-APIClaw-Session`.
 - Remote MCP uses OAuth 2.1 + PKCE + Dynamic Client Registration.
