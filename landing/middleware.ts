@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { canonicalDiscoveryPath } from "./src/lib/discovery-aliases.mjs";
 
 const CONVEX_URL =
   process.env.NEXT_PUBLIC_CONVEX_URL || "https://adventurous-avocet-799.convex.cloud";
@@ -38,7 +39,7 @@ async function legacySessionValid(token: string): Promise<boolean> {
   }
 }
 
-export default clerkMiddleware(async (auth, request) => {
+const clerkHandler = clerkMiddleware(async (auth, request) => {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/dashboard/verify")) {
@@ -106,8 +107,26 @@ export default clerkMiddleware(async (auth, request) => {
   return NextResponse.redirect(signIn);
 });
 
+export default function middleware(request: NextRequest, event: NextFetchEvent) {
+  // Resolve aliases before Clerk. Discovery doors are public, and clerkMiddleware
+  // throws without keys — that must not 500 /AGENTS.md. Exact === only, and also
+  // check the raw URL path in case nextUrl.pathname folds case.
+  const rawPath = new URL(request.url).pathname;
+  const discoveryDestination =
+    canonicalDiscoveryPath(request.nextUrl.pathname) ?? canonicalDiscoveryPath(rawPath);
+  if (discoveryDestination) {
+    const target = request.nextUrl.clone();
+    target.pathname = discoveryDestination;
+    return NextResponse.redirect(target, 308);
+  }
+  return clerkHandler(request, event);
+}
+
 export const config = {
   matcher: [
+    "/AGENTS.md",
+    "/skill.md",
+    "/.well-known/llms.txt",
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
