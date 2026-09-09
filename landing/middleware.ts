@@ -44,8 +44,11 @@ export default clerkMiddleware(async (auth, request) => {
 
   // Exact-pathname aliases. Linux/Vercel static matching is case-sensitive, so
   // /AGENTS.md and /skill.md 404 today. Use === in canonicalDiscoveryPath so
-  // the canonical doors themselves are never redirected.
-  const discoveryDestination = canonicalDiscoveryPath(pathname);
+  // the canonical doors themselves are never redirected. Also check the raw
+  // URL path — nextUrl.pathname can fold case in some Next.js runtimes.
+  const rawPath = new URL(request.url).pathname;
+  const discoveryDestination =
+    canonicalDiscoveryPath(pathname) ?? canonicalDiscoveryPath(rawPath);
   if (discoveryDestination) {
     const target = request.nextUrl.clone();
     target.pathname = discoveryDestination;

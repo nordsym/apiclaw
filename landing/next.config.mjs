@@ -1,4 +1,4 @@
-import { DISCOVERY_DOOR_ALIASES } from "./src/lib/discovery-aliases.mjs";
+import { NEXT_CONFIG_DISCOVERY_REDIRECTS } from "./src/lib/discovery-aliases.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -9,9 +9,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Agents request case-variant / well-known discovery doors. permanent: true
-      // is a 308 so SKILL.md, agents.md, and llms.txt stay the canonical URLs.
-      ...DISCOVERY_DOOR_ALIASES.map(({ source, destination }) => ({
+      // Well-known path aliases only. Case-variant doors (/AGENTS.md, /skill.md)
+      // are handled in middleware with exact pathname matching — next.config
+      // redirects are case-insensitive and would 308-loop the canonical files.
+      ...NEXT_CONFIG_DISCOVERY_REDIRECTS.map(({ source, destination }) => ({
         source,
         destination,
         permanent: true,
