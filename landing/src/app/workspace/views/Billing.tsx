@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { paymentMethodLabel } from "@/lib/billing-presentation";
+import { recoverWorkspaceSessionToken } from "@/lib/workspace-session";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
 import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
@@ -72,6 +73,7 @@ export function BillingTab({
   const [billingInfoLoading, setBillingInfoLoading] = useState(true);
   const [billingInfoError, setBillingInfoError] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const recoveryAttempted = useRef(false);
 
   useEffect(() => {
     const onFocus = () => setRefresh((value) => value + 1);
@@ -84,6 +86,7 @@ export function BillingTab({
     let timer: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
     if (!sessionToken) {
+      setBillingInfoError(true);
       setBillingInfoLoading(false);
       return;
     }
@@ -92,8 +95,18 @@ export function BillingTab({
     const load = () => {
       attempts += 1;
       void convexQuery<BillingInfo | null>("billing:getBillingInfo", { token: sessionToken })
-      .then((result) => {
+      .then(async (result) => {
+        if (cancelled) return;
+        if (result === null && !recoveryAttempted.current) {
+          recoveryAttempted.current = true;
+          const renewedToken = await recoverWorkspaceSessionToken(sessionToken);
+          if (cancelled) return;
+          if (renewedToken) {
+            result = await convexQuery<BillingInfo | null>("billing:getBillingInfo", { token: renewedToken });
+          }
+        }
         if (!cancelled) {
+          if (result !== null) recoveryAttempted.current = false;
           setBillingInfo(result);
           setBillingInfoError(result === null);
         }
@@ -162,7 +175,7 @@ export function BillingTab({
         {billingInfoLoading ? (
           <Loading label="Checking payment method" />
         ) : billingInfoError ? (
-          <Row right={<button type="button" className={btnQuiet} onClick={() => setRefresh((value) => value + 1)}>Try again</button>}>
+          <Row right={<button type="button" className={btnQuiet} onClick={() => { recoveryAttempted.current = false; setRefresh((value) => value + 1); }}>Try again</button>}>
             <p className="text-[14px]">Could not load payment details.</p>
           </Row>
         ) : billingInfo?.paymentMethod ? (
@@ -262,6 +275,7 @@ export function BillingTab({
       </Section>
 
 
+      {!billingInfoError && <>
       <Section title="Credits and spend">
         {billingInfoLoading ? (
           <Loading label="Loading billing details" />
@@ -308,6 +322,7 @@ export function BillingTab({
           <Empty title="No invoices yet" body="Invoices appear here once a billing period closes." />
         )}
       </Section>
+      </>}
     </div>
   );
 }
