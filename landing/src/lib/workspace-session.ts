@@ -13,6 +13,20 @@ let currentSession: BrowserSession | null = null;
 let refreshTimer: number | null = null;
 let refreshInFlight: Promise<BrowserSession | null> | null = null;
 const listeners = new Set<BrowserSessionListener>();
+let resumeListenersInstalled = false;
+
+function refreshSessionOnResume() {
+  if (currentSession && currentSession.expiresAt <= Date.now() + REFRESH_LEAD_MS) {
+    void refreshBrowserSession();
+  }
+}
+
+function installResumeListeners() {
+  if (typeof window === "undefined" || resumeListenersInstalled) return;
+  window.addEventListener("focus", refreshSessionOnResume);
+  window.addEventListener("pageshow", refreshSessionOnResume);
+  resumeListenersInstalled = true;
+}
 
 export function getBrowserSessionRefreshDelay(expiresAt: number, now = Date.now()): number {
   return Math.max(1_000, expiresAt - now - REFRESH_LEAD_MS);
@@ -42,6 +56,7 @@ function notify(next: BrowserSession | null) {
 
 function scheduleRefresh(session: BrowserSession, delay?: number) {
   if (typeof window === "undefined") return;
+  installResumeListeners();
   if (refreshTimer) window.clearTimeout(refreshTimer);
 
   const refreshDelay = delay ?? getBrowserSessionRefreshDelay(session.expiresAt);
@@ -97,6 +112,23 @@ async function refreshBrowserSession(): Promise<BrowserSession | null> {
   });
 
   return refreshInFlight;
+}
+
+/** Recover a rejected child through the HttpOnly owner cookie, never reuse it. */
+export async function recoverWorkspaceSessionToken(rejectedToken: string): Promise<string | null> {
+  if (currentSession && currentSession.token !== rejectedToken && currentSession.expiresAt > Date.now()) {
+    return currentSession.token;
+  }
+
+  // Invalidate locally without publishing a transient logout while recovery is
+  // in flight. A failed refresh must not fall back to the rejected child even
+  // when its advertised expiry is still in the future.
+  currentSession = null;
+  if (refreshTimer && typeof window !== "undefined") window.clearTimeout(refreshTimer);
+  refreshTimer = null;
+  const next = await refreshBrowserSession();
+  if (!next) notify(null);
+  return next?.token ?? null;
 }
 
 export function subscribeWorkspaceSessionToken(listener: BrowserSessionListener): () => void {
