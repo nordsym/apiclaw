@@ -60,6 +60,7 @@ export default function WorkspacePage() {
   const subFromUrl = searchParams.get("sub") as AnalyticsSubtab | null;
   const arrival = searchParams.get("from") === "cli" ? "cli" : undefined;
 
+  const [returnedFromStripe] = useState(() => searchParams.get("billing") === "success" || searchParams.get("portal") === "success");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "agents");
@@ -93,13 +94,15 @@ export default function WorkspacePage() {
       window.history.replaceState({}, "", newUrl.toString());
     };
 
+    if (billingParam || portalParam) setActiveTab("billing");
+
     if (billingParam === "success") {
       if (!sessionToken) return;
 
       let active = true;
       let attempts = 0;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      showToast("Payment method received. Verifying PAYG billing before activation.", "info");
+      showToast("Checking your payment method and billing status.", "info");
 
       const pollBillingReadiness = async () => {
         attempts += 1;
@@ -117,6 +120,21 @@ export default function WorkspacePage() {
           const dashboard = payload.value || payload;
           if (!active) return;
           if (dashboard?.workspace) setWorkspace(dashboard.workspace);
+          if (dashboard?.workspace && !["free", "usage_based"].includes(dashboard.workspace.tier)) {
+            const billingResponse = await fetch(`${CONVEX_URL}/api/query`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ path: "billing:getBillingInfo", args: { token: sessionToken } }),
+              cache: "no-store",
+            });
+            const billing = await billingResponse.json();
+            if (!active) return;
+            if (billingResponse.ok && billing.value?.paymentMethod) {
+              showToast("Payment method connected. Your plan is unchanged.", "success");
+              cleanReturnParam("billing");
+              return;
+            }
+          }
           if (dashboard?.workspace?.paygActive === true) {
             showToast("PAYG verified. Billing-ready calls can now continue at provider cost + 15%.", "success");
             cleanReturnParam("billing");
@@ -132,7 +150,7 @@ export default function WorkspacePage() {
         }
 
         if (active) {
-          showToast("Payment method saved. PAYG is still pending verification, so billing-ready calls remain off.", "info");
+          showToast("Payment details are still updating. Check Billing again before using Paid APIs.", "info");
           cleanReturnParam("billing");
         }
       };
@@ -149,7 +167,7 @@ export default function WorkspacePage() {
 
     // Handle portal return
     if (portalParam === "success") {
-      showToast("Billing settings received. Entitlement remains fail-closed until Stripe confirms it.", "info");
+      showToast("Back from Stripe. Checking your payment details.", "info");
       cleanReturnParam("portal");
     }
   }, [searchParams, sessionToken, showToast]);
@@ -431,7 +449,7 @@ export default function WorkspacePage() {
             />
           )}
           {activeTab === "billing" && (
-            <BillingTab workspace={workspace} sessionToken={sessionToken} />
+            <BillingTab workspace={workspace} sessionToken={sessionToken} returnedFromStripe={returnedFromStripe} />
           )}
           {activeTab === "settings" && (
             <SettingsTab workspace={workspace} sessionToken={sessionToken} onWorkspaceUpdate={(patch) => setWorkspace(prev => prev ? { ...prev, ...patch } : prev)} />

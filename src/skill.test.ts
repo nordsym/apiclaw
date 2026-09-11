@@ -17,6 +17,14 @@ assert.equal(existsSync("landing/public/llms.txt"), true, "llms.txt remains iden
 assert.equal(existsSync("landing/src/app/api/catalog/route.ts"), true, "/api/catalog remains the live count source");
 
 const skill = readFileSync(SKILL_PATH, "utf8");
+const readme = readFileSync("README.md", "utf8");
+const mcpbManifest = JSON.parse(readFileSync("landing/mcpb/manifest.json", "utf8")) as {
+  long_description: string;
+};
+const packageDescription = (
+  JSON.parse(readFileSync("package.json", "utf8")) as { description: string }
+).description;
+const llmsFull = readFileSync("landing/public/llms-full.txt", "utf8");
 // Homepage design reset (2026-08-23, a819b6d/891f444/66ccb17) split page.tsx
 // into landing/src/components/home/*; HeroDoorsPreview.tsx no longer exists,
 // its content moved into Hero.tsx and Connect.tsx. Read the composed tree.
@@ -144,6 +152,48 @@ assert.match(agents, /Workspace is optional/);
 assert.match(agents, /first line/);
 assert.match(agents, /Do not summarize it away/);
 assert.match(agents, /Do not run `auth login` on those machines/);
+assert.match(agents, /On Grok, cloud, or headless: do not run `auth login`/);
+assert.match(agents, /Show the first-line login URL; do not only run/);
+assert.doesNotMatch(
+  agents,
+  /Headless or SSH: run the same command/,
+  "headless must not tell agents to run auth login on a machine the human cannot see",
+);
+
+assert.match(readme, /auth\/cli\?authId=/);
+assert.match(readme, /show the first-line/);
+assert.match(readme, /Do not run `auth login` there/);
+assert.match(readme, /Workspace is optional/);
+assert.match(readme, /Terminal\.app is not the product/);
+
+assert.match(mcpbManifest.long_description, /auth\/cli\?authId=/);
+assert.match(mcpbManifest.long_description, /first line of the tool text/);
+assert.match(mcpbManifest.long_description, /Show that first-line URL/);
+assert.match(mcpbManifest.long_description, /Do not only run/);
+assert.match(mcpbManifest.long_description, /Workspace is optional/);
+assert.match(mcpbManifest.long_description, /Terminal\.app is not the product/);
+assert.doesNotMatch(
+  mcpbManifest.long_description,
+  /After this extension installs, sign in with `npx @nordsym\/apiclaw auth login`/,
+  "mcpb must not lead with auth login as the only door",
+);
+
+assert.match(packageDescription, /auth\/cli\?authId=/);
+assert.match(packageDescription, /Show that URL in chat/);
+assert.match(packageDescription, /Do not only run/);
+assert.match(packageDescription, /Workspace is optional/);
+assert.doesNotMatch(
+  packageDescription,
+  /`apiclaw auth login` opens your browser/,
+  "package pitch must not teach agents that auth login is the only door",
+);
+
+assert.match(llmsFull, /first line of the tool text/);
+assert.match(llmsFull, /On Grok, cloud, or headless: do not run `auth login`/);
+assert.match(llmsFull, /Show the first-line login URL; do not only run/);
+assert.match(llmsFull, /Workspace is optional/);
+assert.match(llmsFull, /Terminal\.app is not the product/);
+
 assert.match(llms, /Agent front door/);
 assert.match(llms, /operational[\s\S]{0,16}(?:canon|door)/i);
 assert.match(llms, /click Authorize/);
@@ -153,6 +203,9 @@ assert.match(llms, /Frankfurter/);
 assert.doesNotMatch(llms, /Brave search/);
 assert.doesNotMatch(llms, /Authorizes the terminal/);
 assert.match(llms, /first line of the tool text/);
+assert.match(llms, /On Grok, cloud, or headless: do not run `auth login` there/);
+assert.match(llms, /Workspace is optional/);
+assert.match(llms, /Terminal\.app is not the product/);
 assert.match(llms, /retry in this chat/);
 assert.match(llms, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);
 assert.match(agents, /X-APIClaw-Session: <session_token from ~\/\.apiclaw\.toml>/);

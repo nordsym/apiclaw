@@ -108,9 +108,10 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "setup",
+      locale: "en",
       payment_method_types: ["card"],
-      success_url: `${baseUrl}/workspace?billing=success`,
-      cancel_url: `${baseUrl}/workspace?billing=cancel`,
+      success_url: `${baseUrl}/workspace?tab=billing&billing=success`,
+      cancel_url: `${baseUrl}/workspace?tab=billing&billing=cancel`,
       metadata: { workspaceId },
     });
 
@@ -158,7 +159,8 @@ export const createPortalSession = httpAction(async (ctx, request) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: workspace.stripeCustomerId,
-      return_url: `${safeAppBase(returnUrl)}/workspace?tab=settings&portal=success`,
+      locale: "en",
+      return_url: `${safeAppBase(returnUrl)}/workspace?tab=billing&portal=success`,
     });
 
     return jsonResponse({

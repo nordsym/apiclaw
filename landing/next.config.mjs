@@ -1,3 +1,5 @@
+import { NEXT_CONFIG_DISCOVERY_REDIRECTS } from "./src/lib/discovery-aliases.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -7,6 +9,14 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Well-known path aliases only. Case-variant doors (/AGENTS.md, /skill.md)
+      // are handled in middleware with exact pathname matching — next.config
+      // redirects are case-insensitive and would 308-loop the canonical files.
+      ...NEXT_CONFIG_DISCOVERY_REDIRECTS.map(({ source, destination }) => ({
+        source,
+        destination,
+        permanent: true,
+      })),
       // /docs is a public page; no redirect to /workspace.
       {
         source: '/faq',

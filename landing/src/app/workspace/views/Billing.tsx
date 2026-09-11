@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
+import { paymentMethodLabel } from "@/lib/billing-presentation";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
 import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
@@ -38,7 +39,7 @@ async function convexQuery<T>(path: string, args: Record<string, unknown>): Prom
   });
   const data = await res.json();
   if (!res.ok || data.status === "error") throw new Error(data.errorMessage || `${path} failed`);
-  return (data.value ?? data) as T;
+  return data.value as T;
 }
 
 function planLabel(tier: string): string {
@@ -51,9 +52,11 @@ function planLabel(tier: string): string {
 export function BillingTab({
   workspace,
   sessionToken,
+  returnedFromStripe = false,
 }: {
   workspace: Workspace | null;
   sessionToken: string | null;
+  returnedFromStripe?: boolean;
 }) {
   const currentTier = workspace?.tier || "free";
   const isPartner = currentTier === "partner";
@@ -67,28 +70,52 @@ export function BillingTab({
   const [portalError, setPortalError] = useState<string | null>(null);
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const [billingInfoLoading, setBillingInfoLoading] = useState(true);
+  const [billingInfoError, setBillingInfoError] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => {
+    const onFocus = () => setRefresh((value) => value + 1);
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
     if (!sessionToken) {
       setBillingInfoLoading(false);
       return;
     }
     setBillingInfoLoading(true);
-    convexQuery<BillingInfo | null>("billing:getBillingInfo", { token: sessionToken })
+    setBillingInfoError(false);
+    const load = () => {
+      attempts += 1;
+      void convexQuery<BillingInfo | null>("billing:getBillingInfo", { token: sessionToken })
       .then((result) => {
-        if (!cancelled) setBillingInfo(result);
+        if (!cancelled) {
+          setBillingInfo(result);
+          setBillingInfoError(result === null);
+        }
       })
       .catch(() => {
-        if (!cancelled) setBillingInfo(null);
+        if (!cancelled) setBillingInfoError(true);
       })
       .finally(() => {
-        if (!cancelled) setBillingInfoLoading(false);
+        if (!cancelled) {
+          setBillingInfoLoading(false);
+          // Stripe can return before its webhook is delivered. Keep the visible
+          // summary current during this bounded return window, including edits.
+          if (returnedFromStripe && attempts < 15) timer = setTimeout(load, 2_000);
+        }
       });
+    };
+    load();
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
-  }, [sessionToken]);
+  }, [sessionToken, refresh, returnedFromStripe]);
 
   const openBillingPortal = async () => {
     if (!sessionToken) {
@@ -120,6 +147,10 @@ export function BillingTab({
     </button>
   );
 
+  const paymentAction = (label: string) => hasStripeCustomer && currentTier !== "free"
+    ? portalButton(btnSolid, label)
+    : <CheckoutButton sessionToken={sessionToken || ""}>{label}</CheckoutButton>;
+
   return (
     <div className="space-y-10">
       <PageHeader
@@ -127,11 +158,30 @@ export function BillingTab({
         description={`Free APIs are free forever, no card. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}% after you add a card.`}
       />
 
+      <Section title="Payment method">
+        {billingInfoLoading ? (
+          <Loading label="Checking payment method" />
+        ) : billingInfoError ? (
+          <Row right={<button type="button" className={btnQuiet} onClick={() => setRefresh((value) => value + 1)}>Try again</button>}>
+            <p className="text-[14px]">Could not load payment details.</p>
+          </Row>
+        ) : billingInfo?.paymentMethod ? (
+          <Row>
+            <p className="text-[14px] font-medium">{paymentMethodLabel(billingInfo.paymentMethod)}</p>
+            <Status kind="ok">Connected</Status>
+          </Row>
+        ) : (
+          <Row>
+            <p className="text-[14px]">No payment method connected</p>
+            <p className="mt-1 text-[13px] text-[var(--text-muted)]">Add a card securely with Stripe. Free APIs never need one.</p>
+          </Row>
+        )}
+        {portalError && <p role="alert" className="mt-3 text-[12.5px] text-[var(--accent)]">{portalError}</p>}
+      </Section>
+
       <Section title="Plan">
         {paygNeedsRecovery && (
-          <Row
-            right={hasStripeCustomer ? portalButton(btnSolid) : <a href="/book" className={btnQuiet}>Contact support</a>}
-          >
+          <Row>
             <Status kind="warn">Pay as you go is paused</Status>
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
               Calls resume once Stripe confirms the subscription and payment method
@@ -147,7 +197,7 @@ export function BillingTab({
             hint={isUnlimited || !hasPlanLimit ? "No cap on this plan" : `of ${usageLimit.toLocaleString()}`}
           />
           {isUnlimited || !hasPlanLimit ? (
-            <StatCard title="Billing" value={isPartner ? "By agreement" : "Active"} hint={isPartner ? undefined : "Usage reported to Stripe monthly"} />
+            <StatCard title="Billing" value={isPartner ? "By agreement" : currentTier === "usage_based" ? (workspace?.paygActive ? "Active" : "Pending") : "Included"} hint={currentTier === "usage_based" && workspace?.paygActive ? "Usage reported to Stripe monthly" : undefined} />
           ) : (
             <StatCard
               title="Remaining"
@@ -167,18 +217,22 @@ export function BillingTab({
               : currentTier === plan.id || (isPartner && plan.id === "free");
 
             let cta: ReactNode;
-            if (isCurrent) {
+            if (isPaygPlan && (billingInfoLoading || billingInfoError)) {
+              cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>{billingInfoLoading ? "Checking payment method…" : "Payment details unavailable"}</button>;
+            } else if (isCurrent && isPaygPlan) {
+              cta = <div className="mt-7 self-start">{portalButton(btnSolid, "Manage payment method")}</div>;
+            } else if (isCurrent) {
               cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>Current plan</button>;
             } else if (isPaygPlan && paygNeedsRecovery && hasStripeCustomer) {
               cta = <div className="mt-7 self-start">{portalButton(btnSolid)}</div>;
-            } else if (isPaygPlan && currentTier === "free") {
+            } else if (isPaygPlan) {
               cta = (
-                <CheckoutButton sessionToken={sessionToken || ""} variant="primary" className="mt-7">
-                  Add payment method
-                </CheckoutButton>
+                <div className="mt-7 self-start">
+                  {paymentAction(billingInfo?.paymentMethod && currentTier !== "free" ? "Manage payment method" : "Add payment method")}
+                </div>
               );
             } else {
-              cta = <a href="/book" className={`${btnQuiet} mt-7 self-start`}>Talk to us</a>;
+              cta = <span className="mt-7 text-[13px] text-[var(--text-muted)]">Included</span>;
             }
 
             return (
@@ -207,20 +261,6 @@ export function BillingTab({
         </Panel>
       </Section>
 
-      <Section title="Invoices and payment method">
-        {hasStripeCustomer ? (
-          <Row right={portalButton(btnQuiet, "Open Stripe portal")}>
-            <p className="text-[14px]">Stripe billing portal</p>
-            <p className="mt-0.5 text-[13px] text-[var(--text-muted)]">Invoices, receipts, payment method and cancellation.</p>
-          </Row>
-        ) : isPartner ? (
-          <Empty title="Billed by agreement" body="Partner workspaces are invoiced outside Stripe." />
-        ) : null}
-        {portalError && <p className="mt-3 text-[12.5px] text-[var(--accent)]">{portalError}</p>}
-        <p className="mt-6 text-[12.5px] text-[var(--text-muted)]">
-          Pay as you go continues only for actions with an exact billing adapter. Custom limits or SLA: <a href="/book" className="claw-link text-[var(--text-primary)]">talk to us</a>.
-        </p>
-      </Section>
 
       <Section title="Credits and spend">
         {billingInfoLoading ? (
@@ -266,24 +306,6 @@ export function BillingTab({
           </div>
         ) : (
           <Empty title="No invoices yet" body="Invoices appear here once a billing period closes." />
-        )}
-      </Section>
-
-      <Section title="Payment method">
-        {billingInfoLoading ? (
-          <Loading label="Loading payment method" />
-        ) : billingInfo?.paymentMethod ? (
-          <Row>
-            <p className="text-[14px] capitalize">
-              {billingInfo.paymentMethod.brand || billingInfo.paymentMethod.type || "Card"} ending {billingInfo.paymentMethod.last4 || "····"}
-            </p>
-          </Row>
-        ) : (
-          <Empty
-            title="No payment method on file"
-            body="Add a card to call Paid APIs. Free APIs never need one."
-            action={currentTier === "free" ? <CheckoutButton sessionToken={sessionToken || ""} variant="outline">Add payment method</CheckoutButton> : undefined}
-          />
         )}
       </Section>
     </div>

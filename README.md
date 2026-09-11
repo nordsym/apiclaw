@@ -26,10 +26,10 @@ set up https://apiclaw.cloud/SKILL.md
 Or pick a path directly:
 
 ```bash
-# Local MCP (Claude Desktop, Cursor, Windsurf, OpenClaw)
+# Local MCP on a machine the human can see (Claude Desktop, Cursor, Windsurf, OpenClaw)
 npm install -g @nordsym/apiclaw && npx @nordsym/apiclaw auth login
 
-# CLI
+# CLI (only after whoami prints an email)
 npx @nordsym/apiclaw call nasa/apod --params '{}'
 
 # HTTP gateway
@@ -39,9 +39,9 @@ curl https://api.apiclaw.cloud/v1/execute -H "Authorization: Bearer sk-claw-..."
 https://apiclaw.cloud/mcp
 ```
 
-The auth flow opens the browser, signs the user in, and writes `~/.apiclaw.toml`. The same credential works across every path.
+On headless, Grok, or cloud: show the first-line `https://apiclaw.cloud/auth/cli?authId=…` URL from unsigned first_run and stop. Do not run `auth login` there — that opens a browser they will never get. After Authorize, whoami and the first call stay in the same chat. Workspace is optional. Terminal.app is not the product.
 
-> Headless server or SSH session? Open the browser sign-in URL on a device where you can complete ownership verification.
+`auth login` on a machine they can see writes `~/.apiclaw.toml`. The same credential works across every path.
 
 ---
 

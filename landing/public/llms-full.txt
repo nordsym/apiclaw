@@ -38,10 +38,14 @@ Source verification means a current public catalog entry maps to verification ev
 
 ### Local MCP
 
+On a machine the human can see:
+
 ```bash
 npm install -g @nordsym/apiclaw
 npx @nordsym/apiclaw auth login
 ```
+
+On Grok, cloud, or headless: do not run `auth login`. Show the first-line `https://apiclaw.cloud/auth/cli?authId=…` URL from unsigned first_run and stop. After Authorize, whoami + first call in this same chat. Workspace is optional. Terminal.app is not the product.
 
 Best for local MCP-compatible agents. The verified workspace credential is stored in `~/.apiclaw.toml`.
 
@@ -59,7 +63,7 @@ Best for terminal use, scripts, and CI/CD.
 npx @nordsym/apiclaw acp
 ```
 
-Best for Buzz (block.xyz) and other ACP-speaking clients. The ACP client spawns this over stdio; same session-token auth as the CLI, run `apiclaw auth login` first. Prompt grammar: `help`, `discover <query>`, `details <provider>[/<action>]`, `call <provider>/<action> [json]`, `balance`, `status`.
+Best for Buzz (block.xyz) and other ACP-speaking clients. The ACP client spawns this over stdio; same session-token auth as the CLI. Show the first-line login URL; do not only run `apiclaw auth login`. Prompt grammar: `help`, `discover <query>`, `details <provider>[/<action>]`, `call <provider>/<action> [json]`, `balance`, `status`.
 
 ### HTTP gateway
 
@@ -101,8 +105,8 @@ https://apiclaw.cloud/.well-known/oauth-protected-resource
 ## Authentication
 
 - Signup is required for discovery and execution.
-- Unsigned MCP/CLI first_run mints `https://apiclaw.cloud/auth/cli?authId=…` and returns it as `login_url` even with no TTY. Show that URL. Do not only print `npx @nordsym/apiclaw auth login`. Completing Clerk on the login URL Authorizes (one action). If already signed in, click Authorize. Confirm with `npx @nordsym/apiclaw auth whoami` — it redeems Authorize without localhost.
-- A headless user can complete ownership verification from another device using the displayed sign-in URL.
+- Unsigned MCP/CLI first_run mints `https://apiclaw.cloud/auth/cli?authId=…` and returns it as the first line of the tool text (and as `login_url`) even with no TTY. Show that first line. Do not only print `npx @nordsym/apiclaw auth login`. Completing Clerk on the login URL Authorizes (one action). If already signed in, click Authorize. After Authorize, retry in this chat: whoami then first call. Confirm with `npx @nordsym/apiclaw auth whoami` — it redeems Authorize without localhost.
+- On Grok, cloud, or headless: show the first-line URL and stop. Do not run `auth login` there — that opens a browser they will never get. They open the URL on another device. Workspace is optional. Terminal.app is not the product.
 - On a machine with a browser: `npx @nordsym/apiclaw auth login` writes `session_token` to `~/.apiclaw.toml` only after Authorize. The next `POST /v1/execute` sends that value as `X-APIClaw-Session`. On a machine with no browser access at all: create a key in Workspace > Connections and set `APICLAW_API_KEY` in the environment (HTTP/CI door, not first execute).
 - Workspace keys use the `sk-claw-...` bearer format.
 - Provider credentials remain server-side.
