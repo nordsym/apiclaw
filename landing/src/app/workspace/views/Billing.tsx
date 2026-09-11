@@ -166,12 +166,12 @@ export function BillingTab({
             <p className="text-[14px]">Could not load payment details.</p>
           </Row>
         ) : billingInfo?.paymentMethod ? (
-          <Row right={portalButton(btnQuiet, "Manage payment method")}>
+          <Row>
             <p className="text-[14px] font-medium">{paymentMethodLabel(billingInfo.paymentMethod)}</p>
             <Status kind="ok">Connected</Status>
           </Row>
         ) : (
-          <Row right={paymentAction("Add payment method")}>
+          <Row>
             <p className="text-[14px]">No payment method connected</p>
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">Add a card securely with Stripe. Free APIs never need one.</p>
           </Row>
@@ -181,9 +181,7 @@ export function BillingTab({
 
       <Section title="Plan">
         {paygNeedsRecovery && (
-          <Row
-            right={hasStripeCustomer ? portalButton(btnSolid) : <a href="/book" className={btnQuiet}>Contact support</a>}
-          >
+          <Row>
             <Status kind="warn">Pay as you go is paused</Status>
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
               Calls resume once Stripe confirms the subscription and payment method
@@ -219,7 +217,11 @@ export function BillingTab({
               : currentTier === plan.id || (isPartner && plan.id === "free");
 
             let cta: ReactNode;
-            if (isCurrent) {
+            if (isPaygPlan && (billingInfoLoading || billingInfoError)) {
+              cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>{billingInfoLoading ? "Checking payment method…" : "Payment details unavailable"}</button>;
+            } else if (isCurrent && isPaygPlan) {
+              cta = <div className="mt-7 self-start">{portalButton(btnSolid, "Manage payment method")}</div>;
+            } else if (isCurrent) {
               cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>Current plan</button>;
             } else if (isPaygPlan && paygNeedsRecovery && hasStripeCustomer) {
               cta = <div className="mt-7 self-start">{portalButton(btnSolid)}</div>;
