@@ -74,6 +74,7 @@ export function BillingTab({
   const [billingInfoError, setBillingInfoError] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const recoveryAttempted = useRef(false);
+  const paymentConnected = !billingInfoLoading && !billingInfoError && Boolean(billingInfo?.paymentMethod);
 
   useEffect(() => {
     const onFocus = () => setRefresh((value) => value + 1);
@@ -161,14 +162,16 @@ export function BillingTab({
   );
 
   const paymentAction = (label: string) => hasStripeCustomer && currentTier !== "free"
-    ? portalButton(btnSolid, label)
+    ? portalButton(paymentConnected ? btnQuiet : btnSolid, label)
     : <CheckoutButton sessionToken={sessionToken || ""}>{label}</CheckoutButton>;
 
   return (
     <div className="space-y-10">
       <PageHeader
         title="Billing"
-        description={`Free APIs are free forever, no card. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}% after you add a card.`}
+        description={paymentConnected
+          ? `Your payment method is connected. Free APIs remain free; Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`
+          : `Free APIs remain free. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`}
       />
 
       <Section title="Payment method">
@@ -233,7 +236,7 @@ export function BillingTab({
             if (isPaygPlan && (billingInfoLoading || billingInfoError)) {
               cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>{billingInfoLoading ? "Checking payment method…" : "Payment details unavailable"}</button>;
             } else if (isCurrent && isPaygPlan) {
-              cta = <div className="mt-7 self-start">{portalButton(btnSolid, "Manage payment method")}</div>;
+              cta = <div className="mt-7 self-start">{portalButton(btnQuiet, "Manage payment method")}</div>;
             } else if (isCurrent) {
               cta = <button type="button" disabled className={`${btnQuiet} mt-7 self-start opacity-60`}>Current plan</button>;
             } else if (isPaygPlan && paygNeedsRecovery && hasStripeCustomer) {
@@ -241,7 +244,7 @@ export function BillingTab({
             } else if (isPaygPlan) {
               cta = (
                 <div className="mt-7 self-start">
-                  {paymentAction(billingInfo?.paymentMethod && currentTier !== "free" ? "Manage payment method" : "Add payment method")}
+                  {paymentAction(paymentConnected ? (currentTier === "free" ? "Continue billing setup" : "Manage payment method") : "Add payment method")}
                 </div>
               );
             } else {
@@ -250,20 +253,24 @@ export function BillingTab({
 
             return (
               <div key={plan.id} className="flex flex-col bg-[var(--surface)] p-6 sm:p-7">
-                <div className="flex items-baseline justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <h3 className="text-[15px] font-semibold">{plan.name}</h3>
-                  {plan.highlight && <span className="claw-eyebrow !text-[10.5px] text-[var(--text-muted)]">Recommended</span>}
+                  {isPaygPlan && paymentConnected ? (
+                    <span className="rounded-full border border-[var(--ok)] px-3 py-1">
+                      <Status kind="ok">Payment method connected</Status>
+                    </span>
+                  ) : plan.highlight && <span className="claw-eyebrow !text-[10.5px] text-[var(--text-muted)]">Recommended</span>}
                 </div>
                 <div className="mt-4 claw-display text-[2rem]">{plan.price}</div>
                 <p className="text-[13px] text-[var(--text-muted)]">{plan.period}</p>
                 <p className="mt-4 text-[14px] text-[var(--text-secondary)]">
-                  <span className="text-[var(--text-primary)]">{plan.calls}</span> {plan.callsSub}
+                  <span className="text-[var(--text-primary)]">{plan.calls}</span> {isPaygPlan && paymentConnected ? `provider cost plus ${PAYG_MARGIN_PERCENT}%` : plan.callsSub}
                 </p>
                 <ul className="mt-5 flex-1 space-y-2 text-[13.5px] leading-[1.55] text-[var(--text-secondary)]">
                   {plan.features.map((f) => (
                     <li key={f} className="flex gap-2.5">
                       <span className="mt-[9px] h-px w-3 flex-none bg-[var(--text-muted)]" aria-hidden="true" />
-                      {f}
+                      {isPaygPlan && paymentConnected && f === "Add a card once, pay per call" ? "Payment method saved securely with Stripe" : f}
                     </li>
                   ))}
                 </ul>
