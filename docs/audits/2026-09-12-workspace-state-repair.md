@@ -1,6 +1,6 @@
 # Workspace state repair, 2026-09-12
 
-Status: implemented and locally verified. No deployment or production data mutation performed. Gustav explicitly requires this report and a separate deploy approval.
+Status at initial handoff: implemented and locally verified, awaiting explicit deploy approval. Deployment was subsequently approved and completed; see [production verification](2026-09-12-workspace-state-deployment.md).
 
 ## Implemented changes
 
