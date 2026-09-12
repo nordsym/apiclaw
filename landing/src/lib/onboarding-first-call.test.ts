@@ -126,11 +126,11 @@ assert.match(wizard, /Other MCP/);
 assert.match(wizard, /Later/);
 assert.match(wizard, /onboarding:dismiss/);
 assert.match(wizard, /decideOnboardingGate/);
-assert.match(wizard, /UNKNOWN_ONBOARDING_STATE/);
+assert.doesNotMatch(wizard, /UNKNOWN_ONBOARDING_STATE/);
 assert.match(
   wizard,
-  /next \?\? UNKNOWN_ONBOARDING_STATE/,
-  "getState failure must fail-open, not keep the wizard closed",
+  /if \(!next\) \{ setStateError/,
+  "getState failure must remain unknown, not fabricate incomplete onboarding",
 );
 assert.match(wizard, /gate === "complete"/);
 assert.match(wizard, /firstCallAt/);

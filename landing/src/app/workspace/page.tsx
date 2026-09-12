@@ -1,6 +1,8 @@
 "use client";
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useWorkspaceRefreshEvents } from "@/lib/use-workspace-refresh";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Loader2,
@@ -24,7 +26,7 @@ import {
   getWorkspaceSessionToken,
   subscribeWorkspaceSessionToken,
 } from "@/lib/workspace-session";
-import { CONVEX_URL, CLERK_ENABLED, type Workspace, type Agent, type ConnectedAgent, type UsageData, type ProviderAPI, type TabType, type AnalyticsSubtab } from "./_shared";
+import { CLERK_ENABLED, type Workspace, type Agent, type ConnectedAgent, type UsageData, type ProviderAPI, type TabType, type AnalyticsSubtab } from "./_shared";
 import { WorkspaceShell } from "./views/Shell";
 import { AgentsTab } from "./views/Agents";
 import { ActivityTab } from "./views/Activity";
@@ -34,6 +36,10 @@ import { SettingsTab } from "./views/Settings";
 
 export default function WorkspacePage() {
   const router = useRouter();
+  useWorkspaceRefreshEvents();
+  const revision = useWorkspaceRefresh();
+  const accountRequest = useRef(0);
+  const providerRequest = useRef(0);
   const searchParams = useSearchParams();
   const signInPath = "/sign-in";
   
@@ -62,6 +68,7 @@ export default function WorkspacePage() {
 
   const [returnedFromStripe] = useState(() => searchParams.get("billing") === "success" || searchParams.get("portal") === "success");
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>(tabFromUrl || "agents");
   const [analyticsSubtab, setAnalyticsSubtab] = useState<AnalyticsSubtab>(subFromUrl || "logs");
@@ -107,33 +114,15 @@ export default function WorkspacePage() {
       const pollBillingReadiness = async () => {
         attempts += 1;
         try {
-          const response = await fetch(`${CONVEX_URL}/api/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              path: "workspaces:getWorkspaceDashboard",
-              args: { token: sessionToken },
-            }),
-            cache: "no-store",
-          });
-          const payload = await response.json();
-          const dashboard = payload.value || payload;
+          const dashboard = await workspaceRequest<{ workspace: Workspace }>("query", "workspaces:getWorkspaceDashboard", { token: sessionToken });
           if (!active) return;
-          if (dashboard?.workspace) setWorkspace(dashboard.workspace);
-          if (dashboard?.workspace && !["free", "usage_based"].includes(dashboard.workspace.tier)) {
-            const billingResponse = await fetch(`${CONVEX_URL}/api/query`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ path: "billing:getBillingInfo", args: { token: sessionToken } }),
-              cache: "no-store",
-            });
-            const billing = await billingResponse.json();
-            if (!active) return;
-            if (billingResponse.ok && billing.value?.paymentMethod) {
-              showToast("Payment method connected. Your plan is unchanged.", "success");
-              cleanReturnParam("billing");
-              return;
-            }
+          invalidateWorkspace();
+          const billing = await workspaceRequest<{ paymentMethod: unknown }>("query", "billing:getBillingInfo", { token: sessionToken });
+          if (!active) return;
+          if (billing.paymentMethod) {
+            showToast("Payment method connected. Your plan is shown in Billing.", "success");
+            cleanReturnParam("billing");
+            return;
           }
           if (dashboard?.workspace?.paygActive === true) {
             showToast("PAYG verified. Billing-ready calls can now continue at provider cost + 15%.", "success");
@@ -161,12 +150,14 @@ export default function WorkspacePage() {
         if (timer) clearTimeout(timer);
       };
     } else if (billingParam === "cancel") {
+      invalidateWorkspace();
       showToast("Checkout cancelled. You can try again anytime.", "info");
       cleanReturnParam("billing");
     }
 
     // Handle portal return
     if (portalParam === "success") {
+      invalidateWorkspace();
       showToast("Back from Stripe. Checking your payment details.", "info");
       cleanReturnParam("portal");
     }
@@ -185,50 +176,17 @@ export default function WorkspacePage() {
   }, [tabFromUrl, subFromUrl]);
 
   const fetchWorkspaceData = useCallback(async (token: string) => {
-    try {
-      const dashboardRes = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: "workspaces:getWorkspaceDashboard",
-          args: { token },
-        }),
-      });
-      
-      const dashboardData = await dashboardRes.json();
-      const dashboard = dashboardData.value || dashboardData;
-      
-      if (dashboard?.workspace) {
-        // Guard: anonymous workspace (no email) means the browser session is stale, force re-login
-        if (!dashboard.workspace.email) {
-          localStorage.removeItem("apiclaw_workspace_session");
-          await fetch("/api/workspace-auth/session", { method: "DELETE" });
-          router.push(signInPath);
-          return;
-        }
-        setWorkspace(dashboard.workspace);
-      }
-
-      // Agents and usage are independent of each other: read them together.
-      const q = (path: string) => fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path, args: { token } }),
-      }).then((r) => r.json());
-      const [agentsData, usageData] = await Promise.all([q("agents:getWorkspaceAgents"), q("workspaces:getUsageBreakdown")]);
-      const connectedAgents = agentsData.value || agentsData || [];
-      setAgents((Array.isArray(connectedAgents) ? connectedAgents : []).map((a: ConnectedAgent) => ({
-        id: a.id,
-        fingerprint: a.fingerprint,
-        name: a.name,
-        lastUsedAt: a.lastActiveAt,
-        createdAt: a.firstSeenAt,
-        isCurrent: false,
-      })));
-      setUsage(usageData.value || usageData);
-    } catch (err) {
-      console.error("Fetch workspace error:", err);
-    }
+    const request = ++accountRequest.current;
+    const dashboard = await workspaceRequest<{ workspace: Workspace }>("query", "workspaces:getWorkspaceDashboard", { token });
+    if (!dashboard?.workspace?.id || !dashboard.workspace.email || !dashboard.workspace.tier) throw new Error("Could not verify workspace identity");
+    const [connectedAgents, usageData] = await Promise.all([
+      workspaceRequest<ConnectedAgent[]>("query", "agents:getWorkspaceAgents", { token }),
+      workspaceRequest<UsageData>("query", "workspaces:getUsageBreakdown", { token }),
+    ]);
+    if (request !== accountRequest.current) return;
+    setWorkspace(dashboard.workspace);
+    setAgents(connectedAgents.map((a) => ({ id: a.id, fingerprint: a.fingerprint, name: a.name, lastUsedAt: a.lastActiveAt, createdAt: a.firstSeenAt, isCurrent: false })));
+    setUsage(usageData);
   }, []);
 
   const fetchProviderData = useCallback(async (token?: string) => {
@@ -236,15 +194,10 @@ export default function WorkspacePage() {
       setIsProvider(false);
       return;
     }
+    const request = ++providerRequest.current;
     try {
-      const response = await fetch(`${CONVEX_URL}/api/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "providers:getWorkspaceProviderConsole", args: { token } }),
-      });
-      const data = await response.json();
-      if (!response.ok || data.status === "error") throw new Error(data.errorMessage || "Provider console unavailable");
-      const result = data.value || data;
+      const result = await workspaceRequest<{ provider: { id: string; name: string } | null; apis: ProviderAPI[] }>("query", "providers:getWorkspaceProviderConsole", { token });
+      if (request !== providerRequest.current) return;
       const provider = result.provider;
       const seen = new Set<string>();
       const apis = (Array.isArray(result.apis) ? result.apis : []).filter((api: ProviderAPI) => {
@@ -264,8 +217,7 @@ export default function WorkspacePage() {
         setIsProvider(false);
       }
     } catch (err) {
-      console.error("Fetch provider error:", err);
-      setIsProvider(false);
+      throw err;
     }
   }, []);
 
@@ -288,8 +240,7 @@ export default function WorkspacePage() {
 
         if (token) {
           setSessionToken(token);
-          await fetchWorkspaceData(token);
-          await fetchProviderData(token);
+
         }
 
         // If no verified session exists, enter the canonical Clerk flow.
@@ -298,7 +249,6 @@ export default function WorkspacePage() {
           return;
         }
 
-        setIsLoading(false);
       } catch (err) {
         console.error("Init error:", err);
         setError("Failed to load workspace");
@@ -310,11 +260,22 @@ export default function WorkspacePage() {
   }, [router, fetchWorkspaceData, fetchProviderData, signInPath]);
 
   useEffect(() => {
-    if (!isLoading && activeTab === "provider-console" && !isProvider) {
+    if (!sessionToken) return;
+    let cancelled = false;
+    setRefreshing(true);
+    void Promise.all([fetchWorkspaceData(sessionToken), fetchProviderData(sessionToken)])
+      .then(() => { if (!cancelled) setError(null); })
+      .catch(() => { if (!cancelled) setError("Could not refresh account data. Previously loaded information may be out of date."); })
+      .finally(() => { if (!cancelled) { setIsLoading(false); setRefreshing(false); } });
+    return () => { cancelled = true; accountRequest.current++; providerRequest.current++; };
+  }, [sessionToken, revision, fetchWorkspaceData, fetchProviderData]);
+
+  useEffect(() => {
+    if (!isLoading && !error && activeTab === "provider-console" && !isProvider) {
       setActiveTab("agents");
       router.replace("/workspace?tab=agents");
     }
-  }, [activeTab, isLoading, isProvider, router]);
+  }, [activeTab, isLoading, isProvider, error, router]);
 
   const handleLogout = async () => {
     try {
@@ -338,16 +299,17 @@ export default function WorkspacePage() {
       router.push(signInPath);
     } catch (err) {
       console.error("Logout error:", err);
-      setError("Could not sign out safely. Your APIClaw session is still active, so please try again.");
+      setError("Sign-out did not finish. Refresh to check your session, then try again.");
     }
   };
 
   const handleRefresh = async () => {
-    setIsLoading(true);
     try {
       if (sessionToken) {
         await fetchWorkspaceData(sessionToken);
         await fetchProviderData(sessionToken);
+        setError(null);
+        invalidateWorkspace();
       }
     } catch (err) {
       setError("Failed to refresh");
@@ -366,7 +328,7 @@ export default function WorkspacePage() {
     );
   }
 
-  if (error) {
+  if (error && !workspace) {
     return (
       <div className="claw flex min-h-screen items-center justify-center px-6">
         <div className="max-w-[24rem] text-center">
@@ -378,8 +340,10 @@ export default function WorkspacePage() {
     );
   }
 
-  const displayEmail = workspace?.workspaceName || workspace?.email || providerName || "User";
-  const displayTier = workspace?.tier || "free";
+  if (!workspace) return <p role="status">Loading verified account data…</p>;
+
+  const displayEmail = workspace.workspaceName || workspace.email;
+  const displayTier = workspace.tier;
   
   // Usage thresholds for banners
   const showUsageWarning = workspace && workspace.tier === "free" && workspace.usagePercentage >= 80 && workspace.usagePercentage < 100;
@@ -390,7 +354,7 @@ export default function WorkspacePage() {
     : undefined;
 
   return (
-    <WorkspaceShell
+    <WorkspaceShell key={workspace.id}
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={(id) => {
@@ -404,6 +368,8 @@ export default function WorkspacePage() {
       usageLow={Boolean(workspace && workspace.usagePercentage > 80)}
       onLogout={handleLogout}
     >
+      {refreshing && <p role="status" className="mb-4">Refreshing account data. Showing the last verified information.</p>}
+      {error && <p role="alert" className="mb-6 text-[var(--accent)]">{error} <button type="button" onClick={invalidateWorkspace}>Try again</button></p>}
       <OnboardingWizard sessionToken={sessionToken} arrival={arrival} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
           {/* Usage warning/exceeded banners */}

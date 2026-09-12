@@ -1,5 +1,8 @@
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
 import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -39,15 +42,7 @@ import {
    ------------------------------------------------------------------ */
 
 async function convexQuery<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-    signal,
-  });
-  const data = await res.json();
-  if (!res.ok || data.status === "error") throw new Error(data.errorMessage || `${path} failed`);
-  return (data.value ?? data) as T;
+  return workspaceRequest<T>("query", path, args, signal);
 }
 
 function relativeTime(ts: number) {
@@ -106,17 +101,26 @@ export function ActivityTab({
   sessionToken: string | null;
 }) {
   const router = useRouter();
+  const revision = useWorkspaceRefresh();
+  const [chainStatsError, setChainStatsError] = useState(false);
   const [chainStats, setChainStats] = useState<ChainStats | null>(null);
 
+  const fetchChainStatsGuard = useRequestGuard();
   const fetchChainStats = useCallback(async () => {
+    const request = fetchChainStatsGuard.next();
     if (!sessionToken) return;
     try {
       const result = await convexQuery<ChainStats & { error?: string }>("chains:getChainStatsAuth", { token: sessionToken });
-      if (result && !result.error) setChainStats(result);
+      if (!result || result.error) throw new Error("Chain status unavailable");
+      if (!fetchChainStatsGuard.current(request)) return;
+      setChainStatsError(false);
+      if (!fetchChainStatsGuard.current(request)) return;
+      setChainStats(result);
     } catch {
-      setChainStats(null);
+      if (!fetchChainStatsGuard.current(request)) return;
+      setChainStatsError(true);
     }
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   useEffect(() => {
     fetchChainStats();
@@ -132,7 +136,7 @@ export function ActivityTab({
   const tabs = [
     { id: "logs", label: "Logs" },
     { id: "overview", label: "Usage" },
-    ...(hasChains ? [{ id: "chains", label: "Chains" }] : []),
+    ...((hasChains || chainStatsError) ? [{ id: "chains", label: "Chains" }] : []),
   ];
 
   const changeTab = (id: string) => {
@@ -143,6 +147,7 @@ export function ActivityTab({
 
   return (
     <div>
+      {chainStatsError && <p role="alert">Could not refresh chain status.</p>}
       <PageHeader title="Activity" description="Every call and search from this workspace, newest first." />
       <div className="mb-6">
         <SurfaceTabs items={tabs} active={activeSubtab} onChange={changeTab} />
@@ -222,6 +227,7 @@ function agentLabel(subagentId: string | null | undefined) {
 }
 
 function LogsTab({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -236,9 +242,12 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const fetchLogsGuard = useRequestGuard();
   const fetchLogs = useCallback(async (append = false, appendCursor?: number) => {
+    const request = fetchLogsGuard.next();
     if (!sessionToken) return;
     if (append) setLoadingMore(true); else setIsLoading(true);
+    if (!fetchLogsGuard.current(request)) return;
     setLoadError(null);
 
     const controller = new AbortController();
@@ -274,38 +283,50 @@ function LogsTab({ sessionToken }: { sessionToken: string | null }) {
             }));
           }
         } catch (err) {
-          console.error("Error fetching search logs:", err);
+          if (!fetchLogsGuard.current(request)) return;
+          setLoadError("Call logs loaded, but searches could not be loaded. Results are incomplete.");
         }
       }
 
       const byNewest = (a: LogEntry, b: LogEntry) => b.createdAt - a.createdAt;
       if (append) {
+        if (!fetchLogsGuard.current(request)) return;
         setLogs((prev) => [...prev, ...apiLogs].sort(byNewest));
       } else {
+        if (!fetchLogsGuard.current(request)) return;
         setLogs([...apiLogs, ...searchLogs].sort(byNewest));
       }
+      if (!fetchLogsGuard.current(request)) return;
       setHasMore(Boolean(apiResult?.hasMore));
+      if (!fetchLogsGuard.current(request)) return;
       setNextCursor(apiResult?.nextCursor);
     } catch (err) {
       console.error("Error fetching logs:", err);
+      if (!fetchLogsGuard.current(request)) return;
       setLoadError(err instanceof DOMException && err.name === "AbortError" ? "Activity took too long to load." : "Could not load activity.");
     } finally {
       clearTimeout(timeout);
+      if (!fetchLogsGuard.current(request)) return;
       setIsLoading(false);
+      if (!fetchLogsGuard.current(request)) return;
       setLoadingMore(false);
     }
-  }, [sessionToken, statusFilter, providerFilter, agentFilter]);
+  }, [sessionToken, revision, statusFilter, providerFilter, agentFilter]);
 
+  const fetchFilterOptionsGuard = useRequestGuard();
   const fetchFilterOptions = useCallback(async () => {
+    const request = fetchFilterOptionsGuard.next();
     if (!sessionToken) return;
     try {
       const result = await convexQuery<LogStatsResult>("logs:getLogStats", { token: sessionToken, periodDays: 30 });
+      if (!fetchFilterOptionsGuard.current(request)) return;
       setProviders(result?.providers || []);
+      if (!fetchFilterOptionsGuard.current(request)) return;
       setAgents(result?.agents || []);
     } catch (err) {
       console.error("Error fetching log filters:", err);
     }
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   useEffect(() => {
     fetchLogs();
@@ -507,13 +528,17 @@ interface SearchStatsResult {
 }
 
 function UsageTab({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
   const [stats, setStats] = useState<LogStatsResult | null>(null);
   const [searchStats, setSearchStats] = useState<SearchStatsResult | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!sessionToken) { setLoading(false); return; }
     let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
     (async () => {
       const [logRes, searchRes] = await Promise.allSettled([
         convexQuery<LogStatsResult>("logs:getLogStats", { token: sessionToken, periodDays: USAGE_DAYS }),
@@ -524,10 +549,11 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
       else if (logRes.status === "rejected") console.error("Error fetching usage:", logRes.reason);
       if (searchRes.status === "fulfilled" && searchRes.value && !searchRes.value.error) setSearchStats(searchRes.value);
       else if (searchRes.status === "rejected") console.error("Error fetching search stats:", searchRes.reason);
+      setLoadError(logRes.status === "rejected" || searchRes.status === "rejected" || (searchRes.status === "fulfilled" && Boolean(searchRes.value?.error)));
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   const chartData = useMemo(() => {
     const calls: Record<string, number> = {};
@@ -543,6 +569,7 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
   if (!sessionToken) {
     return <Empty title="Sign in to see usage" body="Usage is tied to your workspace session." />;
   }
+  if (loadError) return <p role="alert">Could not load usage. <button onClick={invalidateWorkspace}>Try again</button></p>;
   if (loading) return <Loading label="Loading usage" />;
 
   const totalCalls = stats?.totalCalls || 0;
@@ -559,7 +586,7 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
         <StatCard title="Calls" value={totalCalls.toLocaleString()} hint="Last 30 days" />
         <StatCard title="Searches" value={totalSearches.toLocaleString()} hint="Last 30 days" />
         <StatCard title="Success rate" value={totalCalls > 0 ? `${Math.round(stats?.successRate || 0)}%` : "n/a"} hint={totalCalls > 0 ? `${stats?.errorCount || 0} failed` : "No calls yet"} />
-        <StatCard title="Avg latency" value={totalCalls > 0 ? `${Math.round(stats?.avgLatency || 0)} ms` : "n/a"} hint="Callable calls" />
+        <StatCard title="Avg latency" value={totalCalls > 0 ? stats?.avgLatency ? `${Math.round(stats.avgLatency)} ms` : "Not measured" : "n/a"} hint="Callable calls" />
       </StatGrid>
 
       <Section title="Calls per day">
@@ -597,7 +624,7 @@ function UsageTab({ sessionToken }: { sessionToken: string | null }) {
               right={
                 <>
                   <span className={p.successRate < 100 ? "text-[var(--accent)]" : ""}>{Math.round(p.successRate)}% ok</span>
-                  <span className="claw-mono">{p.avgLatency} ms</span>
+                  <span className="claw-mono">{p.avgLatency ? `${p.avgLatency} ms` : "Not measured"}</span>
                 </>
               }
             >
@@ -667,6 +694,8 @@ function chainStatus(status: string): { kind: "ok" | "warn" | "bad" | "muted"; l
 }
 
 function ChainsTab({ sessionToken, stats, onChanged }: { sessionToken: string | null; stats: ChainStats | null; onChanged: () => void }) {
+  const revision = useWorkspaceRefresh();
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [chains, setChains] = useState<ChainExecution[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -676,17 +705,25 @@ function ChainsTab({ sessionToken, stats, onChanged }: { sessionToken: string | 
   const [resuming, setResuming] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const fetchChainsGuard = useRequestGuard();
   const fetchChains = useCallback(async () => {
+    const request = fetchChainsGuard.next();
     if (!sessionToken) { setLoading(false); return; }
     try {
       const result = await convexQuery<ChainExecution[] | { error: string }>("chains:getChainExecutions", { token: sessionToken, limit: 50, status: statusFilter });
-      if (Array.isArray(result)) setChains(result);
+      if (!Array.isArray(result)) throw new Error("Could not load chains");
+      if (!fetchChainsGuard.current(request)) return;
+      setLoadError(null);
+      if (!fetchChainsGuard.current(request)) return;
+      setChains(result);
     } catch (err) {
-      console.error("Fetch chains error:", err);
+      if (!fetchChainsGuard.current(request)) return;
+      setLoadError("Could not load chains.");
     } finally {
+      if (!fetchChainsGuard.current(request)) return;
       setLoading(false);
     }
-  }, [sessionToken, statusFilter]);
+  }, [sessionToken, revision, statusFilter]);
 
   useEffect(() => {
     fetchChains();
@@ -701,25 +738,18 @@ function ChainsTab({ sessionToken, stats, onChanged }: { sessionToken: string | 
       .then((result) => { if (!cancelled && result && !result.error) setDetail(result); })
       .catch((err) => console.error("Fetch chain detail error:", err))
       .finally(() => { if (!cancelled) setLoadingDetail(false); });
-    return () => { cancelled = true; };
-  }, [expandedId, sessionToken]);
+  return () => { cancelled = true; };
+  }, [expandedId, sessionToken, revision]);
 
   const handleResume = async (chainId: string) => {
     if (!sessionToken) return;
     setResuming(chainId);
     try {
-      const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "chains:resumeChainAuth", args: { token: sessionToken, chainId } }),
-      });
-      const data = await res.json();
-      const result = data.value ?? data;
-      if (result?.error) console.error("Resume chain error:", result.error);
+      await workspaceRequest("mutation", "chains:resumeChainAuth", { token: sessionToken, chainId });
       await fetchChains();
       onChanged();
     } catch (err) {
-      console.error("Resume chain error:", err);
+      setLoadError("Could not resume chain. Its current status must be checked before retrying.");
     } finally {
       setResuming(null);
     }
@@ -733,6 +763,7 @@ function ChainsTab({ sessionToken, stats, onChanged }: { sessionToken: string | 
     } catch { /* clipboard unavailable */ }
   };
 
+    if (loadError) return <p role="alert">{loadError} <button onClick={invalidateWorkspace}>Try again</button></p>;
   return (
     <div className="space-y-10">
       {stats && (

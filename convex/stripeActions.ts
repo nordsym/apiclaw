@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { readCustomerPaymentMethod } from "./stripePaymentSnapshot";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import {
@@ -259,6 +260,18 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
         break;
       }
 
+      case "customer.updated": {
+        const customer = event.data.object as Stripe.Customer;
+        const workspace = await ctx.runQuery(internal.billing.getByStripeCustomerId, { stripeCustomerId: customer.id });
+        if (workspace) {
+          const method = await readCustomerPaymentMethod(stripe, customer.id);
+          await ctx.runMutation(internal.billing.updatePaymentMethodInfo, {
+            workspaceId: workspace._id, hasPaymentMethod: Boolean(method),
+            paymentMethodType: method?.type, cardBrand: method?.card?.brand, cardLast4: method?.card?.last4,
+          });
+        }
+        break;
+      }
       case "payment_method.attached": {
         const paymentMethod = event.data.object as Stripe.PaymentMethod;
         await handlePaymentMethodAttached(ctx, paymentMethod, stripe);
@@ -959,12 +972,7 @@ async function handlePaymentMethodDetached(
     return;
   }
 
-  const remaining = await stripe.paymentMethods.list({
-    customer: customerId,
-    type: "card",
-    limit: 100,
-  });
-  const replacement = remaining.data[0];
+  const replacement = await readCustomerPaymentMethod(stripe, customerId);
   if (replacement) {
     await stripe.customers.update(customerId, {
       invoice_settings: { default_payment_method: replacement.id },

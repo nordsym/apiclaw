@@ -18,7 +18,7 @@ assert.equal(isUnlimitedWorkspace({ tier: "pro", usageLimit: 25 }), false);
 const now = Date.UTC(2026, 6, 18, 12, 0, 0);
 assert.deepEqual(getAgentPresence(now - 2 * 60_000, now), {
   state: "active",
-  label: "Active now",
+  label: "Seen in the last 15 min",
 });
 assert.deepEqual(getAgentPresence(now - 2 * 24 * 60 * 60_000, now), {
   state: "recent",

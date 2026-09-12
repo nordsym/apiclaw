@@ -1,4 +1,6 @@
 "use client";
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useWorkspaceRefreshEvents } from "@/lib/use-workspace-refresh";
 
 /**
  * Shell wrapper for standalone workspace routes (/workspace/integrations,
@@ -20,25 +22,26 @@ export function hrefForTab(id: WorkspaceSurfaceId): string {
 
 export function StandaloneShell({ activeTab, sessionToken, children }: { activeTab: WorkspaceSurfaceId; sessionToken: string | null; children: ReactNode }) {
   const router = useRouter();
+  useWorkspaceRefreshEvents();
+  const revision = useWorkspaceRefresh();
+  const [isProvider, setIsProvider] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionToken) return;
     let cancelled = false;
-    fetch(`${CONVEX_URL}/api/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: "workspaces:getWorkspaceDashboard", args: { token: sessionToken } }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        const dashboard = data?.value ?? data;
-        if (!cancelled && dashboard?.workspace) setWorkspace(dashboard.workspace as Workspace);
-      })
-      .catch((err) => console.error("Fetch workspace error:", err));
+    Promise.all([
+      workspaceRequest<{ workspace: Workspace }>("query", "workspaces:getWorkspaceDashboard", { token: sessionToken }),
+      workspaceRequest<{ provider: unknown }>("query", "providers:getWorkspaceProviderConsole", { token: sessionToken }),
+    ]).then(([dashboard, provider]) => {
+      if (cancelled) return;
+      if (!dashboard?.workspace?.id) throw new Error("Workspace unavailable");
+      setWorkspace(dashboard.workspace); setIsProvider(Boolean(provider.provider)); setLoadError(false);
+    }).catch(() => { if (!cancelled) setLoadError(true); });
     return () => { cancelled = true; };
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   const handleLogout = async () => {
     try {
@@ -55,7 +58,7 @@ export function StandaloneShell({ activeTab, sessionToken, children }: { activeT
       router.push(SIGN_IN_PATH);
     } catch (err) {
       console.error("Logout error:", err);
-      setLogoutError("Could not sign out. Your session is still active. Try again.");
+      setLogoutError("Sign-out did not finish. Refresh to check your session, then try again.");
     }
   };
 
@@ -63,9 +66,11 @@ export function StandaloneShell({ activeTab, sessionToken, children }: { activeT
     ? workspace.usageLimit === -1 ? "Unlimited calls" : `${workspace.usageRemaining}/${workspace.usageLimit} calls`
     : undefined;
 
+  if (!workspace) return <p role="status">{loadError ? "Could not load workspace." : "Loading workspace…"} {loadError && <button onClick={invalidateWorkspace}>Try again</button>}</p>;
+
   return (
     <WorkspaceShell
-      tabs={getWorkspaceNavigation({ isProvider: false })}
+      tabs={getWorkspaceNavigation({ isProvider })}
       activeTab={activeTab}
       onTabChange={(id) => router.push(hrefForTab(id))}
       workspaceName={workspace?.workspaceName || workspace?.email || "Workspace"}
@@ -74,6 +79,7 @@ export function StandaloneShell({ activeTab, sessionToken, children }: { activeT
       usageLow={workspace ? workspace.usagePercentage >= 80 : false}
       onLogout={handleLogout}
     >
+      {loadError && <p role="alert">Account information may be out of date. <button onClick={invalidateWorkspace}>Try again</button></p>}
       {logoutError && <p className="mb-4 text-[13px] text-[var(--accent)]">{logoutError}</p>}
       {children}
     </WorkspaceShell>

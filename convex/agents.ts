@@ -73,6 +73,7 @@ export const getMainAgent = query({
       mainAgentId: workspace.mainAgentId || null,
       mainAgentName: workspace.mainAgentName || null,
       aiBackend: workspace.aiBackend || null,
+      aiBackendLastSeen: workspace.aiBackendLastSeen ?? null,
       usageCount: workspace.usageCount,
       createdAt: workspace.createdAt,
     };
@@ -196,9 +197,7 @@ export const getSubagents = query({
   handler: async (ctx, { token, limit = 50 }) => {
     const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) {
-      return { subagents: [], total: 0 };
-    }
+    if (!session) throw new Error("Invalid or expired session");
 
     const subagents = await ctx.db
       .query("subagents")
@@ -751,7 +750,7 @@ export const getWorkspaceAgents = query({
   handler: async (ctx, { token }) => {
     const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!session) return [];
+    if (!session) throw new Error("Invalid or expired session");
 
     const agents = await ctx.db
       .query("agents")

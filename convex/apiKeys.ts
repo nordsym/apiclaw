@@ -139,9 +139,7 @@ export const listKeys = query({
   handler: async (ctx, args) => {
     const session = await findUsableAgentSession(ctx.db, args.token);
 
-    if (!session) {
-      return { keys: [] };
-    }
+    if (!session) throw new Error("Invalid or expired session");
 
     const keys = await ctx.db
       .query("workspaceApiKeys")

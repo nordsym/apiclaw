@@ -25,7 +25,7 @@ const docsNav = [
   {
     label: "Remote MCP",
     href: "/sign-in",
-    note: "Sign in, then integrations",
+    note: "Workspace connection options",
   },
   {
     label: "Your key",
@@ -139,7 +139,7 @@ export default function DocsPage() {
                 <div>
                   <h3 className={SUB}>Headless server or SSH</h3>
                   <p className={`${BODY} mt-3`}>
-                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Connections and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
+                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Settings and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
                   </p>
                 </div>
                 <div className="border-t border-border-subtle pt-6">
@@ -209,7 +209,7 @@ apiclaw balance`}</pre>
                   <dt className={META}>API key</dt>
                   <dd>
                     <span className={CODE}>sk-claw-...</span>
-                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Connections and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
+                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Settings and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
                   </dd>
                 </div>
               </dl>
@@ -242,7 +242,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/sign-in" className="claw-btn claw-btn-solid">Sign in</Link>
-                <Link href="/workspace/integrations" className="claw-btn claw-btn-quiet">Open integrations</Link>
+                <Link href="/workspace?tab=agents" className="claw-btn claw-btn-quiet">Open connection options</Link>
               </div>
               <ol className="mt-8 border-t border-border-subtle">
                 {[
@@ -267,7 +267,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
             <section id="byok" className="scroll-mt-20">
               <h2 className="claw-h2">Bring your own key</h2>
               <p className={`${BODY} mt-4`}>
-                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
+                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Settings, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
               </p>
               <p className={`${BODY} mt-4`}>
                 An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.

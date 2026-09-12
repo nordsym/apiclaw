@@ -220,7 +220,7 @@ export const listKeys = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const session = await findUsableAgentSession(ctx.db, token);
-    if (!session) return [];
+    if (!session) throw new Error("Invalid or expired session");
 
     const rows = await ctx.db
       .query("providerKeys")

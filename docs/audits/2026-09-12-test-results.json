@@ -1,0 +1,330 @@
+[
+  {
+    "test": "src/test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/first-run.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/first-execute-rails.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/first-call.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/execute-auth.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/auth-config.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/login-wait.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/cli-auth-redeem.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/pending-login-start.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/skill.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/funnel.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/funnel.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/product-truth.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/workspace-public-apis.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/apilayer-customer-rails.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/version-trap.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/mcp-scope-policy.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/trust-floor.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/provider-boundaries.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/gateway-client.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/cli/commands/direct.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/chainExecutor.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/capability-router.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/provider-boundaries.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/workspace-truth.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/discovery-aliases.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/onboarding-first-call.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/app/auth/cli/page.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/app/auth/cli/claim.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/app/auth/cli/done/page.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/app/oauth/authorize/page.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/workspace-session.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/workspace-session-recovery.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/app/mcp/route.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/httpTrust.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/idempotencyBinding.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/oauthPassthrough.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedProviderPathSafety.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/apilayerHttpsSafety.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/sessionSecurity.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/agentDisplay.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/logSecurity.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/cliAuthLogout.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/cliAuthPoll.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/browserSession.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/chainTenantIsolation.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/tenantIsolation.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/providerBoundaries.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/workspaceUsage.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/quota.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedUsagePolicy.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedCostPolicy.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/providerKeys.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/openRouterExecuteContract.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedUsage.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/activation.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/onboarding.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/missionRunnerMetering.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/openRouterAttribution.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/openRouterReconciliation.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedMetering.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/stripeWebhookEvents.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/stripeSessions.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/billing-presentation.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/webhooks.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/missionIdempotency.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/inbound.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/nurtureDelivery.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/nurture.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/postVerifyNudge.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/founderSignupMail.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/scorecardEmail.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/modelRouting.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/modelCatalog.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/managedCredentials.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/modelPricing.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/billing.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/providerCallerAnalytics.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/acp-grammar.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "src/acp-server.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "landing/src/lib/workspace-data.test.ts",
+    "exit": 0
+  },
+  {
+    "test": "convex/stripePaymentSnapshot.test.ts",
+    "exit": 0
+  }
+]

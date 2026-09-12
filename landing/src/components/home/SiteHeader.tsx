@@ -1,7 +1,7 @@
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function SiteHeader({
-  signInHref = "/sign-in",
+  signInHref = "/workspace",
 }: {
   /** Omit or pass a path. `null` hides the header Sign in (CLI Authorize). */
   signInHref?: string | null;
@@ -18,7 +18,7 @@ export function SiteHeader({
           <a href="/catalog" className="claw-link hidden sm:inline">Catalog</a>
           <ThemeToggle />
           {signInHref ? (
-            <a href={signInHref} className="claw-btn claw-btn-quiet !h-9 !px-3.5 !text-[13px]">Sign in</a>
+            <a href={signInHref} className="claw-btn claw-btn-quiet !h-9 !px-3.5 !text-[13px]">{signInHref === "/workspace" ? "Workspace" : "Sign in"}</a>
           ) : null}
         </nav>
       </div>

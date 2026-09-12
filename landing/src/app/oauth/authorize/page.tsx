@@ -3,6 +3,7 @@
 // page renders, so we can trust the cookie. The actual mint happens in
 // /api/oauth/authorize after the user clicks "Authorize".
 "use client";
+import { decodeWorkspaceResponse } from "@/lib/workspace-data";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -117,9 +118,9 @@ function AuthorizeInner() {
           }),
         });
         const json = await res.json();
-        const data = (json?.value ?? json) as ClientMeta | null;
+        const data = decodeWorkspaceResponse(json, res.ok) as ClientMeta | null;
         if (cancelled) return;
-        if (!data) {
+        if (!data || typeof data.name !== "string") {
           setError("Unknown client or redirect URI not registered.");
           setPhase("error");
           return;

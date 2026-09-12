@@ -1,5 +1,8 @@
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh } from "@/lib/use-workspace-refresh";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
 import { paymentMethodLabel } from "@/lib/billing-presentation";
@@ -32,15 +35,8 @@ function formatCents(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (!res.ok || data.status === "error") throw new Error(data.errorMessage || `${path} failed`);
-  return data.value as T;
+async function convexQuery<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+  return workspaceRequest<T>("query", path, args, signal);
 }
 
 function planLabel(tier: string): string {
@@ -59,7 +55,8 @@ export function BillingTab({
   sessionToken: string | null;
   returnedFromStripe?: boolean;
 }) {
-  const currentTier = workspace?.tier || "free";
+  const revision = useWorkspaceRefresh();
+  const currentTier = workspace?.tier;
   const isPartner = currentTier === "partner";
   const isUnlimited = isUnlimitedWorkspace(workspace || {});
   const paygNeedsRecovery = currentTier === "usage_based" && workspace?.paygActive !== true;
@@ -129,7 +126,7 @@ export function BillingTab({
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [sessionToken, refresh, returnedFromStripe]);
+  }, [sessionToken, refresh, returnedFromStripe, revision]);
 
   const openBillingPortal = async () => {
     if (!sessionToken) {
@@ -161,9 +158,11 @@ export function BillingTab({
     </button>
   );
 
-  const paymentAction = (label: string) => hasStripeCustomer && currentTier !== "free"
+  const paymentAction = (label: string) => hasStripeCustomer && (paymentConnected || currentTier !== "free")
     ? portalButton(paymentConnected ? btnQuiet : btnSolid, label)
     : <CheckoutButton sessionToken={sessionToken || ""}>{label}</CheckoutButton>;
+
+  if (!workspace || !currentTier) return <Loading label="Loading verified account data" />;
 
   return (
     <div className="space-y-10">
@@ -198,9 +197,9 @@ export function BillingTab({
       <Section title="Plan">
         {paygNeedsRecovery && (
           <Row>
-            <Status kind="warn">Pay as you go is paused</Status>
+            <Status kind="warn">Subscription status needs review</Status>
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-              Calls resume once Stripe confirms the subscription and payment method
+              Check your subscription details in billing
               {workspace?.stripeSubscriptionStatus ? ` (status: ${workspace.stripeSubscriptionStatus})` : ""}.
             </p>
           </Row>
@@ -213,7 +212,7 @@ export function BillingTab({
             hint={isUnlimited || !hasPlanLimit ? "No cap on this plan" : `of ${usageLimit.toLocaleString()}`}
           />
           {isUnlimited || !hasPlanLimit ? (
-            <StatCard title="Billing" value={isPartner ? "By agreement" : currentTier === "usage_based" ? (workspace?.paygActive ? "Active" : "Pending") : "Included"} hint={currentTier === "usage_based" && workspace?.paygActive ? "Usage reported to Stripe monthly" : undefined} />
+            <StatCard title={currentTier === "usage_based" ? "Subscription" : "Billing"} value={isPartner ? "By agreement" : currentTier === "usage_based" ? (workspace?.paygActive ? "Active" : "Pending") : "Included"} hint={currentTier === "usage_based" && workspace?.paygActive ? "Usage reported to Stripe monthly" : undefined} />
           ) : (
             <StatCard
               title="Remaining"
@@ -244,7 +243,7 @@ export function BillingTab({
             } else if (isPaygPlan) {
               cta = (
                 <div className="mt-7 self-start">
-                  {paymentAction(paymentConnected ? (currentTier === "free" ? "Continue billing setup" : "Manage payment method") : "Add payment method")}
+                  {paymentAction(paymentConnected ? "Manage payment method" : "Add payment method")}
                 </div>
               );
             } else {
@@ -259,12 +258,12 @@ export function BillingTab({
                     <span className="rounded-full border border-[var(--ok)] px-3 py-1">
                       <Status kind="ok">Payment method connected</Status>
                     </span>
-                  ) : plan.highlight && <span className="claw-eyebrow !text-[10.5px] text-[var(--text-muted)]">Recommended</span>}
+                  ) : plan.highlight && !billingInfoLoading && !billingInfoError && <span className="claw-eyebrow !text-[10.5px] text-[var(--text-muted)]">Recommended</span>}
                 </div>
                 <div className="mt-4 claw-display text-[2rem]">{plan.price}</div>
                 <p className="text-[13px] text-[var(--text-muted)]">{plan.period}</p>
                 <p className="mt-4 text-[14px] text-[var(--text-secondary)]">
-                  <span className="text-[var(--text-primary)]">{plan.calls}</span> {isPaygPlan && paymentConnected ? `provider cost plus ${PAYG_MARGIN_PERCENT}%` : plan.callsSub}
+                  <span className="text-[var(--text-primary)]">{plan.calls}</span> {isPaygPlan && (paymentConnected || billingInfoLoading || billingInfoError) ? `provider cost plus ${PAYG_MARGIN_PERCENT}%` : plan.callsSub}
                 </p>
                 <ul className="mt-5 flex-1 space-y-2 text-[13.5px] leading-[1.55] text-[var(--text-secondary)]">
                   {plan.features.map((f) => (

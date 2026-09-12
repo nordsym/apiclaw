@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function TestPage() {
-  redirect("/workspace");
+export default function TestPage({ params }: { params: { apiId: string } }) {
+  redirect(`/workspace?tab=provider-console&api=${encodeURIComponent(params.apiId)}`);
 }

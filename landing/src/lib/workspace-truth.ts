@@ -36,13 +36,13 @@ export function getAgentPresence(lastActiveAt: number, now = Date.now()): {
   const day = 24 * 60 * minute;
 
   if (elapsedMs <= 15 * minute) {
-    return { state: "active", label: "Active now" };
+    return { state: "active", label: "Seen in the last 15 min" };
   }
 
   if (elapsedMs < day) {
     return {
       state: "recent",
-      label: `Last seen ${Math.max(1, Math.floor(elapsedMs / minute / 60))}h ago`,
+      label: elapsedMs < 60 * minute ? `Last seen ${Math.floor(elapsedMs / minute)}m ago` : `Last seen ${Math.floor(elapsedMs / minute / 60)}h ago`,
     };
   }
 

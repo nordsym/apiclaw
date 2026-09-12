@@ -1,4 +1,5 @@
 "use client";
+import { invalidateWorkspace } from "@/lib/workspace-data";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -423,6 +424,7 @@ function useTestCall(target: Target | null, sessionToken?: string | null) {
       testCallIdempotencyKeyRef.current = null;
       sessionStorage.removeItem(TEST_CALL_PENDING_STORAGE_KEY);
       const ok = response.ok && !data?.error && data?.success !== false;
+      if (ok) invalidateWorkspace();
       const reported = typeof data?._apiclaw?.latencyMs === "number" ? data._apiclaw.latencyMs : null;
       setResult({ ok, status: response.status, latencyMs: reported ?? elapsed, body: formatBody(data) });
     } catch {

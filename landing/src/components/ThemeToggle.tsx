@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { getCurrentTheme, toggleTheme, type Theme } from "@/lib/theme";
+import { getCurrentTheme, toggleTheme, applyTheme, THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 /** Quiet icon-button theme switch. Hydration-safe: renders inert until mounted. */
 export function ThemeToggle({ className = "" }: { className?: string }) {
@@ -10,6 +10,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     setTheme(getCurrentTheme());
+    const sync = (event: StorageEvent) => {
+      if (event.key === THEME_STORAGE_KEY && (event.newValue === "dark" || event.newValue === "light")) {
+        applyTheme(event.newValue); setTheme(event.newValue);
+      }
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, []);
 
   const base = `claw-btn claw-btn-quiet !h-9 !w-9 !px-0 ${className}`;
