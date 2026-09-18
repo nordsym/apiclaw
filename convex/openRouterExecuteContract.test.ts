@@ -87,5 +87,7 @@ assert.match(
 assert.match(quotaResponse, /costHold \? 503 : 402/);
 assert.match(quotaResponse, /code:[\s\S]*?costHold[\s\S]*?"managed_cost_hold"/);
 assert.match(quotaResponse, /!costHold[\s\S]*?upgradeUrl/);
+assert.match(quotaResponse, /PAYMENT_REQUIRED_MESSAGE/);
+assert.match(quotaResponse, /APICLAW_UPGRADE_URL/);
 
 console.log("OpenRouter execute: hard-bound routing and exact-cost finalization");

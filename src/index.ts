@@ -1868,7 +1868,10 @@ Docs: https://apiclaw.cloud
                   outcome_unknown: result.outcomeUnknown,
                   retryable: result.retryable,
                   idempotency_key: result.idempotencyKey,
+                  ...(typeof result.upgradeUrl === 'string' ? { upgradeUrl: result.upgradeUrl } : {}),
                 }),
+                ...(typeof result._notice === 'string' ? { _notice: result._notice } : {}),
+                ...(result.next_step ? { next_step: result.next_step } : {}),
               }, {
                 hint: 'Ask for a summary or narrower params if the confirmed result is very large.',
               })
@@ -1992,8 +1995,11 @@ Docs: https://apiclaw.cloud
             outcome_unknown: result.outcomeUnknown,
             retryable: result.retryable,
             idempotency_key: result.idempotencyKey,
+            ...(typeof result.upgradeUrl === 'string' ? { upgradeUrl: result.upgradeUrl } : {}),
           }),
-          ...(result.cost !== undefined ? { cost_sek: result.cost } : {})
+          ...(result.cost !== undefined ? { cost_sek: result.cost } : {}),
+          ...(typeof result._notice === 'string' ? { _notice: result._notice } : {}),
+          ...(result.next_step ? { next_step: result.next_step } : {}),
         };
 
         // Nudge unregistered users

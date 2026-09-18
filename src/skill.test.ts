@@ -114,6 +114,9 @@ assert.match(skill, /nasa/, "first research call is NASA APOD");
 assert.match(skill, /apod/, "first research call is NASA APOD");
 assert.match(skill, /frankfurter/, "Frankfurter is the free last-resort fallback");
 assert.match(skill, /payment_required/, "SKILL.md must warn that billed research is card-gated");
+assert.match(skill, /one cheap paid next step/i, "SKILL.md may suggest one paid step after the free first call");
+assert.match(skill, /https:\/\/apiclaw\.cloud\/upgrade/, "SKILL.md must surface the billing URL after first call");
+assert.match(skill, /retry the same call/, "SKILL.md must tell agents to retry after adding a card");
 assert.doesNotMatch(skill, /brave_search/, "SKILL.md must not send first execute to billed Brave");
 assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
 assert.match(skill, /1,?025/, "callable count is the live catalog card count");
@@ -159,6 +162,10 @@ assert.doesNotMatch(
   /Headless or SSH: run the same command/,
   "headless must not tell agents to run auth login on a machine the human cannot see",
 );
+assert.match(agents, /one cheap paid next step/i);
+assert.match(agents, /https:\/\/apiclaw\.cloud\/upgrade/);
+assert.match(agents, /payment_required/);
+assert.match(agents, /retry the same call/);
 
 assert.match(readme, /auth\/cli\?authId=/);
 assert.match(readme, /show the first-line/);
