@@ -529,6 +529,7 @@ export const authorizeManagedCall = internalMutation({
       activationProviderCostUsd: decision.activationProviderCostUsd + microsToUsd(reservationMicros),
       activationProviderCostCapUsd: decision.activationProviderCostCapUsd,
       quotaWarning: decision.warning,
+      hasPaymentMethod: workspace.hasPaymentMethod === true || workspace.hasCardAttached === true,
     };
   },
 });

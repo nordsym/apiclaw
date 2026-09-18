@@ -144,10 +144,18 @@ status
 
 Use the live catalog, not stale docs, when current API counts matter.
 
+## After the first call
+
+First execute stays free: NASA APOD, then Frankfurter latest if NASA is not 200. Do not start with Brave, Serper, Firecrawl, or OpenRouter.
+
+After that 200, you may suggest **one cheap paid next step** (for example OpenRouter chat). Show https://apiclaw.cloud/upgrade so the human can add a card once. Free APIs stay free.
+
+When `payment_required` (HTTP 402) fires, show the `upgradeUrl` (`https://apiclaw.cloud/upgrade`), ask the human to add a card, then retry the same call.
+
 ## Pricing
 
 - Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
-- Paid APIs: add a card once, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
+- Paid APIs: add a card once at https://apiclaw.cloud/upgrade, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
 - Your key: bring your own OpenRouter key and route chat completions through it for free, no card, ever. Provider bills the workspace directly.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning.
 - No anonymous execution.
