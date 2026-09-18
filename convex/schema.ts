@@ -257,6 +257,7 @@ export default defineSchema({
     keyHash: v.string(), // SHA-256 hash for lookup (key itself not stored after first show)
     keyPrefix: v.string(), // "sk-claw-...last4" for display
     name: v.string(), // user label ("Production", "My Agent")
+    serviceScope: v.optional(v.object({ purpose: v.literal("nordsym-website"), model: v.literal("openai/gpt-5.6-sol"), managedOpenAI: v.literal(true) })),
     lastUsedAt: v.optional(v.number()),
     createdAt: v.number(),
     revokedAt: v.optional(v.number()),
