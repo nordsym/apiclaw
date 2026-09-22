@@ -32,7 +32,7 @@ export async function GET() {
       type: "oauth2",
       authorization_server_metadata: `${ISSUER}/.well-known/oauth-authorization-server`,
       protected_resource_metadata: `${ISSUER}/.well-known/oauth-protected-resource`,
-      dynamic_client_registration: true,
+      dynamic_client_registration: false,
       pkce_required: true,
     },
     tools: CANONICAL_MCP_TOOLS.map((tool) => tool.name),

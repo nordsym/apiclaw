@@ -128,7 +128,7 @@ status
 - Headless or SSH: show the first-line URL. They open it on another device. Do not run `auth login` on a machine they cannot see. Then confirm with `npx @nordsym/apiclaw auth whoami`.
 - No browser anywhere (CI, etc.): create a key in Workspace > Connections on a machine with a browser and set `APICLAW_API_KEY` in the headless environment instead of running `auth login` there.
 - Local auth writes `session_token` to `~/.apiclaw.toml`. Execute sends that value as `X-APIClaw-Session`.
-- Remote MCP uses OAuth 2.1 + PKCE + Dynamic Client Registration.
+- Remote MCP uses OAuth 2.1 with PKCE S256. Public dynamic client registration is closed. Already-registered clients and workspace-issued connectors keep working. New clients: sign in, open the Agents tab, and generate a connector.
 - Workspace keys use `sk-claw-...` bearer tokens.
 
 ## Current capabilities

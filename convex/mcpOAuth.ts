@@ -2,15 +2,18 @@
  * Remote MCP — OAuth 2.1 (RFC 6749 + 7591 + 7636 PKCE) state layer.
  *
  * Three flows:
- *   1. Dynamic Client Registration (RFC 7591) — Grok / Cursor / any MCP client
- *      hits POST /api/oauth/register and gets back a client_id (+ optional
- *      client_secret). Registration alone grants nothing.
+ *   1. Dynamic Client Registration (RFC 7591) — closed to the public.
+ *      POST /api/oauth/register and `registerDynamicClient` mint a client
+ *      only when the caller presents OAUTH_DCR_INITIAL_ACCESS_TOKEN and
+ *      every redirect URI is loopback or allowlisted. Registration alone
+ *      grants nothing.
  *   2. Authorization Code + PKCE — the user signs in via Clerk, lands on
  *      /oauth/authorize, approves consent, and the consent handler calls
  *      `mintAuthCode`. The client then exchanges the code at /api/oauth/token.
- *   3. Dashboard-issued connector — the workspace owner clicks "Generate Grok
- *      Connector" and gets a one-shot client_id+secret pre-bound to their
- *      workspace. Skips the consent screen for repeat installs.
+ *      PKCE S256 is mandatory. Unbound dynamic clients with a non-allowlisted
+ *      redirect cannot complete consent.
+ *   3. Dashboard-issued connector — the workspace owner generates a connector
+ *      and gets a one-shot client_id+secret pre-bound to their workspace.
  *
  * Tokens are SHA-256 hashed for lookup, never stored raw.
  */
@@ -22,6 +25,10 @@ import {
   normalizeRegisteredMcpScope,
   resolveGrantedMcpScope,
 } from "../src/mcp-scope-policy";
+import {
+  assertCanRegisterDynamicClient,
+  isAllowlistedDynamicRedirect,
+} from "../src/oauth-dcr";
 
 // ============================================
 // CONSTANTS
@@ -123,8 +130,17 @@ export function validateRedirectUris(uris: string[]): { ok: true; uris: string[]
 // ============================================
 // PUBLIC: DYNAMIC CLIENT REGISTRATION (RFC 7591)
 // ============================================
-// Open per spec. Registration alone grants nothing — tokens still require
-// human consent on /oauth/authorize against an email-verified workspace.
+// Closed unless the caller presents the server-side initial access token.
+// The Next.js route enforces the same check. This mutation stays closed on
+// its own so a direct call to the public Convex API cannot mint a client.
+
+function unboundDynamicRedirectRejected(
+  client: { registrationKind: string; workspaceId?: string },
+  redirectUri: string,
+): boolean {
+  if (client.registrationKind !== "dynamic" || client.workspaceId) return false;
+  return !isAllowlistedDynamicRedirect(redirectUri, process.env.OAUTH_DCR_REDIRECT_ALLOWLIST);
+}
 
 export const registerDynamicClient = mutation({
   args: {
@@ -134,12 +150,25 @@ export const registerDynamicClient = mutation({
     tokenEndpointAuthMethod: v.optional(v.string()),
     scope: v.optional(v.string()),
     publicClient: v.optional(v.boolean()), // PKCE-only, no client_secret
+    initialAccessToken: v.string(),
   },
+  returns: v.object({
+    client_id: v.string(),
+    client_secret: v.optional(v.string()),
+    client_secret_expires_at: v.number(),
+    client_id_issued_at: v.number(),
+    redirect_uris: v.array(v.string()),
+    grant_types: v.array(v.string()),
+    token_endpoint_auth_method: v.string(),
+    scope: v.string(),
+  }),
   handler: async (ctx, args) => {
-    const redirectCheck = validateRedirectUris(args.redirectUris);
-    if (!redirectCheck.ok) {
-      throw new Error(redirectCheck.error);
-    }
+    const redirectCheck = assertCanRegisterDynamicClient({
+      presentedToken: args.initialAccessToken,
+      configuredToken: process.env.OAUTH_DCR_INITIAL_ACCESS_TOKEN,
+      redirectUris: args.redirectUris,
+      extraAllowlistRaw: process.env.OAUTH_DCR_REDIRECT_ALLOWLIST,
+    });
     const registeredScope = normalizeRegisteredMcpScope(args.scope);
     const trimmedName = args.name.trim().slice(0, 80) || "Unnamed MCP Client";
     const grantTypes = args.grantTypes && args.grantTypes.length > 0
@@ -167,7 +196,7 @@ export const registerDynamicClient = mutation({
       clientSecretHash,
       clientSecretPrefix,
       name: trimmedName,
-      redirectUris: redirectCheck.uris,
+      redirectUris: redirectCheck.redirectUris,
       grantTypes,
       tokenEndpointAuthMethod: tokenAuthMethod,
       scope: registeredScope,
@@ -178,10 +207,10 @@ export const registerDynamicClient = mutation({
 
     return {
       client_id: clientId,
-      client_secret: clientSecret,
+      ...(clientSecret ? { client_secret: clientSecret } : {}),
       client_secret_expires_at: 0, // never expires (RFC 7591)
       client_id_issued_at: Math.floor(now / 1000),
-      redirect_uris: redirectCheck.uris,
+      redirect_uris: redirectCheck.redirectUris,
       grant_types: grantTypes,
       token_endpoint_auth_method: tokenAuthMethod,
       scope: registeredScope,
@@ -295,6 +324,54 @@ export const revokeConnector = mutation({
   },
 });
 
+// Operator sweep for dynamic clients whose redirect URIs are not allowlisted.
+// Default leaves workspace-bound clients alone so an already-consented
+// connector keeps working. Pass includeBound to also revoke those.
+// Run from the Convex dashboard after deploy:
+//   internal.mcpOAuth.revokeUntrustedDynamicClients
+export const revokeUntrustedDynamicClients = internalMutation({
+  args: {
+    internalSecret: v.string(),
+    includeBound: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    scanned: v.number(),
+    revokedClients: v.number(),
+    revokedTokens: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const expected = process.env.APICLAW_INTERNAL_SECRET;
+    if (!expected || args.internalSecret !== expected) {
+      throw new Error("unauthorized: admin secret required");
+    }
+    const rows = await ctx.db.query("mcpOAuthClients").collect();
+    let revokedClients = 0;
+    let revokedTokens = 0;
+    const now = Date.now();
+    for (const client of rows) {
+      if (client.registrationKind !== "dynamic" || client.revokedAt) continue;
+      if (client.workspaceId && args.includeBound !== true) continue;
+      const untrusted = client.redirectUris.some(
+        (uri: string) => !isAllowlistedDynamicRedirect(uri, process.env.OAUTH_DCR_REDIRECT_ALLOWLIST),
+      );
+      if (!untrusted) continue;
+      await ctx.db.patch(client._id, { revokedAt: now, updatedAt: now });
+      revokedClients += 1;
+      const tokens = await ctx.db
+        .query("mcpOAuthTokens")
+        .withIndex("by_clientId", (q) => q.eq("clientId", client.clientId))
+        .collect();
+      for (const token of tokens) {
+        if (!token.revokedAt) {
+          await ctx.db.patch(token._id, { revokedAt: now });
+          revokedTokens += 1;
+        }
+      }
+    }
+    return { scanned: rows.length, revokedClients, revokedTokens };
+  },
+});
+
 // ============================================
 // AUTHORIZE FLOW (consent UI calls these from /oauth/authorize)
 // ============================================
@@ -309,6 +386,7 @@ export const getClientForAuthorize = query({
     if (!client || client.revokedAt) return null;
     if (!client.redirectUris.includes(args.redirectUri)) return null;
     if (!validateRedirectUris([args.redirectUri]).ok) return null;
+    if (unboundDynamicRedirectRejected(client, args.redirectUri)) return null;
     return {
       clientId: client.clientId,
       name: client.name,
@@ -348,6 +426,7 @@ export const mintAuthCode = mutation({
     if (!client || client.revokedAt) throw new Error("invalid_client");
     if (!client.redirectUris.includes(args.redirectUri)) throw new Error("invalid_redirect_uri");
     if (!validateRedirectUris([args.redirectUri]).ok) throw new Error("invalid_redirect_uri");
+    if (unboundDynamicRedirectRejected(client, args.redirectUri)) throw new Error("invalid_redirect_uri");
     const grantedScope = resolveGrantedMcpScope(client.scope, args.scope);
 
     // Bind dynamic clients to this workspace on first authorize (one-time).
