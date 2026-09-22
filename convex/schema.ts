@@ -1143,10 +1143,10 @@ export default defineSchema({
   // REMOTE MCP — OAuth 2.1 (PKCE + DCR)
   // ============================================
   // Clients registered to talk to https://apiclaw.cloud/mcp.
-  // Created either via the dashboard ("Generate Grok Connector") or via
-  // RFC 7591 Dynamic Client Registration. A client is just metadata; it
-  // grants nothing on its own — tokens require human consent on
-  // /oauth/authorize against an email-authenticated workspace.
+  // Created via the dashboard ("Generate connector") or, when an initial
+  // access token is configured, RFC 7591 registration. Public registration
+  // is closed. A client grants nothing on its own — tokens require human
+  // consent on /oauth/authorize against an email-authenticated workspace.
   mcpOAuthClients: defineTable({
     clientId: v.string(),                  // public identifier (claw_mcp_<24 chars>)
     clientSecretHash: v.optional(v.string()), // null = public client (PKCE only)
