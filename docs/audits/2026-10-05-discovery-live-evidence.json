@@ -1,0 +1,279 @@
+{
+  "verifiedAt": "2026-10-05",
+  "frontendCommit": "abfec7d4a49eb4a0a495c6563d7eef347aca17ff",
+  "frontendDeployment": "dpl_8ghtXaniALKbo1CjJACLD1VzDYSe",
+  "backendDeployment": "adventurous-avocet-799",
+  "backendCommit": "656cbf58fb9ab6469e06abc656a8db3720be1e2f",
+  "registration": "Admin-provisioned verified Clerk test identity; native workspace bridge. CAPTCHA self-signup not verified.",
+  "states": {
+    "pending": [
+      {
+        "surface": "catalog",
+        "callable": false,
+        "total": 0,
+        "cacheControl": "no-store",
+        "items": []
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": false,
+        "total": 0,
+        "apis": []
+      },
+      {
+        "surface": "catalog",
+        "callable": true,
+        "total": 0,
+        "cacheControl": "no-store",
+        "items": []
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": true,
+        "total": 0,
+        "apis": []
+      }
+    ],
+    "published": [
+      {
+        "surface": "catalog",
+        "callable": false,
+        "total": 2,
+        "cacheControl": "no-store",
+        "items": [
+          {
+            "auth": "Not declared; confirm with provider",
+            "baseUrl": "https://api.apiclaw.cloud/",
+            "callable": false,
+            "category": "Other",
+            "description": "Owned synthetic release fixture, no service or operations exist.",
+            "docsUrl": "https://apiclaw.cloud/docs",
+            "executionAvailable": false,
+            "listingId": "s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+            "managedAdapter": false,
+            "name": "APIClaw Synthetic PR49 FILE 20261005",
+            "operations": [
+              {
+                "method": "GET",
+                "path": "/_synthetic-release-fixture-do-not-call",
+                "summary": "Metadata only, never execute"
+              }
+            ],
+            "pricing": "Synthetic test only",
+            "pricingNotes": "Synthetic fixture only. No service, credentials or purchase.",
+            "providerId": "listing:s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+            "tier": "untested",
+            "verified": false,
+            "actions": []
+          },
+          {
+            "auth": "Not declared; confirm with provider",
+            "baseUrl": "https://api.apiclaw.cloud/",
+            "callable": false,
+            "category": "Other",
+            "description": "Synthetic metadata for APIClaw release verification only. This is not a working service. Do not execute the operation.",
+            "docsUrl": "https://apiclaw.cloud/docs",
+            "executionAvailable": false,
+            "listingId": "s578hm0tysv93vrb2e2vpvfrd98fqvex",
+            "managedAdapter": false,
+            "name": "APIClaw Synthetic PR49 URL 20261005",
+            "operations": [
+              {
+                "method": "GET",
+                "path": "/_synthetic-release-fixture-do-not-call",
+                "summary": "Metadata fixture only. No upstream API operation exists."
+              }
+            ],
+            "pricing": "Synthetic test only",
+            "pricingNotes": "Synthetic fixture only. No service, credentials or purchase.",
+            "providerId": "listing:s578hm0tysv93vrb2e2vpvfrd98fqvex",
+            "tier": "untested",
+            "verified": false,
+            "actions": []
+          }
+        ]
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": false,
+        "total": 2,
+        "apis": [
+          {
+            "auth": "Not declared; confirm with provider",
+            "baseUrl": "https://api.apiclaw.cloud/",
+            "callable": false,
+            "category": "Other",
+            "description": "Owned synthetic release fixture, no service or operations exist.",
+            "docsUrl": "https://apiclaw.cloud/docs",
+            "executionAvailable": false,
+            "listingId": "s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+            "managedAdapter": false,
+            "name": "APIClaw Synthetic PR49 FILE 20261005",
+            "operations": [
+              {
+                "method": "GET",
+                "path": "/_synthetic-release-fixture-do-not-call",
+                "summary": "Metadata only, never execute"
+              }
+            ],
+            "pricing": "Synthetic test only",
+            "pricingNotes": "Synthetic fixture only. No service, credentials or purchase.",
+            "providerId": "listing:s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+            "tier": "untested",
+            "verified": false,
+            "actions": []
+          },
+          {
+            "auth": "Not declared; confirm with provider",
+            "baseUrl": "https://api.apiclaw.cloud/",
+            "callable": false,
+            "category": "Other",
+            "description": "Synthetic metadata for APIClaw release verification only. This is not a working service. Do not execute the operation.",
+            "docsUrl": "https://apiclaw.cloud/docs",
+            "executionAvailable": false,
+            "listingId": "s578hm0tysv93vrb2e2vpvfrd98fqvex",
+            "managedAdapter": false,
+            "name": "APIClaw Synthetic PR49 URL 20261005",
+            "operations": [
+              {
+                "method": "GET",
+                "path": "/_synthetic-release-fixture-do-not-call",
+                "summary": "Metadata fixture only. No upstream API operation exists."
+              }
+            ],
+            "pricing": "Synthetic test only",
+            "pricingNotes": "Synthetic fixture only. No service, credentials or purchase.",
+            "providerId": "listing:s578hm0tysv93vrb2e2vpvfrd98fqvex",
+            "tier": "untested",
+            "verified": false,
+            "actions": []
+          }
+        ]
+      },
+      {
+        "surface": "catalog",
+        "callable": true,
+        "total": 0,
+        "cacheControl": "no-store",
+        "items": []
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": true,
+        "total": 0,
+        "apis": []
+      }
+    ],
+    "withdrawn": [
+      {
+        "surface": "catalog",
+        "callable": false,
+        "total": 0,
+        "cacheControl": "no-store",
+        "items": []
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": false,
+        "total": 0,
+        "apis": []
+      },
+      {
+        "surface": "catalog",
+        "callable": true,
+        "total": 0,
+        "cacheControl": "no-store",
+        "items": []
+      },
+      {
+        "surface": "MCP discover_apis",
+        "callable": true,
+        "total": 0,
+        "apis": []
+      }
+    ]
+  },
+  "executionDenials": [
+    {
+      "listingId": "s578hm0tysv93vrb2e2vpvfrd98fqvex",
+      "path": "/v1/execute",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s578hm0tysv93vrb2e2vpvfrd98fqvex",
+      "path": "/v1/call",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+      "path": "/v1/execute",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s5784revz9wxs0hb8sv2ttemjn8fqnxh",
+      "path": "/v1/call",
+      "status": 403,
+      "code": "discovery_only"
+    }
+  ],
+  "billingAndExecution": {
+    "baseline": {
+      "counts": {
+        "managedCallLedger": 1,
+        "providerAPIs": 0,
+        "providerDirectCall": 0,
+        "providerKeys": 0,
+        "providers": 0,
+        "purchases": 0,
+        "usageRecords": 0
+      },
+      "status": "active",
+      "stripeCustomer": false,
+      "stripeSubscription": false,
+      "tier": "free",
+      "usageCount": 1
+    },
+    "after-publish": {
+      "counts": {
+        "managedCallLedger": 1,
+        "providerAPIs": 0,
+        "providerDirectCall": 0,
+        "providerKeys": 0,
+        "providers": 0,
+        "purchases": 0,
+        "usageRecords": 0
+      },
+      "status": "active",
+      "stripeCustomer": false,
+      "stripeSubscription": false,
+      "tier": "free",
+      "usageCount": 1
+    },
+    "after-withdrawal": {
+      "counts": {
+        "managedCallLedger": 1,
+        "providerAPIs": 0,
+        "providerDirectCall": 0,
+        "providerKeys": 0,
+        "providers": 0,
+        "purchases": 0,
+        "usageRecords": 0
+      },
+      "status": "active",
+      "stripeCustomer": false,
+      "stripeSubscription": false,
+      "tier": "free",
+      "usageCount": 1
+    }
+  },
+  "arcmira": {
+    "previewOnly": true,
+    "operations": 36,
+    "saved": false,
+    "published": false
+  },
+  "browserErrors": []
+}
