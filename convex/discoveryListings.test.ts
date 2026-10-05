@@ -1,3 +1,5 @@
+import { mock } from "node:test";
+mock.timers.enable({ apis: ["setTimeout"] });
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { convexTest } from "convex-test";
@@ -15,6 +17,7 @@ const {
   publicSpecUrl,
 } = require("../landing/src/lib/listing-fetch.ts");
 const modules = {
+  "./listingNotifications.ts": () => import("./listingNotifications"),
   "./discoveryListings.ts": () => import("./discoveryListings"),
   "./_generated/server.ts": () => import("./_generated/server"),
 };
@@ -233,3 +236,7 @@ assert.equal((mod.pending as any).isInternal, true);
 console.log(
   "PASS: import, ownership, rejection, revision-safe approval, discovery, withdrawal and zero execution/billing/key side effects",
 );
+
+await t.run(async ctx => { for (const task of await ctx.db.system.query("_scheduled_functions").collect()) if (task.state.kind === "pending") await ctx.scheduler.cancel(task._id); });
+
+mock.timers.reset();

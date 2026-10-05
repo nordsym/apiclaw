@@ -453,7 +453,7 @@ call_api({
                   {
                     n: "03",
                     t: "Save and submit for review",
-                    d: <>Check the imported name, description, URLs, operations, authentication, and provider pricing. Save the draft, then select Submit for review. APIClaw reviews the metadata and your right to represent the API. Pending drafts stay private.</>,
+                    d: <>Check the imported name, description, URLs, operations, authentication, and provider pricing. Save the draft, then select Submit for review. Submitting notifies the APIClaw review team. We review the metadata and your right to represent the API. Pending drafts stay private.</>,
                   },
                   {
                     n: "04",
