@@ -1,6 +1,9 @@
 import { getManagedProviderAdapter } from "../src/product-truth";
 import { getWorkspacePublicApi } from "../src/workspace-public-apis";
 import { isPubliclyAvailableManagedProvider } from "./providerBoundaries";
+import { internal } from "./_generated/api";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import {
@@ -136,10 +139,42 @@ export const submit = mutation({
       throw Error("Listing changed. Reload before submitting.");
     validateListing(row.draft);
     if (row.reviewState === "pending") return null;
+    if (row.reviewedRevision === row.revision)
+      throw Error("Edit the draft before resubmitting.");
+    // Keep edits/resubmissions from becoming an unbounded operator email sender.
+    const key = `listing-submit:${workspaceId}`;
+    const hourBucket = Math.floor(Date.now() / 3600000);
+    const budget = await ctx.db
+      .query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .first();
+    if (budget?.hourBucket === hourBucket && budget.count >= 10)
+      throw Error("Submission limit reached. Try again next hour.");
+    if (budget)
+      await ctx.db.patch(budget._id, {
+        hourBucket,
+        count: budget.hourBucket === hourBucket ? budget.count + 1 : 1,
+      });
+    else
+      await ctx.db.insert("rateLimits", {
+        key,
+        identifier: workspaceId,
+        action: "listing-submit",
+        count: 1,
+        hourBucket,
+        createdAt: Date.now(),
+      });
     await ctx.db.patch(row._id, {
       reviewState: "pending",
+      notificationState: "queued",
+      notificationAttempts: 0,
+      notificationId: undefined,
       reviewNote: undefined,
       updatedAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(0, internal.listingNotifications.send, {
+      id: row._id,
+      revision: row.revision,
     });
     return null;
   },
@@ -162,7 +197,7 @@ export const unpublish = mutation({
     return null;
   },
 });
-// Only authenticated deployment operators can review. There is no public approval mutation.
+// Internal CLI review and the authenticated server bridge share the same policy.
 export const pending = internalQuery({
   args: { paginationOpts: paginationOptsValidator },
   returns: v.any(),
@@ -172,6 +207,62 @@ export const pending = internalQuery({
       .withIndex("by_review", (q) => q.eq("reviewState", "pending"))
       .paginate(args.paginationOpts),
 });
+async function reviewListing(
+  ctx: MutationCtx,
+  args: {
+    id: Id<"discoveryListings">;
+    revision: number;
+    approve: boolean;
+    reviewer: string;
+    note: string;
+  },
+) {
+  if (
+    !args.reviewer.trim() ||
+    !args.note.trim() ||
+    args.note.length > 2000 ||
+    args.reviewer.length > 150
+  )
+    throw Error("Reviewer and ownership/content review evidence required");
+  const row = await ctx.db.get(args.id);
+  if (!row || row.reviewState !== "pending" || row.revision !== args.revision)
+    throw Error("Review is stale or listing is not pending");
+  validateListing(row.draft);
+  if (args.approve) {
+    if (
+      getManagedProviderAdapter(row.draft.name) ||
+      getWorkspacePublicApi(row.draft.name)
+    )
+      throw Error(
+        "This name belongs to an existing execution integration; review it separately",
+      );
+    if (
+      [row.draft.name, row.draft.baseUrl, row.draft.docsUrl].some(
+        (value) => !isPubliclyAvailableManagedProvider(value),
+      )
+    )
+      throw Error("Listing conflicts with public discovery boundaries");
+    const duplicates = await ctx.db
+      .query("discoveryListings")
+      .withIndex("by_name", (q) => q.eq("nameKey", row.nameKey))
+      .take(100);
+    if (
+      duplicates.length === 100 ||
+      duplicates.some((r) => r._id !== row._id && r.isPublished)
+    )
+      throw Error("Duplicate listing name requires review");
+  }
+  await ctx.db.patch(row._id, {
+    reviewState: args.approve ? "approved" : "changes_requested",
+    reviewedRevision: row.revision,
+    reviewedBy: args.reviewer,
+    reviewNote: args.note,
+    reviewedAt: Date.now(),
+    updatedAt: Date.now(),
+    ...(args.approve ? { published: row.draft, isPublished: true } : {}),
+  });
+  return null;
+}
 export const review = internalMutation({
   args: {
     id: v.id("discoveryListings"),
@@ -181,53 +272,7 @@ export const review = internalMutation({
     note: v.string(),
   },
   returns: v.null(),
-  handler: async (ctx, args) => {
-    if (
-      !args.reviewer.trim() ||
-      !args.note.trim() ||
-      args.note.length > 2000 ||
-      args.reviewer.length > 150
-    )
-      throw Error("Reviewer and ownership/content review evidence required");
-    const row = await ctx.db.get(args.id);
-    if (!row || row.reviewState !== "pending" || row.revision !== args.revision)
-      throw Error("Review is stale or listing is not pending");
-    validateListing(row.draft);
-    if (args.approve) {
-      if (
-        getManagedProviderAdapter(row.draft.name) ||
-        getWorkspacePublicApi(row.draft.name)
-      )
-        throw Error(
-          "This name belongs to an existing execution integration; review it separately",
-        );
-      if (
-        [row.draft.name, row.draft.baseUrl, row.draft.docsUrl].some(
-          (value) => !isPubliclyAvailableManagedProvider(value),
-        )
-      )
-        throw Error("Listing conflicts with public discovery boundaries");
-      const duplicates = await ctx.db
-        .query("discoveryListings")
-        .withIndex("by_name", (q) => q.eq("nameKey", row.nameKey))
-        .take(100);
-      if (
-        duplicates.length === 100 ||
-        duplicates.some((r) => r._id !== row._id && r.isPublished)
-      )
-        throw Error("Duplicate listing name requires review");
-    }
-    await ctx.db.patch(row._id, {
-      reviewState: args.approve ? "approved" : "changes_requested",
-      reviewedRevision: row.revision,
-      reviewedBy: args.reviewer,
-      reviewNote: args.note,
-      reviewedAt: Date.now(),
-      updatedAt: Date.now(),
-      ...(args.approve ? { published: row.draft, isPublished: true } : {}),
-    });
-    return null;
-  },
+  handler: reviewListing,
 });
 // Deliberately projects only the approved snapshot. No drafts, workspace IDs or review notes.
 export const published = query({
@@ -244,5 +289,60 @@ export const published = query({
         .filter((r) => r.published)
         .map((r) => listingCard(r._id, r.published!)),
     };
+  },
+});
+
+// This server-only bridge is called after verified Clerk operator authorization.
+function requireOperator(secret: string, reviewer: string) {
+  if (
+    !process.env.APICLAW_INTERNAL_SECRET ||
+    secret !== process.env.APICLAW_INTERNAL_SECRET ||
+    reviewer !== "gustav@nordsym.com"
+  )
+    throw Error("Unauthorized operator");
+}
+export const operatorPending = query({
+  args: {
+    internalSecret: v.string(),
+    reviewer: v.string(),
+    paginationOpts: paginationOptsValidator,
+    id: v.optional(v.id("discoveryListings")),
+  },
+  handler: async (ctx, args) => {
+    requireOperator(args.internalSecret, args.reviewer);
+    const selected = args.id ? await ctx.db.get(args.id) : null;
+    const result = args.id
+      ? {
+          page: selected?.reviewState === "pending" ? [selected] : [],
+          isDone: true,
+          continueCursor: "",
+        }
+      : await ctx.db
+          .query("discoveryListings")
+          .withIndex("by_review", (q) => q.eq("reviewState", "pending"))
+          .paginate(args.paginationOpts);
+    return {
+      ...result,
+      page: await Promise.all(
+        result.page.map(async (row) => ({
+          ...row,
+          submitter: (await ctx.db.get(row.workspaceId))?.email ?? "Unknown",
+        })),
+      ),
+    };
+  },
+});
+export const operatorReview = mutation({
+  args: {
+    internalSecret: v.string(),
+    reviewer: v.string(),
+    id: v.id("discoveryListings"),
+    revision: v.number(),
+    approve: v.boolean(),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    requireOperator(args.internalSecret, args.reviewer);
+    return reviewListing(ctx, args);
   },
 });

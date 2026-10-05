@@ -50,9 +50,39 @@ and documentation. Those boundaries apply to Arcmira as to every other listing.
 
 ## Operator review
 
-Approval is an internal Convex mutation. There is no browser/admin flag that a
-workspace can send to approve itself. An authenticated deployment operator uses
-Convex CLI or the dashboard. Work on the intended deployment explicitly:
+A workspace can submit at most 10 revisions per UTC hour, independently of import
+and execution quotas. Repeating an already-pending submission creates no new email.
+On submission, APIClaw schedules an operator email to `gustav@nordsym.com` from
+`noreply@apiclaw.cloud`. The message links to the exact listing in
+`https://apiclaw.cloud/workspace/review-listings?listing=LISTING_ID`.
+
+1. Sign in with the verified `gustav@nordsym.com` Clerk identity. Other workspace
+   users cannot read the queue or approve submissions.
+2. Check the submitter, imported metadata and operations. Verify the submitter's
+   right to represent the API using independent ownership evidence.
+3. Enter a review note. It is shown to the submitting workspace, so do not include
+   internal secrets or other customers' data.
+4. Choose **Approve discovery listing** or **Request changes**. The decision applies
+   only to the revision shown. Stale decisions fail and require a fresh review.
+   Rejected submissions must be edited before resubmission.
+5. After approval, verify the catalog and `discover_apis` with `callable_only:false`.
+   The submitter sees status and your note in My APIs. No decision email to the
+   submitter is implied.
+
+The full pending queue is available at `/workspace/review-listings`, including
+notification status (`queued`, `sent`, `failed`, or not recorded for older entries).
+`sent` means the email provider accepted the message, not proof of inbox delivery.
+Failed attempts retry after one and two minutes, with three attempts maximum.
+A stable provider idempotency key prevents duplicate sends for the same revision.
+Approval, editing and withdrawal stop queued retries for an obsolete submission.
+If all attempts fail, the pending item remains reviewable in the queue; check the
+mail service configuration before resubmitting a revised draft. Previously pending
+entries are not automatically backfilled with emails on deployment.
+
+The server bridge verifies Clerk operator identity and supplies the internal secret
+server-side. The browser never receives that secret, and a workspace session alone
+cannot approve itself. Mutating HTTP requests require same-origin validation.
+The internal CLI remains available to authenticated deployment operators:
 
 ```sh
 npx convex run --prod discoveryListings:pending '{"paginationOpts":{"numItems":50,"cursor":null}}'

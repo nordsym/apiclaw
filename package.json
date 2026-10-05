@@ -28,7 +28,7 @@
     "convex:dev": "npx convex dev",
     "convex:deploy": "find convex -maxdepth 1 \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' \\) -delete && npx convex deploy --yes --typecheck=disable",
     "test:workspace-browser": "node scripts/workspace-state-matrix.cjs",
-    "test:listings": "tsx convex/discoveryListings.test.ts && tsx tests/listing-fetch.test.ts",
+    "test:listings": "tsx convex/discoveryListings.test.ts && tsx tests/listing-fetch.test.ts && tsx convex/listingReview.test.ts && tsx tests/listing-review-route.test.ts",
     "test:listings-browser": "TSX_TSCONFIG_PATH=landing/tsconfig.json tsx tests/listing-e2e.ts"
   },
   "keywords": [

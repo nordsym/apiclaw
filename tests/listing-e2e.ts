@@ -49,6 +49,11 @@ await t.run(async (ctx) => {
   });
 });
 const nativeFetch = globalThis.fetch;
+const priorInternalSecret = process.env.APICLAW_INTERNAL_SECRET;
+process.env.APICLAW_INTERNAL_SECRET = "isolated-review-bridge";
+const notifications: any[] = [];
+const priorResendKey = process.env.RESEND_API_KEY;
+process.env.RESEND_API_KEY = "isolated-no-network";
 let catalogGET: any, importPOST: any;
 const server = createServer(async (req, res) => {
   try {
@@ -59,7 +64,29 @@ const server = createServer(async (req, res) => {
       res.end(readFileSync(path.join(temporary, "fixture.js")));
       return;
     }
-    if (url.pathname === "/api/catalog")
+    if (url.pathname === "/api/listings/review") {
+      const credentials = {
+        internalSecret: "isolated-review-bridge",
+        reviewer: "gustav@nordsym.com",
+      };
+      if (req.method === "GET")
+        result = Response.json(
+          await t.query(api.operatorPending, {
+            ...credentials,
+            id: url.searchParams.get("listing") ?? undefined,
+            paginationOpts: { numItems: 25, cursor: null },
+          }),
+        );
+      else {
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        await t.mutation(api.operatorReview, {
+          ...JSON.parse(Buffer.concat(chunks).toString()),
+          ...credentials,
+        });
+        result = Response.json({ ok: true });
+      }
+    } else if (url.pathname === "/api/catalog")
       result = await catalogGET(new NextRequest(url));
     else if (url.pathname === "/api/listings/import") {
       const chunks = [];
@@ -131,6 +158,10 @@ globalThis.fetch = (async (input: any, init: any) => {
   const url = new URL(
     typeof input === "string" ? input : input.url || input.toString(),
   );
+  if (url.origin === "https://api.resend.com") {
+    notifications.push(JSON.parse(init.body));
+    return Response.json({ id: "isolated-notification" });
+  }
   if (url.origin === "https://apiclaw.cloud" && url.pathname === "/api/catalog")
     return catalogGET(new NextRequest(origin + url.pathname + url.search));
   assert.equal(url.origin, origin, "Unexpected outbound fetch");
@@ -201,14 +232,31 @@ try {
       .length,
     0,
   );
-  await t.mutation(api.review, {
+  await t.action(anyApi.listingNotifications.send, {
     id: row._id,
     revision: 1,
-    approve: true,
-    reviewer: "Isolated test",
-    note: "Synthetic fixture only; not a real provider approval",
   });
-  await page.reload();
+  assert.equal(notifications.length, 1);
+  assert.equal(notifications[0].to, "gustav@nordsym.com");
+  assert(
+    notifications[0].html.includes(
+      "workspace/review-listings?listing=" + row._id,
+    ),
+  );
+  await page.goto(origin + "/review?listing=" + row._id);
+  await page
+    .getByRole("heading", { name: row.draft.name, exact: true })
+    .waitFor();
+  await page
+    .getByRole("textbox")
+    .fill("Synthetic fixture only; owned test data, discovery only.");
+  await page
+    .getByRole("button", { name: "Approve discovery listing", exact: true })
+    .click();
+  await page
+    .getByText("Listing approved and published for discovery.", { exact: true })
+    .waitFor();
+  await page.goto(origin);
   await page.getByRole("tab", { name: "My APIs" }).click();
   await page.getByRole("link", { name: "Find in catalog" }).click();
   await page.getByText(row.draft.name, { exact: true }).waitFor();
@@ -321,14 +369,25 @@ try {
   });
   assert.deepEqual(errors, []);
   console.log(
-    "PASS: new free workspace -> browser file import -> preview -> draft -> submit -> private operator approval -> catalog -> discover_apis -> execution denied -> unpublish; no keys, execution or payment records",
+    "PASS: new free workspace -> browser file import -> preview -> draft -> submit -> notification -> operator review UI -> catalog -> discover_apis -> execution denied -> unpublish; no keys, execution or payment records",
   );
 } catch (e) {
   console.error(await page?.locator("body").innerText());
   throw e;
 } finally {
+  await t.run(async (ctx) => {
+    for (const task of await ctx.db.system
+      .query("_scheduled_functions")
+      .collect())
+      if (task.state.kind === "pending") await ctx.scheduler.cancel(task._id);
+  });
   await browser?.close();
   globalThis.fetch = nativeFetch;
+  if (priorInternalSecret === undefined)
+    delete process.env.APICLAW_INTERNAL_SECRET;
+  else process.env.APICLAW_INTERNAL_SECRET = priorInternalSecret;
+  if (priorResendKey === undefined) delete process.env.RESEND_API_KEY;
+  else process.env.RESEND_API_KEY = priorResendKey;
   process.chdir(root);
   await new Promise<void>((resolve) => server.close(() => resolve()));
   rmSync(temporary, { recursive: true, force: true });
