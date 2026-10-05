@@ -13,18 +13,8 @@ export const listingMetadata = v.object({
     v.object({ method: v.string(), path: v.string(), summary: v.string() }),
   ),
 });
-export type ListingMetadata = {
-  name: string;
-  description: string;
-  category: string;
-  docsUrl: string;
-  baseUrl: string;
-  specUrl?: string;
-  auth: string;
-  pricing: string;
-  pricingNotes: string;
-  operations: { method: string; path: string; summary: string }[];
-};
+export type { ListingMetadata } from "../src/listing-metadata";
+import type { ListingMetadata } from "../src/listing-metadata";
 export function validateListing(m: ListingMetadata) {
   for (const [key, max] of Object.entries({
     name: 120,
