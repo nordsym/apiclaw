@@ -700,9 +700,7 @@ export const getConnectedAgents = query({
   handler: async (ctx, { token }) => {
     const session = await findUsableAgentSession(ctx.db, token);
 
-    if (!isSessionUsable(session)) {
-      return [];
-    }
+    if (!isSessionUsable(session)) throw new Error("Invalid or expired session");
 
     const agentSessions = await ctx.db
       .query("agentSessions")

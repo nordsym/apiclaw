@@ -1,24 +1,18 @@
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { CONVEX_URL, Workspace } from "../_shared";
 import { PageHeader, Section, Panel, SurfaceTabs, Row, Status, Empty, KV, Field, Loading, inputClass, btnSolid, btnQuiet, btnDanger } from "./ui";
 
 async function convexCall<T>(kind: "query" | "mutation", path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/${kind}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data?.status === "error" || data?.error) {
-    throw new Error(data.errorMessage || data.error || "Request failed");
-  }
-  return (data?.value ?? data) as T;
+  return workspaceRequest<T>(kind, path, args);
 }
 
 function timeAgo(ts?: number) {
-  if (!ts) return "never";
+  if (!ts) return "not recorded";
   const diff = Date.now() - ts;
   if (diff < 60_000) return "just now";
   if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
@@ -85,9 +79,10 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 function WorkspaceSection({ workspace, sessionToken, onWorkspaceUpdate }: { workspace: Workspace | null; sessionToken: string | null; onWorkspaceUpdate?: (patch: Partial<Workspace>) => void }) {
   const [name, setName] = useState(workspace?.workspaceName || "");
   const [state, setState] = useState<SaveState>("idle");
+  const nameDirty = useRef(false);
 
   useEffect(() => {
-    setName(workspace?.workspaceName || "");
+    if (!nameDirty.current) setName(workspace?.workspaceName || "");
   }, [workspace?.workspaceName]);
 
   const trimmed = name.trim();
@@ -98,13 +93,9 @@ function WorkspaceSection({ workspace, sessionToken, onWorkspaceUpdate }: { work
     if (!trimmed || !sessionToken || state === "saving") return;
     setState("saving");
     try {
-      const response = await fetch(`${CONVEX_URL}/api/mutation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: "workspaces:updateWorkspaceName", args: { token: sessionToken, name: trimmed } }),
-      });
-      const result = await response.json();
-      if (!response.ok || result.status === "error") throw new Error(result.errorMessage || "Save failed");
+      await workspaceRequest("mutation", "workspaces:updateWorkspaceName", { token: sessionToken, name: trimmed });
+      nameDirty.current = false;
+      invalidateWorkspace();
       onWorkspaceUpdate?.({ workspaceName: trimmed });
       setState("saved");
     } catch {
@@ -119,8 +110,9 @@ function WorkspaceSection({ workspace, sessionToken, onWorkspaceUpdate }: { work
           <input
             type="text"
             value={name}
+            disabled={state === "saving"}
             maxLength={100}
-            onChange={(e) => { setName(e.target.value); if (state !== "saving") setState("idle"); }}
+            onChange={(e) => { nameDirty.current = true; setName(e.target.value); if (state !== "saving") setState("idle"); }}
             placeholder="Team or company name"
             className={inputClass}
           />
@@ -155,6 +147,8 @@ function parseProviderList(input: string): string[] {
 }
 
 function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
+  const draftDirty = useRef(false);
   const [routingMode, setRoutingMode] = useState("balanced");
   const [defaultModel, setDefaultModel] = useState("");
   const [allowFallback, setAllowFallback] = useState(true);
@@ -180,6 +174,8 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
       })
       .then((settings) => {
         if (cancelled) return;
+        setLoadError(false);
+        if (draftDirty.current) return;
         const mode = ROUTING_MODES.some((m) => m.id === settings?.routingMode) ? settings.routingMode : "balanced";
         setRoutingMode(mode);
         setDefaultModel(settings?.defaultModel || "");
@@ -192,7 +188,7 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
         if (!cancelled) setLoadError(true);
       });
     return () => { cancelled = true; };
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,6 +196,8 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d: { models?: CatalogModel[] }) => {
         if (cancelled) return;
+        setLoadError(false);
+        if (draftDirty.current) return;
         const models = (d.models || []).filter((m) => m && typeof m.id === "string");
         setCatalog([...models].sort((a, b) => a.id.localeCompare(b.id)));
       })
@@ -228,13 +226,15 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
       });
       const result = await response.json();
       if (!response.ok || result.status === "error") throw new Error(result.errorMessage || "Save failed");
+      draftDirty.current = false;
+      invalidateWorkspace();
       setState("saved");
     } catch {
       setState("error");
     }
   };
 
-  const touch = () => { if (state !== "saving") setState("idle"); };
+  const touch = () => { draftDirty.current = true; if (state !== "saving") setState("idle"); };
   const activeMode = ROUTING_MODES.find((m) => m.id === routingMode) || ROUTING_MODES[0];
   const modelInCatalog = !defaultModel || catalog.some((m) => m.id === defaultModel);
 
@@ -245,7 +245,7 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
       ) : !loaded ? (
         <Loading label="Loading routing settings" />
       ) : (
-        <div className="max-w-[32rem] space-y-6">
+        <fieldset disabled={state === "saving"} className="max-w-[32rem] space-y-6">
           <div>
             <span className="mb-1.5 block text-[13px] text-[var(--text-muted)]">Routing mode</span>
             <SurfaceTabs label="Routing mode" items={ROUTING_MODES} active={routingMode} onChange={(id) => { setRoutingMode(id); touch(); }} />
@@ -306,7 +306,7 @@ function ModelRoutingSection({ sessionToken }: { sessionToken: string | null }) 
             {state === "saved" && <span className="text-[12.5px] text-[var(--ok)]">Saved</span>}
             {state === "error" && <span className="text-[12.5px] text-[var(--accent)]">Could not save</span>}
           </div>
-        </div>
+        </fieldset>
       )}
     </Section>
   );
@@ -326,6 +326,8 @@ interface ApiKeyRow {
 }
 
 function APIKeysSection({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
+  const guard = useRequestGuard();
   const [keys, setKeys] = useState<ApiKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -338,15 +340,18 @@ function APIKeysSection({ sessionToken }: { sessionToken: string | null }) {
 
   const fetchKeys = useCallback(async () => {
     if (!sessionToken) { setLoading(false); return; }
+    const request = guard.next();
+    setError(null);
     try {
       const res = await convexCall<{ keys?: unknown } | null>("query", "apiKeys:listKeys", { token: sessionToken });
+      if (!guard.current(request)) return;
       setKeys(res && Array.isArray(res.keys) ? (res.keys as ApiKeyRow[]) : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load keys");
+      if (guard.current(request)) setError(err instanceof Error ? err.message : "Could not load keys");
     } finally {
       setLoading(false);
     }
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   useEffect(() => { fetchKeys(); }, [fetchKeys]);
 
@@ -447,7 +452,7 @@ function APIKeysSection({ sessionToken }: { sessionToken: string | null }) {
               <Row
                 key={k.id}
                 right={<>
-                  <span className="hidden sm:inline">Last used {timeAgo(k.lastUsedAt)}</span>
+                  <span className="hidden sm:inline">Historical last use {timeAgo(k.lastUsedAt)}</span>
                   <button type="button" onClick={() => revoke(k.id)} disabled={revoking === k.id} className={`${btnDanger} !h-8`}>
                     {revoking === k.id ? "Revoking" : confirm.armed === k.id ? "Confirm revoke" : "Revoke"}
                   </button>
@@ -488,6 +493,8 @@ interface ProviderKeyRow {
 }
 
 function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
+  const guard = useRequestGuard();
   const [keys, setKeys] = useState<ProviderKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -500,15 +507,18 @@ function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
 
   const fetchKeys = useCallback(async () => {
     if (!sessionToken) { setLoading(false); return; }
+    const request = guard.next();
+    setError(null);
     try {
       const res = await convexCall<ProviderKeyRow[]>("query", "providerKeys:listKeys", { token: sessionToken });
+      if (!guard.current(request)) return;
       setKeys(Array.isArray(res) ? res : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load keys");
+      if (guard.current(request)) setError(err instanceof Error ? err.message : "Could not load keys");
     } finally {
       setLoading(false);
     }
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   useEffect(() => { fetchKeys(); }, [fetchKeys]);
 

@@ -359,9 +359,7 @@ export const getLogs = query({
     // Verify session
     const session = await findUsableAgentSession(ctx.db, args.token);
 
-    if (!session) {
-      return { logs: [], hasMore: false };
-    }
+    if (!session) throw new Error("Invalid or expired session");
 
     // Get logs for workspace
     let query = ctx.db
@@ -433,17 +431,7 @@ export const getLogStats = query({
     // Verify session
     const session = await findUsableAgentSession(ctx.db, args.token);
 
-    if (!session) {
-      return {
-        totalCalls: 0,
-        successCount: 0,
-        errorCount: 0,
-        successRate: 0,
-        avgLatency: 0,
-        byProvider: [],
-        byDay: [],
-      };
-    }
+    if (!session) throw new Error("Invalid or expired session");
 
     const now = Date.now();
     const periodStart = now - periodDays * 24 * 60 * 60 * 1000;
@@ -459,17 +447,18 @@ export const getLogStats = query({
     const successCount = logs.filter((l) => l.status === "success").length;
     const errorCount = logs.filter((l) => l.status === "error").length;
     const successRate = totalCalls > 0 ? (successCount / totalCalls) * 100 : 0;
-    const totalLatency = logs.reduce((sum, l) => sum + l.latencyMs, 0);
-    const avgLatency = totalCalls > 0 ? Math.round(totalLatency / totalCalls) : 0;
+    const measured = logs.filter(l => l.latencyMs > 0);
+    const totalLatency = measured.reduce((sum, l) => sum + l.latencyMs, 0);
+    const avgLatency = measured.length > 0 ? Math.round(totalLatency / measured.length) : 0;
 
     // Group by provider
-    const byProviderMap: Record<string, { calls: number; success: number; error: number; latency: number }> = {};
+    const byProviderMap: Record<string, { calls: number; success: number; error: number; latency: number; measured: number }> = {};
     for (const log of logs) {
       if (!byProviderMap[log.provider]) {
-        byProviderMap[log.provider] = { calls: 0, success: 0, error: 0, latency: 0 };
+        byProviderMap[log.provider] = { calls: 0, success: 0, error: 0, latency: 0, measured: 0 };
       }
       byProviderMap[log.provider].calls++;
-      byProviderMap[log.provider].latency += log.latencyMs;
+      if (log.latencyMs > 0) { byProviderMap[log.provider].latency += log.latencyMs; byProviderMap[log.provider].measured++; }
       if (log.status === "success") {
         byProviderMap[log.provider].success++;
       } else {
@@ -482,7 +471,7 @@ export const getLogStats = query({
         provider,
         calls: data.calls,
         successRate: data.calls > 0 ? (data.success / data.calls) * 100 : 0,
-        avgLatency: data.calls > 0 ? Math.round(data.latency / data.calls) : 0,
+        avgLatency: data.measured > 0 ? Math.round(data.latency / data.measured) : 0,
       }))
       .sort((a, b) => b.calls - a.calls);
 

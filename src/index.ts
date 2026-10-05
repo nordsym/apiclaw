@@ -1296,12 +1296,13 @@ Docs: https://apiclaw.cloud
             );
             const open = publicApis.map((a: any) => ({
               provider: {
-                id: String(a.name || '').toLowerCase().replace(/\s+/g, '_'),
+                id: a.listingId ? `listing:${a.listingId}` : String(a.name || '').toLowerCase().replace(/\s+/g, '_'),
                 name: a.name,
                 description: a.description,
                 category: a.category,
                 baseUrl: a.baseUrl,
                 callable: a.callable !== false,
+                ...(a.listingId ? { docsUrl: a.docsUrl, auth: a.auth, pricing: a.pricing, pricingNotes: a.pricingNotes, operations: a.operations, executionAvailable: false } : {}),
               },
               matchScore: 0.9,
               matchedKeywords: [],

@@ -25,7 +25,7 @@ const docsNav = [
   {
     label: "Remote MCP",
     href: "/sign-in",
-    note: "Sign in, then integrations",
+    note: "Workspace connection options",
   },
   {
     label: "Your key",
@@ -139,7 +139,7 @@ export default function DocsPage() {
                 <div>
                   <h3 className={SUB}>Headless server or SSH</h3>
                   <p className={`${BODY} mt-3`}>
-                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Connections and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
+                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Settings and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
                   </p>
                 </div>
                 <div className="border-t border-border-subtle pt-6">
@@ -209,7 +209,7 @@ apiclaw balance`}</pre>
                   <dt className={META}>API key</dt>
                   <dd>
                     <span className={CODE}>sk-claw-...</span>
-                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Connections and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
+                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Settings and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
                   </dd>
                 </div>
               </dl>
@@ -242,7 +242,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/sign-in" className="claw-btn claw-btn-solid">Sign in</Link>
-                <Link href="/workspace/integrations" className="claw-btn claw-btn-quiet">Open integrations</Link>
+                <Link href="/workspace?tab=agents" className="claw-btn claw-btn-quiet">Open connection options</Link>
               </div>
               <ol className="mt-8 border-t border-border-subtle">
                 {[
@@ -267,7 +267,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
             <section id="byok" className="scroll-mt-20">
               <h2 className="claw-h2">Bring your own key</h2>
               <p className={`${BODY} mt-4`}>
-                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Connections, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
+                You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Settings, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
               </p>
               <p className={`${BODY} mt-4`}>
                 An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.
@@ -448,22 +448,22 @@ call_api({
                   {
                     n: "02",
                     t: "Submit your spec",
-                    d: <>Open <span className="font-medium text-text-primary">Workspace, My APIs, Add API</span>. Paste an OpenAPI 3 / Swagger URL, or describe the endpoint manually. APIClaw normalises auth, parameters, and pricing.</>,
+                    d: <>Open <span className="font-medium text-text-primary">Workspace → Catalog → My APIs → Add API</span>. Paste a public HTTPS OpenAPI URL or upload a JSON/YAML file. OpenAPI 3.0/3.1 and Swagger 2.0 are supported, up to 1 MB and 200 operations. External references must be bundled.</>,
                   },
                   {
                     n: "03",
-                    t: "Approve the listing",
-                    d: <>Review the auto-generated capability tags (the keywords agents will match on), the pricing model, and a working example. Edit any field before going live.</>,
+                    t: "Save and submit for review",
+                    d: <>Check the imported name, description, URLs, operations, authentication, and provider pricing. Save the draft, then select Submit for review. APIClaw reviews the metadata and your right to represent the API. Pending drafts stay private.</>,
                   },
                   {
                     n: "04",
                     t: "Live and discoverable",
-                    d: <>Your API is searchable by <code className="claw-mono text-[13px] text-text-primary">discover_apis</code> immediately. Per-call analytics show in your dashboard from the first agent that calls you.</>,
+                    d: <>After approval, find the listing under Catalog → All APIs or use <code className="claw-mono text-[13px] text-text-primary">{'discover_apis({ query: "your API name", callable_only: false })'}</code>. Callable-only results exclude discovery listings. Check review status in My APIs; corrections require a new review.</>,
                   },
                   {
                     n: "05",
-                    t: "Optional: partner upgrade",
-                    d: <>Hand APIClaw the credential. We hold custody and agents call without keys. Commercial terms (flat fee, share, or hybrid) are agreed per partner.</>,
+                    t: "Keep control of your API",
+                    d: <>A discovery listing does not enable gateway execution, store API credentials, or activate APIClaw billing. Users follow your documentation and use their own provider account. You can unpublish from My APIs.</>,
                   },
                 ].map((step) => (
                   <li key={step.n} className="grid gap-1 border-b border-border-subtle py-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
@@ -479,9 +479,9 @@ call_api({
               <div className="mt-8 flex flex-col gap-5 rounded-[14px] border border-border-subtle bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
                   <p className="claw-eyebrow mb-1.5">Always free</p>
-                  <p className={BODY}>Listing your API is free. Always. The partner upgrade is opt-in.</p>
+                  <p className={BODY}>Discovery listings are free. No API key or payment method is needed to submit one.</p>
                 </div>
-                <a href="/workspace" className="claw-btn claw-btn-solid flex-none">List your API</a>
+                <a href="/workspace?tab=api-catalog&view=my-apis" className="claw-btn claw-btn-solid flex-none">List your API</a>
               </div>
             </section>
           </div>

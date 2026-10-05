@@ -14,6 +14,7 @@
     "@sparticuz/chromium": "^143.0.4",
     "@vercel/analytics": "^1.6.1",
     "@vercel/og": "^0.8.6",
+    "ipaddr.js": "^2.5.0",
     "lucide-react": "^0.350.0",
     "next": "^14.2.0",
     "posthog-js": "^1.367.0",
@@ -22,7 +23,8 @@
     "react-dom": "^18.2.0",
     "recharts": "^3.7.0",
     "stripe": "^20.4.0",
-    "styled-jsx": "^5.1.7"
+    "styled-jsx": "^5.1.7",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@types/node": "^20",

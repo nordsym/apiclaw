@@ -11,13 +11,14 @@ assert.equal(loopbackCallbackUrl("80", "one-time-code", "csrf-state"), null);
 assert.equal(loopbackCallbackUrl("41789", "bad code", "csrf-state"), null);
 
 const page = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
-assert.match(page, /Authorized\. Go back to your agent/);
+assert.match(page, /Go back to your agent/);
+assert.doesNotMatch(page, /You are signed in|Authorized\./, "unverified completion URL must not claim authorization");
 assert.match(page, /Claude/);
 assert.match(page, /Codex/);
 assert.match(page, /Cursor/);
 assert.match(page, /Grok/);
-assert.match(page, /Connection refused on localhost is OK/);
-assert.match(page, /Your agent confirms the sign-in and makes the first call there/);
+assert.match(page, /Connection refused on localhost does not confirm success/);
+assert.match(page, /Your agent must confirm the sign-in before making the first call/);
 assert.match(page, /Go back to that chat and retry/, "done page must send the human back to the agent");
 assert.match(page, /Workspace is optional/, "workspace is optional, not where the call is made");
 assert.match(page, /The first call happens in that chat, not here/);

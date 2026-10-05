@@ -1,0 +1,196 @@
+--- deployed/apiKeys.js
++++ repaired/apiKeys.js
+@@ -120,7 +120,8 @@
+     return e || (e = await t.db.query("workspaceApiKeys").withIndex("by_keyHash", (o) => o.eq("keyHash", s)).first()), !e || e.revokedAt ? null : {
+       workspaceId: e.workspaceId,
+       keyId: e._id,
+-      name: e.name
++      name: e.name,
++      serviceScope: e.serviceScope
+     };
+   }, "handler")
+ }), H = y({
+@@ -137,4 +138,4 @@
+   q as revokeKey,
+   H as touchKey
+ };
+-//# sourceMappingURL=apiKeys.js.map
++
+--- deployed/http.js
++++ repaired/http.js
+@@ -1049,9 +1049,10 @@
+   if (s.method === "api-key") {
+     try {
+       let o = await t.runQuery(M.apiKeys.resolveKey, { rawKey: s.rawKey });
++      if (o?.serviceScope && !nordsymWebsiteServiceEndpointAllowed(o.workspaceId, o.serviceScope, r)) return m({ error: { code: "service_key_scope_denied", message: "This service key is restricted to the NordSym website model endpoint." } }, 403);
+       if (o)
+         return t.runMutation(D.apiKeys.touchKey, { keyId: o.keyId }).catch(() => {
+-        }), { workspaceId: o.workspaceId, keyId: o.keyId, authMethod: "api-key" };
++        }), { workspaceId: o.workspaceId, keyId: o.keyId, authMethod: "api-key", ...(o.serviceScope ? { serviceScope: o.serviceScope } : {}) };
+     } catch (o) {
+       console.error("[Auth] API key resolution failed:", o.message);
+     }
+@@ -1508,7 +1509,9 @@
+ }
+ b(Le, "jsonExecuteResponse");
+ async function X(t, r, e, s) {
+-  let o = r.headers.get("X-APIClaw-Subagent") || "main", a = await ye(t, r), n = ge(a, "call");
++  let o = r.headers.get("X-APIClaw-Subagent") || "main", a = await ye(t, r);
++  if (a instanceof Response) return a;
++  let n = ge(a, "call");
+   if (n) return n;
+   let c = a.workspaceId, i = r.headers.get("X-APIClaw-Identifier") || a.workspaceId || "unknown";
+   if (console.log("[Proxy] Call received", { provider: e, action: s, authMethod: a.authMethod, workspaceId: c, subagentId: o }), Mr.has(e.toLowerCase()) && a.authMethod !== "internal")
+@@ -1773,7 +1776,9 @@
+   path: "/api/balance",
+   method: "POST",
+   handler: _(async (t, r) => {
+-    let e = await ye(t, r), s = ge(e, "billing");
++    let e = await ye(t, r);
++    if (e instanceof Response) return e;
++    let s = ge(e, "billing");
+     if (s) return s;
+     if (e.authMethod === "anonymous" || !e.workspaceId)
+       return oe("balance_requires_authenticated_workspace");
+@@ -2793,8 +2798,9 @@
+ });
+ async function we(t, r, e = "call") {
+   let s = await ye(t, r);
++  if (s instanceof Response) return s;
+   if (s.authMethod === "api-key" && s.workspaceId && s.keyId)
+-    return { workspaceId: s.workspaceId, keyId: s.keyId, authMethod: "api-key" };
++    return { workspaceId: s.workspaceId, keyId: s.keyId, authMethod: "api-key", ...(s.serviceScope ? { serviceScope: s.serviceScope } : {}) };
+   if (s.authMethod === "session" && s.workspaceId)
+     return { workspaceId: s.workspaceId, authMethod: "session" };
+   if (s.authMethod === "mcp-oauth" && s.workspaceId) {
+@@ -2821,12 +2827,15 @@
+     let e = Date.now(), s = await we(t, r);
+     if (s instanceof Response) return s;
+     let { workspaceId: o, authMethod: a } = s, n;
++    const nordsymWebsiteService = nordsymIsWebsiteServiceScope(o, s.serviceScope);
+     try {
+       n = await G(r);
+     } catch {
+       return m({ error: { message: "Invalid JSON body", type: "invalid_request_error" } }, 400);
+     }
++    if (nordsymWebsiteService && !nordsymWebsiteServiceBodyAllowed(n)) return m({ error: { code: "service_key_scope_denied", message: "Website service requests must use the approved exact model and bounded non-streaming format." } }, 403);
+     let { model: c } = n, { messages: i, stream: d, ...u } = n;
++    if (nordsymWebsiteService) delete u.model;
+     if (!i || !Array.isArray(i))
+       return m({ error: { message: "messages array is required", type: "invalid_request_error" } }, 400);
+     let p = null, y = "free";
+@@ -2847,7 +2856,7 @@
+       c = $t(c, x, p) ?? c;
+     }
+     let l = lt(c), f = pt({
+-      provider: !Lt(y) || l ? "openrouter" : "auto",
++      provider: !nordsymWebsiteService && (!Lt(y) || l) ? "openrouter" : "auto",
+       action: "chat",
+       requestedModel: c || p || "auto"
+     }), v = f?.model ?? (c === "auto" ? "mistral-small-latest" : c || p || "anthropic/claude-sonnet-4-6"), h = f?.routingModel ?? v, j = r.headers.get("X-APIClaw-OAuth"), k = (c || "").toString().toLowerCase(), U = k.startsWith("openai/") ? k.slice(7) : k.startsWith("openai-codex/") ? k.slice(13) : k, O = /^(gpt-5\.|gpt-5-codex|codex-)/.test(U) || U === "gpt-5", I = _r(j) && O, L = U || "gpt-5.4", q = I ? mr(r) : null;
+@@ -3163,15 +3172,16 @@
+       };
+     }
+     let W = $ && ["best_price", "highest_quality", "fastest", "balanced", "advisor"].includes($) ? $ : F.routingMode, K = $ && Z[$]?.isLLM ? [$, ...F.preferredProviders] : F.preferredProviders, te = h, A = await cr(te, {
+-      routingMode: W,
+-      preferredProviders: K,
++      routingMode: nordsymWebsiteService ? "balanced" : W,
++      preferredProviders: nordsymWebsiteService ? ["openai"] : K,
+       blockedProviders: F.blockedProviders,
+-      allowOpenRouterFallback: F.allowOpenRouterFallback
++      allowOpenRouterFallback: nordsymWebsiteService ? false : F.allowOpenRouterFallback
+     }, i);
+     if (!A)
+       return await C(t, T, { success: !1, providerCostUsd: 0, costSource: "zero_cost" }), m({ error: { message: "No LLM provider available. Check workspace settings.", type: "server_error" } }, 503);
++    if (nordsymWebsiteService && !nordsymWebsiteServiceRouteAllowed(A)) return await C(t, T, { success: false, providerCostUsd: 0, costSource: "zero_cost" }), m({ error: { code: "service_key_route_denied", message: "The approved website model route is unavailable." } }, 503);
+     let de = F.tier === "founder" || F.tier === "partner", ue = String(te || A.model || ""), Ze = /^(openai\/|openai-codex\/)?(gpt-5(\.|-|$)|codex-)/i.test(ue);
+-    if (de && A.provider === "openai" && Ze)
++    if (de && A.provider === "openai" && Ze && !nordsymWebsiteService)
+       return await C(t, T, { success: !1, provider: A.provider, providerCostUsd: 0, model: A.model, costSource: "zero_cost" }), m({
+         error: {
+           message: "Founder OpenAI GPT-5/Codex routing requires valid Codex OAuth passthrough. Refusing managed OpenAI API key fallback.",
+@@ -4195,8 +4205,9 @@
+       return m({ error: { message: "Invalid internal secret", type: "auth_error" } }, 401);
+   }
+   let s = await ye(t, r);
++  if (s instanceof Response) return s;
+   if (s.authMethod === "api-key" && s.workspaceId && s.keyId)
+-    return { workspaceId: s.workspaceId, keyId: s.keyId, authMethod: "api-key" };
++    return { workspaceId: s.workspaceId, keyId: s.keyId, authMethod: "api-key", ...(s.serviceScope ? { serviceScope: s.serviceScope } : {}) };
+   if (s.authMethod === "session" && s.workspaceId)
+     return { workspaceId: s.workspaceId, authMethod: "session" };
+   if (s.authMethod === "mcp-oauth" && s.workspaceId)
+@@ -5501,7 +5512,9 @@
+     let e = Date.now();
+     if (st("/v1/call", r.headers))
+       return await pr(t, r, "/v1/call"), lr();
+-    let s = await ye(t, r), o = s.workspaceId;
++    let s = await ye(t, r);
++    if (s instanceof Response) return s;
++    let o = s.workspaceId;
+     if (s.authMethod === "anonymous") {
+       try {
+         await t.runMutation(D.funnel.recordEvent, {
+@@ -5768,7 +5781,9 @@
+   path: "/v1/missions/start",
+   method: "POST",
+   handler: _(async (t, r) => {
+-    let e = await ye(t, r), s = ge(e, "call");
++    let e = await ye(t, r);
++    if (e instanceof Response) return e;
++    let s = ge(e, "call");
+     if (s) return s;
+     if (e.authMethod === "anonymous" || !e.workspaceId)
+       return oe("missions_require_auth");
+@@ -5846,7 +5861,9 @@
+   path: "/v1/missions",
+   method: "GET",
+   handler: _(async (t, r) => {
+-    let e = await ye(t, r), s = ge(e, "read");
++    let e = await ye(t, r);
++    if (e instanceof Response) return e;
++    let s = ge(e, "read");
+     if (s) return s;
+     if (e.authMethod === "anonymous" || !e.workspaceId)
+       return oe("missions_require_auth");
+@@ -5866,7 +5883,9 @@
+   pathPrefix: "/v1/missions/",
+   method: "GET",
+   handler: _(async (t, r) => {
+-    let e = await ye(t, r), s = ge(e, "read");
++    let e = await ye(t, r);
++    if (e instanceof Response) return e;
++    let s = ge(e, "read");
+     if (s) return s;
+     if (e.authMethod === "anonymous" || !e.workspaceId)
+       return oe("missions_require_auth");
+@@ -5891,4 +5910,28 @@
+   Pr as replicateModelPredictionsUrl,
+   Ir as replicatePredictionUrl
+ };
+-//# sourceMappingURL=http.js.map
++
++
++const nordsymWebsiteWorkspaceId = "n178829315bfdwpryfs20nmjf9821774";
++const nordsymWebsiteModel = "openai/gpt-5.6-sol";
++
++function nordsymIsWebsiteServiceScope(workspaceId, scope) {
++  const value = scope;
++  return workspaceId === nordsymWebsiteWorkspaceId && value?.purpose === "nordsym-website" && value.model === nordsymWebsiteModel && value.managedOpenAI === true;
++}
++
++function nordsymWebsiteServiceEndpointAllowed(workspaceId, scope, request) {
++  return nordsymIsWebsiteServiceScope(workspaceId, scope) && request.method === "POST" && new URL(request.url).pathname === "/v1/chat/completions" &&
++    !request.headers.has("X-APIClaw-OAuth") && !request.headers.has("X-APIClaw-Route");
++}
++
++function nordsymWebsiteServiceBodyAllowed(body) {
++  if (!body || typeof body !== "object" || Array.isArray(body) || body.model !== nordsymWebsiteModel || body.stream !== false) return false;
++  if (Object.keys(body).some(key => !["model", "messages", "stream", "max_tokens", "max_completion_tokens", "reasoning_effort"].includes(key))) return false;
++  const max = body.max_completion_tokens ?? body.max_tokens;
++  return Number.isInteger(max) && max > 0 && max <= 1500 && !(body.max_tokens !== undefined && body.max_completion_tokens !== undefined);
++}
++
++function nordsymWebsiteServiceRouteAllowed(route) {
++  return route.provider === "openai" && route.model === "gpt-5.6-sol" && route.baseUrl === "https://api.openai.com/v1/chat/completions";
++}

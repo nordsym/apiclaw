@@ -1,5 +1,8 @@
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
 /**
  * Agents: the default workspace view (2026-08-24 restructure). Buzz-style
  * card grid for connected MCP-client agents (AgentCardGrid, its own
@@ -48,21 +51,12 @@ const TIER_LABEL: Record<string, string> = {
 };
 
 function tierLabel(tier?: string) {
-  if (!tier) return "Free";
+  if (!tier) return "Unknown";
   return TIER_LABEL[tier] || tier;
 }
 
 async function convexCall<T>(kind: "query" | "mutation", path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/${kind}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data?.status === "error" || data?.error) {
-    throw new Error(data.errorMessage || data.error || "Request failed");
-  }
-  return (data?.value ?? data) as T;
+  return workspaceRequest<T>(kind, path, args);
 }
 
 /** One line with a copy affordance. Same shape as the homepage command line. */
@@ -112,7 +106,7 @@ function InlineName({ value, fallback, onSave }: { value: string; fallback?: str
     const next = draft.trim();
     if (next.length < 2 || next.length > 50 || next === value) { setEditing(false); return; }
     setSaving(true);
-    try { await onSave(next); } finally { setSaving(false); setEditing(false); }
+    try { await onSave(next); setEditing(false); } catch { /* Keep the draft; parent displays the error. */ } finally { setSaving(false); }
   };
 
   if (!editing) {
@@ -168,6 +162,7 @@ interface MainAgentData {
   mainAgentId: string | null;
   mainAgentName: string | null;
   aiBackend?: string | null;
+  aiBackendLastSeen?: number | null;
   usageCount: number;
   createdAt: number;
 }
@@ -193,13 +188,14 @@ function MainAgentCard({ mainAgent, onRename }: { mainAgent: MainAgentData; onRe
         <span className="min-w-0 flex-1">
           <InlineName value={mainAgent.mainAgentName || ""} fallback={mainAgent.mainAgentId || "Workspace agent"} onSave={onRename} />
           <span className="claw-mono block truncate text-[11.5px] text-[var(--text-muted)]">
-            {mainAgent.aiBackend ? `custom:${mainAgent.aiBackend}` : mainAgent.mainAgentId}
+            {mainAgent.aiBackend ? `Last reported: ${mainAgent.aiBackend}` : mainAgent.mainAgentId}
+            {mainAgent.aiBackend && <span className="block">{mainAgent.aiBackendLastSeen ? new Date(mainAgent.aiBackendLastSeen).toLocaleDateString("en-US") : "Report date unknown"}</span>}
           </span>
         </span>
       </div>
       <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
-        <Status kind="muted">Workspace identity</Status>
-        <span>{(mainAgent.usageCount ?? 0).toLocaleString()} calls</span>
+        <Status kind="muted">Workspace identity (historical)</Status>
+        <span>{mainAgent.usageCount.toLocaleString()} workspace calls</span>
       </div>
     </Panel>
   );
@@ -208,6 +204,7 @@ function MainAgentCard({ mainAgent, onRename }: { mainAgent: MainAgentData; onRe
 /** Fetches and manages both the main agent identity and subagents. Rendering is split: the caller folds the main agent into the card grid and renders subagents separately. */
 function useAgentsExtras(sessionToken: string | null) {
   const [loading, setLoading] = useState(true);
+  const revision = useWorkspaceRefresh();
   const [mainAgent, setMainAgent] = useState<MainAgentData | null>(null);
   const [subagents, setSubagents] = useState<SubagentData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -221,8 +218,9 @@ function useAgentsExtras(sessionToken: string | null) {
   const subConfirm = useArmed();
 
   useEffect(() => {
-    if (!sessionToken) { setLoading(false); return; }
+    if (!sessionToken) { setMainAgent(null); setSubagents([]); setLoading(false); return; }
     let cancelled = false;
+    setError(null);
     (async () => {
       try {
         const [mainRes, subRes] = await Promise.all([
@@ -230,7 +228,7 @@ function useAgentsExtras(sessionToken: string | null) {
           convexCall<{ subagents?: unknown } | null>("query", "agents:getSubagents", { token: sessionToken, limit: 50 }),
         ]);
         if (cancelled) return;
-        if (mainRes && typeof mainRes === "object" && "mainAgentId" in mainRes) setMainAgent(mainRes);
+        setMainAgent(mainRes);
         if (subRes && Array.isArray(subRes.subagents)) setSubagents(subRes.subagents as SubagentData[]);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load subagents");
@@ -239,7 +237,7 @@ function useAgentsExtras(sessionToken: string | null) {
       }
     })();
     return () => { cancelled = true; };
-  }, [sessionToken]);
+  }, [sessionToken, revision]);
 
   const renameMain = async (name: string) => {
     if (!sessionToken) return;
@@ -248,6 +246,7 @@ function useAgentsExtras(sessionToken: string | null) {
       setMainAgent((prev) => (prev ? { ...prev, mainAgentName: name } : prev));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Rename failed");
+      throw err;
     }
   };
 
@@ -258,6 +257,7 @@ function useAgentsExtras(sessionToken: string | null) {
       setSubagents((prev) => prev.map((s) => (s.subagentId === subagentId ? { ...s, name } : s)));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Rename failed");
+      throw err;
     }
   };
 
@@ -424,7 +424,7 @@ function SurfaceRow({ label, value }: { label: string; value: string }) {
 function ConnectAgentSection({ sessionToken }: { sessionToken: string | null }) {
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   return (
-    <Section title="Connect an agent" description="Three ways to bring an agent into this workspace." className="mt-8">
+    <Section title="Connect an agent" description="Connection options. Agents can also use SKILL.md, CLI, or HTTP." className="mt-8">
       <Panel className="p-5">
         <SurfaceRow label="Hosted MCP" value={REMOTE_MCP_URL} />
         <SurfaceRow label="Local MCP" value={LOCAL_MCP_COMMAND} />
@@ -481,26 +481,12 @@ const CONNECTOR_PRESETS: ConnectorPreset[] = [
   { key: "custom", label: "Custom", redirectUris: [""] },
 ];
 
-async function connectorsQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const json = await res.json();
-  if (json?.status === "error") throw new Error(json?.errorMessage || "query_failed");
-  return (json?.value ?? json) as T;
+async function connectorsQuery<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+  return workspaceRequest<T>("query", path, args, signal);
 }
 
-async function connectorsMutate<T>(path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const json = await res.json();
-  if (json?.status === "error") throw new Error(json?.errorMessage || "mutation_failed");
-  return (json?.value ?? json) as T;
+async function connectorsMutate<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+  return workspaceRequest<T>("mutation", path, args, signal);
 }
 
 /** Mono value with a copy affordance, tracked per-field. */
@@ -519,6 +505,7 @@ function CopyField({ label, value, field, copiedField, onCopy }: { label?: strin
 }
 
 function ConnectorsAccordion({ sessionToken }: { sessionToken: string | null }) {
+  const revision = useWorkspaceRefresh();
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -536,15 +523,22 @@ function ConnectorsAccordion({ sessionToken }: { sessionToken: string | null }) 
     setCustomName(selected.key === "custom" ? "" : selected.label);
   }, [selected]);
 
+  const refreshGuard = useRequestGuard();
   const refresh = useCallback(async (token: string) => {
+    const request = refreshGuard.next();
+    if (!refreshGuard.current(request)) return;
     setLoading(true);
+    if (!refreshGuard.current(request)) return;
     setError(null);
     try {
       const list = await connectorsQuery<Connector[]>("mcpOAuth:listConnectors", { sessionToken: token });
+      if (!refreshGuard.current(request)) return;
       setConnectors(Array.isArray(list) ? list : []);
     } catch (e) {
+      if (!refreshGuard.current(request)) return;
       setError(e instanceof Error ? e.message : "Could not load connectors.");
     } finally {
+      if (!refreshGuard.current(request)) return;
       setLoading(false);
     }
   }, []);
@@ -552,7 +546,7 @@ function ConnectorsAccordion({ sessionToken }: { sessionToken: string | null }) 
   useEffect(() => {
     if (sessionToken) void refresh(sessionToken);
     else setLoading(false);
-  }, [sessionToken, refresh]);
+  }, [sessionToken, refresh, revision]);
 
   const onGenerate = async () => {
     if (!sessionToken) return;

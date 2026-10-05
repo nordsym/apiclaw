@@ -1,6 +1,9 @@
 // /workspace/chains: multi-step chain executions for this workspace.
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChainTrace, formatCost, formatDuration, statusKind, type StepExecution } from "@/components/ChainTrace";
@@ -67,14 +70,7 @@ const FILTERS: Array<{ id: StatusFilter; label: string }> = [
 ];
 
 async function convex<T>(kind: "query" | "mutation", path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/${kind}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const json = await res.json();
-  if (json?.status === "error") throw new Error(json?.errorMessage || `${kind}_failed`);
-  return (json?.value ?? json) as T;
+  return workspaceRequest<T>(kind, path, args);
 }
 
 const formatTime = (ts: number) => {
@@ -91,6 +87,7 @@ const formatTime = (ts: number) => {
 
 export default function ChainsPage() {
   const router = useRouter();
+  const revision = useWorkspaceRefresh();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,35 +102,49 @@ export default function ChainsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [resuming, setResuming] = useState(false);
 
+  const fetchChainsGuard = useRequestGuard();
   const fetchChains = useCallback(async (token: string, status: StatusFilter) => {
+    const request = fetchChainsGuard.next();
     try {
       const result = await convex<ChainExecution[] | { error: string }>("query", "chains:getChainExecutions", { token, limit: 100, status });
+      if (!fetchChainsGuard.current(request)) return;
       if (Array.isArray(result)) setChains(result);
       else if (result && "error" in result) setError(result.error);
     } catch (err) {
       console.error("Fetch chains error:", err);
+      if (!fetchChainsGuard.current(request)) return;
       setError("Could not load chains.");
     }
   }, []);
 
+  const fetchStatsGuard = useRequestGuard();
   const fetchStats = useCallback(async (token: string) => {
+    const request = fetchStatsGuard.next();
     try {
       const result = await convex<ChainStats | { error: string }>("query", "chains:getChainStatsAuth", { token });
+      if (!fetchStatsGuard.current(request)) return;
       if (result && !("error" in result)) setStats(result);
     } catch (err) {
-      console.error("Fetch stats error:", err);
+      if (!fetchStatsGuard.current(request)) return;
+      setError("Could not load chain totals. Previously loaded information may be out of date.");
     }
   }, []);
 
+  const fetchChainDetailGuard = useRequestGuard();
   const fetchChainDetail = useCallback(async (chainId: string, token: string) => {
+    const request = fetchChainDetailGuard.next();
+    if (!fetchChainDetailGuard.current(request)) return;
     setLoadingDetail(true);
     try {
       const result = await convex<ChainDetail | { error: string }>("query", "chains:getChainTraceAuth", { token, chainId });
+      if (!fetchChainDetailGuard.current(request)) return;
       setChainDetail(result && !("error" in result) ? result : null);
     } catch (err) {
       console.error("Fetch chain detail error:", err);
+      if (!fetchChainDetailGuard.current(request)) return;
       setChainDetail(null);
     } finally {
+      if (!fetchChainDetailGuard.current(request)) return;
       setLoadingDetail(false);
     }
   }, []);
@@ -161,18 +172,19 @@ export default function ChainsPage() {
     if (!sessionToken) return;
     let cancelled = false;
     setError(null);
+    setIsLoading(true);
     void Promise.all([fetchChains(sessionToken, statusFilter), fetchStats(sessionToken)]).then(() => {
       if (!cancelled) setIsLoading(false);
     });
     return () => { cancelled = true; };
-  }, [sessionToken, statusFilter, fetchChains, fetchStats]);
+  }, [sessionToken, revision, statusFilter, fetchChains, fetchStats]);
 
   useEffect(() => {
     setExpandedStepId(null);
     setShowRawJson(false);
     if (expandedChainId && sessionToken) void fetchChainDetail(expandedChainId, sessionToken);
     else setChainDetail(null);
-  }, [expandedChainId, sessionToken, fetchChainDetail]);
+  }, [expandedChainId, sessionToken, revision, fetchChainDetail]);
 
   const handleRefresh = async () => {
     if (!sessionToken) return;
@@ -215,7 +227,7 @@ export default function ChainsPage() {
 
       {error && <p className="mb-6 text-[13px] text-[var(--accent)]">{error}</p>}
 
-      {stats && (
+      {!error && stats && (
         <StatGrid cols={4}>
           <StatCard title="Chains" value={String(stats.total)} />
           <StatCard title="Success rate" value={`${stats.successRate}%`} />
@@ -229,7 +241,7 @@ export default function ChainsPage() {
           <SurfaceTabs items={FILTERS} active={statusFilter} onChange={(id) => setStatusFilter(id as StatusFilter)} label="Status" />
         </div>
         {isLoading && <Loading label="Loading chains" />}
-        {!isLoading && chains.length === 0 && (
+        {!isLoading && !error && chains.length === 0 && (
           <Empty title="No chains yet" body={statusFilter === "all" ? "Chains appear here when an agent runs a multi-step workflow through this workspace." : `No ${statusFilter} chains.`} />
         )}
         {!isLoading && chains.map((chain) => {

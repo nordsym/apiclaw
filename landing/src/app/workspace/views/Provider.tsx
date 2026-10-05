@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   LineChart,
@@ -40,26 +43,12 @@ import {
 
 type ConsoleSection = "apis" | "analytics";
 
-async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Request failed");
-  return (data.value ?? null) as T;
+async function convexQuery<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+  return workspaceRequest<T>("query", path, args, signal);
 }
 
-async function convexMutation<T>(path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (!res.ok || data.status === "error") throw new Error(data.errorMessage || "Request failed");
-  return (data.value ?? null) as T;
+async function convexMutation<T>(path: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+  return workspaceRequest<T>("mutation", path, args, signal);
 }
 
 function errorText(err: unknown, fallback: string) {
@@ -322,7 +311,9 @@ const AUTH_LABEL: Record<string, string> = { bearer: "Bearer token", api_key: "A
 function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: string | null }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const revision = useWorkspaceRefresh();
   const [configId, setConfigId] = useState<string | null>(null);
+  const configDirty = useRef(false);
   const [config, setConfig] = useState(EMPTY_CONFIG);
   const [operatedByApiclaw, setOperatedByApiclaw] = useState(false);
   const [hasCredential, setHasCredential] = useState(false);
@@ -337,20 +328,26 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
   const [actionSaving, setActionSaving] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadActions = useCallback(async (directCallId: string) => {
+  const loadActions = useCallback(async (directCallId: string, isCurrent: () => boolean = () => true) => {
     const list = await convexQuery<RoutingAction[] | null>("directCall:getActions", { directCallId });
-    setActions(Array.isArray(list) ? list : []);
+    if (!Array.isArray(list)) throw new Error("Could not verify actions");
+    if (isCurrent()) setActions(list);
   }, []);
 
+  const loadGuard = useRequestGuard();
   const load = useCallback(async () => {
+    const request = loadGuard.next();
     if (!sessionToken) { setLoading(false); return; }
+    if (!loadGuard.current(request)) return;
     setLoading(true);
+    if (!loadGuard.current(request)) return;
     setLoadError(null);
     try {
       const cfg = await convexQuery<RoutingConfig | null>("managedRouting:getOwnerConfigByApiId", { token: sessionToken, apiId: api._id });
       if (cfg) {
+        if (!loadGuard.current(request)) return;
         setConfigId(cfg._id);
-        setConfig({
+        if (!configDirty.current) setConfig({
           baseUrl: cfg.baseUrl || "",
           authType: cfg.authType || "bearer",
           authHeader: cfg.authHeader || "Authorization",
@@ -364,22 +361,30 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
         });
         // Once APIClaw operations publish a config or hold its credential, the
         // owner form would only downgrade it (saveConfig forces draft/testing).
+        if (!loadGuard.current(request)) return;
         setOperatedByApiclaw(cfg.status === "live" || Boolean(cfg.hasCredential));
+        if (!loadGuard.current(request)) return;
         setHasCredential(Boolean(cfg.hasCredential));
-        await loadActions(cfg._id);
+        await loadActions(cfg._id, () => loadGuard.current(request));
       } else {
+        if (!loadGuard.current(request)) return;
         setConfigId(null);
-        setConfig(EMPTY_CONFIG);
+        if (!configDirty.current) setConfig(EMPTY_CONFIG);
+        if (!loadGuard.current(request)) return;
         setOperatedByApiclaw(false);
+        if (!loadGuard.current(request)) return;
         setHasCredential(false);
+        if (!loadGuard.current(request)) return;
         setActions([]);
       }
     } catch (err) {
+      if (!loadGuard.current(request)) return;
       setLoadError(errorText(err, "Could not load routing config"));
     } finally {
+      if (!loadGuard.current(request)) return;
       setLoading(false);
     }
-  }, [api._id, sessionToken, loadActions]);
+  }, [api._id, sessionToken, loadActions, revision]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -395,6 +400,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
     setSaveError(null);
     try {
       await convexMutation("managedRouting:saveConfig", { token: sessionToken, config: { ...config, apiId: api._id } });
+      configDirty.current = false;
       setSaveState("saved");
       await load();
     } catch (err) {
@@ -447,7 +453,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
   if (loading) return <div className="pb-4"><Loading label="Loading routing config" /></div>;
   if (loadError) return <p className="py-4 text-[13px] text-[var(--accent)]">{loadError}</p>;
 
-  const set = (key: keyof typeof EMPTY_CONFIG, value: string | number) => setConfig((c) => ({ ...c, [key]: value }));
+  const set = (key: keyof typeof EMPTY_CONFIG, value: string | number) => { configDirty.current = true; setConfig((c) => ({ ...c, [key]: value })); };
 
   return (
     <div className="pb-6 pl-0 sm:pl-4">
@@ -465,7 +471,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
             <KV k="Credential" v={hasCredential ? "Held by APIClaw" : "Not set"} />
           </div>
         ) : (
-          <div className="space-y-5">
+          <fieldset disabled={saving} className="space-y-5">
             <p className="text-[13px] text-[var(--text-muted)]">Set the public endpoint agents are routed to. Provider credentials are added by APIClaw after review and never pass through this browser.</p>
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label="Base URL">
@@ -512,7 +518,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
               {saveState === "saved" && <span className="text-[13px] text-[var(--ok)]">Saved</span>}
               {saveState === "error" && saveError && <span className="text-[13px] text-[var(--accent)]">{saveError}</span>}
             </div>
-          </div>
+          </fieldset>
         )}
       </div>
 
@@ -525,7 +531,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
         </div>
         {!configId && <p className="text-[13px] text-[var(--text-muted)]">Save routing first. Actions define the endpoints agents can call.</p>}
         {showAddAction && (
-          <div className="space-y-4 border-t border-[var(--border-subtle)] py-4">
+          <fieldset disabled={actionSaving} className="space-y-4 border-t border-[var(--border-subtle)] py-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Action name" hint="Machine name, lowercase with underscores.">
                 <input className={`${inputClass} claw-mono !text-[13px]`} value={actionForm.name} onChange={(e) => setActionForm((p) => ({ ...p, name: e.target.value }))} placeholder="get_forecast" />
@@ -550,7 +556,7 @@ function ApiDetail({ api, sessionToken }: { api: ProviderAPI; sessionToken: stri
               <button type="button" className={`${btnSolid} disabled:opacity-50`} onClick={saveAction} disabled={actionSaving || !actionForm.name.trim() || !actionForm.path.trim()}>{actionSaving ? "Adding" : "Add action"}</button>
               <button type="button" className={btnQuiet} onClick={() => { setShowAddAction(false); setActionError(null); }}>Cancel</button>
             </div>
-          </div>
+          </fieldset>
         )}
         {!showAddAction && actionError && <p className="py-2 text-[13px] text-[var(--accent)]">{actionError}</p>}
         {configId && actions.length === 0 && !showAddAction && (
@@ -612,6 +618,7 @@ function relativeTime(ts: number) {
 }
 
 function InboundAnalytics({ apis, sessionToken, onAdd }: { apis: ProviderAPI[]; sessionToken: string | null; onAdd: () => void }) {
+  const revision = useWorkspaceRefresh();
   const [range, setRange] = useState("7d");
   const [data, setData] = useState<InboundAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -627,7 +634,10 @@ function InboundAnalytics({ apis, sessionToken, onAdd }: { apis: ProviderAPI[]; 
       .catch((err) => { if (!cancelled) setError(errorText(err, "Could not load analytics")); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [sessionToken, range]);
+  }, [sessionToken, range, revision]);
+
+  if (loading) return <Loading label="Loading inbound traffic" />;
+  if (error || !data) return <p role="alert">{error || "Could not verify inbound traffic"} <button onClick={invalidateWorkspace}>Try again</button></p>;
 
   const calls = data?.totalCalls ?? 0;
   const discoveries = data?.totalDiscoveries ?? 0;

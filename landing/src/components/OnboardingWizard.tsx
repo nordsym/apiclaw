@@ -1,4 +1,6 @@
 "use client";
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh } from "@/lib/use-workspace-refresh";
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -19,7 +21,6 @@ import {
   formatOnboardingExecuteResult,
   httpFirstCallCurl,
   isOnboardingExecuteSuccess,
-  UNKNOWN_ONBOARDING_STATE,
   type OnboardingState,
 } from "@/lib/onboarding-first-call";
 
@@ -40,7 +41,7 @@ type View = "choose" | "client" | "launch" | "success";
 type RunStatus = "idle" | "running" | "success" | "error";
 
 const DOORS: Array<{ id: DoorId; title: string; description: string }> = [
-  { id: "agent", title: "AI agent (MCP)", description: "Cursor, Codex, Claude, or any MCP client." },
+  { id: "agent", title: "AI agent", description: "Guided setup with SKILL.md in your agent." },
   { id: "cli", title: "CLI", description: "Shell, scripts, CI." },
   { id: "http", title: "HTTP", description: "Your own agent, app, or automation." },
   { id: "remote", title: "Remote MCP", description: "An OAuth-aware host connected to the remote endpoint." },
@@ -66,30 +67,16 @@ function stepOf(view: View, door: DoorId): { current: number; total: number } {
 
 async function callMutation(path: string, args: Record<string, unknown>) {
   try {
-    const res = await fetch(`${CONVEX_URL}/api/mutation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path, args }),
-    });
-    return res.ok ? await res.json() : null;
-  } catch {
-    return null;
-  }
+    await workspaceRequest("mutation", path, args);
+    return true;
+  } catch { return false; }
 }
 
 /** Returns the onboarding state, or null when the session is unknown or the query failed.
  *  Null is unknown, not "already done". The wizard fail-opens on null. */
 async function fetchOnboardingState(token: string): Promise<OnboardingState | null> {
   try {
-    const res = await fetch(`${CONVEX_URL}/api/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: "onboarding:getState", args: { token } }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data?.status === "error") return null;
-    const value = "value" in (data ?? {}) ? data.value : data;
+    const value = await workspaceRequest<OnboardingState | null>("query", "onboarding:getState", { token });
     if (!value || typeof value !== "object" || !("completedAt" in value)) return null;
     return {
       completedAt: value.completedAt ?? null,
@@ -102,6 +89,8 @@ async function fetchOnboardingState(token: string): Promise<OnboardingState | nu
 }
 
 export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: string | null; arrival?: "cli" }) {
+  const revision = useWorkspaceRefresh();
+  const [stateError, setStateError] = useState<string | null>(null);
   const [state, setState] = useState<OnboardingState | null>(null);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("choose");
@@ -126,10 +115,15 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
     let cancelled = false;
     fetchOnboardingState(sessionToken).then(async (next) => {
       if (cancelled) return;
-      const resolved = next ?? UNKNOWN_ONBOARDING_STATE;
+      if (!next) { setStateError("Could not verify setup status. Retry when your connection is restored."); return; }
+      setStateError(null);
+      const resolved = next;
       const gate = decideOnboardingGate(resolved);
       if (gate === "complete") {
-        await callMutation("onboarding:complete", { token: sessionToken });
+        if (!(await callMutation("onboarding:complete", { token: sessionToken }))) {
+      setStateError("Could not save setup status. Please try again.");
+      setBusy(false); settlingRef.current = false; return;
+    }
         if (cancelled) return;
         setState({ ...resolved, completedAt: resolved.completedAt ?? Date.now() });
         return;
@@ -148,7 +142,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
       }
     });
     return () => { cancelled = true; };
-  }, [sessionToken, arrival]);
+  }, [sessionToken, arrival, revision]);
 
   useEffect(() => {
     if (!open || !sessionToken) return;
@@ -195,6 +189,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
     if (liftTimerRef.current) window.clearTimeout(liftTimerRef.current);
   }, []);
 
+  if (stateError && !open) return <p role="alert">{stateError} <button onClick={invalidateWorkspace}>Try again</button></p>;
   if (!sessionToken || !state || !portalReady) return null;
 
   if (!open && state.dismissedAt && !state.completedAt && !state.firstCallAt) {
@@ -209,7 +204,10 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
   async function dismiss() {
     if (!sessionToken) return;
     setBusy(true);
-    await callMutation("onboarding:dismiss", { token: sessionToken });
+    if (!(await callMutation("onboarding:dismiss", { token: sessionToken }))) {
+      setStateError("Could not save setup status. Please try again.");
+      setBusy(false); settlingRef.current = false; return;
+    }
     setState((current) => current ? { ...current, dismissedAt: Date.now() } : current);
     setOpen(false);
     setBusy(false);
@@ -219,7 +217,10 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
     if (!sessionToken || settlingRef.current) return;
     settlingRef.current = true;
     setBusy(true);
-    await callMutation("onboarding:complete", { token: sessionToken });
+    if (!(await callMutation("onboarding:complete", { token: sessionToken }))) {
+      setStateError("Could not save setup status. Please try again.");
+      setBusy(false); settlingRef.current = false; return;
+    }
     posthog.capture("onboarding_completed", {
       door,
       client: door === "agent" ? client : undefined,
@@ -238,7 +239,10 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
     setView("success");
     setRunStatus("success");
     if (!next.completedAt && sessionToken) {
-      await callMutation("onboarding:complete", { token: sessionToken });
+      if (!(await callMutation("onboarding:complete", { token: sessionToken }))) {
+      setStateError("Could not save setup status. Please try again.");
+      setBusy(false); settlingRef.current = false; return;
+    }
       posthog.capture("onboarding_completed", {
         door,
         client: door === "agent" ? client : undefined,
@@ -332,6 +336,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
             </button>
           </div>
 
+          {stateError && <p role="alert">{stateError}</p>}
           {view === "choose" && (
             <Step
               headingRef={headingRef}

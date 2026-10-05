@@ -1,5 +1,8 @@
 "use client";
 
+import { workspaceRequest, invalidateWorkspace } from "@/lib/workspace-data";
+import { useWorkspaceRefresh, useRequestGuard } from "@/lib/use-workspace-refresh";
+
 /**
  * Buzz-inspired agent card grid (BYOH Phase 2, 2026-08-24). Cards + detail
  * side panel for the workspace's connected agents. Every element maps to
@@ -18,16 +21,7 @@ import { CONVEX_URL, ConnectedAgent } from "../_shared";
 import { Panel, Row, Status, Loading, KV, inputClass, btnSolid, btnQuiet, btnDanger } from "./ui";
 
 async function convexCall<T>(kind: "query" | "mutation", path: string, args: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`${CONVEX_URL}/api/${kind}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, args }),
-  });
-  const data = await res.json();
-  if (data?.status === "error" || data?.error) {
-    throw new Error(data.errorMessage || data.error || "Request failed");
-  }
-  return (data?.value ?? data) as T;
+  return workspaceRequest<T>(kind, path, args);
 }
 
 const MCP_CLIENT_LABEL: Record<string, string> = {
@@ -162,7 +156,7 @@ function ModelEditor({ value, onSave, onCancel }: { value: string | null | undef
 
   const save = async () => {
     setSaving(true);
-    try { await onSave(draft.trim() || null); } finally { setSaving(false); }
+    try { await onSave(draft.trim() || null); } catch { /* Parent reports the error; keep the draft open. */ } finally { setSaving(false); }
   };
 
   return (
@@ -184,7 +178,7 @@ function ModelEditor({ value, onSave, onCancel }: { value: string | null | undef
         </datalist>
       )}
       <button type="button" onClick={save} disabled={saving} className={`${btnSolid} !h-8`}>{saving ? "Saving" : "Save"}</button>
-      {value && <button type="button" onClick={() => onSave(null)} disabled={saving} className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Clear</button>}
+      {value && <button type="button" onClick={() => { setDraft(""); }} disabled={saving} className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Clear</button>}
       <button type="button" onClick={onCancel} disabled={saving} className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Cancel</button>
     </div>
   );
@@ -272,8 +266,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
   const saveName = async () => {
     const next = nameDraft.trim();
     if (next.length < 2 || next.length > 50 || next === agent.displayName) { setEditingName(false); return; }
-    await onRename(next);
-    setEditingName(false);
+    try { await onRename(next); setEditingName(false); } catch { /* Keep draft on save failure. */ }
   };
 
   return (
@@ -294,7 +287,7 @@ function DetailPanel({ agent, initialEditModel, onClose, onRename, onSetModel, o
                 <p className="truncate text-[16px] font-semibold tracking-[-0.01em]">{agent.displayName}</p>
                 <button type="button" onClick={() => { setNameDraft(agent.displayName); setEditingName(true); }} className="shrink-0 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)]">Rename</button>
               </div>
-              <Status kind={presence.state === "active" ? "ok" : "muted"}>{presence.label}</Status>
+              <Status kind={"muted"}>{presence.label}</Status>
             </div>
           ) : (
             <div className="flex min-w-0 flex-col gap-2">
@@ -391,7 +384,7 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
 
   const saveName = async () => {
     const next = nameDraft.trim();
-    if (next.length >= 2 && next.length <= 50 && next !== agent.displayName) await onRename(next);
+    if (next.length >= 2 && next.length <= 50 && next !== agent.displayName) { try { await onRename(next); } catch { return; } }
     setRenaming(false);
   };
 
@@ -402,7 +395,7 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
           <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-elevated)] text-[12px] font-semibold">
             {monogram(label)}
             <span
-              className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--surface)] ${presence.state === "active" ? "bg-[var(--ok)]" : "bg-[var(--text-muted)]"}`}
+              className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--surface)] ${"bg-[var(--text-muted)]"}`}
               aria-hidden="true"
             />
           </span>
@@ -439,7 +432,7 @@ function AgentCard({ agent, onOpen, onSetModel, onRename, onRevoke }: {
         </div>
       )}
       <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)]">
-        <Status kind={presence.state === "active" ? "ok" : "muted"}>{presence.label}</Status>
+        <Status kind={"muted"}>{presence.label}</Status>
         <span>{agent.callCount.toLocaleString()} calls</span>
       </div>
     </Panel>
@@ -454,6 +447,8 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
   /** Optional card rendered first in the grid, e.g. the workspace's main agent (2026-08-24: folded out of its own section). */
   leadingCard?: React.ReactNode;
 }) {
+  const revision = useWorkspaceRefresh();
+  const guard = useRequestGuard();
   const [cards, setCards] = useState<CardAgent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modelEditorFor, setModelEditorFor] = useState<string | null>(null);
@@ -461,11 +456,14 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
 
   const load = useCallback(async () => {
     if (!sessionToken) { setCards([]); return; }
+    const request = guard.next();
+    setError(null);
     try {
       const [clientsRes, sessRes] = await Promise.all([
         convexCall<ConnectedAgent[]>("query", "agents:getWorkspaceAgents", { token: sessionToken }),
         convexCall<SessionRow[]>("query", "workspaces:getConnectedAgents", { token: sessionToken }),
       ]);
+      if (!guard.current(request)) return;
       const sessions = Array.isArray(sessRes) ? sessRes : [];
       const clients = Array.isArray(clientsRes) ? clientsRes : [];
       const usedSessionIds = new Set<string>();
@@ -490,10 +488,11 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
       });
       setCards(next);
     } catch (err) {
+      if (!guard.current(request)) return;
       setError(err instanceof Error ? err.message : "Could not load agents");
       setCards([]);
     }
-  }, [sessionToken]);
+  }, [sessionToken, revision, guard]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -504,6 +503,7 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
       setCards((prev) => prev && prev.map((c) => (c.id === agentId ? { ...c, name, displayName: name } : c)));
     } catch (err) {
       onToast?.(err instanceof Error ? err.message : "Rename failed", "error");
+      throw err;
     }
   };
 
@@ -515,6 +515,7 @@ export function AgentCardGrid({ sessionToken, onToast, onEmpty, leadingCard }: {
       onToast?.(model ? "Default model updated." : "Default model cleared.", "success");
     } catch (err) {
       onToast?.(err instanceof Error ? err.message : "Could not update default model", "error");
+      throw err;
     }
   };
 

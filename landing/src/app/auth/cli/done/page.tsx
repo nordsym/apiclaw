@@ -25,10 +25,10 @@ export default async function CliAuthDonePage({
       <section className="claw-container flex-1 py-16 sm:py-20">
         <div className="mx-auto max-w-[28rem]">
           <p className="claw-eyebrow">Agent sign-in</p>
-          <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Authorized. Go back to your agent.</h1>
+          <h1 className="claw-display mt-3 text-[2.2rem] sm:text-[2.75rem]">Go back to your agent.</h1>
           <p className="mt-5 text-[15px] leading-[1.65] text-text-secondary">
-            You are signed in. Return to Claude, Codex, Cursor, Grok, or whichever chat you used.
-            Your agent confirms the sign-in and makes the first call there. Connection refused on localhost is OK.
+            Return to Claude, Codex, Cursor, Grok, or whichever chat you used.
+            Your agent must confirm the sign-in before making the first call. If authorization expired, start sign-in again from that chat. Connection refused on localhost does not confirm success.
           </p>
           <p className="mt-8 text-[15px] leading-[1.65] text-text-primary">
             Go back to that chat and retry. Do not wait here.

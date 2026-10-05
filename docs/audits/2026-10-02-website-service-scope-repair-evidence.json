@@ -1,0 +1,18 @@
+{
+  "deploy_ok": true,
+  "deployment": "adventurous-avocet-799",
+  "verified_utc": "2026-10-02T09:02:15Z",
+  "changed_modules": [
+    "apiKeys.js",
+    "http.js"
+  ],
+  "preserved_modules": 129,
+  "config_preserved": true,
+  "udf_version_preserved": true,
+  "schema_preserved": true,
+  "source_map_normalization": "Absent maps read back as null for the two modified modules only",
+  "module_hashes": {
+    "apiKeys.js": "0e3b55d87cb041f9413be1926978d47eb32ec84b4dff802391692bc39b0e5110",
+    "http.js": "1143cb59a09d8d573b54acbbe4dba64d00ad9b415b77e80304dbea1817c5fcc4"
+  }
+}

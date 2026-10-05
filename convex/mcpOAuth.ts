@@ -279,7 +279,7 @@ export const listConnectors = query({
   args: { sessionToken: v.string() },
   handler: async (ctx, args) => {
     const session = await findUsableAgentSession(ctx.db, args.sessionToken);
-    if (!session) return [];
+    if (!session) throw new Error("Invalid or expired session");
     const rows = await ctx.db
       .query("mcpOAuthClients")
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))

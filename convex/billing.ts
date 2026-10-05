@@ -662,7 +662,7 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
     stripeSubscriptionId: workspace.stripeSubscriptionId,
     lastBillingDate: workspace.lastBillingDate,
     currentPeriodStart: periodStart.getTime(),
-    monthlySpendCents: Math.round((workspace.monthlySpendCents ?? 0)),
+    monthlySpendCents: workspace.lastSpendResetAt && workspace.lastSpendResetAt >= periodStart.getTime() ? Math.round(workspace.monthlySpendCents ?? 0) : 0,
     invoices: invoices.map((inv) => ({
       id: inv._id,
       stripeInvoiceId: inv.stripeInvoiceId,
