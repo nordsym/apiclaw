@@ -5,6 +5,12 @@ import assert from "node:assert/strict";
 const [input, output] = process.argv.slice(2);
 if (!input || !output) throw new Error("Input and output paths required");
 const workflow = JSON.parse(fs.readFileSync(input, "utf8"));
+const webhook = workflow.nodes.find((n) => n.type === "n8n-nodes-base.webhook");
+assert(
+  webhook?.parameters.authentication === "headerAuth" &&
+    webhook.credentials?.httpHeaderAuth?.id,
+  "Configure the existing shared webhook secret as an n8n Header Auth credential first",
+);
 const target = workflow.nodes.find((n) => n.name === "Send ALERT to Telegram");
 assert(target?.type === "n8n-nodes-base.telegram");
 assert(
