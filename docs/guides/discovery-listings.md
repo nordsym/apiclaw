@@ -204,3 +204,14 @@ Observed release behavior: pushes to main automatically start Vercel production
 builds; branch previews were canceled before building. Deploy backend changes
 before merging a frontend dependency on them, or explicitly coordinate the Git
 release. Do not assume this project is manual-deploy-only.
+
+### Notification configuration
+
+The existing Inbound Net webhook must use **Header Auth** with
+`X-APIClaw-Webhook-Secret`, matching Convex's `APICLAW_INBOUND_WEBHOOK_SECRET`.
+Store its value in n8n credentials, never a workflow expression or repository file.
+The workflow must respond after its Telegram node completes (`lastNode`).
+`scripts/configure-listing-review-alert.mjs` transforms an authenticated saved
+workflow and verifies unchanged rendering of existing events. It refuses an
+unauthenticated input. Preserve a private workflow snapshot before applying it.
+Live notification and review evidence: [2026-10-05 audit](../audits/2026-10-05-listing-review.md).

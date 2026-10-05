@@ -1,0 +1,415 @@
+{
+  "date": "2026-10-05",
+  "backend": "adventurous-avocet-799",
+  "backendSource": "dc6ce0e11bbdfde3ad9978e7d0042411efcf4fc5",
+  "frontendCommit": "7b2eddbec103abbb98c2ae032c88acbc80ae5092",
+  "frontendDeployment": "dpl_F5vzgp1gQyZ5nnwTnP5FHS4ZQCj3",
+  "frontendAliases": [
+    "https://apiclaw.cloud",
+    "https://api.apiclaw.cloud"
+  ],
+  "signup": "New operator-provisioned verified Clerk test identity; native bridge created a new free workspace. CAPTCHA self-registration not tested.",
+  "browser": {
+    "urlImport": true,
+    "fileImport": true,
+    "operatorApprovalUI": true,
+    "requestChangesUI": true,
+    "ownerSawReviewNote": true,
+    "catalogUI": true,
+    "pageErrors": []
+  },
+  "negativeReview": {
+    "ownerGet": 403,
+    "ownerApprove": 403,
+    "stale": 409
+  },
+  "notifications": [
+    {
+      "execution": "40211",
+      "successful": true,
+      "telegramMessageId": 672,
+      "reviewUrl": "https://apiclaw.cloud/workspace/review-listings?listing=s5713qgyspwm41wmepzz6mw16h8fp0er"
+    },
+    {
+      "execution": "40212",
+      "successful": true,
+      "telegramMessageId": 673,
+      "reviewUrl": "https://apiclaw.cloud/workspace/review-listings?listing=s574q4f6k32kmc49sqzj0r98k18fq09z"
+    },
+    {
+      "execution": "40213",
+      "successful": true,
+      "telegramMessageId": 674,
+      "reviewUrl": "https://apiclaw.cloud/workspace/review-listings?listing=s574q4f6k32kmc49sqzj0r98k18fq09z"
+    }
+  ],
+  "email": {
+    "providerAccepted": true,
+    "gmailReceived": true,
+    "inboxDelivery": false,
+    "observedPlacement": "spam",
+    "spf": "pass",
+    "dkim": "pass",
+    "dmarc": "pass",
+    "operationalChannel": "Telegram ALERTS"
+  },
+  "webhook": {
+    "authentication": "headerAuth",
+    "missingSecretStatus": 403,
+    "incorrectSecretStatus": 403,
+    "validSubmissionExecution": "40213"
+  },
+  "phases": [
+    {
+      "phase": "pending",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 0,
+          "entries": []
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "published-url",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 1,
+          "cacheControl": "no-store",
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 20261005",
+              "providerId": "listing:s5713qgyspwm41wmepzz6mw16h8fp0er",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 1,
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 20261005",
+              "providerId": "listing:s5713qgyspwm41wmepzz6mw16h8fp0er",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "withdrawn-url",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 0,
+          "entries": []
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "pending-file",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 0,
+          "entries": []
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "published-file",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 1,
+          "cacheControl": "no-store",
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 File 20261005",
+              "providerId": "listing:s574q4f6k32kmc49sqzj0r98k18fq09z",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 1,
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 File 20261005",
+              "providerId": "listing:s574q4f6k32kmc49sqzj0r98k18fq09z",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "published-secured",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 1,
+          "cacheControl": "no-store",
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 File 20261005",
+              "providerId": "listing:s574q4f6k32kmc49sqzj0r98k18fq09z",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 1,
+          "entries": [
+            {
+              "name": "APIClaw Synthetic Review PR52 File 20261005",
+              "providerId": "listing:s574q4f6k32kmc49sqzj0r98k18fq09z",
+              "callable": false,
+              "managedAdapter": false,
+              "executionAvailable": false,
+              "verified": false
+            }
+          ]
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    },
+    {
+      "phase": "withdrawn-final",
+      "observations": [
+        {
+          "surface": "catalog",
+          "callableOnly": false,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": false,
+          "total": 0,
+          "entries": []
+        },
+        {
+          "surface": "catalog",
+          "callableOnly": true,
+          "total": 0,
+          "cacheControl": "no-store",
+          "entries": []
+        },
+        {
+          "surface": "MCP discover_apis",
+          "callableOnly": true,
+          "total": 0,
+          "entries": []
+        }
+      ]
+    }
+  ],
+  "executionDenied": [
+    {
+      "listingId": "s5713qgyspwm41wmepzz6mw16h8fp0er",
+      "path": "/v1/execute",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s5713qgyspwm41wmepzz6mw16h8fp0er",
+      "path": "/v1/call",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s574q4f6k32kmc49sqzj0r98k18fq09z",
+      "path": "/v1/execute",
+      "status": 403,
+      "code": "discovery_only"
+    },
+    {
+      "listingId": "s574q4f6k32kmc49sqzj0r98k18fq09z",
+      "path": "/v1/call",
+      "status": 403,
+      "code": "discovery_only"
+    }
+  ],
+  "before": {
+    "counts": {
+      "managedCallLedger": 1,
+      "providerAPIs": 0,
+      "providerDirectCall": 0,
+      "providerKeys": 0,
+      "providers": 0,
+      "purchases": 0,
+      "usageRecords": 0
+    },
+    "status": "active",
+    "stripeCustomer": false,
+    "stripeSubscription": false,
+    "tier": "free",
+    "usageCount": 1
+  },
+  "after": {
+    "counts": {
+      "managedCallLedger": 1,
+      "providerAPIs": 0,
+      "providerDirectCall": 0,
+      "providerKeys": 0,
+      "providers": 0,
+      "purchases": 0,
+      "usageRecords": 0
+    },
+    "status": "active",
+    "stripeCustomer": false,
+    "stripeSubscription": false,
+    "tier": "free",
+    "usageCount": 1
+  },
+  "cleanup": {
+    "drafts": [
+      {
+        "id": "s5713qgyspwm41wmepzz6mw16h8fp0er",
+        "revision": 4,
+        "state": "draft",
+        "published": false
+      },
+      {
+        "id": "s574q4f6k32kmc49sqzj0r98k18fq09z",
+        "revision": 3,
+        "state": "draft",
+        "published": false
+      }
+    ],
+    "connectorRevoked": true,
+    "oldMcpTokenStatus": 401
+  },
+  "arcmira": {
+    "total": 0,
+    "published": false
+  }
+}
