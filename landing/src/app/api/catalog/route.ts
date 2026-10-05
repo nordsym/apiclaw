@@ -1,3 +1,4 @@
+import { loadPublishedListings, mergePublishedListings } from "@/lib/published-listings";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
@@ -254,7 +255,9 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = Math.min(parseInt(searchParams.get("limit") || "60", 10), 100);
 
-  const apis = loadApis();
+  let apis: ApiEntry[];
+  try { apis = mergePublishedListings(loadApis(), await loadPublishedListings()); }
+  catch (error) { console.error("Catalog unavailable", error); return NextResponse.json({ error: "Catalog temporarily unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } }); }
   const tierFilter = searchParams.get("tier") || ""; // callable | adapter | verified | discovery
 
   let filtered = apis;
@@ -297,7 +300,7 @@ export async function GET(req: NextRequest) {
   const hasMore = offset + limit < total;
 
   // Category counts with callable + verified breakdown
-  const categories: Record<string, { total: number; callable: number; verified: number; managedAdapters: number }> = {};
+  const categories: Record<string, { total: number; callable: number; verified: number; managedAdapters: number }> = Object.create(null);
   for (const a of apis) {
     if (!categories[a.category]) {
       categories[a.category] = { total: 0, callable: 0, verified: 0, managedAdapters: 0 };
@@ -329,5 +332,5 @@ export async function GET(req: NextRequest) {
     managedProviderAdapterCount: MANAGED_PROVIDER_ADAPTER_COUNT,
     customerExecutableProviderCount: PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
     canonGeneratedAt: CANON_STATS.generated_at,
-  });
+  }, { headers: { "Cache-Control": "no-store" } });
 }

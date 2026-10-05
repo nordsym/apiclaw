@@ -1,0 +1,17 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Arcmira: YouTube Transcript Search",
+    "version": "1",
+    "description": "Search YouTube transcripts for timestamped passages, speakers and mentions."
+  },
+  "servers": [{ "url": "https://api.arcmira.com/v1" }],
+  "externalDocs": { "url": "https://arcmira.com/docs" },
+  "components": {
+    "securitySchemes": { "bearer": { "type": "http", "scheme": "bearer" } }
+  },
+  "security": [{ "bearer": [] }],
+  "paths": {
+    "/search": { "post": { "summary": "Search transcript passages" } }
+  }
+}

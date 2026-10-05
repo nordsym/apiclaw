@@ -5710,6 +5710,9 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
     }
 
     const { provider, action, params = {} } = body;
+    if (typeof provider === "string" && provider.startsWith("listing:")) {
+      return jsonResponse({ error: { code: "discovery_only", message: "This is a discovery listing. APIClaw execution is not enabled." } }, 403);
+    }
     if (!provider) {
       return jsonResponse({ error: { message: "provider is required", type: "invalid_request" } }, 400);
     }
@@ -7564,6 +7567,9 @@ http.route({
     const method: string = (body?.method ?? "GET").toString().toUpperCase();
     const params = body?.params && typeof body.params === "object" ? body.params : undefined;
     const userBody = body?.body;
+    if (apiName.startsWith("listing:")) {
+      return jsonResponse({ error: { code: "discovery_only", message: "This is a discovery listing. APIClaw execution is not enabled." } }, 403);
+    }
     if (!apiName) {
       return jsonResponse({ error: { code: "missing_api", message: "Body must include { api: string }" } }, 400);
     }

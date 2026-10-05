@@ -75,6 +75,10 @@ Pricing canon: underlying provider cost plus a 15% margin. Stripe metered billin
 
 ---
 
+## List an API
+
+Workspace discovery submissions use **Catalog > My APIs > Add API**: import an OpenAPI URL or JSON/YAML file, save a draft, and submit for operator review. Approved metadata is searchable with `discover_apis({ query: "your API", callable_only: false })`. Listing does not enable execution, key custody or billing. See the [workspace and reviewer guide](docs/guides/discovery-listings.md) for limits, release requirements and runnable tests.
+
 ## Links
 
 - **Site** — [apiclaw.cloud](https://apiclaw.cloud)

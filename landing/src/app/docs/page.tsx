@@ -448,22 +448,22 @@ call_api({
                   {
                     n: "02",
                     t: "Submit your spec",
-                    d: <>Open <span className="font-medium text-text-primary">Workspace, My APIs, Add API</span>. Paste an OpenAPI 3 / Swagger URL, or describe the endpoint manually. APIClaw normalises auth, parameters, and pricing.</>,
+                    d: <>Open <span className="font-medium text-text-primary">Workspace → Catalog → My APIs → Add API</span>. Paste a public HTTPS OpenAPI URL or upload a JSON/YAML file. OpenAPI 3.0/3.1 and Swagger 2.0 are supported, up to 1 MB and 200 operations. External references must be bundled.</>,
                   },
                   {
                     n: "03",
-                    t: "Approve the listing",
-                    d: <>Review the auto-generated capability tags (the keywords agents will match on), the pricing model, and a working example. Edit any field before going live.</>,
+                    t: "Save and submit for review",
+                    d: <>Check the imported name, description, URLs, operations, authentication, and provider pricing. Save the draft, then select Submit for review. APIClaw reviews the metadata and your right to represent the API. Pending drafts stay private.</>,
                   },
                   {
                     n: "04",
                     t: "Live and discoverable",
-                    d: <>Your API is searchable by <code className="claw-mono text-[13px] text-text-primary">discover_apis</code> immediately. Per-call analytics show in your dashboard from the first agent that calls you.</>,
+                    d: <>After approval, find the listing under Catalog → All APIs or use <code className="claw-mono text-[13px] text-text-primary">{'discover_apis({ query: "your API name", callable_only: false })'}</code>. Callable-only results exclude discovery listings. Check review status in My APIs; corrections require a new review.</>,
                   },
                   {
                     n: "05",
-                    t: "Optional: partner upgrade",
-                    d: <>Hand APIClaw the credential. We hold custody and agents call without keys. Commercial terms (flat fee, share, or hybrid) are agreed per partner.</>,
+                    t: "Keep control of your API",
+                    d: <>A discovery listing does not enable gateway execution, store API credentials, or activate APIClaw billing. Users follow your documentation and use their own provider account. You can unpublish from My APIs.</>,
                   },
                 ].map((step) => (
                   <li key={step.n} className="grid gap-1 border-b border-border-subtle py-5 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
@@ -479,9 +479,9 @@ call_api({
               <div className="mt-8 flex flex-col gap-5 rounded-[14px] border border-border-subtle bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>
                   <p className="claw-eyebrow mb-1.5">Always free</p>
-                  <p className={BODY}>Listing your API is free. Always. The partner upgrade is opt-in.</p>
+                  <p className={BODY}>Discovery listings are free. No API key or payment method is needed to submit one.</p>
                 </div>
-                <a href="/workspace" className="claw-btn claw-btn-solid flex-none">List your API</a>
+                <a href="/workspace?tab=api-catalog&view=my-apis" className="claw-btn claw-btn-solid flex-none">List your API</a>
               </div>
             </section>
           </div>

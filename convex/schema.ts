@@ -1,7 +1,28 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+import { listingMetadata } from "./listingPolicy";
+
 export default defineSchema({
+  // Discovery metadata only. Never read by routing, provider keys or billing.
+  discoveryListings: defineTable({
+    workspaceId: v.id("workspaces"),
+    nameKey: v.string(),
+    draft: listingMetadata,
+    revision: v.number(),
+    reviewState: v.union(v.literal("draft"), v.literal("pending"), v.literal("approved"), v.literal("changes_requested")),
+    published: v.optional(listingMetadata),
+    isPublished: v.boolean(),
+    reviewedRevision: v.optional(v.number()),
+    reviewNote: v.optional(v.string()),
+    reviewedBy: v.optional(v.string()),
+    reviewedAt: v.optional(v.number()),
+    createdAt: v.number(), updatedAt: v.number(),
+  }).index("by_workspace", ["workspaceId"])
+    .index("by_workspace_name", ["workspaceId", "nameKey"])
+    .index("by_name", ["nameKey"])
+    .index("by_published", ["isPublished"])
+    .index("by_review", ["reviewState"]),
   // Credits per agent
   agentCredits: defineTable({
     agentId: v.string(),

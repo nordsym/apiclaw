@@ -1,4 +1,5 @@
 "use client";
+import { MyApiListings } from "./MyApiListings";
 import { invalidateWorkspace } from "@/lib/workspace-data";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -25,7 +26,7 @@ import {
 export const GATEWAY_URL = process.env.NEXT_PUBLIC_APICLAW_GATEWAY_URL || "https://api.apiclaw.cloud";
 const TEST_CALL_PENDING_STORAGE_KEY = "apiclaw.workspace.pending-test-call";
 
-type SourceId = "managed" | "all";
+type SourceId = "managed" | "all" | "mine";
 
 /** Catalog row as returned by either source. Extra fields are optional on the shared type. */
 type Item = CatalogItem & {
@@ -141,6 +142,11 @@ function targetOf(item: Item): Target | null {
 
 export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | null }) {
   const [source, setSource] = useState<SourceId>("managed");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("q")) { setQuery(params.get("q")!); setSource("all"); }
+    if (params.get("view") === "my-apis") setSource("mine");
+  }, []);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [target, setTarget] = useState<Target | null>(null);
@@ -166,6 +172,7 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
     <TestCallPanel target={target} call={call} sessionToken={sessionToken} onClose={() => setTarget(null)} />
   ) : null;
 
+  if (source === "mine") return <div><PageHeader title="My APIs" description="Your workspace's discovery listings" /><button className={btnQuiet} onClick={() => setSource("all")}>Back to catalog</button><MyApiListings sessionToken={sessionToken} /></div>;
   return (
     <div>
       <PageHeader title="Catalog" description="Search providers. Callable rows can be called right now, the rest are discoverable." />
@@ -181,7 +188,7 @@ export function WorkspaceCatalog({ sessionToken }: { sessionToken?: string | nul
 
       <div className="mt-4">
         <SurfaceTabs
-          items={[{ id: "managed", label: "Callable" }, { id: "all", label: "All" }]}
+          items={[{ id: "managed", label: "Callable" }, { id: "all", label: "All" }, { id: "mine", label: "My APIs" }]}
           active={source}
           onChange={(id) => { setSource(id as SourceId); setTarget(null); }}
           label="Source"
