@@ -1,5 +1,5 @@
 import { parseDocument } from "yaml";
-import type { ListingMetadata } from "../../../convex/listingPolicy";
+import type { ListingMetadata } from "../../../src/listing-metadata";
 export const SPEC_LIMIT = 1024 * 1024;
 export function parseListingSpec(
   text: string,

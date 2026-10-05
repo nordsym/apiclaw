@@ -1,0 +1,15 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "APIClaw Synthetic Release Fixture",
+    "version": "1.0.0",
+    "description": "Synthetic metadata for APIClaw release verification only. This is not a working service. Do not execute the operation."
+  },
+  "servers": [{"url": "https://api.apiclaw.cloud"}],
+  "externalDocs": {"url": "https://apiclaw.cloud/docs"},
+  "paths": {
+    "/_synthetic-release-fixture-do-not-call": {
+      "get": {"summary": "Metadata fixture only. No upstream API operation exists."}
+    }
+  }
+}

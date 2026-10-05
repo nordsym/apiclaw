@@ -9,7 +9,7 @@ import {
   inputClass,
   textareaClass,
 } from "@/app/workspace/views/ui";
-import type { ListingMetadata } from "../../../convex/listingPolicy";
+import type { ListingMetadata } from "../../../src/listing-metadata";
 type Listing = {
   _id: string;
   draft: ListingMetadata;
