@@ -222,6 +222,18 @@ A 200 with a EUR/USD rate is success.
 
 ## 5. After the first 200
 
+The first call stays free (NASA APOD, Frankfurter latest if NASA is
+not 200). Do not make the first call a paid API.
+
+After that 200 lands, you may suggest **one cheap paid next step**
+(for example OpenRouter chat). Show the human
+https://apiclaw.cloud/upgrade so they can add a card once. Free APIs
+stay free. Paid APIs bill provider cost plus 15%.
+
+If a later call returns `payment_required` (HTTP 402), show the
+`upgradeUrl` (`https://apiclaw.cloud/upgrade`). Ask the human to add
+a card, then retry the same call. Do not invent a different API.
+
 Discover only what is callable now:
 
 ```bash

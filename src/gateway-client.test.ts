@@ -5,12 +5,21 @@ const originalFetch = globalThis.fetch;
 const originalSecret = process.env.APICLAW_INTERNAL_SECRET;
 const captured: Array<Record<string, string>> = [];
 let failNextTransport = false;
+let nextResponse: { status: number; body: unknown } | null = null;
 
 globalThis.fetch = (async (_input: string | URL | Request, init?: RequestInit) => {
   captured.push(init?.headers as Record<string, string>);
   if (failNextTransport) {
     failNextTransport = false;
     throw new TypeError("simulated transport failure");
+  }
+  if (nextResponse) {
+    const queued = nextResponse;
+    nextResponse = null;
+    return new Response(JSON.stringify(queued.body), {
+      status: queued.status,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   return new Response(
     JSON.stringify({ success: true, provider: "brave_search", action: "search", data: {} }),
@@ -59,6 +68,47 @@ try {
   assert.equal(ambiguous.retryable, false);
   assert.equal(ambiguous.idempotencyKey, captured[3]["Idempotency-Key"]);
   assert.match(ambiguous.error ?? "", /Do not rerun it with a new key/);
+
+  nextResponse = {
+    status: 200,
+    body: {
+      success: true,
+      provider: "nasa",
+      action: "apod",
+      data: { title: "Helix" },
+      _notice: "First call landed.",
+      next_step: { kind: "add_payment_method", upgradeUrl: "https://apiclaw.cloud/upgrade" },
+    },
+  };
+  const nudged = await client.execute("nasa", "apod", {}, {
+    sessionToken: "session-public",
+    idempotencyKey: "first-call-nudge-1",
+  });
+  assert.equal(nudged.success, true);
+  assert.equal(nudged._notice, "First call landed.");
+  assert.deepEqual(nudged.next_step, {
+    kind: "add_payment_method",
+    upgradeUrl: "https://apiclaw.cloud/upgrade",
+  });
+
+  nextResponse = {
+    status: 402,
+    body: {
+      error: {
+        code: "payment_required",
+        message: "Add a card at https://apiclaw.cloud/upgrade, then retry this same call.",
+        upgradeUrl: "https://apiclaw.cloud/upgrade",
+      },
+    },
+  };
+  const gated = await client.execute("openrouter", "chat", {}, {
+    sessionToken: "session-public",
+    idempotencyKey: "payment-required-1",
+  });
+  assert.equal(gated.success, false);
+  assert.equal(gated.code, "payment_required");
+  assert.equal(gated.upgradeUrl, "https://apiclaw.cloud/upgrade");
+  assert.match(gated.error ?? "", /apiclaw\.cloud\/upgrade/);
 } finally {
   globalThis.fetch = originalFetch;
   if (originalSecret === undefined) delete process.env.APICLAW_INTERNAL_SECRET;

@@ -3,6 +3,7 @@ import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
   PAYG_MARGIN_RATE,
 } from "../src/product-truth";
+import { PAYMENT_REQUIRED_MESSAGE } from "../src/first-call-nudge";
 
 export type ManagedTrafficClass = "customer" | "internal" | "byok";
 export type ManagedBillingClass = "activation" | "payg" | "internal" | "contract" | "byok";
@@ -226,7 +227,7 @@ export function managedQuotaMessage(reason: ManagedUsageDecision["reason"]): str
     return "Managed execution is temporarily paused because realized provider cost did not match the authorized ceiling.";
   }
   if (reason === "payment_required") {
-    return "This API has real provider cost. Add a card to continue; you pay provider cost plus 15 percent.";
+    return PAYMENT_REQUIRED_MESSAGE;
   }
   if (reason === "unpriced_managed_call") {
     return "This managed action does not yet have a billing-grade cost adapter and is unavailable for customer traffic.";

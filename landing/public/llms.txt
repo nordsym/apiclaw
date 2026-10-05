@@ -123,7 +123,7 @@ Authorization: Bearer sk-claw-...
 
 ### 4. Remote MCP
 
-Use `https://apiclaw.cloud/mcp` in OAuth-aware MCP clients. Remote MCP supports Streamable HTTP, OAuth 2.1, PKCE, and Dynamic Client Registration.
+Use `https://apiclaw.cloud/mcp` in OAuth-aware MCP clients. Remote MCP supports Streamable HTTP and OAuth 2.1 with PKCE S256. Public dynamic client registration is closed. Sign in and generate a workspace connector for a new client.
 
 Discovery documents:
 

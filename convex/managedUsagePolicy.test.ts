@@ -6,7 +6,9 @@ import {
   evaluateManagedUsage,
   hasActiveContractEntitlement,
   hasActivePaygEntitlement,
+  managedQuotaMessage,
 } from "./managedUsagePolicy";
+import { APICLAW_UPGRADE_URL, PAYMENT_REQUIRED_MESSAGE } from "../src/first-call-nudge";
 
 // A call whose provider cost is provably zero (billingGradeCost proof +
 // estimatedProviderCostUsd === 0) is free forever, no card, uncapped; even
@@ -277,5 +279,10 @@ assert.equal(
 // A byok call never earns a customer charge (the workspace pays its own
 // provider directly, not through apiclaw's margin).
 assert.deepEqual(customerChargeForProviderCost(5, "byok"), { customerChargeUsd: 0, marginUsd: 0 });
+
+assert.equal(managedQuotaMessage("payment_required"), PAYMENT_REQUIRED_MESSAGE);
+assert.match(managedQuotaMessage("payment_required"), /https:\/\/apiclaw\.cloud\/upgrade/);
+assert.match(managedQuotaMessage("payment_required"), /retry this same call/);
+assert.equal(APICLAW_UPGRADE_URL, "https://apiclaw.cloud/upgrade");
 
 console.log("managed usage policy: zero-cost calls are free forever, paid calls require a card, entitlement and traffic classes hold, byok bypasses the card gate");

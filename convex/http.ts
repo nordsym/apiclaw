@@ -30,6 +30,13 @@ import {
   isPublicCustomerExecutableAction,
 } from "../src/product-truth";
 import {
+  APICLAW_UPGRADE_URL,
+  PAYMENT_REQUIRED_MESSAGE,
+  attachFirstCallRevenueNudge,
+  firstCallRevenueNudge,
+  type FirstCallRevenueNudge,
+} from "../src/first-call-nudge";
+import {
   buildPinnedPublicApiUrl,
   getWorkspacePublicApi,
 } from "../src/workspace-public-apis";
@@ -1343,7 +1350,7 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
         reason: quota.reason || "quota_exceeded",
         message:
           quota.message ||
-          "This API has real provider cost. Add a card to continue; you pay provider cost plus 15 percent: https://apiclaw.cloud/upgrade",
+          PAYMENT_REQUIRED_MESSAGE,
         type: unavailable ? "permission_error" : costHold ? "billing_error" : paymentRequired ? "billing_error" : "quota_error",
         ...(costHold ? { retryable: false } : {}),
         tier: quota.tier,
@@ -1357,7 +1364,7 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
         activationProviderCostCapUsd: quota.activationProviderCostCapUsd,
         activationProviderCostRemainingUsd: quota.activationProviderCostRemainingUsd,
         ...(!costHold
-          ? { upgradeUrl: quota.upgradeUrl || "https://apiclaw.cloud/upgrade" }
+          ? { upgradeUrl: quota.upgradeUrl || APICLAW_UPGRADE_URL }
           : {}),
       },
     },
@@ -1373,6 +1380,7 @@ type ManagedCallGate = {
   fixedProviderCostUsd?: number;
   reservedProviderCostUsd?: number;
   quotaWarning?: unknown;
+  hasPaymentMethod?: boolean;
 };
 
 type ManagedCallFinalization = {
@@ -1612,6 +1620,7 @@ async function enforcePreCallQuota(
       fixedProviderCostUsd,
       reservedProviderCostUsd: estimatedProviderCostUsd,
       quotaWarning: quota.quotaWarning,
+      hasPaymentMethod: quota.hasPaymentMethod === true,
     };
   }
 
@@ -1876,6 +1885,10 @@ async function rejectProxyBeforeUpstream(
   return jsonResponse(data, status);
 }
 
+type FirstCallRecordResult = {
+  firstCallRecorded: boolean;
+};
+
 async function recordFirstSuccessfulGatewayCall(
   ctx: any,
   args: {
@@ -1885,20 +1898,48 @@ async function recordFirstSuccessfulGatewayCall(
     provider?: string;
     action?: string;
   }
-): Promise<void> {
-  if (!args.workspaceId || args.authMethod === "anonymous") return;
+): Promise<FirstCallRecordResult> {
+  if (!args.workspaceId || args.authMethod === "anonymous") {
+    return { firstCallRecorded: false };
+  }
   try {
-    await ctx.runMutation((internal as any).activation.recordFirstCallApiSuccess, {
+    const recorded = await ctx.runMutation((internal as any).activation.recordFirstCallApiSuccess, {
       workspaceId: args.workspaceId as any,
       path: args.path,
       authMethod: args.authMethod,
       provider: args.provider,
       action: args.action,
-    });
+    }) as { event?: string; deduped?: boolean } | null;
+    return {
+      firstCallRecorded: recorded?.event === "first_call_api_success" && recorded?.deduped === false,
+    };
   } catch (e: any) {
     // Activation telemetry must never turn a successful API call into a failure.
     console.error("[Activation] first-call recording failed:", e?.message);
+    return { firstCallRecorded: false };
   }
+}
+
+function executeRevenueNudge(
+  recorded: FirstCallRecordResult | null | undefined,
+  gate: ManagedCallGate | undefined,
+): FirstCallRevenueNudge | null {
+  return firstCallRevenueNudge({
+    firstCallRecorded: recorded?.firstCallRecorded === true,
+    hasPaymentMethod: gate?.hasPaymentMethod === true,
+    billingClass: gate?.billingClass,
+  });
+}
+
+function jsonExecuteResponse(
+  payload: Record<string, unknown>,
+  status: number,
+  nudge: FirstCallRevenueNudge | null,
+): Response {
+  const body = status === 200 && payload.success !== false
+    ? attachFirstCallRevenueNudge(payload, nudge)
+    : payload;
+  return jsonResponse(body, status);
 }
 
 // Helper to validate session and log API usage.
@@ -5942,15 +5983,15 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           signal: AbortSignal.timeout(60_000),
         });
 
-        if (response.ok) {
-          await recordFirstSuccessfulGatewayCall(ctx, {
+        const firstCall = response.ok
+          ? await recordFirstSuccessfulGatewayCall(ctx, {
             workspaceId,
             path: "/v1/execute",
             authMethod,
             provider: route.provider,
             action: "chat",
-          });
-        }
+          })
+          : { firstCallRecorded: false };
 
         // Streaming
         if (params.stream && response.body) {
@@ -6015,7 +6056,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         const reconciliationResponse = managedCostReconciliationResponse(quotaGate, finalization);
         if (reconciliationResponse) return reconciliationResponse;
 
-        return jsonResponse({
+        return jsonExecuteResponse({
           success: response.ok,
           provider: route.provider,
           action: "chat",
@@ -6029,7 +6070,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
               margin: "15%",
             },
           },
-        }, response.ok ? 200 : response.status);
+        }, response.ok ? 200 : response.status, executeRevenueNudge(firstCall, quotaGate));
       } catch (e: any) {
         if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
           await finalizeManagedCall(ctx, quotaGate, {
@@ -6103,15 +6144,15 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           upstreamDispatchAttempted = true;
           const result = await executeE2BCode(e2bKey, params);
           const latencyMs = Date.now() - startTime;
-          if (result.ok) {
-            await recordFirstSuccessfulGatewayCall(ctx, {
+          const firstCall = result.ok
+            ? await recordFirstSuccessfulGatewayCall(ctx, {
               workspaceId,
               path: "/v1/execute",
               authMethod,
               provider,
               action,
-            });
-          }
+            })
+            : { firstCallRecorded: false };
           await finalizeManagedCall(ctx, quotaGate, {
             success: result.ok,
             provider,
@@ -6120,13 +6161,13 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
               : { providerCostUsd: 0, costSource: "zero_cost" as const }),
             model: params.model,
           });
-          return jsonResponse({
+          return jsonExecuteResponse({
             success: result.ok,
             provider,
             action,
             data: result.data,
             _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-          }, result.status);
+          }, result.status, executeRevenueNudge(firstCall, quotaGate));
         }
 
         if (!req) {
@@ -6145,15 +6186,15 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         const response = await fetch(req.url, fetchOpts);
         const latencyMs = Date.now() - startTime;
 
-        if (response.ok) {
-          await recordFirstSuccessfulGatewayCall(ctx, {
+        const firstCall = response.ok
+          ? await recordFirstSuccessfulGatewayCall(ctx, {
             workspaceId,
             path: "/v1/execute",
             authMethod,
             provider,
             action,
-          });
-        }
+          })
+          : { firstCallRecorded: false };
 
         // Inbound log to provider-owner workspace (parity with MCP src/index.ts:2192).
         // Without this, gateway/HTTP calls bypass partner dashboards.
@@ -6195,7 +6236,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
               : { providerCostUsd: 0, costSource: "zero_cost" as const }),
             model: params.model,
           });
-          return jsonResponse({
+          return jsonExecuteResponse({
             success: response.ok,
             provider,
             action,
@@ -6206,7 +6247,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
               base64,
             },
             _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-          }, response.ok ? 200 : response.status);
+          }, response.ok ? 200 : response.status, executeRevenueNudge(firstCall, quotaGate));
         }
 
         // For text/json responses read once as text then try json parse
@@ -6228,13 +6269,13 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
           upstreamRequestId: typeof data?.id === "string" ? data.id : undefined,
         });
 
-        return jsonResponse({
+        return jsonExecuteResponse({
           success: response.ok,
           provider,
           action,
           data,
           _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-        }, response.ok ? 200 : response.status);
+        }, response.ok ? 200 : response.status, executeRevenueNudge(firstCall, quotaGate));
       } catch (e: any) {
         const latencyMs = Date.now() - startTime;
         if (workspaceId) {
@@ -6322,15 +6363,15 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         upstreamDispatchAttempted = true;
         const response = await fetch(pinned.toString(), fetchOpts);
         const latencyMs = Date.now() - startTime;
-        if (response.ok) {
-          await recordFirstSuccessfulGatewayCall(ctx, {
+        const firstCall = response.ok
+          ? await recordFirstSuccessfulGatewayCall(ctx, {
             workspaceId,
             path: "/v1/execute",
             authMethod,
             provider: publicApi.id,
             action,
-          });
-        }
+          })
+          : { firstCallRecorded: false };
         const raw = await readUpstreamTextCapped(response);
         let data: any;
         try {
@@ -6345,13 +6386,13 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
             ? successfulManagedCostDetails(quotaGate)
             : { providerCostUsd: 0, costSource: "zero_cost" as const }),
         });
-        return jsonResponse({
+        return jsonExecuteResponse({
           success: response.ok,
           provider: publicApi.id,
           action,
           data,
           _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-        }, response.ok ? 200 : response.status);
+        }, response.ok ? 200 : response.status, executeRevenueNudge(firstCall, quotaGate));
       } catch (e: any) {
         if (upstreamDispatchAttempted) {
           return ambiguousPostDispatchResponse(

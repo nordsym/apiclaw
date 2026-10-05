@@ -1,10 +1,15 @@
 // RFC 7591 Dynamic Client Registration.
-// Open per spec — clients (Grok, Cursor, ChatGPT, etc.) register themselves
-// to discover IDs/secrets. Registration alone grants nothing; tokens still
-// require human consent on /oauth/authorize against an email-verified
-// workspace, so this endpoint cannot be used to bypass the auth gate.
+// Public registration is closed. Callers must present an initial access
+// token (Authorization: Bearer) that matches OAUTH_DCR_INITIAL_ACCESS_TOKEN
+// on this server and on Convex. Redirect URIs must be loopback or on the
+// hosted-client allowlist. This route does not mint credentials otherwise.
+//
+// First-party clients keep working without this endpoint:
+// - already-registered clients continue through /oauth/authorize + PKCE S256
+// - a signed-in workspace mints a new connector at POST /api/workspace/connectors
 import { NextRequest, NextResponse } from "next/server";
 import { convexMutation, ConvexCallError } from "@/lib/convex";
+import { registrationDecision } from "@/lib/oauth-dcr.generated";
 
 export const runtime = "nodejs";
 
@@ -28,7 +33,33 @@ type DynamicRegistrationResult = {
 };
 
 function badRequest(error: string, description: string) {
-  return NextResponse.json({ error, error_description: description }, { status: 400 });
+  return NextResponse.json(
+    { error, error_description: description },
+    {
+      status: 400,
+      headers: {
+        "Cache-Control": "no-store",
+        "Access-Control-Allow-Origin": "*",
+      },
+    },
+  );
+}
+
+function unauthorized() {
+  return NextResponse.json(
+    {
+      error: "invalid_token",
+      error_description: "Dynamic client registration requires an initial access token.",
+    },
+    {
+      status: 401,
+      headers: {
+        "Cache-Control": "no-store",
+        "WWW-Authenticate": 'Bearer realm="apiclaw-oauth-registration", error="invalid_token"',
+        "Access-Control-Allow-Origin": "*",
+      },
+    },
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -42,8 +73,16 @@ export async function POST(req: NextRequest) {
   const redirectUris = Array.isArray(body.redirect_uris)
     ? body.redirect_uris.filter((u): u is string => typeof u === "string")
     : [];
-  if (redirectUris.length === 0) {
-    return badRequest("invalid_redirect_uri", "redirect_uris is required");
+
+  const decision = registrationDecision({
+    authorizationHeader: req.headers.get("authorization"),
+    configuredToken: process.env.OAUTH_DCR_INITIAL_ACCESS_TOKEN,
+    redirectUris,
+    extraAllowlistRaw: process.env.OAUTH_DCR_REDIRECT_ALLOWLIST,
+  });
+  if (!decision.ok) {
+    if (decision.status === 401) return unauthorized();
+    return badRequest(decision.error, decision.error_description);
   }
 
   const grantTypesIn = Array.isArray(body.grant_types)
@@ -66,11 +105,12 @@ export async function POST(req: NextRequest) {
       "mcpOAuth:registerDynamicClient",
       {
         name,
-        redirectUris,
+        redirectUris: decision.redirectUris,
         grantTypes: grantTypesIn,
         tokenEndpointAuthMethod: authMethod,
         ...(scope === undefined ? {} : { scope }),
         publicClient: isPublic,
+        initialAccessToken: decision.initialAccessToken,
       }
     );
     return NextResponse.json(result, {
@@ -81,6 +121,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (e) {
+    if (e instanceof ConvexCallError && e.message.includes("dynamic_client_registration_closed")) {
+      return unauthorized();
+    }
     if (e instanceof ConvexCallError) {
       return badRequest("invalid_client_metadata", e.message);
     }
@@ -94,7 +137,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
     },
   });
 }

@@ -92,7 +92,7 @@ Authorization: Bearer sk-claw-...
 https://apiclaw.cloud/mcp
 ```
 
-Remote MCP supports OAuth 2.1, PKCE, Dynamic Client Registration, and Streamable HTTP.
+Remote MCP supports OAuth 2.1 with PKCE S256 and Streamable HTTP. Public dynamic client registration is closed. Sign in and generate a workspace connector for a new client. Already-registered clients keep working.
 
 Discovery documents:
 

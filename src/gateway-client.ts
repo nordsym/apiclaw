@@ -51,6 +51,11 @@ export interface GatewayResponse {
     authMode?: string;
     credentialSource?: string;
   };
+  /** Soft post-first-call billing hint from a free activation success. */
+  _notice?: string;
+  next_step?: unknown;
+  /** Present on payment_required so the agent can show the billing URL. */
+  upgradeUrl?: string;
 }
 
 export interface GatewayExecuteOptions {
@@ -205,6 +210,9 @@ export class GatewayClient {
             typeof errObj === "string"
               ? errObj
               : errObj?.message || `Gateway HTTP ${response.status}`,
+          upgradeUrl: typeof errObj?.upgradeUrl === "string"
+            ? errObj.upgradeUrl
+            : undefined,
           ...(isAuthError
             ? {
                 authRequired: {
@@ -230,6 +238,8 @@ export class GatewayClient {
         error: json.error,
         cost: json.cost,
         _apiclaw: json._apiclaw,
+        _notice: typeof json._notice === "string" ? json._notice : undefined,
+        next_step: json.next_step,
       };
     } catch (e: any) {
       return {
