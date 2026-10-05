@@ -150,3 +150,20 @@ approve or publish an actual Arcmira listing, or call an Arcmira API operation.
 Unit tests also cover tenant isolation, stale/rejected review, published snapshot
 isolation, workspace import budget, malicious specs, DNS pinning and response
 bounds. Live release verification is separate from these local checks.
+
+## Live release verification
+
+PR #49 and build fix #50 are deployed. The October 5 production check used a new
+free workspace, an owned OpenAPI URL and an uploaded YAML file through preview,
+review and both catalog and Remote MCP search. Synthetic entries were withdrawn
+after verification. Registration through Clerk CAPTCHA was not automated; the
+test identity was provisioned by the operator before the native workspace bridge.
+See [the release evidence](../audits/2026-10-05-discovery-listings.md) for precise
+limits and before/after billing checks. The owned URL fixture at
+`/testing/discovery-openapi.json` describes no executable service. Real provider
+publication still requires ownership and content approval.
+
+Observed release behavior: pushes to main automatically start Vercel production
+builds; branch previews were canceled before building. Deploy backend changes
+before merging a frontend dependency on them, or explicitly coordinate the Git
+release. Do not assume this project is manual-deploy-only.
