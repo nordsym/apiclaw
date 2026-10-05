@@ -169,6 +169,7 @@ export const submit = mutation({
       notificationState: "queued",
       notificationAttempts: 0,
       notificationId: undefined,
+      notificationAlertSent: false,
       reviewNote: undefined,
       updatedAt: Date.now(),
     });

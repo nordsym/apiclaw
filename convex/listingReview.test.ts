@@ -75,8 +75,19 @@ await assert.rejects(
 );
 const nativeFetch = globalThis.fetch;
 process.env.RESEND_API_KEY = "synthetic-no-network";
+process.env.APICLAW_INBOUND_WEBHOOK_SECRET = "synthetic-alert-secret";
 let deliveries = 0;
+let alerts = 0;
 globalThis.fetch = async (_url, init) => {
+  if (String(_url).includes("/webhook/inbound/apiclaw")) {
+    alerts++;
+    const alert = JSON.parse(String(init?.body));
+    assert.equal(alert.listingId, id);
+    assert.equal(alert.revision, 1);
+    assert.equal(alert.event, "listing_review");
+    assert(!JSON.stringify(alert).includes("test@example.test"));
+    return new Response(null, { status: alerts === 1 ? 503 : 200 });
+  }
   deliveries++;
   const body = JSON.parse(String(init?.body));
   assert.equal(body.to, "gustav@nordsym.com");
@@ -88,11 +99,18 @@ globalThis.fetch = async (_url, init) => {
 };
 try {
   await t.action(n.send, { id, revision: 1 });
+  assert.equal(
+    (await t.query(n.candidate, { id, revision: 1 })).notificationId,
+    "synthetic-receipt",
+  );
+  await t.action(n.send, { id, revision: 1 });
   await t.action(n.send, { id, revision: 1 });
   assert.equal(deliveries, 1);
+  assert.equal(alerts, 2);
 } finally {
   globalThis.fetch = nativeFetch;
   delete process.env.RESEND_API_KEY;
+  delete process.env.APICLAW_INBOUND_WEBHOOK_SECRET;
 }
 const queue = await t.query(api.operatorPending, {
   internalSecret: "synthetic-review-secret",
@@ -100,6 +118,7 @@ const queue = await t.query(api.operatorPending, {
   paginationOpts: { numItems: 25, cursor: null },
 });
 assert.equal(queue.page[0].notificationState, "sent");
+assert.equal(queue.page[0].notificationAlertSent, true);
 assert.equal(queue.page[0].submitter, "test@example.test");
 await assert.rejects(
   t.mutation(api.operatorReview, {

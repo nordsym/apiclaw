@@ -53,6 +53,9 @@ const priorInternalSecret = process.env.APICLAW_INTERNAL_SECRET;
 process.env.APICLAW_INTERNAL_SECRET = "isolated-review-bridge";
 const notifications: any[] = [];
 const priorResendKey = process.env.RESEND_API_KEY;
+const priorInboundSecret = process.env.APICLAW_INBOUND_WEBHOOK_SECRET;
+process.env.APICLAW_INBOUND_WEBHOOK_SECRET = "isolated-alert-secret";
+const alerts: any[] = [];
 process.env.RESEND_API_KEY = "isolated-no-network";
 let catalogGET: any, importPOST: any;
 const server = createServer(async (req, res) => {
@@ -162,6 +165,10 @@ globalThis.fetch = (async (input: any, init: any) => {
     notifications.push(JSON.parse(init.body));
     return Response.json({ id: "isolated-notification" });
   }
+  if (url.href === "https://nordsym.app.n8n.cloud/webhook/inbound/apiclaw") {
+    alerts.push(JSON.parse(init.body));
+    return new Response(null, { status: 200 });
+  }
   if (url.origin === "https://apiclaw.cloud" && url.pathname === "/api/catalog")
     return catalogGET(new NextRequest(origin + url.pathname + url.search));
   assert.equal(url.origin, origin, "Unexpected outbound fetch");
@@ -237,6 +244,8 @@ try {
     revision: 1,
   });
   assert.equal(notifications.length, 1);
+  assert.equal(alerts.length, 1);
+  assert.equal(alerts[0].listingId, row._id);
   assert.equal(notifications[0].to, "gustav@nordsym.com");
   assert(
     notifications[0].html.includes(
@@ -388,6 +397,9 @@ try {
   else process.env.APICLAW_INTERNAL_SECRET = priorInternalSecret;
   if (priorResendKey === undefined) delete process.env.RESEND_API_KEY;
   else process.env.RESEND_API_KEY = priorResendKey;
+  if (priorInboundSecret === undefined)
+    delete process.env.APICLAW_INBOUND_WEBHOOK_SECRET;
+  else process.env.APICLAW_INBOUND_WEBHOOK_SECRET = priorInboundSecret;
   process.chdir(root);
   await new Promise<void>((resolve) => server.close(() => resolve()));
   rmSync(temporary, { recursive: true, force: true });

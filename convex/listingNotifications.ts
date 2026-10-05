@@ -41,7 +41,12 @@ export const candidate = internalQuery({
   },
 });
 export const record = internalMutation({
-  args: { ...identity, sent: v.boolean(), messageId: v.optional(v.string()) },
+  args: {
+    ...identity,
+    sent: v.boolean(),
+    messageId: v.optional(v.string()),
+    alertSent: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     const row = await ctx.db.get(args.id);
     if (
@@ -60,6 +65,7 @@ export const record = internalMutation({
           ? "failed"
           : "queued",
       notificationId: args.messageId,
+      notificationAlertSent: args.alertSent ?? false,
     });
     if (!args.sent && attempts < 3)
       await ctx.scheduler.runAfter(
@@ -77,11 +83,11 @@ export const send = internalAction({
       args,
     );
     if (!row) return;
-    let sent = false,
-      messageId: string | undefined;
+    let alertSent = row.notificationAlertSent ?? false;
+    let messageId = row.notificationId;
     try {
       const key = process.env.RESEND_API_KEY;
-      if (key) {
+      if (key && !messageId) {
         const response = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -97,7 +103,6 @@ export const send = internalAction({
         if (response.ok) {
           const data = await response.json();
           if (typeof data.id === "string") {
-            sent = true;
             messageId = data.id;
           }
         }
@@ -105,9 +110,41 @@ export const send = internalAction({
     } catch {
       /* Persist failure and bounded retry; never log credentials or provider responses. */
     }
+    try {
+      const secret = process.env.APICLAW_INBOUND_WEBHOOK_SECRET;
+      if (!alertSent && secret) {
+        const response = await fetch(
+          "https://nordsym.app.n8n.cloud/webhook/inbound/apiclaw",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-APIClaw-Webhook-Secret": secret,
+            },
+            // Keep submitter-controlled text and personal data out of operator alerts.
+            body: JSON.stringify({
+              source: "apiclaw",
+              event: "listing_review",
+              email: "Review queue",
+              workspaceId: row.workspaceId,
+              tier: "Discovery only",
+              listingId: args.id,
+              revision: args.revision,
+              timestamp: row.updatedAt,
+            }),
+            signal: AbortSignal.timeout(10000),
+          },
+        );
+        // The existing webhook responds only after Telegram sendMessage completes.
+        alertSent = response.ok;
+      }
+    } catch {
+      /* Retry only the missing delivery. An ambiguous timeout may duplicate an alert. */
+    }
     await ctx.runMutation(internal.listingNotifications.record, {
       ...args,
-      sent,
+      sent: !!messageId && alertSent,
+      alertSent,
       ...(messageId ? { messageId } : {}),
     });
   },
