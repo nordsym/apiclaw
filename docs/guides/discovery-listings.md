@@ -51,9 +51,10 @@ and documentation. Those boundaries apply to Arcmira as to every other listing.
 ## Operator review
 
 A workspace can submit at most 10 revisions per UTC hour, independently of import
-and execution quotas. Repeating an already-pending submission creates no new email.
-On submission, APIClaw schedules an operator email to `gustav@nordsym.com` from
-`noreply@apiclaw.cloud`. The message links to the exact listing in
+and execution quotas. Repeating an already-pending submission creates no new notification.
+On submission, APIClaw schedules an alert to the existing APIClaw Telegram ALERTS
+channel through Inbound Net and an email to `gustav@nordsym.com` from
+`noreply@apiclaw.cloud`. Both link to the exact listing in
 `https://apiclaw.cloud/workspace/review-listings?listing=LISTING_ID`.
 
 1. Sign in with the verified `gustav@nordsym.com` Clerk identity. Other workspace
@@ -71,13 +72,19 @@ On submission, APIClaw schedules an operator email to `gustav@nordsym.com` from
 
 The full pending queue is available at `/workspace/review-listings`, including
 notification status (`queued`, `sent`, `failed`, or not recorded for older entries).
-`sent` means the email provider accepted the message, not proof of inbox delivery.
+For new submissions after the alert-delivery release, `sent` means Telegram
+sendMessage completed through Inbound Net and the email provider accepted the
+message. This is not proof of reading or Gmail inbox placement. Live tests found
+the email in Gmail spam despite SPF, DKIM and DMARC passing; use Telegram or the
+review queue as the operational path. Older `sent` records are email-only.
 Failed attempts retry after one and two minutes, with three attempts maximum.
-A stable provider idempotency key prevents duplicate sends for the same revision.
+A stable email idempotency key prevents duplicate email sends for the same revision.
+Completed channels are skipped on retry. An ambiguous Telegram timeout can produce
+a duplicate alert; approval still requires the current revision and operator login.
 Approval, editing and withdrawal stop queued retries for an obsolete submission.
 If all attempts fail, the pending item remains reviewable in the queue; check the
-mail service configuration before resubmitting a revised draft. Previously pending
-entries are not automatically backfilled with emails on deployment.
+mail service and Inbound Net configuration before resubmitting a revised draft.
+Previously pending entries are not automatically backfilled on deployment.
 
 The server bridge verifies Clerk operator identity and supplies the internal secret
 server-side. The browser never receives that secret, and a workspace session alone

@@ -16,6 +16,7 @@ export default defineSchema({
     notificationState: v.optional(v.union(v.literal("queued"), v.literal("sent"), v.literal("failed"))),
     notificationAttempts: v.optional(v.number()),
     notificationId: v.optional(v.string()),
+    notificationAlertSent: v.optional(v.boolean()),
     reviewedRevision: v.optional(v.number()),
     reviewNote: v.optional(v.string()),
     reviewedBy: v.optional(v.string()),
