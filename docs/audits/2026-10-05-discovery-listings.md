@@ -35,9 +35,8 @@ The docs now describe the actual import/review/search path and the explicit
   `https://api.arcmira.com/` and `https://arcmira.com/docs`. The browser also imported
   that public URL through the real import route and saved to the isolated database.
   No Arcmira API operation was executed and no real listing was submitted/approved.
-- Existing regression suite passed all pre-existing test files. An initial newly
-  added assertion depended on fixture whitespace; it was corrected to construct a
-  real external-reference document, and the complete new test command passed.
+- Full `npm test` passed after merging current main, including the OAuth
+  registration and first-call nudge regressions plus the new listing tests.
 - Root and Convex TypeScript checks passed. Next production build passed; existing
   Browserslist and edge-rendering warnings remained. Generated timestamp-only
   statistics changes from the prebuild were restored.
@@ -53,6 +52,8 @@ pricing metadata in the local MCP source requires a future npm release.
 
 Production deployment, npm publication and actual Arcmira publication are separate
 from these local results. Follow the guide's backend-first rollout and data-preserving
-rollback. Current remote main contains subsequent security changes and the local
-baseline retains deployed workspace and website-service repairs; reconcile both
-before any production deployment. Do not overwrite those repairs.
+rollback. The candidate merges remote main through `2f657e1` (OAuth registration fix)
+while preserving the deployed workspace-state and website-service repairs in the
+local baseline. Post-merge browser, regression, typecheck/codegen and Next build
+checks passed. Feature commit: `3af76d0`; merge commit: `a2073b5`. Production state
+must still be inspected immediately before any release. Do not overwrite live repairs.
