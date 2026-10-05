@@ -57,3 +57,11 @@ while preserving the deployed workspace-state and website-service repairs in the
 local baseline. Post-merge browser, regression, typecheck/codegen and Next build
 checks passed. Feature commit: `3af76d0`; merge commit: `a2073b5`. Production state
 must still be inspected immediately before any release. Do not overwrite live repairs.
+
+## Hosted preview status
+
+Draft PR: https://github.com/nordsym/apiclaw/pull/49. The automatic Git preview
+`dpl_25DZBNRABBbZThxFCrgJvTux4roV` is CANCELED, with a 0 ms build and no build
+events. GitHub reports this as a failing Vercel check. No hosted preview is
+claimed as verified; the cancellation reason was not returned by the available
+deployment metadata. Local build and test results remain the evidence above.
