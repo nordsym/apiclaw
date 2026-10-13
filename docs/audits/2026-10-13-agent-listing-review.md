@@ -68,3 +68,13 @@ They verify zero provider/key/payment/execution records and unchanged usage.
 
 Release verification and deployment identifiers are recorded after the live gate.
 Operator procedure: [approve listings](../ops/approve-listings.md).
+
+### Production envelope correction
+
+The first live stale-revision probe returned 503 even though the underlying mutation
+correctly refused the decision. Convex's production HTTP envelope hides the error
+message as `Server Error` and provides the structured application code in `errorData`.
+The shared HTTP caller had discarded that field. It now retains structured data
+on ConvexCallError, and both review routes map LISTING_REVIEW_STALE to 409. No
+raw error payload is returned to clients. A regression test reproduces the exact
+production envelope, alongside the real route classification test.

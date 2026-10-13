@@ -52,7 +52,8 @@ export async function authorizeListingAgent(req: NextRequest) {
 
 export function listingReviewFailure(error: unknown) {
   const message = error instanceof Error ? error.message : "";
-  if (/LISTING_REVIEW_STALE|Review is stale|^stale$/.test(message))
+  const code = (error as { data?: { code?: string } } | null)?.data?.code;
+  if (code === "LISTING_REVIEW_STALE" || /LISTING_REVIEW_STALE|Review is stale|^stale$/.test(message))
     return operatorJson(
       {
         error:

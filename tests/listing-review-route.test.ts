@@ -107,6 +107,8 @@ try {
     (await POST(request("https://apiclaw.cloud", body))).status,
     409,
   );
+  globals.__listingFailure = 'structured';
+  assert.equal((await POST(request("https://apiclaw.cloud", body))).status, 409);
   console.log(
     "PASS: real review route denies non-operators/CSRF, requires notes, ignores forged identity and handles stale reviews",
   );
