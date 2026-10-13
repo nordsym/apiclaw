@@ -15,20 +15,20 @@ async function call<T>(kind: "mutation" | "query", path: string, args: Record<st
     body: JSON.stringify({ path, args }),
     cache: "no-store",
   });
-  const json = (await res.json()) as ConvexEnvelope<T> & { status?: string; errorMessage?: string };
+  const json = (await res.json()) as ConvexEnvelope<T> & { status?: string; errorMessage?: string; errorData?: unknown };
   if (!res.ok) {
     const msg = (json as { errorMessage?: string })?.errorMessage || `convex ${kind} failed: ${res.status}`;
-    throw new ConvexCallError(msg, res.status);
+    throw new ConvexCallError(msg, res.status, json.errorData);
   }
   // Convex returns { status: "success", value: ... } or { status: "error", errorMessage }
   if ((json as { status?: string }).status === "error") {
-    throw new ConvexCallError((json as { errorMessage?: string }).errorMessage || "convex error", 400);
+    throw new ConvexCallError((json as { errorMessage?: string }).errorMessage || "convex error", 400, json.errorData);
   }
   return ((json as { value?: T }).value !== undefined ? (json as { value: T }).value : (json as T));
 }
 
 export class ConvexCallError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(message: string, public readonly status: number, public readonly data?: unknown) {
     super(message);
   }
 }
