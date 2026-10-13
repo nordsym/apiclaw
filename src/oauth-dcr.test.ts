@@ -7,7 +7,7 @@ import {
   isAllowlistedDynamicRedirect,
   MIN_INITIAL_ACCESS_TOKEN_LENGTH,
   registrationDecision,
-} from "./oauth-dcr";
+} from "./oauth-dcr.js";
 
 const TOKEN = "a".repeat(MIN_INITIAL_ACCESS_TOKEN_LENGTH);
 const EVIL = ["https://evil.example/callback"];

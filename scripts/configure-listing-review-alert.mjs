@@ -30,7 +30,7 @@ const parts = previous
     p.startsWith("{{") ? "(" + p.slice(2, -2).trim() + ")" : JSON.stringify(p),
   );
 target.parameters.text =
-  '={{ $json.body.event === "listing_review" ? "🦞 APIClaw: API listing awaiting review\\n\\nRevision: " + Number($json.body.revision) + "\\nhttps://apiclaw.cloud/workspace/review-listings?listing=" + encodeURIComponent(String($json.body.listingId)) + "\\n\\nSign in as gustav@nordsym.com. Discovery only. Review ownership before approving." : (' +
+  '={{ $json.body.event === "listing_review" ? "🦞 APIClaw: API listing awaiting review\\n\\nListing ID: " + String($json.body.listingId) + "\\nRevision: " + Number($json.body.revision) + "\\nhttps://apiclaw.cloud/workspace/review-listings?listing=" + encodeURIComponent(String($json.body.listingId)) + "\\n\\nSign in as gustav@nordsym.com. Discovery only. Review ownership before approving." : (' +
   parts.join(" + ") +
   ") }}";
 const evaluate = (body) =>

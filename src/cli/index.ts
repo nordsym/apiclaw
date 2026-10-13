@@ -5,6 +5,7 @@
  */
 
 import { Command } from 'commander';
+import { registerListingAdmin } from './commands/admin-listings.js';
 import { writeFileSync } from 'fs';
 import { setupCommand } from './commands/setup.js';
 import { mcpInstallCommand } from './commands/mcp-install.js';
@@ -18,7 +19,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.9.11';
+const VERSION = '2.9.12';
 
 const program = new Command();
 
@@ -26,6 +27,8 @@ program
   .name('apiclaw')
   .description('APIClaw MCP Auto-Setup - Configure APIClaw across all your AI coding assistants')
   .version(VERSION);
+
+registerListingAdmin(program);
 
 // Setup command - main entry point
 program
