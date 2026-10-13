@@ -230,9 +230,9 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
   version: string;
   packages: Record<string, { version?: string; bin?: Record<string, string> }>;
 };
-assert.equal(packageMetadata.version, "2.9.11");
-assert.equal(packageLock.version, "2.9.11");
-assert.equal(packageLock.packages[""].version, "2.9.11");
+assert.equal(packageMetadata.version, "2.9.12");
+assert.equal(packageLock.version, "2.9.12");
+assert.equal(packageLock.packages[""].version, "2.9.12");
 assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);

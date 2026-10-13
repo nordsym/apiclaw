@@ -26,7 +26,7 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
             : next
               ? "?cursor=" + encodeURIComponent(next)
               : ""),
-        { cache: "no-store" },
+        { cache: "no-store", signal: AbortSignal.timeout(15000) },
       );
       const d = await r.json();
       if (!r.ok) throw Error(d.error);
@@ -42,6 +42,13 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
     void load();
   }, [listingId]);
   async function review(row: Row, approve: boolean) {
+    if (!notes[row._id]?.trim()) {
+      setError(
+        "Enter a review note before approving or requesting changes. Record ownership evidence or explain what needs to change.",
+      );
+      document.getElementById("note-" + row._id)?.focus();
+      return;
+    }
     setBusy(true);
     setError("");
     setNotice("");
@@ -55,8 +62,14 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
           approve,
           note: notes[row._id],
         }),
+        signal: AbortSignal.timeout(15000),
       });
-      const d = await r.json();
+      const d = await r
+        .json()
+        .catch(() => ({
+          error:
+            "Review service returned an invalid response. Refresh before retrying.",
+        }));
       if (!r.ok) throw Error(d.error);
       await load();
       setNotice(
@@ -65,7 +78,11 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
           : "Changes requested. The workspace can see your note.",
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Review failed");
+      setError(
+        e instanceof Error && e.name !== "TimeoutError"
+          ? e.message
+          : "Review timed out. Refresh the queue to check whether the decision was saved before retrying.",
+      );
     } finally {
       setBusy(false);
     }
@@ -102,6 +119,9 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
             {row.notificationState ?? "not recorded"}.
           </p>
           <p>{row.draft.description}</p>
+          <p>
+            Listing ID: <code>{row._id}</code>
+          </p>
           <p>Category: {row.draft.category}</p>
           <p>
             Base URL:{" "}
@@ -140,6 +160,8 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
           <label className="block">
             Review note (visible to submitter)
             <textarea
+              id={"note-" + row._id}
+              aria-describedby={"note-help-" + row._id}
               className="block w-full border rounded p-2 bg-transparent"
               maxLength={2000}
               value={notes[row._id] ?? ""}
@@ -148,21 +170,21 @@ export function ListingReviewQueue({ listingId }: { listingId?: string }) {
               }
             />
           </label>
-          <p>
-            For approval, record evidence that the submitter has the right to
-            represent this API. No actual provider listing without their
-            approval.
+          <p id={"note-help-" + row._id}>
+            A review note is required for either decision. For approval, record
+            evidence that the submitter has the right to represent this API. No
+            actual provider listing without their approval.
           </p>
           <button
             className="border rounded px-3 py-2 mr-3"
-            disabled={busy || !notes[row._id]?.trim()}
+            disabled={busy}
             onClick={() => void review(row, true)}
           >
             Approve discovery listing
           </button>
           <button
             className="border rounded px-3 py-2"
-            disabled={busy || !notes[row._id]?.trim()}
+            disabled={busy}
             onClick={() => void review(row, false)}
           >
             Request changes

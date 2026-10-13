@@ -108,6 +108,11 @@ const clerkHandler = clerkMiddleware(async (auth, request) => {
 });
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
+  // These two routes authenticate their own scoped operator bearer token.
+  // Do not let Clerk interpret that token as a Clerk JWT or require browser auth.
+  if (["/api/internal/listings/pending", "/api/internal/listings/review"].includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   // Resolve aliases before Clerk. Discovery doors are public, and clerkMiddleware
   // throws without keys — that must not 500 /AGENTS.md. Exact === only, and also
   // check the raw URL path in case nextUrl.pathname folds case.

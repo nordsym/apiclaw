@@ -66,7 +66,7 @@ assert.equal(
   "a paid-class success is not the free first-call nudge",
 );
 
-const attached = attachFirstCallRevenueNudge(
+const attached = attachFirstCallRevenueNudge<Record<string, unknown>>(
   { success: true, provider: "nasa", action: "apod", data: { title: "Helix" } },
   noCardFirstCall,
 );

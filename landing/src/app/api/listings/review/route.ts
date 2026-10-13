@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { isListingOperator } from "@/lib/listing-review-auth";
 import { convexQuery, convexMutation } from "@/lib/convex";
+import { listingReviewFailure } from "@/lib/listing-operator-api";
 export const runtime = "nodejs";
 const json = (body: unknown, status = 200) =>
   NextResponse.json(body, {
@@ -68,13 +69,8 @@ export async function POST(req: NextRequest) {
       note: note.trim(),
     });
     return json({ ok: true });
-  } catch {
-    return json(
-      {
-        error:
-          "Review failed. The submission may have changed or conflict with listing policy. Reload and review again.",
-      },
-      409,
-    );
+  } catch (error) {
+    if (error instanceof SyntaxError) return json({ error: "Invalid JSON" }, 400);
+    return listingReviewFailure(error);
   }
 }

@@ -1,0 +1,29 @@
+name: Listing review checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            landing/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix landing
+      - run: npx tsc --noEmit
+      - run: npx tsc --noEmit -p convex/tsconfig.json
+      - run: npx tsc --noEmit -p landing/tsconfig.json
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:listings-browser
+      - run: npm run build
+      - run: npm run build --prefix landing

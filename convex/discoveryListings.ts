@@ -4,7 +4,7 @@ import { isPubliclyAvailableManagedProvider } from "./providerBoundaries";
 import { internal } from "./_generated/api";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import {
   query,
@@ -166,6 +166,7 @@ export const submit = mutation({
       });
     await ctx.db.patch(row._id, {
       reviewState: "pending",
+      submittedAt: Date.now(),
       notificationState: "queued",
       notificationAttempts: 0,
       notificationId: undefined,
@@ -227,7 +228,10 @@ async function reviewListing(
     throw Error("Reviewer and ownership/content review evidence required");
   const row = await ctx.db.get(args.id);
   if (!row || row.reviewState !== "pending" || row.revision !== args.revision)
-    throw Error("Review is stale or listing is not pending");
+    throw new ConvexError({
+      code: "LISTING_REVIEW_STALE",
+      message: "Review is stale or listing is not pending. Refresh the queue.",
+    });
   validateListing(row.draft);
   if (args.approve) {
     if (
@@ -253,13 +257,23 @@ async function reviewListing(
     )
       throw Error("Duplicate listing name requires review");
   }
+  const reviewedAt = Date.now();
+  await ctx.db.insert("discoveryListingReviews", {
+    listingId: row._id,
+    workspaceId: row.workspaceId,
+    revision: row.revision,
+    reviewer: args.reviewer,
+    decision: args.approve ? "approved" : "changes_requested",
+    note: args.note.trim(),
+    reviewedAt,
+  });
   await ctx.db.patch(row._id, {
     reviewState: args.approve ? "approved" : "changes_requested",
     reviewedRevision: row.revision,
     reviewedBy: args.reviewer,
     reviewNote: args.note,
-    reviewedAt: Date.now(),
-    updatedAt: Date.now(),
+    reviewedAt,
+    updatedAt: reviewedAt,
     ...(args.approve ? { published: row.draft, isPublished: true } : {}),
   });
   return null;
@@ -298,7 +312,10 @@ function requireOperator(secret: string, reviewer: string) {
   if (
     !process.env.APICLAW_INTERNAL_SECRET ||
     secret !== process.env.APICLAW_INTERNAL_SECRET ||
-    reviewer !== "gustav@nordsym.com"
+    !(
+      reviewer === "gustav@nordsym.com" ||
+      /^operator-token:[A-Za-z0-9][A-Za-z0-9 ._-]{0,63}$/.test(reviewer)
+    )
   )
     throw Error("Unauthorized operator");
 }
@@ -309,6 +326,7 @@ export const operatorPending = query({
     paginationOpts: paginationOptsValidator,
     id: v.optional(v.id("discoveryListings")),
   },
+  returns: v.any(),
   handler: async (ctx, args) => {
     requireOperator(args.internalSecret, args.reviewer);
     const selected = args.id ? await ctx.db.get(args.id) : null;
@@ -342,8 +360,43 @@ export const operatorReview = mutation({
     approve: v.boolean(),
     note: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     requireOperator(args.internalSecret, args.reviewer);
     return reviewListing(ctx, args);
+  },
+});
+
+// Durable budget shared by all token agents, across all Vercel instances.
+export const operatorPermit = mutation({
+  args: { internalSecret: v.string(), reviewer: v.string() },
+  returns: v.object({ allowed: v.boolean(), retryAfter: v.number() }),
+  handler: async (ctx, args) => {
+    requireOperator(args.internalSecret, args.reviewer);
+    const now = Date.now(),
+      hourBucket = Math.floor(now / 3600000);
+    const key = "listing-operator-http";
+    const row = await ctx.db
+      .query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .unique();
+    const retryAfter = Math.ceil(((hourBucket + 1) * 3600000 - now) / 1000);
+    if (row?.hourBucket === hourBucket && row.count >= 120)
+      return { allowed: false, retryAfter };
+    if (row)
+      await ctx.db.patch(row._id, {
+        hourBucket,
+        count: row.hourBucket === hourBucket ? row.count + 1 : 1,
+      });
+    else
+      await ctx.db.insert("rateLimits", {
+        key,
+        identifier: "listing-operator",
+        action: "listing-operator",
+        hourBucket,
+        count: 1,
+        createdAt: now,
+      });
+    return { allowed: true, retryAfter: 0 };
   },
 });

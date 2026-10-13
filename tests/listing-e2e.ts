@@ -256,9 +256,20 @@ try {
   await page
     .getByRole("heading", { name: row.draft.name, exact: true })
     .waitFor();
+  await page.getByRole("button", { name: "Approve discovery listing", exact: true }).click();
+  await page.getByRole("alert").filter({ hasText: "Enter a review note" }).waitFor();
+  assert.equal((await t.query(api.mine, { token }))[0].reviewState, "pending");
   await page
     .getByRole("textbox")
     .fill("Synthetic fixture only; owned test data, discovery only.");
+  await page.route(origin + "/api/listings/review", async (route: any) => {
+    if (route.request().method() === "POST") await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "Review service unavailable. Refresh before retrying." }) });
+    else await route.continue();
+  });
+  await page.getByRole("button", { name: "Approve discovery listing", exact: true }).click();
+  await page.getByRole("alert").filter({ hasText: "Review service unavailable" }).waitFor();
+  assert.equal((await t.query(api.mine, { token }))[0].reviewState, "pending");
+  await page.unroute(origin + "/api/listings/review");
   await page
     .getByRole("button", { name: "Approve discovery listing", exact: true })
     .click();

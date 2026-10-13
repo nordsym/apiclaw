@@ -1,6 +1,6 @@
 {
   "name": "@nordsym/apiclaw",
-  "version": "2.9.11",
+  "version": "2.9.12",
   "description": "Your agent calls real APIs. You sign in once. Authenticated execution and discovery layer for AI agents, reachable via SKILL.md, local MCP, CLI, HTTP gateway, or Remote MCP. Discover 26,619 API definitions, including 689 exact-name source-verified entries. Source verification is not execution. APIClaw inventories 22 built-in providers, all customer-executable today, plus 1,003 workspace-authenticated public/no-key HTTPS origins (1,025 callable now). Anonymous keyless proxy stays disabled. Agent-native auth: unsigned first_run returns a live https://apiclaw.cloud/auth/cli?authId=\u2026 URL as the first line. Show that URL in chat. Do not only run `apiclaw auth login` on a machine the human cannot see. After Authorize, whoami then execute in the same harness. Workspace is optional.",
   "type": "module",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
     "convex:dev": "npx convex dev",
     "convex:deploy": "find convex -maxdepth 1 \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' \\) -delete && npx convex deploy --yes --typecheck=disable",
     "test:workspace-browser": "node scripts/workspace-state-matrix.cjs",
-    "test:listings": "tsx convex/discoveryListings.test.ts && tsx tests/listing-fetch.test.ts && tsx convex/listingReview.test.ts && tsx tests/listing-review-route.test.ts",
+    "test:listings": "tsx convex/discoveryListings.test.ts && tsx tests/listing-fetch.test.ts && tsx convex/listingReview.test.ts && tsx tests/listing-review-route.test.ts && tsx tests/listing-operator-api.test.ts && tsx src/cli/commands/admin-listings.test.ts",
     "test:listings-browser": "TSX_TSCONFIG_PATH=landing/tsconfig.json tsx tests/listing-e2e.ts"
   },
   "keywords": [

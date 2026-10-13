@@ -21,12 +21,22 @@ export default defineSchema({
     reviewNote: v.optional(v.string()),
     reviewedBy: v.optional(v.string()),
     reviewedAt: v.optional(v.number()),
+    submittedAt: v.optional(v.number()),
     createdAt: v.number(), updatedAt: v.number(),
   }).index("by_workspace", ["workspaceId"])
     .index("by_workspace_name", ["workspaceId", "nameKey"])
     .index("by_name", ["nameKey"])
     .index("by_published", ["isPublished"])
     .index("by_review", ["reviewState"]),
+  discoveryListingReviews: defineTable({
+    listingId: v.id("discoveryListings"),
+    workspaceId: v.id("workspaces"),
+    revision: v.number(),
+    reviewer: v.string(),
+    decision: v.union(v.literal("approved"), v.literal("changes_requested")),
+    note: v.string(),
+    reviewedAt: v.number(),
+  }).index("by_listing", ["listingId"]),
   // Credits per agent
   agentCredits: defineTable({
     agentId: v.string(),

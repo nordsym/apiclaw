@@ -16,7 +16,11 @@ dist/
 convex/**/*.d.ts
 convex/**/*.d.ts.map
 convex/**/*.js.map
-convex/_generated/
+convex/_generated/*
+# Official schema-derived types are required in a fresh CI checkout.
+!convex/_generated/api.d.ts
+!convex/_generated/dataModel.d.ts
+!convex/_generated/server.d.ts
 convex/*.js
 convex/*.bak
 

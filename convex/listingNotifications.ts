@@ -24,7 +24,8 @@ export function reviewEmail(name: string, id: string, revision: number) {
     from: "APIClaw <noreply@apiclaw.cloud>",
     to: "gustav@nordsym.com",
     subject: `APIClaw: API listing awaiting review - ${name.replace(/[\r\n]/g, " ").slice(0, 120)}`,
-    html: `<p>A workspace submitted <strong>${escape(name)}</strong>, revision ${revision}, for discovery review.</p><p><a href="${url}">Review listing</a></p><p>Sign in as gustav@nordsym.com. Check ownership and metadata before approving. Approval only publishes discovery metadata; no gateway execution, provider keys or payments are enabled.</p>`,
+    text: `API listing awaiting review: ${name}\nListing ID: ${id}\nRevision: ${revision}\n${url}\nAgents: use the operator API with this exact revision and a review note. Approval publishes discovery metadata only.`,
+    html: `<p>A workspace submitted <strong>${escape(name)}</strong>, revision ${revision}, for discovery review.</p><p>Listing ID: <code>${escape(id)}</code><br>Revision: ${revision}</p><p><a href="${url}">Review listing</a></p><p>Sign in as gustav@nordsym.com. Check ownership and metadata before approving. Approval only publishes discovery metadata; no gateway execution, provider keys or payments are enabled.</p>`,
   };
 }
 const identity = { id: v.id("discoveryListings"), revision: v.number() };
