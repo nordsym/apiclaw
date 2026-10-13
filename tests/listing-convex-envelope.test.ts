@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { convexMutation, ConvexCallError } from '../landing/src/lib/convex';
+import { createRequire } from 'node:module';
+const { convexMutation, ConvexCallError } = createRequire(import.meta.url)('../landing/src/lib/convex.ts');
 const nativeFetch = globalThis.fetch;
 try {
   globalThis.fetch = (async () => Response.json({ status: 'error', errorMessage: '[Request ID: synthetic] Server Error', errorData: { code: 'LISTING_REVIEW_STALE', message: 'Review is stale' } })) as typeof fetch;
