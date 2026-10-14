@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 import { internal } from "./_generated/api";
 import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import { hasActivePaygEntitlement, type ManagedUsageWorkspace } from "./managedUsagePolicy";
 
 const CLAIM_LEASE_MS = 5 * 60 * 1000;
 const STRIPE_DEDUPE_SAFETY_WINDOW_MS = 23 * 60 * 60 * 1000;
@@ -33,6 +34,14 @@ export type LedgerStripeSnapshot = {
 };
 
 type MeterEnvironment = Record<string, string | undefined>;
+
+export function assertStripeBillingEnvironment(env: MeterEnvironment): "test" | "live" {
+  const mode = env.APICLAW_BILLING_ENVIRONMENT?.trim();
+  const key = env.STRIPE_SECRET_KEY?.trim() || "";
+  if (mode === "test" && /^[sr]k_test_/.test(key)) return "test";
+  if (mode === "live" && /^[sr]k_live_/.test(key)) return "live";
+  throw new Error("Stripe billing mode and secret key do not match");
+}
 
 export type MicroUsdMeterConfig = {
   secretKey: string;
@@ -105,6 +114,7 @@ function requiredEnvironmentValue(env: MeterEnvironment, name: string): string {
 }
 
 export function readMicroUsdMeterConfig(env: MeterEnvironment): MicroUsdMeterConfig {
+  assertStripeBillingEnvironment(env);
   const unit = requiredEnvironmentValue(env, "STRIPE_METER_VALUE_UNIT");
   if (unit !== "micro_usd") {
     throw new Error("STRIPE_METER_VALUE_UNIT must be exactly micro_usd");
@@ -116,6 +126,18 @@ export function readMicroUsdMeterConfig(env: MeterEnvironment): MicroUsdMeterCon
     meterId: requiredEnvironmentValue(env, "STRIPE_METER_ID_MICRO_USD"),
     priceId: requiredEnvironmentValue(env, "STRIPE_PRICE_ID_MICRO_USD"),
   };
+}
+
+export function hasConfiguredPaygEntitlement(
+  workspace: ManagedUsageWorkspace,
+  env: MeterEnvironment,
+): boolean {
+  try {
+    const config = readMicroUsdMeterConfig(env);
+    return hasActivePaygEntitlement(workspace, config);
+  } catch {
+    return false;
+  }
 }
 
 function normalizeDecimal(value: string): string | undefined {
@@ -344,19 +366,46 @@ export type MicroUsdMeterWorkspace = {
   stripeSubscriptionId?: string;
 };
 
-/** Validate the existing meter contract before offering customer Checkout. */
-export async function verifyMicroUsdCheckoutPrice(stripe: Stripe, config: MicroUsdMeterConfig): Promise<void> {
+function hasExactMicroUsdMeterContract(
+  meter: Stripe.Billing.Meter,
+  config: MicroUsdMeterConfig,
+): boolean {
+  return meter.status === "active" &&
+    meter.event_name === config.eventName &&
+    meter.default_aggregation.formula === "sum" &&
+    meter.customer_mapping.event_payload_key === "stripe_customer_id" &&
+    meter.value_settings.event_payload_key === "value";
+}
+
+function hasExactMicroUsdPriceContract(
+  price: Stripe.Price,
+  config: MicroUsdMeterConfig,
+): boolean {
+  return price.id === config.priceId &&
+    price.active &&
+    price.currency === "usd" &&
+    price.billing_scheme === "per_unit" &&
+    price.transform_quantity === null &&
+    price.recurring?.usage_type === "metered" &&
+    price.recurring.meter === config.meterId &&
+    isExactMicroUsdPrice(price.unit_amount_decimal);
+}
+
+/**
+ * Validate the configured price and meter before exposing Checkout. This
+ * prevents a dashboard configuration mistake from creating subscriptions
+ * whose usage cannot be reported in APIClaw's immutable micro-USD unit.
+ */
+export async function verifyMicroUsdCheckoutPrice(
+  stripe: Stripe,
+  config: MicroUsdMeterConfig,
+): Promise<void> {
   const [meter, price] = await Promise.all([
     stripe.billing.meters.retrieve(config.meterId),
     stripe.prices.retrieve(config.priceId),
   ]);
-  if (meter.status !== "active" || meter.event_name !== config.eventName ||
-    meter.default_aggregation.formula !== "sum" ||
-    meter.customer_mapping.event_payload_key !== "stripe_customer_id" ||
-    meter.value_settings.event_payload_key !== "value" || !price.active ||
-    price.currency !== "usd" || price.billing_scheme !== "per_unit" ||
-    price.transform_quantity !== null || price.recurring?.usage_type !== "metered" ||
-    price.recurring.meter !== config.meterId || !isExactMicroUsdPrice(price.unit_amount_decimal)) {
+  if (!hasExactMicroUsdMeterContract(meter, config) ||
+    !hasExactMicroUsdPriceContract(price, config)) {
     throw new Error("Stripe Checkout requires the verified APIClaw micro-USD price and meter");
   }
 }
@@ -374,13 +423,7 @@ export async function verifyMicroUsdMeterReadiness(
     stripe.billing.meters.retrieve(config.meterId),
     stripe.subscriptions.retrieve(workspace.stripeSubscriptionId),
   ]);
-  if (
-    meter.status !== "active" ||
-    meter.event_name !== config.eventName ||
-    meter.default_aggregation.formula !== "sum" ||
-    meter.customer_mapping.event_payload_key !== "stripe_customer_id" ||
-    meter.value_settings.event_payload_key !== "value"
-  ) {
+  if (!hasExactMicroUsdMeterContract(meter, config)) {
     throw new Error("Configured Stripe meter is not an active sum meter with APIClaw payload keys");
   }
 
@@ -395,15 +438,7 @@ export async function verifyMicroUsdMeterReadiness(
   }
 
   const item = subscription.items.data.find((candidate) => candidate.price.id === config.priceId);
-  if (
-    !item ||
-    item.price.currency !== "usd" ||
-    item.price.billing_scheme !== "per_unit" ||
-    item.price.transform_quantity !== null ||
-    item.price.recurring?.usage_type !== "metered" ||
-    item.price.recurring.meter !== config.meterId ||
-    !isExactMicroUsdPrice(item.price.unit_amount_decimal)
-  ) {
+  if (!item || !hasExactMicroUsdPriceContract(item.price, config)) {
     throw new Error(
       "Stripe subscription must contain the configured metered price at exactly $0.000001 per unit",
     );

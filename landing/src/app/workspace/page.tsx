@@ -350,7 +350,9 @@ export default function WorkspacePage() {
   const showUsageExceeded = workspace && workspace.tier === "free" && workspace.usagePercentage >= 100;
 
   const usageLabel = workspace
-    ? workspace.usageLimit === -1 ? "Unlimited calls" : `${workspace.usageRemaining}/${workspace.usageLimit} calls`
+    ? workspace.usageLimit === -1
+      ? "PAYG active"
+      : `${workspace.usageRemaining}/${workspace.usageLimit} free managed calls`
     : undefined;
 
   return (

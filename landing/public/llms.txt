@@ -39,10 +39,10 @@ APIClaw provides unified API access for AI agents across five access paths: SKIL
 - Discoverable APIs: 26,619
 - Exact-name source-verified catalog entries: 689
 - Built-in provider inventory: 22
-- Customer-executable providers: 22
-- Workspace-authenticated public/no-key origins: 1,003
+- Customer-executable providers: 19
+- Workspace-authenticated public/no-key origins: 1,002
 - npm package: @nordsym/apiclaw
-- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once, then provider cost plus 15% margin, metered per call.
 - Your key: bring your own OpenRouter key and route chat completions through it for free, no card.
 - Anonymous keyless public execution: disabled. Workspace-authenticated public/no-key origins are executable.
@@ -149,7 +149,7 @@ Use `call_api` or `POST /v1/execute` to run API calls through APIClaw. APIClaw h
 
 ### Route LLM calls
 
-Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, DeepInfra, and others. An explicit request model always wins; otherwise resolution falls back to the calling agent's default model, then the workspace default.
+Use `POST /v1/chat/completions` or `POST /v1/embeddings` for OpenAI-compatible model routing across OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, and DeepInfra. An explicit request model always wins; otherwise resolution falls back to the calling agent's default model, then the workspace default.
 
 ### Bring your own key (escape hatch)
 
@@ -166,14 +166,14 @@ Responses include `_apiclaw` metadata where applicable: provider, route, latency
 ## Managed provider boundary
 
 - APIClaw inventories 22 built-in providers. Inventory means server-side provider support, not customer execution.
-- 22 built-in providers are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- 19 of the 22 built-in providers are customer-executable now, plus 1,002 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - Harvested apiKey/unknown registry rows stay discovery-only.
 
 Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.
 
 ## Pricing
 
-- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
 - Your key: bring your own OpenRouter key and route chat completions through it for free, no card required, ever.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning and redirect rejection.

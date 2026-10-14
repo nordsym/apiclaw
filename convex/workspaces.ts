@@ -3,7 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { FREE_LIFETIME_LIMIT, getQuotaState } from "./quota";
 import { recordWorkspaceAuthenticated } from "./funnel";
-import { hasActivePaygEntitlement } from "./managedUsagePolicy";
+import { hasConfiguredPaygEntitlement } from "./managedMetering";
 import { resolveAgentDisplayName } from "./agentDisplay";
 import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
@@ -662,7 +662,7 @@ export const getWorkspaceDashboard = query({
         usagePercentage: usage.usagePercentage,
         stripeCustomerId: workspace.stripeCustomerId,
         stripeSubscriptionStatus: workspace.stripeSubscriptionStatus,
-        paygActive: hasActivePaygEntitlement(workspace),
+        paygActive: hasConfiguredPaygEntitlement(workspace, process.env),
         createdAt: workspace.createdAt,
         mainAgentName: workspace.mainAgentName,
         mainAgentId: workspace.mainAgentId,
@@ -1199,7 +1199,7 @@ export const getWorkspaceStatus = query({
       managedUsageLimit: usage.usageLimit,
       activationProviderCostUsd: (workspace.activationProviderCostMicros ?? 0) / 1_000_000,
       activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
-      paygActive: hasActivePaygEntitlement(workspace),
+      paygActive: hasConfiguredPaygEntitlement(workspace, process.env),
       hasStripe: !!workspace.stripeCustomerId,
       createdAt: workspace.createdAt,
     };
@@ -1512,8 +1512,8 @@ export function getWorkspaceUsageDisplay(workspace: {
   hourlyUsageCount?: number;
   lastWeeklyResetAt?: number;
   lastHourlyResetAt?: number;
-}, nowMs = Date.now()) {
-  const quota = getQuotaState(workspace, 1, nowMs);
+}, nowMs = Date.now(), configuredPaygEntitlement = hasConfiguredPaygEntitlement(workspace, process.env)) {
+  const quota = getQuotaState(workspace, 1, nowMs, { configuredPaygEntitlement });
   const usageCount = quota.lifetimeCount;
   const usageLimit = quota.lifetimeLimit;
   const usageRemaining = usageLimit === -1 ? -1 : Math.max(0, usageLimit - usageCount);

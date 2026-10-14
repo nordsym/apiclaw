@@ -2,6 +2,47 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { summarizeCurrentPeriodLedger } from "./billing";
+
+assert.deepEqual(summarizeCurrentPeriodLedger([
+  {
+    status: "succeeded",
+    billingClass: "payg",
+    providerCostMicros: 100_000,
+    customerChargeMicros: 115_000,
+    stripeStatus: "reported",
+  },
+  {
+    status: "succeeded",
+    billingClass: "payg",
+    providerCostMicros: 200_000,
+    customerChargeMicros: 230_000,
+    stripeStatus: "claiming",
+  },
+  {
+    status: "succeeded",
+    billingClass: "activation",
+    providerCostMicros: 50_000,
+    customerChargeMicros: 0,
+    stripeStatus: "not_applicable",
+  },
+  {
+    status: "failed",
+    billingClass: "payg",
+    providerCostMicros: 900_000,
+    customerChargeMicros: 1_035_000,
+    stripeStatus: "pending",
+  },
+]), {
+  currentPeriodUsage: 3,
+  billableCalls: 2,
+  providerCostMicros: 300_000,
+  customerChargeMicros: 345_000,
+  stripePendingCount: 1,
+  stripePendingMicros: 230_000,
+  stripeReportedCount: 1,
+  stripeReportedMicros: 115_000,
+});
 
 const source = readFileSync(
   fileURLToPath(new URL("./billing.ts", import.meta.url)),

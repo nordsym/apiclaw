@@ -26,3 +26,9 @@ export function normalizeManagedChatParams(provider: string, model: string, para
   const { max_tokens, ...rest } = params;
   return { ...rest, max_completion_tokens: rest.max_completion_tokens ?? max_tokens };
 }
+
+/** An explicit adapter must retain model owner prefixes such as openai/ on Groq. */
+export function bindManagedChatModel(provider: string, model: string): string {
+  if (provider === "auto" || model.startsWith(`${provider}/`)) return model;
+  return `${provider}/${model}`;
+}

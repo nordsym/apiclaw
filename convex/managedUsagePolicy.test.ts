@@ -10,9 +10,8 @@ import {
 } from "./managedUsagePolicy";
 import { APICLAW_UPGRADE_URL, PAYMENT_REQUIRED_MESSAGE } from "../src/first-call-nudge";
 
-// A call whose provider cost is provably zero (billingGradeCost proof +
-// estimatedProviderCostUsd === 0) is free forever, no card, uncapped; even
-// after hundreds of prior calls and with no card on file.
+// Proven-zero provider rails remain free forever, even after activation is
+// exhausted and without any Stripe state.
 const heavyZeroCostUser = {
   tier: "free",
   managedUsageCount: 900,
@@ -24,18 +23,16 @@ const zeroCostCall = evaluateManagedUsage(heavyZeroCostUser, {
 });
 assert.equal(zeroCostCall.allowed, true);
 assert.equal(zeroCostCall.reason, null);
-assert.equal(zeroCostCall.managedUsageLimit, -1, "the lifetime cap no longer gates zero-cost calls");
+assert.equal(zeroCostCall.managedUsageLimit, -1, "the activation cap never gates proven-zero calls");
 assert.equal(zeroCostCall.managedUsageRemaining, -1);
 
-// A zero-VALUED reservation/guess (billingGradeCost !== true) is not proof of
-// zero cost. It is treated as a paid call (fail closed) and requires a card,
-// exactly like any other unproven cost.
+// A zero-valued guess is not proof and stays fail-closed.
 const guessedZero = evaluateManagedUsage({ tier: "free" }, {
   estimatedProviderCostUsd: 0,
   billingGradeCost: false,
 });
 assert.equal(guessedZero.allowed, false);
-assert.equal(guessedZero.reason, "payment_required");
+assert.equal(guessedZero.reason, "unpriced_managed_call");
 
 // Any call with an unpriced/invalid cost estimate stays fail-closed.
 const unpriced = evaluateManagedUsage({ tier: "free", managedUsageCount: 0 }, {});
@@ -46,53 +43,58 @@ assert.equal(evaluateManagedUsage(
   { estimatedProviderCostUsd: -0.01 },
 ).reason, "unpriced_managed_call");
 
-// A call with real (proven, non-zero) provider cost and no card on file
-// requires payment, regardless of lifetime call count.
+// Real provider cost uses the restored activation allowance first.
 const noCardWorkspace = { tier: "free", managedUsageCount: 3 };
 const paidNoCard = evaluateManagedUsage(noCardWorkspace, {
   estimatedProviderCostUsd: 0.04,
   billingGradeCost: true,
 });
-assert.equal(paidNoCard.allowed, false);
-assert.equal(paidNoCard.reason, "payment_required");
-assert.equal(paidNoCard.billingClass, "payg");
+assert.equal(paidNoCard.allowed, true);
+assert.equal(paidNoCard.reason, null);
+assert.equal(paidNoCard.billingClass, "activation");
+assert.equal(paidNoCard.managedUsageLimit, 25);
+assert.equal(paidNoCard.managedUsageRemaining, 21);
 
-// A brand-new workspace's very first call, if it has real cost, also needs a
-// card; the old 25-call/$1 activation allowance no longer applies.
+// A brand-new workspace receives the same lifetime activation allowance.
 const brandNewNoCard = evaluateManagedUsage({ tier: "free" }, {
   estimatedProviderCostUsd: 0.01,
   billingGradeCost: true,
 });
-assert.equal(brandNewNoCard.allowed, false);
-assert.equal(brandNewNoCard.reason, "payment_required");
+assert.equal(brandNewNoCard.allowed, true);
+assert.equal(brandNewNoCard.billingClass, "activation");
+assert.equal(brandNewNoCard.managedUsageRemaining, 24);
 
-// A saved card alone cannot authorize spend before Stripe billing is ready.
-const cardOnFile = { tier: "free", hasPaymentMethod: true };
+// A card alone is not an exact Stripe micro-USD entitlement. It can use the
+// activation allowance, but cannot open PAYG after that allowance is spent.
+const cardOnFile = {
+  tier: "free",
+  hasPaymentMethod: true,
+  activationManagedCallCount: 25,
+};
 const paidWithCard = evaluateManagedUsage(cardOnFile, {
   estimatedProviderCostUsd: 0.01,
   billingGradeCost: true,
 });
 assert.equal(paidWithCard.allowed, false);
 assert.equal(paidWithCard.reason, "payment_required");
-assert.equal(paidWithCard.billingClass, "payg");
+assert.equal(paidWithCard.billingClass, "activation");
 
-// hasCardAttached is an accepted alias for hasPaymentMethod.
+// hasCardAttached alone also cannot impersonate a PAYG entitlement.
 assert.equal(
-  evaluateManagedUsage({ tier: "free", hasCardAttached: true }, {
+  evaluateManagedUsage({ tier: "free", hasCardAttached: true, activationManagedCallCount: 25 }, {
     estimatedProviderCostUsd: 0.01,
     billingGradeCost: true,
-  }).allowed,
-  false,
+  }).reason,
+  "payment_required",
 );
 
-// Even with a card, a numeric reservation alone (billingGradeCost !== true)
-// is not enough to charge; this cap/reservation behavior is unchanged.
-const paidCardUnprovenCost = evaluateManagedUsage(cardOnFile, {
+// Even within activation, a numeric guess is not billing-grade.
+const paidCardUnprovenCost = evaluateManagedUsage({ tier: "free", hasPaymentMethod: true }, {
   estimatedProviderCostUsd: 0.005,
   billingGradeCost: false,
 });
 assert.equal(paidCardUnprovenCost.allowed, false);
-assert.equal(paidCardUnprovenCost.reason, "payment_required");
+assert.equal(paidCardUnprovenCost.reason, "unpriced_managed_call");
 
 const fakePayg = {
   tier: "usage_based",
@@ -107,15 +109,28 @@ const fakePayg = {
   paygMeterEventName: "apiclaw_managed_micro_usd",
 };
 assert.equal(hasActivePaygEntitlement(fakePayg), false);
-// Failed subscriptions cannot authorize paid calls even with a saved card.
 assert.equal(
   evaluateManagedUsage(fakePayg, { estimatedProviderCostUsd: 10, billingGradeCost: true }).allowed,
   false,
 );
+assert.equal(
+  evaluateManagedUsage(fakePayg, { estimatedProviderCostUsd: 10, billingGradeCost: true }).reason,
+  "payment_required",
+);
 
 for (const invalid of [
   { ...fakePayg, stripeSubscriptionStatus: "active", hasPaymentMethod: false },
+  { ...fakePayg, stripeSubscriptionStatus: "active", stripeCustomerId: undefined },
   { ...fakePayg, stripeSubscriptionStatus: "active", stripeSubscriptionId: undefined },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterReadyAt: undefined },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterPriceId: undefined },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterId: undefined },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterEventName: undefined },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterReadyAt: 0 },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterReadyAt: Number.NaN },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterPriceId: "   " },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterId: "" },
+  { ...fakePayg, stripeSubscriptionStatus: "active", paygMeterEventName: "   " },
   { ...fakePayg, stripeSubscriptionStatus: "canceled" },
 ]) {
   assert.equal(hasActivePaygEntitlement(invalid), false);
@@ -130,10 +145,41 @@ const paidDecision = evaluateManagedUsage(payg, {
 assert.equal(paidDecision.allowed, true);
 assert.equal(paidDecision.billingClass, "payg");
 assert.equal(
-  evaluateManagedUsage(payg, { estimatedProviderCostUsd: 0.005 }).reason,
+  evaluateManagedUsage(
+    { ...payg, activationManagedCallCount: 25 },
+    { estimatedProviderCostUsd: 0.005 },
+  ).reason,
   "payg_cost_adapter_missing",
 );
 assert.equal(evaluateManagedUsage(payg).reason, "unpriced_managed_call");
+
+// Either activation boundary is sufficient to require the exact entitlement.
+for (const exhausted of [
+  { tier: "free", activationManagedCallCount: 25, activationProviderCostMicros: 0 },
+  { tier: "free", activationManagedCallCount: 0, activationProviderCostMicros: 1_000_000 },
+  { tier: "free", activationManagedCallCount: 24, activationProviderCostMicros: 995_000 },
+]) {
+  const decision = evaluateManagedUsage(exhausted, {
+    estimatedProviderCostUsd: 0.01,
+    billingGradeCost: true,
+  });
+  assert.equal(decision.allowed, false);
+  assert.equal(decision.reason, "payment_required");
+}
+
+// A call may consume the exact final slot / final provider-cost remainder.
+const finalActivationCall = evaluateManagedUsage({
+  tier: "free",
+  activationManagedCallCount: 24,
+  activationProviderCostMicros: 990_000,
+}, {
+  estimatedProviderCostUsd: 0.01,
+  billingGradeCost: true,
+});
+assert.equal(finalActivationCall.allowed, true);
+assert.equal(finalActivationCall.billingClass, "activation");
+assert.equal(finalActivationCall.managedUsageRemaining, 0);
+assert.equal(finalActivationCall.warning?.remaining, 0);
 
 assert.equal(activationManagedCallCount({ tier: "free", usageCount: 8 }), 8);
 assert.equal(activationManagedCallCount({ tier: "free", managedUsageCount: 900 }), 25);
@@ -143,8 +189,7 @@ assert.equal(activationManagedCallCount({
   activationManagedCallCount: 7,
 }), 7);
 
-// A paid call does not consume/require the (now-informational) activation
-// counter.
+// An entitled PAYG call does not consume activation after exhaustion.
 const paidCallDoesNotConsumeActivation = evaluateManagedUsage(
   { ...payg, activationManagedCallCount: 25 },
   { estimatedProviderCostUsd: 0.01, billingGradeCost: true },
@@ -234,10 +279,27 @@ const managedCostHoldBlocksZeroCost = evaluateManagedUsage({
 assert.equal(managedCostHoldBlocksZeroCost.allowed, false);
 assert.equal(managedCostHoldBlocksZeroCost.reason, "managed_cost_hold");
 
-const founder = evaluateManagedUsage({ tier: "founder", managedUsageCount: 999 }, {});
-assert.equal(founder.allowed, true);
-assert.equal(founder.trafficClass, "internal");
-assert.equal(founder.billingClass, "internal");
+const founderInternal = evaluateManagedUsage(
+  { tier: "founder", managedUsageCount: 999 },
+  { trafficClass: "internal" },
+);
+assert.equal(founderInternal.allowed, true);
+assert.equal(founderInternal.trafficClass, "internal");
+assert.equal(founderInternal.billingClass, "internal");
+
+const founderCustomer = evaluateManagedUsage({
+  ...payg,
+  tier: "founder",
+  managedUsageCount: 999,
+  activationManagedCallCount: 25,
+}, {
+  trafficClass: "customer",
+  estimatedProviderCostUsd: 0.01,
+  billingGradeCost: true,
+});
+assert.equal(founderCustomer.allowed, true);
+assert.equal(founderCustomer.trafficClass, "customer");
+assert.equal(founderCustomer.billingClass, "payg");
 
 assert.deepEqual(customerChargeForProviderCost(1, "activation"), { customerChargeUsd: 0, marginUsd: 0 });
 assert.deepEqual(customerChargeForProviderCost(1, "internal"), { customerChargeUsd: 0, marginUsd: 0 });
@@ -282,4 +344,4 @@ assert.match(managedQuotaMessage("payment_required"), /https:\/\/apiclaw\.cloud\
 assert.match(managedQuotaMessage("payment_required"), /retry this same call/);
 assert.equal(APICLAW_UPGRADE_URL, "https://apiclaw.cloud/upgrade");
 
-console.log("managed usage policy: zero-cost calls are free forever, paid calls require a card, entitlement and traffic classes hold, byok bypasses the card gate");
+console.log("managed usage policy: activation allowance, zero-cost bypass, exact PAYG entitlement, holds, contracts, and byok all hold");

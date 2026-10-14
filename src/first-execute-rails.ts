@@ -41,7 +41,8 @@ export const FIRST_EXECUTE_FRANKFURTER = {
 
 export const FIRST_EXECUTE_RAILS = [FIRST_EXECUTE_NASA, FIRST_EXECUTE_FRANKFURTER] as const;
 
-/** Research-shaped managed providers that require a card. Not first-execute rails. */
+/** Cost-bearing research providers. Eligible for the bounded managed trial,
+ * but never used automatically as first-execute rails. */
 export const FIRST_EXECUTE_BILLED_RESEARCH_PROVIDERS = [
   "brave_search",
   "serper",

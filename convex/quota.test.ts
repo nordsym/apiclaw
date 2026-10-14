@@ -2,18 +2,17 @@
 import assert from "node:assert/strict";
 import { getQuotaState, isPaidTier } from "./quota";
 
-// getQuotaState is a display/status shim that always evaluates a
-// provably-zero-cost call (see convex/quota.ts). Under the current policy
-// that means it is unlimited and never blocks on lifetime call count,
-// no matter how many calls a workspace has already made.
+// The display shim keeps zero-cost open rails allowed while exposing the
+// separate managed trial boundary to the workspace UI.
 const heavyUsage = getQuotaState({ tier: "free", managedUsageCount: 900 }, 1);
 assert.equal(heavyUsage.allowed, true);
-assert.equal(heavyUsage.lifetimeLimit, -1);
-assert.equal(heavyUsage.lifetimeRemaining, -1);
+assert.equal(heavyUsage.lifetimeLimit, 25);
+assert.equal(heavyUsage.lifetimeRemaining, 0);
 
 const brandNew = getQuotaState({ tier: "free", managedUsageCount: 0 }, 1);
 assert.equal(brandNew.allowed, true);
-assert.equal(brandNew.lifetimeLimit, -1);
+assert.equal(brandNew.lifetimeLimit, 25);
+assert.equal(brandNew.lifetimeRemaining, 25);
 
 const tierOnlyPayg = { tier: "usage_based", managedUsageCount: 25 };
 assert.equal(isPaidTier(tierOnlyPayg), false);
@@ -51,8 +50,7 @@ assert.equal(onHold.allowed, false);
 assert.equal(onHold.reason, "managed_cost_hold");
 assert.match(onHold.message ?? "", /temporarily paused/i);
 
-// The lifetime allowance never resets on a stale weekly-reset marker; there
-// is no reset concept anymore, it is simply always unlimited for zero cost.
+// The lifetime allowance never resets on a stale weekly-reset marker.
 const noReset = getQuotaState({
   tier: "free",
   managedUsageCount: 900,
@@ -60,5 +58,6 @@ const noReset = getQuotaState({
   lastWeeklyResetAt: 0,
 }, 1, Date.UTC(2030, 0, 1));
 assert.equal(noReset.allowed, true);
+assert.equal(noReset.lifetimeRemaining, 0);
 
 console.log("convex quota guard: zero-cost display is unlimited and only a cost hold blocks it");

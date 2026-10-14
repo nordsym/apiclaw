@@ -1,5 +1,6 @@
+import { PAYG_RESALE_PROVIDER_IDS } from "./product-truth.js";
 /** Current launch boundary, backed by docs/ops/managed-api-audit.md. */
-export const PAID_MANAGED_PROVIDERS = ["openrouter"] as const;
+export const PAID_MANAGED_PROVIDERS = PAYG_RESALE_PROVIDER_IDS;
 
 export function managedPaidProviderReady(provider: string): boolean {
   return PAID_MANAGED_PROVIDERS.some((id) => id === provider.toLowerCase());

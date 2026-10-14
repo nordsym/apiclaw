@@ -4,20 +4,16 @@
  * Keep this module dependency-free so the gateway, Convex functions, CLI,
  * website, tests, and lifecycle messages can all consume the same values.
  */
-// Deprecated 2026-08-23: the 25-lifetime-call / $1-cap activation allowance
-// no longer gates access. A call with provably zero provider cost is free
-// forever and uncapped (see FREE_FOREVER_ZERO_COST); a call with real cost
-// requires a card (see PAID_CALL_REQUIRES_CARD). These two constants are
-// kept exported, unchanged, so older callers/tests/generated mirrors that
-// still import them do not break; do not use them to gate new behavior.
+// Customer traffic receives one activation allowance across the lifetime of
+// the workspace. Proven-zero provider rails bypass both caps and stay free.
 export const FREE_MANAGED_CALLS_LIFETIME = 25;
 export const FREE_MANAGED_PROVIDER_COST_CAP_USD = 1;
 export const PAYG_MARGIN_RATE = 0.15;
 export const FREE_MANAGED_WARNING_AT = 20;
 
-// Current policy flags (2026-08-23 pricing gate migration).
 export const FREE_FOREVER_ZERO_COST = true;
 export const PAID_CALL_REQUIRES_CARD = true;
+export const PAID_CALL_REQUIRES_EXACT_STRIPE_ENTITLEMENT = true;
 
 export const MANAGED_USAGE_POLICY = {
   freeManagedCallsLifetime: FREE_MANAGED_CALLS_LIFETIME,
@@ -25,6 +21,7 @@ export const MANAGED_USAGE_POLICY = {
   freeManagedWarningAt: FREE_MANAGED_WARNING_AT,
   freeForeverZeroCost: FREE_FOREVER_ZERO_COST,
   paidCallRequiresCard: PAID_CALL_REQUIRES_CARD,
+  paidCallRequiresExactStripeEntitlement: PAID_CALL_REQUIRES_EXACT_STRIPE_ENTITLEMENT,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
   workspaceAuthenticatedPublicExecutionAvailable: true,
@@ -32,6 +29,22 @@ export const MANAGED_USAGE_POLICY = {
   paygPriceBasis: "provider_cost",
   paygRequiresBillingGradeAdapter: true,
 } as const;
+
+/** Providers that may use the exact Stripe micro-USD resale rail. */
+export const PAYG_RESALE_PROVIDER_IDS = ["openrouter"] as const;
+
+export const ACTIVATION_ONLY_PROVIDER_IDS = ["brave_search", "serper"] as const;
+
+const PAYG_RESALE_PROVIDERS = new Set<string>(PAYG_RESALE_PROVIDER_IDS);
+const ACTIVATION_ONLY_PROVIDERS = new Set<string>(ACTIVATION_ONLY_PROVIDER_IDS);
+
+export function isPaygResaleProvider(provider: string | undefined): boolean {
+  return !!provider && PAYG_RESALE_PROVIDERS.has(provider.trim().toLowerCase());
+}
+
+export function isActivationOnlyProvider(provider: string | undefined): boolean {
+  return !!provider && ACTIVATION_ONLY_PROVIDERS.has(provider.trim().toLowerCase());
+}
 
 /**
  * The managed-adapter inventory and the customer execution surface are

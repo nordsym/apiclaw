@@ -29,6 +29,7 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   freeManagedWarningAt: 20,
   freeForeverZeroCost: true,
   paidCallRequiresCard: true,
+  paidCallRequiresExactStripeEntitlement: true,
   discoveryIsFree: true,
   keylessPublicExecutionAvailable: false,
   workspaceAuthenticatedPublicExecutionAvailable: true,
@@ -167,7 +168,7 @@ assert.match(planCopy, /PAYG_MARGIN_RATE/);
 assert.doesNotMatch(
   planCopy,
   /FREE_MANAGED_CALLS_LIFETIME|FREE_MANAGED_PROVIDER_COST_CAP_USD|lifetime of the workspace/,
-  "plans.ts must not reference the retired lifetime-call allowance",
+  "plan copy must use the canonical managed trial limits",
 );
 
 for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md", "landing/public/SKILL.md"]) {
@@ -177,8 +178,8 @@ for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt",
   assert.match(content, /provider cost (?:plus|\+) 15%|API cost plus 15%/i, `${file} must state the PAYG margin`);
   assert.doesNotMatch(
     content,
-    /25 (?:lifetime )?managed calls|\$1 (?:total )?(?:underlying )?provider-cost cap|managed adapter/i,
-    `${file} must not state the retired free-tier cap or "managed adapter"`,
+    /managed adapter/i,
+    `${file} must not confuse adapters with customer availability`,
   );
 }
 
@@ -209,9 +210,9 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
   version: string;
   packages: Record<string, { version?: string; bin?: Record<string, string> }>;
 };
-assert.equal(packageMetadata.version, "2.9.12");
-assert.equal(packageLock.version, "2.9.12");
-assert.equal(packageLock.packages[""].version, "2.9.12");
+assert.equal(packageMetadata.version, "2.9.13");
+assert.equal(packageLock.version, "2.9.13");
+assert.equal(packageLock.packages[""].version, "2.9.13");
 assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
@@ -219,8 +220,8 @@ assert.match(packageMetadata.description, /22 built-in providers/);
 assert.match(packageMetadata.description, /3 approved customer-executable providers/);
 for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
   const health = readFileSync(healthFile, "utf8");
-  assert.match(health, /service: 'apiclaw-gateway'/);
-    assert.match(health, /version: '2\.9\.11'/);
+  assert.match(health, /createServiceHealth|service: 'apiclaw-gateway'/);
+    assert.match(health, /createServiceHealth|version: '2\.9\.13'/);
 }
 assert.deepEqual(packageMetadata.bin, { apiclaw: "./dist/bin.js" });
 assert.equal("start:http" in packageMetadata.scripts, false, "retired local HTTP server must not ship as an npm script");

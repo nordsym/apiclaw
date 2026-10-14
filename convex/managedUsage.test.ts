@@ -9,6 +9,7 @@ import {
   managedDuplicateTerminalReceipt,
   microsToCents,
   microsToUsd,
+  isManagedProviderAllowedForBillingClass,
   managedFinalizationMatchesAuthorization,
   resolveActivationProviderCostMicros,
   resolveRealizedManagedCost,
@@ -26,6 +27,31 @@ assert.equal(microsToCents(0), 0);
 assert.equal(customerChargeMicros(1_000_000, "payg"), 1_150_000);
 assert.equal(customerChargeMicros(1_000_000, "activation"), 0);
 assert.equal(customerChargeMicros(1_000_000, "internal"), 0);
+assert.equal(isManagedProviderAllowedForBillingClass({
+  provider: "openrouter",
+  billingClass: "payg",
+  trafficClass: "customer",
+}), true);
+assert.equal(isManagedProviderAllowedForBillingClass({
+  provider: "brave_search",
+  billingClass: "activation",
+  trafficClass: "customer",
+}), true);
+assert.equal(isManagedProviderAllowedForBillingClass({
+  provider: "brave_search",
+  billingClass: "payg",
+  trafficClass: "customer",
+}), false);
+assert.equal(isManagedProviderAllowedForBillingClass({
+  provider: "serper",
+  billingClass: "contract",
+  trafficClass: "customer",
+}), false);
+assert.equal(isManagedProviderAllowedForBillingClass({
+  provider: "github",
+  billingClass: "internal",
+  trafficClass: "internal",
+}), true);
 assert.throws(() => usdToMicros(Number.MAX_VALUE), /safe metering range/);
 
 assert.deepEqual(authorizeRealizedManagedCost({
@@ -201,12 +227,24 @@ const mutableWorkspace = {
   paygMeterId: "mtr_original",
   paygMeterEventName: "event_original",
 };
-const snapshot = buildStripeBillingSnapshot(mutableWorkspace, "payg");
+const expectedMeter = {
+  priceId: "price_original",
+  meterId: "mtr_original",
+  eventName: "event_original",
+};
+const snapshot = buildStripeBillingSnapshot(mutableWorkspace, "payg", expectedMeter);
 mutableWorkspace.stripeCustomerId = "cus_changed";
 assert.equal(snapshot.stripeCustomerIdSnapshot, "cus_original");
 assert.throws(
-  () => buildStripeBillingSnapshot({ stripeCustomerId: "cus_incomplete" }, "payg"),
+  () => buildStripeBillingSnapshot({ stripeCustomerId: "cus_incomplete" }, "payg", expectedMeter),
   /missing immutable Stripe billing context/,
+);
+assert.throws(
+  () => buildStripeBillingSnapshot({
+    ...mutableWorkspace,
+    paygMeterPriceId: "price_stale",
+  }, "payg", expectedMeter),
+  /does not match the configured Stripe meter/,
 );
 assert.deepEqual(buildStripeBillingSnapshot({}, "activation"), {});
 

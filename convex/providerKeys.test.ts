@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 import assert from "node:assert/strict";
-import { decryptProviderKey } from "./providerKeys";
+import { decryptProviderKey, isCustomerManagedProviderKey } from "./providerKeys";
 
 // BYOH (2026-08-24): providerKeys.ts stores workspace-supplied provider keys
 // encrypted at rest and must never expose the decrypted value except at the
@@ -84,7 +84,11 @@ async function main() {
   assert.equal(listKeysAllowedFields.has("key"), false);
   assert.equal(listKeysAllowedFields.has("decryptedKey"), false);
 
-  console.log("providerKeys: encrypt/decrypt round-trips, tampered ciphertext fails closed, listKeys shape never carries a raw key");
+  assert.equal(isCustomerManagedProviderKey("apilayer"), false);
+  assert.equal(isCustomerManagedProviderKey(" APILAYER "), false);
+  assert.equal(isCustomerManagedProviderKey("openai"), true);
+
+  console.log("providerKeys: encryption stays private and the legacy APILayer BYOK surface stays hidden");
 }
 
 main()

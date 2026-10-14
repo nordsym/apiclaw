@@ -16,7 +16,7 @@ interface CheckoutButtonProps {
   onError?: (error: string) => void;
 }
 
-/** Starts a Stripe Checkout setup session and redirects. Keep the fetch contract in sync with /api/billing/checkout. */
+/** Starts verified metered subscription Checkout and redirects. Keep the fetch contract in sync with /api/billing/checkout. */
 export function CheckoutButton({
   sessionToken,
   variant = "primary",

@@ -1,5 +1,5 @@
 import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
-import { friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
+import { bindManagedChatModel, friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
@@ -24,7 +24,8 @@ import {
 } from "./managedCostPolicy";
 import { decorateOpenRouterRequest } from "./openRouterAttribution";
 import { decryptProviderKey } from "./providerKeys";
-import { hasActivePaygEntitlement, isInternalTier } from "./managedUsagePolicy";
+import { hasConfiguredPaygEntitlement } from "./managedMetering";
+import { managedChatProviderForRequest } from "./managedChatRouting";
 import { getWorkspaceUsageDisplay } from "./workspaces";
 import {
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
@@ -1336,7 +1337,10 @@ function internalOnlyResponse(_provider: string) {
 }
 
 function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
-  const unavailable = quota.reason === "managed_action_not_customer_executable" || quota.reason === "managed_billing_unavailable";
+  const unavailable = quota.reason === "managed_action_not_customer_executable" ||
+    quota.reason === "managed_billing_unavailable" || quota.reason === "managed_provider_not_available_for_paid_usage";
+  const billingUnavailable = quota.reason === "payg_cost_adapter_missing" ||
+    quota.reason === "unpriced_managed_call";
   const costHold = quota.reason === "managed_cost_hold";
   const paymentRequired = quota.reason === "payment_required";
   return jsonResponse(
@@ -1346,6 +1350,8 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
           ? "managed_action_not_available"
           : costHold
             ? "managed_cost_hold"
+            : billingUnavailable
+              ? "managed_billing_unavailable"
             : paymentRequired
               ? "payment_required"
               : "quota_exceeded",
@@ -1353,8 +1359,8 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
         message:
           quota.message ||
           PAYMENT_REQUIRED_MESSAGE,
-        type: unavailable ? "permission_error" : costHold ? "billing_error" : paymentRequired ? "billing_error" : "quota_error",
-        ...(costHold ? { retryable: false } : {}),
+        type: unavailable ? "permission_error" : costHold || billingUnavailable || paymentRequired ? "billing_error" : "quota_error",
+        ...(costHold || billingUnavailable ? { retryable: false } : {}),
         tier: quota.tier,
         provider,
         action,
@@ -1365,12 +1371,12 @@ function quotaExceededResponse(quota: any, provider: string, action: string, pat
         activationProviderCostUsd: quota.activationProviderCostUsd,
         activationProviderCostCapUsd: quota.activationProviderCostCapUsd,
         activationProviderCostRemainingUsd: quota.activationProviderCostRemainingUsd,
-        ...(!costHold
+        ...(paymentRequired
           ? { upgradeUrl: quota.upgradeUrl || APICLAW_UPGRADE_URL }
           : {}),
       },
     },
-    unavailable ? 403 : costHold ? 503 : 402
+    unavailable ? 403 : costHold || billingUnavailable ? 503 : 402
   );
 }
 
@@ -2397,7 +2403,7 @@ http.route({
       managedUsageLimit: usage.usageLimit,
       activationProviderCostUsd: (workspace.activationProviderCostMicros ?? 0) / 1_000_000,
       activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
-      paygActive: hasActivePaygEntitlement(workspace),
+      paygActive: hasConfiguredPaygEntitlement(workspace, process.env),
       hasStripe: !!workspace.stripeCustomerId,
       createdAt: workspace.createdAt,
       authMethod: auth.authMethod,
@@ -3870,7 +3876,11 @@ http.route({
     }
     const explicitOpenRouterTarget = resolveExplicitOpenRouterTarget(model);
     const openRouterExecution = resolveExplicitOpenRouterExecution({
-      provider: !websiteService && (!isInternalTier(configuredTier) || explicitOpenRouterTarget) ? "openrouter" : "auto",
+      provider: managedChatProviderForRequest({
+        authMethod,
+        websiteService: Boolean(websiteService),
+        hasExplicitOpenRouterTarget: Boolean(explicitOpenRouterTarget),
+      }),
       action: "chat",
       requestedModel: model || configuredDefaultModel || "auto",
     });
@@ -5907,7 +5917,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
 
       const effectiveModel = params.model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
 
-      const route = await routeLLMRequest(explicitOpenRouterExecution?.routingModel ?? effectiveModel, {
+      const route = await routeLLMRequest(explicitOpenRouterExecution?.routingModel ?? bindManagedChatModel(provider, effectiveModel), {
         routingMode: effectiveRoutingMode,
         preferredProviders: finalPreferred,
         blockedProviders: settings.blockedProviders,

@@ -12,6 +12,8 @@ const subscription={id:'sub_test',customer:'cus_test',status:'active',items:{dat
 mock(stripe.prices,'retrieve',async()=>price);
 mock(stripe.billing.meters,'retrieve',async()=>({id:'mtr_test',status:'active',event_name:'usage_micro',default_aggregation:{formula:'sum'},customer_mapping:{event_payload_key:'stripe_customer_id'},value_settings:{event_payload_key:'value'}}));
 mock(stripe.subscriptions,'retrieve',async()=>subscription);
+mock(stripe.subscriptions,'list',async()=>({data:[]}));
+mock(stripe.checkout.sessions,'list',async()=>({data:[]}));
 mock(stripe.customers,'retrieve',async()=>({id:'cus_test',invoice_settings:{default_payment_method:'pm_test'}}));
 mock(stripe.paymentMethods,'retrieve',async()=>({id:'pm_test',customer:'cus_test',type:'card',card:{brand:'visa',last4:'4242'}}));
 const sessions:any[]=[];
@@ -31,8 +33,8 @@ try{
  assert.equal((await(createCheckoutSession as any)._handler({...ctx,runMutation:async()=>null},req({token:'expired'}))).status,401);
  process.env.STRIPE_SECRET_KEY='sk_live_synthetic';assert.equal((await(createCheckoutSession as any)._handler(ctx,req({token:'owner'}))).status,503);process.env.STRIPE_SECRET_KEY='sk_test_synthetic';
  calls.length=0;assert.equal((await webhook('unpaid')).status,200);assert.equal(calls.some(c=>c.name==='billing:updateSubscription'||c.name==='billing:completePaygActivation'),false);
- calls.length=0;assert.equal((await webhook('paid')).status,200);assert.equal(calls.find(c=>c.name==='billing:completePaygActivation')?.args.stripeSubscriptionStatus,'active');assert.equal(calls.find(c=>c.name==='billing:updatePaymentMethodInfo')?.args.hasPaymentMethod,true);
- calls.length=0;assert.equal((await webhook('paid','workspace_test','checkout.session.async_payment_succeeded')).status,200);assert.equal(calls.some(c=>c.name==='billing:completePaygActivation'),true);
+ calls.length=0;assert.equal((await webhook('paid')).status,200);assert.equal(calls.find(c=>c.name==='billing:updateSubscription')?.args.stripeSubscriptionStatus,'active');assert.equal(calls.find(c=>c.name==='billing:updatePaymentMethodInfo')?.args.hasPaymentMethod,true);
+ calls.length=0;assert.equal((await webhook('paid','workspace_test','checkout.session.async_payment_succeeded')).status,200);assert.equal(calls.some(c=>c.name==='billing:updateSubscription'),true);
  calls.length=0;assert.equal((await webhook('paid','another_workspace')).status,500);assert.equal(calls.some(c=>c.name==='billing:updateSubscription'||c.name==='billing:completePaygActivation'),false);
  assert.equal((await(handleStripeWebhook as any)._handler(ctx,new Request('https://gateway.example/api/webhooks/stripe',{method:'POST',body:'{}'}))).status,400);
  console.log('Customer subscription Checkout, mode isolation, authentication and signed webhook activation passed');

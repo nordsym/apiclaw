@@ -1,15 +1,15 @@
 # Customer billing operations
 
-APIClaw offers usage billing, with no monthly platform fee. The first free NASA/Frankfurter call and other verified zero-cost APIs remain free and uncapped. A free workspace has no allowance for nonzero-cost paid execution: the gateway returns `402 payment_required` and `https://apiclaw.cloud/upgrade` before dispatch. Agents should show that link to the human, then retry after billing is verified.
+APIClaw offers usage billing, with no monthly platform fee. The first free NASA/Frankfurter call and other verified zero-cost APIs remain free and uncapped. A free workspace has 25 successful approved managed calls or USD 1 in provider cost, whichever comes first. Once this allowance is exhausted, the gateway returns `402 payment_required` and `https://apiclaw.cloud/upgrade` before dispatch. Agents should show that link to the human, then retry after billing is verified.
 
 ## Customer path
 
 1. Sign in and open Workspace > Billing, or follow `/upgrade` from the agent's message.
 2. Select Add payment method. The owner-authenticated landing endpoint forwards the workspace session to the gateway; it cannot select another workspace or choose a cheaper billing mode.
-3. Stripe Checkout creates an actual metered usage subscription for ordinary workspaces. Founder and partner accounts retain setup-only Checkout and do not become paid customers.
+3. Stripe Checkout creates an actual metered usage subscription for ordinary workspaces. Founder and partner labels are preserved, but their customer-authenticated calls use the same billing rules. Only explicitly authenticated internal traffic is nonbillable.
 4. Checkout collects billing address and optional tax ID; applicable tax is calculated by Stripe Tax. Confirming Checkout authorizes monthly usage billing at verified provider cost plus 15%, plus tax.
-5. Signed Stripe webhooks reconcile the current customer, payment method, subscription and exact micro-USD meter. The success redirect or a saved-card flag cannot grant paid access alone. A duplicate completed Checkout subscription is canceled rather than leaving two active subscriptions on the same customer meter.
-6. The current approved paid rail is OpenRouter chat using `openai/gpt-5.4-nano`, `openai/gpt-5.4-mini` or `openai/gpt-5.4`. `openrouter/auto` selects nano. The nano model has a live action smoke test; mini and standard share the reviewed terms and cost contract but need their own functional coverage.
+5. Signed Stripe webhooks reconcile the current customer, payment method, subscription and exact micro-USD meter. The success redirect or a saved-card flag cannot grant paid access alone. Matching open Checkout sessions are reused, and existing billable subscriptions block another Checkout. Terminal subscriptions may be replaced after Stripe reconciliation.
+6. The current approved paid rail is OpenRouter chat using `openai/gpt-5.4-nano`, `openai/gpt-5.4-mini` or `openai/gpt-5.4`. `openrouter/auto` selects nano. All three models have action-level gateway smoke coverage, including provider-reported cost.
 7. Exact finalized usage enters the existing durable Stripe meter outbox. Unknown, failed or ambiguous costs are not silently promoted from reservations into customer charges. Streaming managed customer responses remain unavailable until exact stream usage can be reconciled.
 
 ## Configuration and isolation

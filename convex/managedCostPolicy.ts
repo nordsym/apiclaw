@@ -13,7 +13,6 @@ const FIXED_PROVIDER_RESERVATIONS_USD: Record<string, number> = {
   assemblyai: 0.01,
   github: 0,
   nasa: 0,
-  apilayer: 0.01,
   coingecko: 0,
   resend: 0.001,
   genprd: 0.04,
@@ -55,6 +54,21 @@ const VERIFIED_ZERO_COST_PROVIDERS = new Set([
 ]);
 
 export const APICLAW_OPENROUTER_DEFAULT_MODEL = "openai/gpt-5.4-nano";
+
+function configuredApilayerProviderCostUsd(action: string): number | undefined {
+  const encoded = process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON?.trim();
+  if (!encoded) return undefined;
+  try {
+    const parsed = JSON.parse(encoded) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return undefined;
+    const value = (parsed as Record<string, unknown>)[action];
+    return typeof value === "number" && Number.isFinite(value) && value > 0
+      ? value
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export function resolveExplicitOpenRouterModel(requestedModel: unknown): string | undefined {
   if (typeof requestedModel !== "string") return undefined;
@@ -131,6 +145,7 @@ export type ManagedCostEstimateInput = {
 
 export function estimateManagedProviderCostUsd(input: ManagedCostEstimateInput): number | undefined {
   const provider = input.provider.toLowerCase();
+  if (provider === "apilayer") return configuredApilayerProviderCostUsd(input.action);
   if (provider === "openai-codex") return 0;
   if (provider === "mission") return 0.04;
   if (isWorkspacePublicExecutableApi(input.provider)) return 0;

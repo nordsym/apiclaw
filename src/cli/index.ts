@@ -19,7 +19,7 @@ import { discoverCommand, callCommand, detailsCommand, balanceCommand } from './
 import { generateScript } from '../enterprise/script-generator.js';
 import { detectOS, getOSDisplayName } from '../utils/os.js';
 
-const VERSION = '2.9.12';
+const VERSION = '2.9.13';
 
 const program = new Command();
 

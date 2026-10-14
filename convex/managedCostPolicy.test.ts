@@ -61,7 +61,7 @@ assert.equal(hasBillingGradeManagedCost({ provider: "github", action: "search_re
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "weatherstack_current" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "verify_number" }), false);
-assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "scrape" }), 0.01);
+assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "scrape" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "world_news" }), undefined);
 

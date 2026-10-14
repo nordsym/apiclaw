@@ -48,6 +48,7 @@ import type * as inbound from "../inbound.js";
 import type * as listingNotifications from "../listingNotifications.js";
 import type * as listingPolicy from "../listingPolicy.js";
 import type * as logs from "../logs.js";
+import type * as managedChatRouting from "../managedChatRouting.js";
 import type * as managedCostPolicy from "../managedCostPolicy.js";
 import type * as managedCredentials from "../managedCredentials.js";
 import type * as managedMetering from "../managedMetering.js";
@@ -155,6 +156,7 @@ declare const fullApi: ApiFromModules<{
   listingNotifications: typeof listingNotifications;
   listingPolicy: typeof listingPolicy;
   logs: typeof logs;
+  managedChatRouting: typeof managedChatRouting;
   managedCostPolicy: typeof managedCostPolicy;
   managedCredentials: typeof managedCredentials;
   managedMetering: typeof managedMetering;

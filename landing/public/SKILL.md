@@ -21,7 +21,7 @@ without guessing.
 Live catalog (2026-08-25). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
-- 1,025 callable
+- 1,005 callable
 - 26,619 discoverable
 - 22 built-in providers
 
@@ -186,9 +186,8 @@ If NASA is not 200, fetch today's ECB FX rates. Same whoami gate.
 Same nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
 This is the same last-resort rail the automatic first execute
 uses after Authorize. It is free forever, no card, no key.
-Brave / Serper / Firecrawl are paid research APIs and will
-return payment_required on a new workspace — do not use them
-for first execute.
+Brave / Serper / Firecrawl have real provider cost and consume the
+bounded managed allowance. Do not use them for first execute.
 
 ```bash
 npx @nordsym/apiclaw call frankfurter/latest --params '{"path":"/latest"}' --idempotency-key "apiclaw-first-frankfurter-$(date +%s)"
@@ -273,7 +272,7 @@ not every provider.
 ## Pricing (do not invent)
 
 - Free APIs: free forever, no card. Discovery and every zero-cost API,
-  over 1,000 of the 1,025 callable.
+  plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once, then provider cost plus 15%, metered per call.
 - Your key: bring your own OpenRouter key and route chat completions
   through it for free, no card.

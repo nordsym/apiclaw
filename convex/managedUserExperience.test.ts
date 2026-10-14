@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { friendlyManagedFailure, normalizeManagedChatParams } from './managedUserExperience';
+import { bindManagedChatModel, friendlyManagedFailure, normalizeManagedChatParams } from './managedUserExperience';
 import { managedPaidCallReady, managedPaidProviderReady } from '../src/managed-commercial-policy';
 for (const provider of ['brave_search', 'cohere', 'e2b', 'apilayer', 'firecrawl', 'genprd', 'deepinfra', 'elevenlabs']) {
   assert.equal(managedPaidProviderReady(provider), false);
@@ -19,3 +19,7 @@ assert.equal((funding.error as any).code,'provider_unavailable');
 assert.equal((friendlyManagedFailure({success:false},502).error as any).code,'provider_temporarily_unavailable');
 assert.deepEqual(friendlyManagedFailure({success:true,data:{ok:true}},200),{success:true,data:{ok:true}});
 console.log('Managed commercial boundary and friendly failures passed');
+
+assert.equal(bindManagedChatModel('groq','openai/gpt-oss-20b'),'groq/openai/gpt-oss-20b');
+assert.equal(bindManagedChatModel('groq','groq/openai/gpt-oss-20b'),'groq/openai/gpt-oss-20b');
+assert.equal(bindManagedChatModel('auto','openai/gpt-5.4-nano'),'openai/gpt-5.4-nano');
