@@ -133,7 +133,7 @@ try {
     fixer_latest: {},
   };
   for (const action of APILAYER_CUSTOMER_EXECUTABLE_ACTIONS) {
-    assert.equal(isPublicCustomerExecutableAction("apilayer", action), true);
+    assert.equal(isPublicCustomerExecutableAction("apilayer", action), false);
     const request = buildManagedRequest("apilayer", action, requiredParams[action] ?? {});
     assert.ok(request, `${action} must be executable over verified HTTPS`);
     assert.equal(new URL(request.url).protocol, "https:");

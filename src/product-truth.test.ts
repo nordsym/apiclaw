@@ -37,7 +37,7 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   paygRequiresBillingGradeAdapter: true,
 });
 
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 22);
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 3);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
 assert.equal(CANON_STATS.discoverable, 26_619);
 assert.equal(CANON_STATS.source_verified, 689);
@@ -47,8 +47,8 @@ assert.equal(
   CANON_STATS.customer_executable_providers,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
-assert.equal(CANON_STATS.workspace_public_executable, 1_003);
-assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_025);
+assert.equal(CANON_STATS.workspace_public_executable, 1_002);
+assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_005);
 assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
@@ -60,46 +60,25 @@ assert.deepEqual(
 assert.deepEqual(
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map(({ id }) => id),
   [
-    "openrouter",
-    "groq",
-    "mistral",
-    "deepinfra",
-    "openai",
-    "xai",
-    "anthropic",
-    "cohere",
-    "brave_search",
-    "serper",
-    "elevenlabs",
-    "deepgram",
-    "assemblyai",
-    "replicate",
-    "stability",
-    "firecrawl",
-    "genprd",
-    "github",
-    "e2b",
-    "nasa",
-    "apilayer",
-    "voyage",
+    "openrouter", "github", "nasa",
   ],
 );
 assert.deepEqual(getPublicCustomerExecutableProvider("OpenRouter")?.customerExecutableActions, ["chat"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Groq")?.customerExecutableActions, ["chat"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Anthropic")?.customerExecutableActions, ["chat", "messages"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Firecrawl")?.customerExecutableActions, ["scrape", "crawl", "map"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("APILayer")?.customerExecutableActions, [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]);
+assert.equal(getPublicCustomerExecutableProvider("Groq"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("Anthropic"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("Firecrawl"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("APILayer"), undefined);
 assert.equal(getPublicCustomerExecutableProvider("GitHub API")?.id, "github");
 assert.equal(getManagedProviderAdapter("AssemblyAI")?.id, "assemblyai");
-assert.equal(getPublicCustomerExecutableProvider("AssemblyAI")?.id, "assemblyai");
-assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), true);
+assert.equal(getPublicCustomerExecutableProvider("AssemblyAI"), undefined);
+assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), false);
 assert.equal(isPublicCustomerExecutableAction("github", "create_issue"), false);
-assert.equal(isPublicCustomerExecutableAction("replicate", "run"), true);
-assert.equal(isPublicCustomerExecutableAction("voyage", "embeddings"), true);
-assert.equal(isPublicCustomerExecutableAction("elevenlabs", "text_to_speech"), true);
-assert.equal(isPublicCustomerExecutableAction("e2b", "run_code"), true);
-assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), true);
-assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), true);
+assert.equal(isPublicCustomerExecutableAction("replicate", "run"), false);
+assert.equal(isPublicCustomerExecutableAction("voyage", "embeddings"), false);
+assert.equal(isPublicCustomerExecutableAction("elevenlabs", "text_to_speech"), false);
+assert.equal(isPublicCustomerExecutableAction("e2b", "run_code"), false);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), false);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), false);
 for (const action of APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS) {
   assert.equal(
     isPublicCustomerExecutableAction("apilayer", action),
@@ -237,7 +216,7 @@ assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 built-in providers/);
-assert.match(packageMetadata.description, /all customer-executable today/);
+assert.match(packageMetadata.description, /3 approved customer-executable providers/);
 for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
   const health = readFileSync(healthFile, "utf8");
   assert.match(health, /service: 'apiclaw-gateway'/);

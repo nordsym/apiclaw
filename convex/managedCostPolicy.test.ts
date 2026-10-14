@@ -22,7 +22,7 @@ assert.equal(estimateManagedProviderCostUsd({ provider: "stability", action: "ge
 assert.equal(estimateManagedProviderCostUsd({ provider: "e2b", action: "run_code" }), 0.02);
 assert.equal(estimateManagedProviderCostUsd({ provider: "genprd", action: "providerAction" }), 0.04);
 assert.equal(hasBillingGradeManagedCost({ provider: "genprd", action: "providerAction" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "genprd", action: "generate_prd" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "genprd", action: "generate_prd" }), false);
 assert.equal(estimateManagedProviderCostUsd({ provider: "openrouter", action: "chat" }), undefined);
 assert.equal(estimateManagedProviderCostUsd({
   provider: "openrouter",
@@ -51,26 +51,26 @@ cyclic.self = cyclic;
 assert.equal(estimateInputTokens(cyclic), Number.MAX_SAFE_INTEGER);
 assert.equal(hasBillingGradeManagedCost({ provider: "openrouter", action: "chat" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "openrouter", action: "embeddings" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "openai", action: "chat" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "anthropic", action: "messages" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "groq", action: "chat" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "voyage", action: "embeddings" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "serper", action: "search" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "openai", action: "chat" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "anthropic", action: "messages" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "groq", action: "chat" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "voyage", action: "embeddings" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "serper", action: "search" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "brave_search", action: "search" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "github", action: "search_repos" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), true);
-assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "weatherstack_current" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), false);
+assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "weatherstack_current" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "verify_number" }), false);
 assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "scrape" }), 0.01);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), 0.01);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "world_news" }), undefined);
 
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "brave_search", action: "search" }), 0.005);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "github", action: "get_repo" }), 0);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), 0.001);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "firecrawl", action: "scrape" }), 0.02);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "voyage", action: "embeddings" }), 0.02);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), 0.01);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), undefined);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "firecrawl", action: "scrape" }), undefined);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "voyage", action: "embeddings" }), undefined);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), undefined);
 
 assert.deepEqual(resolveManagedResponseCost({
   provider: "openrouter",
@@ -95,21 +95,21 @@ assert.deepEqual(resolveManagedResponseCost({
 }), { providerCostUsd: 0.005, costSource: "fixed_price_policy" });
 
 const documentedOpenRouterModel = resolveExplicitOpenRouterModel("apiclaw/openrouter/auto");
-assert.equal(documentedOpenRouterModel, "anthropic/claude-sonnet-4-6");
+assert.equal(documentedOpenRouterModel, "openai/gpt-5.4-nano");
 assert.deepEqual(resolveExplicitOpenRouterTarget("apiclaw/openrouter/auto"), {
   provider: "openrouter",
-  model: "anthropic/claude-sonnet-4-6",
+  model: "openai/gpt-5.4-nano",
 });
 assert.equal(resolveExplicitOpenRouterModel("openrouter/openai/gpt-5.4"), "openai/gpt-5.4");
-assert.equal(resolveExplicitOpenRouterModel("anthropic/claude-sonnet-4-6"), undefined);
+assert.equal(resolveExplicitOpenRouterModel("openai/gpt-5.4-nano"), undefined);
 assert.deepEqual(resolveExplicitOpenRouterExecution({
   provider: "openrouter",
   action: "chat",
   requestedModel: "auto",
 }), {
   provider: "openrouter",
-  model: "anthropic/claude-sonnet-4-6",
-  routingModel: "openrouter/anthropic/claude-sonnet-4-6",
+  model: "openai/gpt-5.4-nano",
+  routingModel: "openrouter/openai/gpt-5.4-nano",
 });
 assert.deepEqual(resolveExplicitOpenRouterExecution({
   provider: "auto",

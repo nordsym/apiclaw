@@ -59,7 +59,7 @@ const VERIFIED_ZERO_COST_PROVIDERS = new Set([
   "openai-codex",
 ]);
 
-export const APICLAW_OPENROUTER_DEFAULT_MODEL = "anthropic/claude-sonnet-4-6";
+export const APICLAW_OPENROUTER_DEFAULT_MODEL = "openai/gpt-5.4-nano";
 
 export function resolveExplicitOpenRouterModel(requestedModel: unknown): string | undefined {
   if (typeof requestedModel !== "string") return undefined;

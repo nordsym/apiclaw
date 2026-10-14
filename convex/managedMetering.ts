@@ -344,6 +344,23 @@ export type MicroUsdMeterWorkspace = {
   stripeSubscriptionId?: string;
 };
 
+/** Validate the existing meter contract before offering customer Checkout. */
+export async function verifyMicroUsdCheckoutPrice(stripe: Stripe, config: MicroUsdMeterConfig): Promise<void> {
+  const [meter, price] = await Promise.all([
+    stripe.billing.meters.retrieve(config.meterId),
+    stripe.prices.retrieve(config.priceId),
+  ]);
+  if (meter.status !== "active" || meter.event_name !== config.eventName ||
+    meter.default_aggregation.formula !== "sum" ||
+    meter.customer_mapping.event_payload_key !== "stripe_customer_id" ||
+    meter.value_settings.event_payload_key !== "value" || !price.active ||
+    price.currency !== "usd" || price.billing_scheme !== "per_unit" ||
+    price.transform_quantity !== null || price.recurring?.usage_type !== "metered" ||
+    price.recurring.meter !== config.meterId || !isExactMicroUsdPrice(price.unit_amount_decimal)) {
+    throw new Error("Stripe Checkout requires the verified APIClaw micro-USD price and meter");
+  }
+}
+
 export async function verifyMicroUsdMeterReadiness(
   stripe: Stripe,
   config: MicroUsdMeterConfig,

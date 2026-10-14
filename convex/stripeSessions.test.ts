@@ -23,7 +23,7 @@ function request(body: unknown) {
 
 const context = {
   runMutation: async () => ({ workspaceId: "workspace_synthetic" }),
-  runQuery: async () => ({ stripeCustomerId: "cus_synthetic" }),
+  runQuery: async () => ({ stripeCustomerId: "cus_synthetic", tier: "founder" }),
 };
 
 try {
@@ -56,7 +56,7 @@ try {
   for (const params of checkoutCalls) {
     assert.equal(params.customer, "cus_synthetic");
     assert.equal(params.mode, "setup");
-    assert.deepEqual(params.payment_method_types, ["card"]);
+    assert.equal(params.payment_method_types, undefined);
     assert.equal(params.locale, "en");
     assert.equal(params.success_url, "https://apiclaw.cloud/workspace?tab=billing&billing=success");
     assert.equal(params.cancel_url, "https://apiclaw.cloud/workspace?tab=billing&billing=cancel");

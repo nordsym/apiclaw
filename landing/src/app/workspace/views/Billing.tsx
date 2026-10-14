@@ -158,7 +158,7 @@ export function BillingTab({
     </button>
   );
 
-  const paymentAction = (label: string) => hasStripeCustomer && (paymentConnected || currentTier !== "free")
+  const paymentAction = (label: string) => hasStripeCustomer && (workspace?.paygActive === true || currentTier === "usage_based" || (isUnlimited && paymentConnected))
     ? portalButton(paymentConnected ? btnQuiet : btnSolid, label)
     : <CheckoutButton sessionToken={sessionToken || ""}>{label}</CheckoutButton>;
 
@@ -168,7 +168,9 @@ export function BillingTab({
     <div className="space-y-10">
       <PageHeader
         title="Billing"
-        description={paymentConnected
+        description={paymentConnected && workspace?.paygActive !== true && !isUnlimited
+          ? "Your card is saved. Paid APIs unlock after Stripe confirms your subscription. Free APIs remain available."
+          : paymentConnected
           ? `Your payment method is connected. Free APIs remain free; Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`
           : `Free APIs remain free. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`}
       />

@@ -22,4 +22,6 @@ assert.deepEqual(resolveFrontierModelCost("x-ai/grok-4.5"), { input: 2, output: 
 assert.deepEqual(resolveFrontierModelCost("mistralai/mistral-medium-3-5"), { input: 1.5, output: 7.5 });
 assert.equal(resolveFrontierModelCost("openai/future-unknown-frontier"), undefined);
 
+assert.deepEqual(resolveFrontierModelCost("groq/openai/gpt-oss-20b"), {input: 0.075, output: 0.30});
+
 console.log("model pricing: current direct frontier prices resolve before generic fallback");

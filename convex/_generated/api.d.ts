@@ -54,6 +54,7 @@ import type * as managedMetering from "../managedMetering.js";
 import type * as managedRouting from "../managedRouting.js";
 import type * as managedUsage from "../managedUsage.js";
 import type * as managedUsagePolicy from "../managedUsagePolicy.js";
+import type * as managedUserExperience from "../managedUserExperience.js";
 import type * as mcpOAuth from "../mcpOAuth.js";
 import type * as migrateFilestack from "../migrateFilestack.js";
 import type * as migratePartnersProd from "../migratePartnersProd.js";
@@ -160,6 +161,7 @@ declare const fullApi: ApiFromModules<{
   managedRouting: typeof managedRouting;
   managedUsage: typeof managedUsage;
   managedUsagePolicy: typeof managedUsagePolicy;
+  managedUserExperience: typeof managedUserExperience;
   mcpOAuth: typeof mcpOAuth;
   migrateFilestack: typeof migrateFilestack;
   migratePartnersProd: typeof migratePartnersProd;

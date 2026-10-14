@@ -4,6 +4,7 @@ import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import {
   readMicroUsdMeterConfig,
+  verifyMicroUsdCheckoutPrice,
   verifyMicroUsdMeterReadiness,
 } from "./managedMetering";
 import {
@@ -18,6 +19,9 @@ function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
     throw new Error("STRIPE_SECRET_KEY not configured");
+  }
+  if (process.env.APICLAW_BILLING_ENVIRONMENT === "test" && !/^[sr]k_test_/.test(key)) {
+    throw new Error("Test billing requires a Stripe test key");
   }
   return new Stripe(key);
 }
@@ -41,7 +45,11 @@ function safeAppBase(returnUrl: unknown): string {
   if (typeof returnUrl !== "string") return fallback;
   try {
     const url = new URL(returnUrl);
-    if (url.protocol !== "https:" || !["apiclaw.cloud", "www.apiclaw.cloud"].includes(url.hostname)) {
+    const configuredTestOrigin = process.env.APICLAW_BILLING_ENVIRONMENT === "test" &&
+      /^[sr]k_test_/.test(process.env.STRIPE_SECRET_KEY || "")
+      ? process.env.APICLAW_BILLING_RETURN_ORIGIN : undefined;
+    if (url.protocol !== "https:" || !(["apiclaw.cloud", "www.apiclaw.cloud"].includes(url.hostname) ||
+      url.origin === configuredTestOrigin)) {
       return fallback;
     }
     return url.origin;
@@ -57,13 +65,10 @@ function safeAppBase(returnUrl: unknown): string {
 export const createCheckoutSession = httpAction(async (ctx, request) => {
   try {
     const body = await request.json();
-    const { token, returnUrl, mode = "setup" } = body;
+    const { token, returnUrl } = body;
 
     if (!token) {
       return jsonResponse({ error: "session token required" }, 401);
-    }
-    if (mode !== "setup") {
-      return jsonResponse({ error: "Only secure payment-method setup is supported" }, 400);
     }
 
     const verified = await ctx.runMutation(api.workspaces.verifySession, { sessionToken: token });
@@ -106,20 +111,36 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
 
     const baseUrl = safeAppBase(returnUrl);
 
+    const internalWorkspace = workspace.tier === "founder" || workspace.tier === "partner";
+    if (!internalWorkspace && workspace.stripeSubscriptionId &&
+      ["active", "trialing", "past_due", "incomplete"].includes(workspace.stripeSubscriptionStatus || "")) {
+      return jsonResponse({ error: "You already have a billing account. Use Manage billing to update your card." }, 409);
+    }
+    const meterConfig = internalWorkspace ? null : readMicroUsdMeterConfig(process.env);
+    if (meterConfig) await verifyMicroUsdCheckoutPrice(stripe, meterConfig);
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "setup",
+      mode: internalWorkspace ? "setup" : "subscription",
       locale: "en",
-      payment_method_types: ["card"],
+      ...(meterConfig ? {
+        line_items: [{ price: meterConfig.priceId }],
+        payment_method_collection: "always" as const,
+        subscription_data: { metadata: { workspaceId, termsVersion: "2026-10-14" } },
+        automatic_tax: { enabled: true },
+        billing_address_collection: "required" as const,
+        tax_id_collection: { enabled: true },
+        customer_update: { address: "auto" as const, name: "auto" as const },
+        custom_text: { submit: { message: "You agree to APIClaw terms at https://apiclaw.cloud/terms. Paid usage is provider cost plus 15%, plus applicable tax. No monthly platform fee." } },
+      } : {}),
       success_url: `${baseUrl}/workspace?tab=billing&billing=success`,
       cancel_url: `${baseUrl}/workspace?tab=billing&billing=cancel`,
       metadata: { workspaceId },
-    });
+    }, { idempotencyKey: `apiclaw_checkout_${workspaceId}_${internalWorkspace ? "setup" : "payg"}_${Math.floor(Date.now() / 600000)}` });
 
     return jsonResponse({ checkoutUrl: session.url, sessionId: session.id });
   } catch (e: any) {
-    console.error("Checkout error:", e);
-    return jsonResponse({ error: e.message || "Failed to create checkout" }, 500);
+    console.error("Checkout unavailable");
+    return jsonResponse({ error: "We could not open secure checkout. Your card has not been charged. Please try again shortly." }, 503);
   }
 });
 
@@ -168,8 +189,8 @@ export const createPortalSession = httpAction(async (ctx, request) => {
       portalUrl: session.url,
     });
   } catch (e: any) {
-    console.error("Portal error:", e);
-    return jsonResponse({ error: e.message || "Failed to create portal session" }, 500);
+    console.error("Billing portal unavailable");
+    return jsonResponse({ error: "We could not open billing. Please try again shortly." }, 503);
   }
 });
 
@@ -223,9 +244,10 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
   // Handle the event
   try {
     switch (event.type) {
+      case "checkout.session.async_payment_succeeded":
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutComplete(ctx, session);
+        await handleCheckoutComplete(ctx, session, stripe);
         break;
       }
 
@@ -323,7 +345,8 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
 
 async function handleCheckoutComplete(
   ctx: any,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  stripe: Stripe,
 ) {
   const workspaceId = session.metadata?.workspaceId;
   if (!workspaceId) {
@@ -333,7 +356,45 @@ async function handleCheckoutComplete(
 
   // If subscription mode, the subscription webhook will handle it
   if (session.mode === "subscription" && session.subscription) {
-    console.log("Subscription checkout completed, waiting for subscription webhook");
+    if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") return;
+    const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
+    const workspace = await ctx.runQuery(internal.billing.getByStripeCustomerId, { stripeCustomerId: customerId });
+    if (!workspace || String(workspace._id) !== workspaceId) throw new Error("Checkout workspace mismatch");
+    const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const readiness = await verifyMicroUsdMeterReadiness(stripe, readMicroUsdMeterConfig(process.env), {
+      stripeCustomerId: customerId, stripeSubscriptionId: subscriptionId,
+    });
+    const payment = await readCustomerPaymentMethod(stripe, customerId!);
+    if (!payment) throw new Error("Checkout payment method has not attached yet");
+    if (workspace.stripeSubscriptionId && workspace.stripeSubscriptionId !== subscriptionId) {
+      // A second completed Checkout must not leave two subscriptions billing
+      // the same customer meter. Only cancel this verified, duplicate session.
+      await stripe.subscriptions.cancel(subscriptionId, { invoice_now: false, prorate: false });
+      return;
+    }
+    if (workspace.tier === "free" && (!workspace.billingPlan || workspace.billingPlan === "free")) {
+      const claim = await ctx.runMutation(internal.billing.claimPaygActivation, {
+        workspaceId: workspace._id, activationId: session.id,
+      });
+      if (!claim.claimed) throw new Error("Checkout billing activation is still processing");
+      const completion = await ctx.runMutation(internal.billing.completePaygActivation, {
+        workspaceId: workspace._id, activationId: session.id,
+        stripeSubscriptionId: subscriptionId, stripeSubscriptionStatus: subscription.status,
+        paygMeterReadyAt: Date.now(), paygMeterPriceId: readiness.priceId,
+        paygMeterId: readiness.meterId, paygMeterEventName: readiness.eventName,
+      });
+      if (!completion.applied) throw new Error("Checkout billing activation could not be completed");
+    } else {
+      await handleSubscriptionUpdate(ctx, subscription, stripe);
+    }
+    await ctx.runMutation(internal.billing.updatePaymentMethodInfo, {
+      workspaceId: workspace._id,
+      hasPaymentMethod: Boolean(payment),
+      paymentMethodType: payment?.type,
+      cardBrand: payment?.card?.brand,
+      cardLast4: payment?.card?.last4,
+    });
     return;
   }
 

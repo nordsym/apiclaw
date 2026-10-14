@@ -119,7 +119,7 @@ export default function WorkspacePage() {
           invalidateWorkspace();
           const billing = await workspaceRequest<{ paymentMethod: unknown }>("query", "billing:getBillingInfo", { token: sessionToken });
           if (!active) return;
-          if (billing.paymentMethod) {
+          if (billing.paymentMethod && ["founder", "partner"].includes(dashboard?.workspace?.tier || "")) {
             showToast("Payment method connected. Your plan is shown in Billing.", "success");
             cleanReturnParam("billing");
             return;

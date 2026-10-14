@@ -17,12 +17,12 @@ assert.equal(isPubliclyAvailableManagedProvider("Together AI"), false);
 assert.equal(isPubliclyAvailableManagedProvider("openai"), true);
 assert.equal(isCustomerExecutableManagedAction("openrouter", "chat"), true);
 assert.equal(isCustomerExecutableManagedAction("openrouter", "chat_completions"), true);
-assert.equal(isCustomerExecutableManagedAction("brave_search", "search"), true);
+assert.equal(isCustomerExecutableManagedAction("brave_search", "search"), false);
 assert.equal(isCustomerExecutableManagedAction("github", "get_file"), true);
 assert.equal(isCustomerExecutableManagedAction("nasa", "apod"), true);
-assert.equal(isCustomerExecutableManagedAction("apilayer", "exchange_rates"), true);
-assert.equal(isCustomerExecutableManagedAction("apilayer", "weatherstack_current"), true);
-assert.equal(isCustomerExecutableManagedAction("apilayer", "fixer_latest"), true);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "exchange_rates"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "weatherstack_current"), false);
+assert.equal(isCustomerExecutableManagedAction("apilayer", "fixer_latest"), false);
 assert.equal(isCustomerExecutableManagedAction("apilayer", "verify_number"), false);
 assert.equal(isCustomerExecutableManagedAction("apilayer", "world_news"), false);
 assert.equal(isCustomerExecutableManagedAction("apilayer", "image_crop"), false);
@@ -36,8 +36,8 @@ for (const [provider, action] of [
 ] as const) {
   assert.equal(
     isCustomerExecutableManagedAction(provider, action),
-    true,
-    `${provider}/${action} is customer-executable`,
+    false,
+    `${provider}/${action} must stay unavailable until commercial and billing readiness is proven`,
   );
 }
 assert.equal(
@@ -46,6 +46,6 @@ assert.equal(
   "github/create_issue must remain inventory-only for customer execution",
 );
 assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "internal"), true);
-assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), true);
+assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), false);
 
 console.log("convex provider boundaries: internal and unavailable managed providers stay off public discovery");

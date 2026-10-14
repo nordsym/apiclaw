@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
-        mode: "setup",
         returnUrl: process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
       }),
       cache: "no-store",
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: data.checkoutUrl, sessionId: data.sessionId });
   } catch (error) {
-    console.error("[Checkout] Convex billing request failed:", error);
-    return NextResponse.json({ error: "Checkout failed" }, { status: 502 });
+    console.error("[Checkout] Billing service unavailable");
+    return NextResponse.json({ error: "Secure checkout is temporarily unavailable. Please try again shortly." }, { status: 503 });
   }
 }

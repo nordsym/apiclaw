@@ -172,14 +172,16 @@ export function getWorkspacePublicApi(
 }
 
 export function isWorkspacePublicExecutableApi(reference: string | undefined): boolean {
-  return getWorkspacePublicApi(reference) !== undefined;
+  const api = getWorkspacePublicApi(reference);
+  // Raw CoinGecko redistribution requires a custom license. Discovery stays available.
+  return api !== undefined && api.origin !== "https://api.coingecko.com";
 }
 
 export function isWorkspacePublicExecutableAction(
   reference: string | undefined,
   action: string | undefined,
 ): boolean {
-  if (!getWorkspacePublicApi(reference) || !action) return false;
+  if (!isWorkspacePublicExecutableApi(reference) || !action) return false;
   const normalized = action.trim().toLowerCase();
   return normalized.length > 0 && normalized.length <= 64 && /^[a-z0-9_./-]+$/.test(normalized);
 }

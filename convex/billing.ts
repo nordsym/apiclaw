@@ -1,3 +1,5 @@
+import { PAID_MANAGED_PROVIDERS } from "../src/managed-commercial-policy";
+import { hasActivePaygEntitlement, hasActiveContractEntitlement, isInternalTier } from "./managedUsagePolicy";
 import { v } from "convex/values";
 import { internalMutation, internalAction, internalQuery, query, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
@@ -654,7 +656,10 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
     tier: workspace.tier,
     usage: managedUsageCount,
     currentPeriodUsage,
-    limit: plan === "free" ? FREE_MANAGED_CALLS_LIFETIME : -1,
+    limit: -1,
+    paygActive: hasActivePaygEntitlement(workspace),
+    paidProviderAllowlist: [...PAID_MANAGED_PROVIDERS],
+    freePaidCallAllowance: 0,
     activationProviderCostUsd,
     activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
     creditBalance: workspace.creditBalance || 0,
@@ -682,11 +687,8 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
         }
       : null,
     // Check if payment method needed
-    needsPaymentMethod:
-      plan === "free" && (
-        managedUsageCount >= FREE_MANAGED_CALLS_LIFETIME ||
-        activationProviderCostUsd >= FREE_MANAGED_PROVIDER_COST_CAP_USD
-      ),
+    needsPaymentMethod: !isInternalTier(workspace.tier) &&
+      !hasActivePaygEntitlement(workspace) && !hasActiveContractEntitlement(workspace),
   };
 }
 

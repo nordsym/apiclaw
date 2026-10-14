@@ -66,15 +66,14 @@ const brandNewNoCard = evaluateManagedUsage({ tier: "free" }, {
 assert.equal(brandNewNoCard.allowed, false);
 assert.equal(brandNewNoCard.reason, "payment_required");
 
-// A card on file is trusted directly (hasPaymentMethod boolean), no live
-// Stripe check and no requirement for a fully-wired PAYG subscription.
+// A saved card alone cannot authorize spend before Stripe billing is ready.
 const cardOnFile = { tier: "free", hasPaymentMethod: true };
 const paidWithCard = evaluateManagedUsage(cardOnFile, {
   estimatedProviderCostUsd: 0.01,
   billingGradeCost: true,
 });
-assert.equal(paidWithCard.allowed, true);
-assert.equal(paidWithCard.reason, null);
+assert.equal(paidWithCard.allowed, false);
+assert.equal(paidWithCard.reason, "payment_required");
 assert.equal(paidWithCard.billingClass, "payg");
 
 // hasCardAttached is an accepted alias for hasPaymentMethod.
@@ -83,7 +82,7 @@ assert.equal(
     estimatedProviderCostUsd: 0.01,
     billingGradeCost: true,
   }).allowed,
-  true,
+  false,
 );
 
 // Even with a card, a numeric reservation alone (billingGradeCost !== true)
@@ -93,7 +92,7 @@ const paidCardUnprovenCost = evaluateManagedUsage(cardOnFile, {
   billingGradeCost: false,
 });
 assert.equal(paidCardUnprovenCost.allowed, false);
-assert.equal(paidCardUnprovenCost.reason, "payg_cost_adapter_missing");
+assert.equal(paidCardUnprovenCost.reason, "payment_required");
 
 const fakePayg = {
   tier: "usage_based",
@@ -108,12 +107,10 @@ const fakePayg = {
   paygMeterEventName: "apiclaw_managed_micro_usd",
 };
 assert.equal(hasActivePaygEntitlement(fakePayg), false);
-// The gate no longer requires the full PAYG entitlement apparatus (active
-// subscription, exact-meter readiness); only the stored hasPaymentMethod
-// boolean and a billing-grade cost proof.
+// Failed subscriptions cannot authorize paid calls even with a saved card.
 assert.equal(
   evaluateManagedUsage(fakePayg, { estimatedProviderCostUsd: 10, billingGradeCost: true }).allowed,
-  true,
+  false,
 );
 
 for (const invalid of [

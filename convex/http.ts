@@ -1,3 +1,5 @@
+import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
+import { friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
@@ -1334,7 +1336,7 @@ function internalOnlyResponse(_provider: string) {
 }
 
 function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
-  const unavailable = quota.reason === "managed_action_not_customer_executable";
+  const unavailable = quota.reason === "managed_action_not_customer_executable" || quota.reason === "managed_billing_unavailable";
   const costHold = quota.reason === "managed_cost_hold";
   const paymentRequired = quota.reason === "payment_required";
   return jsonResponse(
@@ -1938,7 +1940,7 @@ function jsonExecuteResponse(
 ): Response {
   const body = status === 200 && payload.success !== false
     ? attachFirstCallRevenueNudge(payload, nudge)
-    : payload;
+    : friendlyManagedFailure(payload, status);
   return jsonResponse(body, status);
 }
 
@@ -4997,8 +4999,8 @@ export function buildManagedRequest(
   const meta = PROVIDERS[provider];
   if (!meta?.envKey) return null;
 
-  const apiKey = resolveManagedCredential(provider, meta.envKey, process.env);
-  if (!apiKey) return null;
+  const apiKey = resolveManagedCredential(provider, meta.envKey, process.env) ?? (provider === "github" ? "" : undefined);
+  if (apiKey === undefined) return null;
 
   // Provider-specific request builders
   switch (provider) {
@@ -5579,8 +5581,9 @@ export function buildManagedRequest(
         method: "POST",
         headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: params.model || "voyage-3-large",
+          model: String(params.model || "voyage-3-large").replace(/^voyage\//, ""),
           input,
+          ...(params.input_type ? { input_type: params.input_type } : {}),
         }),
       };
     }
@@ -5802,7 +5805,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       });
       params.model = explicitOpenRouterExecution?.model ?? (requestedModel === "auto"
         ? "mistral-small-latest"
-        : requestedModel || "anthropic/claude-sonnet-4-6");
+        : requestedModel || (provider === "groq" ? "groq/openai/gpt-oss-20b" : "anthropic/claude-sonnet-4-6"));
       try {
         authorizedMaxOutputTokens = normalizeMaxOutputTokens(params.max_completion_tokens ?? params.max_tokens);
       } catch (error) {
@@ -5916,6 +5919,12 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         return jsonResponse({ success: false, error: "No LLM provider available", _apiclaw: { latencyMs: Date.now() - startTime, route: "none", gateway: true } }, 503);
       }
 
+      if (quotaGate?.trafficClass === "customer" && quotaGate.billingClass !== "activation" &&
+        !managedPaidCallReady(route.provider, route.model)) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+        return jsonResponse({ success: false, error: { code: "managed_billing_unavailable",
+          message: MANAGED_BILLING_UNAVAILABLE_MESSAGE } }, 403);
+      }
       routeDetail = route.reason;
 
       // Log usage. Capture incrementUsage result so A-17 quota_warning
@@ -5979,7 +5988,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
 
         upstreamDispatchAttempted = true;
         const response = await fetch(route.baseUrl, {
-          method: "POST", headers, body: JSON.stringify(finalBody),
+          method: "POST", headers, body: JSON.stringify(normalizeManagedChatParams(route.provider, route.model, finalBody)),
           signal: AbortSignal.timeout(60_000),
         });
 

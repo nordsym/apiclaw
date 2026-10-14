@@ -96,10 +96,6 @@ export function activationManagedCallCount(workspace: ManagedUsageWorkspace): nu
   return Math.max(0, Math.min(FREE_MANAGED_CALLS_LIFETIME, managedUsageCount(workspace)));
 }
 
-function hasStoredPaymentMethod(workspace: ManagedUsageWorkspace): boolean {
-  return workspace.hasPaymentMethod === true || workspace.hasCardAttached === true;
-}
-
 function baseDecision(
   workspace: ManagedUsageWorkspace,
   billingClass: ManagedBillingClass,
@@ -191,10 +187,9 @@ export function evaluateManagedUsage(
     return { ...base, allowed: true, reason: null, warning: null };
   }
 
-  // Any call with real (or unproven) provider cost requires a card on file.
-  // The stored boolean is trusted here; there is no live Stripe check in
-  // this hot path.
-  if (!hasStoredPaymentMethod(workspace)) {
+  // Paid dispatch requires a webhook-reconciled subscription, a saved payment
+  // method and a verified meter. A card alone is not a billing entitlement.
+  if (!hasActivePaygEntitlement(workspace)) {
     const base = baseDecision(workspace, "payg", trafficClass);
     return { ...base, allowed: false, reason: "payment_required", warning: null };
   }

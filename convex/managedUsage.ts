@@ -1,3 +1,4 @@
+import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -452,6 +453,12 @@ export const authorizeManagedCall = internalMutation({
         reason: "managed_action_not_customer_executable",
         message: "This managed provider action is not available on APIClaw's public execution surface.",
       };
+    }
+
+    if (trafficClass === "customer" && (args.estimatedProviderCostUsd ?? 0) > 0 &&
+      !managedPaidCallReady(args.provider, args.model)) {
+      return { allowed: false as const, reason: "managed_billing_unavailable",
+        message: MANAGED_BILLING_UNAVAILABLE_MESSAGE };
     }
 
     const decision = evaluateManagedUsage(workspace, {
