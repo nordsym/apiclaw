@@ -136,7 +136,7 @@ status
 - 26,619 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not execution.
 - 22 built-in providers are inventoried. Built-in inventory is not an execution promise.
-- 22 built-in providers are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- 19 of the 22 built-in providers are customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - OpenAI-compatible LLM gateway.
 - Remote MCP validated end to end.
 - Mission runtime with append-only events.
@@ -154,7 +154,7 @@ When `payment_required` (HTTP 402) fires, show the `upgradeUrl` (`https://apicla
 
 ## Pricing
 
-- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once at https://apiclaw.cloud/upgrade, then provider cost plus 15% margin, metered per call. Actions without an exact cost adapter remain blocked.
 - Your key: bring your own OpenRouter key and route chat completions through it for free, no card, ever. Provider bills the workspace directly.
 - Anonymous keyless public execution stays disabled. Workspace-authenticated public/no-key origins execute with origin pinning.
@@ -186,7 +186,7 @@ Agents can be given a default model via `agents:setDefaultModel`. Resolution ord
 
 - Do not claim “one key for everything” as the primary positioning. The current position is “Your agent calls real APIs. You sign in once.”
 - Do not claim free anonymous discovery.
-- Do not claim a recurring weekly or monthly free-call allowance. Free APIs are free forever with no counter; Paid APIs require a card and bill provider cost plus 15% per call.
+- Do not claim a recurring weekly or monthly allowance. The managed trial is lifetime: up to 25 calls, capped at $1 provider cost. Zero-cost APIs remain free forever. PAYG bills provider cost plus 15% per call after a card is added.
 - Do not claim 30% margin. Current margin is 15%.
 - Do not claim anonymous keyless public APIs are proxied. Workspace-authenticated public/no-key origins are a separate, origin-pinned rail.
 - Do not claim old Pro or Scale pricing tiers unless the live pricing page says so.

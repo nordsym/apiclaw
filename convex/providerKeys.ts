@@ -70,6 +70,14 @@ function keyHintFor(plainKey: string): string {
   return plainKey.length > 4 ? plainKey.slice(-4) : plainKey;
 }
 
+/** APILayer is an APIClaw-managed commercial rail. Customers must not attach
+ * their own APILayer credential through the legacy BYOK surface. Keep this
+ * policy shared by writes and reads so historical rows remain intact but are
+ * no longer exposed in workspace settings. */
+export function isCustomerManagedProviderKey(provider: string): boolean {
+  return provider.trim().toLowerCase() !== "apilayer";
+}
+
 /** Decrypts a providerKeys.encryptedKey value. Server-side execution only —
  * never call this from a query/mutation whose result reaches the client. */
 export async function decryptProviderKey(encryptedKey: string): Promise<string> {
@@ -130,6 +138,9 @@ export const setKey = mutation({
 
     const provider = args.provider.trim().toLowerCase();
     if (!provider) throw new Error("provider is required");
+    if (!isCustomerManagedProviderKey(provider)) {
+      throw new Error("APILayer is managed by APIClaw; no provider key is needed");
+    }
     if (!args.key || args.key.trim().length === 0) throw new Error("key is required");
 
     const workspaceId = session.workspaceId;
@@ -227,7 +238,7 @@ export const listKeys = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", session.workspaceId))
       .collect();
 
-    return rows.map((row) => ({
+    return rows.filter((row) => isCustomerManagedProviderKey(row.provider)).map((row) => ({
       id: row._id,
       provider: row.provider,
       keyHint: row.keyHint,

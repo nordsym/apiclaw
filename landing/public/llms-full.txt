@@ -3,7 +3,7 @@
 > Your agent calls real APIs. You sign in once.
 > https://apiclaw.cloud
 
-APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,619 API definitions discoverable, 1,025 callable now.
+APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,619 API definitions discoverable, 1,022 callable now.
 
 ## Canonical endpoints
 
@@ -22,12 +22,12 @@ APIClaw is the authenticated execution and discovery layer for AI agents. An age
 - Discoverable API definitions: 26,619
 - Exact-name source-verified catalog entries: 689
 - Managed provider adapter inventory: 22
-- Customer-executable provider rails: 22
+- Customer-executable provider rails: 19
 - Workspace-authenticated public/no-key origins: 1,003
 - Managed execution: available only where a server-side provider is live
 - Anonymous keyless public execution: disabled
 - Discovery: free after signup
-- Free APIs: free forever, no card. Discovery and every zero-cost API, over 1,000 of the 1,025 callable now.
+- Free APIs: free forever, no card. Discovery and every zero-cost API, plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once, then provider cost plus 15%, metered per call.
 - Unknown-cost paid actions: blocked rather than estimated
 - Anonymous execution: unavailable
@@ -122,7 +122,7 @@ Use `discover_apis(query)` or `POST /v1/discover` to search the registry by capa
 
 Use `call_api` or `POST /v1/execute` with an execution-ready managed provider and action. The runtime checks workspace ownership, allowance, provider-cost reservation, action readiness, and payload bounds before it calls upstream.
 
-APIClaw inventories 22 built-in providers, all customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Provider inventory is not an execution promise.
+APIClaw inventories 22 built-in providers, 19 customer-executable now, plus 1,003 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled. Provider inventory is not an execution promise.
 
 Successful responses can include `_apiclaw` metadata for provider, route, latency, provider cost, auth mode, and quota notices.
 
@@ -130,7 +130,7 @@ Internal NordSym communication infrastructure is not a public APIClaw provider s
 
 ## Model routing
 
-Use the OpenAI-compatible chat and embeddings endpoints with a supported model identifier. APIClaw can route through configured OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, Cohere, and DeepInfra adapters.
+Use the OpenAI-compatible chat and embeddings endpoints with a supported model identifier. APIClaw can route through configured OpenAI, Anthropic, OpenRouter, xAI, Groq, Mistral, and DeepInfra adapters.
 
 Model catalogs change. A name in static documentation is not an availability guarantee. Check the live provider response for current frontier-model access.
 
@@ -164,7 +164,7 @@ Mission templates compose typed fetch, transform, decide, validate, and execute 
 
 ## Pricing and billing
 
-- Free APIs are free forever with no card: discovery plus every zero-cost API, over 1,000 of the 1,025 callable now.
+- Free APIs are free forever with no card: discovery plus every zero-cost API, with up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs need a card on file, then bill exact provider cost plus 15%, metered per call.
 - Your key: bring your own OpenRouter key and route chat completions through it for free, no card, ever.
 - Discovery stays free after signup.

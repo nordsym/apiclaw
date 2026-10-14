@@ -14,8 +14,9 @@ export function SiteHeader({
           <span className="text-[15px] font-semibold tracking-tight">APIClaw</span>
         </a>
         <nav className="flex items-center gap-5 text-[13.5px]" aria-label="Primary">
+          <a href="/pricing" className="claw-link">Pricing</a>
           <a href="/docs" className="claw-link">Docs</a>
-          <a href="/catalog" className="claw-link hidden sm:inline">Catalog</a>
+          <a href="/catalog" className="claw-link hidden md:inline">Catalog</a>
           <ThemeToggle />
           {signInHref ? (
             <a href={signInHref} className="claw-btn claw-btn-quiet !h-9 !px-3.5 !text-[13px]">{signInHref === "/workspace" ? "Workspace" : "Sign in"}</a>

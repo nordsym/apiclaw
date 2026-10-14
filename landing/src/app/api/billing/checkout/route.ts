@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
-        mode: "setup",
         returnUrl: process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
       }),
       cache: "no-store",

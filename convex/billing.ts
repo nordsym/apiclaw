@@ -1,8 +1,7 @@
 import { v } from "convex/values";
-import { internalMutation, internalAction, internalQuery, query, QueryCtx } from "./_generated/server";
+import { internalMutation, internalQuery, query, QueryCtx } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
-import Stripe from "stripe";
 import {
   FREE_MANAGED_CALLS_LIFETIME,
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
@@ -18,13 +17,38 @@ import { findUsableAgentSession } from "./sessionSecurity";
 
 const PAYG_USAGE_LIMIT = 999_999_999;
 
-// Initialize Stripe
-function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error("STRIPE_SECRET_KEY not configured");
-  }
-  return new Stripe(key);
+type BillingLedgerRow = {
+  status: string;
+  billingClass: string;
+  providerCostMicros?: number;
+  customerChargeMicros?: number;
+  stripeStatus: "not_applicable" | "pending" | "claiming" | "reported";
+};
+
+export function summarizeCurrentPeriodLedger(rows: BillingLedgerRow[]) {
+  const succeeded = rows.filter((row) => row.status === "succeeded");
+  const payg = succeeded.filter((row) => row.billingClass === "payg");
+  const sumCharges = (selected: BillingLedgerRow[]) => selected.reduce(
+    (sum, row) => sum + Math.max(0, Math.round(row.customerChargeMicros ?? 0)),
+    0,
+  );
+  return {
+    currentPeriodUsage: succeeded.length,
+    billableCalls: payg.length,
+    providerCostMicros: payg.reduce(
+      (sum, row) => sum + Math.max(0, Math.round(row.providerCostMicros ?? 0)),
+      0,
+    ),
+    customerChargeMicros: sumCharges(payg),
+    stripePendingCount: payg.filter((row) =>
+      row.stripeStatus === "pending" || row.stripeStatus === "claiming"
+    ).length,
+    stripePendingMicros: sumCharges(payg.filter((row) =>
+      row.stripeStatus === "pending" || row.stripeStatus === "claiming"
+    )),
+    stripeReportedCount: payg.filter((row) => row.stripeStatus === "reported").length,
+    stripeReportedMicros: sumCharges(payg.filter((row) => row.stripeStatus === "reported")),
+  };
 }
 
 // ============================================
@@ -642,7 +666,7 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
       q.eq("workspaceId", workspaceId).gte("createdAt", periodStart.getTime()),
     )
     .collect();
-  const currentPeriodUsage = ledger.filter((row) => row.status === "succeeded").length;
+  const periodSummary = summarizeCurrentPeriodLedger(ledger);
 
   // Determine plan limits
   const plan = workspace.billingPlan || "free";
@@ -653,7 +677,14 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
     plan,
     tier: workspace.tier,
     usage: managedUsageCount,
-    currentPeriodUsage,
+    currentPeriodUsage: periodSummary.currentPeriodUsage,
+    billableCalls: periodSummary.billableCalls,
+    currentPeriodProviderCostMicros: periodSummary.providerCostMicros,
+    currentPeriodChargeMicros: periodSummary.customerChargeMicros,
+    stripePendingCount: periodSummary.stripePendingCount,
+    stripePendingMicros: periodSummary.stripePendingMicros,
+    stripeReportedCount: periodSummary.stripeReportedCount,
+    stripeReportedMicros: periodSummary.stripeReportedMicros,
     limit: plan === "free" ? FREE_MANAGED_CALLS_LIFETIME : -1,
     activationProviderCostUsd,
     activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
@@ -662,7 +693,9 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
     stripeSubscriptionId: workspace.stripeSubscriptionId,
     lastBillingDate: workspace.lastBillingDate,
     currentPeriodStart: periodStart.getTime(),
-    monthlySpendCents: workspace.lastSpendResetAt && workspace.lastSpendResetAt >= periodStart.getTime() ? Math.round(workspace.monthlySpendCents ?? 0) : 0,
+    // Retained for older clients, now derived from the same immutable ledger
+    // that feeds Stripe rather than the legacy mutable workspace counter.
+    monthlySpendCents: Math.round(periodSummary.customerChargeMicros / 10_000),
     invoices: invoices.map((inv) => ({
       id: inv._id,
       stripeInvoiceId: inv.stripeInvoiceId,
@@ -849,274 +882,5 @@ export const getWorkspace = internalQuery({
   },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
-  },
-});
-
-// ============================================
-// STRIPE USAGE REPORTING (Internal Actions)
-// ============================================
-
-/**
- * Get all workspaces with active Stripe subscriptions (internal)
- */
-export const getActiveSubscriptions = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    // Get all workspaces with a subscription ID
-    const workspaces = await ctx.db
-      .query("workspaces")
-      .filter((q) => q.neq(q.field("stripeSubscriptionId"), undefined))
-      .collect();
-
-    // Filter to only those with billing plan that requires reporting
-    return workspaces.filter(
-      (w) => w.billingPlan === "usage_based" && w.stripeSubscriptionId
-    );
-  },
-});
-
-/**
- * Get unreported usage records for a specific workspace (internal)
- */
-export const getUnreportedUsageForWorkspace = internalQuery({
-  args: {
-    workspaceId: v.id("workspaces"),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("usageRecords")
-      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
-      .filter((q) => q.eq(q.field("reportedToStripe"), false))
-      .collect();
-  },
-});
-
-/**
- * Mark multiple usage records as reported (internal)
- */
-export const markUsageRecordsReported = internalMutation({
-  args: {
-    usageRecordIds: v.array(v.id("usageRecords")),
-    stripeUsageRecordId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now();
-    for (const recordId of args.usageRecordIds) {
-      await ctx.db.patch(recordId, {
-        reportedToStripe: true,
-        stripeUsageRecordId: args.stripeUsageRecordId,
-        updatedAt: now,
-      });
-    }
-  },
-});
-
-/**
- * Report usage to Stripe for a single workspace
- * Internal action - called by the daily cron
- */
-export const reportUsageToStripe = internalAction({
-  args: {
-    workspaceId: v.id("workspaces"),
-    stripeSubscriptionId: v.string(),
-  },
-  handler: async (ctx, args): Promise<{ success: boolean; callCount: number; error?: string }> => {
-    try {
-      // Get unreported usage records
-      const usageRecords = await ctx.runQuery(
-        internal.billing.getUnreportedUsageForWorkspace,
-        { workspaceId: args.workspaceId }
-      );
-
-      if (usageRecords.length === 0) {
-        return { success: true, callCount: 0 };
-      }
-
-      // Sum up all unreported calls and costs
-      const totalCalls = usageRecords.reduce(
-        (sum: number, r: { callCount: number }) => sum + r.callCount,
-        0
-      );
-      const totalCostUsd = usageRecords.reduce(
-        (sum: number, r: any) => sum + (r.apiclawCostUsd || r.callCount * 0.002),
-        0
-      );
-
-      if (totalCalls === 0) {
-        // Mark as reported even if 0 calls (to prevent re-processing)
-        await ctx.runMutation(internal.billing.markUsageRecordsReported, {
-          usageRecordIds: usageRecords.map((r: { _id: Id<"usageRecords"> }) => r._id),
-          stripeUsageRecordId: "zero_usage",
-        });
-        return { success: true, callCount: 0 };
-      }
-
-      const stripe = getStripe();
-
-      // Get subscription to find the metered subscription item
-      const subscription = await stripe.subscriptions.retrieve(args.stripeSubscriptionId);
-
-      // Find the metered price item (usage_based price)
-      const meteredItem = subscription.items.data.find((item) => {
-        return item.price.recurring?.usage_type === "metered";
-      });
-
-      if (!meteredItem) {
-        console.error(
-          `No metered subscription item found for subscription ${args.stripeSubscriptionId}`
-        );
-        return {
-          success: false,
-          callCount: totalCalls,
-          error: "No metered subscription item found",
-        };
-      }
-
-      // Report usage via Stripe Meter Events API.
-      // The metered price `price_1TL038RtJYK3aJTqODoFAiVT` is bound to meter
-      // `mtr_61UFEGojJ0b2awh1441RtJYK3aJTqS9g` (event_name="api_call", sum of payload.value).
-      // Stripe deprecated the legacy /v1/subscription_items/.../usage_records endpoint
-      // for meter-bound prices -- it returns an error there. Use /v1/billing/meter_events.
-      // 1 unit = $0.01, so we send the dollar cost in cents.
-      const costInCents = Math.ceil(totalCostUsd * 100);
-      const customerId = typeof subscription.customer === "string"
-        ? subscription.customer
-        : subscription.customer?.id;
-
-      if (!customerId) {
-        throw new Error(`Subscription ${args.stripeSubscriptionId} has no customer`);
-      }
-
-      const stripeKey = process.env.STRIPE_SECRET_KEY;
-      const usageRecordKey = usageRecords
-        .map((r: { _id: Id<"usageRecords"> }) => r._id)
-        .sort()
-        .join("_");
-      const idempotencyKey = `apiclaw_${args.workspaceId}_${usageRecordKey}`;
-
-      const meterEventResponse = await fetch(
-        `https://api.stripe.com/v1/billing/meter_events`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${stripeKey}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            event_name: "api_call",
-            "payload[stripe_customer_id]": customerId,
-            "payload[value]": String(costInCents),
-            identifier: idempotencyKey,
-            timestamp: String(Math.floor(Date.now() / 1000)),
-          }),
-        }
-      );
-
-      if (!meterEventResponse.ok) {
-        const errorData = await meterEventResponse.text();
-        throw new Error(`Stripe meter event error: ${meterEventResponse.status} - ${errorData}`);
-      }
-
-      // Meter events don't return an `id`; the idempotency identifier is the reference.
-      await ctx.runMutation(internal.billing.markUsageRecordsReported, {
-        usageRecordIds: usageRecords.map((r: { _id: Id<"usageRecords"> }) => r._id),
-        stripeUsageRecordId: idempotencyKey,
-      });
-
-      console.log(
-        `Reported ${totalCalls} calls (${costInCents}¢) for workspace ${args.workspaceId} via meter event ${idempotencyKey}`
-      );
-
-      return { success: true, callCount: totalCalls };
-    } catch (error: any) {
-      console.error(
-        `Failed to report usage for workspace ${args.workspaceId}:`,
-        error
-      );
-      return {
-        success: false,
-        callCount: 0,
-        error: error.message || "Unknown error",
-      };
-    }
-  },
-});
-
-// Type for workspace with active subscription
-type ActiveWorkspace = {
-  _id: Id<"workspaces">;
-  email: string;
-  stripeSubscriptionId?: string;
-};
-
-// Type for cron results
-type CronResults = {
-  total: number;
-  success: number;
-  failed: number;
-  skipped: number;
-  totalCallsReported: number;
-  errors: string[];
-};
-
-/**
- * Daily cron job: Report all unreported usage to Stripe
- * Runs at 00:05 UTC
- */
-export const reportAllUsageToStripe = internalAction({
-  args: {},
-  handler: async (ctx): Promise<CronResults> => {
-    console.log("[Cron] Starting daily usage reporting to Stripe...");
-
-    // Get all workspaces with active subscriptions
-    const workspaces: ActiveWorkspace[] = await ctx.runQuery(
-      internal.billing.getActiveSubscriptions,
-      {}
-    );
-
-    console.log(`[Cron] Found ${workspaces.length} workspaces with active subscriptions`);
-
-    const results: CronResults = {
-      total: workspaces.length,
-      success: 0,
-      failed: 0,
-      skipped: 0,
-      totalCallsReported: 0,
-      errors: [],
-    };
-
-    // Process each workspace
-    for (const workspace of workspaces) {
-      if (!workspace.stripeSubscriptionId) {
-        results.skipped++;
-        continue;
-      }
-
-      try {
-        const result = await ctx.runAction(internal.billing.reportUsageToStripe, {
-          workspaceId: workspace._id,
-          stripeSubscriptionId: workspace.stripeSubscriptionId,
-        });
-
-        if (result.success) {
-          results.success++;
-          results.totalCallsReported += result.callCount;
-        } else {
-          results.failed++;
-          results.errors.push(
-            `${workspace.email}: ${result.error || "Unknown error"}`
-          );
-        }
-      } catch (error: any) {
-        results.failed++;
-        results.errors.push(`${workspace.email}: ${error.message || "Unknown error"}`);
-        console.error(`[Cron] Error processing workspace ${workspace._id}:`, error);
-        // Continue with next workspace
-      }
-    }
-
-    console.log("[Cron] Daily usage reporting complete:", JSON.stringify(results));
-
-    return results;
   },
 });

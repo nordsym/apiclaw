@@ -1,6 +1,7 @@
 import {
   FREE_MANAGED_CALLS_LIFETIME,
   FREE_MANAGED_PROVIDER_COST_CAP_USD,
+  FREE_MANAGED_WARNING_AT,
   PAYG_MARGIN_RATE,
 } from "../src/product-truth";
 import { PAYMENT_REQUIRED_MESSAGE } from "../src/first-call-nudge";
@@ -53,20 +54,34 @@ export type ManagedUsageDecision = {
 const ACTIVE_SUBSCRIPTION_STATES = new Set(["active", "trialing"]);
 const CONTRACT_TIERS = new Set(["pro", "scale", "enterprise"]);
 
+function hasNonEmptyString(value: string | undefined): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export function isInternalTier(tier: string): boolean {
   return tier === "founder" || tier === "partner";
 }
 
-export function hasActivePaygEntitlement(workspace: ManagedUsageWorkspace): boolean {
+export function hasActivePaygEntitlement(
+  workspace: ManagedUsageWorkspace,
+  expectedMeter?: { priceId: string; meterId: string; eventName: string },
+): boolean {
   const planIsPayg = workspace.billingPlan === "usage_based" || workspace.tier === "usage_based";
-  const subscriptionActive = !!workspace.stripeCustomerId &&
-    !!workspace.stripeSubscriptionId &&
+  const subscriptionActive = hasNonEmptyString(workspace.stripeCustomerId) &&
+    hasNonEmptyString(workspace.stripeSubscriptionId) &&
     ACTIVE_SUBSCRIPTION_STATES.has(workspace.stripeSubscriptionStatus || "");
   const paymentMethodActive = workspace.hasPaymentMethod === true || workspace.hasCardAttached === true;
-  const exactMeterReady = !!workspace.paygMeterReadyAt &&
-    !!workspace.paygMeterPriceId &&
-    !!workspace.paygMeterId &&
-    !!workspace.paygMeterEventName;
+  const exactMeterReady = typeof workspace.paygMeterReadyAt === "number" &&
+    Number.isFinite(workspace.paygMeterReadyAt) &&
+    workspace.paygMeterReadyAt > 0 &&
+    hasNonEmptyString(workspace.paygMeterPriceId) &&
+    hasNonEmptyString(workspace.paygMeterId) &&
+    hasNonEmptyString(workspace.paygMeterEventName) &&
+    (!expectedMeter || (
+      workspace.paygMeterPriceId === expectedMeter.priceId &&
+      workspace.paygMeterId === expectedMeter.meterId &&
+      workspace.paygMeterEventName === expectedMeter.eventName
+    ));
   return planIsPayg && subscriptionActive && paymentMethodActive && exactMeterReady;
 }
 
@@ -88,16 +103,10 @@ export function managedUsageCount(workspace: ManagedUsageWorkspace): number {
 // lifetime managed/legacy count is deliberately conservative: a migration can
 // never accidentally grant a second free allowance. The value is capped at the
 // activation limit because paid/internal history must not grow this counter.
-// This counter is informational only now (see evaluateManagedUsage below);
-// it is kept for analytics/back-compat display, not for gating.
 export function activationManagedCallCount(workspace: ManagedUsageWorkspace): number {
   const explicit = workspace.activationManagedCallCount;
   if (explicit !== undefined) return Math.max(0, Math.min(FREE_MANAGED_CALLS_LIFETIME, explicit));
   return Math.max(0, Math.min(FREE_MANAGED_CALLS_LIFETIME, managedUsageCount(workspace)));
-}
-
-function hasStoredPaymentMethod(workspace: ManagedUsageWorkspace): boolean {
-  return workspace.hasPaymentMethod === true || workspace.hasCardAttached === true;
 }
 
 function baseDecision(
@@ -110,7 +119,7 @@ function baseDecision(
   const activationCost = (workspace.activationProviderCostMicros ?? 0) / 1_000_000;
   const trafficClass = trafficClassOverride === "byok"
     ? "byok"
-    : trafficClassOverride === "internal" || isInternalTier(workspace.tier)
+    : trafficClassOverride === "internal"
     ? "internal"
     : "customer";
   return {
@@ -118,13 +127,10 @@ function baseDecision(
     trafficClass,
     managedUsageCount: totalUsed,
     activationManagedCallCount: activationUsed,
-    // The lifetime call count and the $1 provider-cost cap no longer gate
-    // access. A call with provably zero provider cost is free forever and
-    // uncapped; a call with real cost is gated on hasPaymentMethod instead.
-    // These fields stay populated (as -1 / informational counters) for
-    // display and analytics back-compat, never for enforcement.
-    managedUsageLimit: -1,
-    managedUsageRemaining: -1,
+    managedUsageLimit: billingClass === "activation" ? FREE_MANAGED_CALLS_LIFETIME : -1,
+    managedUsageRemaining: billingClass === "activation"
+      ? Math.max(0, FREE_MANAGED_CALLS_LIFETIME - activationUsed)
+      : -1,
     activationProviderCostUsd: activationCost,
     activationProviderCostCapUsd: FREE_MANAGED_PROVIDER_COST_CAP_USD,
     activationProviderCostRemainingUsd: Math.max(0, FREE_MANAGED_PROVIDER_COST_CAP_USD - activationCost),
@@ -144,7 +150,7 @@ export function evaluateManagedUsage(
   const estimatedProviderCostUsd = options.estimatedProviderCostUsd;
   const trafficClass = options.trafficClass === "byok"
     ? "byok"
-    : options.trafficClass === "internal" || isInternalTier(workspace.tier)
+    : options.trafficClass === "internal"
     ? "internal"
     : "customer";
   // BYOK: the workspace attached its own provider key for this call, so it
@@ -180,28 +186,58 @@ export function evaluateManagedUsage(
     return { ...base, allowed: false, reason: "unpriced_managed_call", warning: null };
   }
 
-  // A call whose provider cost is provably zero is free forever, no card
-  // required, uncapped: a verified-zero provider (VERIFIED_ZERO_COST_PROVIDERS),
-  // the workspace-public keyless-origin path, or an explicit {input:0,output:0}
-  // model row. A zero-valued reservation/guess (billingGradeCost !== true)
-  // does not qualify; unknown or unproven cost is treated as paid.
+  // A call whose provider cost is provably zero is free forever and does not
+  // depend on activation or Stripe. A zero-valued guess does not qualify.
   const isProvenZeroCost = estimatedProviderCostUsd === 0 && options.billingGradeCost === true;
   if (isProvenZeroCost) {
     const base = baseDecision(workspace, "activation", trafficClass);
-    return { ...base, allowed: true, reason: null, warning: null };
+    return {
+      ...base,
+      allowed: true,
+      reason: null,
+      managedUsageLimit: -1,
+      managedUsageRemaining: -1,
+      warning: null,
+    };
   }
 
-  // Any call with real (or unproven) provider cost requires a card on file.
-  // The stored boolean is trusted here; there is no live Stripe check in
-  // this hot path.
-  if (!hasStoredPaymentMethod(workspace)) {
-    const base = baseDecision(workspace, "payg", trafficClass);
-    return { ...base, allowed: false, reason: "payment_required", warning: null };
+  const activationBase = baseDecision(workspace, "activation", trafficClass);
+  const activationCallAvailable = activationBase.activationManagedCallCount + amount <=
+    FREE_MANAGED_CALLS_LIFETIME;
+  const activationCostAvailable = activationBase.activationProviderCostUsd + estimatedProviderCostUsd <=
+    FREE_MANAGED_PROVIDER_COST_CAP_USD + Number.EPSILON;
+
+  if (activationCallAvailable && activationCostAvailable) {
+    if (options.billingGradeCost !== true) {
+      return { ...activationBase, allowed: false, reason: "unpriced_managed_call", warning: null };
+    }
+    const nextUsed = activationBase.activationManagedCallCount + amount;
+    const nextRemaining = Math.max(0, FREE_MANAGED_CALLS_LIFETIME - nextUsed);
+    const warning = nextUsed >= FREE_MANAGED_WARNING_AT
+      ? {
+          type: "managed_allowance_warning" as const,
+          used: nextUsed,
+          limit: FREE_MANAGED_CALLS_LIFETIME,
+          remaining: nextRemaining,
+          message: `${nextRemaining} free managed calls remain. Add a payment method to continue at provider cost + ${Math.round(PAYG_MARGIN_RATE * 100)}%.`,
+          upgradeUrl: "https://apiclaw.cloud/upgrade",
+        }
+      : null;
+    return {
+      ...activationBase,
+      allowed: true,
+      reason: null,
+      managedUsageRemaining: nextRemaining,
+      warning,
+    };
   }
 
-  // A numeric reservation is not enough once a card is on file either. The
-  // adapter must prove realized cost or enforce a request-specific upper
-  // bound before the call can be charged.
+  // After either activation cap is exhausted, only the complete active Stripe
+  // micro-USD entitlement may open PAYG. A stored card boolean is insufficient.
+  if (!hasActivePaygEntitlement(workspace)) {
+    return { ...activationBase, allowed: false, reason: "payment_required", warning: null };
+  }
+
   if (options.billingGradeCost !== true) {
     const base = baseDecision(workspace, "payg", trafficClass);
     return { ...base, allowed: false, reason: "payg_cost_adapter_missing", warning: null };

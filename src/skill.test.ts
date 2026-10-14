@@ -119,7 +119,7 @@ assert.match(skill, /https:\/\/apiclaw\.cloud\/upgrade/, "SKILL.md must surface 
 assert.match(skill, /retry the same call/, "SKILL.md must tell agents to retry after adding a card");
 assert.doesNotMatch(skill, /brave_search/, "SKILL.md must not send first execute to billed Brave");
 assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
-assert.match(skill, /1,?025/, "callable count is the live catalog card count");
+assert.match(skill, /1,?022/, "callable count is the live catalog card count");
 assert.match(skill, /26,?619/, "discoverable count is canon");
 assert.match(skill, /22 built-in providers/, "built-in provider inventory is canon");
 assert.match(skill, /Do not invent metrics/);

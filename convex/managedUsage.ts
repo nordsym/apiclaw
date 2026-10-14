@@ -5,18 +5,21 @@ import { Id } from "./_generated/dataModel";
 import {
   activationManagedCallCount,
   evaluateManagedUsage,
-  hasActivePaygEntitlement,
-  isInternalTier,
   managedQuotaMessage,
   type ManagedBillingClass,
   type ManagedTrafficClass,
 } from "./managedUsagePolicy";
 import { isManagedActionAllowedForTraffic } from "./providerBoundaries";
-import { PAYG_MARGIN_RATE } from "../src/product-truth";
+import { PAYG_MARGIN_RATE, isPaygResaleProvider } from "../src/product-truth";
 import {
   buildIdempotencyReplayReceipt,
   safeReplayTerminalCode,
 } from "./idempotencyBinding";
+import {
+  hasConfiguredPaygEntitlement,
+  readMicroUsdMeterConfig,
+  type MicroUsdMeterConfig,
+} from "./managedMetering";
 
 const trafficClassValidator = v.union(v.literal("customer"), v.literal("internal"), v.literal("byok"));
 const costSourceValidator = v.union(
@@ -98,6 +101,7 @@ type StripeBillingSnapshotWorkspace = {
 export function buildStripeBillingSnapshot(
   workspace: StripeBillingSnapshotWorkspace,
   billingClass: ManagedBillingClass,
+  expectedMeter?: Pick<MicroUsdMeterConfig, "priceId" | "meterId" | "eventName">,
 ): {
   stripeCustomerIdSnapshot?: string;
   stripeSubscriptionIdSnapshot?: string;
@@ -114,6 +118,13 @@ export function buildStripeBillingSnapshot(
     !workspace.paygMeterEventName
   ) {
     throw new Error("PAYG authorization is missing immutable Stripe billing context");
+  }
+  if (!expectedMeter ||
+    workspace.paygMeterPriceId !== expectedMeter.priceId ||
+    workspace.paygMeterId !== expectedMeter.meterId ||
+    workspace.paygMeterEventName !== expectedMeter.eventName
+  ) {
+    throw new Error("PAYG authorization does not match the configured Stripe meter");
   }
   return {
     stripeCustomerIdSnapshot: workspace.stripeCustomerId,
@@ -313,6 +324,16 @@ export function customerChargeMicros(providerCostMicros: number, billingClass: M
     : 0;
 }
 
+export function isManagedProviderAllowedForBillingClass(input: {
+  provider: string;
+  billingClass: ManagedBillingClass;
+  trafficClass: ManagedTrafficClass;
+}): boolean {
+  if (input.trafficClass !== "customer") return true;
+  if (input.billingClass === "activation" || input.billingClass === "byok") return true;
+  return isPaygResaleProvider(input.provider);
+}
+
 export function authorizeRealizedManagedCost(input: {
   reservedProviderCostMicros: number;
   providerCostUsd?: number;
@@ -441,7 +462,7 @@ export const authorizeManagedCall = internalMutation({
       };
     }
 
-    const trafficClass = args.trafficClass === "internal" || isInternalTier(workspace.tier)
+    const trafficClass = args.trafficClass === "internal"
       ? "internal"
       : "customer";
     if (
@@ -460,6 +481,13 @@ export const authorizeManagedCall = internalMutation({
       trafficClass: args.trafficClass as ManagedTrafficClass | undefined,
     });
     if (!decision.allowed) {
+      if (decision.reason === "payment_required" && !isPaygResaleProvider(args.provider)) {
+        return {
+          allowed: false as const,
+          reason: "managed_provider_not_available_for_paid_usage",
+          message: "This provider is available only within APIClaw's free managed allowance and is not offered through PAYG.",
+        };
+      }
       return {
         allowed: false as const,
         reason: decision.reason,
@@ -473,10 +501,25 @@ export const authorizeManagedCall = internalMutation({
         upgradeUrl: "https://apiclaw.cloud/upgrade",
       };
     }
+    if (!isManagedProviderAllowedForBillingClass({
+      provider: args.provider,
+      billingClass: decision.billingClass,
+      trafficClass: decision.trafficClass,
+    })) {
+      return {
+        allowed: false as const,
+        reason: "managed_provider_not_available_for_paid_usage",
+        message: "This provider is available only within APIClaw's free managed allowance and is not offered through PAYG.",
+      };
+    }
 
     const now = Date.now();
     const reservationMicros = usdToMicros(args.estimatedProviderCostUsd ?? 0);
-    const stripeBillingSnapshot = buildStripeBillingSnapshot(workspace, decision.billingClass);
+    const stripeBillingSnapshot = buildStripeBillingSnapshot(
+      workspace,
+      decision.billingClass,
+      decision.billingClass === "payg" ? readMicroUsdMeterConfig(process.env) : undefined,
+    );
     const currentManagedCount = workspace.managedUsageCount ?? workspace.usageCount ?? 0;
     const currentActivationCount = activationManagedCallCount(workspace);
     const patch: Record<string, unknown> = {
@@ -833,7 +876,9 @@ export const getOperatingSnapshot = internalQuery({
         founderOrPartner: active.length - customer.length,
         nearLifetimeCap: activationUsage.filter((count) => count >= 20 && count < 25).length,
         atOrOverLifetimeCap: activationUsage.filter((count) => count >= 25).length,
-        paygReady: active.filter((workspace) => hasActivePaygEntitlement(workspace)).length,
+        paygReady: active.filter((workspace) =>
+          hasConfiguredPaygEntitlement(workspace, process.env)
+        ).length,
       },
       auth: {
         sessions: sessions.length,

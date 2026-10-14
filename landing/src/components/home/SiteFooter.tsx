@@ -1,5 +1,6 @@
 const LINKS = [
   { href: "/SKILL.md", label: "SKILL.md" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/docs", label: "Docs" },
   { href: "/catalog", label: "Catalog" },
   { href: "/security", label: "Security" },

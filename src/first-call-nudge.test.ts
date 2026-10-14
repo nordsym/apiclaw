@@ -16,6 +16,7 @@ assert.match(FIRST_CALL_REVENUE_NUDGE_MESSAGE, /https:\/\/apiclaw\.cloud\/upgrad
 assert.match(FIRST_CALL_REVENUE_NUDGE_MESSAGE, /OpenRouter/);
 assert.match(FIRST_CALL_REVENUE_NUDGE_MESSAGE, /15%/);
 assert.match(PAYMENT_REQUIRED_MESSAGE, /https:\/\/apiclaw\.cloud\/upgrade/);
+assert.match(PAYMENT_REQUIRED_MESSAGE, /free managed allowance/);
 assert.match(PAYMENT_REQUIRED_MESSAGE, /retry this same call/);
 assert.match(PAYMENT_REQUIRED_MESSAGE, /15 percent/);
 
