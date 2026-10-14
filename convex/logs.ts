@@ -752,18 +752,25 @@ export const attachCost = internalMutation({
   args: {
     requestId: v.string(),
     costCents: v.number(),
+    workspaceId: v.optional(v.id("workspaces")),
+    status: v.optional(v.union(v.literal("success"), v.literal("error"))),
+    latencyMs: v.optional(v.number()),
   },
-  handler: async (ctx, { requestId, costCents }) => {
+  returns: v.object({ patched: v.boolean() }),
+  handler: async (ctx, { requestId, costCents, workspaceId, status, latencyMs }) => {
     const row = await ctx.db
       .query("apiLogs")
       .withIndex("by_requestId", (q) => q.eq("requestId", requestId))
       .first();
 
-    if (!row) {
+    if (!row || (workspaceId !== undefined && row.workspaceId !== workspaceId)) {
       return { patched: false };
     }
 
-    await ctx.db.patch(row._id, { costCents });
+    await ctx.db.patch(row._id, { costCents,
+      ...(status ? { status, errorMessage: status === "error" ? "Provider call failed" : undefined } : {}),
+      ...(latencyMs !== undefined ? { latencyMs: Math.max(0, latencyMs) } : {}),
+    });
     return { patched: true };
   },
 });

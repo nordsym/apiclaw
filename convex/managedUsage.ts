@@ -693,6 +693,9 @@ export const finalizeManagedCall = internalMutation({
     try {
       await ctx.runMutation(internal.logs.attachCost, {
         requestId: ledger.requestId,
+        workspaceId: ledger.workspaceId,
+        status: args.success ? "success" : "error",
+        latencyMs: now - ledger.createdAt,
         costCents: microsToCents(args.success ? chargeMicros : 0),
       });
     } catch (e) {

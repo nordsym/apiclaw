@@ -6029,27 +6029,12 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         const usage = (data as any)?.usage;
         const calculatedCost = calculateCallCost(route.model, usage);
         const providerReportedCost = providerReportedUsageCostUsd(usage);
-        let managedCostDecision = resolveManagedResponseCost({
+        const managedCostDecision = resolveManagedResponseCost({
           provider: route.provider,
           responseOk: response.ok,
           providerReportedCostUsd: providerReportedCost,
           tokenTableCostUsd: calculatedCost?.providerCost,
         });
-        // Non-OpenRouter customer-executable LLM rails reuse the authorized
-        // reservation when the provider omits usage. OpenRouter still requires
-        // usage.cost and must stay fail-closed.
-        if (
-          response.ok &&
-          managedCostDecision.providerCostUsd === undefined &&
-          route.provider !== "openrouter" &&
-          isPublicCustomerExecutableAction(route.provider, "chat") &&
-          quotaGate?.reservedProviderCostUsd !== undefined
-        ) {
-          managedCostDecision = {
-            providerCostUsd: quotaGate.reservedProviderCostUsd,
-            costSource: "fixed_price_policy",
-          };
-        }
         const providerCost = managedCostDecision.providerCostUsd;
         const apiclawCost = providerCost === undefined ? undefined : providerCost * (1 + APICLAW_MARGIN);
         const finalization = await finalizeManagedCall(ctx, quotaGate, {

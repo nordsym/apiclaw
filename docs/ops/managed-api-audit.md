@@ -53,8 +53,8 @@ APILayer's public agreement restricts disclosure of testing/performance results 
 
 Window: 2026-10-07T09:25:13.778000+00:00 through 2026-10-14T09:25:13.778000+00:00, captured before the audit probes. Indexed reads were capped at 10,000 rows; both returned fewer than the cap.
 
-- `managedCallLedger`: 43 recorded calls, 1 failed, or 2.33% recorded ledger failures. This is a small observed sample, not a full HTTP request denominator.
-- `apiLogs`: 42 rows, 0 errors. These logs therefore do **not** provide a complete execution-error rate: a ledger failure exists without a corresponding error log.
+- `managedCallLedger`: 43 recorded calls, 1 failed, or 2.33% recorded ledger failures. The failed row is a customer NASA APOD call with zero cost, not an interrupted internal LLM call. This is a small observed sample, not a full HTTP request denominator.
+- `apiLogs`: 42 rows, 0 errors. These historical logs therefore do **not** provide a complete execution-error rate: a ledger failure exists without a corresponding error log. Confirmed future finalization now updates the matching workspace log status as well as its cost.
 - Logged providers: 39 OpenAI-Codex calls and 3 NASA calls. There was no meaningful seven-day customer sample for the other managed providers.
 - Requests rejected before authorization, authorization failures and unrecorded network failures are outside the ledger denominator. Do not report 0% overall errors from the application log alone.
 

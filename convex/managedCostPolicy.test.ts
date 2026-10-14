@@ -56,7 +56,7 @@ assert.equal(hasBillingGradeManagedCost({ provider: "anthropic", action: "messag
 assert.equal(hasBillingGradeManagedCost({ provider: "groq", action: "chat" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "voyage", action: "embeddings" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "serper", action: "search" }), false);
-assert.equal(hasBillingGradeManagedCost({ provider: "brave_search", action: "search" }), true);
+assert.equal(hasBillingGradeManagedCost({ provider: "brave_search", action: "search" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "github", action: "search_repos" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), false);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "weatherstack_current" }), false);
@@ -65,7 +65,7 @@ assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "scr
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "world_news" }), undefined);
 
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "brave_search", action: "search" }), 0.005);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "brave_search", action: "search" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "github", action: "get_repo" }), 0);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), undefined);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "firecrawl", action: "scrape" }), undefined);

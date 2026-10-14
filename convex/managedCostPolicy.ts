@@ -45,13 +45,8 @@ const LLM_ACTIONS = new Set([
   "messages",
 ]);
 
-// These are realized per-call costs, not reservation guesses. Keep this list
-// deliberately small: adding an adapter here makes it eligible for customer
-// PAYG after the activation allowance is exhausted.
-const VERIFIED_FIXED_PROVIDER_COSTS_USD: Record<string, Record<string, number>> = {
-  brave_search: { search: 0.005 },
-};
-
+// Nonzero reservations remain estimates. They cannot become realized
+// customer cost just because a credential or adapter is configured.
 const VERIFIED_ZERO_COST_PROVIDERS = new Set([
   "coingecko",
   "github",
@@ -174,9 +169,8 @@ export function hasBillingGradeManagedCost(input: ManagedCostEstimateInput): boo
   if (isWorkspacePublicExecutableApi(input.provider)) return true;
   if (VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return true;
   if (verifiedFixedManagedProviderCostUsd(input) !== undefined) return true;
-  // Customer-executable LLM rails may use the token-bound reservation as
-  // realized cost (same pattern as APILayer). OpenRouter still prefers
-  // usage.cost when the provider reports it.
+  // The public LLM rail requires provider-reported cost after dispatch.
+  // Reservations remain only a bounded pre-call authorization.
   if (
     isPublicCustomerExecutableAction(provider, input.action) &&
     (LLM_PROVIDERS.has(provider) || LLM_ACTIONS.has(input.action))
@@ -191,16 +185,7 @@ export function verifiedFixedManagedProviderCostUsd(
 ): number | undefined {
   const provider = input.provider.toLowerCase();
   if (isWorkspacePublicExecutableApi(input.provider) || VERIFIED_ZERO_COST_PROVIDERS.has(provider)) return 0;
-  // Customer-executable adapters reuse their existing reservation as the
-  // realized per-call cost (APILayer's pattern). Inventory-only actions
-  // stay unpriced so they cannot enter PAYG.
-  if (isPublicCustomerExecutableAction(provider, input.action)) {
-    const reserved = FIXED_PROVIDER_RESERVATIONS_USD[provider];
-    if (reserved !== undefined) return reserved;
-    const verified = VERIFIED_FIXED_PROVIDER_COSTS_USD[provider]?.[input.action];
-    if (verified !== undefined) return verified;
-  }
-  return VERIFIED_FIXED_PROVIDER_COSTS_USD[provider]?.[input.action];
+  return undefined;
 }
 
 export type ManagedResponseCostDecision = {
