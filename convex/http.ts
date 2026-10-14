@@ -4519,7 +4519,7 @@ http.route({
       }
 
       // For streaming responses, proxy the stream directly
-      if (stream && response.body) {
+      if (stream && response.ok && response.body) {
         await finalizeManagedCall(ctx, quotaGate, {
           success: response.ok,
           provider: route.provider,
@@ -4594,7 +4594,9 @@ http.route({
         };
       }
 
-      return jsonResponse(data, response.status);
+      return jsonResponse(response.ok ? data : friendlyManagedFailure({
+        data, provider: route.provider, _apiclaw: data?._apiclaw,
+      }, response.status), response.status);
     } catch (e: any) {
       if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
         await finalizeManagedCall(ctx, quotaGate, {

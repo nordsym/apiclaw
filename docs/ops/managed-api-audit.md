@@ -64,6 +64,22 @@ The NordSym Stripe account has live charges and payouts enabled. Its existing AP
 
 The old Checkout saves a card (`mode=setup`). The implementation on this branch offers a real usage subscription for ordinary workspaces, preserves founder/partner labels while requiring explicit internal authorization for nonbillable traffic, calculates applicable tax in Checkout and requires a webhook-reconciled subscription before paid dispatch. Free APIs remain uncapped and free; the free plan includes 25 successful approved managed calls or USD 1 provider cost before requiring billing. The first free NASA/Frankfurter call remains unchanged.
 
-The existing Convex development deployment incorrectly contains a live Stripe key, not a test key. Do not test card purchases there using it. An isolated preview deployment is being used instead. The connected Stripe plugin requires reauthentication but a valid NordSym Stripe CLI test key was found and imported only into the isolated preview. **A real Stripe test-mode card purchase and production release are not yet verified.** This document must be updated with release/test evidence before marking the task complete.
+The existing Convex development deployment incorrectly contains a live Stripe key, not a test key. Do not test card purchases there using it. An isolated preview deployment is being used instead. The connected Stripe plugin requires reauthentication but a valid NordSym Stripe CLI test key was found and imported only into the isolated preview. **Hosted Checkout completion is still blocked by a CAPTCHA in isolated headless Chromium.** The separate real Stripe API test below verifies a test-card payment and signed webhook/meter processing; it does not prove browser Checkout completion. Production release verification is still pending.
 
 Before widening paid providers: confirm Cohere production credentials, relevant paid/commercial plans and explicit gateway redistribution permission where required. Funding Anthropic resolves its credit error but does not resolve reseller permission. APILayer needs current product entitlements, redistribution scope and reconciled cost, not a generic per-call reservation. GenPRD needs its live API endpoint restored in its own deployment. Never treat guessed reservations as customer billable actual cost.
+
+## Verified isolated-preview evidence
+
+Convex preview: `coordinated-oyster-180`. Real Clerk test sign-in created an ordinary Free workspace. Its first NASA request failed, Frankfurter succeeded, and the `first_call_api_success` funnel event was present before any payment method. The managed trial then allowed real nano responses and stopped with `402 payment_required` before further upstream dispatch. Free public rails remain available.
+
+The workspace Billing button opened a real Stripe sandbox subscription Checkout with billing address, tax disclosure and the reviewed terms. Card submission in the isolated headless browser hit Stripe CAPTCHA; no subscription was created by that attempt. A human must finish this hosted step.
+
+A separate ordinary preview fixture validated the backend using Stripe's documented test-card token through the Stripe API, without administratively granting paid status:
+
+- Stripe created active test subscription `sub_1UQQKIRtJYK3aJTqAeLUQMR2`. Real signed subscription/payment-method webhooks established `usage_based`, the saved method and the exact meter in Convex.
+- Real test invoice `in_1UQQKKRtJYK3aJTqokJ26Ha1` was paid for USD 1.25: a clearly labeled synthetic USD 1 test item plus 25% tax. This is payment-path proof, not fabricated gateway usage or a real sale. The signed `invoice.paid` event persisted the paid invoice.
+- After its free allowance, a real nano call finalized at 9 provider micro-USD and 11 customer micro-USD. The durable reporter delivered one real Stripe meter event and readback showed `stripeStatus=reported`.
+- Rejected calls finalized at zero customer charge and `stripeStatus=not_applicable`. Brave was blocked before dispatch. No unapproved provider became paid.
+- The repository suite, all TypeScript projects, package and landing builds passed after integrating PR #57. The isolated listing browser regression also passed submission, review, notification, catalog/discovery visibility, execution denial and withdrawal, with no keys or payment records.
+
+The pending browser CAPTCHA is not replaced by a mocked Checkout event or an admin-set paid flag. No real customer card was entered or charged.
