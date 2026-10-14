@@ -41,7 +41,9 @@ export default function WorkspacePage() {
   const accountRequest = useRef(0);
   const providerRequest = useRef(0);
   const searchParams = useSearchParams();
-  const signInPath = "/sign-in";
+  const signInPath = searchParams?.get("tab") === "billing"
+    ? `/sign-in?redirect_url=${encodeURIComponent("/workspace?tab=billing")}`
+    : "/sign-in";
   
   // Handle null searchParams
   if (!searchParams) {
