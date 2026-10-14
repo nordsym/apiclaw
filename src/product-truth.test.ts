@@ -7,19 +7,15 @@ import {
   FREE_MANAGED_WARNING_AT,
   MANAGED_PROVIDER_ADAPTER_COUNT,
   MANAGED_PROVIDER_ADAPTERS,
-  ACTIVATION_ONLY_PROVIDER_IDS,
   APILAYER_CUSTOMER_EXECUTABLE_ACTIONS,
   APILAYER_PAID_PLAN_ONLY_ACTIONS,
   APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS,
   MANAGED_USAGE_POLICY,
-  PAYG_RESALE_PROVIDER_IDS,
   PAYG_MARGIN_RATE,
   getManagedProviderAdapter,
   getPublicCustomerExecutableProvider,
-  isActivationOnlyProvider,
-  isPaygResaleProvider,
   isPublicCustomerExecutableAction,
 } from "./product-truth.js";
 
@@ -42,44 +38,18 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
   paygRequiresBillingGradeAdapter: true,
 });
 
-assert.deepEqual(PAYG_RESALE_PROVIDER_IDS, [
-  "openai",
-  "xai",
-  "anthropic",
-  "groq",
-  "openrouter",
-  "mistral",
-  "deepinfra",
-  "apilayer",
-]);
-assert.deepEqual(ACTIVATION_ONLY_PROVIDER_IDS, ["brave_search", "serper"]);
-assert.equal(new Set(PAYG_RESALE_PROVIDER_IDS).size, 8);
-for (const provider of PAYG_RESALE_PROVIDER_IDS) {
-  assert.equal(isPaygResaleProvider(provider), true, `${provider} must be PAYG eligible`);
-  assert.equal(isActivationOnlyProvider(provider), false, `${provider} must not be activation-only`);
-}
-assert.equal(isPaygResaleProvider(" OpenAI "), true, "allowlist lookup must normalize case and whitespace");
-for (const provider of ACTIVATION_ONLY_PROVIDER_IDS) {
-  assert.equal(isActivationOnlyProvider(provider), true, `${provider} must be activation-only`);
-  assert.equal(isPaygResaleProvider(provider), false, `${provider} must never enter PAYG`);
-}
-assert.equal(isActivationOnlyProvider(" Brave_Search "), true, "activation-only lookup must normalize case and whitespace");
-for (const provider of ["cohere", "replicate", "github", "elevenlabs", "deepgram", "assemblyai", "stability", "e2b"]) {
-  assert.equal(isPaygResaleProvider(provider), false, `${provider} is outside the exact PAYG resale allowlist`);
-}
-
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 19);
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 3);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
 assert.equal(CANON_STATS.discoverable, 26_619);
 assert.equal(CANON_STATS.source_verified, 689);
 assert.equal(CANON_STATS.verification_sweep_passes, 2_895);
 assert.equal(CANON_STATS.managed_provider_adapters, MANAGED_PROVIDER_ADAPTER_COUNT);
-// src/canon-stats.ts is owned by the release-truth reconciliation slice. Once
-// reconciled it must move from 22/1,025 to 19/1,022 while workspace-public
-// remains 1,003.
-assert.equal(CANON_STATS.customer_executable_providers, 19);
-assert.equal(CANON_STATS.workspace_public_executable, 1_003);
-assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_022);
+assert.equal(
+  CANON_STATS.customer_executable_providers,
+  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
+);
+assert.equal(CANON_STATS.workspace_public_executable, 1_002);
+assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_005);
 assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
@@ -91,55 +61,25 @@ assert.deepEqual(
 assert.deepEqual(
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDERS.map(({ id }) => id),
   [
-    "openrouter",
-    "groq",
-    "mistral",
-    "deepinfra",
-    "openai",
-    "xai",
-    "anthropic",
-    "brave_search",
-    "serper",
-    "elevenlabs",
-    "deepgram",
-    "assemblyai",
-    "stability",
-    "firecrawl",
-    "genprd",
-    "e2b",
-    "nasa",
-    "apilayer",
-    "voyage",
+    "openrouter", "github", "nasa",
   ],
 );
 assert.deepEqual(getPublicCustomerExecutableProvider("OpenRouter")?.customerExecutableActions, ["chat"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Groq")?.customerExecutableActions, ["chat"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Anthropic")?.customerExecutableActions, ["chat", "messages"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Firecrawl")?.customerExecutableActions, ["scrape", "crawl", "map"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("APILayer")?.customerExecutableActions, [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]);
-assert.equal(getManagedProviderAdapter("Cohere")?.id, "cohere");
-assert.equal(getManagedProviderAdapter("Replicate")?.id, "replicate");
-assert.equal(getManagedProviderAdapter("GitHub API")?.id, "github");
-assert.equal(getPublicCustomerExecutableProvider("Cohere"), undefined);
-assert.equal(getPublicCustomerExecutableProvider("Replicate"), undefined);
-assert.equal(getPublicCustomerExecutableProvider("GitHub API"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("Groq"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("Anthropic"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("Firecrawl"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("APILayer"), undefined);
+assert.equal(getPublicCustomerExecutableProvider("GitHub API")?.id, "github");
 assert.equal(getManagedProviderAdapter("AssemblyAI")?.id, "assemblyai");
-assert.equal(getPublicCustomerExecutableProvider("AssemblyAI")?.id, "assemblyai");
-assert.deepEqual(getPublicCustomerExecutableProvider("ElevenLabs")?.customerExecutableActions, ["text_to_speech"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Deepgram")?.customerExecutableActions, ["transcribe"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("AssemblyAI")?.customerExecutableActions, ["transcribe"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("Stability AI")?.customerExecutableActions, ["generate"]);
-assert.deepEqual(getPublicCustomerExecutableProvider("E2B")?.customerExecutableActions, ["run_code"]);
-assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), true);
+assert.equal(getPublicCustomerExecutableProvider("AssemblyAI"), undefined);
+assert.equal(isPublicCustomerExecutableAction("Brave Search", "search"), false);
 assert.equal(isPublicCustomerExecutableAction("github", "create_issue"), false);
-assert.equal(isPublicCustomerExecutableAction("cohere", "chat"), false);
 assert.equal(isPublicCustomerExecutableAction("replicate", "run"), false);
-assert.equal(isPublicCustomerExecutableAction("github", "get_repo"), false);
-assert.equal(isPublicCustomerExecutableAction("voyage", "embeddings"), true);
-assert.equal(isPublicCustomerExecutableAction("elevenlabs", "text_to_speech"), true);
-assert.equal(isPublicCustomerExecutableAction("e2b", "run_code"), true);
-assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), true);
-assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), true);
+assert.equal(isPublicCustomerExecutableAction("voyage", "embeddings"), false);
+assert.equal(isPublicCustomerExecutableAction("elevenlabs", "text_to_speech"), false);
+assert.equal(isPublicCustomerExecutableAction("e2b", "run_code"), false);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "weatherstack_current"), false);
+assert.equal(isPublicCustomerExecutableAction("apilayer", "fixer_latest"), false);
 for (const action of APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS) {
   assert.equal(
     isPublicCustomerExecutableAction("apilayer", action),
@@ -210,6 +150,11 @@ for (const file of ["convex/quota.ts", "convex/managedUsagePolicy.ts"]) {
     `${file} must consume the canonical lifetime allowance`,
   );
 }
+assert.doesNotMatch(
+  readFileSync("src/index.ts", "utf8"),
+  /FREE_MANAGED_CALLS_LIFETIME|FREE_MANAGED_PROVIDER_COST_CAP_USD/,
+  "src/index.ts must derive Free/Paid API copy without importing the retired lifetime-call constants",
+);
 assert.match(
   readFileSync("convex/adminStats.ts", "utf8"),
   /getWorkspaceUsageDisplay[\s\S]*?FREE_MANAGED_PROVIDER_COST_CAP_USD/,
@@ -220,15 +165,10 @@ const planCopy = readFileSync("landing/src/lib/plans.ts", "utf8");
 assert.match(planCopy, /Free APIs/);
 assert.match(planCopy, /Paid APIs/);
 assert.match(planCopy, /PAYG_MARGIN_RATE/);
-assert.match(
+assert.doesNotMatch(
   planCopy,
-  /25 managed calls/i,
-  "plans.ts must state the restored activation call allowance",
-);
-assert.match(
-  planCopy,
-  /\$1 provider cost/i,
-  "plans.ts must state the USD 1 activation provider-cost cap",
+  /FREE_MANAGED_CALLS_LIFETIME|FREE_MANAGED_PROVIDER_COST_CAP_USD|lifetime of the workspace/,
+  "plan copy must use the canonical managed trial limits",
 );
 
 for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt", "landing/public/agents.md", "landing/public/SKILL.md"]) {
@@ -236,8 +176,11 @@ for (const file of ["README.md", "apiclaw-README.md", "landing/public/llms.txt",
   assert.match(content, /Free APIs?[^\n]*free forever/i, `${file} must state Free APIs are free forever`);
   assert.match(content, /add a card/i, `${file} must state Paid APIs require a card`);
   assert.match(content, /provider cost (?:plus|\+) 15%|API cost plus 15%/i, `${file} must state the PAYG margin`);
-  assert.match(content, /25 (?:lifetime )?(?:managed )?calls/i, `${file} must state the lifetime activation call cap`);
-  assert.match(content, /\$1(?:\.00)?[^\n]*(?:provider[- ]cost|provider cost)/i, `${file} must state the USD 1 provider-cost cap`);
+  assert.doesNotMatch(
+    content,
+    /managed adapter/i,
+    `${file} must not confuse adapters with customer availability`,
+  );
 }
 
 const workspacePage = [
@@ -267,22 +210,19 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
   version: string;
   packages: Record<string, { version?: string; bin?: Record<string, string> }>;
 };
-assert.equal(packageMetadata.version, "2.9.12");
-assert.equal(packageLock.version, "2.9.12");
-assert.equal(packageLock.packages[""].version, "2.9.12");
+assert.equal(packageMetadata.version, "2.9.13");
+assert.equal(packageLock.version, "2.9.13");
+assert.equal(packageLock.packages[""].version, "2.9.13");
 assert.match(packageMetadata.description, /26,619 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 built-in providers/);
-assert.match(packageMetadata.description, /19 customer-executable today/);
-const rootHealth = readFileSync("api/health.ts", "utf8");
-assert.match(rootHealth, /service: 'apiclaw-gateway'/);
-assert.match(rootHealth, /version: '2\.9\.12'/);
-const landingHealth = readFileSync("landing/pages/api/health.ts", "utf8");
-assert.match(landingHealth, /createServiceHealth/);
-const sharedLandingHealth = readFileSync("landing/src/lib/service-health.ts", "utf8");
-assert.match(sharedLandingHealth, /SERVICE_NAME = "apiclaw-gateway"/);
-assert.match(sharedLandingHealth, /SERVICE_VERSION = packageMetadata\.version/);
+assert.match(packageMetadata.description, /3 approved customer-executable providers/);
+for (const healthFile of ["api/health.ts", "landing/pages/api/health.ts"]) {
+  const health = readFileSync(healthFile, "utf8");
+  assert.match(health, /createServiceHealth|service: 'apiclaw-gateway'/);
+    assert.match(health, /createServiceHealth|version: '2\.9\.13'/);
+}
 assert.deepEqual(packageMetadata.bin, { apiclaw: "./dist/bin.js" });
 assert.equal("start:http" in packageMetadata.scripts, false, "retired local HTTP server must not ship as an npm script");
 assert.deepEqual(packageLock.packages[""].bin, { apiclaw: "dist/bin.js" });

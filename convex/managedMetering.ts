@@ -38,8 +38,8 @@ type MeterEnvironment = Record<string, string | undefined>;
 export function assertStripeBillingEnvironment(env: MeterEnvironment): "test" | "live" {
   const mode = env.APICLAW_BILLING_ENVIRONMENT?.trim();
   const key = env.STRIPE_SECRET_KEY?.trim() || "";
-  if (mode === "test" && key.startsWith("sk_test_")) return "test";
-  if (mode === "live" && key.startsWith("sk_live_")) return "live";
+  if (mode === "test" && /^[sr]k_test_/.test(key)) return "test";
+  if (mode === "live" && /^[sr]k_live_/.test(key)) return "live";
   throw new Error("Stripe billing mode and secret key do not match");
 }
 

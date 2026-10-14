@@ -181,7 +181,9 @@ try {
     assert.equal(params.mode, "subscription");
     assert.deepEqual(params.line_items, [{ price: "price_synthetic" }]);
     assert.equal(params.payment_method_collection, "always");
-    assert.deepEqual(params.subscription_data?.metadata, { workspaceId: "workspace_synthetic" });
+    assert.deepEqual(params.subscription_data?.metadata, { workspaceId: "workspace_synthetic", termsVersion: "2026-10-14" });
+    assert.deepEqual(params.automatic_tax, { enabled: true });
+    assert.equal(params.billing_address_collection, "required");
     assert.deepEqual(params.metadata, {
       workspaceId: "workspace_synthetic",
       priceId: "price_synthetic",

@@ -2,10 +2,10 @@
   "apiCount": 26619,
   "sourceVerifiedCount": 689,
   "managedProviderAdapterCount": 22,
-  "customerExecutableProviderCount": 19,
+  "customerExecutableProviderCount": 3,
   "npmDownloads": 20058,
   "capabilityCount": 15,
-  "generatedAt": "2026-10-14T10:29:15.107Z",
+  "generatedAt": "2026-10-14T11:27:25.560Z",
   "categoryBreakdown": {
     "AI & ML": 2164,
     "Utilities": 8890,

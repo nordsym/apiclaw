@@ -1,3 +1,5 @@
+import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
+import { bindManagedChatModel, friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
@@ -1336,7 +1338,7 @@ function internalOnlyResponse(_provider: string) {
 
 function quotaExceededResponse(quota: any, provider: string, action: string, path: string) {
   const unavailable = quota.reason === "managed_action_not_customer_executable" ||
-    quota.reason === "managed_provider_not_available_for_paid_usage";
+    quota.reason === "managed_billing_unavailable" || quota.reason === "managed_provider_not_available_for_paid_usage";
   const billingUnavailable = quota.reason === "payg_cost_adapter_missing" ||
     quota.reason === "unpriced_managed_call";
   const costHold = quota.reason === "managed_cost_hold";
@@ -1944,7 +1946,7 @@ function jsonExecuteResponse(
 ): Response {
   const body = status === 200 && payload.success !== false
     ? attachFirstCallRevenueNudge(payload, nudge)
-    : payload;
+    : friendlyManagedFailure(payload, status);
   return jsonResponse(body, status);
 }
 
@@ -4517,7 +4519,7 @@ http.route({
       }
 
       // For streaming responses, proxy the stream directly
-      if (stream && response.body) {
+      if (stream && response.ok && response.body) {
         await finalizeManagedCall(ctx, quotaGate, {
           success: response.ok,
           provider: route.provider,
@@ -4592,7 +4594,9 @@ http.route({
         };
       }
 
-      return jsonResponse(data, response.status);
+      return jsonResponse(response.ok ? data : friendlyManagedFailure({
+        data, provider: route.provider, _apiclaw: data?._apiclaw,
+      }, response.status), response.status);
     } catch (e: any) {
       if (e instanceof UnsafeManagedOpenRouterRequestError && !upstreamDispatchAttempted) {
         await finalizeManagedCall(ctx, quotaGate, {
@@ -5007,8 +5011,8 @@ export function buildManagedRequest(
   const meta = PROVIDERS[provider];
   if (!meta?.envKey) return null;
 
-  const apiKey = resolveManagedCredential(provider, meta.envKey, process.env);
-  if (!apiKey) return null;
+  const apiKey = resolveManagedCredential(provider, meta.envKey, process.env) ?? (provider === "github" ? "" : undefined);
+  if (apiKey === undefined) return null;
 
   // Provider-specific request builders
   switch (provider) {
@@ -5589,8 +5593,9 @@ export function buildManagedRequest(
         method: "POST",
         headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: params.model || "voyage-3-large",
+          model: String(params.model || "voyage-3-large").replace(/^voyage\//, ""),
           input,
+          ...(params.input_type ? { input_type: params.input_type } : {}),
         }),
       };
     }
@@ -5812,7 +5817,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       });
       params.model = explicitOpenRouterExecution?.model ?? (requestedModel === "auto"
         ? "mistral-small-latest"
-        : requestedModel || "anthropic/claude-sonnet-4-6");
+        : requestedModel || (provider === "groq" ? "groq/openai/gpt-oss-20b" : "anthropic/claude-sonnet-4-6"));
       try {
         authorizedMaxOutputTokens = normalizeMaxOutputTokens(params.max_completion_tokens ?? params.max_tokens);
       } catch (error) {
@@ -5914,7 +5919,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
 
       const effectiveModel = params.model || settings.defaultModel || "anthropic/claude-sonnet-4-6";
 
-      const route = await routeLLMRequest(explicitOpenRouterExecution?.routingModel ?? effectiveModel, {
+      const route = await routeLLMRequest(explicitOpenRouterExecution?.routingModel ?? bindManagedChatModel(provider, effectiveModel), {
         routingMode: effectiveRoutingMode,
         preferredProviders: finalPreferred,
         blockedProviders: settings.blockedProviders,
@@ -5926,6 +5931,12 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         return jsonResponse({ success: false, error: "No LLM provider available", _apiclaw: { latencyMs: Date.now() - startTime, route: "none", gateway: true } }, 503);
       }
 
+      if (quotaGate?.trafficClass === "customer" && quotaGate.billingClass !== "activation" &&
+        !managedPaidCallReady(route.provider, route.model)) {
+        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
+        return jsonResponse({ success: false, error: { code: "managed_billing_unavailable",
+          message: MANAGED_BILLING_UNAVAILABLE_MESSAGE } }, 403);
+      }
       routeDetail = route.reason;
 
       // Log usage. Capture incrementUsage result so A-17 quota_warning
@@ -5989,7 +6000,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
 
         upstreamDispatchAttempted = true;
         const response = await fetch(route.baseUrl, {
-          method: "POST", headers, body: JSON.stringify(finalBody),
+          method: "POST", headers, body: JSON.stringify(normalizeManagedChatParams(route.provider, route.model, finalBody)),
           signal: AbortSignal.timeout(60_000),
         });
 
@@ -6030,27 +6041,12 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         const usage = (data as any)?.usage;
         const calculatedCost = calculateCallCost(route.model, usage);
         const providerReportedCost = providerReportedUsageCostUsd(usage);
-        let managedCostDecision = resolveManagedResponseCost({
+        const managedCostDecision = resolveManagedResponseCost({
           provider: route.provider,
           responseOk: response.ok,
           providerReportedCostUsd: providerReportedCost,
           tokenTableCostUsd: calculatedCost?.providerCost,
         });
-        // Non-OpenRouter customer-executable LLM rails reuse the authorized
-        // reservation when the provider omits usage. OpenRouter still requires
-        // usage.cost and must stay fail-closed.
-        if (
-          response.ok &&
-          managedCostDecision.providerCostUsd === undefined &&
-          route.provider !== "openrouter" &&
-          isPublicCustomerExecutableAction(route.provider, "chat") &&
-          quotaGate?.reservedProviderCostUsd !== undefined
-        ) {
-          managedCostDecision = {
-            providerCostUsd: quotaGate.reservedProviderCostUsd,
-            costSource: "fixed_price_policy",
-          };
-        }
         const providerCost = managedCostDecision.providerCostUsd;
         const apiclawCost = providerCost === undefined ? undefined : providerCost * (1 + APICLAW_MARGIN);
         const finalization = await finalizeManagedCall(ctx, quotaGate, {

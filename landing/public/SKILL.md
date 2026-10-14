@@ -21,7 +21,7 @@ without guessing.
 Live catalog (2026-08-25). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
-- 1,022 callable
+- 1,005 callable
 - 26,619 discoverable
 - 22 built-in providers
 

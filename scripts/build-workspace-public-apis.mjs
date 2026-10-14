@@ -154,7 +154,8 @@ for (const api of CURATED) {
   curated.push(api);
 }
 
-const allowlist = [...curated, ...harvested].sort((a, b) => a.name.localeCompare(b.name));
+// Raw CoinGecko redistribution requires a custom license; retain discovery only.
+const allowlist = [...curated, ...harvested].filter((api) => api.origin !== "https://api.coingecko.com").sort((a, b) => a.name.localeCompare(b.name));
 
 const compact = JSON.stringify(allowlist);
 writeFileSync(JSON_OUTPUT, compact + "\n");

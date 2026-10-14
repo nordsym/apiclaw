@@ -52,7 +52,8 @@ assert.equal(shouldUnlockHarvestedPublicApi({
 }), false);
 
 assert.equal(isWorkspacePublicExecutableApi("Frankfurter"), true);
-assert.equal(isWorkspacePublicExecutableApi("CoinGecko"), true);
+assert.equal(isWorkspacePublicExecutableApi("CoinGecko"), false);
+assert.equal(isWorkspacePublicExecutableAction("coingecko", "call"), false);
 assert.equal(isWorkspacePublicExecutableApi("Studio Ghibli API"), true);
 assert.equal(isWorkspacePublicCatalogCard("Frankfurter"), true);
 assert.equal(isWorkspacePublicCatalogCard("Disney+"), false);
@@ -76,8 +77,8 @@ assert.equal(
   "https://api.frankfurter.dev/v1/latest",
 );
 
-const coingecko = getWorkspacePublicApi("CoinGecko");
-assert.ok(coingecko);
+assert.equal(getWorkspacePublicApi("CoinGecko"), undefined);
+const coingecko = { id: "coingecko", name: "CoinGecko", baseUrl: "https://api.coingecko.com/api/v3", origin: "https://api.coingecko.com" };
 assert.equal(coingecko.baseUrl, "https://api.coingecko.com/api/v3");
 assert.equal(coingecko.origin, "https://api.coingecko.com");
 assert.equal(

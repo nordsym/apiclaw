@@ -57,7 +57,7 @@ assert.match(
 );
 assert.match(
   execute,
-  /routeLLMRequest\(explicitOpenRouterExecution\?\.routingModel \?\? effectiveModel/,
+  /routeLLMRequest\(explicitOpenRouterExecution\?\.routingModel \?\? bindManagedChatModel\(provider, effectiveModel\)/,
   "OpenRouter customer calls must not fall through to direct-provider routing",
 );
 assert.match(

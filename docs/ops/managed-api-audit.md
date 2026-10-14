@@ -1,85 +1,85 @@
 # Managed API audit
 
-Last run: 2026-10-14  
-Environment: production gateway, `https://api.apiclaw.cloud/v1/execute`  
-Code baseline: `692ea745`  
-Workspace: APIClaw website workspace, using internal audit authorization  
+Audit date: 2026-10-14. Baseline gateway code: `692ea7453bd7048a3294918873c6265e60e39149`, production `adventurous-avocet-799`, gateway `https://api.apiclaw.cloud`.
 
-This document records which managed adapters have fresh action-level evidence and which ones APIClaw may advertise as customer-callable. It contains no credentials, customer payloads, or upstream response bodies.
+## Method and limits
 
-## Commercial boundary
+The initial probes ran before code changes or deployments, using an isolated operator audit workspace. Each public adapter received a small real gateway request. No customer account, card, provider plan or recharge setting was changed. No email or SMS was sent. A successful call proves the tested action, not all actions or models. Two adapters return asynchronous jobs; job acceptance is not completed-output proof. Corrected model/version inputs were retested separately.
 
-APIClaw has two customer rails:
+`getManagedProviderAdapter` inventories 22 providers. CoinGecko and Frankfurter are separate workspace-authenticated public/no-key APIs. The backend audit also inventories Together and three reserved communications adapters; these are reported separately below. Configured credentials do not establish paid plans, commercial permission or healthy APIs. Unknown means not verified, not free or paid.
 
-- Free: discovery, workspace-authenticated public or no-key HTTPS APIs, and a small managed trial after login. The managed trial ends at the first of 25 successful calls or USD 1 in provider cost.
-- PAYG: the provider cost plus a 15% APIClaw margin, reported through the configured Stripe micro-USD meter.
+These classifications evaluate APIClaw's gateway use, not merely the right to monetize generated output. A commercial-output license does not automatically permit reselling a provider's raw API. No ordinary account was promoted to reseller status. The launch paid boundary is OpenRouter's audited OpenAI models (`openai/gpt-5.4-nano`, `openai/gpt-5.4-mini`, `openai/gpt-5.4`) with exact provider-reported cost. All three approved models received successful isolated-preview gateway smoke tests with provider-reported cost. Every other nonzero-cost managed provider is excluded from customer paid dispatch until both rights and cost truth are verified. BYOK is separately billed by the user's provider.
 
-PAYG resale is limited to OpenAI, xAI, Anthropic, Groq, OpenRouter, Mistral, DeepInfra, and APILayer. Brave and Serper may be used during the free managed allowance but are not sold through PAYG. GitHub public reads are free-only when healthy and are currently hidden because the live adapter failed.
+APILayer's public agreement restricts disclosure of testing/performance results (section 9 and 16). Its numerical probe evidence is retained in the private operator audit rather than published in this public repository.
 
-APIClaw holds the APILayer subscription and injects the managed credential. Customers do not configure an APILayer key. APILayer confirmed the provider-cost-plus-15% model by email on 2026-04-16. The formal partnership agreement sent on 2026-04-15 still has unconfirmed signature status, so this audit does not claim a signed partnership.
+## Provider table
 
-## 2026-10-14 action smoke test
+| Provider / tested action | Works? / gateway latency | Upstream key / plan evidence | May APIClaw charge? / launch treatment | Primary terms and pricing |
+|---|---|---|---|---|
+| openrouter / `chat` | Pass; 1485 ms | Managed OPENROUTER_API_KEY; paid credits, current key is_free_tier=false (account API) | OK for customer applications, subject to each model's terms. Launch paid use only for audited OpenAI models; exact usage.cost required. | [Terms](https://openrouter.ai/terms) · [Pricing](https://openrouter.ai/pricing) |
+| groq / `chat` | Baseline model unavailable (404), 634 ms; corrected Groq binding and GPT-OSS-20B pass in isolated preview, 535 ms | Managed GROQ_API_KEY; current Free/Developer/Enterprise plan unknown | Unclear for raw gateway resale: application integration allowed, service resale requires approval (3.1, 8). Excluded from paid use. | [Terms](https://console.groq.com/docs/legal/services-agreement) · [Pricing](https://console.groq.com/docs/models) |
+| mistral / `chat` | Rate-limited (429); 728 ms | Managed MISTRAL_API_KEY; current plan unknown; upstream capacity limit observed | Commercial terms required; raw third-party access/partner resale needs appropriate authorization. Current entitlement unclear; excluded. | [Terms](https://legal.mistral.ai/terms/commercial-terms-of-service/) · [Pricing](https://mistral.ai/pricing) |
+| deepinfra / `chat` | Pass; 835 ms | Managed DEEPINFRA_API_KEY; historical prepaid receipt; current balance/plan unknown | Not allowed to resell/make services available absent explicit agreement/order permission (6). No such permission verified; excluded. | [Terms](https://deepinfra.com/terms) · [Pricing](https://deepinfra.com/pricing) |
+| openai / `chat` | Baseline GPT-5 token parameter rejected (400), 1250 ms; normalized GPT-5.4-nano passes in isolated preview, 2266 ms | Managed OPENAI_API_KEY; historical paid API/prepaid receipts; current balance unknown | OK to integrate API in paid customer applications (2.2), never sell accounts/keys. Direct paid rail excluded until exact cost reconciliation is proven. | [Terms](https://openai.com/policies/services-agreement/) · [Pricing](https://openai.com/api/pricing/) |
+| xai / `chat` | Pass; 1951 ms | Managed XAI_API_KEY; historical paid API receipt; current funding source unknown | Unclear: end-user applications supported under business terms, actual agreement/plan and raw proxy rights unverified. Excluded. | [Terms](https://x.ai/legal/terms-of-service-enterprise) · [Pricing](https://docs.x.ai/docs/models) |
+| anthropic / `chat` | Insufficient upstream credits (400); 826 ms | Managed ANTHROPIC_API_KEY; historical paid credits; current balance exhausted | Application integration allowed, but standalone service resale requires express approval (A.1, D.4). No reseller approval verified; excluded. | [Terms](https://www.anthropic.com/legal/commercial-terms) · [Pricing](https://claude.com/pricing) |
+| cohere / `rerank` | Pass; 410 ms | Managed COHERE_API_KEY; trial/production key class not yet verified | Only on production/commercial agreement. Trial keys explicitly cannot be used commercially. Current key class unknown; excluded. | [Terms](https://cohere.com/terms-of-use) · [Pricing](https://cohere.com/pricing) |
+| brave_search / `search` | Pass; 912 ms | Managed BRAVE_API_KEY; historical paid API with promotional credits; current plan unknown | Not allowed: ordinary Search API terms prohibit redistribution/resale of raw results (3.2). Written exception required; excluded. | [Terms](https://api-dashboard.search.brave.com/documentation/resources/terms-of-service) · [Pricing](https://brave.com/search/api/) |
+| serper / `search` | Pass; 1318 ms | Managed SERPER_API_KEY; purchased vs trial credits unknown | Unclear: B2B use allowed but as-is mirroring without added value prohibited. Raw gateway permission and actual paid credits unverified; excluded. | [Terms](https://serper.dev/terms) · [Pricing](https://serper.dev/) |
+| elevenlabs / `text_to_speech` | Pass; 754 ms | Managed ELEVENLABS_API_KEY; Starter verified by subscription API today | Only paid plan permits commercial outputs. Starter is verified, but service redistribution/authorized-reseller rights remain unclear; excluded. | [Terms](https://elevenlabs.io/terms-of-use) · [Pricing](https://elevenlabs.io/pricing) |
+| deepgram / `transcribe` | Pass; 927 ms | Managed DEEPGRAM_API_KEY; paid vs promotional credit balance unknown | Unclear for this raw gateway: stand-alone resale forbidden, integration must add material independent functionality (2.4). Excluded. | [Terms](https://deepgram.com/terms) · [Pricing](https://deepgram.com/pricing) |
+| assemblyai / `transcribe` | Accepted async job; completed output not verified; 525 ms | Managed ASSEMBLYAI_API_KEY; paid vs trial credits unknown | Not allowed under ordinary internal-business-use/non-sublicensable grant (2.1); a suitable written reseller amendment is needed. Excluded. | [Terms](https://www.assemblyai.com/legal/terms-of-service) · [Pricing](https://www.assemblyai.com/pricing) |
+| replicate / `run` | Accepted async job; completed output not verified; 885 ms | Managed REPLICATE_API_TOKEN; paid vs trial credits unknown | Unclear for raw proxying; service license is non-sublicensable and each model has separate terms. Model/output use is not blanket service-resale permission. Excluded. | [Terms](https://replicate.com/terms) · [Pricing](https://replicate.com/pricing) |
+| stability / `generate` | Pass; 5353 ms | Managed STABILITY_API_KEY; paid vs promotional credits unknown | OK only as an integrated component of own product under current terms (3.b.3); raw proxy boundary/current plan unresolved. Excluded. | [Terms](https://stability.ai/terms-of-service) · [Pricing](https://platform.stability.ai/pricing) |
+| firecrawl / `scrape` | Pass; 602 ms | Managed FIRECRAWL_API_KEY; historical Free downgrade; current plan not verified | Not allowed commercially except as expressly authorized (5.d); no applicable hosted-service resale permission verified. Excluded. | [Terms](https://www.firecrawl.dev/terms-of-service) · [Pricing](https://www.firecrawl.dev/pricing) |
+| genprd / `generate_prd` | Live endpoint missing (404); source endpoint exists but is not deployed; 445 ms | Managed GENPRD_API_KEY; NordSym-owned service; underlying LLM cost not reconciled | NordSym owns the service; upstream model restrictions still apply. No functional live endpoint/cost proof; excluded from paid use. | [Terms](https://genprd.se/) · [Pricing](https://genprd.se/#pricing) |
+| github / `get_repo` | Baseline shared egress IP rate-limited (403), 279 ms; keyless repository read passes in isolated preview, 437 ms; upstream rate limits remain | Public, keyless customer REST requests; shared GITHUB_TOKEN is not injected | Public read integration permitted subject to GitHub and repository/content licenses. Remains free; never sell private access or shared credentials. | [Terms](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) · [Pricing](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) |
+| e2b / `run_code` | Pass; 1125 ms | Managed E2B_API_KEY; Hobby/Pro and remaining credits unknown | Not allowed to distribute/resell/provide access without written authorization (Prohibited Conduct 2, 9). Excluded. | [Terms](https://e2b.dev/terms) · [Pricing](https://e2b.dev/pricing) |
+| nasa / `apod` | Pass; 520 ms | Managed NASA_API_KEY, with DEMO_KEY fallback; free public-data API | Generally usable commercially, but third-party APOD media and endorsements have separate restrictions. Remains free; not a universal media resale license. | [Terms](https://www.nasa.gov/nasa-brand-center/images-and-media/) · [Pricing](https://api.nasa.gov/) |
+| apilayer / `exchange_rates` | Probe recorded privately; publication permission unverified; withheld | Managed unified and product-specific keys; documented enterprise trial, current entitlement not verified | Unclear: account access/trial does not establish gateway redistribution rights; product/order terms must be reconciled. Excluded from paid use. | [Terms](https://www.ideracorp.com/~/media/IderaInc/Files/APILayer/Apilayer%20Master%20Software%20as%20a%20Service%20Subscription%20Agreement%20SaaS%20082523ns%20FORM) · [Pricing](https://apilayer.com/products/) |
+| voyage / `embeddings` | Pass; 430 ms | Managed VOYAGE_API_KEY; free token allowance vs paid usage unknown | Unclear for raw service resale; API use on behalf of authorized third parties described, but no blanket redistribution permission verified. Excluded. | [Terms](https://www.voyageai.com/tos) · [Pricing](https://docs.voyageai.com/docs/pricing) |
+| coingecko / `call` | Rate-limited (429); 327 ms | Keyless public API; no custom redistribution license verified | Not allowed for raw data redistribution under standard commercial plans. Custom license required. Discovery retained; public gateway execution disabled. | [Terms](https://support.coingecko.com/articles/1043089972-what-are-the-differences-between-commercial-and-custom-licenses) · [Pricing](https://www.coingecko.com/en/api/pricing) |
+| frankfurter / `latest` | Pass; 348 ms | Keyless public API, no subscription | OK for commercial application use; upstream data terms still apply to direct provider feeds. Remains free. | [Terms](https://frankfurter.dev/) · [Pricing](https://github.com/lineofflight/frankfurter/blob/main/LICENSE) |
+## Reserved and unavailable adapters
 
-Each test used one bounded, low-cost request through the same public execution gateway customers use. The audit checked the returned success flag, media type or response shape, and gateway latency. Secrets and full response payloads were neither printed nor retained here.
+| Adapter | Gateway probe | Plan / commercial classification | Primary terms / pricing |
+|---|---|---|---|
+| 46elks | Intentionally blocked, HTTP 404; 822 ms. No upstream dispatch. | Communications credentials configured; current funding/plan unknown. Only commercial telecom use under provider conditions; resale permission not verified. Internal only. | [Terms](https://46elks.com/terms) · [Pricing](https://46elks.com/pricing) |
+| twilio | Intentionally blocked, HTTP 404; 500 ms. No upstream dispatch. | SID/token configured; trial vs paid status unknown. Customer applications are supported; resale/order conditions must be checked. Internal only. | [Terms](https://www.twilio.com/en-us/legal/tos) · [Pricing](https://www.twilio.com/en-us/sms/pricing) |
+| resend | Intentionally blocked, HTTP 404; 290 ms. No upstream dispatch. | Key configured; Free vs Pro unknown. Ordinary service terms do not establish gateway reseller rights. Internal only. | [Terms](https://resend.com/legal/terms-of-service) · [Pricing](https://resend.com/pricing) |
+| together | Intentionally blocked, HTTP 404; 432 ms. No upstream dispatch. | No production key; not available. Plan and reseller rights unknown. | [Terms](https://www.together.ai/terms-of-service) · [Pricing](https://www.together.ai/pricing) |
 
-| Adapter | Sanitized request profile | Result | Customer-callable decision |
-| --- | --- | --- | --- |
-| Cohere | One short chat request using `command-a-03-2025` | Fail before upstream: model had no billing-grade price | Hide actions until model pricing and the request contract are verified |
-| ElevenLabs | Short text-to-speech sample | Pass: MPEG audio, 20,523 bytes, 996 ms | Keep callable |
-| Deepgram | Transcribe one short public audio sample | Pass, 941 ms | Keep callable |
-| AssemblyAI | Submit one short public audio sample for transcription | Pass: upstream accepted transcript `96d58d2d-fb94-4b0f-8675-6dc3573d3354`, status `processing`, 345 ms | Keep callable for submission; completion polling remains an operational follow-up |
-| Replicate | Minimal prediction request through the advertised `run` action | Fail: upstream HTTP 422 because a valid model version was not safely expressed by the advertised contract | Hide actions until the adapter exposes a complete, validated model contract |
-| Stability | Generate one minimal image | Pass, 4,074 ms | Keep callable |
-| GitHub | Read one private repository, then one public repository | Fail twice: upstream HTTP 403, including the public control request | Hide actions until unauthenticated rate-limit behavior is made reliable or an owner-scoped connection exists |
-| E2B | Run `2 + 2`, verify stdout, then clean up the sandbox | Pass: stdout `4`, cleanup completed, 1,158 ms | Keep callable |
+## Seven-day production execution evidence
 
-The inventory remains 22 built-in adapters. Removing only the customer actions for Cohere, Replicate, and GitHub leaves 19 customer-executable managed providers. Together with 1,003 workspace-public origins, the callable catalog contains 1,022 cards.
+Window: 2026-10-07T09:25:13.778000+00:00 through 2026-10-14T09:25:13.778000+00:00, captured before the audit probes. Indexed reads were capped at 10,000 rows; both returned fewer than the cap.
 
-## Serper follow-up
+- `managedCallLedger`: 43 recorded calls, 1 failed, or 2.33% recorded ledger failures. The failed row is a customer NASA APOD call with zero cost, not an interrupted internal LLM call. This is a small observed sample, not a full HTTP request denominator.
+- `apiLogs`: 42 rows, 0 errors. These historical logs therefore do **not** provide a complete execution-error rate: a ledger failure exists without a corresponding error log. Confirmed future finalization now updates the matching workspace log status as well as its cost.
+- Logged providers: 39 OpenAI-Codex calls and 3 NASA calls. There was no meaningful seven-day customer sample for the other managed providers.
+- Requests rejected before authorization, authorization failures and unrecorded network failures are outside the ledger denominator. Do not report 0% overall errors from the application log alone.
 
-The passive provider history showed two failures and no successes. A fresh bounded search for `APIClaw` with one requested organic result passed on 2026-10-14, returning one organic result in 955 ms. Serper therefore remains callable within the free managed allowance, but remains outside the PAYG resale allowlist.
+## Billing readiness and remaining operator work
 
-## Billing controls checked
+The NordSym Stripe account has live charges and payouts enabled. Its existing APIClaw micro-USD price and sum meter are active. A Swedish Stripe Tax registration is active. Production already has the live secret key, signing secret and meter configuration; none are included here.
 
-- A saved card is not, by itself, a PAYG entitlement.
-- Paid execution requires an active or trialing subscription attached to the exact configured Stripe price, meter, and event name.
-- Each successful PAYG call creates one immutable ledger row with frozen customer, subscription, price, meter, event, and micro-USD amount fields.
-- The reporter uses a deterministic event identifier, so retries cannot intentionally double-report one ledger row.
-- The Billing tab reads current-month totals and pending or reported state from the immutable ledger rather than the legacy workspace spend counter.
-- Founder and partner tiers keep their visible tier label, but normal customer-authenticated requests become PAYG after exact activation. Only requests carrying explicit internal authorization remain nonbillable.
-- Preview metering requires `APICLAW_BILLING_ENVIRONMENT=test` with an `sk_test_` key. Production requires `live` with an `sk_live_` key. A mismatch blocks Checkout, webhooks, and the scheduled meter reporter.
+The old Checkout saves a card (`mode=setup`). The implementation on this branch offers a real usage subscription for ordinary workspaces, preserves founder/partner labels while requiring explicit internal authorization for nonbillable traffic, calculates applicable tax in Checkout and requires a webhook-reconciled subscription before paid dispatch. Free APIs remain uncapped and free; the free plan includes 25 successful approved managed calls or USD 1 provider cost before requiring billing. The first free NASA/Frankfurter call remains unchanged.
 
-## Saved-card repair
+The existing Convex development deployment incorrectly contains a live Stripe key, not a test key. Do not test card purchases there using it. An isolated preview deployment is being used instead. The connected Stripe plugin requires reauthentication but a valid NordSym Stripe CLI test key was found and imported only into the isolated preview. **Hosted Checkout completion is still blocked by a CAPTCHA in isolated headless Chromium.** The separate real Stripe API test below verifies a test-card payment and signed webhook/meter processing; it does not prove browser Checkout completion. Production release verification is still pending.
 
-After the corrected Convex functions and exact Stripe meter configuration are deployed, repair each audited workspace separately:
+Before widening paid providers: confirm Cohere production credentials, relevant paid/commercial plans and explicit gateway redistribution permission where required. Funding Anthropic resolves its credit error but does not resolve reseller permission. APILayer needs current product entitlements, redistribution scope and reconciled cost, not a generic per-call reservation. GenPRD needs its live API endpoint restored in its own deployment. Never treat guessed reservations as customer billable actual cost.
 
-```bash
-npx convex run stripeActions:repairSavedCardPayg '{"workspaceId":"<workspace-id>"}' --prod
-```
+## Verified isolated-preview evidence
 
-The operator must supply the exact workspace ID from an authenticated audit. The repair accepts no secret argument, verifies the saved Stripe payment method, reuses an existing exact-price subscription when possible, and refuses ineligible workspaces. Read the workspace and Stripe subscription back after each run before moving to the next customer.
+Convex preview: `coordinated-oyster-180`. Real Clerk test sign-in created an ordinary Free workspace. Its first NASA request failed, Frankfurter succeeded, and the `first_call_api_success` funnel event was present before any payment method. The managed trial then allowed real nano responses and stopped with `402 payment_required` before further upstream dispatch. Free public rails remain available.
 
-## Rerun procedure
+The workspace Billing button opened a real Stripe sandbox subscription Checkout with billing address, tax disclosure and the reviewed terms. Card submission in the isolated headless browser hit Stripe CAPTCHA; no subscription was created by that attempt. A human must finish this hosted step.
 
-1. Confirm the selected Convex deployment with `npx convex run providerAudit:snapshot '{}' --prod`. This is a passive inventory check only.
-2. Use an internal audit authorization tied to a known APIClaw workspace. Keep it in a shell variable and never print it.
-3. Send one smallest-valid request per action to `https://api.apiclaw.cloud/v1/execute` with a unique idempotency key.
-4. Record only provider, action, HTTP status, success flag, media type or safe shape, latency, and any sanitized upstream error class.
-5. For asynchronous APIs, poll to a terminal state when the adapter exposes a safe polling action. Otherwise label the evidence as submission-only.
-6. Confirm every created sandbox or job is cleaned up where the provider supports cleanup.
-7. Update `customerExecutableActions` only from fresh evidence, then run:
+A separate ordinary preview fixture validated the backend using Stripe's documented test-card token through the Stripe API, without administratively granting paid status:
 
-   ```bash
-   npx tsx src/product-truth.test.ts
-   npx tsx convex/managedProviderPathSafety.test.ts
-   npx tsx convex/managedCostPolicy.test.ts
-   npm test
-   ```
+- Stripe created active test subscription `sub_1UQQKIRtJYK3aJTqAeLUQMR2`. Real signed subscription/payment-method webhooks established `usage_based`, the saved method and the exact meter in Convex.
+- Real test invoice `in_1UQQKKRtJYK3aJTqokJ26Ha1` was paid for USD 1.25: a clearly labeled synthetic USD 1 test item plus 25% tax. This is payment-path proof, not fabricated gateway usage or a real sale. The signed `invoice.paid` event persisted the paid invoice.
+- After its free allowance, a real nano call finalized at 9 provider micro-USD and 11 customer micro-USD. The durable reporter delivered one real Stripe meter event and readback showed `stripeStatus=reported`.
+- Rejected calls finalized at zero customer charge and `stripeStatus=not_applicable`. Brave was blocked before dispatch. No unapproved provider became paid.
+- The repository suite, all TypeScript projects, package and landing builds passed after integrating PR #57. The isolated listing browser regression also passed submission, review, notification, catalog/discovery visibility, execution denial and withdrawal, with no keys or payment records.
 
-8. Regenerate public stats and confirm the landing catalog count before deployment.
-
-Do not make production smoke calls with customer data. Keep each request bounded and stop if the projected provider cost is unclear.
-
-## Required APILayer cost configuration
-
-APILayer PAYG is fail-closed until each customer-callable action has an audited underlying cost. Configure `APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON` as a JSON object from canonical action name to APIClaw's allocated provider cost in USD, for example `{"exchange_rates":0.006}`. These values must come from the current managed APILayer subscription economics. Missing, malformed, zero, negative, or non-numeric values keep that action unavailable rather than guessing a customer charge.
+The pending browser CAPTCHA is not replaced by a mocked Checkout event or an admin-set paid flag. No real customer card was entered or charged.

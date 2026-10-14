@@ -52,7 +52,7 @@ export const PLANS: Plan[] = [
       "Everything in Free",
       `Provider cost plus ${PAYG_MARGIN_PERCENT}%`,
       "Add a card once, pay per call",
-      "OpenAI, xAI, Anthropic, Groq, OpenRouter, Mistral, DeepInfra, and APILayer",
+      "OpenRouter with approved OpenAI models",
       "No commitment, cancel anytime",
     ],
     cta: "Add Payment Method",

@@ -5,16 +5,7 @@ import { PLANS } from "@/lib/plans";
 import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
-const PAID_PROVIDERS = [
-  "OpenAI",
-  "xAI",
-  "Anthropic",
-  "Groq",
-  "OpenRouter",
-  "Mistral",
-  "DeepInfra",
-  "APILayer",
-] as const;
+const PAID_PROVIDERS = ["OpenRouter with GPT-5.4 nano, mini and standard"] as const;
 
 export const metadata: Metadata = {
   title: "Pricing | APIClaw",

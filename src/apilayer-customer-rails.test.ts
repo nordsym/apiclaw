@@ -13,25 +13,13 @@ import {
 } from "./product-truth.js";
 
 const apilayer = getPublicCustomerExecutableProvider("apilayer");
-assert.ok(apilayer, "APILayer must be a customer-executable managed provider");
-assert.deepEqual(
-  [...apilayer.customerExecutableActions],
-  [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS],
-);
-assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 19);
-assert.equal(CANON_STATS.customer_executable_providers, 19);
-
+assert.equal(apilayer, undefined, "APILayer must stay inventory-only until resale rights and exact costs are verified");
+assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 3);
+assert.equal(CANON_STATS.customer_executable_providers, 3);
 const connected = getConnectedProviders();
-const connectedApilayer = connected.find((entry) => entry.provider === "apilayer");
-assert.ok(connectedApilayer, "list_connected / execute surface must expose APILayer");
-assert.deepEqual(connectedApilayer.actions, [...APILAYER_CUSTOMER_EXECUTABLE_ACTIONS]);
-
+assert.equal(connected.some((entry) => entry.provider === "apilayer"), false);
 for (const action of APILAYER_CUSTOMER_EXECUTABLE_ACTIONS) {
-  assert.equal(
-    isPublicCustomerExecutableAction("apilayer", action),
-    true,
-    `${action} must be customer-executable`,
-  );
+  assert.equal(isPublicCustomerExecutableAction("apilayer", action), false);
 }
 for (const action of [
   ...APILAYER_SUBSCRIPTION_BLOCKED_ACTIONS,
@@ -52,8 +40,8 @@ assert.match(catalogRoute, /callable: provider\.customerExecutableActions\.lengt
 const publicStats = JSON.parse(readFileSync("landing/public/stats.json", "utf8")) as {
   customerExecutableProviderCount: number;
 };
-assert.equal(publicStats.customerExecutableProviderCount, 19);
+assert.equal(publicStats.customerExecutableProviderCount, 3);
 
 console.log(
-  `APILayer customer rails: ${APILAYER_CUSTOMER_EXECUTABLE_ACTIONS.length} executable actions, 19 providers`,
+  `APILayer customer rails: ${APILAYER_CUSTOMER_EXECUTABLE_ACTIONS.length} inventory actions, 3 customer providers`,
 );

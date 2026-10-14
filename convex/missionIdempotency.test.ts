@@ -44,15 +44,15 @@ assert.equal(
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "GenPRD", actionName: "generate_prd" },
-}]), true);
+}]), false);
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "brave_search", actionName: "search" },
-}]), true);
+}]), false);
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "replicate", actionName: "run" },
-}]), false, "missions must not advertise an adapter that failed its live smoke test");
+}]), false);
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "together", actionName: "chat" },
@@ -60,6 +60,9 @@ assert.equal(isCustomerRunnableMissionTemplate([{
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "transform",
   config: { model: "anthropic/claude-haiku-4-5", maxTokens: 200 },
+}]), false);
+assert.equal(isCustomerRunnableMissionTemplate([{
+  kind: "transform", config: { model: "openai/gpt-5.4-nano", maxTokens: 200 },
 }]), true);
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",

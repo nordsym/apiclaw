@@ -29,8 +29,12 @@ async function main() {
   assert.ok(free?.features.some((feature) => /25 managed calls/.test(feature)));
   assert.ok(free?.features.some((feature) => /\$1 provider cost/.test(feature)));
   assert.ok(paid?.features.some((feature) => /provider cost plus 15%/i.test(feature)));
-  for (const provider of ["OpenAI", "xAI", "Anthropic", "Groq", "OpenRouter", "Mistral", "DeepInfra", "APILayer"]) {
+  for (const provider of ["OpenRouter"]) {
     assert.ok(paid?.features.some((feature) => feature.includes(provider)), `${provider} must be listed on the paid plan`);
+  }
+
+  for (const provider of ["xAI", "Anthropic", "Groq", "DeepInfra", "APILayer"]) {
+    assert.ok(!paid?.features.some((feature) => feature.includes(provider)), `${provider} is not approved for paid resale`);
   }
 
   const pricingPage = readFileSync("landing/src/app/pricing/page.tsx", "utf8");

@@ -207,7 +207,8 @@ for (const billed of FIRST_EXECUTE_BILLED_RESEARCH_PROVIDERS) {
     estimatedProviderCostUsd: cost,
     billingGradeCost: hasBillingGradeManagedCost({ provider: billed, action }),
   });
-  assert.equal(billedUsage.allowed, true, `${billed} may use the bounded managed trial after login`);
+  assert.equal(billedUsage.allowed, false, `${billed} cannot turn an unverified reservation into free or paid execution`);
+  assert.equal(billedUsage.reason, "unpriced_managed_call");
   assert.equal(billedUsage.billingClass, "activation", `${billed} must stay out of PAYG during the trial`);
 }
 assert.equal(firstExecuteIdempotencyKey("ws1", "nasa"), "apiclaw-first:ws1:nasa");

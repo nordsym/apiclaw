@@ -177,7 +177,7 @@ try {
     };
     const result = await runExecuteForTest(executeArgs(harness.ctx));
     assert.equal(result.ok, true);
-    assert.equal(result.costUsd, 0.005);
+    assert.equal(result.costUsd, 0, "an unverified upstream price must not become realized customer cost");
     const url = new URL(dispatchedUrl);
     assert.equal(url.pathname, "/res/v1/web/search");
     assert.equal(url.searchParams.get("q"), "agent infrastructure");
@@ -186,8 +186,8 @@ try {
       ledgerId: "ledger-test",
       success: true,
       provider: "brave_search",
-      providerCostUsd: 0.005,
-      costSource: "fixed_price_policy",
+      providerCostUsd: undefined,
+      costSource: "reservation",
     });
   }
 
@@ -209,8 +209,8 @@ try {
       ledgerId: "ledger-test",
       success: true,
       provider: "brave_search",
-      providerCostUsd: 0.005,
-      costSource: "fixed_price_policy",
+      providerCostUsd: undefined,
+      costSource: "reservation",
     });
   }
 
@@ -231,13 +231,13 @@ try {
     globalThis.fetch = async () => response;
     const result = await runExecuteForTest(executeArgs(harness.ctx));
     assert.equal(result.ok, false);
-    assert.equal(result.costUsd, 0.005);
+    assert.equal(result.costUsd, 0, "an unverified upstream price must not become realized customer cost");
     assert.deepEqual(finalization(harness.mutationArgs), {
       ledgerId: "ledger-test",
       success: true,
       provider: "brave_search",
-      providerCostUsd: 0.005,
-      costSource: "fixed_price_policy",
+      providerCostUsd: undefined,
+      costSource: "reservation",
     });
   }
 
@@ -277,8 +277,8 @@ try {
       ledgerId: "ledger-test",
       success: true,
       provider: "brave_search",
-      providerCostUsd: 0.005,
-      costSource: "fixed_price_policy",
+      providerCostUsd: undefined,
+      costSource: "reservation",
     });
   }
 

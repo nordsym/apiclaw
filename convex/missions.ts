@@ -1,3 +1,4 @@
+import { managedPaidCallReady } from "../src/managed-commercial-policy";
 /**
  * Control Plane — Missions
  *
@@ -85,7 +86,7 @@ export function isCustomerRunnableMissionTemplate(stepsValue: unknown): boolean 
       } catch {
         return false;
       }
-      return estimateManagedProviderCostUsd({
+      return managedPaidCallReady("openrouter", model) && estimateManagedProviderCostUsd({
         provider: "openrouter",
         action: "chat",
         model,

@@ -28,7 +28,7 @@ assert.equal(customerChargeMicros(1_000_000, "payg"), 1_150_000);
 assert.equal(customerChargeMicros(1_000_000, "activation"), 0);
 assert.equal(customerChargeMicros(1_000_000, "internal"), 0);
 assert.equal(isManagedProviderAllowedForBillingClass({
-  provider: "openai",
+  provider: "openrouter",
   billingClass: "payg",
   trafficClass: "customer",
 }), true);

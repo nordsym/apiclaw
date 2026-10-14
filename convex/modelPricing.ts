@@ -8,6 +8,8 @@ const FRONTIER_MODEL_COSTS: Record<string, TokenPrice> = {
   // completion. Keep this exact entry so managed routing can stay fail-closed
   // for every other unpriced model.
   "stealth/ox-alpha": { input: 0, output: 0 },
+  "gpt-oss-20b": { input: 0.075, output: 0.30 },
+  "gpt-oss-120b": { input: 0.15, output: 0.60 },
   "gpt-5.6-sol": { input: 5, output: 30 },
   "gpt-5.6": { input: 5, output: 30 },
   "gpt-5.6-terra": { input: 2.5, output: 15 },
@@ -29,7 +31,7 @@ const FRONTIER_MODEL_COSTS: Record<string, TokenPrice> = {
 };
 
 function stripDirectProviderPrefix(model: string): string {
-  return model.replace(/^(?:openai|anthropic|xai|x-ai|mistralai)\//i, "").toLowerCase();
+  return model.replace(/^groq\//i, "").replace(/^(?:openai|anthropic|xai|x-ai|mistralai)\//i, "").toLowerCase();
 }
 
 export function resolveFrontierModelCost(

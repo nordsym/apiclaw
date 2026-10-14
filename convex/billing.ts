@@ -14,6 +14,7 @@ import {
   resolveTierAfterBillingTransition,
 } from "./stripeWebhookEvents";
 import { findUsableAgentSession } from "./sessionSecurity";
+import { hasConfiguredPaygEntitlement } from "./managedMetering";
 
 const PAYG_USAGE_LIMIT = 999_999_999;
 
@@ -676,6 +677,7 @@ async function buildBillingInfo(ctx: QueryCtx, workspaceId: Id<"workspaces">) {
   return {
     plan,
     tier: workspace.tier,
+    paygActive: hasConfiguredPaygEntitlement(workspace, process.env),
     usage: managedUsageCount,
     currentPeriodUsage: periodSummary.currentPeriodUsage,
     billableCalls: periodSummary.billableCalls,

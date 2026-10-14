@@ -1,3 +1,4 @@
+import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -475,6 +476,12 @@ export const authorizeManagedCall = internalMutation({
       };
     }
 
+    if (trafficClass === "customer" && (args.estimatedProviderCostUsd ?? 0) > 0 &&
+      !managedPaidCallReady(args.provider, args.model)) {
+      return { allowed: false as const, reason: "managed_billing_unavailable",
+        message: MANAGED_BILLING_UNAVAILABLE_MESSAGE };
+    }
+
     const decision = evaluateManagedUsage(workspace, {
       estimatedProviderCostUsd: args.estimatedProviderCostUsd,
       billingGradeCost: args.billingGradeCost,
@@ -729,6 +736,9 @@ export const finalizeManagedCall = internalMutation({
     try {
       await ctx.runMutation(internal.logs.attachCost, {
         requestId: ledger.requestId,
+        workspaceId: ledger.workspaceId,
+        status: args.success ? "success" : "error",
+        latencyMs: now - ledger.createdAt,
         costCents: microsToCents(args.success ? chargeMicros : 0),
       });
     } catch (e) {

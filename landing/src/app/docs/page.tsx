@@ -401,7 +401,7 @@ call_api({
                   <span className={BODY}>Discoverable by agents via the catalog.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
-                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1022).toLocaleString("en-US")} callable now</span>
+                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1005).toLocaleString("en-US")} callable now</span>
                   <span className={BODY}>What a workspace can execute today, including {statsData.customerExecutableProviderCount} managed providers. Keyless public origins are Free; managed providers use the bounded trial and then PAYG where resale is supported.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
