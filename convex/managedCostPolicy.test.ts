@@ -58,11 +58,17 @@ assert.equal(hasBillingGradeManagedCost({ provider: "voyage", action: "embedding
 assert.equal(hasBillingGradeManagedCost({ provider: "serper", action: "search" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "brave_search", action: "search" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "github", action: "search_repos" }), true);
+const originalApilayerCosts = process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON;
+process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON = JSON.stringify({
+  exchange_rates: 0.006,
+  fixer_latest: 0.0075,
+  weatherstack_current: 0.012,
+});
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "weatherstack_current" }), true);
 assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "verify_number" }), false);
-assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "scrape" }), 0.01);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), 0.01);
+assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), 0.006);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "fixer_latest" }), 0.0075);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "world_news" }), undefined);
 
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "brave_search", action: "search" }), 0.005);
@@ -70,7 +76,20 @@ assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "github", action: "
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "serper", action: "search" }), 0.001);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "firecrawl", action: "scrape" }), 0.02);
 assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "voyage", action: "embeddings" }), 0.02);
-assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), 0.01);
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), 0.006);
+delete process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON;
+assert.equal(estimateManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), undefined);
+assert.equal(hasBillingGradeManagedCost({ provider: "apilayer", action: "exchange_rates" }), false);
+process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON = "not-json";
+assert.equal(verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }), undefined);
+process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON = JSON.stringify({ exchange_rates: 0 });
+assert.equal(
+  verifiedFixedManagedProviderCostUsd({ provider: "apilayer", action: "exchange_rates" }),
+  undefined,
+  "a paid APILayer action cannot be configured as free by mistake",
+);
+if (originalApilayerCosts === undefined) delete process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON;
+else process.env.APILAYER_PROVIDER_COST_USD_BY_ACTION_JSON = originalApilayerCosts;
 
 assert.deepEqual(resolveManagedResponseCost({
   provider: "openrouter",

@@ -5,7 +5,7 @@ import { useWorkspaceRefresh } from "@/lib/use-workspace-refresh";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckoutButton } from "@/components/CheckoutButton";
-import { paymentMethodLabel } from "@/lib/billing-presentation";
+import { formatMicroUsd, paymentMethodLabel } from "@/lib/billing-presentation";
 import { recoverWorkspaceSessionToken } from "@/lib/workspace-session";
 import { PLANS } from "@/lib/plans";
 import { isUnlimitedWorkspace } from "@/lib/workspace-truth";
@@ -26,7 +26,14 @@ interface BillingInvoice {
 interface BillingInfo {
   currentPeriodStart?: number;
   creditBalance: number;
-  monthlySpendCents?: number;
+  stripeSubscriptionId?: string;
+  billableCalls: number;
+  currentPeriodProviderCostMicros: number;
+  currentPeriodChargeMicros: number;
+  stripePendingCount: number;
+  stripePendingMicros: number;
+  stripeReportedCount: number;
+  stripeReportedMicros: number;
   invoices: BillingInvoice[];
   paymentMethod: { brand: string | null; last4: string | null; type: string | null } | null;
 }
@@ -58,8 +65,8 @@ export function BillingTab({
   const revision = useWorkspaceRefresh();
   const currentTier = workspace?.tier;
   const isPartner = currentTier === "partner";
+  const isInternalWorkspace = currentTier === "founder" || currentTier === "partner";
   const isUnlimited = isUnlimitedWorkspace(workspace || {});
-  const paygNeedsRecovery = currentTier === "usage_based" && workspace?.paygActive !== true;
   const hasStripeCustomer = Boolean(workspace?.stripeCustomerId);
   const usageCount = workspace?.usageCount ?? 0;
   const hasPlanLimit = Boolean(workspace?.usageLimit && workspace.usageLimit > 0);
@@ -72,6 +79,8 @@ export function BillingTab({
   const [refresh, setRefresh] = useState(0);
   const recoveryAttempted = useRef(false);
   const paymentConnected = !billingInfoLoading && !billingInfoError && Boolean(billingInfo?.paymentMethod);
+  const paygNeedsRecovery = Boolean(billingInfo?.stripeSubscriptionId) && workspace?.paygActive !== true;
+  const hasBillingSubscription = Boolean(billingInfo?.stripeSubscriptionId);
 
   useEffect(() => {
     const onFocus = () => setRefresh((value) => value + 1);
@@ -158,7 +167,8 @@ export function BillingTab({
     </button>
   );
 
-  const paymentAction = (label: string) => hasStripeCustomer && (paymentConnected || currentTier !== "free")
+  const paymentAction = (label: string) => hasStripeCustomer &&
+    (workspace?.paygActive === true || hasBillingSubscription)
     ? portalButton(paymentConnected ? btnQuiet : btnSolid, label)
     : <CheckoutButton sessionToken={sessionToken || ""}>{label}</CheckoutButton>;
 
@@ -168,7 +178,11 @@ export function BillingTab({
     <div className="space-y-10">
       <PageHeader
         title="Billing"
-        description={paymentConnected
+        description={isInternalWorkspace
+          ? workspace?.paygActive
+            ? `Founder and partner benefits remain. Paid provider calls cost provider price plus ${PAYG_MARGIN_PERCENT}%.`
+            : "Founder and partner benefits remain. Stripe is used only if you explicitly activate pay as you go for paid provider calls."
+          : paymentConnected
           ? `Your payment method is connected. Free APIs remain free; Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`
           : `Free APIs remain free. Paid APIs cost provider price plus ${PAYG_MARGIN_PERCENT}%.`}
       />
@@ -205,14 +219,18 @@ export function BillingTab({
           </Row>
         )}
         <StatGrid cols={3}>
-          <StatCard title="Current plan" value={planLabel(currentTier)} />
+          <StatCard title="Current plan" value={`${planLabel(currentTier)}${workspace?.paygActive && currentTier !== "usage_based" ? " + PAYG" : ""}`} />
           <StatCard
             title="Calls"
             value={usageCount.toLocaleString()}
             hint={isUnlimited || !hasPlanLimit ? "No cap on this plan" : `of ${usageLimit.toLocaleString()}`}
           />
           {isUnlimited || !hasPlanLimit ? (
-            <StatCard title={currentTier === "usage_based" ? "Subscription" : "Billing"} value={isPartner ? "By agreement" : currentTier === "usage_based" ? (workspace?.paygActive ? "Active" : "Pending") : "Included"} hint={currentTier === "usage_based" && workspace?.paygActive ? "Usage reported to Stripe monthly" : undefined} />
+            <StatCard
+              title={currentTier === "usage_based" ? "Subscription" : "Billing"}
+              value={workspace?.paygActive ? "PAYG active" : isPartner ? "By agreement" : currentTier === "usage_based" ? "Pending" : "Included"}
+              hint={workspace?.paygActive ? "Usage reported to Stripe" : undefined}
+            />
           ) : (
             <StatCard
               title="Remaining"
@@ -228,7 +246,7 @@ export function BillingTab({
           {PLANS.map((plan) => {
             const isPaygPlan = plan.id === "usage_based";
             const isCurrent = isPaygPlan
-              ? currentTier === "usage_based" && workspace?.paygActive === true
+              ? workspace?.paygActive === true
               : currentTier === plan.id || (isPartner && plan.id === "free");
 
             let cta: ReactNode;
@@ -243,7 +261,7 @@ export function BillingTab({
             } else if (isPaygPlan) {
               cta = (
                 <div className="mt-7 self-start">
-                  {paymentAction(paymentConnected ? "Manage payment method" : "Add payment method")}
+                  {paymentAction(paymentConnected ? "Activate pay as you go" : "Add payment method")}
                 </div>
               );
             } else {
@@ -282,17 +300,45 @@ export function BillingTab({
 
 
       {!billingInfoError && <>
-      <Section title="Credits and spend">
+      <Section title="Usage and credits">
         {billingInfoLoading ? (
           <Loading label="Loading billing details" />
         ) : (
           <StatGrid cols={3}>
             <StatCard title="Credit balance" value={formatCents(billingInfo?.creditBalance ?? 0)} />
-            <StatCard title="This month's spend" value={formatCents(billingInfo?.monthlySpendCents ?? 0)} />
+            <StatCard
+              title="This month's paid usage"
+              value={formatMicroUsd(billingInfo?.currentPeriodChargeMicros ?? 0)}
+              hint={`${(billingInfo?.billableCalls ?? 0).toLocaleString()} paid calls`}
+            />
             <StatCard
               title="Current period"
               value={billingInfo?.currentPeriodStart ? new Date(billingInfo.currentPeriodStart).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Not started"}
               hint="Started"
+            />
+          </StatGrid>
+        )}
+      </Section>
+
+      <Section title="Stripe reporting">
+        {billingInfoLoading ? (
+          <Loading label="Checking usage reporting" />
+        ) : (
+          <StatGrid cols={3}>
+            <StatCard
+              title="Reported"
+              value={(billingInfo?.stripeReportedCount ?? 0).toLocaleString()}
+              hint={formatMicroUsd(billingInfo?.stripeReportedMicros ?? 0)}
+            />
+            <StatCard
+              title="Pending"
+              value={(billingInfo?.stripePendingCount ?? 0).toLocaleString()}
+              hint={formatMicroUsd(billingInfo?.stripePendingMicros ?? 0)}
+            />
+            <StatCard
+              title="Provider cost"
+              value={formatMicroUsd(billingInfo?.currentPeriodProviderCostMicros ?? 0)}
+              hint="Before APIClaw margin"
             />
           </StatGrid>
         )}

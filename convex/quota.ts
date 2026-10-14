@@ -3,7 +3,6 @@ import {
   evaluateManagedUsage,
   hasActiveContractEntitlement,
   hasActivePaygEntitlement,
-  isInternalTier,
   type ManagedUsageWorkspace,
 } from "./managedUsagePolicy";
 
@@ -38,26 +37,32 @@ export function getHourStart(nowMs = Date.now()): number {
 
 export function isPaidTier(workspaceOrTier: QuotaWorkspace | string): boolean {
   if (typeof workspaceOrTier === "string") {
-    return isInternalTier(workspaceOrTier);
+    return workspaceOrTier === "enterprise" || workspaceOrTier === "pro" || workspaceOrTier === "scale";
   }
-  return isInternalTier(workspaceOrTier.tier) ||
-    hasActivePaygEntitlement(workspaceOrTier) ||
+  return hasActivePaygEntitlement(workspaceOrTier) ||
     hasActiveContractEntitlement(workspaceOrTier);
 }
 
-// This is a display/status shim, not the real gate. It always evaluates as
-// a provably-zero-cost call (estimatedProviderCostUsd: 0, billingGradeCost:
-// true), which under the current policy is free forever and uncapped for
-// any workspace that is not on a cost hold. The real per-call gate lives in
-// evaluateManagedUsage via convex/http.ts::enforcePreCallQuota, which passes
-// each call's actual estimated cost and billing-grade proof.
-export function getQuotaState(workspace: QuotaWorkspace, amount = 1, _nowMs = Date.now()) {
+// This is a display/status shim, not the real gate. Zero-cost open rails remain
+// unlimited, while the returned lifetime fields deliberately show the separate
+// managed trial so the workspace UI does not hide the 25-call boundary.
+export function getQuotaState(
+  workspace: QuotaWorkspace,
+  amount = 1,
+  _nowMs = Date.now(),
+  options: { configuredPaygEntitlement?: boolean } = {},
+) {
   const decision = evaluateManagedUsage(workspace, {
     amount,
     estimatedProviderCostUsd: 0,
     billingGradeCost: true,
   });
-  const isPaid = decision.billingClass !== "activation";
+  const isPaid = hasActiveContractEntitlement(workspace) ||
+    (options.configuredPaygEntitlement ?? hasActivePaygEntitlement(workspace));
+  const lifetimeLimit = isPaid ? -1 : FREE_MANAGED_CALLS_LIFETIME;
+  const lifetimeRemaining = isPaid
+    ? -1
+    : Math.max(0, lifetimeLimit - decision.activationManagedCallCount);
 
   return {
     allowed: decision.allowed,
@@ -67,20 +72,17 @@ export function getQuotaState(workspace: QuotaWorkspace, amount = 1, _nowMs = Da
       : null,
     billingClass: decision.billingClass,
     trafficClass: decision.trafficClass,
-    // Free (zero-cost) calls are unlimited, so the lifetime/weekly "limit"
-    // is always -1 now. The old $25-lifetime / $1-cap framing is retired as
-    // a gate; FREE_MANAGED_CALLS_LIFETIME is kept only for back-compat.
     lifetimeCount: decision.activationManagedCallCount,
-    lifetimeLimit: -1,
-    lifetimeRemaining: decision.managedUsageRemaining,
+    lifetimeLimit,
+    lifetimeRemaining,
     providerCostUsd: decision.activationProviderCostUsd,
     providerCostCapUsd: decision.activationProviderCostCapUsd,
     providerCostRemainingUsd: decision.activationProviderCostRemainingUsd,
     // Deprecated response aliases retained so older CLI/MCP builds degrade
     // safely while all current UI uses the lifetime fields above.
     weeklyCount: decision.activationManagedCallCount,
-    weeklyLimit: -1,
-    weeklyRemaining: decision.managedUsageRemaining,
+    weeklyLimit: lifetimeLimit,
+    weeklyRemaining: lifetimeRemaining,
     hourlyCount: workspace.hourlyUsageCount ?? 0,
     hourlyLimit: isPaid ? -1 : FREE_HOURLY_LIMIT,
     hourlyRemaining: isPaid ? -1 : Math.max(0, FREE_HOURLY_LIMIT - (workspace.hourlyUsageCount ?? 0)),

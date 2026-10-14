@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { managedChatProviderForRequest } from "./managedChatRouting";
 
 const http = readFileSync(fileURLToPath(new URL("./http.ts", import.meta.url)), "utf8");
 const executeRouteStart = http.indexOf("async function handleManagedExecute");
@@ -84,10 +85,27 @@ assert.match(
   /const finalization = await finalizeManagedCall[\s\S]*?managedCostReconciliationResponse\(gate, finalization\)[\s\S]*?if \(reconciliationResponse\) return reconciliationResponse/,
   "the shared proxy finalizer must withhold anomalous customer payloads",
 );
-assert.match(quotaResponse, /costHold \? 503 : 402/);
+assert.match(quotaResponse, /costHold \|\| billingUnavailable \? 503 : 402/);
 assert.match(quotaResponse, /code:[\s\S]*?costHold[\s\S]*?"managed_cost_hold"/);
-assert.match(quotaResponse, /!costHold[\s\S]*?upgradeUrl/);
+assert.match(quotaResponse, /paymentRequired[\s\S]*?upgradeUrl/);
 assert.match(quotaResponse, /PAYMENT_REQUIRED_MESSAGE/);
 assert.match(quotaResponse, /APICLAW_UPGRADE_URL/);
+
+for (const tier of ["founder", "partner"]) {
+  assert.equal(
+    managedChatProviderForRequest({
+      authMethod: "session",
+      websiteService: false,
+      hasExplicitOpenRouterTarget: false,
+    }),
+    "openrouter",
+    `${tier} session-authenticated chat must use the customer OpenRouter rail`,
+  );
+}
+assert.equal(managedChatProviderForRequest({
+  authMethod: "internal",
+  websiteService: false,
+  hasExplicitOpenRouterTarget: false,
+}), "auto");
 
 console.log("OpenRouter execute: hard-bound routing and exact-cost finalization");

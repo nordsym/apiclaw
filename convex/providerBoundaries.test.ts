@@ -18,7 +18,7 @@ assert.equal(isPubliclyAvailableManagedProvider("openai"), true);
 assert.equal(isCustomerExecutableManagedAction("openrouter", "chat"), true);
 assert.equal(isCustomerExecutableManagedAction("openrouter", "chat_completions"), true);
 assert.equal(isCustomerExecutableManagedAction("brave_search", "search"), true);
-assert.equal(isCustomerExecutableManagedAction("github", "get_file"), true);
+assert.equal(isCustomerExecutableManagedAction("github", "get_file"), false);
 assert.equal(isCustomerExecutableManagedAction("nasa", "apod"), true);
 assert.equal(isCustomerExecutableManagedAction("apilayer", "exchange_rates"), true);
 assert.equal(isCustomerExecutableManagedAction("apilayer", "weatherstack_current"), true);
@@ -31,7 +31,6 @@ assert.equal(isCustomerExecutableManagedAction("apilayer", "fixer_convert"), fal
 for (const [provider, action] of [
   ["openai", "chat"],
   ["anthropic", "messages"],
-  ["replicate", "run"],
   ["assemblyai", "transcribe"],
 ] as const) {
   assert.equal(
@@ -46,6 +45,7 @@ assert.equal(
   "github/create_issue must remain inventory-only for customer execution",
 );
 assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "internal"), true);
-assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), true);
+assert.equal(isManagedActionAllowedForTraffic("replicate", "run", "customer"), false);
+assert.equal(isManagedActionAllowedForTraffic("cohere", "chat", "customer"), false);
 
 console.log("convex provider boundaries: internal and unavailable managed providers stay off public discovery");

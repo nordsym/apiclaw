@@ -8,9 +8,9 @@ const free = getWorkspaceUsageDisplay({
 });
 assert.deepEqual(free, {
   usageCount: 12,
-  usageLimit: -1,
-  usageRemaining: -1,
-  usagePercentage: 0,
+  usageLimit: 25,
+  usageRemaining: 13,
+  usagePercentage: 48,
 });
 
 const zeroCostContinuesAfterLegacyThreshold = getWorkspaceUsageDisplay({
@@ -21,10 +21,10 @@ const zeroCostContinuesAfterLegacyThreshold = getWorkspaceUsageDisplay({
   lastWeeklyResetAt: 0,
 }, Date.UTC(2030, 0, 1));
 assert.equal(zeroCostContinuesAfterLegacyThreshold.usageCount, 25);
-assert.equal(zeroCostContinuesAfterLegacyThreshold.usageLimit, -1, "zero-cost Free APIs have no lifetime cap");
-assert.equal(zeroCostContinuesAfterLegacyThreshold.usageRemaining, -1);
+assert.equal(zeroCostContinuesAfterLegacyThreshold.usageLimit, 25, "the UI exposes the managed trial boundary");
+assert.equal(zeroCostContinuesAfterLegacyThreshold.usageRemaining, 0);
 
-const paid = getWorkspaceUsageDisplay({
+const paidWorkspace = {
   tier: "usage_based",
   billingPlan: "usage_based",
   stripeCustomerId: "cus_test",
@@ -37,17 +37,25 @@ const paid = getWorkspaceUsageDisplay({
   paygMeterEventName: "apiclaw_managed_micro_usd",
   managedUsageCount: 500,
   activationManagedCallCount: 25,
-});
+};
+const paid = getWorkspaceUsageDisplay(paidWorkspace, Date.now(), true);
 assert.equal(paid.usageCount, 25);
 assert.equal(paid.usageLimit, -1);
 assert.equal(paid.usageRemaining, -1);
 assert.equal(paid.usagePercentage, 0);
 
+const staleMeter = getWorkspaceUsageDisplay({
+  ...paidWorkspace,
+  paygMeterPriceId: "price_stale",
+}, Date.now(), false);
+assert.equal(staleMeter.usageLimit, 25);
+assert.equal(staleMeter.usageRemaining, 0);
+
 for (const tier of ["founder", "partner"]) {
-  const unlimited = getWorkspaceUsageDisplay({ tier, managedUsageCount: 680 });
-  assert.equal(unlimited.usageLimit, -1, `${tier} must be unlimited`);
-  assert.equal(unlimited.usageRemaining, -1, `${tier} must never show negative remaining`);
-  assert.equal(unlimited.usagePercentage, 0, `${tier} must never show negative usage percent`);
+  const allowance = getWorkspaceUsageDisplay({ tier, managedUsageCount: 680 });
+  assert.equal(allowance.usageLimit, 25, `${tier} customer traffic must show the managed allowance`);
+  assert.equal(allowance.usageRemaining, 0, `${tier} must show the exhausted allowance`);
+  assert.equal(allowance.usagePercentage, 100, `${tier} must show the upgrade boundary`);
 }
 
 console.log("workspace quota display uses lifetime managed allowance and verified PAYG state");

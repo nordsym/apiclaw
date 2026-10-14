@@ -6,8 +6,10 @@ import {
   isUnlimitedWorkspace,
 } from "./workspace-truth";
 
-assert.equal(isUnlimitedWorkspace({ tier: "founder", usageLimit: -1 }), true);
-assert.equal(isUnlimitedWorkspace({ tier: "partner", usageLimit: -1 }), true);
+assert.equal(isUnlimitedWorkspace({ tier: "founder", usageLimit: -1 }), false);
+assert.equal(isUnlimitedWorkspace({ tier: "partner", usageLimit: -1 }), false);
+assert.equal(isUnlimitedWorkspace({ tier: "founder", usageLimit: -1, paygActive: true }), true);
+assert.equal(isUnlimitedWorkspace({ tier: "partner", usageLimit: -1, paygActive: true }), true);
 assert.equal(isUnlimitedWorkspace({ tier: "enterprise", usageLimit: -1 }), true);
 assert.equal(isUnlimitedWorkspace({ tier: "free", usageLimit: 50 }), false);
 assert.equal(isUnlimitedWorkspace({ tier: "usage_based", usageLimit: -1, paygActive: true }), true);

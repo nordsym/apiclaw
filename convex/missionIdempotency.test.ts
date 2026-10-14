@@ -52,7 +52,7 @@ assert.equal(isCustomerRunnableMissionTemplate([{
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "replicate", actionName: "run" },
-}]), true);
+}]), false, "missions must not advertise an adapter that failed its live smoke test");
 assert.equal(isCustomerRunnableMissionTemplate([{
   kind: "fetch",
   config: { source: "providerAction", providerId: "together", actionName: "chat" },

@@ -526,6 +526,10 @@ function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
     const p = provider.trim().toLowerCase();
     const k = key.trim();
     if (!sessionToken || !p || !k) return;
+    if (p === "apilayer") {
+      setError("APILayer is managed by APIClaw. You do not need to add a key.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -565,7 +569,7 @@ function YourKeysSection({ sessionToken }: { sessionToken: string | null }) {
       {showAdd && (
         <Panel className="mb-4 p-5">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Provider" hint="e.g. openai, anthropic, groq">
+            <Field label="Provider" hint="e.g. openai, anthropic, groq. APILayer is managed for you.">
               <input type="text" value={provider} onChange={(e) => setProvider(e.target.value)} className={`${inputClass} claw-mono`} maxLength={40} autoFocus />
             </Field>
             <Field label="Your key">

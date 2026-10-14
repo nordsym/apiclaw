@@ -11,18 +11,13 @@ export type WorkspaceNavigationItem = {
   label: string;
 };
 
-const UNCONDITIONAL_UNLIMITED_TIERS = new Set([
-  "partner",
-  "founder",
-]);
-
 export function isUnlimitedWorkspace(workspace: {
   tier?: string | null;
   usageLimit?: number | null;
   paygActive?: boolean | null;
 }): boolean {
   const tier = workspace.tier ?? "";
-  if (UNCONDITIONAL_UNLIMITED_TIERS.has(tier)) return true;
+  if (tier === "partner" || tier === "founder") return workspace.paygActive === true;
   if (tier === "usage_based") return workspace.paygActive === true;
   return workspace.usageLimit === -1;
 }

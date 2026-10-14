@@ -63,7 +63,9 @@ export function StandaloneShell({ activeTab, sessionToken, children }: { activeT
   };
 
   const usageLabel = workspace
-    ? workspace.usageLimit === -1 ? "Unlimited calls" : `${workspace.usageRemaining}/${workspace.usageLimit} calls`
+    ? workspace.usageLimit === -1
+      ? "PAYG active"
+      : `${workspace.usageRemaining}/${workspace.usageLimit} free managed calls`
     : undefined;
 
   if (!workspace) return <p role="status">{loadError ? "Could not load workspace." : "Loading workspace…"} {loadError && <button onClick={invalidateWorkspace}>Try again</button>}</p>;

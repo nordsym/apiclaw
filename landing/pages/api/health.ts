@@ -4,6 +4,7 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { createServiceHealth } from '../../src/lib/service-health';
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,10 +13,5 @@ export default async function handler(
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
   
-  return res.status(200).json({
-    status: 'ok',
-    service: 'apiclaw-gateway',
-    version: '2.9.11',
-    timestamp: new Date().toISOString(),
-  });
+  return res.status(200).json(createServiceHealth());
 }

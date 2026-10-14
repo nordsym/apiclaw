@@ -362,7 +362,7 @@ call_api({
                     <ul className="mt-2 space-y-1.5">
                       <li><code className="claw-mono text-text-secondary">openrouter</code>: 800+ LLMs</li>
                       <li><code className="claw-mono text-text-secondary">brave_search</code>: Web search</li>
-                      <li><code className="claw-mono text-text-secondary">github</code>: Read-only GitHub</li>
+                      <li><code className="claw-mono text-text-secondary">stability</code>: Image generation</li>
                       <li><code className="claw-mono text-text-secondary">nasa</code>: Astronomy Picture of the Day</li>
                       <li><code className="claw-mono text-text-secondary">apilayer</code>: Fixer latest (EUR base) and other contracted HTTPS rails</li>
                     </ul>
@@ -401,8 +401,8 @@ call_api({
                   <span className={BODY}>Discoverable by agents via the catalog.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
-                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString("en-US")} callable now</span>
-                  <span className={BODY}>What a workspace can execute today, of which {statsData.managedProviderAdapterCount} are built-in providers. Keyless public origins are Free; built-in providers are Free when the upstream API is free and Paid otherwise.</span>
+                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1022).toLocaleString("en-US")} callable now</span>
+                  <span className={BODY}>What a workspace can execute today, including {statsData.customerExecutableProviderCount} managed providers. Keyless public origins are Free; managed providers use the bounded trial and then PAYG where resale is supported.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
                   <span className={META}>{statsData.sourceVerifiedCount.toLocaleString("en-US")} source-verified</span>

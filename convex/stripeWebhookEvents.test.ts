@@ -50,14 +50,24 @@ assert.equal(
 assert.equal(shouldApplyReconciledSubscription(undefined, undefined, "sub_new", true), true);
 assert.equal(shouldApplyReconciledSubscription("sub_same", "active", "sub_same", true), true);
 assert.equal(shouldApplyReconciledSubscription("sub_new", "active", "sub_old", true), false);
-assert.equal(shouldApplyReconciledSubscription(undefined, "canceled", "sub_old", true), false);
+assert.equal(
+  shouldApplyReconciledSubscription("sub_canceled", "canceled", "sub_new", true),
+  true,
+  "a new active subscription may replace a terminal local subscription before deletion arrives",
+);
+assert.equal(shouldApplyReconciledSubscription("sub_old", "active", "sub_new", true), false);
+assert.equal(shouldApplyReconciledSubscription(undefined, "canceled", "sub_new", true), true);
+assert.equal(shouldApplyReconciledSubscription(undefined, "unpaid", "sub_new", true), true);
+assert.equal(shouldApplyReconciledSubscription(undefined, "incomplete_expired", "sub_new", true), true);
+assert.equal(shouldApplyReconciledSubscription(undefined, "past_due", "sub_new", true), false);
 assert.equal(shouldApplyReconciledSubscription(undefined, "canceled", "sub_old", false), false);
 assert.equal(shouldApplyReconciledSubscription("sub_old", "past_due", "sub_old", false), true);
 
 assert.equal(canActivatePaygWorkspace({ tier: "free" }), true);
 assert.equal(canActivatePaygWorkspace({ tier: "free", billingPlan: "free" }), true);
-assert.equal(canActivatePaygWorkspace({ tier: "founder" }), false);
-assert.equal(canActivatePaygWorkspace({ tier: "partner" }), false);
+assert.equal(canActivatePaygWorkspace({ tier: "founder" }), true);
+assert.equal(canActivatePaygWorkspace({ tier: "partner", billingPlan: "free" }), true);
+assert.equal(canActivatePaygWorkspace({ tier: "enterprise" }), false);
 assert.equal(canActivatePaygWorkspace({ tier: "pro", billingPlan: "pro" }), false);
 assert.equal(canActivatePaygWorkspace({ tier: "usage_based", billingPlan: "usage_based" }), false);
 
@@ -95,6 +105,10 @@ assert.equal(
 assert.equal(
   decidePaygActivationClaim({ tier: "usage_based", billingPlan: "usage_based" }, "seti_new", now),
   "not_eligible",
+);
+assert.equal(
+  decidePaygActivationClaim({ tier: "founder", billingPlan: "free" }, "repair_founder", now),
+  "claim",
 );
 
 assert.equal(isPaidInvoiceState({ status: "paid", paid: false }), true);

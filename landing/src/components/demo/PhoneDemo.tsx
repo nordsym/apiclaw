@@ -23,20 +23,20 @@ interface WithoutMessage {
 
 type Message = WithMessage | WithoutMessage;
 
-// Example 1: Managed API - Replicate
+// Example 1: Managed API - Stability
 const DirectCallExample: WithMessage[] = [
   { role: "user", text: "Generate a product photo of a coffee mug" },
-  { role: "assistant", text: "Managed API → Replicate", search: true },
+  { role: "assistant", text: "Managed API → Stability", search: true },
   { 
     role: "assistant", 
     text: "Selecting model...",
     models: [
-      { name: "Flux Pro", match: "Best for products" },
-      { name: "SDXL", match: "Fast generation" },
-      { name: "Stable Diffusion 3", match: "Versatile" },
+      { name: "SD3.5 Large", match: "Best quality" },
+      { name: "SD3.5 Turbo", match: "Fast generation" },
+      { name: "SD3.5 Medium", match: "Balanced" },
     ]
   },
-  { role: "assistant", text: "Using Flux Pro", meta: "via Replicate (managed)" },
+  { role: "assistant", text: "Using SD3.5 Large", meta: "via Stability (managed)" },
   { role: "assistant", text: "Generating...", typing: true },
   { role: "assistant", text: "Done", image: true, success: true },
 ];

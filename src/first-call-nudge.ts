@@ -10,7 +10,7 @@ export const FIRST_CALL_REVENUE_NUDGE_MESSAGE =
   "First call landed. Free APIs stay free. For paid APIs (e.g. OpenRouter chat), add a card once at https://apiclaw.cloud/upgrade (provider cost + 15%), then retry.";
 
 export const PAYMENT_REQUIRED_MESSAGE =
-  "This API has real provider cost. Add a card at https://apiclaw.cloud/upgrade, then retry this same call. You pay provider cost plus 15 percent.";
+  "You've used the free managed allowance. Add a card at https://apiclaw.cloud/upgrade, then retry this same call. You pay the provider cost plus 15 percent, with no subscription fee.";
 
 export type FirstCallRevenueNudge = {
   kind: "add_payment_method";
@@ -28,7 +28,8 @@ export function workspaceHasPaymentMethod(workspace: {
 /**
  * Attach once, on a newly recorded first_call success, only when this
  * call was free/activation and the workspace has no card. A card on file
- * means the paid rail is already open — no nudge.
+ * means the customer does not need another card prompt here; exact PAYG
+ * activation is still verified independently by the gateway.
  */
 export function firstCallRevenueNudge(input: {
   firstCallRecorded: boolean;

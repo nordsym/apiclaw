@@ -1,12 +1,16 @@
 import Stripe from "stripe";
+import { v } from "convex/values";
 import { readCustomerPaymentMethod } from "./stripePaymentSnapshot";
-import { httpAction } from "./_generated/server";
+import { httpAction, internalAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import {
+  assertStripeBillingEnvironment,
   readMicroUsdMeterConfig,
+  verifyMicroUsdCheckoutPrice,
   verifyMicroUsdMeterReadiness,
 } from "./managedMetering";
 import {
+  canActivatePaygWorkspace,
   isPaidInvoiceState,
   paygSubscriptionIdempotencyKey,
   shouldApplyReconciledSubscription,
@@ -19,6 +23,7 @@ function getStripe(): Stripe {
   if (!key) {
     throw new Error("STRIPE_SECRET_KEY not configured");
   }
+  assertStripeBillingEnvironment(process.env);
   return new Stripe(key);
 }
 
@@ -41,7 +46,20 @@ function safeAppBase(returnUrl: unknown): string {
   if (typeof returnUrl !== "string") return fallback;
   try {
     const url = new URL(returnUrl);
-    if (url.protocol !== "https:" || !["apiclaw.cloud", "www.apiclaw.cloud"].includes(url.hostname)) {
+    let testOrigin: string | undefined;
+    if (process.env.APICLAW_BILLING_ENVIRONMENT === "test" &&
+      process.env.STRIPE_SECRET_KEY?.startsWith("sk_test_")) {
+      try {
+        const configured = new URL(process.env.APICLAW_BILLING_RETURN_ORIGIN || "");
+        if (configured.protocol === "https:") testOrigin = configured.origin;
+      } catch {
+        // A malformed preview origin is ignored and cannot widen redirects.
+      }
+    }
+    if (url.protocol !== "https:" || !(
+      ["https://apiclaw.cloud", "https://www.apiclaw.cloud"].includes(url.origin) ||
+      url.origin === testOrigin
+    )) {
       return fallback;
     }
     return url.origin;
@@ -57,19 +75,16 @@ function safeAppBase(returnUrl: unknown): string {
 export const createCheckoutSession = httpAction(async (ctx, request) => {
   try {
     const body = await request.json();
-    const { token, returnUrl, mode = "setup" } = body;
+    const { token, returnUrl } = body;
 
     if (!token) {
       return jsonResponse({ error: "session token required" }, 401);
     }
-    if (mode !== "setup") {
-      return jsonResponse({ error: "Only secure payment-method setup is supported" }, 400);
-    }
-
     const verified = await ctx.runMutation(api.workspaces.verifySession, { sessionToken: token });
     if (!verified?.workspaceId) return jsonResponse({ error: "Invalid session" }, 401);
     const workspaceId = verified.workspaceId;
 
+    assertStripeBillingEnvironment(process.env);
     const stripe = getStripe();
 
     // Get workspace
@@ -80,6 +95,23 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
     if (!workspace) {
       return jsonResponse({ error: "Workspace not found" }, 404);
     }
+
+    if (workspace.stripeSubscriptionId &&
+      ["active", "trialing", "past_due", "incomplete"].includes(workspace.stripeSubscriptionStatus || "")) {
+      return jsonResponse(
+        { error: "You already have a billing account. Use Manage billing to update your payment method." },
+        409,
+      );
+    }
+    if (!canActivatePaygWorkspace(workspace)) {
+      return jsonResponse(
+        { error: "This workspace is not eligible for pay-as-you-go billing." },
+        409,
+      );
+    }
+
+    const meterConfig = readMicroUsdMeterConfig(process.env);
+    await verifyMicroUsdCheckoutPrice(stripe, meterConfig);
 
     let customerId = workspace.stripeCustomerId;
 
@@ -106,20 +138,78 @@ export const createCheckoutSession = httpAction(async (ctx, request) => {
 
     const baseUrl = safeAppBase(returnUrl);
 
+    const existingSubscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "all",
+      limit: 100,
+    });
+    const existingBillableSubscription = existingSubscriptions.data.find((subscription) =>
+      ["active", "trialing", "past_due", "incomplete"].includes(subscription.status) &&
+      subscription.items.data.some((item) => item.price.id === meterConfig.priceId)
+    );
+    if (existingBillableSubscription) {
+      return jsonResponse(
+        { error: "You already have a billing account. Use Manage billing to update your payment method." },
+        409,
+      );
+    }
+
+    const listedSessions = await stripe.checkout.sessions.list({
+      customer: customerId,
+      limit: 100,
+    });
+    const matchingSessions = listedSessions.data
+      .filter((candidate) =>
+        candidate.mode === "subscription" &&
+        candidate.metadata?.workspaceId === String(workspaceId) &&
+        candidate.metadata?.priceId === meterConfig.priceId
+      )
+      .sort((left, right) => right.created - left.created);
+    const openSession = matchingSessions.find((candidate) => candidate.status === "open" && candidate.url);
+    if (openSession) {
+      return jsonResponse({
+        url: openSession.url,
+        checkoutUrl: openSession.url,
+        sessionId: openSession.id,
+      });
+    }
+    const completedSession = matchingSessions.find((candidate) => candidate.status === "complete");
+    if (completedSession) {
+      const completedSubscriptionId = typeof completedSession.subscription === "string"
+        ? completedSession.subscription
+        : completedSession.subscription?.id;
+      const knownSubscription = completedSubscriptionId
+        ? existingSubscriptions.data.find((candidate) => candidate.id === completedSubscriptionId)
+        : undefined;
+      if (!knownSubscription) {
+        return jsonResponse(
+          { error: "Your billing setup is being confirmed. Refresh Billing in a moment." },
+          409,
+        );
+      }
+    }
+    const latestSessionId = matchingSessions[0]?.id || "initial";
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "setup",
+      mode: "subscription",
       locale: "en",
-      payment_method_types: ["card"],
+      line_items: [{ price: meterConfig.priceId }],
+      payment_method_collection: "always",
+      subscription_data: { metadata: { workspaceId } },
       success_url: `${baseUrl}/workspace?tab=billing&billing=success`,
       cancel_url: `${baseUrl}/workspace?tab=billing&billing=cancel`,
-      metadata: { workspaceId },
+      metadata: { workspaceId, priceId: meterConfig.priceId },
+    }, {
+      idempotencyKey: `apiclaw_checkout:${workspaceId}:${meterConfig.priceId}:${latestSessionId}`,
     });
 
-    return jsonResponse({ checkoutUrl: session.url, sessionId: session.id });
+    return jsonResponse({ url: session.url, checkoutUrl: session.url, sessionId: session.id });
   } catch (e: any) {
-    console.error("Checkout error:", e);
-    return jsonResponse({ error: e.message || "Failed to create checkout" }, 500);
+    console.error("Checkout unavailable");
+    return jsonResponse({
+      error: "We could not open secure checkout. Your card has not been charged. Please try again shortly.",
+    }, 503);
   }
 });
 
@@ -223,9 +313,10 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
   // Handle the event
   try {
     switch (event.type) {
+      case "checkout.session.async_payment_succeeded":
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutComplete(ctx, session);
+        await handleCheckoutComplete(ctx, session, stripe);
         break;
       }
 
@@ -323,7 +414,8 @@ export const handleStripeWebhook = httpAction(async (ctx, request) => {
 
 async function handleCheckoutComplete(
   ctx: any,
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  stripe: Stripe,
 ) {
   const workspaceId = session.metadata?.workspaceId;
   if (!workspaceId) {
@@ -331,9 +423,28 @@ async function handleCheckoutComplete(
     return;
   }
 
-  // If subscription mode, the subscription webhook will handle it
+  // Reconcile here as well as in subscription webhooks. Stripe does not
+  // guarantee delivery order, so either event must establish the same state.
   if (session.mode === "subscription" && session.subscription) {
-    console.log("Subscription checkout completed, waiting for subscription webhook");
+    if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+      console.log(`Checkout ${session.id} is not ready for billing reconciliation`);
+      return;
+    }
+    const customerId = typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id;
+    if (!customerId) throw new Error("Subscription checkout has no customer");
+    const workspace = await ctx.runQuery(internal.billing.getByStripeCustomerId, {
+      stripeCustomerId: customerId,
+    });
+    if (!workspace || String(workspace._id) !== workspaceId) {
+      throw new Error("Checkout workspace does not match its Stripe customer");
+    }
+    const subscriptionId = typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription.id;
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    await handleSubscriptionUpdate(ctx, subscription, stripe);
     return;
   }
 
@@ -415,11 +526,16 @@ async function handleSubscriptionUpdate(
   let meterPriceId: string | undefined;
   let meterId: string | undefined;
   let meterEventName: string | undefined;
+  let verifiedPaymentMethod: Stripe.PaymentMethod | undefined;
   if (plan === "usage_based" && billable) {
     const readiness = await verifyMicroUsdMeterReadiness(stripe, meterConfig, {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscription.id,
     });
+    verifiedPaymentMethod = await readCustomerPaymentMethod(stripe, customerId) || undefined;
+    if (!verifiedPaymentMethod) {
+      throw new Error("Active PAYG subscription has no saved payment method");
+    }
     meterReadyAt = Date.now();
     meterPriceId = readiness.priceId;
     meterId = readiness.meterId;
@@ -440,6 +556,16 @@ async function handleSubscriptionUpdate(
   if (!update.applied) {
     console.log(`Subscription ${subscription.id} update lost a newer workspace update`);
     return;
+  }
+
+  if (verifiedPaymentMethod) {
+    await ctx.runMutation(internal.billing.updatePaymentMethodInfo, {
+      workspaceId: workspace._id,
+      hasPaymentMethod: true,
+      paymentMethodType: verifiedPaymentMethod.type,
+      cardBrand: verifiedPaymentMethod.card?.brand,
+      cardLast4: verifiedPaymentMethod.card?.last4,
+    });
   }
 
   console.log(`Subscription ${subscription.id} updated for workspace ${workspace._id} -> plan: ${plan}`);
@@ -934,7 +1060,7 @@ async function handlePaymentMethodAttached(
           stripeSubscriptionId: subscription.id,
         },
       );
-      await ctx.runMutation(internal.billing.updateSubscription, {
+      const update = await ctx.runMutation(internal.billing.updateSubscription, {
         workspaceId: workspace._id,
         stripeSubscriptionId: subscription.id,
         billingPlan: "usage_based",
@@ -945,6 +1071,9 @@ async function handlePaymentMethodAttached(
         paygMeterEventName: readiness.eventName,
         expectedCurrentSubscriptionId: workspace.stripeSubscriptionId,
       });
+      if (!update.applied) {
+        throw new Error(`PAYG payment-method refresh was not applied (${update.reason})`);
+      }
     }
   }
 
@@ -1001,6 +1130,180 @@ async function handlePaymentMethodDetached(
   }
   console.log(`Payment method ${paymentMethod.id} detached; PAYG is on hold`);
 }
+
+/**
+ * One-workspace repair for customers who saved a card under the former setup
+ * flow but never received the metered subscription. It is intentionally not
+ * a bulk sweep: the operator must name each audited workspace explicitly.
+ */
+export const repairSavedCardPayg = internalAction({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  handler: async (ctx, args): Promise<{
+    repaired: true;
+    alreadyRepaired?: true;
+    tier: string;
+    billingPlan: "usage_based";
+    stripeSubscriptionStatus: string | undefined;
+  }> => {
+    assertStripeBillingEnvironment(process.env);
+
+    const workspace = await ctx.runQuery(internal.billing.getWorkspace, {
+      id: args.workspaceId,
+    });
+    if (!workspace) throw new Error("Workspace not found");
+    if (!workspace.stripeCustomerId) {
+      throw new Error("Workspace has no Stripe customer");
+    }
+    const alreadyRepaired = workspace.billingPlan === "usage_based" &&
+      !!workspace.stripeSubscriptionId &&
+      ["active", "trialing"].includes(workspace.stripeSubscriptionStatus || "");
+    if (!canActivatePaygWorkspace(workspace) && !alreadyRepaired) {
+      throw new Error("Workspace is not eligible for saved-card PAYG repair");
+    }
+
+    const stripe = getStripe();
+    const meterConfig = readMicroUsdMeterConfig(process.env);
+    await verifyMicroUsdCheckoutPrice(stripe, meterConfig);
+
+    const paymentMethod = await readCustomerPaymentMethod(stripe, workspace.stripeCustomerId);
+    if (!paymentMethod) {
+      throw new Error("Workspace has no saved Stripe payment method");
+    }
+    await stripe.customers.update(workspace.stripeCustomerId, {
+      invoice_settings: { default_payment_method: paymentMethod.id },
+    });
+
+    if (alreadyRepaired && workspace.stripeSubscriptionId) {
+      const readiness = await verifyMicroUsdMeterReadiness(stripe, meterConfig, {
+        stripeCustomerId: workspace.stripeCustomerId,
+        stripeSubscriptionId: workspace.stripeSubscriptionId,
+      });
+      const update = await ctx.runMutation(internal.billing.updateSubscription, {
+        workspaceId: workspace._id,
+        stripeSubscriptionId: workspace.stripeSubscriptionId,
+        stripeSubscriptionStatus: workspace.stripeSubscriptionStatus,
+        billingPlan: "usage_based",
+        paygMeterReadyAt: Date.now(),
+        paygMeterPriceId: readiness.priceId,
+        paygMeterId: readiness.meterId,
+        paygMeterEventName: readiness.eventName,
+        expectedCurrentSubscriptionId: workspace.stripeSubscriptionId,
+      });
+      if (!update.applied) {
+        throw new Error(`PAYG repair refresh was not applied (${update.reason})`);
+      }
+      await ctx.runMutation(internal.billing.updatePaymentMethodInfo, {
+        workspaceId: workspace._id,
+        hasPaymentMethod: true,
+        paymentMethodType: paymentMethod.type,
+        cardBrand: paymentMethod.card?.brand,
+        cardLast4: paymentMethod.card?.last4,
+      });
+      return {
+        repaired: true,
+        alreadyRepaired: true,
+        tier: workspace.tier,
+        billingPlan: "usage_based",
+        stripeSubscriptionStatus: workspace.stripeSubscriptionStatus,
+      };
+    }
+
+    // The payment-method suffix lets a definitive failure be retried after
+    // the customer replaces their card while remaining idempotent per card.
+    const activationId = [
+      "saved_card_repair",
+      String(workspace._id),
+      meterConfig.priceId.slice(-24),
+      paymentMethod.id.slice(-24),
+    ].join("_");
+    const activation = await ctx.runMutation(internal.billing.claimPaygActivation, {
+      workspaceId: workspace._id,
+      activationId,
+    });
+    if (!activation.claimed) {
+      throw new Error(`PAYG repair could not claim workspace (${activation.reason})`);
+    }
+
+    let subscriptionCreateAttempted = false;
+    try {
+      const subscriptions = await stripe.subscriptions.list({
+        customer: workspace.stripeCustomerId,
+        status: "all",
+        limit: 100,
+      });
+      let subscription = subscriptions.data.find((candidate) =>
+        ["active", "trialing"].includes(candidate.status) &&
+        candidate.items.data.some((item) => item.price.id === meterConfig.priceId)
+      );
+      if (!subscription) {
+        subscriptionCreateAttempted = true;
+        subscription = await stripe.subscriptions.create({
+          customer: workspace.stripeCustomerId,
+          items: [{ price: meterConfig.priceId }],
+          payment_behavior: "error_if_incomplete",
+          payment_settings: { save_default_payment_method: "on_subscription" },
+          metadata: { workspaceId: String(workspace._id), repair: "saved_card" },
+        }, {
+          idempotencyKey: paygSubscriptionIdempotencyKey(
+            String(workspace._id),
+            meterConfig.priceId,
+            activationId,
+          ),
+        });
+      }
+
+      if (!(["active", "trialing"] as string[]).includes(subscription.status)) {
+        throw new Error(`Repaired Stripe subscription is not billable (${subscription.status})`);
+      }
+      const readiness = await verifyMicroUsdMeterReadiness(stripe, meterConfig, {
+        stripeCustomerId: workspace.stripeCustomerId,
+        stripeSubscriptionId: subscription.id,
+      });
+      const completion = await ctx.runMutation(internal.billing.completePaygActivation, {
+        workspaceId: workspace._id,
+        activationId,
+        stripeSubscriptionId: subscription.id,
+        stripeSubscriptionStatus: subscription.status,
+        paygMeterReadyAt: Date.now(),
+        paygMeterPriceId: readiness.priceId,
+        paygMeterId: readiness.meterId,
+        paygMeterEventName: readiness.eventName,
+      });
+      if (!completion.applied) {
+        if (subscriptionCreateAttempted) {
+          await stripe.subscriptions.cancel(subscription.id);
+          subscriptionCreateAttempted = false;
+        }
+        throw new Error(`PAYG repair was not applied (${completion.reason})`);
+      }
+      await ctx.runMutation(internal.billing.updatePaymentMethodInfo, {
+        workspaceId: workspace._id,
+        hasPaymentMethod: true,
+        paymentMethodType: paymentMethod.type,
+        cardBrand: paymentMethod.card?.brand,
+        cardLast4: paymentMethod.card?.last4,
+      });
+      return {
+        repaired: true,
+        tier: workspace.tier,
+        billingPlan: "usage_based",
+        stripeSubscriptionStatus: subscription.status,
+      };
+    } catch (error) {
+      // Preserve the claim after an attempted Stripe create so retries reuse
+      // the same idempotency key rather than racing a second subscription.
+      if (!subscriptionCreateAttempted) {
+        await ctx.runMutation(internal.billing.releasePaygActivation, {
+          workspaceId: workspace._id,
+          activationId,
+        });
+      }
+      throw error;
+    }
+  },
+});
 
 // ============================================
 // OPTIONS handlers for CORS

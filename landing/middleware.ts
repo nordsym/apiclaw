@@ -108,6 +108,11 @@ const clerkHandler = clerkMiddleware(async (auth, request) => {
 });
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
+  // Health checks must stay available even when browser authentication is
+  // missing or degraded. They expose no workspace data.
+  if (["/health", "/api/health"].includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   // These two routes authenticate their own scoped operator bearer token.
   // Do not let Clerk interpret that token as a Clerk JWT or require browser auth.
   if (["/api/internal/listings/pending", "/api/internal/listings/review"].includes(request.nextUrl.pathname)) {

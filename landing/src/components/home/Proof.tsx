@@ -13,7 +13,7 @@ const FIGURES = [
     label: "discoverable APIs",
   },
   {
-    value: (statsData.customerExecutableCatalogCardCount ?? 1025).toLocaleString("en-US"),
+    value: (statsData.customerExecutableCatalogCardCount ?? 1022).toLocaleString("en-US"),
     label: "callable now",
   },
 ];

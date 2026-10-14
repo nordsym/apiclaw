@@ -2,14 +2,17 @@
 import assert from "node:assert/strict";
 import type Stripe from "stripe";
 import {
+  assertStripeBillingEnvironment,
   buildStripeMeterEvent,
   decideStripeClaim,
   isDefinitiveStripeStatus,
   isExactMicroUsdPrice,
   preserveFirstStripeClaimAt,
+  hasConfiguredPaygEntitlement,
   readLedgerStripeSnapshot,
   readMicroUsdMeterConfig,
   stripeMeterEventIdentifier,
+  verifyMicroUsdCheckoutPrice,
   verifyMicroUsdMeterReadiness,
 } from "./managedMetering";
 
@@ -91,23 +94,68 @@ assert.equal(
 
 assert.throws(
   () => readMicroUsdMeterConfig({ STRIPE_SECRET_KEY: "sk_test" }),
-  /STRIPE_METER_VALUE_UNIT/,
+  /mode and secret key/,
 );
 assert.throws(
   () => readMicroUsdMeterConfig({
-    STRIPE_SECRET_KEY: "sk_test",
+    STRIPE_SECRET_KEY: "sk_test_synthetic",
+    APICLAW_BILLING_ENVIRONMENT: "test",
     STRIPE_METER_VALUE_UNIT: "cent",
   }),
   /micro_usd/,
 );
+assert.equal(assertStripeBillingEnvironment({
+  STRIPE_SECRET_KEY: "sk_test_synthetic",
+  APICLAW_BILLING_ENVIRONMENT: "test",
+}), "test");
+assert.throws(() => readMicroUsdMeterConfig({
+  STRIPE_SECRET_KEY: "sk_live_wrong_mode",
+  APICLAW_BILLING_ENVIRONMENT: "test",
+  STRIPE_METER_VALUE_UNIT: "micro_usd",
+  STRIPE_METER_EVENT_NAME_MICRO_USD: "managed_cost_micro_usd",
+  STRIPE_METER_ID_MICRO_USD: "mtr_test",
+  STRIPE_PRICE_ID_MICRO_USD: "price_test",
+}), /mode and secret key/);
 const config = readMicroUsdMeterConfig({
-  STRIPE_SECRET_KEY: "sk_test",
+  STRIPE_SECRET_KEY: "sk_test_synthetic",
+  APICLAW_BILLING_ENVIRONMENT: "test",
   STRIPE_METER_VALUE_UNIT: "micro_usd",
   STRIPE_METER_EVENT_NAME_MICRO_USD: "managed_cost_micro_usd",
   STRIPE_METER_ID_MICRO_USD: "mtr_test",
   STRIPE_PRICE_ID_MICRO_USD: "price_test",
 });
 assert.equal(config.eventName, "managed_cost_micro_usd");
+const configuredPayg = {
+  tier: "usage_based",
+  billingPlan: "usage_based",
+  stripeCustomerId: "cus_test",
+  stripeSubscriptionId: "sub_test",
+  stripeSubscriptionStatus: "active",
+  hasPaymentMethod: true,
+  paygMeterReadyAt: now,
+  paygMeterPriceId: "price_test",
+  paygMeterId: "mtr_test",
+  paygMeterEventName: "managed_cost_micro_usd",
+};
+assert.equal(hasConfiguredPaygEntitlement(configuredPayg, {
+  STRIPE_SECRET_KEY: "sk_test_synthetic",
+  APICLAW_BILLING_ENVIRONMENT: "test",
+  STRIPE_METER_VALUE_UNIT: "micro_usd",
+  STRIPE_METER_EVENT_NAME_MICRO_USD: "managed_cost_micro_usd",
+  STRIPE_METER_ID_MICRO_USD: "mtr_test",
+  STRIPE_PRICE_ID_MICRO_USD: "price_test",
+}), true);
+assert.equal(hasConfiguredPaygEntitlement({
+  ...configuredPayg,
+  paygMeterPriceId: "price_stale",
+}, {
+  STRIPE_SECRET_KEY: "sk_test_synthetic",
+  APICLAW_BILLING_ENVIRONMENT: "test",
+  STRIPE_METER_VALUE_UNIT: "micro_usd",
+  STRIPE_METER_EVENT_NAME_MICRO_USD: "managed_cost_micro_usd",
+  STRIPE_METER_ID_MICRO_USD: "mtr_test",
+  STRIPE_PRICE_ID_MICRO_USD: "price_test",
+}), false);
 
 assert.equal(isExactMicroUsdPrice("0.0001"), true);
 assert.equal(isExactMicroUsdPrice("0.0001000"), true);
@@ -140,6 +188,15 @@ assert.throws(
 );
 
 function fakeStripe(unitAmountDecimal: string): Stripe {
+  const price = {
+    id: "price_test",
+    active: true,
+    currency: "usd",
+    billing_scheme: "per_unit",
+    transform_quantity: null,
+    recurring: { usage_type: "metered", meter: "mtr_test" },
+    unit_amount_decimal: unitAmountDecimal,
+  };
   return {
     billing: {
       meters: {
@@ -153,26 +210,28 @@ function fakeStripe(unitAmountDecimal: string): Stripe {
         }),
       },
     },
+    prices: {
+      retrieve: async () => price,
+    },
     subscriptions: {
       retrieve: async () => ({
         customer: "cus_test",
         status: "active",
         items: {
           data: [{
-            price: {
-              id: "price_test",
-              currency: "usd",
-              billing_scheme: "per_unit",
-              transform_quantity: null,
-              recurring: { usage_type: "metered", meter: "mtr_test" },
-              unit_amount_decimal: unitAmountDecimal,
-            },
+            price,
           }],
         },
       }),
     },
   } as unknown as Stripe;
 }
+
+await verifyMicroUsdCheckoutPrice(fakeStripe("0.0001"), config);
+await assert.rejects(
+  verifyMicroUsdCheckoutPrice(fakeStripe("0.01"), config),
+  /verified APIClaw micro-USD price and meter/,
+);
 
 const readiness = await verifyMicroUsdMeterReadiness(fakeStripe("0.0001"), config, {
   stripeCustomerId: "cus_test",

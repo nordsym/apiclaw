@@ -46,8 +46,12 @@ export function shouldApplyReconciledSubscription(
   eventSubscriptionId: string,
   billable: boolean,
 ): boolean {
-  if (workspaceSubscriptionId && workspaceSubscriptionId !== eventSubscriptionId) return false;
-  if (billable && !workspaceSubscriptionId && workspaceSubscriptionStatus !== undefined) return false;
+  const terminalStatus = workspaceSubscriptionStatus === undefined ||
+    ["canceled", "unpaid", "incomplete_expired"].includes(workspaceSubscriptionStatus);
+  if (workspaceSubscriptionId && workspaceSubscriptionId !== eventSubscriptionId) {
+    return billable && terminalStatus;
+  }
+  if (billable && !workspaceSubscriptionId && !terminalStatus) return false;
   if (!billable && workspaceSubscriptionId !== eventSubscriptionId) return false;
   return true;
 }
@@ -56,7 +60,7 @@ export function canActivatePaygWorkspace(workspace: {
   tier: string;
   billingPlan?: string;
 }): boolean {
-  return workspace.tier === "free" &&
+  return ["free", "founder", "partner"].includes(workspace.tier) &&
     (workspace.billingPlan === undefined || workspace.billingPlan === "free");
 }
 
