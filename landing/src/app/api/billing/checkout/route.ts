@@ -22,7 +22,9 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
-        returnUrl: process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
+        returnUrl: process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : process.env.NEXT_PUBLIC_APP_URL || "https://apiclaw.cloud",
       }),
       cache: "no-store",
     });
@@ -35,7 +37,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ url: data.checkoutUrl, sessionId: data.sessionId });
+    return NextResponse.json({ url: data.checkoutUrl, sessionId: data.sessionId }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("[Checkout] Billing service unavailable");
     return NextResponse.json({ error: "Secure checkout is temporarily unavailable. Please try again shortly." }, { status: 503 });
