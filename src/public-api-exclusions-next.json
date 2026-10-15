@@ -1,0 +1,198 @@
+[
+  {
+    "id": "grype",
+    "name": "Grype",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/anchore/grype/main/README.md",
+    "evidence": "Official README describes a vulnerability scanner installed on the operator machine and demonstrates local image, directory and SBOM scans. Its scanning interface is a CLI, not a shared hosted scan endpoint."
+  },
+  {
+    "id": "atom",
+    "name": "Atom",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/atom/atom/master/README.md",
+    "evidence": "Official README describes an Electron text editor and distributes Windows, Linux and macOS installers. Its editor API requires the installed application rather than offering a hosted HTTPS service."
+  },
+  {
+    "id": "brackets",
+    "name": "Brackets",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/brackets-cont/brackets/master/README.md",
+    "evidence": "Official README identifies Brackets as a code editor for HTML and CSS. The indexed application is editor software rather than a hosted public data API."
+  },
+  {
+    "id": "marktext",
+    "name": "Mark Text",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/marktext/marktext/develop/README.md",
+    "evidence": "Official README identifies an open-source Markdown editor and supplies architecture-specific desktop installers. Its application interface requires installed software."
+  },
+  {
+    "id": "lapce",
+    "name": "Lapce",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/lapce/lapce/master/README.md",
+    "evidence": "Official README distributes pre-built releases for Windows, Linux and macOS or package-manager installation. This indexed code editor is desktop software rather than a hosted public HTTP API."
+  },
+  {
+    "id": "obsidian",
+    "name": "Obsidian",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/obsidianmd/obsidian-api/master/README.md",
+    "evidence": "Official API repository documents plugin classes inside the Obsidian application, including App, Vault and Workspace and importing Node or Electron modules. This is an in-application plugin API, not a shared HTTPS service."
+  },
+  {
+    "id": "dendron",
+    "name": "Dendron",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/dendronhq/dendron/master/README.md",
+    "evidence": "Official README describes a local-first Markdown note-taking tool integrated with VS Code and VSCodium. The indexed interface needs that application environment, not a shared public HTTP endpoint."
+  },
+  {
+    "id": "logseq",
+    "name": "Logseq",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/logseq/logseq/master/README.md",
+    "evidence": "Official README directs users to install the application on their device and documents desktop and mobile applications. Its application/plugin interface is not a shared hosted data API."
+  },
+  {
+    "id": "zettlr",
+    "name": "Zettlr",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/Zettlr/Zettlr/develop/README.md",
+    "evidence": "Official README distributes desktop installers and describes Zettlr as an Electron-based application. This application interface requires a running installation."
+  },
+  {
+    "id": "kubebench",
+    "name": "Kube-bench",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/aquasecurity/kube-bench/main/README.md",
+    "evidence": "Official README identifies a tool that runs CIS Kubernetes checks against a Kubernetes deployment. The indexed scanner must run in an operator environment rather than providing a shared public HTTP service."
+  },
+  {
+    "id": "cosign",
+    "name": "Cosign",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/sigstore/cosign/main/README.md",
+    "evidence": "Official README installs a command-line signing and verification program and demonstrates local command execution. This tool interface is not itself a hosted HTTPS data service; separate Sigstore infrastructure is not the indexed CLI."
+  },
+  {
+    "id": "falco",
+    "name": "Falco",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/falcosecurity/falco/master/README.md",
+    "evidence": "Official README describes a Linux runtime security tool and kernel monitoring agent observing syscalls. The indexed software must run on a monitored system rather than exposing a shared hosted data API."
+  },
+  {
+    "id": "miragejs",
+    "name": "Mirage JS",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/miragejs/miragejs/master/README.md",
+    "evidence": "Official README identifies Mirage as a client-side server for developing, testing and prototyping JavaScript applications. The simulated API runs in the application environment, not on a shared hosted service."
+  },
+  {
+    "id": "vercelaisdk",
+    "name": "Vercel AI SDK",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/vercel/ai/main/packages/ai/README.md",
+    "evidence": "Official package README identifies a provider-agnostic TypeScript toolkit installed with npm on Node.js. This SDK entry is application software; Vercel AI Gateway is a distinct hosted service requiring separate access."
+  },
+  {
+    "id": "llamacpp",
+    "name": "Llama.cpp",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/ggml-org/llama.cpp/master/README.md",
+    "evidence": "Official README instructs users to install llama.cpp on their machine and describes inference on local or cloud hardware. Its inference server requires an operator deployment rather than providing a shared keyless endpoint."
+  },
+  {
+    "id": "promptflow",
+    "name": "Promptflow",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/microsoft/promptflow/main/README.md",
+    "evidence": "Official README describes development tools, local Python package installation and deploying developed flows to production. Its software interface requires a configured runtime rather than a shared public data endpoint."
+  },
+  {
+    "id": "postgrest",
+    "name": "PostgREST",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/PostgREST/postgrest/main/README.md",
+    "evidence": "Official README serves an API from an existing PostgreSQL database and instructs operators to install PostgREST or Docker. A database and operator deployment are required; the project itself is not a shared public data endpoint."
+  },
+  {
+    "id": "shepherdjs",
+    "name": "Shepherd.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/shipshapecode/shepherd/main/README.md",
+    "evidence": "Official README distinguishes the standalone JavaScript library, embedded into an application or website for guided tours, from commercial services. The indexed Shepherd.js library is not a hosted data API."
+  },
+  {
+    "id": "zetta",
+    "name": "Zetta",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/zettajs/zetta/master/README.md",
+    "evidence": "Official README describes a Node.js IoT platform and quick start that installs software, creates a project and starts a Zetta server. This requires a deployment rather than supplying a shared public instance."
+  },
+  {
+    "id": "zettaiot",
+    "name": "Zetta IoT",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/zettajs/zetta/master/README.md",
+    "evidence": "Official README describes a Node.js IoT platform and quick start that installs software, creates a project and starts a Zetta server. This requires a deployment rather than supplying a shared public instance."
+  },
+  {
+    "id": "caprover",
+    "name": "CapRover",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/caprover/caprover/master/README.md",
+    "evidence": "Official README describes a deployment and web-server manager for applications and databases on the operator server. The project requires operator infrastructure rather than supplying a shared public data API."
+  },
+  {
+    "id": "atlantis",
+    "name": "Atlantis",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/runatlantis/atlantis/main/README.md",
+    "evidence": "Official README explicitly describes a self-hosted Go application listening for Terraform pull-request webhook events. It requires an operator installation and is not a shared public data service."
+  },
+  {
+    "id": "fixer",
+    "name": "Fixer",
+    "cause": "needs_key",
+    "docsUrl": "https://github.com/fixerAPI/fixer/blob/master/README.md",
+    "evidence": "Official provider README states that the replacement Fixer endpoint requires an access_key query parameter and that legacy users must register for an API access key. It is not eligible for credential-free execution."
+  },
+  {
+    "id": "weatherstack",
+    "name": "Weatherstack",
+    "cause": "needs_key",
+    "docsUrl": "https://docs.apilayer.com/weatherstack/docs/getting-started",
+    "evidence": "Official getting-started documentation authenticates requests using the account API access key in the access_key parameter. An account credential is required, so this is not a keyless public rail."
+  },
+  {
+    "id": "opcua",
+    "name": "OPC UA",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://opcfoundation.org/about/opc-technologies/opc-ua/",
+    "evidence": "Official OPC Foundation architecture describes an interoperability framework implemented by clients and servers across embedded devices and cloud infrastructure. This indexed standard requires an implementation and server address; it is not itself a hosted HTTPS data endpoint."
+  },
+  {
+    "id": "xmpp",
+    "name": "XMPP",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://xmpp.org/about/technology-overview/",
+    "evidence": "Official XMPP overview defines an XML messaging and presence protocol with decentralized client and server implementations. The indexed protocol is not a shared HTTP GET data API; participating messaging servers are separate services."
+  },
+  {
+    "id": "lorawan",
+    "name": "LoRaWAN",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://lora-alliance.org/about-lorawan/",
+    "evidence": "Official LoRa Alliance overview defines a network protocol and architecture consisting of end devices, radio gateways, network servers and application servers. The indexed communications standard is not a hosted HTTPS data endpoint."
+  },
+  {
+    "id": "zigbee",
+    "name": "Zigbee",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://csa-iot.org/all-solutions/zigbee/",
+    "evidence": "Official Connectivity Standards Alliance documentation defines a low-power wireless mesh standard for smart devices and describes physical radio bands, device certification and interoperability. This indexed communications standard is not a shared HTTPS data service."
+  }
+]

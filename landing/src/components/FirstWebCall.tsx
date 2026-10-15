@@ -6,13 +6,14 @@ import { invalidateWorkspace } from "@/lib/workspace-data";
 
 type Picture = Awaited<ReturnType<typeof runBrowserNasaCall>>;
 
-export function FirstWebCall({ sessionToken, onSuccess }: { sessionToken: string; onSuccess?: (title: string) => void }) {
+export function FirstWebCall({ sessionToken, onSuccess, onRunningChange }: { sessionToken: string; onSuccess?: (title: string) => void; onRunningChange?: (running: boolean) => void }) {
   const [running, setRunning] = useState(false);
   const [picture, setPicture] = useState<Picture | null>(null);
   const [error, setError] = useState<string | null>(null);
   async function run() {
     if (running) return;
     setRunning(true);
+    onRunningChange?.(true);
     setError(null);
     try {
       const result = await runBrowserNasaCall(sessionToken);
@@ -22,7 +23,7 @@ export function FirstWebCall({ sessionToken, onSuccess }: { sessionToken: string
     } catch (cause) {
       setError(cause instanceof Error && /^(NASA |Your session )/.test(cause.message)
         ? cause.message : "Could not reach NASA. Check your connection and try again. This call is free.");
-    } finally { setRunning(false); }
+    } finally { setRunning(false); onRunningChange?.(false); }
   }
   return <section aria-label="Try a free API call" className="mb-6 rounded-[14px] border border-[var(--border-subtle)] p-5">
     <h2 className="text-lg font-medium">Your first API call</h2>

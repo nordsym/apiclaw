@@ -18,11 +18,12 @@ export const isHealthy = internalQuery({
 });
 
 export const snapshot = query({
-  args: {}, returns: v.object({ disabledIds: v.array(v.string()), checkedAt: v.union(v.number(), v.null()) }),
+  args: {}, returns: v.object({ approvedIds: v.array(v.string()), disabledIds: v.array(v.string()), checkedAt: v.union(v.number(), v.null()) }),
   handler: async (ctx) => {
     const rows = await Promise.all(WORKSPACE_PUBLIC_APIS.map((api) =>
       ctx.db.query("publicApiHealth").withIndex("by_apiId", (q) => q.eq("apiId", api.id)).unique()));
     return {
+      approvedIds: WORKSPACE_PUBLIC_APIS.map((api) => api.id),
       disabledIds: rows.filter((row) => row?.healthy === false).map((row) => row!.apiId),
       checkedAt: rows.length > 0 && rows.every((row) => row !== null)
         ? Math.min(...rows.map((row) => row!.checkedAt)) : null,

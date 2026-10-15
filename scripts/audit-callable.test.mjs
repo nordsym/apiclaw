@@ -317,3 +317,17 @@ test('health-disabled and discovery responses fail despite HTTP 200 while exact 
   assert.equal(result.results[0].cause, 'unresolved');
   assert.equal(result.results[1].cause, 'unresolved');
 });
+
+test('merged complete customer proof retains original per-result verification dates and defaults only new results', () => {
+  const proof = customerProof();
+  proof.verifiedAt = '2026-10-16T18:00:00Z';
+  proof.results[0].verifiedAt = '2026-10-15T18:00:00Z';
+  proof.results[1].success = true; proof.results[1].status = 200;
+  const report = applyCustomerGatewayEvidence(customerFixture(), proof);
+  assert.equal(report.results.find(row => row.id === 'a').gatewayVerification.verifiedAt, '2026-10-15T18:00:00Z');
+  assert.equal(report.results.find(row => row.id === 'b').gatewayVerification.verifiedAt, proof.verifiedAt);
+  assert.equal(report.customerGatewayVerification.verifiedAt, proof.verifiedAt);
+  assert.equal(report.verifiedCount, 2);
+  proof.results[0].verifiedAt = 'yesterday';
+  assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), proof), /valid ISO verification date/);
+});

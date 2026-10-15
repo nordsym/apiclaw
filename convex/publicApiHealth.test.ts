@@ -16,7 +16,7 @@ const ctx: any = { db: {
 const run = (fn: any, args: any = {}) => fn._handler(ctx, args);
 assert.equal(await run(isHealthy, { apiId: frankfurter.id }), true, "reviewed baseline works before first sweep");
 assert.equal(await run(isHealthy, { apiId: "unapproved" }), false);
-assert.deepEqual(await run(snapshot), { disabledIds: [], checkedAt: null });
+assert.deepEqual(await run(snapshot), { approvedIds: WORKSPACE_PUBLIC_APIS.map((api) => api.id), disabledIds: [], checkedAt: null });
 await run(record, { apiId: frankfurter.id, healthy: false, status: 503, checkedAt: 100 });
 assert.equal(await run(isHealthy, { apiId: frankfurter.id }), false);
 assert.deepEqual((await run(snapshot)).disabledIds, [frankfurter.id]);

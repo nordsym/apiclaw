@@ -1,5 +1,7 @@
 # New customer preview verification
 
+> Historical baseline: 2026-10-15 at 15:05 UTC. Its 16-card count predates the expanded audit and customer gateway checks. See [the later callable customer verification](callable-customer-verification.md) for the current evidence checkpoint and outstanding verification.
+
 Verified 2026-10-15T15:05:49.620Z. PR: https://github.com/nordsym/apiclaw/pull/60 . Production was not changed.
 
 Preview app: https://apiclaw-a8nfh6bo4-gustavs-projects-0c9f35af.vercel.app

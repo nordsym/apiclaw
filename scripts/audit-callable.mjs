@@ -451,7 +451,9 @@ export function applyCustomerGatewayEvidence(report, proof) {
     const status = Number.isInteger(result.status) && result.status >= 0 && result.status <= 599 ? result.status : 0;
     const healthDisabled = disabled.has(row.canonicalId) || disabled.has(row.id);
     const success = result.success === true && status >= 200 && status < 300 && result.discovery !== true && !healthDisabled;
-    const gatewayVerification = { verifiedAt: proof.verifiedAt, preview, status, success, healthDisabled,
+    const rowVerifiedAt = result.verifiedAt ?? proof.verifiedAt;
+    if (typeof rowVerifiedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(rowVerifiedAt) || !Number.isFinite(Date.parse(rowVerifiedAt))) throw new Error('Customer gateway result requires a valid ISO verification date');
+    const gatewayVerification = { verifiedAt: rowVerifiedAt, preview, status, success, healthDisabled,
       latencyMs: Number.isFinite(result.latencyMs) && result.latencyMs >= 0 ? Math.round(result.latencyMs) : null,
       route: result.route === '/v1/execute' ? result.route : 'customer-gateway',
       errorCode: typeof result.errorCode === 'string' && /^[A-Z0-9_.:-]{1,64}$/i.test(result.errorCode) ? result.errorCode : null };
@@ -472,7 +474,7 @@ const cell = value => String(value ?? '-').replaceAll('|', '/').replace(/[\r\n]/
 export function renderMarkdown(report) {
   const lines = ['# Callable API audit', '', `Checked: ${report.checkedAt}. Mode: ${report.mode}. Complete sweep: ${report.sweepComplete ? 'yes' : 'no'}.`, '',
     `**${report.verifiedCount} canonical free APIs verified from ${report.candidateCount} candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only \`customerExecutableProviderCount\` is not the full \`totalCallable\`. Unknown pricing remains discovery even after HTTP 200.`, '',
-    ...(report.customerGatewayVerification ? [`Customer gateway verification: ${report.customerGatewayVerification.verifiedAt}, preview ${report.customerGatewayVerification.preview}. ${report.customerGatewayVerification.passedCanonicalCount}/${report.customerGatewayVerification.testedCanonicalCount} authenticated customer calls passed; ${report.customerGatewayVerification.demotedCanonicalCount} were demoted. Billing snapshots were identical. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.`, ''] : []),
+    ...(report.customerGatewayVerification ? [`Customer gateway verification: ${report.customerGatewayVerification.verifiedAt}, preview ${report.customerGatewayVerification.preview}. ${report.customerGatewayVerification.passedCanonicalCount}/${report.customerGatewayVerification.testedCanonicalCount} authenticated customer calls passed; ${report.customerGatewayVerification.demotedCanonicalCount} were demoted. Billing snapshots were identical. ${report.customerGatewayVerification.pendingCanonicalCount ?? 0} newly upstream-verified APIs still await customer gateway verification. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.`, ''] : []),
     ...(report.customerExecutableCatalogCount === null ? [] : [`Catalog arithmetic: ${report.verifiedCount} measured free APIs + ${report.managedApprovedCount} existing approved managed providers = **${report.customerExecutableCatalogCount} catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires ${report.additionalVerifiedApisNeededFor1000} additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.`, '']),
     `Policy: ${report.policy}`, '', 'CORS is a browser rule and does not block server-to-server gateway execution. HTTP 401/403 alone does not establish a key requirement. Documentation/spec URLs are not hosted API endpoints. HTML, malformed/unsupported responses and oversized bodies do not qualify.', '',
     '## Baseline and current evidence', '', `Immutable baseline: commit ${report.baseline.commit}, ${report.baseline.checkedAt}; ${report.baseline.candidateCount} rows, ${report.baseline.verifiedCount} working free APIs (16 site cards after three managed providers). The old advertised ~1,005 figure described eligibility guesses, not successful calls.`, '',
@@ -519,8 +521,8 @@ export async function runAudit(argv = process.argv.slice(2)) {
   }
   const registry = readJson(resolve(ROOT, 'src/registry/apis.json'), {}).apis ?? [];
   const generated = readJson(resolve(ROOT, 'src/registry/generated-providers.json'), {}).providers ?? [];
-  const recipes = ['src/public-api-recipes-am.json', 'src/public-api-recipes-nz.json', 'src/public-api-recipes-reviewed.json', 'src/public-api-recipes-rescue.json', 'src/public-api-recipes-rescue-extra.json'].flatMap(path => readJson(resolve(ROOT, path), []));
-  const exclusions = readJson(resolve(ROOT, 'src/public-api-exclusions.json'), []);
+  const recipes = ['src/public-api-recipes-am.json', 'src/public-api-recipes-nz.json', 'src/public-api-recipes-reviewed.json', 'src/public-api-recipes-rescue.json', 'src/public-api-recipes-rescue-extra.json', 'src/public-api-recipes-rescue-next.json', 'src/public-api-recipes-rescue-next-extra.json', 'src/public-api-recipes-rescue-next-government.json', 'src/public-api-recipes-rescue-next-registry.json'].flatMap(path => readJson(resolve(ROOT, path), []));
+  const exclusions = ['src/public-api-exclusions.json', 'src/public-api-exclusions-next.json'].flatMap(path => readJson(resolve(ROOT, path), []));
   const responseDecoderHash = createHash('sha256').update(readFileSync(resolve(ROOT, 'src/workspace-public-response.ts'))).digest('hex');
   const transportHash = createHash('sha256').update(readFileSync(resolve(ROOT, 'src/workspace-public-transport.ts'))).digest('hex');
   const candidates = prepareCandidates({ candidates: readJson(resolve(ROOT, 'src/workspace-public-api-candidates.json'), []), registry, recipes, generated, exclusions, responseDecoderHash, transportHash, previous: previousReport.results, baseline: baseline.results });
@@ -534,7 +536,11 @@ export async function runAudit(argv = process.argv.slice(2)) {
     isSafePublicApiBaseUrl: urls.isSafePublicApiBaseUrl, limit: createOriginLimiter(), keyReport: readJson(resolve(ROOT, 'docs/ops/free-api-key-signups.json'), null),
   }, onProgress: (done, total) => { if (done % 100 === 0 || done === total) console.log(`Processed ${done}/${total} canonical groups`); },
   onCheckpoint: partial => { if (checkpointPath) { mkdirSync(dirname(checkpointPath), { recursive: true }); writeFileSync(checkpointPath, JSON.stringify({ checkedAt: new Date().toISOString(), results: partial })); } } });
-  const report = makeReport(results, baseline, { only, lastFullSweepAt: previousReport.lastFullSweepAt ?? (previousReport.sweepComplete ? previousReport.checkedAt : null), exclusions: readJson(resolve(ROOT, 'src/public-api-exclusions.json'), []), safeUrl: urls.isSafePublicApiBaseUrl, managedApprovedCount: productTruth.PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT });
+  const report = makeReport(results, baseline, { only, lastFullSweepAt: previousReport.lastFullSweepAt ?? (previousReport.sweepComplete ? previousReport.checkedAt : null), exclusions, safeUrl: urls.isSafePublicApiBaseUrl, managedApprovedCount: productTruth.PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT });
+  if (previousReport.customerGatewayVerification && only) {
+    const pendingCanonicalCount = report.results.filter(row => row.verified && row.gatewayVerification?.success !== true).length;
+    report.customerGatewayVerification = { ...previousReport.customerGatewayVerification, complete: pendingCanonicalCount === 0, pendingCanonicalCount };
+  }
   mkdirSync(outputDirectory, { recursive: true });
   writeFileSync(resolve(outputDirectory, 'callable-audit.json'), JSON.stringify(report, null, 2) + '\n');
   writeFileSync(resolve(outputDirectory, 'callable-audit.md'), renderMarkdown(report));

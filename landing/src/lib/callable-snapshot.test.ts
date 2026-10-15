@@ -12,12 +12,16 @@ const baseline = buildCallableSnapshot([], null);
 const fetcher: typeof fetch = async (_url, init) => {
   assert.equal(init?.cache, "no-store");
   assert.deepEqual(JSON.parse(String(init?.body)), { path: "publicApiHealth:snapshot", args: {} });
-  return Response.json({ status: "success", value: { disabledIds: [approved.id], checkedAt: 1_792_000_000_000 } });
+  return Response.json({ status: "success", value: { approvedIds: publicApis.map((api: any) => api.id), disabledIds: [approved.id], checkedAt: 1_792_000_000_000 } });
 };
 const demoted = await loadCallableSnapshot(fetcher);
 assert.equal(demoted.available, true);
 assert.equal(demoted.callableCount, baseline.callableCount! - 1);
 assert.equal(demoted.activePublicIds.includes(approved.id), false);
+// A backend rollout may remove an API before the landing manifest is deployed.
+const removedByBackend = buildCallableSnapshot([], null, publicApis.filter((api: any) => api.id !== approved.id).map((api: any) => api.id));
+assert.equal(removedByBackend.callableCount, baseline.callableCount! - 1);
+assert.equal(removedByBackend.activePublicIds.includes(approved.id), false);
 const rows = applyCallableSnapshot([
   { name: approved.name, callable: true, managedAdapter: false },
   { name: "OpenRouter", callable: true, managedAdapter: true },
@@ -35,11 +39,11 @@ assert.equal(networkFailure.available, false);
 assert.doesNotMatch(renderLiveSkill(template, networkFailure), /^- [\d,]+ callable$/m);
 assert.match(renderLiveSkill(template, networkFailure), /Callable availability temporarily unavailable/);
 const missing = await loadCallableSnapshot(async () => Response.json({ status: "error", errorMessage: "Could not find public function for 'publicApiHealth:snapshot'. Did you forget to run convex deploy?" }, { status: 400 }));
-assert.equal(missing.migrationBaseline, true);
-assert.equal(missing.callableCount, baseline.callableCount);
+assert.equal(missing.available, false);
+assert.equal(missing.callableCount, null);
 const wrongMissing = await loadCallableSnapshot(async () => Response.json({ status: "error", errorMessage: "Could not find public function for 'another:snapshot'." }, { status: 400 }));
 assert.equal(wrongMissing.available, false);
-const invalid = await loadCallableSnapshot(async () => Response.json({ status: "success", value: { disabledIds: "not-an-array", checkedAt: null } }));
+const invalid = await loadCallableSnapshot(async () => Response.json({ status: "success", value: { approvedIds: publicApis.map((api: any) => api.id), disabledIds: "not-an-array", checkedAt: null } }));
 assert.equal(invalid.available, false);
 // Exercise the actual Next handlers against one shared synthetic health state.
 const { GET: catalogGet } = require("../app/api/catalog/route.ts");
@@ -48,13 +52,14 @@ const { NextRequest } = require("../../node_modules/next/server");
 const nativeFetch = globalThis.fetch;
 const root = process.cwd();
 let disabledIds = [approved.id];
+let backendApprovedIds = publicApis.map((api: any) => api.id);
 let healthUnavailable = false;
 try {
   globalThis.fetch = async (_url, options) => {
     const query = JSON.parse(String(options?.body));
     if (query.path === "publicApiHealth:snapshot") {
       if (healthUnavailable) throw new Error("Synthetic health outage");
-      return Response.json({ status: "success", value: { disabledIds, checkedAt: 1_792_000_000_000 } });
+      return Response.json({ status: "success", value: { approvedIds: backendApprovedIds, disabledIds, checkedAt: 1_792_000_000_000 } });
     }
     assert.equal(query.path, "discoveryListings:published");
     return Response.json({ status: "success", value: { page: [], isDone: true, continueCursor: "" } });
@@ -77,6 +82,10 @@ try {
   assert.equal(publicCard.auth, "none (public reads)");
   assert.equal(publicCard.pricing, "free");
   assert.deepEqual(publicCard.actions, ["get"]);
+  backendApprovedIds = backendApprovedIds.filter((id: string) => id !== approved.id);
+  const backendRemoved = await (await catalogGet(new NextRequest("https://preview.example/api/catalog?callable=true"))).json();
+  assert.equal(backendRemoved.totalCallable, baseline.callableCount! - 1);
+  assert.ok((await (await skillGet()).text()).includes(`- ${backendRemoved.totalCallable} callable`));
   healthUnavailable = true;
   assert.equal((await catalogGet(new NextRequest("https://preview.example/api/catalog"))).status, 503);
   assert.match(await (await skillGet()).text(), /Callable availability temporarily unavailable/);
@@ -86,7 +95,7 @@ for (const file of ["landing/src/app/page.tsx", "landing/src/app/catalog/page.ts
 }
 assert.match(readFileSync("landing/src/app/catalog/CatalogClient.tsx", "utf8"), /useState<number \| null>\(initialCallableCount\)/);
 assert.match(readFileSync("landing/middleware.ts", "utf8"), /pathname === "\/SKILL\.md"/);
-console.log("Callable snapshot: shared SSR count, health demotion, managed preservation, dynamic SKILL and honest unavailable/migration states passed");
+console.log("Callable snapshot: shared SSR count, health demotion, managed preservation, dynamic SKILL and honest unavailable/rollout states passed");
 
 }
 void main().catch((error) => { console.error(error); process.exitCode = 1; });

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "mmogames",
+    "name": "MMO Games",
+    "canonicalId": "mmogames",
+    "baseUrl": "https://www.mmobomb.com",
+    "smokePath": "/api1/game?id=452",
+    "docsUrl": "https://www.mmobomb.com/api",
+    "pricing": "free",
+    "pricingSource": "https://www.mmobomb.com/api",
+    "freeEvidence": "Official MMO API is available to everyone free without restrictions provided MMOBomb.com is attributed; avoid more than four requests per second.",
+    "responseKind": "json"
+  },
+  {
+    "id": "itis",
+    "name": "ITIS",
+    "canonicalId": "itis",
+    "baseUrl": "https://www.itis.gov",
+    "smokePath": "/ITISWebService/jsonservice/getFullRecordFromTSN?tsn=180543",
+    "docsUrl": "https://www.itis.gov/web_service.html",
+    "pricing": "free",
+    "pricingSource": "https://www.itis.gov/privacy.html",
+    "freeEvidence": "Official ITIS data and database are CC0 public-domain; citation is requested. Public JSON webservice is keyless. Third-party copyrighted site material remains separate.",
+    "responseKind": "json"
+  },
+  {
+    "id": "callookinfo",
+    "name": "Callook.info",
+    "canonicalId": "callookinfo",
+    "baseUrl": "https://callook.info",
+    "smokePath": "/W1AW/json",
+    "docsUrl": "https://callook.info/api_reference.php",
+    "pricing": "free",
+    "pricingSource": "https://callook.info/api_reference.php",
+    "freeEvidence": "Official reference explicitly states API is publicly available and free to use however you wish. Default lookup is the ARRL club station, not an individual customer.",
+    "responseKind": "json"
+  },
+  {
+    "id": "chebi",
+    "name": "ChEBI",
+    "canonicalId": "chebi",
+    "baseUrl": "https://www.ebi.ac.uk/chebi/backend",
+    "smokePath": "/api/public/compound/15377/",
+    "docsUrl": "https://www.ebi.ac.uk/chebi/backend/api/docs/",
+    "pricing": "free",
+    "pricingSource": "https://www.ebi.ac.uk/chebi/about",
+    "freeEvidence": "Official ChEBI Licensing section states database is freely accessible and available to anyone under CC BY 4.0. EMBL-EBI terms allow public service interfaces, with fair use and source rights preserved.",
+    "responseKind": "json"
+  },
+  {
+    "id": "finnishmeteorologicalinstitute",
+    "name": "Finnish Meteorological Institute",
+    "canonicalId": "finnishmeteorologicalinstitute",
+    "baseUrl": "https://opendata.fmi.fi",
+    "smokePath": "/wfs?request=getFeature&storedquery_id=fmi::observations::weather::simple&place=Helsinki&parameters=t2m&timestep=60&maxlocations=1",
+    "docsUrl": "https://en.ilmatieteenlaitos.fi/open-data-manual-fmi-wfs-services",
+    "pricing": "free",
+    "pricingSource": "https://en.ilmatieteenlaitos.fi/open-data",
+    "freeEvidence": "Official FMI documentation explicitly provides machine-readable interface downloads free of charge. Use the open data licence and source attribution; this reads one location and one variable.",
+    "responseKind": "xml"
+  },
+  {
+    "id": "medlineplus",
+    "name": "MedlinePlus",
+    "canonicalId": "medlineplus",
+    "baseUrl": "https://wsearch.nlm.nih.gov",
+    "smokePath": "/ws/query?db=healthTopics&term=asthma&retmax=1",
+    "docsUrl": "https://medlineplus.gov/about/developers/webservices/",
+    "pricing": "free",
+    "pricingSource": "https://medlineplus.gov/about/developers/webservices/",
+    "freeEvidence": "Official NLM webservice is free of charge and requires neither registration nor licensing. Credit MedlinePlus.gov, avoid implying endorsement, stay below 85 requests/minute and cache daily data.",
+    "responseKind": "xml"
+  },
+  {
+    "id": "hongkongobervatory",
+    "name": "Hong Kong Obervatory",
+    "canonicalId": "hongkongobervatory",
+    "baseUrl": "https://data.weather.gov.hk",
+    "smokePath": "/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en",
+    "docsUrl": "https://www.hko.gov.hk/en/abouthko/opendata_intro.htm",
+    "pricing": "free",
+    "pricingSource": "https://data.gov.hk/en/terms-and-conditions",
+    "freeEvidence": "Official Hong Kong open-data terms allow free commercial and non-commercial download and redistribution. Attribute HKO, DATA.GOV.HK and government ownership; weather measurements are provisional.",
+    "responseKind": "json"
+  },
+  {
+    "id": "geneontologyapi",
+    "name": "Gene Ontology API",
+    "canonicalId": "geneontologyapi",
+    "baseUrl": "https://api.geneontology.org",
+    "smokePath": "/api/ontology/term/GO%3A0008150",
+    "docsUrl": "https://api.geneontology.org/",
+    "pricing": "free",
+    "pricingSource": "https://geneontology.org/docs/go-citation-policy/",
+    "freeEvidence": "Gene Ontology Consortium data and data products are openly available under CC BY 4.0. Preserve creator, source, licence and release attribution; read-only public term API requires no key.",
+    "responseKind": "json"
+  },
+  {
+    "id": "humanproteinatlas",
+    "name": "Human Protein Atlas",
+    "canonicalId": "humanproteinatlas",
+    "baseUrl": "https://www.proteinatlas.org",
+    "smokePath": "/ENSG00000141510.json",
+    "docsUrl": "https://www.proteinatlas.org/about/help/dataaccess",
+    "pricing": "free",
+    "pricingSource": "https://www.proteinatlas.org/about/licence",
+    "freeEvidence": "Official licence encourages research and commercial use under CC BY 4.0. Cite Human Protein Atlas, the gene URL, version and relevant primary publication; preserve third-party data licence constraints.",
+    "responseKind": "json"
+  },
+  {
+    "id": "eurostatapi",
+    "name": "Eurostat API",
+    "canonicalId": "eurostatapi",
+    "baseUrl": "https://ec.europa.eu",
+    "smokePath": "/eurostat/api/dissemination/statistics/1.0/data/demo_pjan?geo=SE&sex=T&age=TOTAL&time=2025",
+    "docsUrl": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction",
+    "pricing": "free",
+    "pricingSource": "https://ec.europa.eu/eurostat/web/user-guides/data-browser/api-data-access/api-introduction",
+    "freeEvidence": "Official Eurostat API guide explicitly grants free-of-charge programmatic access to statistical data and metadata and describes this interface for automated queries/downloads. Cite Eurostat as the data source.",
+    "responseKind": "json"
+  }
+]

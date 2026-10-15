@@ -26,6 +26,7 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web-first-call-browser
+      - run: npm run test:onboarding-race-browser
       - run: npm run test:listings-browser
       - run: npm run build
       - run: npm run build --prefix landing

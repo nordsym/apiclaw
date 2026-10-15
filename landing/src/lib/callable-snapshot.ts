@@ -9,15 +9,15 @@ export type CallableSnapshot = {
   activePublicIds: string[];
   activePublicNames: string[];
   checkedAt: number | null;
-  migrationBaseline: boolean;
 };
 
-export function buildCallableSnapshot(disabledIds: string[], checkedAt: number | null, migrationBaseline = false): CallableSnapshot {
+export function buildCallableSnapshot(disabledIds: string[], checkedAt: number | null, approvedIds = publicApis.map((api) => api.id)): CallableSnapshot {
   const disabled = new Set(disabledIds);
-  const active = publicApis.filter((api) => !disabled.has(api.id));
+  const approved = new Set(approvedIds);
+  const active = publicApis.filter((api) => approved.has(api.id) && !disabled.has(api.id));
   return { available: true, callableCount: PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT + active.length,
     activePublicIds: active.map((api) => api.id), activePublicNames: active.map((api) => api.name.toLowerCase().trim()),
-    checkedAt, migrationBaseline };
+    checkedAt };
 }
 
 export async function loadCallableSnapshot(fetcher: typeof fetch = fetch): Promise<CallableSnapshot> {
@@ -26,19 +26,16 @@ export async function loadCallableSnapshot(fetcher: typeof fetch = fetch): Promi
     const response = await fetcher(`${url}/api/query`, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path: "publicApiHealth:snapshot", args: {} }), cache: "no-store", signal: AbortSignal.timeout(5000) });
     const data = await response.json();
-    if (data.status === "error" && typeof data.errorMessage === "string"
-      && /(?:could not find public function|function[^\n]*not found)/i.test(data.errorMessage)
-      && data.errorMessage.includes("publicApiHealth:snapshot")) {
-      return buildCallableSnapshot([], null, true);
-    }
-    if (!response.ok || data.status !== "success" || !Array.isArray(data.value?.disabledIds)
+    if (!response.ok || data.status !== "success" || !Array.isArray(data.value?.approvedIds)
+      || !data.value.approvedIds.every((id: unknown) => typeof id === "string")
+      || !Array.isArray(data.value?.disabledIds)
       || !data.value.disabledIds.every((id: unknown) => typeof id === "string")
       || !(data.value.checkedAt === null || (typeof data.value.checkedAt === "number" && Number.isFinite(data.value.checkedAt)))) {
       throw Error("Invalid callable health snapshot");
     }
-    return buildCallableSnapshot(data.value.disabledIds, data.value.checkedAt);
+    return buildCallableSnapshot(data.value.disabledIds, data.value.checkedAt, data.value.approvedIds);
   } catch {
-    return { available: false, callableCount: null, activePublicIds: [], activePublicNames: [], checkedAt: null, migrationBaseline: false };
+    return { available: false, callableCount: null, activePublicIds: [], activePublicNames: [], checkedAt: null };
   }
 }
 
