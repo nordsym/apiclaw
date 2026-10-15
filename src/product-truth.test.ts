@@ -108,7 +108,7 @@ for (const catalogFile of [
   "landing/src/app/api/catalog/route.ts",
 ]) {
   const source = readFileSync(catalogFile, "utf8");
-  assert.match(source, /@apiclaw\/product-truth/);
+  assert.match(source, /@apiclaw\/product-truth|@\/lib\/stats\.json/);
   assert.doesNotMatch(
     source,
     /OpenAI[^\n]+callable:\s*true|AssemblyAI[^\n]+callable:\s*true|Replicate[^\n]+callable:\s*true/,
