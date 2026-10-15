@@ -96174,16 +96174,6 @@
       "callable": true
     },
     {
-      "name": "Frankfurter API",
-      "description": "Free currency exchange rates API (alias for Frankfurter). No auth required.",
-      "category": "Finance",
-      "baseUrl": "https://api.frankfurter.dev/v1",
-      "docsUrl": "https://www.frankfurter.dev/",
-      "auth": "none",
-      "pricing": "free",
-      "callable": true
-    },
-    {
       "name": "Frankie Financial API",
       "description": "------  \nThis API allows developers to integrate the Frankie Financial Compliance Utility into their applications. The API allows:\n  - Checking name, address, date of birth against national databases\n  - Validating Australian driver's licences, passports, medicare, visas and other Australian national ID documents\n  - Validating Australian electricity bills\n  - Validating NZ driver's licences\n  - Validating Chinese bank cards and national ID card\n  - Validating International passports and nationa",
       "category": "Development",

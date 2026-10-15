@@ -77,7 +77,7 @@ const PATHS: Path[] = [
     id: "remote",
     label: "Remote MCP",
     title: "For connected clients. Nothing to install.",
-    body: "OAuth-capable clients connect to the hosted endpoint through your workspace.",
+    body: "OAuth-capable clients connect to the hosted endpoint. Sign in when prompted so the connection belongs to your workspace and your credentials stay private.",
     snippet: <CopyLine text={REMOTE_MCP_URL} prompt="›" />,
     doc: { href: "/docs#remote-mcp", label: "Remote MCP docs" },
   },

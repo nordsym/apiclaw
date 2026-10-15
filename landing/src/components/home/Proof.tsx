@@ -10,10 +10,10 @@ const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 const FIGURES = [
   {
     value: statsData.apiCount.toLocaleString("en-US"),
-    label: "discoverable APIs",
+    label: "indexed API definitions",
   },
   {
-    value: (statsData.customerExecutableCatalogCardCount ?? 1005).toLocaleString("en-US"),
+    value: statsData.customerExecutableCatalogCardCount.toLocaleString("en-US"),
     label: "callable now",
   },
 ];
@@ -36,6 +36,9 @@ export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
               </div>
             ))}
           </dl>
+          <p className="mt-5 text-[13px] text-text-muted">
+            <a href="/catalog" className="claw-link underline underline-offset-4">Browse the catalog, including community listings.</a>
+          </p>
 
           <div className="mt-20 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
             <div>

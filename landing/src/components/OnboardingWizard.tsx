@@ -5,6 +5,7 @@ import { useWorkspaceRefresh } from "@/lib/use-workspace-refresh";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import posthog from "posthog-js";
+import { FirstWebCall } from "@/components/FirstWebCall";
 import { CopyLine } from "@/components/home/CopyLine";
 import { Panel, Status, btnQuiet, btnSolid } from "@/app/workspace/views/ui";
 import {
@@ -340,10 +341,11 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
           {view === "choose" && (
             <Step
               headingRef={headingRef}
-              title="How will you call APIClaw?"
-              line="Pick one. You can use the others later."
-              action={<button type="button" onClick={() => setView(door === "agent" ? "client" : "launch")} className={btnSolid}>Continue</button>}
+              title="Make your first API call"
+              line="Try it here, or connect your agent below."
+              action={<button type="button" onClick={() => setView(door === "agent" ? "client" : "launch")} className={btnQuiet}>Continue</button>}
             >
+              <FirstWebCall sessionToken={sessionToken} onSuccess={(title) => { setResultLine(`NASA APOD: ${title}`); setRunStatus("success"); setView("success"); }} />
               <div role="radiogroup" aria-label="Choose how to use APIClaw" className="mt-5">
                 {DOORS.map((item) => {
                   const active = door === item.id;

@@ -5,6 +5,7 @@ import statsData from '@/lib/stats.json';
 import { SiteHeader } from '@/components/home/SiteHeader';
 import { SiteFooter } from '@/components/home/SiteFooter';
 import { CopyLine } from '@/components/home/CopyLine';
+import { DOCS_EXECUTE_EXAMPLES, DOCS_EXECUTE_URL, DOCS_SESSION_SETUP, docsCliExample, docsExecuteBody, docsHttpExample } from '@/lib/docs-examples';
 
 const docsNav = [
   {
@@ -24,7 +25,7 @@ const docsNav = [
   },
   {
     label: "Remote MCP",
-    href: "/sign-in",
+    href: "#remote-mcp",
     note: "Workspace connection options",
   },
   {
@@ -139,13 +140,13 @@ export default function DocsPage() {
                 <div>
                   <h3 className={SUB}>Headless server or SSH</h3>
                   <p className={`${BODY} mt-3`}>
-                    On a machine with a browser: <code className={CODE}>npx @nordsym/apiclaw auth login</code> writes <code className={CODE}>~/.apiclaw.toml</code> with your <code className={CODE}>api_key</code>. On a machine with no browser at all, skip the CLI entirely: create a key in Workspace, Settings and set <code className={CODE}>APICLAW_API_KEY</code> in the environment instead.
+                    Run <code className={CODE}>npx @nordsym/apiclaw auth login</code> on the server, then open the printed sign-in URL on your own device. Finish sign-in and return to the same terminal. Your session stays in <code className={CODE}>~/.apiclaw.toml</code>; never paste it into chat.
                   </p>
                 </div>
                 <div className="border-t border-border-subtle pt-6">
                   <h3 className={SUB}>For MCP clients: agent_auth_required action</h3>
                   <p className={`${BODY} mt-3`}>
-                    When the APIClaw MCP server has no local session, every tool returns a JSON payload with <code className={CODE}>action: &quot;agent_auth_required&quot;</code> and the exact CLI command to run. Agents that recognize this contract can resolve auth without human intervention.
+                    When the APIClaw MCP server has no local session, every tool returns a JSON payload with <code className={CODE}>action: &quot;agent_auth_required&quot;</code> and the exact CLI command to run. Show the sign-in URL to the human, wait for authorization, then run auth whoami before calling an API.
                   </p>
                 </div>
               </div>
@@ -157,7 +158,7 @@ export default function DocsPage() {
             <section id="cli" className="scroll-mt-20">
               <h2 className="claw-h2">CLI</h2>
               <p className={`${BODY} mt-4`}>
-                Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category. Run <code className={CODE}>apiclaw auth login</code> first (see Auth above), then use the direct commands below.
+                Terminal-native use for Codex, scripts, and CI/CD. Codex is one example, not the whole category. Run <code className={CODE}>npx @nordsym/apiclaw auth login</code> first (see Auth above), then use the direct commands below.
               </p>
               <p className={`${META} mt-3`}>
                 Buzz and other ACP (Agent Client Protocol) clients spawn <code className="claw-mono">npx @nordsym/apiclaw acp</code> over stdio instead.
@@ -166,10 +167,7 @@ export default function DocsPage() {
               <div className="mt-8 space-y-8">
                 <div>
                   <h3 className={SUB}>Direct tool parity</h3>
-                  <pre className={`${PRE} mt-3`}>{`apiclaw discover "currency conversion"
-apiclaw details apilayer/fixer-latest
-apiclaw call apilayer/fixer-latest --params '{"base":"USD","symbols":"EUR"}'
-apiclaw balance`}</pre>
+                  <pre className={`${PRE} mt-3`}>{DOCS_EXECUTE_EXAMPLES.map(docsCliExample).join("\n")}</pre>
                 </div>
                 <div>
                   <h3 className={SUB}>Install APIClaw into Codex / Cursor / Windsurf</h3>
@@ -193,43 +191,27 @@ apiclaw balance`}</pre>
             <section id="gateway" className="scroll-mt-20">
               <h2 className="claw-h2">HTTP</h2>
               <p className={`${BODY} mt-4`}>
-                Server-side agents and custom runtimes. Use it from OpenClaw or any backend that sends requests with a workspace API key.
+                Sign in once with <code className={CODE}>npx @nordsym/apiclaw auth login</code>.
+                Every execution uses <code className={CODE}>POST {DOCS_EXECUTE_URL}</code>,
+                the <code className={CODE}>X-APIClaw-Session</code> header, and a JSON body with
+                <code className={CODE}> provider</code>, <code className={CODE}>action</code>, and <code className={CODE}>params</code>.
               </p>
-
-              <dl className="mt-8 border-t border-border-subtle">
-                <div className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
-                  <dt className={META}>Endpoint</dt>
-                  <dd className={`${CODE} break-all`}>https://api.apiclaw.cloud/v1</dd>
-                </div>
-                <div className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
-                  <dt className={META}>Default model</dt>
-                  <dd className={`${CODE} break-all`}>apiclaw/openai/gpt-5.4-20260305</dd>
-                </div>
-                <div className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
-                  <dt className={META}>API key</dt>
-                  <dd>
-                    <span className={CODE}>sk-claw-...</span>
-                    <p className={`${META} mt-1.5`}>On a machine with a browser: run <code className="claw-mono">apiclaw auth login</code> and the key is written to ~/.apiclaw.toml. On a headless machine: create a key in Workspace, Settings and set <code className="claw-mono">APICLAW_API_KEY</code> in the environment.</p>
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="mt-8 space-y-8">
+              <div className="mt-8 space-y-6">
                 <div>
-                  <h3 className={SUB}>Environment config</h3>
-                  <pre className={`${PRE} mt-3`}>{`OPENAI_BASE_URL=https://api.apiclaw.cloud/v1
-OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
+                  <h3 className={SUB}>Read your session locally</h3>
+                  <p className={`${META} mt-3`}>After login, run this in your own terminal. Keep the session private.</p>
+                  <pre className={`${PRE} mt-3`}>{DOCS_SESSION_SETUP}</pre>
                 </div>
                 <div>
-                  <h3 className={SUB}>Override route or model per request</h3>
-                  <div className="mt-3">
-                    <CopyLine text="X-APIClaw-Route: fastest   # or: best_price, highest_quality, balanced" prompt="›" />
-                  </div>
-                  <p className={`${META} mt-3`}>
-                    Response includes <code className="claw-mono">_apiclaw</code> metadata: provider used, route reason, model resolved.
-                  </p>
+                  <h3 className={SUB}>Make your first free call</h3>
+                  <pre className={`${PRE} mt-3`}>{docsHttpExample(DOCS_EXECUTE_EXAMPLES[0])}</pre>
+                  <p className={`${META} mt-3`}>An HTTP 200 with an APOD title means it worked. No card needed. If NASA is temporarily unavailable, use the Frankfurter example below.</p>
                 </div>
               </div>
+              <p className={`${META} mt-6`}>
+                Legacy <code className={CODE}>sk-claw-...</code> workspace keys are for existing integrations.
+                New integrations use the session flow above.
+              </p>
             </section>
 
             <div className="claw-rule my-16 sm:my-20" />
@@ -270,7 +252,7 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
                 You do not need your own keys. APIClaw&apos;s point is one sign-in, no key collecting. If your workspace already has its own OpenRouter key, you can add it in Workspace, Settings, Your keys, and route calls through it for free: no card, no markup, OpenRouter bills your workspace directly instead of going through the built-in rail. Today this covers an OpenRouter key for <code className={CODE}>POST /v1/chat/completions</code>, not every provider.
               </p>
               <p className={`${BODY} mt-4`}>
-                An APIClaw key (<code className={CODE}>sk-claw-...</code>) authenticates a client into the gateway. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.
+                Your APIClaw session authenticates your client. A provider key is different: it is the workspace&apos;s own credential for an upstream provider, kept encrypted server-side and never returned decrypted.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/workspace?tab=connections" className="claw-btn claw-btn-solid">Add your key</Link>
@@ -283,31 +265,13 @@ OPENAI_API_KEY=sk-claw-<your-workspace-key>`}</pre>
             <section>
               <h2 className="claw-h2">Examples</h2>
               <div className="mt-8 space-y-8">
-                <div>
-                  <h3 className={SUB}>NASA Astronomy Picture of the Day</h3>
-                  <pre className={`${PRE} mt-3`}>{`// First call: POST /v1/execute
-call_api({
-  provider: "nasa",
-  action: "apod",
-  params: {}
-})`}</pre>
-                </div>
-                <div>
-                  <h3 className={SUB}>Search the web</h3>
-                  <pre className={`${PRE} mt-3`}>{`call_api({
-  provider: "brave_search",
-  endpoint: "search",
-  params: { query: "best MCP servers 2026" }
-})`}</pre>
-                </div>
-                <div>
-                  <h3 className={SUB}>Latest EUR exchange rates</h3>
-                  <pre className={`${PRE} mt-3`}>{`call_api({
-  provider: "apilayer",
-  action: "fixer_latest",
-  params: { base: "EUR" }
-})`}</pre>
-                </div>
+                {DOCS_EXECUTE_EXAMPLES.map((example) => (
+                  <div key={example.provider}>
+                    <h3 className={SUB}>{example.title}</h3>
+                    <pre className={`${PRE} mt-3`}>{docsHttpExample(example)}</pre>
+                    <p className={`${META} mt-2`}>Use the same nonempty $SESSION from the HTTP setup above.</p>
+                  </div>
+                ))}
               </div>
             </section>
 
@@ -327,7 +291,7 @@ call_api({
                 {/* discover_apis */}
                 <div>
                   <h3 className={`${SUB} claw-mono`}>discover_apis</h3>
-                  <p className={`${BODY} mt-2`}>Search 26,619 discoverable APIs using natural language.</p>
+                  <p className={`${BODY} mt-2`}>Search {statsData.apiCount.toLocaleString("en-US")} indexed API definitions and approved community listings using natural language.</p>
                   <pre className={`${PRE} mt-3`}>{`discover_apis({
   query: "send alerts to Sweden",
   max_results: 5
@@ -360,12 +324,11 @@ call_api({
                   <div className={`${META} mt-4`}>
                     <p className="font-medium text-text-primary">Currently available</p>
                     <ul className="mt-2 space-y-1.5">
-                      <li><code className="claw-mono text-text-secondary">openrouter</code>: 800+ LLMs</li>
-                      <li><code className="claw-mono text-text-secondary">brave_search</code>: Web search</li>
-                      <li><code className="claw-mono text-text-secondary">stability</code>: Image generation</li>
-                      <li><code className="claw-mono text-text-secondary">nasa</code>: Astronomy Picture of the Day</li>
-                      <li><code className="claw-mono text-text-secondary">apilayer</code>: Fixer latest (EUR base) and other contracted HTTPS rails</li>
+                      <li><code className="claw-mono text-text-secondary">nasa</code>: Astronomy Picture of the Day, free</li>
+                      <li><code className="claw-mono text-text-secondary">github</code>: Public GitHub data, free</li>
+                      <li><code className="claw-mono text-text-secondary">openrouter</code>: Approved managed models</li>
                     </ul>
+                    <p className="mt-3">Verified open APIs such as Frankfurter use the same execute endpoint. Discovery entries are not execution promises.</p>
                   </div>
                 </div>
 
@@ -373,11 +336,7 @@ call_api({
                 <div>
                   <h3 className={`${SUB} claw-mono`}>call_api</h3>
                   <p className={`${BODY} mt-2`}>Execute an API call through a built-in provider.</p>
-                  <pre className={`${PRE} mt-3`}>{`call_api({
-  provider: "brave_search",
-  endpoint: "search",
-  params: { query: "AI agents 2026" }
-})`}</pre>
+                  <pre className={`${PRE} mt-3`}>{`call_api(${JSON.stringify(docsExecuteBody(DOCS_EXECUTE_EXAMPLES[0]), null, 2)})`}</pre>
                 </div>
 
                 {/* list_categories */}
@@ -397,11 +356,11 @@ call_api({
               <p className={`${BODY} mt-4`}>Source verification is not execution: a source-verified entry passed a reachability check, not a customer call.</p>
               <ul className="mt-5 border-t border-border-subtle">
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
-                  <span className={META}>{statsData.apiCount.toLocaleString("en-US")} API definitions</span>
+                  <span className={META}>{statsData.apiCount.toLocaleString("en-US")} indexed API definitions</span>
                   <span className={BODY}>Discoverable by agents via the catalog.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
-                  <span className={META}>{(statsData.customerExecutableCatalogCardCount ?? 1005).toLocaleString("en-US")} callable now</span>
+                  <span className={META}>{statsData.customerExecutableCatalogCardCount.toLocaleString("en-US")} callable now</span>
                   <span className={BODY}>What a workspace can execute today, including {statsData.customerExecutableProviderCount} managed providers. Keyless public origins are Free; managed providers use the bounded trial and then PAYG where resale is supported.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
@@ -435,7 +394,7 @@ call_api({
             <section id="list-your-api" className="scroll-mt-20">
               <h2 className="claw-h2">List your API on APIClaw</h2>
               <p className={`${BODY} mt-4`}>
-                APIClaw indexes {statsData.apiCount.toLocaleString("en-US")} APIs and {statsData.sourceVerifiedCount.toLocaleString("en-US")} have source-verified definitions. Callable readiness is shown separately. Adding yours takes one OpenAPI spec and a free email signup.
+                APIClaw indexes {statsData.apiCount.toLocaleString("en-US")} API definitions, plus approved community listings, and {statsData.sourceVerifiedCount.toLocaleString("en-US")} have source-verified definitions. Callable readiness is shown separately. Adding yours takes one OpenAPI spec and a free email signup.
               </p>
 
               <ol className="mt-8 border-t border-border-subtle">

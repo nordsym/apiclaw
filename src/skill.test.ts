@@ -6,6 +6,7 @@
  * already exist; SKILL.md is the operational door, not a second canon.
  */
 import assert from "node:assert/strict";
+import { CANON_STATS } from "./canon-stats.js";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -119,8 +120,8 @@ assert.match(skill, /https:\/\/apiclaw\.cloud\/upgrade/, "SKILL.md must surface 
 assert.match(skill, /retry the same call/, "SKILL.md must tell agents to retry after adding a card");
 assert.doesNotMatch(skill, /brave_search/, "SKILL.md must not send first execute to billed Brave");
 assert.match(skill, /api\.apiclaw\.cloud\/v1\/execute/, "first execute is the public gateway");
-assert.match(skill, /1,?005/, "callable count is the live catalog card count");
-assert.match(skill, /26,?619/, "discoverable count is canon");
+assert.ok(skill.includes(CANON_STATS.customer_executable_catalog_cards.toLocaleString("en-US") + " callable"), "callable count is the live catalog card count");
+assert.ok(skill.includes(CANON_STATS.discoverable.toLocaleString("en-US") + " discoverable"), "discoverable count is canon");
 assert.match(skill, /22 built-in providers/, "built-in provider inventory is canon");
 assert.match(skill, /Do not invent metrics/);
 assert.match(skill, /Never ask the user to paste|Do not ask the user to paste a token/i);

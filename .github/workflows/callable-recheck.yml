@@ -1,0 +1,40 @@
+name: Recheck free callable APIs
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: callable-recheck
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: node scripts/audit-callable.mjs
+      - run: node scripts/refresh-callable.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: callable-audit
+          path: docs/ops/callable-audit.*
+      - name: Propose measured registry update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'APIClaw callable audit'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -B codex/callable-recheck
+          git add docs/ops/callable-audit.* src/workspace-public-apis.json src/workspace-public-apis.data.ts src/canon-stats.ts landing/src/lib/workspace-public-apis.json landing/src/lib/canon-stats.generated.ts landing/src/lib/stats.json landing/public/stats.json README.md landing/README.md landing/public/SKILL.md landing/public/llms.txt landing/public/llms-full.txt landing/public/agents.md package.json
+          git commit -m 'Refresh verified free callable APIs'
+          git push --force-with-lease origin codex/callable-recheck
+          if ! gh pr view codex/callable-recheck >/dev/null 2>&1; then
+            gh pr create --base main --head codex/callable-recheck --title 'Refresh verified free callable APIs' --body 'Weekly keyless GET probes refreshed the measured callable registry, counts and public documentation. Review the audit table and CI before merging. This does not deploy or enable billing.'
+          fi

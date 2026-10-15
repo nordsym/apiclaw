@@ -106,6 +106,7 @@ import type * as usageReports from "../usageReports.js";
 import type * as waitlist from "../waitlist.js";
 import type * as webhooks from "../webhooks.js";
 import type * as websiteServicePolicy from "../websiteServicePolicy.js";
+import type * as workspacePublicExecute from "../workspacePublicExecute.js";
 import type * as workspaceSettings from "../workspaceSettings.js";
 import type * as workspaces from "../workspaces.js";
 
@@ -214,6 +215,7 @@ declare const fullApi: ApiFromModules<{
   waitlist: typeof waitlist;
   webhooks: typeof webhooks;
   websiteServicePolicy: typeof websiteServicePolicy;
+  workspacePublicExecute: typeof workspacePublicExecute;
   workspaceSettings: typeof workspaceSettings;
   workspaces: typeof workspaces;
 }>;

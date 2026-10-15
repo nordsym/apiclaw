@@ -19,6 +19,7 @@ export type WorkspacePublicApi = {
   name: string;
   baseUrl: string;
   origin: string;
+  smokePath?: string;
 };
 
 export const WORKSPACE_PUBLIC_APIS = JSON.parse(
@@ -108,7 +109,7 @@ export function isSafePublicApiBaseUrl(value: unknown): URL | undefined {
   } catch {
     return undefined;
   }
-  if (url.protocol !== "https:") return undefined;
+  if (url.protocol !== "https:" || url.username || url.password) return undefined;
   const host = url.hostname.toLowerCase();
   if (
     host === "localhost" ||
@@ -164,11 +165,12 @@ export function getWorkspacePublicApi(
   reference: string | undefined,
 ): WorkspacePublicApi | undefined {
   if (!reference) return undefined;
-  const exact = byExactName.get(reference.trim().toLowerCase());
+  const candidate = reference.trim().replace(/^open:/i, "");
+  const exact = byExactName.get(candidate.toLowerCase());
   if (exact) return exact;
   // Id tokens only. Do not collapse "Disney+" onto "Disney".
-  if (!/^[a-z0-9_-]+$/i.test(reference.trim())) return undefined;
-  return byNormalizedId.get(normalizePublicApiReference(reference));
+  if (!/^[a-z0-9_-]+$/i.test(candidate)) return undefined;
+  return byNormalizedId.get(normalizePublicApiReference(candidate));
 }
 
 export function isWorkspacePublicExecutableApi(reference: string | undefined): boolean {

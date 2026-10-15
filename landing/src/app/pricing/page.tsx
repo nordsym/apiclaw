@@ -58,7 +58,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <a href="/workspace" className="claw-btn claw-btn-quiet mt-10 self-start">Start free</a>
+              <a href="/sign-up" className="claw-btn claw-btn-quiet mt-10 self-start">Start free</a>
             </article>
 
             <article className="flex flex-col bg-surface p-7 sm:p-10">

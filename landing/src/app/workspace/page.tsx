@@ -18,6 +18,7 @@ import {
 } from "@/components/CheckoutButton";
 import { Toast, useToast } from "@/components/Toast";
 import { WorkspaceCatalog } from "@/components/WorkspaceCatalog";
+import { FirstWebCall } from "@/components/FirstWebCall";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import {
   getWorkspaceNavigation,
@@ -393,6 +394,7 @@ export default function WorkspacePage() {
             />
           )}
           
+          {activeTab === "agents" && sessionToken && <FirstWebCall sessionToken={sessionToken} />}
           {activeTab === "agents" && (
             <AgentsTab
               workspace={workspace}

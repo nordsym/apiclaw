@@ -97,7 +97,7 @@ assert.equal(
 );
 
 const executeSource = readFileSync("convex/http.ts", "utf8");
-assert.match(executeSource, /workspace_public_/);
+assert.match(readFileSync("convex/workspacePublicExecute.ts", "utf8"), /workspace_public_/);
 assert.match(executeSource, /redirect:\s*"error"/);
 assert.match(executeSource, /public_api_requires_workspace_auth/);
 assert.doesNotMatch(
@@ -118,3 +118,24 @@ assert.doesNotMatch(
 console.log(
   `workspace-public APIs: ${WORKSPACE_PUBLIC_EXECUTABLE_COUNT} origins, anonymous keyless proxy stays off`,
 );
+
+// Every advertised public card must have measured, free, successful evidence.
+const audit = JSON.parse(readFileSync("docs/ops/callable-audit.json", "utf8"));
+const publicRows = JSON.parse(readFileSync("src/workspace-public-apis.json", "utf8"));
+assert.equal(audit.candidateCount, audit.results.length);
+assert.equal(audit.verifiedCount, publicRows.length);
+for (const api of publicRows) {
+  const evidence = audit.results.find((row: { id: string }) => row.id === api.id);
+  assert.ok(evidence?.verified, `${api.id} needs measured evidence`);
+  assert.equal(evidence.status, 200);
+  assert.equal(evidence.outcome, "ok_json");
+  assert.equal(evidence.pricing, "free");
+  assert.equal(buildPinnedPublicApiUrl(api, api.smokePath)?.origin, api.origin);
+}
+for (const excluded of ["0x", "1inch", "1forgecom", "frankfurterapi"]) {
+  assert.equal(publicRows.some((row: { id: string }) => row.id === excluded), false);
+}
+assert.equal(publicRows.filter((row: { name: string }) => /frankfurter/i.test(row.name)).length, 1);
+const catalogPage = readFileSync("landing/src/app/catalog/page.tsx", "utf8");
+assert.doesNotMatch(catalogPage, /totalCallable\s*\|\|\s*PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT/);
+assert.match(catalogPage, /useState\(statsData.customerExecutableCatalogCardCount\)/);

@@ -35,6 +35,7 @@ interface CategoryInfo {
 }
 
 interface CatalogResponse {
+  totalDiscoverable: number;
   items: ApiEntry[];
   total: number;
   page: number;
@@ -61,7 +62,8 @@ export default function CatalogPage() {
   const [apis, setApis] = useState<ApiEntry[]>([]);
   const [categories, setCategories] = useState<Record<string, CategoryInfo>>({});
   const [total, setTotal] = useState(0);
-  const [totalCallable, setTotalCallable] = useState(0);
+  const [indexedCount, setIndexedCount] = useState(statsData.apiCount);
+  const [totalCallable, setTotalCallable] = useState(statsData.customerExecutableCatalogCardCount);
   const [managedProviderAdapterCount, setManagedProviderAdapterCount] = useState(
     statsData.managedProviderAdapterCount,
   );
@@ -106,6 +108,7 @@ export default function CatalogPage() {
 
         setApis((prev) => (append ? [...prev, ...data.items] : data.items));
         setTotal(data.total);
+        setIndexedCount(data.totalDiscoverable);
         setTotalCallable(data.totalCustomerExecutable ?? data.totalCallable);
         setManagedProviderAdapterCount(
           data.managedProviderAdapterCount ?? statsData.managedProviderAdapterCount,
@@ -167,9 +170,8 @@ export default function CatalogPage() {
     ([, a], [, b]) => b.total - a.total
   );
 
-  const indexedCount = statsData.apiCount;
   const sourceVerifiedHeadline = statsData.sourceVerifiedCount;
-  const customerExecutionHeadline = totalCallable || PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT;
+  const customerExecutionHeadline = totalCallable;
   const discoveryOnlyHeadline = discoveryOnlyCount;
 
   const tierOptions = [

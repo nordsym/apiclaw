@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { CopyLine } from "@/components/home/CopyLine";
+import { DOCS_EXECUTE_EXAMPLES, DOCS_SESSION_SETUP, docsHttpExample } from "@/lib/docs-examples";
 
 type OS = "mac" | "win" | "linux" | "unknown";
 
@@ -105,7 +106,7 @@ export default function InstallPage() {
           <h1 className="claw-display text-[2.2rem] sm:text-[2.75rem]">Install APIClaw.</h1>
           <p className="claw-lede mt-5">
             One layer for every AI agent. Pick the path that fits your machine, or skip
-            install entirely with a workspace key.
+            install and use the HTTP API after signing in.
           </p>
         </div>
       </section>
@@ -150,7 +151,7 @@ export default function InstallPage() {
             <Step n="02" title="Sign in">
               <CopyLine text="npx @nordsym/apiclaw auth login" />
               <p className="text-[13px] text-text-muted">
-                Required before any managed call. Opens a browser, writes{" "}
+                Required before any API call. Opens a browser, writes{" "}
                 <code className="claw-mono">~/.apiclaw.toml</code>. Headless? Open the printed URL
                 on another device.
               </p>
@@ -195,25 +196,19 @@ export default function InstallPage() {
         <div className="grid gap-8 py-16 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
           <div>
             <p className="claw-eyebrow mb-4">Building an agent?</p>
-            <h2 className="claw-h2">Skip install. Use a workspace key.</h2>
+            <h2 className="claw-h2">Call from any language.</h2>
             <p className="mt-4 text-[15px] leading-[1.65] text-text-secondary">
-              Sign up at <code className="claw-mono text-[13px] text-text-primary">/workspace</code>, get an{" "}
-              <code className="claw-mono text-[13px] text-text-primary">sk-claw-...</code> key, and call{" "}
-              <code className="claw-mono text-[13px] text-text-primary">/v1/execute</code> from any language. Your agent
-              handles the user. APIClaw handles the APIs.
+              Run <code className="claw-mono text-[13px] text-text-primary">npx @nordsym/apiclaw auth login</code>,
+              then use your saved session with <code className="claw-mono text-[13px] text-text-primary">X-APIClaw-Session</code>.
+              Every call sends <code className="claw-mono text-[13px] text-text-primary">provider</code> and
+              <code className="claw-mono text-[13px] text-text-primary"> action</code> to the same execute endpoint. No key copy-paste.
             </p>
           </div>
           <div className="min-w-0">
-            <CopyBlock
-              cmd={`curl https://api.apiclaw.cloud/v1/execute \\
-  -H "Authorization: Bearer sk-claw-..." \\
-  -H "Idempotency-Key: first-managed-call" \\
-  -H "Content-Type: application/json" \\
-  -d '{"provider":"nasa","action":"apod","params":{}}'`}
-            />
+            <CopyBlock cmd={`${DOCS_SESSION_SETUP}\n${docsHttpExample(DOCS_EXECUTE_EXAMPLES[0])}`} />
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/workspace" className="claw-btn claw-btn-solid">
-                Get a workspace key
+              <Link href="/sign-up" className="claw-btn claw-btn-solid">
+                Sign up free
               </Link>
               <Link href="/docs" className="claw-btn claw-btn-quiet">
                 API reference

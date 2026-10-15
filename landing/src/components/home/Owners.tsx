@@ -5,9 +5,9 @@ export function Owners() {
         <div className="claw-rule" />
         <div className="flex flex-col gap-4 py-14 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[15px] text-text-secondary">
-            <span className="font-semibold text-text-primary">Own an API?</span> List it free and agents can find it by capability.
+            <span className="font-semibold text-text-primary">Own an API?</span> List it free and agents can find it by capability. Sign in to save your listing and manage its review.
           </p>
-          <a href="/sign-in" className="claw-btn claw-btn-quiet">List your API</a>
+          <a href="/sign-in?redirect_url=%2Fworkspace%3Ftab%3Dapi-catalog%26view%3Dmy-apis" className="claw-btn claw-btn-quiet">List your API</a>
         </div>
       </div>
     </section>

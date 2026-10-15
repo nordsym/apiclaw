@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Rate limit config per tier
@@ -100,5 +100,28 @@ export const cleanup = mutation({
     }
 
     return { deleted: old.length };
+  },
+});
+
+
+// Separate from managed usage: free public calls never consume the paid trial
+// or create billing-ledger rows. A workspace gets sixty reads per minute.
+export const checkWorkspacePublic = internalMutation({
+  args: { workspaceId: v.id("workspaces") },
+  returns: v.object({ allowed: v.boolean(), retryAfterSeconds: v.number() }),
+  handler: async (ctx, { workspaceId }) => {
+    const now = Date.now();
+    const minute = Math.floor(now / 60_000);
+    const key = `workspace_public:${workspaceId}:${minute}`;
+    const existing = await ctx.db.query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", key)).first();
+    const retryAfterSeconds = Math.ceil((60_000 - now % 60_000) / 1000);
+    if (existing && existing.count >= 60) return { allowed: false, retryAfterSeconds };
+    if (existing) await ctx.db.patch(existing._id, { count: existing.count + 1 });
+    else await ctx.db.insert("rateLimits", {
+      key, identifier: workspaceId, action: "workspace_public", count: 1,
+      hourBucket: Math.floor(now / 3_600_000), createdAt: now,
+    });
+    return { allowed: true, retryAfterSeconds: 0 };
   },
 });
