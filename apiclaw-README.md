@@ -21,7 +21,7 @@ Your agent calls real APIs. You sign in once. APIClaw is the authenticated execu
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not APIClaw execution.
 - 22 built-in providers are inventoried. Provider inventory is not an execution promise.
 - 19 of the 22 built-in providers are customer-executable now. Provider actions without current evidence stay inventory-only.
-- 1,002 workspace-authenticated public/no-key HTTPS origins are executable. Anonymous keyless public execution stays disabled.
+- 13 workspace-authenticated public/no-key HTTPS origins are executable. Anonymous keyless public execution stays disabled.
 - Signup is required. There is no anonymous execution.
 - Internal NordSym communication infrastructure is not part of the public provider surface.
 
@@ -74,7 +74,7 @@ Use `discover_apis` to search by job-to-be-done. Results distinguish among:
 
 Use `call_api` only with a managed route returned as executable. Unknown-cost customer traffic fails closed. Public registry entries never become an open proxy.
 
-The built-in provider inventory spans model, search, voice, media, developer, and data providers. Of 22 inventoried providers, 19 are customer-executable now. 1,002 workspace-authenticated public/no-key HTTPS origins are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
+The built-in provider inventory spans model, search, voice, media, developer, and data providers. Of 22 inventoried providers, 3 are customer-executable now. 13 workspace-authenticated public/no-key HTTPS origins are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
 
 ## Model routing
 

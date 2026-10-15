@@ -73,7 +73,7 @@ const schemaOrg = {
       "operatingSystem": "Web",
       "softwareVersion": "2.9.5",
       "dateModified": "2026-08-23",
-      "description": "APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,619 API definitions discoverable, 1,005 callable now.",
+      "description": `${SITE_DESCRIPTION} ${statsData.apiCount.toLocaleString("en-US")} indexed API definitions, ${statsData.customerExecutableCatalogCardCount.toLocaleString("en-US")} callable now.`,
       "offers": {
         "@type": "Offer",
         "price": "0",
