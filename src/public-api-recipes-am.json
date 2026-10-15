@@ -332,6 +332,7 @@
   },
   {
     "id": "fda",
+    "canonicalId": "fda",
     "baseUrl": "https://api.fda.gov",
     "smokePath": "/food/enforcement.json?limit=1",
     "docsUrl": "https://open.fda.gov/apis/authentication/",

@@ -40,7 +40,7 @@ APIClaw provides unified API access for AI agents across five access paths: SKIL
 - Exact-name source-verified catalog entries: 689
 - Built-in provider inventory: 22
 - Customer-executable providers: 19
-- Workspace-authenticated public/no-key origins: 199
+- Workspace-authenticated public/no-key origins: 198
 - npm package: @nordsym/apiclaw
 - Free APIs: free forever, no card. Discovery and every zero-cost API, plus up to 25 managed calls capped at $1 provider cost after login.
 - Paid APIs: add a card once, then provider cost plus 15% margin, metered per call.
@@ -166,7 +166,7 @@ Responses include `_apiclaw` metadata where applicable: provider, route, latency
 ## Managed provider boundary
 
 - APIClaw inventories 22 built-in providers. Inventory means server-side provider support, not customer execution.
-- 3 of the 22 built-in providers are customer-executable now, plus 199 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- 3 of the 22 built-in providers are customer-executable now, plus 198 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - Harvested apiKey/unknown registry rows stay discovery-only.
 
 Some providers are internal-only NordSym infrastructure and are not exposed in the public catalog.

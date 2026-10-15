@@ -5,12 +5,12 @@
   "mode": "full-sweep",
   "lastFullSweepAt": "2026-10-15T17:29:32.497Z",
   "candidateCount": 1641,
-  "verifiedCount": 199,
+  "verifiedCount": 198,
   "causes": {
     "wrong_base_url_path": 779,
-    "ok": 199,
+    "ok": 198,
     "redirect_https": 184,
-    "duplicate": 171,
+    "duplicate": 172,
     "dead_upstream": 94,
     "unresolved": 75,
     "not_hosted_api": 40,
@@ -25,8 +25,8 @@
   "outcomes": {
     "html_instead_of_api": 403,
     "documentation_url": 260,
-    "ok_json": 197,
-    "duplicate": 171,
+    "ok_json": 196,
+    "duplicate": 172,
     "http_error": 161,
     "redirect_not_approved": 153,
     "network_error": 76,
@@ -630,13 +630,6 @@
       ]
     },
     {
-      "id": "openfdadrug",
-      "causes": [
-        "wrong_base_url_path",
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "openholidays",
       "causes": [
         "wrong_base_url_path",
@@ -1133,23 +1126,23 @@
     }
   ],
   "managedApprovedCount": 3,
-  "customerExecutableCatalogCount": 202,
-  "additionalVerifiedApisNeededFor1000": 798,
+  "customerExecutableCatalogCount": 201,
+  "additionalVerifiedApisNeededFor1000": 799,
   "signupsNeededFor1000": null,
   "originalCohortSummary": {
     "cohortRows": 1002,
     "matchedRows": 1002,
-    "currentlyVerifiedCanonicalRows": 155,
-    "currentDuplicateRows": 110,
+    "currentlyVerifiedCanonicalRows": 154,
+    "currentDuplicateRows": 111,
     "currentDiscoveryRows": 737,
     "missingRows": [],
     "originallyVerifiedRows": 13,
     "originallyFailingRows": 989,
     "currentCauses": {
       "wrong_base_url_path": 411,
-      "ok": 155,
+      "ok": 154,
       "redirect_https": 127,
-      "duplicate": 110,
+      "duplicate": 111,
       "dead_upstream": 60,
       "unresolved": 54,
       "not_hosted_api": 30,
@@ -1163,9 +1156,9 @@
     },
     "formerlyFailingCurrentCauses": {
       "wrong_base_url_path": 411,
-      "ok": 142,
+      "ok": 141,
       "redirect_https": 127,
-      "duplicate": 110,
+      "duplicate": 111,
       "dead_upstream": 60,
       "unresolved": 54,
       "not_hosted_api": 30,
@@ -1177,7 +1170,7 @@
       "commercial_permission": 2,
       "missing_default_params": 0
     },
-    "formerlyFailingNowVerifiedCanonicalRows": 142,
+    "formerlyFailingNowVerifiedCanonicalRows": 141,
     "note": "Cohort matching uses historical ID and exact normalized name, not normalized ID alone. Counts are candidate rows including aliases; expanded candidates are separate. Missing rows are unresolved, not presumed dead or key-required. Current causes do not rewrite original outcomes."
   },
   "baseline": {
@@ -27170,10 +27163,10 @@
       "origin": "https://api.fda.gov",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "fda-e876707f",
+      "canonicalId": "fda",
       "sourceUrl": "https://open.fda.gov/apis",
       "smokePath": "/food/enforcement.json?limit=1",
-      "canonicalExplicit": false,
+      "canonicalExplicit": true,
       "docsUrl": "https://open.fda.gov/apis/authentication/",
       "pricing": "free",
       "pricingSource": "https://open.fda.gov/apis/authentication/",
@@ -45640,7 +45633,7 @@
       "origin": "https://api.fda.gov",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "fda-1e910dd4",
+      "canonicalId": "fda",
       "sourceUrl": "https://open.fda.gov/apis/drug",
       "smokePath": "/drug/label.json?limit=1",
       "canonicalExplicit": true,
@@ -45676,7 +45669,7 @@
       "definitionHash": "b911cb3113455831220271163036aa2dfce94c511a1bf7ed1be55cb5b3e1d72c",
       "checkedAt": "2026-10-15T17:27:56.789Z",
       "status": 200,
-      "verified": true,
+      "verified": false,
       "trace": [
         {
           "url": "https://api.fda.gov/drug/label.json?limit=1",
@@ -45689,10 +45682,16 @@
       "finalProbeUrl": "https://api.fda.gov/drug/label.json?limit=1",
       "responseBytes": 3933,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
+      "outcome": "duplicate",
+      "cause": "duplicate",
       "latencyMs": 2793,
-      "canonicalBaseId": "fda"
+      "canonicalBaseId": "fda",
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "canonicalVerified": true,
+      "duplicateOf": "fda",
+      "canonicalProbeUrl": "https://api.fda.gov/food/enforcement.json?limit=1",
+      "detail": "Reviewed openFDA identity: food and drug datasets share one API; the previously successful drug probe remains recorded but does not add a callable API."
     },
     {
       "id": "openfdadruglabels",
@@ -45701,7 +45700,7 @@
       "origin": "https://api.fda.gov",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "fda-1e910dd4",
+      "canonicalId": "fda",
       "sourceUrl": "https://open.fda.gov/apis/drug/label",
       "smokePath": "/drug/label.json?limit=1",
       "canonicalExplicit": true,
@@ -45740,10 +45739,10 @@
       "verified": false,
       "outcome": "duplicate",
       "cause": "duplicate",
-      "duplicateOf": "openfdadrug",
+      "duplicateOf": "fda",
       "canonicalVerified": true,
-      "canonicalProbeUrl": "https://api.fda.gov/drug/label.json?limit=1",
-      "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
+      "canonicalProbeUrl": "https://api.fda.gov/food/enforcement.json?limit=1",
+      "detail": "Reviewed openFDA identity: food and drug datasets share one API; the previously successful drug probe remains recorded but does not add a callable API.",
       "trace": [],
       "canonicalBaseId": "fda"
     },

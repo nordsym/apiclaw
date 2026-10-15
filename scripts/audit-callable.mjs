@@ -5,6 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_BYTES = 256 * 1024;
@@ -423,10 +424,55 @@ export function makeReport(results, baseline, { checkedAt = new Date().toISOStri
       note: 'Baseline preserves the original 1,002-row outcomes. Their old network/403 errors lack sufficient evidence for retrospective key/CORS/root-cause claims. Current rows provide traces and specific causes.' }, results };
 }
 
+/** Apply complete authenticated customer proof without promoting upstream-only rows. */
+export function applyCustomerGatewayEvidence(report, proof) {
+  const before = proof?.before;
+  const after = proof?.after;
+  if (!before || !after || !isDeepStrictEqual(before, after)) throw new Error('Customer gateway proof requires identical before/after billing snapshots');
+  if (!Array.isArray(proof?.results) || !proof.results.length) throw new Error('Customer gateway proof results are missing');
+  if (!proof.verifiedAt || !Number.isFinite(Date.parse(proof.verifiedAt))) throw new Error('Customer gateway proof verification date is missing');
+  let preview;
+  try { const url = new URL(proof.preview); if (url.protocol !== 'https:') throw new Error(); preview = url.origin; } catch { throw new Error('Customer gateway proof requires an HTTPS preview origin'); }
+  const next = structuredClone(report);
+  const eligible = next.results.filter(row => row.verified);
+  const normalized = value => String(value ?? '').toLowerCase().trim();
+  const used = new Set();
+  const matched = eligible.map(row => {
+    let matches = proof.results.filter(item => item.id === row.canonicalId);
+    if (!matches.length) matches = proof.results.filter(item => item.id === row.id);
+    if (matches.length > 1) matches = matches.filter(item => normalized(item.name) === normalized(row.name));
+    if (!matches.length) matches = proof.results.filter(item => normalized(item.name) === normalized(row.name));
+    if (matches.length !== 1 || used.has(matches[0]) || typeof matches[0].success !== 'boolean') throw new Error('Customer gateway proof requires one unique result for every callable API');
+    used.add(matches[0]); return [row, matches[0]];
+  });
+  const disabled = new Set(proof.health?.disabledIds ?? []);
+  const failed = new Map();
+  for (const [row, result] of matched) {
+    const status = Number.isInteger(result.status) && result.status >= 0 && result.status <= 599 ? result.status : 0;
+    const healthDisabled = disabled.has(row.canonicalId) || disabled.has(row.id);
+    const success = result.success === true && status >= 200 && status < 300 && result.discovery !== true && !healthDisabled;
+    const gatewayVerification = { verifiedAt: proof.verifiedAt, preview, status, success, healthDisabled,
+      latencyMs: Number.isFinite(result.latencyMs) && result.latencyMs >= 0 ? Math.round(result.latencyMs) : null,
+      route: result.route === '/v1/execute' ? result.route : 'customer-gateway',
+      errorCode: typeof result.errorCode === 'string' && /^[A-Z0-9_.:-]{1,64}$/i.test(result.errorCode) ? result.errorCode : null };
+    row.upstreamVerified ??= row.verified; row.upstreamOutcome ??= row.outcome;
+    row.gatewayVerification = gatewayVerification;
+    if (!success) { row.verified = false; row.cause = status === 429 ? 'rate_limit' : 'unresolved'; row.outcome = 'customer_gateway_failed'; failed.set(row.canonicalId, gatewayVerification); }
+  }
+  for (const row of next.results) if (row.cause === 'duplicate' && failed.has(row.canonicalId)) {
+    row.canonicalVerified = false; row.gatewayVerification = { ...failed.get(row.canonicalId) }; row.outcome = 'canonical_customer_gateway_failed';
+  }
+  const updated = makeReport(next.results, next.baseline, { checkedAt: next.checkedAt, only: next.mode === 'partial-recheck' ? ['preserved-upstream-sweep'] : undefined, lastFullSweepAt: next.lastFullSweepAt, managedApprovedCount: next.managedApprovedCount });
+  return { ...next, ...updated, checkedAt: report.checkedAt, lastFullSweepAt: report.lastFullSweepAt, sweepComplete: report.sweepComplete, mode: report.mode,
+    customerGatewayVerification: { verifiedAt: proof.verifiedAt, preview, authentication: 'authenticated-customer-workspace', billingUnchanged: true, complete: true, testedCanonicalCount: eligible.length, passedCanonicalCount: eligible.length - failed.size, demotedCanonicalCount: failed.size,
+      note: 'Complete customer gateway batch supplied by the operator. Billing snapshots were compared in memory; workspace identifiers, credentials and raw snapshots are not persisted. This proof never promotes discovery rows.' } };
+}
+
 const cell = value => String(value ?? '-').replaceAll('|', '/').replace(/[\r\n]/g, ' ');
 export function renderMarkdown(report) {
   const lines = ['# Callable API audit', '', `Checked: ${report.checkedAt}. Mode: ${report.mode}. Complete sweep: ${report.sweepComplete ? 'yes' : 'no'}.`, '',
     `**${report.verifiedCount} canonical free APIs verified from ${report.candidateCount} candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only \`customerExecutableProviderCount\` is not the full \`totalCallable\`. Unknown pricing remains discovery even after HTTP 200.`, '',
+    ...(report.customerGatewayVerification ? [`Customer gateway verification: ${report.customerGatewayVerification.verifiedAt}, preview ${report.customerGatewayVerification.preview}. ${report.customerGatewayVerification.passedCanonicalCount}/${report.customerGatewayVerification.testedCanonicalCount} authenticated customer calls passed; ${report.customerGatewayVerification.demotedCanonicalCount} were demoted. Billing snapshots were identical. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.`, ''] : []),
     ...(report.customerExecutableCatalogCount === null ? [] : [`Catalog arithmetic: ${report.verifiedCount} measured free APIs + ${report.managedApprovedCount} existing approved managed providers = **${report.customerExecutableCatalogCount} catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires ${report.additionalVerifiedApisNeededFor1000} additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.`, '']),
     `Policy: ${report.policy}`, '', 'CORS is a browser rule and does not block server-to-server gateway execution. HTTP 401/403 alone does not establish a key requirement. Documentation/spec URLs are not hosted API endpoints. HTML, malformed/unsupported responses and oversized bodies do not qualify.', '',
     '## Baseline and current evidence', '', `Immutable baseline: commit ${report.baseline.commit}, ${report.baseline.checkedAt}; ${report.baseline.candidateCount} rows, ${report.baseline.verifiedCount} working free APIs (16 site cards after three managed providers). The old advertised ~1,005 figure described eligibility guesses, not successful calls.`, '',
@@ -449,7 +495,7 @@ export function renderMarkdown(report) {
   for (const row of report.results) {
     const probe = row.probeUrl || row.canonicalProbeUrl;
     const source = row.pricingSource ? `[${cell(row.pricing)}](${row.pricingSource})` : cell(row.pricing);
-    lines.push(`| ${cell(row.name)} / ${cell(row.canonicalId)} | ${probe ? `[GET](${probe})` : '-'} | ${row.status} | ${cell(row.cause)} / ${cell(row.outcome)} | ${source} | ${cell(row.latencyMs)} | ${row.verified ? 'callable' : row.cause === 'duplicate' ? `alias of ${cell(row.duplicateOf)}` : 'discovery'} |`);
+    lines.push(`| ${cell(row.name)} / ${cell(row.canonicalId)} | ${probe ? `[GET](${probe})` : '-'} | ${row.status} | ${cell(row.cause)} / ${cell(row.outcome)} | ${source} | ${cell(row.latencyMs)} | ${row.verified ? 'callable' : row.cause === 'duplicate' && row.canonicalVerified !== false ? `alias of ${cell(row.duplicateOf)}` : 'discovery'} |`);
   }
   return lines.join('\n') + '\n';
 }

@@ -2,9 +2,9 @@
 
 Checked: 2026-10-15T17:29:32.497Z. Mode: full-sweep. Complete sweep: yes.
 
-**199 canonical free APIs verified from 1641 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
+**198 canonical free APIs verified from 1641 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
 
-Catalog arithmetic: 199 measured free APIs + 3 existing approved managed providers = **202 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 798 additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
+Catalog arithmetic: 198 measured free APIs + 3 existing approved managed providers = **201 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 799 additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
 
 Policy: Keyless HTTPS GET only; shared 20-second gateway transport; one retry at most; reviewed redirects only; 256 KiB body; eight workers; at least one second between requests per origin. A callable API needs a valid reviewed response, explicit free evidence and one canonical identity.
 
@@ -28,14 +28,14 @@ Immutable baseline: commit 2ef36ab, 2026-10-15T14:57:51.605Z; 1002 rows, 13 work
 
 ## Original cohort: current evidence
 
-The original cohort has 1002 rows: 13 were verified and **989 originally failed**. 1002 match current evidence by ID and exact normalized name. 142 formerly failing rows now represent independently verified canonical APIs. Current status: 155 verified canonical rows, 110 duplicate rows, 737 discovery rows. These are row counts, not extra APIs per alias.
+The original cohort has 1002 rows: 13 were verified and **989 originally failed**. 1002 match current evidence by ID and exact normalized name. 141 formerly failing rows now represent independently verified canonical APIs. Current status: 154 verified canonical rows, 111 duplicate rows, 737 discovery rows. These are row counts, not extra APIs per alias.
 
 | Current cause | All original cohort rows | Originally failing rows only |
 | --- | ---: | ---: |
 | wrong_base_url_path | 411 | 411 |
-| ok | 155 | 142 |
+| ok | 154 | 141 |
 | redirect_https | 127 | 127 |
-| duplicate | 110 | 110 |
+| duplicate | 111 | 111 |
 | dead_upstream | 60 | 60 |
 | unresolved | 54 | 54 |
 | not_hosted_api | 30 | 30 |
@@ -56,9 +56,9 @@ The following table covers all 1641 expanded candidate/alias rows. It must not b
 | Current cause | Expanded rows |
 | --- | ---: |
 | wrong_base_url_path | 779 |
-| ok | 199 |
+| ok | 198 |
 | redirect_https | 184 |
-| duplicate | 171 |
+| duplicate | 172 |
 | dead_upstream | 94 |
 | unresolved | 75 |
 | not_hosted_api | 40 |
@@ -173,7 +173,6 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | openapigenerator | wrong_base_url_path |
 | opencitations | wrong_base_url_path |
 | opendota | wrong_base_url_path |
-| openfdadrug | wrong_base_url_path, missing_default_params |
 | openholidays | wrong_base_url_path, missing_default_params |
 | openleiapi | wrong_base_url_path, missing_default_params |
 | openligadb | wrong_base_url_path |
@@ -548,7 +547,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | FAO API / faoapi | [GET](https://www.fao.org/faostat/en/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.fao.org/faostat/en) | 214 | discovery |
 | FASS / fass | [GET](https://www.fass.se/LIF/developer/) | 301 | redirect_https / redirect_not_approved | unknown | 119 | discovery |
 | FBI Wanted / fbiwanted | [GET](https://api.fbi.gov/wanted/v1/list?pageSize=1) | 200 | ok / ok_json | [free](https://www.fbi.gov/wanted/api) | 235 | callable |
-| FDA / fda-e876707f | [GET](https://api.fda.gov/food/enforcement.json?limit=1) | 200 | ok / ok_json | [free](https://open.fda.gov/apis/authentication/) | 1109 | callable |
+| FDA / fda | [GET](https://api.fda.gov/food/enforcement.json?limit=1) | 200 | ok / ok_json | [free](https://open.fda.gov/apis/authentication/) | 1109 | callable |
 | FDA API / fdaapi | [GET](https://open.fda.gov/apis/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://open.fda.gov/apis) | 379 | discovery |
 | FDA Drug API / fdadrugapi | [GET](https://open.fda.gov/apis/drug/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1394 | discovery |
 | FDA Food / fdafood | [GET](https://api.fda.gov/) | 404 | wrong_base_url_path / http_error | unknown | 1590 | discovery |
@@ -902,8 +901,8 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | OpenCitations API / opencitations | [GET](https://api.opencitations.net/index/v2/citation-count/doi:10.1108/jd-12-2013-0166) | 200 | duplicate / duplicate | [free](https://opencitations.net/index/api/v2) | - | alias of opencitations |
 | Opendatasoft API / opendatasoftapi | [GET](https://help.opendatasoft.com/apis/ods-search-v2/) | 404 | wrong_base_url_path / http_error | [free](https://help.opendatasoft.com/apis/ods-search-v2) | 202 | discovery |
 | OpenDota / opendota | [GET](https://api.opendota.com/api/heroes) | 200 | ok / ok_json | [free](https://docs.opendota.com/) | 221 | callable |
-| OpenFDA Drug / fda-1e910dd4 | [GET](https://api.fda.gov/drug/label.json?limit=1) | 200 | ok / ok_json | [free](https://open.fda.gov/apis/authentication/) | 2793 | callable |
-| openFDA Drug Labels / fda-1e910dd4 | [GET](https://api.fda.gov/drug/label.json?limit=1) | 200 | duplicate / duplicate | [free](https://open.fda.gov/apis/authentication/) | - | alias of openfdadrug |
+| OpenFDA Drug / fda | [GET](https://api.fda.gov/drug/label.json?limit=1) | 200 | duplicate / duplicate | [free](https://open.fda.gov/apis/authentication/) | 2793 | alias of fda |
+| openFDA Drug Labels / fda | [GET](https://api.fda.gov/food/enforcement.json?limit=1) | 200 | duplicate / duplicate | [free](https://open.fda.gov/apis/authentication/) | - | alias of fda |
 | OpenHolidays / openholidays | [GET](https://openholidaysapi.org/PublicHolidays?countryIsoCode=SE&validFrom=2026-01-01&validTo=2026-01-02) | 200 | ok / ok_json | [free](https://www.openholidaysapi.org/en/) | 327 | callable |
 | OpenHolidays API / openholidays | [GET](https://openholidaysapi.org/PublicHolidays?countryIsoCode=SE&validFrom=2026-01-01&validTo=2026-01-02) | 200 | duplicate / duplicate | [free](https://www.openholidaysapi.org/en/) | - | alias of openholidays |
 | OpenIndoor / openindoor | [GET](https://openindoor.io/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://openindoor.io) | 1668 | discovery |

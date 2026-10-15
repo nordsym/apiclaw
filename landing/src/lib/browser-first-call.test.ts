@@ -14,6 +14,27 @@ const fakeFetch: typeof fetch = async (url, options) => {
 };
 assert.deepEqual(await runBrowserNasaCall("test-browser-session", fakeFetch), response);
 assert.equal(called, 1);
+// Advance a fake deadline beyond the old 30-second browser cutoff. A slow
+// successful gateway response must remain visible without waiting in real time.
+const originalTimeout = Object.getOwnPropertyDescriptor(AbortSignal, "timeout")!;
+try {
+  let elapsed = 0;
+  const deadlines: { controller: AbortController; at: number }[] = [];
+  Object.defineProperty(AbortSignal, "timeout", { configurable: true, value: (milliseconds: number) => {
+    assert.equal(milliseconds, 70_000);
+    const controller = new AbortController();
+    deadlines.push({ controller, at: elapsed + milliseconds });
+    return controller.signal;
+  } });
+  const slowResult = await runBrowserNasaCall("test-browser-session", async (_url, options) => {
+    elapsed = 60_001;
+    for (const deadline of deadlines) if (elapsed >= deadline.at) deadline.controller.abort();
+    assert.equal(options?.signal?.aborted, false, "browser must await the gateway's complete upstream budget");
+    return Response.json({ success: true, data: response });
+  });
+  assert.deepEqual(slowResult, response);
+  assert.equal(deadlines.length, 1);
+} finally { Object.defineProperty(AbortSignal, "timeout", originalTimeout); }
 await assert.rejects(runBrowserNasaCall("test-browser-session", async () => Response.json({ error: "raw upstream exception" }, { status: 503 })), /NASA could not return/);
 await assert.rejects(runBrowserNasaCall("test-browser-session", async () => Response.json({}, { status: 429 })), /NASA is busy/);
 await assert.rejects(runBrowserNasaCall("test-browser-session", async () => Response.json({ success: true, data: {} })), /NASA could not return/);

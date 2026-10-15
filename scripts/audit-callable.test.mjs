@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { execFileSync } from 'node:child_process';
-import { prepareCandidates, canonicalGroups, findGeneratedDefault, buildProbeUrl, classifyResult, createOriginLimiter, probeCandidate, auditCandidates, makeBaseline, makeReport, renderMarkdown, findKeyEvidence, disambiguateCanonicalIds, applyRecordedEvidence } from './audit-callable.mjs';
+import { prepareCandidates, canonicalGroups, findGeneratedDefault, buildProbeUrl, classifyResult, createOriginLimiter, probeCandidate, auditCandidates, makeBaseline, makeReport, applyCustomerGatewayEvidence, renderMarkdown, findKeyEvidence, disambiguateCanonicalIds, applyRecordedEvidence } from './audit-callable.mjs';
 import { tsImport } from 'tsx/esm/api';
 const { fetchWorkspacePublicGet } = await tsImport('../src/workspace-public-transport.ts', import.meta.url);
 const { decodePublicApiResponse } = await tsImport('../src/workspace-public-response.ts', import.meta.url);
@@ -254,4 +254,66 @@ test('canonical disambiguation is idempotent for same-source rows and repairs re
   rows.forEach(row => { row.canonicalId += suffix + suffix; delete row.canonicalBaseId; });
   disambiguateCanonicalIds(rows); assert.deepEqual(rows, first);
   disambiguateCanonicalIds(rows); assert.deepEqual(rows, first);
+});
+
+test('explicit openFDA identity counts food and drug datasets as one API despite distinct successful paths', () => {
+  const candidates = [
+    { id: 'fda', name: 'FDA', baseUrl: 'https://api.fda.gov' },
+    { id: 'openfdadrug', name: 'OpenFDA Drug', baseUrl: 'https://open.fda.gov/apis/drug' },
+  ];
+  const recipes = [
+    { ...candidates[0], canonicalId: 'fda', smokePath: '/food/enforcement.json?limit=1', pricing: 'free' },
+    { ...candidates[1], canonicalId: 'fda', baseUrl: 'https://api.fda.gov', smokePath: '/drug/label.json?limit=1', pricing: 'free' },
+  ];
+  const groups = canonicalGroups(prepareCandidates({ candidates, registry: candidates, recipes }));
+  assert.equal(groups.length, 1); assert.equal(groups[0].rows.length, 2);
+  assert.equal(groups[0].representative.canonicalId, 'fda');
+});
+
+const customerFixture = () => {
+  const results = [
+    { id: 'a', name: 'A', canonicalId: 'a', verified: true, cause: 'ok', outcome: 'ok_json', checkedAt: '2026-10-01', status: 200 },
+    { id: 'b', name: 'B', canonicalId: 'b', verified: true, cause: 'ok', outcome: 'ok_json', checkedAt: '2026-10-01', status: 200 },
+    { id: 'alias-b', name: 'Alias B', canonicalId: 'b', verified: false, canonicalVerified: true, cause: 'duplicate', outcome: 'duplicate', checkedAt: '2026-10-01' },
+    { id: 'c', name: 'C', canonicalId: 'c', verified: false, cause: 'unknown_pricing', outcome: 'ok_json', checkedAt: '2026-10-01' },
+  ];
+  return makeReport(results, makeBaseline({ checkedAt: '2026-10-01', candidateCount: 4, verifiedCount: 2, results }), { checkedAt: '2026-10-01', managedApprovedCount: 3 });
+};
+const customerProof = () => ({ before: { workspaceId: 'private-workspace', usage: 0, paid: false }, after: { paid: false, usage: 0, workspaceId: 'private-workspace' }, verifiedAt: '2026-10-15T18:00:00Z', preview: 'https://preview.fixture.org/path?token=private-token', results: [
+  { id: 'a', name: 'A', status: 200, success: true, latencyMs: 1.5, route: '/v1/execute' },
+  { id: 'b', name: 'B', status: 429, success: false, errorCode: 'RATE_LIMITED', latencyMs: 2, route: '/v1/execute' },
+  { id: 'c', name: 'C', status: 200, success: true },
+], health: { disabledIds: [] } });
+
+test('customer evidence demotes failed canonical APIs and aliases, never promotes discovery or changes upstream timestamps', () => {
+  const original = customerFixture(); const frozen = structuredClone(original);
+  const result = applyCustomerGatewayEvidence(original, customerProof());
+  assert.deepEqual(original, frozen);
+  assert.equal(result.verifiedCount, 1); assert.equal(result.customerExecutableCatalogCount, 4); assert.equal(result.additionalVerifiedApisNeededFor1000, 996);
+  const failed = result.results.find(row => row.id === 'b');
+  assert.equal(failed.verified, false); assert.equal(failed.cause, 'rate_limit'); assert.equal(failed.upstreamVerified, true); assert.equal(failed.upstreamOutcome, 'ok_json'); assert.equal(failed.status, 200);
+  assert.equal(result.results.find(row => row.id === 'alias-b').canonicalVerified, false);
+  assert.equal(result.results.find(row => row.id === 'c').verified, false);
+  assert.equal(result.checkedAt, original.checkedAt); assert.equal(result.lastFullSweepAt, original.lastFullSweepAt);
+  assert.equal(result.customerGatewayVerification.billingUnchanged, true);
+  assert.doesNotMatch(JSON.stringify(result), /private-workspace|private-token/);
+  assert.match(renderMarkdown(result), /authenticated customer calls passed/);
+});
+
+test('customer proof refuses incomplete, ambiguous or billing-changing batches before accepting evidence', () => {
+  const proof = customerProof();
+  assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), { ...proof, results: proof.results.slice(0, 1) }), /unique result/);
+  assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), { ...proof, results: [proof.results[0], ...proof.results] }), /unique result/);
+  assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), { ...proof, after: { ...proof.after, usage: 1 } }), /identical/);
+  assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), { ...proof, results: undefined }), /missing/);
+});
+
+test('health-disabled and discovery responses fail despite HTTP 200 while exact unique names can match', () => {
+  const proof = customerProof(); proof.results[0] = { id: 'different', name: 'A', status: 200, success: true }; proof.health.disabledIds = ['a'];
+  proof.results[1] = { id: 'b', status: 200, success: true, discovery: true };
+  const result = applyCustomerGatewayEvidence(customerFixture(), proof);
+  assert.equal(result.verifiedCount, 0);
+  assert.equal(result.results[0].gatewayVerification.healthDisabled, true);
+  assert.equal(result.results[0].cause, 'unresolved');
+  assert.equal(result.results[1].cause, 'unresolved');
 });

@@ -9,7 +9,8 @@ export async function runBrowserNasaCall(token: string, request: typeof fetch = 
     method: "POST",
     headers: { "Content-Type": "application/json", "X-APIClaw-Session": session, "Idempotency-Key": idempotencyKey },
     body: JSON.stringify({ provider: "nasa", action: "apod", params: {} }),
-    signal: AbortSignal.timeout(30_000),
+    // The managed gateway allows 60 seconds upstream, plus response overhead.
+    signal: AbortSignal.timeout(70_000),
   });
   let response = await execute(token);
   if (response.status === 401) {

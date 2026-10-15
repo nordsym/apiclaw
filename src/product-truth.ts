@@ -113,7 +113,7 @@ export const APILAYER_PAID_PLAN_ONLY_ACTIONS = [
 ] as const;
 
 export const PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_SUMMARY =
-  "3 approved managed provider rails plus workspace-authenticated public/no-key HTTPS origins";
+  "3 approved managed provider rails plus workspace-authenticated public/no-key APIs";
 
 export const MANAGED_PROVIDER_ADAPTERS = [
   {
