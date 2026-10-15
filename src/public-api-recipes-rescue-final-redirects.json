@@ -1,0 +1,67 @@
+[
+  {
+    "id": "defillamaapi",
+    "name": "DeFiLlama API",
+    "baseUrl": "https://api.llama.fi",
+    "smokePath": "/v2/chains",
+    "docsUrl": "https://api-docs.defillama.com/",
+    "pricing": "free",
+    "pricingSource": "https://api-docs.defillama.com/",
+    "freeEvidence": "Official API documentation explicitly separates the free API, which requires no key, from its paid API-plan endpoint; the free OpenAPI specification documents GET /v2/chains."
+  },
+  {
+    "id": "curve",
+    "name": "Curve",
+    "baseUrl": "https://api.curve.finance/v1",
+    "smokePath": "/getETHprice",
+    "docsUrl": "https://docs.curve.finance/developer/integration/api/curve-api/",
+    "pricing": "free",
+    "pricingSource": "https://docs.curve.finance/developer/integration/api/curve-api/",
+    "freeEvidence": "Existing source inventory labels Curve free; the official Curve-hosted OpenAPI specification documents this public price-data GET endpoint with no API-key/security requirement. This recipe provides public reads only.",
+    "canonicalId": "curve"
+  },
+  {
+    "id": "curvefinanceprotocolapi",
+    "name": "Curve Finance Protocol API",
+    "baseUrl": "https://api.curve.finance/v1",
+    "smokePath": "/getETHprice",
+    "docsUrl": "https://docs.curve.finance/developer/integration/api/curve-api/",
+    "pricing": "free",
+    "pricingSource": "https://docs.curve.finance/developer/integration/api/curve-api/",
+    "freeEvidence": "Existing source inventory labels Curve free; the official Curve-hosted OpenAPI specification documents this public price-data GET endpoint with no API-key/security requirement. This recipe provides public reads only.",
+    "canonicalId": "curve"
+  },
+  {
+    "id": "gravatar",
+    "name": "Gravatar",
+    "baseUrl": "https://gravatar.com",
+    "smokePath": "/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+    "docsUrl": "https://docs.gravatar.com/guides/llms-txt/",
+    "pricing": "free",
+    "pricingSource": "https://docs.gravatar.com/guides/llms-txt/",
+    "freeEvidence": "Official developer guide calls the API free, documents appending .json to this public sample profile URL, and permits limited legacy no-auth reads. It strongly recommends authenticated requests for production and grants no access to full profiles or writes.",
+    "canonicalId": "gravatar"
+  },
+  {
+    "id": "gravatarapi",
+    "name": "Gravatar API",
+    "baseUrl": "https://gravatar.com",
+    "smokePath": "/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+    "docsUrl": "https://docs.gravatar.com/guides/llms-txt/",
+    "pricing": "free",
+    "pricingSource": "https://docs.gravatar.com/guides/llms-txt/",
+    "freeEvidence": "Official developer guide calls the API free, documents appending .json to this public sample profile URL, and permits limited legacy no-auth reads. It strongly recommends authenticated requests for production and grants no access to full profiles or writes.",
+    "canonicalId": "gravatar"
+  },
+  {
+    "id": "yearnfinanceprotocolapi",
+    "name": "Yearn Finance Protocol API",
+    "canonicalId": "yearnfinanceprotocolapi",
+    "baseUrl": "https://ydaemon.yearn.fi",
+    "smokePath": "/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9",
+    "docsUrl": "https://docs.yearn.fi/developers/building-on-yearn",
+    "pricing": "free",
+    "pricingSource": "https://docs.yearn.fi/developers/building-on-yearn",
+    "freeEvidence": "Existing source inventory labels Yearn free; current official integration docs identify yDaemon as a public vault-data API. The official yearn/ydaemon repository documents this single-vault GET, requiring no API credential. Scope is public legacy vault metadata, not deposits, trading or account access."
+  }
+]

@@ -71,11 +71,11 @@ export const CANON_STATS = {
 
   /** No-key public APIs unlocked for workspace-authenticated execution.
    *  Not the 26k harvest and not anonymous keyless proxy. */
-  workspace_public_executable: 215,
+  workspace_public_executable: 230,
 
   /** Public catalog cards with callable=true: managed rails + workspace-public
    *  APIs. landing/src/app/api/catalog/route.ts throws if this drifts. */
-  customer_executable_catalog_cards: 218,
+  customer_executable_catalog_cards: 233,
 
   /** All-time npm installs (canon as of 2026-08-21 per npmjs dashboard). */
   npm_installs: 20_058,

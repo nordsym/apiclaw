@@ -32,6 +32,7 @@ import type * as debugFilestackLogs from "../debugFilestackLogs.js";
 import type * as debugGetToken from "../debugGetToken.js";
 import type * as deviceAuth from "../deviceAuth.js";
 import type * as directCall from "../directCall.js";
+import type * as discoveryCatalog from "../discoveryCatalog.js";
 import type * as discoveryListings from "../discoveryListings.js";
 import type * as earnProgress from "../earnProgress.js";
 import type * as email from "../email.js";
@@ -142,6 +143,7 @@ declare const fullApi: ApiFromModules<{
   debugGetToken: typeof debugGetToken;
   deviceAuth: typeof deviceAuth;
   directCall: typeof directCall;
+  discoveryCatalog: typeof discoveryCatalog;
   discoveryListings: typeof discoveryListings;
   earnProgress: typeof earnProgress;
   email: typeof email;

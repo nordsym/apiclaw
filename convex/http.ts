@@ -1,3 +1,4 @@
+import { discoveryCatalogRequest } from "./discoveryCatalog";
 import { executeWorkspacePublicApi } from "./workspacePublicExecute";
 import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
 import { bindManagedChatModel, friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
@@ -2195,8 +2196,8 @@ http.route({
       params.set("page", String(page));
       params.set("limit", String(limit));
 
-      const catalogUrl = `https://apiclaw.cloud/api/catalog?${params.toString()}`;
-      const catalogRes = await fetch(catalogUrl, { signal: AbortSignal.timeout(10_000) });
+      const catalogRequest = discoveryCatalogRequest(params);
+      const catalogRes = await fetch(catalogRequest.url, catalogRequest.init);
 
       if (!catalogRes.ok) {
         return jsonResponse({ error: "Registry unavailable" }, 502);

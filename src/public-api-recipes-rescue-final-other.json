@@ -1,0 +1,74 @@
+[
+  {
+    "id": "countryflagsapi",
+    "name": "Country Flags API",
+    "canonicalId": "countryflagsapi",
+    "baseUrl": "https://flagcdn.com",
+    "smokePath": "/en/codes.json",
+    "docsUrl": "https://flagpedia.net/download/api",
+    "pricing": "free",
+    "pricingSource": "https://flagpedia.net/download/api",
+    "freeEvidence": "Official Flagpedia API documentation explicitly describes a completely free CDN and documents the country-code/name JSON endpoint. Only JSON metadata is supported here; binary flag images are outside this gateway response contract. Attribute Flagpedia where appropriate.",
+    "responseKind": "json"
+  },
+  {
+    "id": "feodotrackerapi",
+    "name": "Feodo Tracker API",
+    "canonicalId": "feodotrackerapi",
+    "baseUrl": "https://feodotracker.abuse.ch",
+    "smokePath": "/downloads/ipblocklist_recommended.json",
+    "docsUrl": "https://feodotracker.abuse.ch/blocklist/",
+    "pricing": "free",
+    "pricingSource": "https://feodotracker.abuse.ch/blocklist/",
+    "freeEvidence": "Official blocklist documentation provides a JSON feed and explicitly permits all commercial and non-commercial uses under CC0. Read-only feed download; no contact with listed infrastructure. Public dataset is best-effort and can have false positives.",
+    "responseKind": "json"
+  },
+  {
+    "id": "tosdrapi",
+    "name": "ToS;DR API",
+    "canonicalId": "tosdrapi",
+    "baseUrl": "https://api.tosdr.org",
+    "smokePath": "/service/v3?id=190",
+    "docsUrl": "https://docs.tosdr.org/developer/tos-dr-developers/restful-api/service-api/get-service-v3",
+    "pricing": "free",
+    "pricingSource": "https://docs.tosdr.org/site-policy/tosdr-terms/tosdr.org-terms-of-contribution",
+    "freeEvidence": "Official developer reference documents keyless service GET. Official contribution terms license the open data CC BY-SA 3.0 or later with the stated AGPL larger-program exception. Existing registry labels this public service free. Preserve attribution and share-alike obligations; no paid resale is inferred.",
+    "responseKind": "json"
+  },
+  {
+    "id": "lidoprotocolapi",
+    "name": "Lido Protocol API",
+    "canonicalId": "lidoprotocolapi",
+    "baseUrl": "https://eth-api.lido.fi",
+    "smokePath": "/v1/protocol/steth/apr/sma",
+    "docsUrl": "https://docs.lido.fi/integrations/api/",
+    "pricing": "free",
+    "pricingSource": "https://docs.lido.fi/integrations/api/",
+    "freeEvidence": "Official Lido integration documentation explicitly invites app/website integration and states APIs are strictly read-only; it publishes this unauthenticated APR endpoint. Existing full registry labels this API free. No wallet, transaction, staking, withdrawals or paid RPC is used.",
+    "responseKind": "json"
+  },
+  {
+    "id": "raydiumprotocolapi",
+    "name": "Raydium Protocol API",
+    "canonicalId": "raydiumprotocolapi",
+    "baseUrl": "https://api-v3.raydium.io",
+    "smokePath": "/main/info",
+    "docsUrl": "https://github.com/raydium-io/raydium-docs-v1/blob/main/api-reference/api-v3/overview.mdx",
+    "pricing": "free",
+    "pricingSource": "https://github.com/raydium-io/raydium-docs-v1/blob/main/sdk-api/rest-api.mdx",
+    "freeEvidence": "Official Raydium REST guide documents anonymous HTTPS access for API v3, recommends this heavily cached read endpoint and permits caching/proxying for high throughput. Existing registry labels this API free; no paid plan, wallet-signed Forum, quote transaction, RPC submission or on-chain action is used. Respect progressive per-IP rate limits.",
+    "responseKind": "json"
+  },
+  {
+    "id": "orcaprotocolapi",
+    "name": "Orca Protocol API",
+    "canonicalId": "orcaprotocolapi",
+    "baseUrl": "https://api.orca.so/v2/solana",
+    "smokePath": "/pools?size=1",
+    "docsUrl": "https://docs.orca.so/api-reference/overview",
+    "pricing": "free",
+    "pricingSource": "https://docs.orca.so/api-reference/overview",
+    "freeEvidence": "Official API overview describes the public read API, explicitly says read access requires no authentication and documents size-limited pagination and fair-use rate limits. Existing registry labels this API free. Only public pool metadata is read; no wallet, swap, transaction or paid RPC is used.",
+    "responseKind": "json"
+  }
+]

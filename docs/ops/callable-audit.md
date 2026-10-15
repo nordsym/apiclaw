@@ -1,12 +1,12 @@
 # Callable API audit
 
-Checked: 2026-10-15T17:58:35.900Z. Mode: partial-recheck. Complete sweep: no.
+Checked: 2026-10-15T18:22:35.488Z. Mode: partial-recheck. Complete sweep: no.
 
-**215 canonical free APIs verified from 1641 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
+**230 canonical free APIs verified from 1641 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
 
-Customer gateway verification: 2026-10-15T18:04:58.383Z, preview https://abundant-goldfish-47.eu-west-1.convex.site. 215/215 authenticated customer calls passed; 0 were demoted. Billing snapshots were identical. 0 newly upstream-verified APIs still await customer gateway verification. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.
+Customer gateway verification: 2026-10-15T18:22:08.067Z, preview https://abundant-goldfish-47.eu-west-1.convex.site. 230/230 authenticated customer calls passed; 0 were demoted. Billing snapshots were identical. 0 newly upstream-verified APIs still await customer gateway verification. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.
 
-Catalog arithmetic: 215 measured free APIs + 3 existing approved managed providers = **218 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 782 additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
+Catalog arithmetic: 230 measured free APIs + 3 existing approved managed providers = **233 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 767 additional distinct verified APIs. **The required number of signups is unknown**, because credentials, rights, working adapters and overlap have not been established. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
 
 Policy: Keyless HTTPS GET only; shared 20-second gateway transport; one retry at most; reviewed redirects only; 256 KiB body; eight workers; at least one second between requests per origin. A callable API needs a valid reviewed response, explicit free evidence and one canonical identity.
 
@@ -30,22 +30,22 @@ Immutable baseline: commit 2ef36ab, 2026-10-15T14:57:51.605Z; 1002 rows, 13 work
 
 ## Original cohort: current evidence
 
-The original cohort has 1002 rows: 13 were verified and **989 originally failed**. 1002 match current evidence by ID and exact normalized name. 151 formerly failing rows now represent independently verified canonical APIs. Current status: 164 verified canonical rows, 112 duplicate rows, 726 discovery rows. These are row counts, not extra APIs per alias.
+The original cohort has 1002 rows: 13 were verified and **989 originally failed**. 1002 match current evidence by ID and exact normalized name. 161 formerly failing rows now represent independently verified canonical APIs. Current status: 174 verified canonical rows, 115 duplicate rows, 713 discovery rows. These are row counts, not extra APIs per alias.
 
 | Current cause | All original cohort rows | Originally failing rows only |
 | --- | ---: | ---: |
-| wrong_base_url_path | 389 | 389 |
-| ok | 164 | 151 |
-| redirect_https | 123 | 123 |
-| duplicate | 112 | 112 |
+| wrong_base_url_path | 377 | 377 |
+| ok | 174 | 161 |
+| redirect_https | 118 | 118 |
+| duplicate | 115 | 115 |
 | dead_upstream | 60 | 60 |
 | unresolved | 55 | 55 |
 | not_hosted_api | 50 | 50 |
-| timeout | 25 | 25 |
+| timeout | 26 | 26 |
 | unknown_pricing | 10 | 10 |
 | needs_key | 7 | 7 |
+| commercial_permission | 5 | 5 |
 | rate_limit | 3 | 3 |
-| commercial_permission | 2 | 2 |
 | gateway_block | 2 | 2 |
 | missing_default_params | 0 | 0 |
 
@@ -57,22 +57,22 @@ The following table covers all 1641 expanded candidate/alias rows. It must not b
 
 | Current cause | Expanded rows |
 | --- | ---: |
-| wrong_base_url_path | 747 |
-| ok | 215 |
-| redirect_https | 186 |
-| duplicate | 173 |
+| wrong_base_url_path | 729 |
+| ok | 230 |
+| redirect_https | 179 |
+| duplicate | 177 |
 | dead_upstream | 94 |
-| unresolved | 77 |
+| unresolved | 76 |
 | not_hosted_api | 63 |
-| timeout | 38 |
+| timeout | 39 |
 | gateway_block | 21 |
 | unknown_pricing | 12 |
-| needs_key | 10 |
+| needs_key | 11 |
+| commercial_permission | 7 |
 | rate_limit | 3 |
-| commercial_permission | 2 |
 | missing_default_params | 0 |
 
-Previously verified still working or represented by a verified canonical alias: 13/13. Previously verified requiring attention: none. Reused rows: 1639. Unchecked rows: 0.
+Previously verified still working or represented by a verified canonical alias: 13/13. Previously verified requiring attention: none. Reused rows: 1633. Unchecked rows: 0.
 
 Baseline preserves the original 1,002-row outcomes. Their old network/403 errors lack sufficient evidence for retrospective key/CORS/root-cause claims. Current rows provide traces and specific causes.
 
@@ -104,13 +104,16 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | clinicaltrialsgov | wrong_base_url_path, missing_default_params |
 | codewarsapi | wrong_base_url_path |
 | coinlore | wrong_base_url_path |
+| colombiaopendataapi | wrong_base_url_path, missing_default_params |
 | countriesgraphql | missing_default_params |
 | countryis | wrong_base_url_path |
 | crossref | missing_default_params |
+| curve | wrong_base_url_path |
 | danishdataserviceenergi | wrong_base_url_path, missing_default_params |
 | datausa | wrong_base_url_path, missing_default_params |
 | datamuse | wrong_base_url_path, missing_default_params |
 | deckofcardsapi | wrong_base_url_path, missing_default_params |
+| defillamaapi | wrong_base_url_path |
 | digidates | wrong_base_url_path |
 | digimoninformation | wrong_base_url_path |
 | disify | wrong_base_url_path |
@@ -118,7 +121,10 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | dogceo | wrong_base_url_path |
 | dsbstatisticsdenmark | missing_default_params |
 | dungeonsanddragonsalternate | wrong_base_url_path, missing_default_params |
+| dutchcbsapi | wrong_base_url_path, missing_default_params |
+| ecbapi | wrong_base_url_path, missing_default_params |
 | environmentagency | wrong_base_url_path, missing_default_params |
+| environmentcanadaapi | wrong_base_url_path, missing_default_params |
 | eurostatapi | wrong_base_url_path, missing_default_params |
 | fakestoreapi | missing_default_params |
 | fbiwanted | wrong_base_url_path, missing_default_params |
@@ -134,6 +140,7 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | gbif | wrong_base_url_path, missing_default_params |
 | genrenator | wrong_base_url_path |
 | geojs | wrong_base_url_path |
+| gravatar | wrong_base_url_path |
 | gutendex | missing_default_params |
 | harrypotterapi | wrong_base_url_path |
 | hebrewcalendar | wrong_base_url_path, missing_default_params |
@@ -148,6 +155,7 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | lorempicsum | missing_default_params |
 | malaysiaopendataapi | wrong_base_url_path, missing_default_params |
 | mmogames | wrong_base_url_path, missing_default_params |
+| moroccoopendataapi | wrong_base_url_path, missing_default_params |
 | nasaeonet | wrong_base_url_path, missing_default_params |
 | nasapowerapi | wrong_base_url_path, missing_default_params |
 | nationalvulnerabilitydatabase | wrong_base_url_path, missing_default_params |
@@ -233,6 +241,7 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | hongkongobervatory | wrong_base_url_path, missing_default_params |
 | inspirehepnet | wrong_base_url_path, missing_default_params |
 | itis | wrong_base_url_path, missing_default_params |
+| lidoprotocolapi | wrong_base_url_path |
 | magicthegatheringapi | wrong_base_url_path, missing_default_params |
 | medlineplus | wrong_base_url_path, missing_default_params |
 | networkcalc | wrong_base_url_path, missing_default_params |
@@ -243,14 +252,17 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | opengovernmentswitzerland | wrong_base_url_path, missing_default_params |
 | openlibrary | wrong_base_url_path |
 | openscienceframework | wrong_base_url_path, missing_default_params |
+| orcaprotocolapi | wrong_base_url_path, missing_default_params |
 | poetrydb | wrong_base_url_path |
 | postalpincode | wrong_base_url_path |
 | purgomalum | redirect_https, missing_default_params |
+| raydiumprotocolapi | wrong_base_url_path |
 | razorpayifsc | wrong_base_url_path |
 | ronswansonquotes | wrong_base_url_path |
+| spanishineapi | wrong_base_url_path |
 | tcgdex | wrong_base_url_path |
+| tosdrapi | wrong_base_url_path, missing_default_params |
 | transportforbelgium | wrong_base_url_path, missing_default_params |
-| transportforberlingermany | wrong_base_url_path, missing_default_params |
 | tvmaze | wrong_base_url_path |
 | ukcarbonintensity | wrong_base_url_path |
 | ukparliamentapi | wrong_base_url_path, missing_default_params |
@@ -261,6 +273,7 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | vatcomply | wrong_base_url_path, missing_default_params |
 | wandbox | wrong_base_url_path |
 | whatthecommit | wrong_base_url_path |
+| yearnfinanceprotocolapi | wrong_base_url_path |
 | zippopotamus | wrong_base_url_path |
 | arbetsfrmedlingenapi | missing_default_params |
 | bluesky | missing_default_params |
@@ -317,7 +330,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Auth.js / authjs | - | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
 | Automerge / automerge | - | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
 | Aviationstack / aviationstack | [GET](https://aviationstack.com/?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo-Best-sellers) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 948 | discovery |
-| AviationWeather / aviationweather | [GET](https://aviationweather.gov/api/data/metar?ids=KMCI&format=json) | 200 | ok / ok_json | [free](https://aviationweather.gov/data/api/) | 1239 | callable |
+| AviationWeather / aviationweather | [GET](https://aviationweather.gov/api/data/metar?ids=KJFK&format=json) | 200 | ok / ok_json | [free](https://www.weather.gov/disclaimer) | 1106 | callable |
 | Axolotl / axolotl | [GET](https://theaxolotlapi.netlify.app/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 910 | discovery |
 | Axolotl API / axolotl | [GET](https://theaxolotlapi.netlify.app/) | 200 | duplicate / duplicate | unknown | - | discovery |
 | aztro / aztro | [GET](https://aztro.sameerkumar.website/) | 404 | wrong_base_url_path / http_error | unknown | 528 | discovery |
@@ -420,7 +433,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | ClinicalTrials.gov / clinicaltrialsgov | [GET](https://clinicaltrials.gov/api/v2/studies?pageSize=1&format=json) | 200 | ok / ok_json | [free](https://clinicaltrials.gov/data-api/api) | 259 | callable |
 | CNMV Spain / cnmvspain | [GET](https://www.cnmv.es/) | 302 | redirect_https / redirect_not_approved | unknown | 650 | discovery |
 | CocktailDB API / cocktaildbapi | [GET](https://www.thecocktaildb.com/api.php/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 325 | discovery |
-| CocoaPods / cocoapods | [GET](https://cocoapods.org/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://cocoapods.org) | 227 | discovery |
+| CocoaPods / cocoapods | - | 0 | commercial_permission / reviewed_exclusion | [free](https://cocoapods.org) | 0 | discovery |
 | Codeberg / codeberg | [GET](https://codeberg.org/api/v1/repos/forgejo/forgejo) | 200 | ok / ok_json | [free](https://docs.codeberg.org/getting-started/what-is-codeberg/) | 304 | callable |
 | Codeium / codeium | [GET](https://codeium.com/api/) | 301 | redirect_https / redirect_not_approved | unknown | 256 | discovery |
 | Codewars API / codewarsapi | [GET](https://www.codewars.com/api/v1/code-challenges/valid-braces) | 200 | ok / ok_json | [free](https://dev.codewars.com/) | 321 | callable |
@@ -435,7 +448,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | CoinPaprika API / coinpaprika | [GET](https://api.coinpaprika.com/) | 302 | duplicate / duplicate | unknown | - | discovery |
 | CollegeScoreCard / collegescorecard | [GET](https://collegescorecard.ed.gov/data/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 531 | discovery |
 | CollegeScoreCard.ed.gov / collegescorecard | [GET](https://collegescorecard.ed.gov/data/) | 200 | duplicate / duplicate | unknown | - | discovery |
-| Colombia Open Data API / colombiaopendataapi | [GET](https://www.datos.gov.co/) | 406 | unresolved / http_error | [free](https://www.datos.gov.co) | 740 | discovery |
+| Colombia Open Data API / colombiaopendataapi | [GET](https://api.us.socrata.com/api/catalog/v1?domains=www.datos.gov.co&limit=1) | 200 | ok / ok_json | [free](https://herramientas.datos.gov.co/terminos) | 1034 | callable |
 | Color API / colorapi | [GET](https://www.thecolorapi.com/id?hex=0047AB) | 200 | ok / ok_json | [free](https://www.thecolorapi.com/docs) | 709 | callable |
 | Colorado Information Marketplace / coloradoinformationmarketplace | [GET](https://data.colorado.gov/) | 406 | unresolved / http_error | unknown | 997 | discovery |
 | Coronavirus / coronavirus | [GET](https://pipedream.com/@pravin/http-api-for-latest-wuhan-coronavirus-data-2019-ncov-p_G6CLVM/readme/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 518 | discovery |
@@ -444,7 +457,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | CountAPI / countapi | [GET](https://countapi.xyz/) | 0 | dead_upstream / network_error | unknown | 262 | discovery |
 | Countly / countly | [GET](https://api.count.ly/reference/) | 404 | wrong_base_url_path / http_error | unknown | 335 | discovery |
 | Countries GraphQL / countriesgraphql | [GET](https://countries.trevorblades.com/?query=%7Bcountry(code%3A%22SE%22)%7Bname%7D%7D) | 200 | ok / ok_json | [free](https://github.com/trevorblades/countries) | 139 | callable |
-| Country Flags API / countryflagsapi | [GET](https://flagcdn.com/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://flagcdn.com) | 104 | discovery |
+| Country Flags API / countryflagsapi | [GET](https://flagcdn.com/en/codes.json) | 200 | ok / ok_json | [free](https://flagpedia.net/download/api) | 307 | callable |
 | Country.is / countryis | [GET](https://api.country.is/8.8.8.8) | 200 | ok / ok_json | [free](https://country.is/) | 198 | callable |
 | Covid Tracking Project / covidtrackingproject | [GET](https://covidtracking.com/data/api/version-2/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 417 | discovery |
 | Covid-19 Datenhub / covid19datenhub | [GET](https://npgeo-corona-npgeo-de.hub.arcgis.com/) | 404 | wrong_base_url_path / http_error | unknown | 587 | discovery |
@@ -463,7 +476,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Cryptonator API / cryptonator | [GET](https://www.cryptonator.com/api/) | 0 | duplicate / duplicate | unknown | - | discovery |
 | CurrencyScoop.com / currencyscoopcom | [GET](https://currencyscoop.com/) | 301 | redirect_https / redirect_not_approved | unknown | 217 | discovery |
 | Cursor / cursor | [GET](https://cursor.sh/) | 308 | redirect_https / redirect_not_approved | freemium | 121 | discovery |
-| Curve / curve | [GET](https://curve.fi/) | 301 | redirect_https / redirect_not_approved | unknown | 117 | discovery |
+| Curve / curve | [GET](https://api.curve.finance/v1/getETHprice) | 200 | ok / ok_json | [free](https://docs.curve.finance/developer/integration/api/curve-api/) | 470 | callable |
 | CVR / cvr | [GET](https://datacvr.virk.dk/) | 403 | unresolved / access_denied | unknown | 128 | discovery |
 | CVR API / cvr | [GET](https://datacvr.virk.dk/) | 403 | duplicate / duplicate | [free](https://datacvr.virk.dk) | - | discovery |
 | Czech Namedays / czechnamedays | [GET](https://svatky.adresa.info/) | 402 | unresolved / http_error | unknown | 254 | discovery |
@@ -483,7 +496,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Datayes / datayes | [GET](https://m.datayes.com/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1205 | discovery |
 | Deck of Cards API / deckofcardsapi | [GET](https://deckofcardsapi.com/api/deck/new/draw/?count=1) | 200 | ok / ok_json | [free](https://deckofcardsapi.com/) | 382 | callable |
 | Deepcode / deepcode | [GET](https://www.deepcode.ai/) | 301 | redirect_https / redirect_not_approved | unknown | 682 | discovery |
-| DeFiLlama API / defillamaapi | [GET](https://defillama.com/docs/api/) | 308 | redirect_https / redirect_not_approved | [free](https://defillama.com/docs/api) | 1165 | discovery |
+| DeFiLlama API / defillamaapi | [GET](https://api.llama.fi/v2/chains) | 200 | ok / ok_json | [free](https://api-docs.defillama.com/) | 336 | callable |
 | Dendron / dendron | [GET](https://dendron.so/) | 200 | not_hosted_api / reviewed_exclusion | unknown | 221 | discovery |
 | Destatis API / destatisapi | [GET](https://www-genesis.destatis.de/genesis/online/) | 307 | redirect_https / redirect_not_approved | unknown | 476 | discovery |
 | Destatis Germany / destatisgermany | [GET](https://destatis.de/) | 302 | redirect_https / redirect_not_approved | unknown | 281 | discovery |
@@ -521,11 +534,11 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Ducks Unlimited / ducksunlimited | [GET](https://gis.ducks.org/datasets/du-university-chapters/api/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 736 | discovery |
 | Dungeons and Dragons (Alternate) / dungeonsanddragonsalternate | [GET](https://api.open5e.com/v2/creatures/?limit=1&fields=key,name) | 200 | ok / ok_json | [free](https://open5e.com/api-docs) | 262 | callable |
 | Duolingo API / duolingoapi | [GET](https://www.duolingo.com/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 251 | discovery |
-| Dutch CBS API / dutchcbsapi | [GET](https://www.cbs.nl/en-gb/our-services/open-data/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.cbs.nl/en-gb/our-services/open-data) | 313 | discovery |
+| Dutch CBS API / dutchcbsapi | [GET](https://opendata.cbs.nl/ODataApi/OData/37296ned/TableInfos?$format=json) | 200 | ok / ok_json | [free](https://www.cbs.nl/en-gb/about-us/website/copyright) | 396 | callable |
 | DVC / dvc | - | 0 | not_hosted_api / reviewed_exclusion | [free](https://dvc.org) | 0 | discovery |
 | Dynamic QR Code / dynamicqrcode | [GET](https://rapidapi.com/updeploy-tools/api/qr-code-dynamic-and-static1/details/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1485 | discovery |
-| ECB API / ecbapi | [GET](https://data.ecb.europa.eu/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://data.ecb.europa.eu) | 1197 | discovery |
-| ECB Exchange Rates / ecbexchangerates | [GET](https://www.ecb.europa.eu/stats/eurofxref/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.ecb.europa.eu/stats/eurofxref) | 1297 | discovery |
+| ECB API / ecbapi | [GET](https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata) | 200 | ok / ok_csv | [free](https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.de.html) | 432 | callable |
+| ECB Exchange Rates / ecbapi | [GET](https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata) | 200 | duplicate / duplicate | [free](https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.de.html) | - | alias of ecbapi |
 | Econdb / econdb | [GET](https://www.econdb.com/api/) | 200 | unknown_pricing / valid_response_unknown_pricing | unknown | 438 | discovery |
 | Ecuador Open Data API / ecuadoropendataapi | [GET](https://datosabiertos.gob.ec/) | 403 | unresolved / access_denied | [free](https://datosabiertos.gob.ec) | 1075 | discovery |
 | Egypt Open Data API / egyptopendataapi | [GET](https://data.gov.eg/) | 0 | dead_upstream / network_error | [free](https://data.gov.eg) | 550 | discovery |
@@ -535,7 +548,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Ensembl API / ensemblapi | [GET](https://rest.ensembl.org/) | 0 | timeout / timeout | unknown | 20002 | discovery |
 | Entur / entur | [GET](https://api.entur.io/) | 404 | wrong_base_url_path / http_error | unknown | 273 | discovery |
 | Environment Agency / environmentagency | [GET](https://environment.data.gov.uk/flood-monitoring/id/stations?_limit=1) | 200 | ok / ok_json | [free](https://environment.data.gov.uk/flood-monitoring/doc/reference) | 334 | callable |
-| Environment Canada API / environmentcanadaapi | [GET](https://dd.weather.gc.ca/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://dd.weather.gc.ca) | 596 | discovery |
+| Environment Canada API / environmentcanadaapi | [GET](https://api.weather.gc.ca/collections/hydrometric-stations?f=json) | 200 | ok / ok_json | [free](https://eccc-msc.github.io/open-data/licence/readme_en/) | 621 | callable |
 | EPA API / epaapi | [GET](https://www.epa.gov/enviro/web-services/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.epa.gov/enviro/web-services) | 1606 | discovery |
 | Ergast F1 API / ergastf1 | [GET](https://ergast.com/mrd/) | 200 | duplicate / duplicate | [free](https://ergast.com/mrd) | - | discovery |
 | ESPN / espn | [GET](https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b/) | 404 | wrong_base_url_path / http_error | [free](https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b) | 546 | discovery |
@@ -570,7 +583,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | FDA Food / fdafood | [GET](https://api.fda.gov/) | 404 | wrong_base_url_path / http_error | unknown | 1590 | discovery |
 | Fed Treasury / fedtreasury | [GET](https://fiscaldata.treasury.gov/api-documentation/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 2164 | discovery |
 | Federal Register / federalregister | [GET](https://www.federalregister.gov/api/v1/documents.json?per_page=1) | 200 | ok / ok_json | [free](https://www.federalregister.gov/developers/documentation/api/v1) | 441 | callable |
-| Feodo Tracker API / feodotrackerapi | [GET](https://feodotracker.abuse.ch/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://feodotracker.abuse.ch) | 356 | discovery |
+| Feodo Tracker API / feodotrackerapi | [GET](https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json) | 200 | ok / ok_json | [free](https://feodotracker.abuse.ch/blocklist/) | 190 | callable |
 | FFXIV Collect / ffxivcollect | [GET](https://ffxivcollect.com/api/mounts/186) | 200 | ok / ok_json | [free](https://ffxivcollect.com/) | 297 | callable |
 | FIFA Ultimate Team / fifaultimateteam | [GET](https://www.easports.com/fifa/ultimate-team/api/fut/item/) | 503 | dead_upstream / http_error | unknown | 1130 | discovery |
 | FIFA Women's World Cup / fifawomensworldcup | [GET](https://worldcup.sfg.io/) | 0 | dead_upstream / network_error | unknown | 126 | discovery |
@@ -606,7 +619,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | GamerPower / gamerpower | [GET](https://www.gamerpower.com/api/giveaways?platform=steam) | 200 | ok / ok_json | [free](https://www.gamerpower.com/api-read) | 415 | callable |
 | GBIF / gbif | [GET](https://api.gbif.org/v1/species/match?name=Puma%20concolor) | 200 | ok / ok_json | [free](https://www.gbif.org/developer/summary) | 164 | callable |
 | GBIF API / gbifapi | [GET](https://www.gbif.org/developer/summary/) | 403 | unresolved / access_denied | unknown | 119 | discovery |
-| GDBrowser / gdbrowser | [GET](https://gdbrowser.com/api/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 369 | discovery |
+| GDBrowser / gdbrowser | - | 0 | unresolved / reviewed_exclusion | unknown | 0 | discovery |
 | GDPR API / gdprapi | [GET](https://gdpr-info.eu/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 556 | discovery |
 | Genderize / genderize | [GET](https://genderize.io/) | 406 | unresolved / http_error | unknown | 832 | discovery |
 | Genderize.io / genderize | [GET](https://genderize.io/) | 406 | duplicate / duplicate | unknown | - | discovery |
@@ -632,8 +645,8 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | GPT4All / gpt4all | [GET](https://gpt4all.io/) | 302 | redirect_https / redirect_not_approved | [free](https://gpt4all.io) | 116 | discovery |
 | GraphQL Jobs / graphqljobs | [GET](https://graphql.jobs/docs/api/) | 0 | dead_upstream / network_error | unknown | 5 | discovery |
 | Graphs for Coronavirus / graphsforcoronavirus | [GET](https://corona.dnsforfamily.com/api.txt/) | 0 | dead_upstream / network_error | unknown | 3 | discovery |
-| Gravatar / gravatar | [GET](https://en.gravatar.com/) | 302 | redirect_https / redirect_not_approved | unknown | 545 | discovery |
-| Gravatar API / gravatarapi | [GET](https://en.gravatar.com/site/implement/) | 302 | redirect_https / redirect_not_approved | [free](https://en.gravatar.com/site/implement) | 2000 | discovery |
+| Gravatar / gravatar | [GET](https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json) | 200 | ok / ok_json | [free](https://docs.gravatar.com/guides/llms-txt/) | 577 | callable |
+| Gravatar API / gravatar | [GET](https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json) | 200 | duplicate / duplicate | [free](https://docs.gravatar.com/guides/llms-txt/) | - | alias of gravatar |
 | GroupMe / groupme | [GET](https://dev.groupme.com/docs/v3/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 767 | discovery |
 | GrünstromIndex / grnstromindex | [GET](https://gruenstromindex.de/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 416 | discovery |
 | Grype / grype | [GET](https://anchore.com/) | 200 | not_hosted_api / reviewed_exclusion | unknown | 883 | discovery |
@@ -653,7 +666,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Hipster Ipsum / hipsteripsum | [GET](https://hipsum.co/api/?type=hipster-centric&sentences=1) | 200 | ok / ok_json | [free](https://hipsum.co/the-api/) | 761 | callable |
 | hitokoto / hitokoto | [GET](https://hitokoto.cn/api/) | 302 | redirect_https / redirect_not_approved | unknown | 2261 | discovery |
 | Homebrew / homebrew | [GET](https://formulae.brew.sh/api/formula/git.json) | 200 | ok / ok_json | [free](https://formulae.brew.sh/docs/api/) | 288 | callable |
-| Hong Kong Data API / hongkongdataapi | [GET](https://data.gov.hk/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://data.gov.hk) | 2629 | discovery |
+| Hong Kong Data API / hongkongdataapi | [GET](https://data.gov.hk/en-data/api/3/action/package_list?limit=1) | 0 | timeout / timeout | [free](https://data.gov.hk/en/faq) | 284 | discovery |
 | Hong Kong GeoData Store / hongkonggeodatastore | [GET](https://geodata.gov.hk/gs/) | 0 | dead_upstream / network_error | unknown | 5 | discovery |
 | Hong Kong Open Data API / hongkongopendataapi | [GET](https://data.gov.hk/en/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1377 | discovery |
 | host-t.com / hosttcom | [GET](https://host-t.com/) | 301 | redirect_https / redirect_not_approved | unknown | 1007 | discovery |
@@ -767,7 +780,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Mark Text / marktext | [GET](https://marktext.app/) | 200 | not_hosted_api / reviewed_exclusion | unknown | 839 | discovery |
 | markerapi / markerapi | [GET](https://markerapi.com/) | 521 | dead_upstream / http_error | unknown | 333 | discovery |
 | Marketstack / marketstack | [GET](https://marketstack.com/?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo-Best-sellers) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 893 | discovery |
-| Maven Central / mavencentral | [GET](https://search.maven.org/) | 200 | unresolved / invalid_response | [free](https://search.maven.org) | 222 | discovery |
+| Maven Central / mavencentral | - | 0 | commercial_permission / reviewed_exclusion | [free](https://search.maven.org) | 0 | discovery |
 | MealDB API / mealdbapi | [GET](https://www.themealdb.com/api.php/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 178 | discovery |
 | Mempool / mempool | [GET](https://mempool.space/api/v1/fees/recommended) | 200 | ok / ok_json | [free](https://mempool.space/docs/api/rest) | 328 | callable |
 | Mempool API / mempoolapi | [GET](https://mempool.space/api/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1722 | discovery |
@@ -792,12 +805,12 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | MLB Data API / mlbdataapi | [GET](https://statsapi.mlb.com/api/v1/sports) | 200 | ok / ok_json | [free](https://statsapi.mlb.com) | 807 | callable |
 | MLB StatsAPI / mlbstatsapi-265d31bd | [GET](https://statsapi.mlb.com/api/) | 404 | wrong_base_url_path / http_error | unknown | 1453 | discovery |
 | MMO Games / mmogames | [GET](https://www.mmobomb.com/api1/game?id=452) | 200 | ok / ok_json | [free](https://www.mmobomb.com/api) | 449 | callable |
-| Mockoon / mockoon | [GET](https://mockoon.com/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://mockoon.com) | 147 | discovery |
+| Mockoon / mockoon | - | 0 | unresolved / reviewed_exclusion | [free](https://mockoon.com) | 0 | discovery |
 | Mocky / mocky | [GET](https://designer.mocky.io/) | 0 | redirect_https / tls_error | unknown | 210 | discovery |
 | Mojio / mojio | [GET](https://www.moj.io/developer/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 519 | discovery |
 | Moodle / moodle | [GET](https://moodle.org/) | 403 | unresolved / access_denied | unknown | 231 | discovery |
 | Moon Phase API / moonphaseapi | [GET](https://www.farmsense.net/api/astro-widgets/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 843 | discovery |
-| Morocco Open Data API / moroccoopendataapi | [GET](https://data.gov.ma/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://data.gov.ma) | 791 | discovery |
+| Morocco Open Data API / moroccoopendataapi | [GET](https://data.gov.ma/data/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://data.gov.ma/index.php/fr/Comment_exploiter_les_donn%C3%A9es) | 675 | callable |
 | Motivational Quotes / motivationalquotes | [GET](https://nodejs-quoteapp.herokuapp.com/) | 404 | wrong_base_url_path / http_error | unknown | 528 | discovery |
 | MovieGlu / movieglu | [GET](https://www.movieglu.com/) | 301 | redirect_https / redirect_not_approved | unknown | 980 | discovery |
 | MSW / msw | - | 0 | not_hosted_api / reviewed_exclusion | [free](https://mswjs.io) | 0 | discovery |
@@ -902,7 +915,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Open Government, Spain / opengovernmentspain | [GET](https://datos.gob.es/apidata/catalog/dataset.json?_pageSize=1) | 200 | ok / ok_json | [free](https://datos.gob.es/en/apidata) | 371 | callable |
 | Open Government, Sweden / opengovernmentsweden | [GET](https://www.dataportal.se/en/dataservice/91_29789/api-for-the-statistical-database/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 2227 | discovery |
 | Open Government, Taiwan / opengovernmenttaiwan | [GET](https://data.gov.tw/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1959 | discovery |
-| Open Government, UK / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://ckan.publishing.service.gov.uk) | 514 | callable |
+| Open Government, UK / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id) | 200 | ok / ok_json | [free](https://www.data.gov.uk/about/) | 259 | callable |
 | Open Government, USA / opengovernmentusa | [GET](https://www.data.gov/) | 301 | redirect_https / redirect_not_approved | unknown | 971 | discovery |
 | Open Government, Victoria State Government / opengovernmentvictoriastategovernment | [GET](https://discover.data.vic.gov.au/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://discover.data.vic.gov.au/api/3/action/help_show?name=package_search) | 3317 | callable |
 | Open Government, West Australia / opengovernmentwestaustralia | [GET](https://catalogue.data.wa.gov.au/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://catalogue.data.wa.gov.au/api/3/action/help_show?name=package_search) | 2203 | callable |
@@ -1065,7 +1078,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | SEC EDGAR / secedgar | [GET](https://data.sec.gov/submissions/CIK0000320193.json) | 200 | ok / ok_json | [free](https://www.sec.gov/about/webmaster-frequently-asked-questions) | 192 | callable |
 | SEC EDGAR API / secedgarapi | [GET](https://www.sec.gov/developer/) | 404 | duplicate / duplicate | unknown | - | discovery |
 | SEC EDGAR Data / secedgardata | [GET](https://www.sec.gov/edgar/sec-api-documentation/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1957 | discovery |
-| Semantic Scholar / semanticscholar | [GET](https://api.semanticscholar.org/) | 301 | redirect_https / redirect_not_approved | [free](https://api.semanticscholar.org) | 365 | discovery |
+| Semantic Scholar / semanticscholar | - | 0 | commercial_permission / reviewed_exclusion | [free](https://api.semanticscholar.org) | 0 | discovery |
 | Senegal Open Data API / senegalopendataapi | [GET](https://data.gouv.sn/) | 0 | dead_upstream / network_error | [free](https://data.gouv.sn) | 4 | discovery |
 | Seniverse / seniverse | [GET](https://www.seniverse.com/doc/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 2763 | discovery |
 | Serialif Color / serialifcolor | [GET](https://color.serialif.com/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 591 | discovery |
@@ -1097,7 +1110,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | South African Reserve Bank / southafricanreservebank | [GET](https://www.resbank.co.za/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 3235 | discovery |
 | Spaceflight News / spaceflightnews | [GET](https://spaceflightnewsapi.net/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 197 | discovery |
 | SpaceX / spacex | [GET](https://api.spacexdata.com/v4/launches/latest) | 522 | dead_upstream / http_error | [free](https://github.com/r-spacex/SpaceX-API) | 19774 | discovery |
-| Spain INE Statistics / spaininestatistics | [GET](https://www.ine.es/dyngs/DataLab/) | 404 | wrong_base_url_path / http_error | unknown | 597 | discovery |
+| Spain INE Statistics / spanishineapi | [GET](https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES) | 200 | duplicate / duplicate | [free](https://www.ine.es/datosabiertos/) | - | alias of spanishineapi |
 | Spanish random names / spanishrandomnames | [GET](https://random-names-api.herokuapp.com/public/) | 404 | wrong_base_url_path / http_error | unknown | 660 | discovery |
 | Spanish random words / spanishrandomwords | [GET](https://palabras-aleatorias-public-api.herokuapp.com/) | 404 | wrong_base_url_path / http_error | unknown | 606 | discovery |
 | Squiggle / squiggle | [GET](https://api.squiggle.com.au/?q=teams;team=1) | 200 | ok / ok_json | [free](https://api.squiggle.com.au/) | 372 | callable |
@@ -1187,8 +1200,8 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Uganda Open Data API / ugandaopendataapi | [GET](https://data.ug/) | 301 | redirect_https / redirect_not_approved | [free](https://data.ug) | 191 | discovery |
 | UI Avatars / uiavatars | [GET](https://ui-avatars.com/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://ui-avatars.com) | 91 | discovery |
 | UK Bank Holidays / ukbankholidays | [GET](https://www.gov.uk/bank-holidays.json) | 200 | ok / ok_json | [free](https://www.gov.uk/bank-holidays) | 106 | callable |
-| UK Government / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1) | 200 | duplicate / duplicate | [free](https://ckan.publishing.service.gov.uk) | - | alias of opengovernmentuk |
-| UK Government API / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1) | 200 | duplicate / duplicate | [free](https://ckan.publishing.service.gov.uk) | - | alias of opengovernmentuk |
+| UK Government / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id) | 200 | duplicate / duplicate | [free](https://www.data.gov.uk/about/) | - | alias of opengovernmentuk |
+| UK Government API / opengovernmentuk | [GET](https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id) | 200 | duplicate / duplicate | [free](https://www.data.gov.uk/about/) | - | alias of opengovernmentuk |
 | Ultraleap Tracking / ultraleaptracking | [GET](https://www.ultraleap.com/tracking/) | 404 | wrong_base_url_path / http_error | unknown | 241 | discovery |
 | umati / umati | [GET](https://umati.org/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 476 | discovery |
 | Umeå Open Data / umeopendata | [GET](https://opendata.umea.se/api/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1429 | discovery |
@@ -1282,7 +1295,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | 1inch Protocol API / 1inchprotocolapi | - | 0 | needs_key / reviewed_exclusion | [free](https://1inch.finance/docs) | 0 | discovery |
 | 1pt / 1pt | [GET](https://github.com/1pt-co/api/blob/main/README.md/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | 4chan / 4chan | [GET](https://github.com/4chan/4chan-API/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| 7Timer! / 7timer | [GET](https://www.7timer.info/doc.php?lang=en) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1065 | discovery |
+| 7Timer! / 7timer | - | 0 | commercial_permission / reviewed_exclusion | unknown | 0 | discovery |
 | Aave API / aaveapi | [GET](https://docs.aave.com/developers/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Aave Protocol API / aaveprotocolapi | [GET](https://aave.finance/docs/) | 301 | redirect_https / redirect_not_approved | [free](https://aave.finance/docs) | 226 | discovery |
 | AcgClub / acgclub | [GET](https://github.com/Rabtman/AcgClub/wiki/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
@@ -1368,7 +1381,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Catch The Show / catchtheshow | [GET](https://catchtheshow.herokuapp.com/api/documentation/) | 404 | wrong_base_url_path / http_error | unknown | 512 | discovery |
 | CBM Myanmar Forex / cbmmyanmarforex | [GET](https://forex.cbm.gov.mm/api/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 594 | discovery |
 | CDC / cdc | [GET](https://data.cdc.gov/resource/bi63-dtpu.json?%24limit=1) | 200 | ok / ok_json | [free](https://catalog.data.gov/dataset/cdc-open-data-api) | 695 | callable |
-| Census.gov / censusgov | [GET](https://www.census.gov/data/developers/data-sets.html/) | 404 | wrong_base_url_path / http_error | unknown | 730 | discovery |
+| Census.gov / censusgov | - | 0 | needs_key / reviewed_exclusion | unknown | 0 | discovery |
 | Cep.la / cepla | [GET](https://cep.la/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 889 | discovery |
 | CERN Open Data / cernopendata | [GET](https://opendata.cern.ch/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 458 | discovery |
 | Chainlink API / chainlinkapi | [GET](https://docs.chain.link/) | 0 | wrong_base_url_path / documentation_url | [free](https://docs.chain.link) | 0 | discovery |
@@ -1433,7 +1446,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | ctrip / ctrip | [GET](https://u.ctrip.com/union/help/Termsofuse.aspx/) | 302 | redirect_https / redirect_not_approved | unknown | 1314 | discovery |
 | Cupcake Ipsum / cupcakeipsum | [GET](https://www.cupcakeipsum.com/) | 301 | redirect_https / redirect_not_approved | unknown | 237 | discovery |
 | Currency-api / currencyapi | [GET](https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json) | 200 | ok / ok_json | [free](https://github.com/fawazahmed0/exchange-api) | 246 | callable |
-| Curve Finance Protocol API / curvefinanceprotocolapi | [GET](https://curve.finance/docs/) | 307 | redirect_https / redirect_not_approved | [free](https://curve.finance/docs) | 196 | discovery |
+| Curve Finance Protocol API / curve | [GET](https://api.curve.finance/v1/getETHprice) | 200 | duplicate / duplicate | [free](https://docs.curve.finance/developer/integration/api/curve-api/) | - | alias of curve |
 | Czech Television / czechtelevision | [GET](https://www.ceskatelevize.cz/xml/tv-program/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1290 | discovery |
 | Dangdang / dangdang | [GET](https://open.dangdang.com/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 1710 | discovery |
 | Data.gov API / datagovapi | [GET](https://www.data.gov/developers/apis/) | 301 | redirect_https / redirect_not_approved | unknown | 1389 | discovery |
@@ -1596,7 +1609,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | LeTV / letv | [GET](https://www.lecloud.com/zh-cn/help/2016/07/27/150.html?LeftMenu=api_db_guide) | 0 | redirect_https / tls_error | unknown | 111 | discovery |
 | LibreTranslate API / libretranslateapi | [GET](https://libretranslate.com/docs/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 157 | discovery |
 | License-API / licenseapi | [GET](https://github.com/cmccandless/license-api/blob/master/README.md/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| Lido Protocol API / lidoprotocolapi | [GET](https://lido.finance/docs/) | 403 | unresolved / access_denied | [free](https://lido.finance/docs) | 220 | discovery |
+| Lido Protocol API / lidoprotocolapi | [GET](https://eth-api.lido.fi/v1/protocol/steth/apr/sma) | 200 | ok / ok_json | [free](https://docs.lido.fi/integrations/api/) | 174 | callable |
 | Lifelog / lifelog | [GET](https://developer.sony.com/develop/services/lifelog-api/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Lingva / lingva | [GET](https://github.com/thedaviddelta/lingva-translate/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Llama.cpp / llamacpp | [GET](https://github.com/ggerganov/llama.cpp/) | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
@@ -1689,7 +1702,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | OpenSky Network / openskynetwork | [GET](https://opensky-network.org/apidoc/index.html/) | 404 | wrong_base_url_path / http_error | unknown | 238 | discovery |
 | OpenVR / openvr | - | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
 | Openwhyd / openwhyd | - | 0 | gateway_block / unsafe_url | unknown | 0 | discovery |
-| Orca Protocol API / orcaprotocolapi | [GET](https://orca.finance/docs/) | 403 | unresolved / access_denied | [free](https://orca.finance/docs) | 186 | discovery |
+| Orca Protocol API / orcaprotocolapi | [GET](https://api.orca.so/v2/solana/pools?size=1) | 200 | ok / ok_json | [free](https://docs.orca.so/api-reference/overview) | 353 | callable |
 | Ordoro / ordoro | [GET](https://www.ordoro.com/developers/) | 301 | redirect_https / redirect_not_approved | unknown | 707 | discovery |
 | OSRM API / osrmapi | [GET](https://project-osrm.org/docs/v5.24.0/api/) | 200 | wrong_base_url_path / html_instead_of_api | [free](http://project-osrm.org/docs/v5.24.0/api) | 366 | discovery |
 | Outstatic / outstatic | [GET](https://outstatic.com/docs/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 2936 | discovery |
@@ -1740,7 +1753,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Random User API / randomuser-c51bc20a | [GET](https://randomuser.me/api/?results=1&inc=name,nat&noinfo) | 200 | duplicate / duplicate | [free](https://randomuser.me/documentation) | - | alias of randomuser |
 | RandomUser API / randomuser-9b425277 | [GET](https://randomuser.me/documentation/) | 200 | duplicate / duplicate | [free](https://randomuser.me/documentation) | - | discovery |
 | Ray Serve / rayserve | [GET](https://docs.ray.io/en/latest/serve/) | 0 | wrong_base_url_path / documentation_url | [free](https://docs.ray.io/en/latest/serve) | 0 | discovery |
-| Raydium Protocol API / raydiumprotocolapi | [GET](https://raydium.finance/docs/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://raydium.finance/docs) | 519 | discovery |
+| Raydium Protocol API / raydiumprotocolapi | [GET](https://api-v3.raydium.io/main/info) | 200 | ok / ok_json | [free](https://github.com/raydium-io/raydium-docs-v1/blob/main/sdk-api/rest-api.mdx) | 334 | callable |
 | Razorpay IFSC / razorpayifsc | [GET](https://ifsc.razorpay.com/HDFC0000001) | 200 | ok / ok_json | [free](https://github.com/razorpay/ifsc) | 794 | callable |
 | Readme typing SVG / readmetypingsvg | [GET](https://github.com/DenverCoder1/readme-typing-svg/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | RealityKit / realitykit | - | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
@@ -1780,12 +1793,12 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Solana Web3.js / solanaweb3js | - | 0 | not_hosted_api / reviewed_exclusion | unknown | 0 | discovery |
 | Sonar / sonar | [GET](https://github.com/Cgboal/SonarSearch/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | South Park Quotes / southparkquotes | [GET](https://github.com/Thatskat/southpark-quotes-api/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| Spanish INE API / spanishineapi | [GET](https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66) | 1226 | discovery |
+| Spanish INE API / spanishineapi | [GET](https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES) | 200 | ok / ok_json | [free](https://www.ine.es/datosabiertos/) | 1418 | callable |
 | Sport List & Data / sportlistdata | [GET](https://developers.decathlon.com/products/sports/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Sport Places / sportplaces | [GET](https://developers.decathlon.com/products/sport-places/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Sportscaster API / sportscasterapi | [GET](https://github.com/roysti10/sportscaster/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Sportsipy / sportsipy | [GET](https://github.com/roclark/sportsipy/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| SSL Labs API / ssllabsapi | [GET](https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md/) | 0 | wrong_base_url_path / documentation_url | [free](https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md) | 0 | discovery |
+| SSL Labs API / ssllabsapi | - | 0 | commercial_permission / reviewed_exclusion | [free](https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md) | 0 | discovery |
 | SST / sst | [GET](https://docs.sst.dev/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Stack AI / stackai | [GET](https://docs.stack-ai.com/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Stack Lighting / stacklighting | [GET](https://developers.stacklighting.com/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
@@ -1816,14 +1829,14 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | The Report of the Week / thereportoftheweek | [GET](https://github.com/andyklimczak/TheReportOfTheWeek-API/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | They Said So / theysaidso | [GET](https://quotes.rest/qod.json?category=inspire) | 401 | unresolved / access_denied | unknown | 720 | discovery |
 | Times Adder / timesadder | [GET](https://github.com/FranP-code/API-Times-Adder/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| ToS;DR API / tosdrapi | [GET](https://tosdr.org/api.html/) | 404 | wrong_base_url_path / http_error | [free](https://tosdr.org/api.html) | 270 | discovery |
+| ToS;DR API / tosdrapi | [GET](https://api.tosdr.org/service/v3?id=190) | 200 | ok / ok_json | [free](https://docs.tosdr.org/site-policy/tosdr-terms/tosdr.org-terms-of-contribution) | 206 | callable |
 | Trace Moe / tracemoe | - | 0 | gateway_block / unsafe_url | unknown | 0 | discovery |
 | TransitLand / transitland | [GET](https://www.transit.land/documentation/datastore/api-endpoints.html/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 818 | discovery |
 | Transitland API / transitlandapi | [GET](https://www.transit.land/documentation/) | 200 | wrong_base_url_path / html_instead_of_api | [free](https://www.transit.land/documentation) | 1246 | discovery |
 | Transloadit / transloadit | [GET](https://transloadit.com/docs/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 346 | discovery |
 | Transport for Atlanta, US / transportforatlantaus | [GET](https://www.itsmarta.com/app-developer-resources.aspx/) | 301 | redirect_https / redirect_not_approved | unknown | 489 | discovery |
 | Transport for Belgium / transportforbelgium | [GET](https://api.irail.be/v1/stations?format=json) | 200 | ok / ok_json | [free](https://docs.irail.be/) | 262 | callable |
-| Transport for Berlin, Germany / transportforberlingermany | [GET](https://v6.vbb.transport.rest/locations?query=Berlin&results=1) | 200 | ok / ok_json | [free](https://v6.vbb.transport.rest/api.html) | 1137 | callable |
+| Transport for Berlin, Germany / transportforberlingermany | [GET](https://v6.vbb.transport.rest/locations?query=Berlin&results=1) | 200 | unresolved / customer_gateway_failed | [free](https://v6.vbb.transport.rest/api.html) | 1137 | discovery |
 | Transport for Denver, US / transportfordenverus | [GET](https://www.rtd-denver.com/gtfs-developer-guide.shtml/) | 404 | wrong_base_url_path / http_error | unknown | 1488 | discovery |
 | Transport for Finland / hsl | [GET](https://digitransit.fi/en/developers/) | 200 | duplicate / duplicate | unknown | - | discovery |
 | Transport for Grenoble, France / transportforgrenoblefrance | [GET](https://www.mobilites-m.fr/pages/opendata/OpenDataApi.html/) | 200 | wrong_base_url_path / html_instead_of_api | unknown | 280 | discovery |
@@ -1889,7 +1902,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | wozhitu / wozhitu | [GET](https://api1.wozhitu.com/) | 0 | dead_upstream / network_error | unknown | 211 | discovery |
 | Xively / xively | [GET](https://developer.xively.com/reference/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
 | Yahoo Maps / yahoomaps | [GET](https://developer.yahoo.com/maps/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |
-| Yearn Finance Protocol API / yearnfinanceprotocolapi | [GET](https://yearn.finance/docs/) | 307 | redirect_https / redirect_not_approved | [free](https://yearn.finance/docs) | 237 | discovery |
+| Yearn Finance Protocol API / yearnfinanceprotocolapi | [GET](https://ydaemon.yearn.fi/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9) | 200 | ok / ok_json | [free](https://docs.yearn.fi/developers/building-on-yearn) | 452 | callable |
 | yeekit / yeekit | [GET](https://api.yeekit.com/) | 0 | dead_upstream / network_error | unknown | 259 | discovery |
 | Yeelight / yeelight | [GET](https://www.yeelight.com/en_US/developer/) | 500 | dead_upstream / http_error | unknown | 2094 | discovery |
 | Yellow Pages API / yellowpagesapi | [GET](https://github.com/Hrushi11/Yellow-Pages-End-API/) | 0 | wrong_base_url_path / documentation_url | unknown | 0 | discovery |

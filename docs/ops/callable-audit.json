@@ -1,51 +1,52 @@
 {
-  "checkedAt": "2026-10-15T17:58:35.900Z",
+  "checkedAt": "2026-10-15T18:22:35.488Z",
   "policy": "Keyless HTTPS GET only; shared 20-second gateway transport; one retry at most; reviewed redirects only; 256 KiB body; eight workers; at least one second between requests per origin. A callable API needs a valid reviewed response, explicit free evidence and one canonical identity.",
   "sweepComplete": false,
   "mode": "partial-recheck",
   "lastFullSweepAt": "2026-10-15T17:29:32.497Z",
   "candidateCount": 1641,
-  "verifiedCount": 215,
+  "verifiedCount": 230,
   "causes": {
-    "wrong_base_url_path": 747,
-    "ok": 215,
-    "redirect_https": 186,
-    "duplicate": 173,
+    "wrong_base_url_path": 729,
+    "ok": 230,
+    "redirect_https": 179,
+    "duplicate": 177,
     "dead_upstream": 94,
-    "unresolved": 77,
+    "unresolved": 76,
     "not_hosted_api": 63,
-    "timeout": 38,
+    "timeout": 39,
     "gateway_block": 21,
     "unknown_pricing": 12,
-    "needs_key": 10,
+    "needs_key": 11,
+    "commercial_permission": 7,
     "rate_limit": 3,
-    "commercial_permission": 2,
     "missing_default_params": 0
   },
   "outcomes": {
-    "html_instead_of_api": 380,
-    "documentation_url": 256,
-    "ok_json": 211,
-    "duplicate": 173,
-    "http_error": 156,
-    "redirect_not_approved": 155,
+    "html_instead_of_api": 366,
+    "documentation_url": 255,
+    "ok_json": 225,
+    "duplicate": 177,
+    "http_error": 152,
+    "redirect_not_approved": 148,
+    "reviewed_exclusion": 82,
     "network_error": 76,
-    "reviewed_exclusion": 74,
-    "timeout": 38,
-    "access_denied": 33,
+    "timeout": 39,
+    "access_denied": 31,
     "tls_error": 31,
     "unsafe_url": 19,
-    "invalid_response": 14,
+    "invalid_response": 13,
     "valid_response_unknown_pricing": 12,
-    "customer_gateway_failed": 3,
+    "customer_gateway_failed": 4,
     "rate_limited": 3,
     "body_limit": 2,
     "ok_text": 2,
     "ok_xml": 2,
-    "key_documented": 1
+    "key_documented": 1,
+    "ok_csv": 1
   },
   "uncheckedCount": 0,
-  "reusedCount": 1639,
+  "reusedCount": 1633,
   "repairedAndVerified": [
     {
       "id": "anapioficeandfire",
@@ -165,6 +166,13 @@
       ]
     },
     {
+      "id": "colombiaopendataapi",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
       "id": "countriesgraphql",
       "causes": [
         "missing_default_params"
@@ -180,6 +188,12 @@
       "id": "crossref",
       "causes": [
         "missing_default_params"
+      ]
+    },
+    {
+      "id": "curve",
+      "causes": [
+        "wrong_base_url_path"
       ]
     },
     {
@@ -208,6 +222,12 @@
       "causes": [
         "wrong_base_url_path",
         "missing_default_params"
+      ]
+    },
+    {
+      "id": "defillamaapi",
+      "causes": [
+        "wrong_base_url_path"
       ]
     },
     {
@@ -255,7 +275,28 @@
       ]
     },
     {
+      "id": "dutchcbsapi",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
+      "id": "ecbapi",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
       "id": "environmentagency",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
+      "id": "environmentcanadaapi",
       "causes": [
         "wrong_base_url_path",
         "missing_default_params"
@@ -360,6 +401,12 @@
       ]
     },
     {
+      "id": "gravatar",
+      "causes": [
+        "wrong_base_url_path"
+      ]
+    },
+    {
       "id": "gutendex",
       "causes": [
         "missing_default_params"
@@ -442,6 +489,13 @@
     },
     {
       "id": "mmogames",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
+      "id": "moroccoopendataapi",
       "causes": [
         "wrong_base_url_path",
         "missing_default_params"
@@ -1007,6 +1061,12 @@
       ]
     },
     {
+      "id": "lidoprotocolapi",
+      "causes": [
+        "wrong_base_url_path"
+      ]
+    },
+    {
       "id": "magicthegatheringapi",
       "causes": [
         "wrong_base_url_path",
@@ -1075,6 +1135,13 @@
       ]
     },
     {
+      "id": "orcaprotocolapi",
+      "causes": [
+        "wrong_base_url_path",
+        "missing_default_params"
+      ]
+    },
+    {
       "id": "poetrydb",
       "causes": [
         "wrong_base_url_path"
@@ -1094,6 +1161,12 @@
       ]
     },
     {
+      "id": "raydiumprotocolapi",
+      "causes": [
+        "wrong_base_url_path"
+      ]
+    },
+    {
       "id": "razorpayifsc",
       "causes": [
         "wrong_base_url_path"
@@ -1106,20 +1179,26 @@
       ]
     },
     {
+      "id": "spanishineapi",
+      "causes": [
+        "wrong_base_url_path"
+      ]
+    },
+    {
       "id": "tcgdex",
       "causes": [
         "wrong_base_url_path"
       ]
     },
     {
-      "id": "transportforbelgium",
+      "id": "tosdrapi",
       "causes": [
         "wrong_base_url_path",
         "missing_default_params"
       ]
     },
     {
-      "id": "transportforberlingermany",
+      "id": "transportforbelgium",
       "causes": [
         "wrong_base_url_path",
         "missing_default_params"
@@ -1188,6 +1267,12 @@
       ]
     },
     {
+      "id": "yearnfinanceprotocolapi",
+      "causes": [
+        "wrong_base_url_path"
+      ]
+    },
+    {
       "id": "zippopotamus",
       "causes": [
         "wrong_base_url_path"
@@ -1225,51 +1310,51 @@
     }
   ],
   "managedApprovedCount": 3,
-  "customerExecutableCatalogCount": 218,
-  "additionalVerifiedApisNeededFor1000": 782,
+  "customerExecutableCatalogCount": 233,
+  "additionalVerifiedApisNeededFor1000": 767,
   "signupsNeededFor1000": null,
   "originalCohortSummary": {
     "cohortRows": 1002,
     "matchedRows": 1002,
-    "currentlyVerifiedCanonicalRows": 164,
-    "currentDuplicateRows": 112,
-    "currentDiscoveryRows": 726,
+    "currentlyVerifiedCanonicalRows": 174,
+    "currentDuplicateRows": 115,
+    "currentDiscoveryRows": 713,
     "missingRows": [],
     "originallyVerifiedRows": 13,
     "originallyFailingRows": 989,
     "currentCauses": {
-      "wrong_base_url_path": 389,
-      "ok": 164,
-      "redirect_https": 123,
-      "duplicate": 112,
+      "wrong_base_url_path": 377,
+      "ok": 174,
+      "redirect_https": 118,
+      "duplicate": 115,
       "dead_upstream": 60,
       "unresolved": 55,
       "not_hosted_api": 50,
-      "timeout": 25,
+      "timeout": 26,
       "unknown_pricing": 10,
       "needs_key": 7,
+      "commercial_permission": 5,
       "rate_limit": 3,
-      "commercial_permission": 2,
       "gateway_block": 2,
       "missing_default_params": 0
     },
     "formerlyFailingCurrentCauses": {
-      "wrong_base_url_path": 389,
-      "ok": 151,
-      "redirect_https": 123,
-      "duplicate": 112,
+      "wrong_base_url_path": 377,
+      "ok": 161,
+      "redirect_https": 118,
+      "duplicate": 115,
       "dead_upstream": 60,
       "unresolved": 55,
       "not_hosted_api": 50,
-      "timeout": 25,
+      "timeout": 26,
       "unknown_pricing": 10,
       "needs_key": 7,
+      "commercial_permission": 5,
       "rate_limit": 3,
-      "commercial_permission": 2,
       "gateway_block": 2,
       "missing_default_params": 0
     },
-    "formerlyFailingNowVerifiedCanonicalRows": 151,
+    "formerlyFailingNowVerifiedCanonicalRows": 161,
     "note": "Cohort matching uses historical ID and exact normalized name, not normalized ID alone. Counts are candidate rows including aliases; expanded candidates are separate. Missing rows are unresolved, not presumed dead or key-required. Current causes do not rewrite original outcomes."
   },
   "baseline": {
@@ -14593,15 +14678,15 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "aviationweather",
       "sourceUrl": "https://www.aviationweather.gov/dataserver",
-      "smokePath": "/metar?ids=KMCI&format=json",
-      "canonicalExplicit": false,
+      "smokePath": "/metar?ids=KJFK&format=json",
+      "canonicalExplicit": true,
       "docsUrl": "https://aviationweather.gov/data/api/",
       "pricing": "free",
-      "pricingSource": "https://aviationweather.gov/data/api/",
-      "freeEvidence": "Government machine-readable public weather access; documented GET example, 100 requests/minute ceiling.",
+      "pricingSource": "https://www.weather.gov/disclaimer",
+      "freeEvidence": "Official NOAA/NWS public weather API documents keyless METAR JSON GET and custom User-Agent with maximum 100 requests/minute. NWS states weather data is public domain. One current KJFK METAR replaces an empty/unavailable station query; source attribution and non-endorsement apply.",
       "freeVerified": true,
       "reviewedRecipe": true,
-      "baselineVerified": true,
+      "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": {
@@ -14620,43 +14705,43 @@
         {
           "cause": "missing_default_params",
           "from": "/",
-          "to": "/metar?ids=KMCI&format=json",
+          "to": "/metar?ids=KJFK&format=json",
           "source": "https://aviationweather.gov/data/api/"
         }
       ],
-      "definitionHash": "659ec4ef22957089274cd917754f1c45533924ecf1fc3697df59e71d8e004b05",
-      "checkedAt": "2026-10-15T17:26:55.956Z",
+      "definitionHash": "d4e343c2aaeb5f157ce175b800de140cb93e55f8350f9ce7352c3ae0c6f52d71",
+      "checkedAt": "2026-10-15T18:19:01.100Z",
       "status": 200,
       "verified": true,
       "trace": [
         {
-          "url": "https://aviationweather.gov/api/data/metar?ids=KMCI&format=json",
-          "startedAt": "2026-10-15T17:26:55.956Z",
+          "url": "https://aviationweather.gov/api/data/metar?ids=KJFK&format=json",
+          "startedAt": "2026-10-15T18:19:01.110Z",
           "status": 200,
           "contentType": "application/json; charset=utf-8"
         }
       ],
-      "probeUrl": "https://aviationweather.gov/api/data/metar?ids=KMCI&format=json",
-      "finalProbeUrl": "https://aviationweather.gov/api/data/metar?ids=KMCI&format=json",
-      "responseBytes": 491,
+      "probeUrl": "https://aviationweather.gov/api/data/metar?ids=KJFK&format=json",
+      "finalProbeUrl": "https://aviationweather.gov/api/data/metar?ids=KJFK&format=json",
+      "responseBytes": 582,
       "bodyTruncated": false,
       "outcome": "ok_json",
       "cause": "ok",
-      "latencyMs": 1239,
+      "latencyMs": 1106,
       "canonicalBaseId": "aviationweather",
+      "reused": true,
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
       "gatewayVerification": {
-        "verifiedAt": "2026-10-15T17:48:31.263Z",
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
         "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
         "status": 200,
         "success": true,
         "healthDisabled": false,
-        "latencyMs": 3877,
+        "latencyMs": 397,
         "route": "customer-gateway",
         "errorCode": null
-      },
-      "reused": true
+      }
     },
     {
       "id": "axolotl",
@@ -20247,6 +20332,13 @@
       "origin": "https://cocoapods.org",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "cocoapods",
+        "name": "CocoaPods",
+        "cause": "commercial_permission",
+        "docsUrl": "https://cocoapods.org/legal",
+        "evidence": "Official General Conditions section 5 prohibits reproducing, duplicating, copying, selling, reselling or exploiting any portion of the Service or access without express prior written permission. A public metadata GET works, but that does not establish permission for APIClaw to proxy the service. Discovery only pending permission."
+      },
       "canonicalId": "cocoapods",
       "sourceUrl": "https://cocoapods.org",
       "smokePath": "/",
@@ -20267,28 +20359,18 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "f103f8db2c11b359aebcb56f0fa4e8c72b5efe248f0ad9f82f89d095b4502c84",
-      "checkedAt": "2026-10-15T17:27:03.489Z",
-      "status": 200,
+      "definitionHash": "16b72c33ffafb9e7d903c03f7cfef8b9a6bafe146ff673832107461ba5424820",
+      "checkedAt": "2026-10-15T18:22:35.468Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://cocoapods.org/",
-          "startedAt": "2026-10-15T17:27:03.489Z",
-          "status": 200,
-          "contentType": "text/html;charset=utf-8"
-        }
-      ],
-      "probeUrl": "https://cocoapods.org/",
-      "finalProbeUrl": "https://cocoapods.org/",
-      "responseBytes": 15709,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 227,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "commercial_permission",
+      "detail": "Official General Conditions section 5 prohibits reproducing, duplicating, copying, selling, reselling or exploiting any portion of the Service or access without express prior written permission. A public metadata GET works, but that does not establish permission for APIClaw to proxy the service. Discovery only pending permission.",
+      "exclusionSource": "https://cocoapods.org/legal",
+      "latencyMs": 0,
       "canonicalBaseId": "cocoapods",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "codeberg",
@@ -20348,7 +20430,8 @@
         "latencyMs": 233,
         "route": "customer-gateway",
         "errorCode": null
-      }
+      },
+      "reused": true
     },
     {
       "id": "codeium",
@@ -21052,20 +21135,20 @@
     {
       "id": "colombiaopendataapi",
       "name": "Colombia Open Data API",
-      "baseUrl": "https://www.datos.gov.co",
-      "origin": "https://www.datos.gov.co",
+      "baseUrl": "https://api.us.socrata.com",
+      "origin": "https://api.us.socrata.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "colombiaopendataapi",
       "sourceUrl": "https://www.datos.gov.co",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/api/catalog/v1?domains=www.datos.gov.co&limit=1",
+      "canonicalExplicit": true,
+      "docsUrl": "https://herramientas.datos.gov.co/sites/default/files/Modelo_de_Uso_de_Calidad_de_Datos.pdf",
       "pricing": "free",
-      "pricingSource": "https://www.datos.gov.co",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://herramientas.datos.gov.co/terminos",
+      "freeEvidence": "Official Colombian operator manual documents the Socrata catalog host and domains filter. Operator terms permit free unrestricted reuse for commercial/non-commercial purposes; attribute Fuente: Portal de Datos Abiertos www.datos.gov.co, preserve update dates/metadata. Catalog query is restricted to the Colombian portal and one result; not a second service for each dataset.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -21075,28 +21158,53 @@
         "outcome": "http_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "81faa7ec3fc4710c7bcf3702988bd8bb5f061d15f413e0920dc666739fbd3918",
-      "checkedAt": "2026-10-15T17:27:04.016Z",
-      "status": 406,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://www.datos.gov.co/",
-          "startedAt": "2026-10-15T17:27:04.016Z",
-          "status": 406,
-          "contentType": "application/json; charset=utf-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://www.datos.gov.co",
+          "to": "https://api.us.socrata.com",
+          "source": "https://herramientas.datos.gov.co/sites/default/files/Modelo_de_Uso_de_Calidad_de_Datos.pdf"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/api/catalog/v1?domains=www.datos.gov.co&limit=1",
+          "source": "https://herramientas.datos.gov.co/sites/default/files/Modelo_de_Uso_de_Calidad_de_Datos.pdf"
         }
       ],
-      "probeUrl": "https://www.datos.gov.co/",
-      "finalProbeUrl": "https://www.datos.gov.co/",
-      "responseBytes": 39,
+      "definitionHash": "33eb48b6fd351077132b3f280e15b05e51136c37d6d3bd17aefa98ac5fa2a3c6",
+      "checkedAt": "2026-10-15T18:19:01.108Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://api.us.socrata.com/api/catalog/v1?domains=www.datos.gov.co&limit=1",
+          "startedAt": "2026-10-15T18:19:01.172Z",
+          "status": 200,
+          "contentType": "application/json;charset=utf-8"
+        }
+      ],
+      "probeUrl": "https://api.us.socrata.com/api/catalog/v1?domains=www.datos.gov.co&limit=1",
+      "finalProbeUrl": "https://api.us.socrata.com/api/catalog/v1?domains=www.datos.gov.co&limit=1",
+      "responseBytes": 25406,
       "bodyTruncated": false,
-      "outcome": "http_error",
-      "cause": "unresolved",
-      "latencyMs": 740,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 1034,
       "canonicalBaseId": "colombiaopendataapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 403,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "colorapi",
@@ -21557,14 +21665,14 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "countryflagsapi",
       "sourceUrl": "https://flagcdn.com",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/en/codes.json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://flagpedia.net/download/api",
       "pricing": "free",
-      "pricingSource": "https://flagcdn.com",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://flagpedia.net/download/api",
+      "freeEvidence": "Official Flagpedia API documentation explicitly describes a completely free CDN and documents the country-code/name JSON endpoint. Only JSON metadata is supported here; binary flag images are outside this gateway response contract. Attribute Flagpedia where appropriate.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -21575,28 +21683,39 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "2570b04c876c7f795e8b40dfbc98557f2f7cd06e8e0b7a6262cbcf6609208763",
-      "checkedAt": "2026-10-15T17:27:04.756Z",
+      "definitionHash": "64d730c5e0a7ed762ebd361d5e8ff4cd508faafed87107f2bc47a9857bdba0ec",
+      "checkedAt": "2026-10-15T18:19:01.109Z",
       "status": 200,
-      "verified": false,
+      "verified": true,
       "trace": [
         {
-          "url": "https://flagcdn.com/",
-          "startedAt": "2026-10-15T17:27:04.756Z",
+          "url": "https://flagcdn.com/en/codes.json",
+          "startedAt": "2026-10-15T18:19:01.172Z",
           "status": 200,
-          "contentType": "text/html; charset=utf-8"
+          "contentType": "application/json; charset=utf-8"
         }
       ],
-      "probeUrl": "https://flagcdn.com/",
-      "finalProbeUrl": "https://flagcdn.com/",
-      "responseBytes": 4062,
+      "probeUrl": "https://flagcdn.com/en/codes.json",
+      "finalProbeUrl": "https://flagcdn.com/en/codes.json",
+      "responseBytes": 7441,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 104,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 307,
       "canonicalBaseId": "countryflagsapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 133,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "countryis",
@@ -22603,20 +22722,20 @@
     {
       "id": "curve",
       "name": "Curve",
-      "baseUrl": "https://curve.fi",
-      "origin": "https://curve.fi",
+      "baseUrl": "https://api.curve.finance/v1",
+      "origin": "https://api.curve.finance",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "curve",
       "sourceUrl": "https://curve.fi",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
-      "pricing": "unknown",
-      "pricingSource": null,
-      "freeEvidence": null,
-      "freeVerified": false,
-      "reviewedRecipe": false,
+      "smokePath": "/getETHprice",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.curve.finance/developer/integration/api/curve-api/",
+      "pricing": "free",
+      "pricingSource": "https://docs.curve.finance/developer/integration/api/curve-api/",
+      "freeEvidence": "Existing source inventory labels Curve free; the official Curve-hosted OpenAPI specification documents this public price-data GET endpoint with no API-key/security requirement. This recipe provides public reads only.",
+      "freeVerified": true,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -22626,32 +22745,47 @@
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "747827bfb3cc122bf3b0d4850616469cee259b1e28329098968a1ea77b7b202e",
-      "checkedAt": "2026-10-15T17:27:05.814Z",
-      "status": 301,
-      "verified": false,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://curve.fi",
+          "to": "https://api.curve.finance/v1",
+          "source": "https://docs.curve.finance/developer/integration/api/curve-api/"
+        }
+      ],
+      "definitionHash": "c67c78dc25cd91ec435b67ce221dea01c98c1d5c66fa2342535d1df288622d96",
+      "checkedAt": "2026-10-15T18:19:01.109Z",
+      "status": 200,
+      "verified": true,
       "trace": [
         {
-          "url": "https://curve.fi/",
-          "startedAt": "2026-10-15T17:27:05.814Z",
-          "status": 301,
-          "contentType": "text/html; charset=UTF-8",
-          "redirectTo": "https://curve.finance/"
+          "url": "https://api.curve.finance/v1/getETHprice",
+          "startedAt": "2026-10-15T18:19:01.173Z",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8"
         }
       ],
-      "probeUrl": "https://curve.fi/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 117,
+      "probeUrl": "https://api.curve.finance/v1/getETHprice",
+      "finalProbeUrl": "https://api.curve.finance/v1/getETHprice",
+      "responseBytes": 84,
+      "bodyTruncated": false,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 470,
       "canonicalBaseId": "curve",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 302,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "cvr",
@@ -23703,20 +23837,20 @@
     {
       "id": "defillamaapi",
       "name": "DeFiLlama API",
-      "baseUrl": "https://defillama.com/docs/api",
-      "origin": "https://defillama.com",
+      "baseUrl": "https://api.llama.fi",
+      "origin": "https://api.llama.fi",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "defillamaapi",
       "sourceUrl": "https://defillama.com/docs/api",
-      "smokePath": "/",
+      "smokePath": "/v2/chains",
       "canonicalExplicit": false,
-      "docsUrl": "",
+      "docsUrl": "https://api-docs.defillama.com/",
       "pricing": "free",
-      "pricingSource": "https://defillama.com/docs/api",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://api-docs.defillama.com/",
+      "freeEvidence": "Official API documentation explicitly separates the free API, which requires no key, from its paid API-plan endpoint; the free OpenAPI specification documents GET /v2/chains.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -23726,39 +23860,47 @@
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "c80e39e5cb614585f371a4fecfdbbe793fc9f620e534103761e6caade5de6af2",
-      "checkedAt": "2026-10-15T17:27:06.726Z",
-      "status": 308,
-      "verified": false,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://defillama.com/docs/api",
+          "to": "https://api.llama.fi",
+          "source": "https://api-docs.defillama.com/"
+        }
+      ],
+      "definitionHash": "acb84f3328ebc829757a4f5b8be9d6a2798d3e1414d86abc49f4fba05f509a8e",
+      "checkedAt": "2026-10-15T18:19:01.109Z",
+      "status": 200,
+      "verified": true,
       "trace": [
         {
-          "url": "https://defillama.com/docs/api/",
-          "startedAt": "2026-10-15T17:27:06.726Z",
-          "status": 308,
-          "contentType": null,
-          "redirectTo": "https://defillama.com/docs/api"
-        },
-        {
-          "url": "https://defillama.com/docs/api",
-          "startedAt": "2026-10-15T17:27:07.731Z",
-          "status": 308,
-          "contentType": null,
-          "redirectTo": "https://api-docs.defillama.com/"
+          "url": "https://api.llama.fi/v2/chains",
+          "startedAt": "2026-10-15T18:19:01.174Z",
+          "status": 200,
+          "contentType": "application/json"
         }
       ],
-      "probeUrl": "https://defillama.com/docs/api/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 1165,
+      "probeUrl": "https://api.llama.fi/v2/chains",
+      "finalProbeUrl": "https://api.llama.fi/v2/chains",
+      "responseBytes": 58689,
+      "bodyTruncated": false,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 336,
       "canonicalBaseId": "defillamaapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 173,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "dendron",
@@ -25795,20 +25937,20 @@
     {
       "id": "dutchcbsapi",
       "name": "Dutch CBS API",
-      "baseUrl": "https://www.cbs.nl/en-gb/our-services/open-data",
-      "origin": "https://www.cbs.nl",
+      "baseUrl": "https://opendata.cbs.nl/ODataApi/OData/37296ned",
+      "origin": "https://opendata.cbs.nl",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "dutchcbsapi",
       "sourceUrl": "https://www.cbs.nl/en-gb/our-services/open-data",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/TableInfos?$format=json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://www.cbs.nl/nl-nl/onze-diensten/open-data",
       "pricing": "free",
-      "pricingSource": "https://www.cbs.nl/en-gb/our-services/open-data",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://www.cbs.nl/en-gb/about-us/website/copyright",
+      "freeEvidence": "Official CBS documents anonymous StatLine OData access as open data. CBS content is CC BY 4.0 unless otherwise stated; attribute Statistics Netherlands, avoid endorsement and preserve dataset exceptions. This retrieves one table metadata record, not paid third-party StatLine hosting.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -25818,29 +25960,53 @@
         "outcome": "not_json",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "c7dfbd0cacd64f7e6c0a55147a5b8220a76e53c7ebf154a3a136bf38caa2ce8d",
-      "checkedAt": "2026-10-15T17:27:09.539Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://www.cbs.nl/en-gb/our-services/open-data/",
-          "startedAt": "2026-10-15T17:27:09.540Z",
-          "status": 200,
-          "contentType": "text/html; charset=utf-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://www.cbs.nl/en-gb/our-services/open-data",
+          "to": "https://opendata.cbs.nl/ODataApi/OData/37296ned",
+          "source": "https://www.cbs.nl/nl-nl/onze-diensten/open-data"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/TableInfos?$format=json",
+          "source": "https://www.cbs.nl/nl-nl/onze-diensten/open-data"
         }
       ],
-      "probeUrl": "https://www.cbs.nl/en-gb/our-services/open-data/",
-      "finalProbeUrl": "https://www.cbs.nl/en-gb/our-services/open-data/",
-      "responseBytes": 38429,
+      "definitionHash": "7d45c9079992f9545390aaaac1974029918c1c6e531355a26c775cf817f9e177",
+      "checkedAt": "2026-10-15T18:19:01.110Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://opendata.cbs.nl/ODataApi/OData/37296ned/TableInfos?$format=json",
+          "startedAt": "2026-10-15T18:19:01.174Z",
+          "status": 200,
+          "contentType": "application/json"
+        }
+      ],
+      "probeUrl": "https://opendata.cbs.nl/ODataApi/OData/37296ned/TableInfos?$format=json",
+      "finalProbeUrl": "https://opendata.cbs.nl/ODataApi/OData/37296ned/TableInfos?$format=json",
+      "responseBytes": 13856,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 313,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 396,
       "canonicalBaseId": "dutchcbsapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 145,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "dvc",
@@ -25950,108 +26116,129 @@
     {
       "id": "ecbapi",
       "name": "ECB API",
-      "baseUrl": "https://data.ecb.europa.eu",
-      "origin": "https://data.ecb.europa.eu",
+      "baseUrl": "https://data-api.ecb.europa.eu/service",
+      "origin": "https://data-api.ecb.europa.eu",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "ecbapi",
       "sourceUrl": "https://data.ecb.europa.eu",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+      "canonicalExplicit": true,
+      "docsUrl": "https://data.ecb.europa.eu/help/api/data",
       "pricing": "free",
-      "pricingSource": "https://data.ecb.europa.eu",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.de.html",
+      "freeEvidence": "Official ECB API documents this public data host and csvdata format. ESCB reuse policy grants free access and reuse for commercial and non-commercial purposes; quote Source: ECB statistics, preserve statistics/metadata unchanged and third-party exclusions. Requests one latest daily USD/EUR observation.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
-      "responseKind": "json",
+      "responseKind": "csv",
       "baseline": {
         "checkedAt": "2026-10-15T14:55:30.038Z",
         "status": 200,
         "outcome": "not_json",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "a5f3327876378762f533dea8a5b5710a8c8ce69b9f734b9c2d528daaa9b53ea8",
-      "checkedAt": "2026-10-15T17:27:09.627Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://data.ecb.europa.eu/",
-          "startedAt": "2026-10-15T17:27:09.627Z",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://data.ecb.europa.eu",
+          "to": "https://data-api.ecb.europa.eu/service",
+          "source": "https://data.ecb.europa.eu/help/api/data"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+          "source": "https://data.ecb.europa.eu/help/api/data"
         }
       ],
-      "probeUrl": "https://data.ecb.europa.eu/",
-      "finalProbeUrl": "https://data.ecb.europa.eu/",
-      "responseBytes": 270587,
-      "bodyTruncated": true,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 1197,
+      "definitionHash": "740007900dd4f8afcc9f069622b6f334b6f023fd7df6c5db332ee49ba798c7d1",
+      "checkedAt": "2026-10-15T18:19:01.110Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+          "startedAt": "2026-10-15T18:19:01.175Z",
+          "status": 200,
+          "contentType": "text/csv"
+        }
+      ],
+      "probeUrl": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+      "finalProbeUrl": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+      "responseBytes": 534,
+      "bodyTruncated": false,
+      "outcome": "ok_csv",
+      "cause": "ok",
+      "latencyMs": 432,
       "canonicalBaseId": "ecbapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_csv",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 227,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "ecbexchangerates",
       "name": "ECB Exchange Rates",
-      "baseUrl": "https://www.ecb.europa.eu/stats/eurofxref",
-      "origin": "https://www.ecb.europa.eu",
+      "baseUrl": "https://data-api.ecb.europa.eu/service",
+      "origin": "https://data-api.ecb.europa.eu",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "ecbexchangerates",
+      "canonicalId": "ecbapi",
       "sourceUrl": "https://www.ecb.europa.eu/stats/eurofxref",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+      "canonicalExplicit": true,
+      "docsUrl": "https://data.ecb.europa.eu/help/api/data",
       "pricing": "free",
-      "pricingSource": "https://www.ecb.europa.eu/stats/eurofxref",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.de.html",
+      "freeEvidence": "Official ECB API documents this public data host and csvdata format. ESCB reuse policy grants free access and reuse for commercial and non-commercial purposes; quote Source: ECB statistics, preserve statistics/metadata unchanged and third-party exclusions. Requests one latest daily USD/EUR observation.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
-      "responseKind": "json",
+      "responseKind": "csv",
       "baseline": {
         "checkedAt": "2026-10-15T14:55:29.417Z",
         "status": 0,
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "999f432c434274b934947380a4965d13c08594ad2e978b310076fa7daf770686",
-      "checkedAt": "2026-10-15T17:27:09.773Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://www.ecb.europa.eu/stats/eurofxref/",
-          "startedAt": "2026-10-15T17:27:09.774Z",
-          "status": 301,
-          "contentType": "text/html; charset=UTF-8",
-          "redirectTo": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+          "cause": "wrong_base_url_path",
+          "from": "https://www.ecb.europa.eu/stats/eurofxref",
+          "to": "https://data-api.ecb.europa.eu/service",
+          "source": "https://data.ecb.europa.eu/help/api/data"
         },
         {
-          "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
-          "startedAt": "2026-10-15T17:27:10.777Z",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+          "source": "https://data.ecb.europa.eu/help/api/data"
         }
       ],
-      "probeUrl": "https://www.ecb.europa.eu/stats/eurofxref/",
-      "finalProbeUrl": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
-      "responseBytes": 119495,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 1297,
-      "canonicalBaseId": "ecbexchangerates",
+      "definitionHash": "740007900dd4f8afcc9f069622b6f334b6f023fd7df6c5db332ee49ba798c7d1",
+      "checkedAt": "2026-10-15T18:19:01.110Z",
+      "status": 200,
+      "verified": false,
+      "outcome": "duplicate",
+      "cause": "duplicate",
+      "duplicateOf": "ecbapi",
+      "canonicalVerified": true,
+      "canonicalProbeUrl": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?lastNObservations=1&format=csvdata",
+      "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
+      "trace": [],
+      "canonicalBaseId": "ecbapi",
       "reused": true
     },
     {
@@ -26573,20 +26760,20 @@
     {
       "id": "environmentcanadaapi",
       "name": "Environment Canada API",
-      "baseUrl": "https://dd.weather.gc.ca",
-      "origin": "https://dd.weather.gc.ca",
+      "baseUrl": "https://api.weather.gc.ca",
+      "origin": "https://api.weather.gc.ca",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "environmentcanadaapi",
       "sourceUrl": "https://dd.weather.gc.ca",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/collections/hydrometric-stations?f=json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://eccc-msc.github.io/open-data/msc-geomet/readme_en/",
       "pricing": "free",
-      "pricingSource": "https://dd.weather.gc.ca",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://eccc-msc.github.io/open-data/licence/readme_en/",
+      "freeEvidence": "Official MSC GeoMet provides free public API access. August 2026 End-use Licence grants royalty-free commercial reuse and redistribution with ECCC/originator attribution and exclusions for personal/unauthorised third-party content. Reads one hydrometric collection metadata object; follow MSC service usage policy, no bulk WMS retrieval.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -26596,29 +26783,53 @@
         "outcome": "not_json",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "e5904140bb48c980777b83ec987fef4f960b88ea46004555d73ee316b1bc2610",
-      "checkedAt": "2026-10-15T17:27:11.172Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://dd.weather.gc.ca/",
-          "startedAt": "2026-10-15T17:27:11.172Z",
-          "status": 200,
-          "contentType": "text/html;charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://dd.weather.gc.ca",
+          "to": "https://api.weather.gc.ca",
+          "source": "https://eccc-msc.github.io/open-data/msc-geomet/readme_en/"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/collections/hydrometric-stations?f=json",
+          "source": "https://eccc-msc.github.io/open-data/msc-geomet/readme_en/"
         }
       ],
-      "probeUrl": "https://dd.weather.gc.ca/",
-      "finalProbeUrl": "https://dd.weather.gc.ca/",
-      "responseBytes": 4160,
+      "definitionHash": "1a427aee82e09bb791458d9872c88a430154ea16cf3be9a184c9433d885a5906",
+      "checkedAt": "2026-10-15T18:19:01.110Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://api.weather.gc.ca/collections/hydrometric-stations?f=json",
+          "startedAt": "2026-10-15T18:19:01.176Z",
+          "status": 200,
+          "contentType": "application/json"
+        }
+      ],
+      "probeUrl": "https://api.weather.gc.ca/collections/hydrometric-stations?f=json",
+      "finalProbeUrl": "https://api.weather.gc.ca/collections/hydrometric-stations?f=json",
+      "responseBytes": 3162,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 596,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 621,
       "canonicalBaseId": "environmentcanadaapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 460,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "epaapi",
@@ -28510,14 +28721,14 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "feodotrackerapi",
       "sourceUrl": "https://feodotracker.abuse.ch",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/downloads/ipblocklist_recommended.json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://feodotracker.abuse.ch/blocklist/",
       "pricing": "free",
-      "pricingSource": "https://feodotracker.abuse.ch",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://feodotracker.abuse.ch/blocklist/",
+      "freeEvidence": "Official blocklist documentation provides a JSON feed and explicitly permits all commercial and non-commercial uses under CC0. Read-only feed download; no contact with listed infrastructure. Public dataset is best-effort and can have false positives.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -28528,28 +28739,39 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "c63ab5002664c93e96245d3f8610bd2132698c465768ad32cbffb77d236cd06c",
-      "checkedAt": "2026-10-15T17:27:16.473Z",
+      "definitionHash": "24b16dc1096538e5e89ec496b8944a164c91ce7bc0bd90cca256c1a7261be9a8",
+      "checkedAt": "2026-10-15T18:19:01.417Z",
       "status": 200,
-      "verified": false,
+      "verified": true,
       "trace": [
         {
-          "url": "https://feodotracker.abuse.ch/",
-          "startedAt": "2026-10-15T17:27:16.473Z",
+          "url": "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json",
+          "startedAt": "2026-10-15T18:19:01.417Z",
           "status": 200,
-          "contentType": "text/html; charset=UTF-8"
+          "contentType": "application/json"
         }
       ],
-      "probeUrl": "https://feodotracker.abuse.ch/",
-      "finalProbeUrl": "https://feodotracker.abuse.ch/",
-      "responseBytes": 9504,
+      "probeUrl": "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json",
+      "finalProbeUrl": "https://feodotracker.abuse.ch/downloads/ipblocklist_recommended.json",
+      "responseBytes": 362,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 356,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 190,
       "canonicalBaseId": "feodotrackerapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 151,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "ffxivcollect",
@@ -30524,6 +30746,13 @@
       "origin": "https://gdbrowser.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "gdbrowser",
+        "name": "GDBrowser",
+        "cause": "unresolved",
+        "docsUrl": "https://gdbrowser.com/api",
+        "evidence": "Official operator API page explicitly asks developers not to use the API because it is unreliable and stressful on the servers, and may be removed. Respect this request and leave discovery pending operator permission. This is an operator usage restriction, not evidence of a formal commercial-only licence or proof that no hosted endpoint exists."
+      },
       "canonicalId": "gdbrowser",
       "sourceUrl": "https://gdbrowser.com/api",
       "smokePath": "/",
@@ -30544,28 +30773,18 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "7f50e0ed70720be152a3cefa5d5ca216577108a67f51230777f141df6a103a84",
-      "checkedAt": "2026-10-15T17:27:20.098Z",
-      "status": 200,
+      "definitionHash": "fcba99d0b07836f97ef3532e57443457958e21458af06f68960976a5675841fd",
+      "checkedAt": "2026-10-15T18:22:35.478Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://gdbrowser.com/api/",
-          "startedAt": "2026-10-15T17:27:20.099Z",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        }
-      ],
-      "probeUrl": "https://gdbrowser.com/api/",
-      "finalProbeUrl": "https://gdbrowser.com/api/",
-      "responseBytes": 2465,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 369,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "unresolved",
+      "detail": "Official operator API page explicitly asks developers not to use the API because it is unreliable and stressful on the servers, and may be removed. Respect this request and leave discovery pending operator permission. This is an operator usage restriction, not evidence of a formal commercial-only licence or proof that no hosted endpoint exists.",
+      "exclusionSource": "https://gdbrowser.com/api",
+      "latencyMs": 0,
       "canonicalBaseId": "gdbrowser",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "gdprapi",
@@ -31930,20 +32149,20 @@
     {
       "id": "gravatar",
       "name": "Gravatar",
-      "baseUrl": "https://en.gravatar.com",
-      "origin": "https://en.gravatar.com",
+      "baseUrl": "https://gravatar.com",
+      "origin": "https://gravatar.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "gravatar",
       "sourceUrl": "https://en.gravatar.com",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
-      "pricing": "unknown",
-      "pricingSource": null,
-      "freeEvidence": null,
-      "freeVerified": false,
-      "reviewedRecipe": false,
+      "smokePath": "/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.gravatar.com/guides/llms-txt/",
+      "pricing": "free",
+      "pricingSource": "https://docs.gravatar.com/guides/llms-txt/",
+      "freeEvidence": "Official developer guide calls the API free, documents appending .json to this public sample profile URL, and permits limited legacy no-auth reads. It strongly recommends authenticated requests for production and grants no access to full profiles or writes.",
+      "freeVerified": true,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -31953,50 +32172,65 @@
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "c272b692fbe0c505c40000c74a299db27c8aec52b771a23ace471a3e94ab9c6d",
-      "checkedAt": "2026-10-15T17:27:22.186Z",
-      "status": 302,
-      "verified": false,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://en.gravatar.com",
+          "to": "https://gravatar.com",
+          "source": "https://docs.gravatar.com/guides/llms-txt/"
+        }
+      ],
+      "definitionHash": "00e8915613b58bf260a828481683b021ee6ea17a2096b2509d160bf3f7229d62",
+      "checkedAt": "2026-10-15T18:19:01.446Z",
+      "status": 200,
+      "verified": true,
       "trace": [
         {
-          "url": "https://en.gravatar.com/",
-          "startedAt": "2026-10-15T17:27:22.186Z",
-          "status": 302,
-          "contentType": "text/html; charset=utf-8",
-          "redirectTo": "https://gravatar.com/"
+          "url": "https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+          "startedAt": "2026-10-15T18:19:01.446Z",
+          "status": 200,
+          "contentType": "application/json"
         }
       ],
-      "probeUrl": "https://en.gravatar.com/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 545,
+      "probeUrl": "https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+      "finalProbeUrl": "https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+      "responseBytes": 654,
+      "bodyTruncated": false,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 577,
       "canonicalBaseId": "gravatar",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 545,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "gravatarapi",
       "name": "Gravatar API",
-      "baseUrl": "https://en.gravatar.com/site/implement",
-      "origin": "https://en.gravatar.com",
+      "baseUrl": "https://gravatar.com",
+      "origin": "https://gravatar.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "gravatarapi",
+      "canonicalId": "gravatar",
       "sourceUrl": "https://en.gravatar.com/site/implement",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.gravatar.com/guides/llms-txt/",
       "pricing": "free",
-      "pricingSource": "https://en.gravatar.com/site/implement",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.gravatar.com/guides/llms-txt/",
+      "freeEvidence": "Official developer guide calls the API free, documents appending .json to this public sample profile URL, and permits limited legacy no-auth reads. It strongly recommends authenticated requests for production and grants no access to full profiles or writes.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -32006,38 +32240,26 @@
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "a9d0f4005d81d1366f75d479a48f892c1a6d1d95e89ee566ca27b3fef3867668",
-      "checkedAt": "2026-10-15T17:27:22.451Z",
-      "status": 302,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://en.gravatar.com/site/implement",
+          "to": "https://gravatar.com",
+          "source": "https://docs.gravatar.com/guides/llms-txt/"
+        }
+      ],
+      "definitionHash": "00e8915613b58bf260a828481683b021ee6ea17a2096b2509d160bf3f7229d62",
+      "checkedAt": "2026-10-15T18:19:01.446Z",
+      "status": 200,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://en.gravatar.com/site/implement/",
-          "startedAt": "2026-10-15T17:27:23.188Z",
-          "status": 301,
-          "contentType": "text/html; charset=utf-8",
-          "redirectTo": "https://en.gravatar.com/site/implement"
-        },
-        {
-          "url": "https://en.gravatar.com/site/implement",
-          "startedAt": "2026-10-15T17:27:24.191Z",
-          "status": 302,
-          "contentType": "text/html; charset=utf-8",
-          "redirectTo": "https://gravatar.com/site/implement"
-        }
-      ],
-      "probeUrl": "https://en.gravatar.com/site/implement/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 2000,
-      "canonicalBaseId": "gravatarapi",
+      "outcome": "duplicate",
+      "cause": "duplicate",
+      "duplicateOf": "gravatar",
+      "canonicalVerified": true,
+      "canonicalProbeUrl": "https://gravatar.com/99511d6010af8c574c31f94e1b327bba5e25086dd7b92a4b6f3e132b579cc8d1.json",
+      "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
+      "trace": [],
+      "canonicalBaseId": "gravatar",
       "reused": true
     },
     {
@@ -33118,20 +33340,20 @@
     {
       "id": "hongkongdataapi",
       "name": "Hong Kong Data API",
-      "baseUrl": "https://data.gov.hk",
+      "baseUrl": "https://data.gov.hk/en-data",
       "origin": "https://data.gov.hk",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "hongkongdataapi",
       "sourceUrl": "https://data.gov.hk",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/api/3/action/package_list?limit=1",
+      "canonicalExplicit": true,
+      "docsUrl": "https://data.gov.hk/en/help/ckan-api-development-guide",
       "pricing": "free",
-      "pricingSource": "https://data.gov.hk",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://data.gov.hk/en/faq",
+      "freeEvidence": "Official developer guide documents keyless HTTP GET CKAN package_list with limit. Operator FAQ confirms no fees/royalties for commercial/non-commercial reuse subject to Terms and Conditions and source attribution. Reads one catalog dataset identifier; underlying data licenses remain applicable.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -33141,34 +33363,56 @@
         "outcome": "network_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "af3ef07e12134c92718fd0b1594fb3dcff201005739f7d2fedd431b5482c8406",
-      "checkedAt": "2026-10-15T17:27:25.500Z",
-      "status": 200,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://data.gov.hk",
+          "to": "https://data.gov.hk/en-data",
+          "source": "https://data.gov.hk/en/help/ckan-api-development-guide"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/api/3/action/package_list?limit=1",
+          "source": "https://data.gov.hk/en/help/ckan-api-development-guide"
+        }
+      ],
+      "definitionHash": "5415417196ba8b80dcbd2510a793ce0049a132e666cad035965eef050fc515ba",
+      "checkedAt": "2026-10-15T18:19:01.506Z",
+      "status": 0,
       "verified": false,
       "trace": [
         {
-          "url": "https://data.gov.hk/",
-          "startedAt": "2026-10-15T17:27:25.500Z",
-          "status": 302,
-          "contentType": "text/html",
-          "redirectTo": "https://data.gov.hk/tc/"
-        },
-        {
-          "url": "https://data.gov.hk/tc/",
-          "startedAt": "2026-10-15T17:27:27.503Z",
-          "status": 200,
-          "contentType": "text/html; charset=utf-8"
+          "url": "https://data.gov.hk/en-data/api/3/action/package_list?limit=1",
+          "startedAt": "2026-10-15T18:19:01.506Z",
+          "errorCause": [
+            {
+              "name": "TypeError",
+              "reason": "transport_error"
+            },
+            {
+              "name": "AggregateError",
+              "code": "ETIMEDOUT",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
-      "probeUrl": "https://data.gov.hk/",
-      "finalProbeUrl": "https://data.gov.hk/tc/",
-      "responseBytes": 35631,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 2629,
+      "probeUrl": "https://data.gov.hk/en-data/api/3/action/package_list?limit=1",
+      "outcome": "timeout",
+      "cause": "timeout",
+      "errorCause": [
+        {
+          "name": "TypeError",
+          "reason": "transport_error"
+        },
+        {
+          "name": "AggregateError",
+          "code": "ETIMEDOUT",
+          "reason": "transport_error"
+        }
+      ],
+      "latencyMs": 284,
       "canonicalBaseId": "hongkongdataapi",
       "reused": true
     },
@@ -39377,6 +39621,13 @@
       "origin": "https://search.maven.org",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "mavencentral",
+        "name": "Maven Central",
+        "cause": "commercial_permission",
+        "docsUrl": "https://central.sonatype.org/terms.html",
+        "evidence": "Official Central terms updated March 31, 2026 retain a reasonable-volume Free Consumption Tier but list commercial use without express permission as abuse. Materials include metadata. Working unauthenticated search and a free tier do not establish commercial gateway permission."
+      },
       "canonicalId": "mavencentral",
       "sourceUrl": "https://search.maven.org",
       "smokePath": "/",
@@ -39397,28 +39648,18 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "98e448a73611bf88eb81901c5d9daaef16769f2e58c419f1ed0681df02d561e3",
-      "checkedAt": "2026-10-15T17:27:39.659Z",
-      "status": 200,
+      "definitionHash": "f1990f70fc343df814c54b02fd52b100f4a87958f571532e6d43c4f707790d56",
+      "checkedAt": "2026-10-15T18:22:35.479Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://search.maven.org/",
-          "startedAt": "2026-10-15T17:27:39.659Z",
-          "status": 200,
-          "contentType": "text/html"
-        }
-      ],
-      "probeUrl": "https://search.maven.org/",
-      "finalProbeUrl": "https://search.maven.org/",
-      "responseBytes": 3816,
-      "bodyTruncated": false,
-      "outcome": "invalid_response",
-      "cause": "unresolved",
-      "detail": "Response did not satisfy the reviewed response format.",
-      "latencyMs": 222,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "commercial_permission",
+      "detail": "Official Central terms updated March 31, 2026 retain a reasonable-volume Free Consumption Tier but list commercial use without express permission as abuse. Materials include metadata. Working unauthenticated search and a free tier do not establish commercial gateway permission.",
+      "exclusionSource": "https://central.sonatype.org/terms.html",
+      "latencyMs": 0,
       "canonicalBaseId": "mavencentral",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "mealdbapi",
@@ -40758,6 +40999,13 @@
       "origin": "https://mockoon.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "mockoon",
+        "name": "Mockoon",
+        "cause": "unresolved",
+        "docsUrl": "https://mockoon.com/playground/",
+        "evidence": "Official hosted Playground FAQ limits use to prototyping and states it is not meant for production. This is a real hosted API, so not_hosted_api would be inaccurate. Keep discovery for APIClaw production use pending suitable service permission; no broader commercial-use prohibition is inferred."
+      },
       "canonicalId": "mockoon",
       "sourceUrl": "https://mockoon.com",
       "smokePath": "/",
@@ -40778,28 +41026,18 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "16026f507b08747becf3da5e4f6aad6c0266f702c4a0c01619a8d66b62f5777f",
-      "checkedAt": "2026-10-15T17:27:44.090Z",
-      "status": 200,
+      "definitionHash": "b85bdcfca8fc3eee8881167d3d6d6371744cdb619708124671bbc21c549b91fe",
+      "checkedAt": "2026-10-15T18:22:35.479Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://mockoon.com/",
-          "startedAt": "2026-10-15T17:27:44.090Z",
-          "status": 200,
-          "contentType": "text/html; charset=utf-8"
-        }
-      ],
-      "probeUrl": "https://mockoon.com/",
-      "finalProbeUrl": "https://mockoon.com/",
-      "responseBytes": 38608,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 147,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "unresolved",
+      "detail": "Official hosted Playground FAQ limits use to prototyping and states it is not meant for production. This is a real hosted API, so not_hosted_api would be inaccurate. Keep discovery for APIClaw production use pending suitable service permission; no broader commercial-use prohibition is inferred.",
+      "exclusionSource": "https://mockoon.com/playground/",
+      "latencyMs": 0,
       "canonicalBaseId": "mockoon",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "mocky",
@@ -41020,20 +41258,20 @@
     {
       "id": "moroccoopendataapi",
       "name": "Morocco Open Data API",
-      "baseUrl": "https://data.gov.ma",
+      "baseUrl": "https://data.gov.ma/data",
       "origin": "https://data.gov.ma",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "moroccoopendataapi",
       "sourceUrl": "https://data.gov.ma",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/api/3/action/package_search?rows=1",
+      "canonicalExplicit": true,
+      "docsUrl": "https://www.data.gov.ma/fr/guide-api",
       "pricing": "free",
-      "pricingSource": "https://data.gov.ma",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://data.gov.ma/index.php/fr/Comment_exploiter_les_donn%C3%A9es",
+      "freeEvidence": "Official operator API guide documents this CKAN host. Operator states reuse is free of charge and unrestricted; this reads one public catalog metadata record. Preserve publisher attribution and dataset-specific licensing when accessing underlying resources.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -41043,29 +41281,53 @@
         "outcome": "not_json",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "6bb10471ae6ca4b362a6f7e80fed6835bb0ad44d46a7e260a561258526ad07fc",
-      "checkedAt": "2026-10-15T17:27:44.635Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://data.gov.ma/",
-          "startedAt": "2026-10-15T17:27:44.635Z",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://data.gov.ma",
+          "to": "https://data.gov.ma/data",
+          "source": "https://www.data.gov.ma/fr/guide-api"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/api/3/action/package_search?rows=1",
+          "source": "https://www.data.gov.ma/fr/guide-api"
         }
       ],
-      "probeUrl": "https://data.gov.ma/",
-      "finalProbeUrl": "https://data.gov.ma/",
-      "responseBytes": 47435,
+      "definitionHash": "48b6945552845bde233ea658dde1d9bddcba4be6404ee1ca70b2395bb08fa02e",
+      "checkedAt": "2026-10-15T18:19:01.544Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://data.gov.ma/data/api/3/action/package_search?rows=1",
+          "startedAt": "2026-10-15T18:19:01.544Z",
+          "status": 200,
+          "contentType": "application/json;charset=utf-8"
+        }
+      ],
+      "probeUrl": "https://data.gov.ma/data/api/3/action/package_search?rows=1",
+      "finalProbeUrl": "https://data.gov.ma/data/api/3/action/package_search?rows=1",
+      "responseBytes": 18518,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 791,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 675,
       "canonicalBaseId": "moroccoopendataapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 271,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "motivationalquotes",
@@ -46988,15 +47250,15 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "opengovernmentuk",
       "sourceUrl": "https://data.gov.uk",
-      "smokePath": "/api/3/action/package_search?rows=1",
+      "smokePath": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
       "canonicalExplicit": true,
-      "docsUrl": "https://ckan.publishing.service.gov.uk",
+      "docsUrl": "https://guidance.data.gov.uk/get_data/api_documentation/",
       "pricing": "free",
-      "pricingSource": "https://ckan.publishing.service.gov.uk",
-      "freeEvidence": "Government public open-data catalog; public CKAN metadata search.",
+      "pricingSource": "https://www.data.gov.uk/about/",
+      "freeEvidence": "Official data.gov.uk API guide states no API key is needed and no rate limits. Operator About page permits republication under OGL or the applicable item licence. Reads one public metadata record with explicit id/name/title/license_id projection to avoid a >256KiB resource list; preserve source attribution and dataset-specific licensing.",
       "freeVerified": true,
       "reviewedRecipe": true,
-      "baselineVerified": true,
+      "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": {
@@ -47010,48 +47272,48 @@
           "cause": "wrong_base_url_path",
           "from": "https://data.gov.uk",
           "to": "https://ckan.publishing.service.gov.uk",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         },
         {
           "cause": "missing_default_params",
           "from": "/",
-          "to": "/api/3/action/package_search?rows=1",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "to": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         }
       ],
-      "definitionHash": "86b3ab49f7ef08c47eaf44796cf68214bb77d520f91a1195a6ad5573d697c45e",
-      "checkedAt": "2026-10-15T17:27:54.601Z",
+      "definitionHash": "22619fdf9818ae4f09ef096761bd3b52c19f91abf8500212638fc97a07a36f34",
+      "checkedAt": "2026-10-15T18:19:01.580Z",
       "status": 200,
       "verified": true,
       "trace": [
         {
-          "url": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-15T17:27:54.601Z",
+          "url": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+          "startedAt": "2026-10-15T18:19:01.580Z",
           "status": 200,
           "contentType": "application/json;charset=utf-8"
         }
       ],
-      "probeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1",
-      "finalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1",
-      "responseBytes": 25289,
+      "probeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+      "finalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+      "responseBytes": 336,
       "bodyTruncated": false,
       "outcome": "ok_json",
       "cause": "ok",
-      "latencyMs": 514,
+      "latencyMs": 259,
       "canonicalBaseId": "opengovernmentuk",
+      "reused": true,
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
       "gatewayVerification": {
-        "verifiedAt": "2026-10-15T17:48:31.263Z",
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
         "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
         "status": 200,
         "success": true,
         "healthDisabled": false,
-        "latencyMs": 227,
+        "latencyMs": 136,
         "route": "customer-gateway",
         "errorCode": null
-      },
-      "reused": true
+      }
     },
     {
       "id": "opengovernmentusa",
@@ -56038,6 +56300,13 @@
       "origin": "https://api.semanticscholar.org",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "semanticscholar",
+        "name": "Semantic Scholar",
+        "cause": "commercial_permission",
+        "docsUrl": "https://api.semanticscholar.org/license/",
+        "evidence": "Official API License limits default use to internal non-commercial research/education, requires an expanded licence for commercial purposes, prohibits repackaging/reselling the API and restricts sharing response data. A free or unauthenticated response is not permission for a commercial shared gateway."
+      },
       "canonicalId": "semanticscholar",
       "sourceUrl": "https://api.semanticscholar.org",
       "smokePath": "/",
@@ -56058,31 +56327,18 @@
         "verified": false
       },
       "repairs": [],
-      "definitionHash": "965eb394148f6fb4a1cce3b9756c163efdac9ea01d39fbf3dece15941c14b2cf",
-      "checkedAt": "2026-10-15T17:28:08.914Z",
-      "status": 301,
+      "definitionHash": "59690ecaad67f5e8ee7a9c8f064ef66bc1afa60b98e80878cef02ab0ed3d1741",
+      "checkedAt": "2026-10-15T18:22:35.481Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://api.semanticscholar.org/",
-          "startedAt": "2026-10-15T17:28:08.915Z",
-          "status": 301,
-          "contentType": "text/html; charset=utf-8",
-          "redirectTo": "https://www.semanticscholar.org/product/api"
-        }
-      ],
-      "probeUrl": "https://api.semanticscholar.org/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 365,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "commercial_permission",
+      "detail": "Official API License limits default use to internal non-commercial research/education, requires an expanded licence for commercial purposes, prohibits repackaging/reselling the API and restricts sharing response data. A free or unauthenticated response is not permission for a commercial shared gateway.",
+      "exclusionSource": "https://api.semanticscholar.org/license/",
+      "latencyMs": 0,
       "canonicalBaseId": "semanticscholar",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "senegalopendataapi",
@@ -57726,20 +57982,20 @@
     {
       "id": "spaininestatistics",
       "name": "Spain INE Statistics",
-      "baseUrl": "https://www.ine.es/dyngs/DataLab",
-      "origin": "https://www.ine.es",
+      "baseUrl": "https://servicios.ine.es/wstempus/js/ES",
+      "origin": "https://servicios.ine.es",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "spaininestatistics",
+      "canonicalId": "spanishineapi",
       "sourceUrl": "https://www.ine.es/dyngs/DataLab",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
-      "pricing": "unknown",
-      "pricingSource": null,
-      "freeEvidence": null,
-      "freeVerified": false,
-      "reviewedRecipe": false,
+      "smokePath": "/OPERACIONES_DISPONIBLES",
+      "canonicalExplicit": true,
+      "docsUrl": "https://www.ine.es/dyngs/DAB/index.htm?cid=1100",
+      "pricing": "free",
+      "pricingSource": "https://www.ine.es/datosabiertos/",
+      "freeEvidence": "Official INE API reference documents OPERACIONES_DISPONIBLES. Official open-data page states CC BY 4.0 permits commercial reuse with attribution. Preserve INE source, update dates, meaning and non-endorsement. This reads the small operation catalog; no customer keys or paid data.",
+      "freeVerified": true,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
@@ -57749,28 +58005,26 @@
         "outcome": "http_error",
         "verified": false
       },
-      "repairs": [],
-      "definitionHash": "6b5ba19711fe8dfce13befa631b08688ef28ad5e20a9d1b64e1f1d37fb69dd63",
-      "checkedAt": "2026-10-15T17:28:11.842Z",
-      "status": 404,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://www.ine.es/dyngs/DataLab/",
-          "startedAt": "2026-10-15T17:28:11.842Z",
-          "status": 404,
-          "contentType": "text/html"
+          "cause": "wrong_base_url_path",
+          "from": "https://www.ine.es/dyngs/DataLab",
+          "to": "https://servicios.ine.es/wstempus/js/ES",
+          "source": "https://www.ine.es/dyngs/DAB/index.htm?cid=1100"
         }
       ],
-      "probeUrl": "https://www.ine.es/dyngs/DataLab/",
-      "finalProbeUrl": "https://www.ine.es/dyngs/DataLab/",
-      "responseBytes": 19778,
-      "bodyTruncated": false,
-      "outcome": "http_error",
-      "cause": "wrong_base_url_path",
-      "detail": "Unreviewed root/path returned 404; no claim that the whole service is dead.",
-      "latencyMs": 597,
-      "canonicalBaseId": "spaininestatistics",
+      "definitionHash": "975cd779eab63a37d63bb61c8803191857032ff9d00be31371ccfb07ef54787b",
+      "checkedAt": "2026-10-15T18:19:01.609Z",
+      "status": 200,
+      "verified": false,
+      "outcome": "duplicate",
+      "cause": "duplicate",
+      "duplicateOf": "spanishineapi",
+      "canonicalVerified": true,
+      "canonicalProbeUrl": "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES",
+      "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
+      "trace": [],
+      "canonicalBaseId": "spanishineapi",
       "reused": true
     },
     {
@@ -62563,12 +62817,12 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "opengovernmentuk",
       "sourceUrl": "https://www.api.gov.uk",
-      "smokePath": "/api/3/action/package_search?rows=1",
+      "smokePath": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
       "canonicalExplicit": true,
-      "docsUrl": "https://ckan.publishing.service.gov.uk",
+      "docsUrl": "https://guidance.data.gov.uk/get_data/api_documentation/",
       "pricing": "free",
-      "pricingSource": "https://ckan.publishing.service.gov.uk",
-      "freeEvidence": "Government public open-data catalog; public CKAN metadata search.",
+      "pricingSource": "https://www.data.gov.uk/about/",
+      "freeEvidence": "Official data.gov.uk API guide states no API key is needed and no rate limits. Operator About page permits republication under OGL or the applicable item licence. Reads one public metadata record with explicit id/name/title/license_id projection to avoid a >256KiB resource list; preserve source attribution and dataset-specific licensing.",
       "freeVerified": true,
       "reviewedRecipe": true,
       "baselineVerified": false,
@@ -62585,24 +62839,24 @@
           "cause": "wrong_base_url_path",
           "from": "https://www.api.gov.uk",
           "to": "https://ckan.publishing.service.gov.uk",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         },
         {
           "cause": "missing_default_params",
           "from": "/",
-          "to": "/api/3/action/package_search?rows=1",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "to": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         }
       ],
-      "definitionHash": "86b3ab49f7ef08c47eaf44796cf68214bb77d520f91a1195a6ad5573d697c45e",
-      "checkedAt": "2026-10-15T17:27:54.601Z",
+      "definitionHash": "22619fdf9818ae4f09ef096761bd3b52c19f91abf8500212638fc97a07a36f34",
+      "checkedAt": "2026-10-15T18:19:01.580Z",
       "status": 200,
       "verified": false,
       "outcome": "duplicate",
       "cause": "duplicate",
       "duplicateOf": "opengovernmentuk",
       "canonicalVerified": true,
-      "canonicalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1",
+      "canonicalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
       "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
       "trace": [],
       "canonicalBaseId": "opengovernmentuk",
@@ -62617,12 +62871,12 @@
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "opengovernmentuk",
       "sourceUrl": "https://www.api.gov.uk",
-      "smokePath": "/api/3/action/package_search?rows=1",
+      "smokePath": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
       "canonicalExplicit": true,
-      "docsUrl": "https://ckan.publishing.service.gov.uk",
+      "docsUrl": "https://guidance.data.gov.uk/get_data/api_documentation/",
       "pricing": "free",
-      "pricingSource": "https://ckan.publishing.service.gov.uk",
-      "freeEvidence": "Government public open-data catalog; public CKAN metadata search.",
+      "pricingSource": "https://www.data.gov.uk/about/",
+      "freeEvidence": "Official data.gov.uk API guide states no API key is needed and no rate limits. Operator About page permits republication under OGL or the applicable item licence. Reads one public metadata record with explicit id/name/title/license_id projection to avoid a >256KiB resource list; preserve source attribution and dataset-specific licensing.",
       "freeVerified": true,
       "reviewedRecipe": true,
       "baselineVerified": false,
@@ -62639,24 +62893,24 @@
           "cause": "wrong_base_url_path",
           "from": "https://www.api.gov.uk",
           "to": "https://ckan.publishing.service.gov.uk",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         },
         {
           "cause": "missing_default_params",
           "from": "/",
-          "to": "/api/3/action/package_search?rows=1",
-          "source": "https://ckan.publishing.service.gov.uk"
+          "to": "/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
+          "source": "https://guidance.data.gov.uk/get_data/api_documentation/"
         }
       ],
-      "definitionHash": "86b3ab49f7ef08c47eaf44796cf68214bb77d520f91a1195a6ad5573d697c45e",
-      "checkedAt": "2026-10-15T17:27:54.601Z",
+      "definitionHash": "22619fdf9818ae4f09ef096761bd3b52c19f91abf8500212638fc97a07a36f34",
+      "checkedAt": "2026-10-15T18:19:01.580Z",
       "status": 200,
       "verified": false,
       "outcome": "duplicate",
       "cause": "duplicate",
       "duplicateOf": "opengovernmentuk",
       "canonicalVerified": true,
-      "canonicalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1",
+      "canonicalProbeUrl": "https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1&fl=id,name,title,license_id",
       "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
       "trace": [],
       "canonicalBaseId": "opengovernmentuk",
@@ -67656,6 +67910,13 @@
       "origin": "https://www.7timer.info",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "7timer",
+        "name": "7Timer!",
+        "cause": "commercial_permission",
+        "docsUrl": "https://www.7timer.info/doc.php?lang=en",
+        "evidence": "Official documentation section 5 allows free use and redistribution only for non-commercial purposes and asks program developers to notify the operator. Keyless JSON support does not grant commercial gateway rights; leave discovery absent separate permission."
+      },
       "canonicalId": "7timer",
       "sourceUrl": "http://www.7timer.info/doc.php?lang=en",
       "smokePath": "/",
@@ -67678,28 +67939,18 @@
           "source": "Same-host HTTPS upgrade; never HTTP fallback or insecure TLS."
         }
       ],
-      "definitionHash": "4a878856d5115ff4020ddcfb37ac98dc8154c338241fc8846e526974b1eea5bf",
-      "checkedAt": "2026-10-15T17:28:43.416Z",
-      "status": 200,
+      "definitionHash": "cf294fb93d4546e90375d1b558760f4683f9a1773ee2d4a6e67e9a72fcb53a0f",
+      "checkedAt": "2026-10-15T18:22:35.483Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://www.7timer.info/doc.php?lang=en",
-          "startedAt": "2026-10-15T17:28:43.416Z",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        }
-      ],
-      "probeUrl": "https://www.7timer.info/doc.php?lang=en",
-      "finalProbeUrl": "https://www.7timer.info/doc.php?lang=en",
-      "responseBytes": 69085,
-      "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 1065,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "commercial_permission",
+      "detail": "Official documentation section 5 allows free use and redistribution only for non-commercial purposes and asks program developers to notify the operator. Keyless JSON support does not grant commercial gateway rights; leave discovery absent separate permission.",
+      "exclusionSource": "https://www.7timer.info/doc.php?lang=en",
+      "latencyMs": 0,
       "canonicalBaseId": "7timer",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "aaveapi",
@@ -71574,6 +71825,13 @@
       "origin": "https://www.census.gov",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "censusgov",
+        "name": "Census.gov",
+        "cause": "needs_key",
+        "docsUrl": "https://www.census.gov/library/video/2026/adrm/requesting-a-census-data-api-key.html",
+        "evidence": "Official May 11, 2026 announcement requires an API key for every Census Data API query. Current official example pages also require personal API keys for all data queries. Key registration is free, but no account/key was created or supplied. This restriction applies to Census Data API queries, not unrelated Census geocoder/TIGER services."
+      },
       "canonicalId": "censusgov",
       "sourceUrl": "https://www.census.gov/data/developers/data-sets.html",
       "smokePath": "/",
@@ -71589,28 +71847,18 @@
       "responseKind": "json",
       "baseline": null,
       "repairs": [],
-      "definitionHash": "8c8f5dc2fe1005c802e1f4b65aba7b3adb6716bd953eb2a7426d487af34fb38e",
-      "checkedAt": "2026-10-15T17:28:49.082Z",
-      "status": 404,
+      "definitionHash": "f0a329a77900529793bceca86ccf81fdde6028bdeec2f7a4da561dc7e3178144",
+      "checkedAt": "2026-10-15T18:22:35.483Z",
+      "status": 0,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://www.census.gov/data/developers/data-sets.html/",
-          "startedAt": "2026-10-15T17:28:49.083Z",
-          "status": 404,
-          "contentType": "text/html"
-        }
-      ],
-      "probeUrl": "https://www.census.gov/data/developers/data-sets.html/",
-      "finalProbeUrl": "https://www.census.gov/data/developers/data-sets.html/",
-      "responseBytes": 26711,
-      "bodyTruncated": false,
-      "outcome": "http_error",
-      "cause": "wrong_base_url_path",
-      "detail": "Unreviewed root/path returned 404; no claim that the whole service is dead.",
-      "latencyMs": 730,
+      "trace": [],
+      "outcome": "reviewed_exclusion",
+      "cause": "needs_key",
+      "detail": "Official May 11, 2026 announcement requires an API key for every Census Data API query. Current official example pages also require personal API keys for all data queries. Key registration is free, but no account/key was created or supplied. This restriction applies to Census Data API queries, not unrelated Census geocoder/TIGER services.",
+      "exclusionSource": "https://www.census.gov/library/video/2026/adrm/requesting-a-census-data-api-key.html",
+      "latencyMs": 0,
       "canonicalBaseId": "censusgov",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "cepla",
@@ -74565,49 +74813,44 @@
     {
       "id": "curvefinanceprotocolapi",
       "name": "Curve Finance Protocol API",
-      "baseUrl": "https://curve.finance/docs",
-      "origin": "https://curve.finance",
+      "baseUrl": "https://api.curve.finance/v1",
+      "origin": "https://api.curve.finance",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
-      "canonicalId": "curvefinanceprotocolapi",
+      "canonicalId": "curve",
       "sourceUrl": "https://curve.finance/docs",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/getETHprice",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.curve.finance/developer/integration/api/curve-api/",
       "pricing": "free",
-      "pricingSource": "https://curve.finance/docs",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.curve.finance/developer/integration/api/curve-api/",
+      "freeEvidence": "Existing source inventory labels Curve free; the official Curve-hosted OpenAPI specification documents this public price-data GET endpoint with no API-key/security requirement. This recipe provides public reads only.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "edb9e3d11b7ac65bf18f53fa548dcab997511adf5eb5d93e13bfa986ce908e41",
-      "checkedAt": "2026-10-15T17:28:54.117Z",
-      "status": 307,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://curve.finance/docs",
+          "to": "https://api.curve.finance/v1",
+          "source": "https://docs.curve.finance/developer/integration/api/curve-api/"
+        }
+      ],
+      "definitionHash": "c67c78dc25cd91ec435b67ce221dea01c98c1d5c66fa2342535d1df288622d96",
+      "checkedAt": "2026-10-15T18:19:01.109Z",
+      "status": 200,
       "verified": false,
-      "trace": [
-        {
-          "url": "https://curve.finance/docs/",
-          "startedAt": "2026-10-15T17:28:54.117Z",
-          "status": 307,
-          "contentType": "application/json",
-          "redirectTo": "https://www.curve.finance/docs/"
-        }
-      ],
-      "probeUrl": "https://curve.finance/docs/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 196,
-      "canonicalBaseId": "curvefinanceprotocolapi",
+      "outcome": "duplicate",
+      "cause": "duplicate",
+      "duplicateOf": "curve",
+      "canonicalVerified": true,
+      "canonicalProbeUrl": "https://api.curve.finance/v1/getETHprice",
+      "detail": "Alias shares a reviewed canonical ID or exact canonical base endpoint; request/result counted once.",
+      "trace": [],
+      "canonicalBaseId": "curve",
       "reused": true
     },
     {
@@ -81715,47 +81958,65 @@
     {
       "id": "lidoprotocolapi",
       "name": "Lido Protocol API",
-      "baseUrl": "https://lido.finance/docs",
-      "origin": "https://lido.finance",
+      "baseUrl": "https://eth-api.lido.fi",
+      "origin": "https://eth-api.lido.fi",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "lidoprotocolapi",
       "sourceUrl": "https://lido.finance/docs",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/v1/protocol/steth/apr/sma",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.lido.fi/integrations/api/",
       "pricing": "free",
-      "pricingSource": "https://lido.finance/docs",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.lido.fi/integrations/api/",
+      "freeEvidence": "Official Lido integration documentation explicitly invites app/website integration and states APIs are strictly read-only; it publishes this unauthenticated APR endpoint. Existing full registry labels this API free. No wallet, transaction, staking, withdrawals or paid RPC is used.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "a24ed8780b5db5a2547d3abeab94da648a828f1d0f14a784aa4879c243e8b175",
-      "checkedAt": "2026-10-15T17:29:09.100Z",
-      "status": 403,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://lido.finance/docs/",
-          "startedAt": "2026-10-15T17:29:09.100Z",
-          "status": 403,
-          "contentType": "text/html; charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://lido.finance/docs",
+          "to": "https://eth-api.lido.fi",
+          "source": "https://docs.lido.fi/integrations/api/"
         }
       ],
-      "probeUrl": "https://lido.finance/docs/",
-      "finalProbeUrl": "https://lido.finance/docs/",
-      "responseBytes": 4548,
+      "definitionHash": "7ccc283c722663aac532825f74745d4c91ea1cd937287471ddfa72e4a9f9ea0b",
+      "checkedAt": "2026-10-15T18:19:01.734Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://eth-api.lido.fi/v1/protocol/steth/apr/sma",
+          "startedAt": "2026-10-15T18:19:01.734Z",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8"
+        }
+      ],
+      "probeUrl": "https://eth-api.lido.fi/v1/protocol/steth/apr/sma",
+      "finalProbeUrl": "https://eth-api.lido.fi/v1/protocol/steth/apr/sma",
+      "responseBytes": 392,
       "bodyTruncated": false,
-      "outcome": "access_denied",
-      "cause": "unresolved",
-      "detail": "Access denied could be WAF, geography, policy or authentication; status alone is insufficient.",
-      "latencyMs": 220,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 174,
       "canonicalBaseId": "lidoprotocolapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 195,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "lifelog",
@@ -84531,7 +84792,8 @@
         "latencyMs": 159,
         "route": "customer-gateway",
         "errorCode": null
-      }
+      },
+      "reused": true
     },
     {
       "id": "npmregistryapi",
@@ -86085,47 +86347,71 @@
     {
       "id": "orcaprotocolapi",
       "name": "Orca Protocol API",
-      "baseUrl": "https://orca.finance/docs",
-      "origin": "https://orca.finance",
+      "baseUrl": "https://api.orca.so/v2/solana",
+      "origin": "https://api.orca.so",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "orcaprotocolapi",
       "sourceUrl": "https://orca.finance/docs",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/pools?size=1",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.orca.so/api-reference/overview",
       "pricing": "free",
-      "pricingSource": "https://orca.finance/docs",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.orca.so/api-reference/overview",
+      "freeEvidence": "Official API overview describes the public read API, explicitly says read access requires no authentication and documents size-limited pagination and fair-use rate limits. Existing registry labels this API free. Only public pool metadata is read; no wallet, swap, transaction or paid RPC is used.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "219bfa6f067d0be7c8cf7138baee76a75be6579e14a985c523f12d41c80aba63",
-      "checkedAt": "2026-10-15T17:29:15.279Z",
-      "status": 403,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://orca.finance/docs/",
-          "startedAt": "2026-10-15T17:29:15.280Z",
-          "status": 403,
-          "contentType": "text/plain; charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://orca.finance/docs",
+          "to": "https://api.orca.so/v2/solana",
+          "source": "https://docs.orca.so/api-reference/overview"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/pools?size=1",
+          "source": "https://docs.orca.so/api-reference/overview"
         }
       ],
-      "probeUrl": "https://orca.finance/docs/",
-      "finalProbeUrl": "https://orca.finance/docs/",
-      "responseBytes": 58,
+      "definitionHash": "1728f3186a7b1d8ea065012eead92f896d7111057db966750982a0f036de6399",
+      "checkedAt": "2026-10-15T18:19:01.791Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://api.orca.so/v2/solana/pools?size=1",
+          "startedAt": "2026-10-15T18:19:01.791Z",
+          "status": 200,
+          "contentType": "application/json"
+        }
+      ],
+      "probeUrl": "https://api.orca.so/v2/solana/pools?size=1",
+      "finalProbeUrl": "https://api.orca.so/v2/solana/pools?size=1",
+      "responseBytes": 3716,
       "bodyTruncated": false,
-      "outcome": "access_denied",
-      "cause": "unresolved",
-      "detail": "Access denied could be WAF, geography, policy or authentication; status alone is insufficient.",
-      "latencyMs": 186,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 353,
       "canonicalBaseId": "orcaprotocolapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 367,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "ordoro",
@@ -88392,47 +88678,65 @@
     {
       "id": "raydiumprotocolapi",
       "name": "Raydium Protocol API",
-      "baseUrl": "https://raydium.finance/docs",
-      "origin": "https://raydium.finance",
+      "baseUrl": "https://api-v3.raydium.io",
+      "origin": "https://api-v3.raydium.io",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "raydiumprotocolapi",
       "sourceUrl": "https://raydium.finance/docs",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/main/info",
+      "canonicalExplicit": true,
+      "docsUrl": "https://github.com/raydium-io/raydium-docs-v1/blob/main/api-reference/api-v3/overview.mdx",
       "pricing": "free",
-      "pricingSource": "https://raydium.finance/docs",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://github.com/raydium-io/raydium-docs-v1/blob/main/sdk-api/rest-api.mdx",
+      "freeEvidence": "Official Raydium REST guide documents anonymous HTTPS access for API v3, recommends this heavily cached read endpoint and permits caching/proxying for high throughput. Existing registry labels this API free; no paid plan, wallet-signed Forum, quote transaction, RPC submission or on-chain action is used. Respect progressive per-IP rate limits.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "c6ddf97dc37af53457ed3857bc14ad08aa89649c32bcf72514f1ec8f3fd1a1db",
-      "checkedAt": "2026-10-15T17:29:20.004Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://raydium.finance/docs/",
-          "startedAt": "2026-10-15T17:29:20.004Z",
-          "status": 200,
-          "contentType": "text/html"
+          "cause": "wrong_base_url_path",
+          "from": "https://raydium.finance/docs",
+          "to": "https://api-v3.raydium.io",
+          "source": "https://github.com/raydium-io/raydium-docs-v1/blob/main/api-reference/api-v3/overview.mdx"
         }
       ],
-      "probeUrl": "https://raydium.finance/docs/",
-      "finalProbeUrl": "https://raydium.finance/docs/",
-      "responseBytes": 114,
+      "definitionHash": "3ad02b5d61591c7768d91389e755040eb9473319bd45bb047458470fe74d0c03",
+      "checkedAt": "2026-10-15T18:19:01.839Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://api-v3.raydium.io/main/info",
+          "startedAt": "2026-10-15T18:19:01.839Z",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8"
+        }
+      ],
+      "probeUrl": "https://api-v3.raydium.io/main/info",
+      "finalProbeUrl": "https://api-v3.raydium.io/main/info",
+      "responseBytes": 123,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 519,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 334,
       "canonicalBaseId": "raydiumprotocolapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 441,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "razorpayifsc",
@@ -90088,54 +90392,65 @@
     {
       "id": "spanishineapi",
       "name": "Spanish INE API",
-      "baseUrl": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
-      "origin": "https://www.ine.es",
+      "baseUrl": "https://servicios.ine.es/wstempus/js/ES",
+      "origin": "https://servicios.ine.es",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "spanishineapi",
       "sourceUrl": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/OPERACIONES_DISPONIBLES",
+      "canonicalExplicit": true,
+      "docsUrl": "https://www.ine.es/dyngs/DAB/index.htm?cid=1100",
       "pricing": "free",
-      "pricingSource": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://www.ine.es/datosabiertos/",
+      "freeEvidence": "Official INE API reference documents OPERACIONES_DISPONIBLES. Official open-data page states CC BY 4.0 permits commercial reuse with attribution. Preserve INE source, update dates, meaning and non-endorsement. This reads the small operation catalog; no customer keys or paid data.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "001cd7eb77434d3615c092bddd60d80e266428fbab26f037cc7bbe2c2c6054b6",
-      "checkedAt": "2026-10-15T17:29:22.256Z",
-      "status": 200,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
-          "startedAt": "2026-10-15T17:29:22.256Z",
-          "status": 302,
-          "contentType": "text/html",
-          "redirectTo": "https://www.ine.es/dyngs/DAB/en/index.htm?cid=1099"
-        },
-        {
-          "url": "https://www.ine.es/dyngs/DAB/en/index.htm?cid=1099",
-          "startedAt": "2026-10-15T17:29:23.258Z",
-          "status": 200,
-          "contentType": "text/html;charset=UTF-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
+          "to": "https://servicios.ine.es/wstempus/js/ES",
+          "source": "https://www.ine.es/dyngs/DAB/index.htm?cid=1100"
         }
       ],
-      "probeUrl": "https://www.ine.es/dyngs/DataLab/en/manual.html?cid=66",
-      "finalProbeUrl": "https://www.ine.es/dyngs/DAB/en/index.htm?cid=1099",
-      "responseBytes": 26842,
+      "definitionHash": "975cd779eab63a37d63bb61c8803191857032ff9d00be31371ccfb07ef54787b",
+      "checkedAt": "2026-10-15T18:19:01.609Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES",
+          "startedAt": "2026-10-15T18:19:01.609Z",
+          "status": 200,
+          "contentType": "application/json;charset=UTF-8"
+        }
+      ],
+      "probeUrl": "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES",
+      "finalProbeUrl": "https://servicios.ine.es/wstempus/js/ES/OPERACIONES_DISPONIBLES",
+      "responseBytes": 24096,
       "bodyTruncated": false,
-      "outcome": "html_instead_of_api",
-      "cause": "wrong_base_url_path",
-      "detail": "HTML proves this tested endpoint is wrong, not that no hosted API exists.",
-      "latencyMs": 1226,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 1418,
       "canonicalBaseId": "spanishineapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 1297,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "sportlistdata",
@@ -90284,6 +90599,13 @@
       "origin": "https://github.com",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
+      "exclusionEvidence": {
+        "id": "ssllabsapi",
+        "name": "SSL Labs API",
+        "cause": "commercial_permission",
+        "docsUrl": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md",
+        "evidence": "Official API documentation Terms and Conditions states commercial use is generally disallowed without explicit Qualys permission. The documented free availability does not authorize a commercial shared gateway; obtain permission before enabling."
+      },
       "canonicalId": "ssllabsapi",
       "sourceUrl": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md",
       "smokePath": "/",
@@ -90299,18 +90621,18 @@
       "responseKind": "json",
       "baseline": null,
       "repairs": [],
-      "definitionHash": "4510f997f55efab328dbfed26aae3a19bb853e94e57823310766a61d3ea62205",
-      "checkedAt": "2026-10-15T17:29:22.768Z",
+      "definitionHash": "fed1db4f25e1c0f23eef98b41911e189971ef960d384424e8182b20bf96293ab",
+      "checkedAt": "2026-10-15T18:22:35.485Z",
       "status": 0,
       "verified": false,
       "trace": [],
-      "probeUrl": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md/",
-      "outcome": "documentation_url",
-      "cause": "wrong_base_url_path",
-      "detail": "Catalog points to a documentation/specification host, not a hosted API. No request dispatched.",
+      "outcome": "reviewed_exclusion",
+      "cause": "commercial_permission",
+      "detail": "Official API documentation Terms and Conditions states commercial use is generally disallowed without explicit Qualys permission. The documented free availability does not authorize a commercial shared gateway; obtain permission before enabling.",
+      "exclusionSource": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md",
       "latencyMs": 0,
       "canonicalBaseId": "ssllabsapi",
-      "reused": true
+      "canonicalVerified": false
     },
     {
       "id": "sst",
@@ -91673,47 +91995,71 @@
     {
       "id": "tosdrapi",
       "name": "ToS;DR API",
-      "baseUrl": "https://tosdr.org/api.html",
-      "origin": "https://tosdr.org",
+      "baseUrl": "https://api.tosdr.org",
+      "origin": "https://api.tosdr.org",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "tosdrapi",
       "sourceUrl": "https://tosdr.org/api.html",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/service/v3?id=190",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.tosdr.org/developer/tos-dr-developers/restful-api/service-api/get-service-v3",
       "pricing": "free",
-      "pricingSource": "https://tosdr.org/api.html",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.tosdr.org/site-policy/tosdr-terms/tosdr.org-terms-of-contribution",
+      "freeEvidence": "Official developer reference documents keyless service GET. Official contribution terms license the open data CC BY-SA 3.0 or later with the stated AGPL larger-program exception. Existing registry labels this public service free. Preserve attribution and share-alike obligations; no paid resale is inferred.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "6a0463fc06bcc4faf6929d8f87f746e4afd015438c84a0809637292bb47a683f",
-      "checkedAt": "2026-10-15T17:29:24.776Z",
-      "status": 404,
-      "verified": false,
-      "trace": [
+      "repairs": [
         {
-          "url": "https://tosdr.org/api.html/",
-          "startedAt": "2026-10-15T17:29:24.776Z",
-          "status": 404,
-          "contentType": "text/html; charset=utf-8"
+          "cause": "wrong_base_url_path",
+          "from": "https://tosdr.org/api.html",
+          "to": "https://api.tosdr.org",
+          "source": "https://docs.tosdr.org/developer/tos-dr-developers/restful-api/service-api/get-service-v3"
+        },
+        {
+          "cause": "missing_default_params",
+          "from": "/",
+          "to": "/service/v3?id=190",
+          "source": "https://docs.tosdr.org/developer/tos-dr-developers/restful-api/service-api/get-service-v3"
         }
       ],
-      "probeUrl": "https://tosdr.org/api.html/",
-      "finalProbeUrl": "https://tosdr.org/api.html/",
-      "responseBytes": 14694,
+      "definitionHash": "f1feea3af157556aae7d51ad3511498c580d4034963326c1f4d96fc7ccbdf550",
+      "checkedAt": "2026-10-15T18:19:01.909Z",
+      "status": 200,
+      "verified": true,
+      "trace": [
+        {
+          "url": "https://api.tosdr.org/service/v3?id=190",
+          "startedAt": "2026-10-15T18:19:01.909Z",
+          "status": 200,
+          "contentType": "application/json"
+        }
+      ],
+      "probeUrl": "https://api.tosdr.org/service/v3?id=190",
+      "finalProbeUrl": "https://api.tosdr.org/service/v3?id=190",
+      "responseBytes": 33505,
       "bodyTruncated": false,
-      "outcome": "http_error",
-      "cause": "wrong_base_url_path",
-      "detail": "Unreviewed root/path returned 404; no claim that the whole service is dead.",
-      "latencyMs": 270,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 206,
       "canonicalBaseId": "tosdrapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 181,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "tracemoe",
@@ -92046,7 +92392,7 @@
       "definitionHash": "74a732d1fe1600b5c26a93af300dc1bd994564d36c124a78e62a81df738b98eb",
       "checkedAt": "2026-10-15T17:29:25.860Z",
       "status": 200,
-      "verified": true,
+      "verified": false,
       "trace": [
         {
           "url": "https://v6.vbb.transport.rest/locations?query=Berlin&results=1",
@@ -92059,8 +92405,8 @@
       "finalProbeUrl": "https://v6.vbb.transport.rest/locations?query=Berlin&results=1",
       "responseBytes": 455,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
+      "outcome": "customer_gateway_failed",
+      "cause": "unresolved",
       "latencyMs": 1137,
       "canonicalBaseId": "transportforberlingermany",
       "upstreamVerified": true,
@@ -92069,8 +92415,8 @@
         "verifiedAt": "2026-10-15T17:48:31.263Z",
         "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
         "status": 200,
-        "success": true,
-        "healthDisabled": false,
+        "success": false,
+        "healthDisabled": true,
         "latencyMs": 1025,
         "route": "customer-gateway",
         "errorCode": null
@@ -94984,50 +95330,65 @@
     {
       "id": "yearnfinanceprotocolapi",
       "name": "Yearn Finance Protocol API",
-      "baseUrl": "https://yearn.finance/docs",
-      "origin": "https://yearn.finance",
+      "baseUrl": "https://ydaemon.yearn.fi",
+      "origin": "https://ydaemon.yearn.fi",
       "responseDecoderHash": "666eebcba50a123d54b02f2b45fcf7d9e704fa1427c46281a86f35bca174ac05",
       "transportHash": "3631f388b7ebadf930ce42035bab9064092f387529779e09ded085f2ff9ca0cd",
       "canonicalId": "yearnfinanceprotocolapi",
       "sourceUrl": "https://yearn.finance/docs",
-      "smokePath": "/",
-      "canonicalExplicit": false,
-      "docsUrl": "",
+      "smokePath": "/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9",
+      "canonicalExplicit": true,
+      "docsUrl": "https://docs.yearn.fi/developers/building-on-yearn",
       "pricing": "free",
-      "pricingSource": "https://yearn.finance/docs",
-      "freeEvidence": "Existing full-registry pricing explicitly labels this API free; no inference from successful HTTP alone.",
+      "pricingSource": "https://docs.yearn.fi/developers/building-on-yearn",
+      "freeEvidence": "Existing source inventory labels Yearn free; current official integration docs identify yDaemon as a public vault-data API. The official yearn/ydaemon repository documents this single-vault GET, requiring no API credential. Scope is public legacy vault metadata, not deposits, trading or account access.",
       "freeVerified": true,
-      "reviewedRecipe": false,
+      "reviewedRecipe": true,
       "baselineVerified": false,
       "httpsUpgraded": false,
       "responseKind": "json",
       "baseline": null,
-      "repairs": [],
-      "definitionHash": "7d5800dfe6d778ae0d66f8c63861caf5a788a39519473e9f73225402c5ef96c0",
-      "checkedAt": "2026-10-15T17:29:28.675Z",
-      "status": 307,
-      "verified": false,
+      "repairs": [
+        {
+          "cause": "wrong_base_url_path",
+          "from": "https://yearn.finance/docs",
+          "to": "https://ydaemon.yearn.fi",
+          "source": "https://docs.yearn.fi/developers/building-on-yearn"
+        }
+      ],
+      "definitionHash": "39620e5aee71ad35b204be612d2b38a4abb30b552b1d9ea6e9ce83deb5257322",
+      "checkedAt": "2026-10-15T18:19:02.023Z",
+      "status": 200,
+      "verified": true,
       "trace": [
         {
-          "url": "https://yearn.finance/docs/",
-          "startedAt": "2026-10-15T17:29:28.675Z",
-          "status": 307,
-          "contentType": "application/json",
-          "redirectTo": "https://yearn.fi/docs/"
+          "url": "https://ydaemon.yearn.fi/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9",
+          "startedAt": "2026-10-15T18:19:02.023Z",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8"
         }
       ],
-      "probeUrl": "https://yearn.finance/docs/",
-      "outcome": "redirect_not_approved",
-      "cause": "redirect_https",
-      "errorCause": [
-        {
-          "name": "Error",
-          "reason": "redirect_not_approved"
-        }
-      ],
-      "latencyMs": 237,
+      "probeUrl": "https://ydaemon.yearn.fi/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9",
+      "finalProbeUrl": "https://ydaemon.yearn.fi/1/vaults/0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9",
+      "responseBytes": 1223,
+      "bodyTruncated": false,
+      "outcome": "ok_json",
+      "cause": "ok",
+      "latencyMs": 452,
       "canonicalBaseId": "yearnfinanceprotocolapi",
-      "reused": true
+      "reused": true,
+      "upstreamVerified": true,
+      "upstreamOutcome": "ok_json",
+      "gatewayVerification": {
+        "verifiedAt": "2026-10-15T18:22:08.067Z",
+        "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+        "status": 200,
+        "success": true,
+        "healthDisabled": false,
+        "latencyMs": 272,
+        "route": "customer-gateway",
+        "errorCode": null
+      }
     },
     {
       "id": "yeekit",
@@ -96345,13 +96706,13 @@
     }
   ],
   "customerGatewayVerification": {
-    "verifiedAt": "2026-10-15T18:04:58.383Z",
+    "verifiedAt": "2026-10-15T18:22:08.067Z",
     "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
     "authentication": "authenticated-customer-workspace",
     "billingUnchanged": true,
     "complete": true,
-    "testedCanonicalCount": 215,
-    "passedCanonicalCount": 215,
+    "testedCanonicalCount": 230,
+    "passedCanonicalCount": 230,
     "demotedCanonicalCount": 0,
     "note": "Complete customer gateway batch supplied by the operator. Billing snapshots were compared in memory; workspace identifiers, credentials and raw snapshots are not persisted. This proof never promotes discovery rows."
   }

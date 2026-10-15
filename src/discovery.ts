@@ -10,6 +10,7 @@ import { openAPIs, isOpenAPI } from './open-apis.js';
 import { isInternalProviderReference, isUnavailableManagedProvider } from './provider-boundaries.js';
 import { getPublicCustomerExecutableProvider } from './product-truth.js';
 import { isWorkspacePublicCatalogCard } from './workspace-public-apis.js';
+import { applyPublicDiscoveryHealth, type PublicDiscoveryHealth } from './public-discovery-health.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -515,6 +516,7 @@ export function discoverAPIs(
     maxPrice?: number;
     region?: string;
     callableOnly?: boolean;
+    publicHealth?: PublicDiscoveryHealth;
   } = {}
 ): SearchResult[] {
   const { category, maxResults = 5, maxPrice, region, callableOnly = true } = options;
@@ -524,7 +526,7 @@ export function discoverAPIs(
 
   const results: SearchResult[] = [];
 
-  for (const api of apis) {
+  for (const api of getAllAPIs(options.publicHealth)) {
     // Callable-only filter (default mode): drop registry entries APIClaw
     // can't execute right now. Cast because `callable` is a registry field
     // not yet promoted to the APIProvider type.
@@ -818,7 +820,7 @@ export function getAPIDetails(
  * List all APIs in a category
  */
 export function listByCategory(category: string): APIProvider[] {
-  return apis.filter(api => api.category === category);
+  return getAllAPIs().filter(api => api.category === category);
 }
 
 /**
@@ -831,6 +833,6 @@ export function getCategories(): string[] {
 /**
  * Get all APIs
  */
-export function getAllAPIs(): APIProvider[] {
-  return apis;
+export function getAllAPIs(publicHealth?: PublicDiscoveryHealth): APIProvider[] {
+  return apis.map(api => applyPublicDiscoveryHealth(api, publicHealth));
 }

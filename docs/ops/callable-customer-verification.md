@@ -1,42 +1,39 @@
 # Callable API customer verification
 
-Evidence checkpoint: 2026-10-15T18:04:58.383Z. PR: https://github.com/nordsym/apiclaw/pull/60. This document records preview evidence; it does not establish a production deployment or completion of the 1,000-callable-API target.
+Evidence checkpoint: 2026-10-15T18:22:08.067Z. [PR #60](https://github.com/nordsym/apiclaw/pull/60) remains a draft, unmerged. Production is unchanged. The 1,000-callable target is not met.
 
-## What has been established
+## Measured capacity
 
-| Stage | Evidence | Meaning |
-| --- | --- | --- |
-| Earlier customer journey, 15:05 UTC | [Dated baseline](customer-onboarding-verification.md) | 13 measured free APIs plus three approved managed providers, 16 callable cards. This is historical evidence, not the current count. |
-| Full upstream sweep, 17:29:32.497 UTC | [Audit JSON](callable-audit.json), `lastFullSweepAt` | All 1,641 expanded candidate/alias rows were covered. Successful responses required reviewed free eligibility and valid data; websites, unknown pricing and ambiguous authorization errors did not qualify. |
-| Canonical review following that sweep | FDA food and drug datasets share canonical ID `fda` | 198 free API identities remained before customer gateway verification. Actions, datasets and aliases do not add extra APIs. |
-| Authenticated customer batch, 17:48:31.263 UTC | Per-row `gatewayVerification` in the audit JSON | 195 of those 198 free APIs passed through the isolated preview gateway. Three were disabled by native health checks and remain discovery. |
-| Incremental upstream and customer checks, 18:04:58.383 UTC | 20 additional canonical APIs passed both stages | All 20 passed authenticated customer gateway calls; their billing snapshots were unchanged. |
-| Merged authenticated evidence | [Sanitized customer proof](evidence/2026-10-15/customer-gateway.json) | 215/215 retained free APIs passed customer gateway verification. With three existing approved managed providers, the reviewed total is 218. The earlier three native-health failures remain discovery. |
+| Checkpoint | Free APIs | Existing managed | Total |
+| --- | ---: | ---: | ---: |
+| Original customer baseline | 13 | 3 | 16 |
+| First expanded authenticated batch | 195 | 3 | 198 |
+| Additional 20 authenticated successes | 215 | 3 | 218 |
+| Subsequent native health failures excluded | 212 | 3 | 215 |
+| Final 18 authenticated additions/repairs | 230 | 3 | 233 |
 
-The isolated backend is `abundant-goldfish-47`, at https://abundant-goldfish-47.eu-west-1.convex.site. Requests use a real logged-in customer's `X-APIClaw-Session` through `/v1/execute`. The original signup, NASA first-call and exact docs examples are described in the dated baseline. Secrets and workspace identifiers are excluded from committed evidence.
+The complete upstream sweep covered 1,641 candidate/alias rows at 17:29:32.497 UTC. Subsequent targeted checks retain that timestamp and each unchanged result's original date. Aliases, paths, operations and datasets do not add extra services. The final merged proof covers all 230 retained free APIs through authenticated `/v1/execute` calls against isolated Convex `abundant-goldfish-47`. Its complete native health sweep also passed all 230 reviewed defaults. No paid managed calls were made. The three pre-approved managed providers are not re-audited by keyless probes.
 
-The three native-health failures in the 198-API batch were RandomFox (HTTP 520), Tunisia (no HTTP response, status 0) and Pokémon (HTTP 502). These are observations from the preview environment, not claims that the services are permanently unavailable. A later healthy native recheck can restore an API that remains in the approved manifest; adding a removed API requires reviewed evidence and deployment.
+[Customer gateway proof](evidence/2026-10-15/customer-gateway.json) contains bounded outcomes, separate verification dates and equal before/after billing snapshots. Workspace identifiers, credentials and raw response bodies are excluded. The proof application requires unique complete coverage and deep-equal billing snapshots; failed/discovery/disabled entries cannot be promoted by it. Upstream evidence and customer evidence remain separate in [the audit](callable-audit.md).
 
-Before/after billing snapshots for the customer batch were byte-equal. The workspace's managed counters and billing records did not change during the free public calls. The evidence compiler separately requires deep equality of the supplied snapshots before accepting customer proof. No paid managed requests, provider account creation or payment operations were part of this audit.
+RandomFox, Tunisia, Pokémon and Berlin transport remain discovery after native failures. AviationWeather was repaired with a bounded KJFK request; the UK catalog required a field projection to avoid an oversized response. Both subsequently passed native health and authenticated customer calls. FDA food/drug aliases count as one API.
 
-## Evidence boundaries
+## Customer journey and actual limitations
 
-`checkedAt`, HTTP status, upstream latency and response traces record the upstream probe. `gatewayVerification` records the separate authenticated customer result, preview origin and verification time. A merged batch keeps each previous result's verification date; it must not make an older call appear freshly tested.
+A new identity signed up through the real Clerk form in isolated bundled headless Chromium. Clerk's official test helper and reserved OTP were used; users/workspaces were not pre-created administratively. The same customer's NASA APOD result was displayed after retry. NASA returned intermittent real upstream HTTP 500 responses; an admin-only preview probe confirmed that this also occurs directly upstream with valid JSON. The temporary diagnostic function was removed. Do not describe the first-attempt NASA journey as uniformly successful.
 
-The evidence compiler requires a unique result for every currently eligible canonical API. Failure, a discovery response or native health disablement demotes the API; it never promotes an existing discovery row. Successful upstream evidence is retained as `upstreamVerified` and `upstreamOutcome` when the customer gateway check is applied. Canonical aliases follow a failed canonical API.
+The exact documentation curl snippets for NASA APOD and Frankfurter latest passed against preview. Three deterministically selected free APIs (Cat Facts API, Digimon Information and Open Government, Poland) plus `open:frankfurter` all returned successful customer gateway results, with billing counters unchanged. [Selected-call evidence](evidence/2026-10-15/customer-sample.json) and [NASA transport observations](evidence/2026-10-15/nasa-transport.json) record these checks. The browser's 70-second deadline now permits the existing gateway's upstream budget. A reproduced onboarding race was fixed so activation polling cannot hide a pending local response or dismiss its successful result before the explicit Open workspace action. Controlled browser tests cover that race, failure/retry/loading and unchanged external agent completion.
 
-The 20 verified additions were npm Registry, Codeberg, MMO Games, ITIS, Callook.info, ChEBI, Finnish Meteorological Institute, MedlinePlus, Hong Kong Observatory, Gene Ontology, Human Protein Atlas, Eurostat, DigiDates, isEven, UK Bank Holidays, inspirehep.net, ONS UK, SEC EDGAR, CDC and EPA. All 20 passed the authenticated customer batch at 18:04:58.383 UTC. The merged evidence preserves the earlier 195 successful results at their original verification time, giving 215 free customer-verified APIs. The three existing approved managed providers are counted separately and were not re-audited by keyless probes.
+Preview at this checkpoint: `dpl_2N1gTQq1EEAdjfgXCoTKtA8Mpmby`, https://apiclaw-emokpmctd-gustavs-projects-0c9f35af.vercel.app, source `b507f2a4aba6a5ba9a2adfd3e238cf26509fad84`. Its earlier 215-card snapshot passed all five live web surfaces without JavaScript, paginated unique counts, forced native demotion/recovery and gateway denial while disabled. The final 233-card frontend deployment and latest-head checks must be recorded below before claiming final surface verification.
 
-## Keeping the live count honest
+## Keeping discovery honest
 
-The native Convex `publicApiHealth.recheck` job runs every Monday at 05:23 UTC. It checks reviewed canonical GET endpoints in bounded batches using the gateway's shared transport and decoder. Failed checks write an unhealthy state, which disables execution and removes the API from the live callable snapshot. This works without a GitHub merge or website redeployment. It does not add unreviewed APIs.
+The native Convex `publicApiHealth.recheck` cron runs Monday at 05:23 UTC after deployment. Bounded canonical GET probes use the gateway's transport and response decoder. Failure disables execution and moves the API to discovery through the shared health overlay without a website deployment; a later healthy check can restore only an already approved manifest entry. Unknown IDs cannot be promoted. The separate GitHub audit uploads review evidence and never deploys or publishes additions.
 
-The public `publicApiHealth:snapshot` response supplies `approvedIds`, `disabledIds` and the oldest complete health-check timestamp. The landing app intersects its local reviewed manifest with the backend's `approvedIds`, then removes `disabledIds`. This prevents a newer website from advertising candidates not yet approved by the deployed backend. If the health snapshot is missing or invalid, availability is shown as unavailable rather than substituting a guessed count. An unprobed approved entry defaults healthy in the native overlay; therefore the snapshot is deployment/health state, not a substitute for the committed customer proof.
+Homepage, catalog, docs, served SKILL.md and `/api/catalog` intersect the frontend manifest with backend `approvedIds`, then remove `disabledIds`. Missing/invalid health state shows unavailable rather than a guessed count. Approved entries without health records default healthy, so the overlay is not a substitute for customer proof. MCP local fallback/category totals now use that same public metadata and fail closed for free callability; remote results require explicit callable true. Managed readiness remains unchanged.
 
-The GitHub scheduled audit is a separate review mechanism. It produces an evidence artifact; it does not promote APIs, refresh the manifest, merge or deploy. New upstream successes require reviewed canonical/free eligibility, authenticated customer verification and a deployed manifest before the final public claim.
+`/v1/discover` defaults to the production catalog. An isolated preview can set server-only `APICLAW_CATALOG_URL` to its HTTPS Vercel `/api/catalog`, with existing `APICLAW_CATALOG_OIDC_TOKEN` for deployment protection. Tokens are never sent to callers, query strings, other hosts or redirects. A preview token can expire and must not become a production dependency; production uses the unchanged public URL.
 
-## Completion still required
+## Remaining acceptance gap
 
-The merged customer evidence establishes 215 free APIs plus three approved managed providers, 218 total. The native 215-API health recheck is running on preview; its completed outcome is not yet established in this checkpoint. A fresh signup-to-NASA journey, four selected free API calls, and agreement across the preview homepage, catalog, docs and served skill still require final verification. Record the final preview deployment, health outcome and PR checks before claiming the entire acceptance journey is complete.
-
-The 1,000-callable target is not met by this checkpoint. Remaining unresolved endpoints may yield further APIs. The number of free-key registrations needed to close the gap is unknown; product overlap, credentials, gateway compatibility and redistribution rights must be established rather than inferred from signup pages. [The free-key research](free-api-key-signups.md) is a research shortlist, not measured gateway capacity.
+233 is 767 below 1,000. The expanded pool is not exhausted and no global impossibility claim is justified. [Gap analysis](callable-gap-analysis.md) identifies remaining endpoint, rights and quota work. [Fifty researched free-key account families](free-api-key-signups.md) establish no new customer-callable capacity: entitlements, overlap and shared gateway rights still need verification. The required signup count remains unknown.
