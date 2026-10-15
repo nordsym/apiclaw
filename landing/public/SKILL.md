@@ -186,8 +186,8 @@ If NASA is not 200, fetch today's ECB FX rates. Same whoami gate.
 Same nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
 This is the same last-resort rail the automatic first execute
 uses after Authorize. It is free forever, no card, no key.
-Brave / Serper / Firecrawl have real provider cost and consume the
-bounded managed allowance. Do not use them for first execute.
+Other managed providers can have upstream costs or unavailable actions.
+Use these two free examples for first execute.
 
 ```bash
 npx @nordsym/apiclaw call frankfurter/latest --params '{"path":"/latest"}' --idempotency-key "apiclaw-first-frankfurter-$(date +%s)"

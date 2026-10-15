@@ -12,7 +12,8 @@ writeFileSync(resolve(root,'src/workspace-public-apis.data.ts'),`/** Generated f
 const oldSource=readFileSync(resolve(root,'src/canon-stats.ts'),'utf8');
 const priorOpen=Number(oldSource.match(/workspace_public_executable:\s*([\d_]+)/)[1].replaceAll('_',''));
 const priorTotal=Number(oldSource.match(/customer_executable_catalog_cards:\s*([\d_]+)/)[1].replaceAll('_',''));
-const total=selected.length+3;
+const managedCount=Number(oldSource.match(/customer_executable_providers:\s*([\d_]+)/)[1].replaceAll('_',''));
+const total=selected.length+managedCount;
 writeFileSync(resolve(root,'src/canon-stats.ts'),oldSource.replace(/generated_at: '[^']+'/,`generated_at: '${report.checkedAt.slice(0,10)}'`).replace(/workspace_public_executable:\s*[\d_]+/,`workspace_public_executable: ${selected.length}`).replace(/customer_executable_catalog_cards:\s*[\d_]+/,`customer_executable_catalog_cards: ${total}`));
 for(const p of ['README.md','landing/README.md','landing/public/SKILL.md','landing/public/llms.txt','landing/public/llms-full.txt','landing/public/agents.md','package.json']){
 let s;try{s=readFileSync(resolve(root,p),'utf8')}catch{continue}
@@ -23,4 +24,4 @@ writeFileSync(resolve(root,p),s);
 execFileSync(process.execPath,['landing/scripts/sync-runtime-modules.mjs'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['landing/scripts/generate-stats.js'],{cwd:root,stdio:'inherit'});
 execFileSync(process.execPath,['landing/scripts/sync-canon-to-stats.mjs'],{cwd:root,stdio:'inherit'});
-console.log(`Compiled ${selected.length} measured free APIs and 3 managed providers`);
+console.log(`Compiled ${selected.length} measured free APIs and ${managedCount} managed providers`);

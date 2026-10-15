@@ -3,9 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, ExternalLink, Loader2, X } from "lucide-react";
 import statsData from "@/lib/stats.json";
-import {
-  PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
-} from "@apiclaw/product-truth";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 
