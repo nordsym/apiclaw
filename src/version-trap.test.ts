@@ -61,6 +61,8 @@ const homepage = [
 assert.doesNotMatch(homepage, /16,?485|2\.5\.3/);
 assert.match(homepage, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/);
 assert.doesNotMatch(homepage, /label: "npm installs"/);
+assert.match(homepage, /X-APIClaw-Session/);
+assert.doesNotMatch(homepage, /Authorization: Bearer|one workspace key/);
 
 assert.match(http, /npx @nordsym\/apiclaw auth login/);
 assert.doesNotMatch(http, /run `apiclaw login`/);
