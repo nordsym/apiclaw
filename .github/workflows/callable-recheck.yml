@@ -11,14 +11,16 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
+      - run: npm ci
+      - run: node --check scripts/audit-callable.mjs
       - run: cp src/workspace-public-apis.json /tmp/previous-callable.json
-      - run: node scripts/audit-callable.mjs
+      - run: npm run audit:callable
       - run: node scripts/refresh-callable.mjs
       - uses: actions/upload-artifact@v4
         with:

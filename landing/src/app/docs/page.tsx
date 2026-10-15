@@ -1,6 +1,6 @@
-'use client';
-
 import Link from 'next/link';
+import { getCallableSnapshot, callableLabel } from '@/lib/callable-snapshot';
+export const dynamic = 'force-dynamic';
 import statsData from '@/lib/stats.json';
 import { SiteHeader } from '@/components/home/SiteHeader';
 import { SiteFooter } from '@/components/home/SiteFooter';
@@ -47,7 +47,8 @@ const META = "text-[13px] text-text-muted";
 const SUB = "text-[1.15rem] font-semibold tracking-[-0.02em] text-text-primary";
 const CODE = "claw-mono text-[13px] text-text-primary";
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  const snapshot = await getCallableSnapshot();
   return (
     <main className="claw min-h-screen">
       <SiteHeader />
@@ -360,7 +361,7 @@ export default function DocsPage() {
                   <span className={BODY}>Discoverable by agents via the catalog.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">
-                  <span className={META}>{statsData.customerExecutableCatalogCardCount.toLocaleString("en-US")} callable now</span>
+                  <span className={META}>{callableLabel(snapshot.callableCount)}</span>
                   <span className={BODY}>What a workspace can execute today, including {statsData.customerExecutableProviderCount} managed providers. Keyless public origins are Free; managed providers use the bounded trial and then PAYG where resale is supported.</span>
                 </li>
                 <li className="grid gap-1 border-b border-border-subtle py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6">

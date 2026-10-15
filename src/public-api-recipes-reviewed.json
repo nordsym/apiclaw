@@ -1,0 +1,12 @@
+[
+  {
+    "id": "openapigenerator",
+    "name": "OpenAPI Generator",
+    "baseUrl": "https://api.openapi-generator.tech/api",
+    "smokePath": "/gen/clients",
+    "docsUrl": "https://openapi-generator.tech/docs/online/",
+    "pricing": "free",
+    "pricingSource": "https://openapi-generator.tech/docs/online/",
+    "freeEvidence": "Official Online documentation explicitly offers hosted services publicly and free of charge. Read-only generator discovery over HTTPS returned HTTP200 JSON without credentials; service is beta without an SLA."
+  }
+]

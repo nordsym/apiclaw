@@ -136,7 +136,7 @@ status
 - 26,618 public API definitions are discoverable.
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not execution.
 - 22 built-in providers are inventoried. Built-in inventory is not an execution promise.
-- 3 of the 22 built-in providers are customer-executable now, plus 13 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
+- 3 of the 22 built-in providers are customer-executable now, plus 198 workspace-authenticated public/no-key HTTPS origins. Anonymous keyless public execution stays disabled.
 - OpenAI-compatible LLM gateway.
 - Remote MCP validated end to end.
 - Mission runtime with append-only events.

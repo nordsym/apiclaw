@@ -104,7 +104,7 @@ assert.doesNotMatch(
 );
 
 for (const catalogFile of [
-  "landing/src/app/catalog/page.tsx",
+  "landing/src/app/catalog/CatalogClient.tsx",
   "landing/src/app/api/catalog/route.ts",
 ]) {
   const source = readFileSync(catalogFile, "utf8");

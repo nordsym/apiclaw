@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import "./globals.css";
+import { getCallableSnapshot, callableLabel } from "@/lib/callable-snapshot";
 import statsData from "@/lib/stats.json";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
 };
 
 // Schema.org JSON-LD
-const schemaOrg = {
+const schemaOrg = (callableCount: number | null) => ({
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -73,7 +74,7 @@ const schemaOrg = {
       "operatingSystem": "Web",
       "softwareVersion": "2.9.5",
       "dateModified": "2026-08-23",
-      "description": `${SITE_DESCRIPTION} ${statsData.apiCount.toLocaleString("en-US")} indexed API definitions, ${statsData.customerExecutableCatalogCardCount.toLocaleString("en-US")} callable now.`,
+      "description": `${SITE_DESCRIPTION} ${statsData.apiCount.toLocaleString("en-US")} indexed API definitions, ${callableLabel(callableCount)}.`,
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -82,13 +83,14 @@ const schemaOrg = {
       }
     }
   ]
-};
+});
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const snapshot = await getCallableSnapshot();
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
@@ -102,7 +104,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg(snapshot.callableCount)) }}
         />
         <script
           defer

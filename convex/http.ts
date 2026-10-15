@@ -5743,6 +5743,21 @@ async function resolveExecuteAuth(
   return { authMethod: "anonymous" };
 }
 
+// Health and anti-abuse checks belong to the free rail, not managed billing.
+async function guardWorkspacePublicRead(ctx: any, workspaceId: string, apiId: string): Promise<Response | null> {
+  const healthy = await ctx.runQuery((internal as any).publicApiHealth.isHealthy, { apiId });
+  if (!healthy) return jsonResponse({ success: false, error: {
+    code: "public_api_temporarily_unavailable",
+    message: "This free API is temporarily unavailable. Please choose another API.",
+  } }, 503);
+  const limit = await ctx.runMutation(internal.ratelimit.checkWorkspacePublic, { workspaceId });
+  if (limit.reason === "workspace_inactive") return unauthResponse("public_api_requires_active_workspace");
+  if (!limit.allowed) return new Response(JSON.stringify({ success: false, error: {
+    code: "rate_limited", message: "Please wait a moment before calling another free API.",
+  } }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(limit.retryAfterSeconds) } });
+  return null;
+}
+
 async function handleManagedExecute(ctx: any, request: Request): Promise<Response> {
     const startTime = Date.now();
 
@@ -5843,12 +5858,8 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       if (!workspaceId || authMethod === "anonymous") {
         return unauthResponse("public_api_requires_workspace_auth");
       }
-      const limit = await ctx.runMutation(internal.ratelimit.checkWorkspacePublic, { workspaceId });
-      if (!limit.allowed) {
-        return new Response(JSON.stringify({ success: false, error: {
-          code: "rate_limited", message: "Please wait a moment before calling another free API.",
-        } }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(limit.retryAfterSeconds) } });
-      }
+      const denied = await guardWorkspacePublicRead(ctx, workspaceId, publicApi.id);
+      if (denied) return denied;
       const result = await executeWorkspacePublicApi(publicApi, action, params, {
         readText: readUpstreamTextCapped,
         recordSuccess: async () => {
@@ -7713,38 +7724,26 @@ http.route({
           },
         }, 405);
       }
-      try {
-        const forwardRes = await fetch(pinned.toString(), {
-          method: "GET",
-          headers: { Accept: "application/json", "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud)" },
-          redirect: "error",
-          signal: AbortSignal.timeout(15_000),
-        });
-        if (forwardRes.ok) {
+      const denied = await guardWorkspacePublicRead(ctx, workspaceId, publicApi.id);
+      if (denied) return denied;
+      const result = await executeWorkspacePublicApi(publicApi, "call", { path: userPath }, {
+        readText: readUpstreamTextCapped,
+        recordSuccess: async () => {
           await recordFirstSuccessfulGatewayCall(ctx, {
-            workspaceId,
-            path: "/v1/call",
-            authMethod: auth.authMethod,
-            provider: publicApi.id,
-            action: `${method} ${userPath}`,
+            workspaceId, path: "/v1/call", authMethod: auth.authMethod,
+            provider: publicApi.id, action: `${method} ${userPath}`,
           });
-        }
-        const respText = await forwardRes.text();
-        return new Response(respText, {
-          status: forwardRes.status,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": forwardRes.headers.get("Content-Type") ?? "application/json",
-            "X-APIClaw-Mode": "workspace_public",
-            "X-APIClaw-Provider": publicApi.name,
-          },
-        });
-      } catch (e: any) {
-        return jsonResponse(
-          { error: { code: "public_origin_error", message: e?.message ?? "public origin fetch failed", provider: publicApi.name } },
-          502,
-        );
-      }
+        },
+      });
+      if (result.status !== 200) return jsonResponse(result.body, result.status);
+      const kind = publicApi.responseKind ?? "json";
+      const raw = kind === "json" ? JSON.stringify(result.body.data)
+        : String((result.body.data as { raw: string }).raw);
+      return new Response(raw, { status: 200, headers: {
+        ...corsHeaders,
+        "Content-Type": kind === "xml" ? "application/xml" : kind === "csv" ? "text/csv" : kind === "text" ? "text/plain" : "application/json",
+        "X-APIClaw-Mode": "workspace_public", "X-APIClaw-Provider": publicApi.name,
+      } });
     }
 
     // ---------------- Branch: everything else = discovery_only ----------------

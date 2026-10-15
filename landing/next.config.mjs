@@ -3,6 +3,7 @@ import { NEXT_CONFIG_DISCOVERY_REDIRECTS } from "./src/lib/discovery-aliases.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  outputFileTracingIncludes: { '/api/skill': ['./public/SKILL.md'] },
   webpack(config) {
     config.resolve.alias['@apiclaw/product-truth'] = new URL('../src/product-truth.ts', import.meta.url).pathname;
     return config;

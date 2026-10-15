@@ -47,7 +47,7 @@ On headless, Grok, or cloud: show the first-line `https://apiclaw.cloud/auth/cli
 
 ## What it is
 
-APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,618 API definitions discoverable, 16 callable now.
+APIClaw is the authenticated execution and discovery layer for AI agents. An agent reaches it through SKILL.md, local MCP, CLI, HTTP, or Remote MCP, signs in once through the browser, discovers APIs by capability, and executes calls with credentials kept server-side. 26,618 API definitions discoverable, 201 callable now.
 
 Route across supported models from OpenAI, Anthropic, [OpenRouter](https://openrouter.ai), xAI, Groq, Mistral, DeepInfra, or a configured endpoint. Switch with one parameter, no SDK swap, no lock-in.
 
@@ -58,8 +58,8 @@ Route across supported models from OpenAI, Anthropic, [OpenRouter](https://openr
 - 26,618 discoverable API definitions
 - 689 exact-name source-verified entries. Source verification is discovery evidence, not proof of execution.
 - 22 built-in providers, 3 customer-executable provider rails
-- 13 workspace-authenticated public/no-key HTTPS origins
-- 16 total callable now
+- 198 workspace-authenticated public/no-key HTTPS origins
+- 201 total callable now
 - Source verification is not execution.
 
 ---

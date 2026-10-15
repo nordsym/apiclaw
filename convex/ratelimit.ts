@@ -1,5 +1,6 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { resolveVerifiedOwnerByWorkspaceId } from "./guards";
 
 // Rate limit config per tier
 const LIMITS = {
@@ -108,8 +109,10 @@ export const cleanup = mutation({
 // or create billing-ledger rows. A workspace gets sixty reads per minute.
 export const checkWorkspacePublic = internalMutation({
   args: { workspaceId: v.id("workspaces") },
-  returns: v.object({ allowed: v.boolean(), retryAfterSeconds: v.number() }),
+  returns: v.object({ allowed: v.boolean(), retryAfterSeconds: v.number(), reason: v.optional(v.literal("workspace_inactive")) }),
   handler: async (ctx, { workspaceId }) => {
+    const owner = await resolveVerifiedOwnerByWorkspaceId(ctx, workspaceId, { allowQuotaExceeded: true });
+    if (!owner.ok) return { allowed: false, retryAfterSeconds: 0, reason: "workspace_inactive" as const };
     const now = Date.now();
     const minute = Math.floor(now / 60_000);
     const key = `workspace_public:${workspaceId}:${minute}`;

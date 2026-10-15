@@ -83,6 +83,7 @@ import type * as providerDiscovery from "../providerDiscovery.js";
 import type * as providerHealth from "../providerHealth.js";
 import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
+import type * as publicApiHealth from "../publicApiHealth.js";
 import type * as purchases from "../purchases.js";
 import type * as quota from "../quota.js";
 import type * as ratelimit from "../ratelimit.js";
@@ -192,6 +193,7 @@ declare const fullApi: ApiFromModules<{
   providerHealth: typeof providerHealth;
   providerKeys: typeof providerKeys;
   providers: typeof providers;
+  publicApiHealth: typeof publicApiHealth;
   purchases: typeof purchases;
   quota: typeof quota;
   ratelimit: typeof ratelimit;

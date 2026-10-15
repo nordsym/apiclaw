@@ -1,0 +1,2115 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-15",
+  "scope": "Research only; no accounts, credentials, calls, billing or production changes.",
+  "inventory": {
+    "path": "src/registry/apis.json",
+    "rowsInspected": 26703,
+    "pricingUnknownRows": 23166,
+    "unit": "Deduplicated provider account families, not raw rows."
+  },
+  "ranking": "Qualitative agent utility, recurring free capacity, current availability and permission constraints; not usage analytics.",
+  "summary": {
+    "rankedProviderAccountFamilies": 50,
+    "knownFreeProductOffers": 53,
+    "actualNewSignups": 0,
+    "actualNewKeys": 0,
+    "verifiedIncrementalCallableApis": 0,
+    "numberOfSignupsToReach1000": null,
+    "reason": "A signup does not prove a key grant, gateway rights, adapter support, quota sustainability or a successful customer call. Existing keyless/managed coverage may overlap. No measured signup-to-new-API conversion.",
+    "signupEntryPagesHttp200": 46,
+    "signupEntryPagesHttp403": 4
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "id": "ipinfo",
+      "provider": "IPinfo Lite",
+      "registryMatches": [
+        "IPinfo",
+        "IPinfo API",
+        "IPInfo.io",
+        "ipinfo.io API",
+        "IPinfo.io OpenAPI Specification"
+      ],
+      "value": "Country/ASN enrichment for any agent",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Unlimited authenticated Lite lookups",
+        "sources": [
+          "https://ipinfo.io/lite",
+          "https://support.ipinfo.io/hc/en-us/articles/30792535492626-What-Is-the-Usage-Limit-for-the-Free-Plan",
+          "https://ipinfo.io/blog/ipinfo-lite-free-accurate-unlimited-ip-data"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Unlimited authenticated Lite lookups"
+      },
+      "docsUrl": "https://ipinfo.io/developers",
+      "signupUrl": "https://ipinfo.io/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "IPinfo Lite"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-redistribution-with-attribution",
+      "notes": "CC BY-SA 4.0; attribution and share-alike obligations; use Lite, not paid city/privacy data.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 2,
+      "id": "weatherapi",
+      "provider": "WeatherAPI",
+      "registryMatches": [
+        "WeatherAPI",
+        "WeatherAPI.com"
+      ],
+      "value": "Weather, forecasts, astronomy and location context",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100,000 calls/month; 3-day forecast",
+        "sources": [
+          "https://www.weatherapi.com/pricing.aspx"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100,000 calls/month; 3-day forecast"
+      },
+      "docsUrl": "https://www.weatherapi.com/docs/",
+      "signupUrl": "https://www.weatherapi.com/signup.aspx",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "WeatherAPI"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-apps-permitted-gateway-unreviewed",
+      "notes": "Pricing explicitly includes commercial use. Shared gateway/redistribution permission still needs terms review.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 3,
+      "id": "geoapify",
+      "provider": "Geoapify",
+      "registryMatches": [
+        "Geoapify",
+        "Geoapify API"
+      ],
+      "value": "Geocoding, places and route planning",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "3,000 credits/day; 5 requests/second",
+        "sources": [
+          "https://www.geoapify.com/pricing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "3,000 credits/day; 5 requests/second"
+      },
+      "docsUrl": "https://apidocs.geoapify.com/",
+      "signupUrl": "https://myprojects.geoapify.com/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Geoapify"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-apps-permitted-gateway-unreviewed",
+      "notes": "Commercial production permitted with Geoapify/data-source attribution. Free credit costs differ by API; shared gateway scope unreviewed.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 4,
+      "id": "locationiq",
+      "provider": "LocationIQ",
+      "registryMatches": [
+        "LocationIQ",
+        "LocationIQ API"
+      ],
+      "value": "Address lookup and routing",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "5,000 requests/day; 2/second and 60/minute",
+        "sources": [
+          "https://locationiq.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "5,000 requests/day; 2/second and 60/minute"
+      },
+      "docsUrl": "https://docs.locationiq.com/",
+      "signupUrl": "https://my.locationiq.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "LocationIQ"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-apps-permitted-gateway-unreviewed",
+      "notes": "Commercial use requires prominent backlink. One access token; shared gateway scope unreviewed.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 5,
+      "id": "openalex",
+      "provider": "OpenAlex",
+      "registryMatches": [
+        "OpenAlex",
+        "OpenAlex API"
+      ],
+      "value": "Scientific literature discovery and citation graphs",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "$1/day API usage credit with a key; $0.10/day without",
+        "sources": [
+          "https://help.openalex.org/access/buying-and-renewing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "$1/day API usage credit with a key; $0.10/day without"
+      },
+      "docsUrl": "https://help.openalex.org/api/authentication/",
+      "signupUrl": "https://openalex.org/settings/api",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "OpenAlex"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "No card required; limit is a daily budget, not 100,000 free requests. Already has anonymous access; key may add quota without adding a new API.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 403,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 6,
+      "id": "openweather",
+      "provider": "OpenWeather",
+      "registryMatches": [
+        "OpenWeather",
+        "OpenWeatherMap",
+        "OpenWeatherMap API"
+      ],
+      "value": "Current weather and 5-day forecast",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "60 calls/minute; 1,000,000 calls/month on permanent Free",
+        "sources": [
+          "https://openweathermap.org/full-price"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "60 calls/minute; 1,000,000 calls/month on permanent Free"
+      },
+      "docsUrl": "https://openweathermap.org/api",
+      "signupUrl": "https://home.openweathermap.org/users/sign_up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "OpenWeather"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-apps-permitted-gateway-unreviewed",
+      "notes": "Use permanent Free Current Weather/5-day product. One Call is a separate paid subscription with overages, excluded here. ODbL/attribution and gateway scope need review.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 7,
+      "id": "groq",
+      "provider": "Groq",
+      "registryMatches": [
+        "Groq",
+        "Groq API"
+      ],
+      "value": "Fast language inference and transcription",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Model-specific; GPT-OSS-20B listed at 30 RPM, 1,000 RPD, 8K TPM, 200K TPD",
+        "sources": [
+          "https://console.groq.com/docs/rate-limits"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Model-specific; GPT-OSS-20B listed at 30 RPM, 1,000 RPD, 8K TPM, 200K TPD"
+      },
+      "docsUrl": "https://console.groq.com/docs/quickstart",
+      "signupUrl": "https://console.groq.com/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Groq"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Free-plan model/organization limits change. Check model license and gateway terms. Models are not separate APIs.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 8,
+      "id": "gemini",
+      "provider": "Google Gemini",
+      "registryMatches": [
+        "Google Gemini",
+        "Google Gemini API"
+      ],
+      "value": "Multimodal language tasks",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Selected models have free input/output; quotas vary by model/project",
+        "sources": [
+          "https://ai.google.dev/gemini-api/docs/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Selected models have free input/output; quotas vary by model/project"
+      },
+      "docsUrl": "https://ai.google.dev/gemini-api/docs/api-key",
+      "signupUrl": "https://aistudio.google.com/apikey",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Google Gemini"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Only models explicitly marked free qualify. Free-tier data-use rules and regional availability require review; do not send private client data.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 9,
+      "id": "abstract",
+      "provider": "Abstract",
+      "registryMatches": [
+        "Abstract Email",
+        "Abstract Email Validation",
+        "Abstract Geolocation",
+        "Abstract IP Geolocation"
+      ],
+      "value": "IP enrichment and email validation",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "IP: 1,000 requests/month; Email: 100 requests/month",
+        "sources": [
+          "https://www.abstractapi.com/api/ip-geolocation-api",
+          "https://www.abstractapi.com/api/email-verification-validation-api"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "IP: 1,000 requests/month; Email: 100 requests/month"
+      },
+      "docsUrl": "https://docs.abstractapi.com/",
+      "signupUrl": "https://app.abstractapi.com/users/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 2,
+        "products": [
+          "IP Geolocation",
+          "Email Validation"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Two separately documented free API products under one account family. Do not assume one key works for both; obtain per-product keys and verify entitlements.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 10,
+      "id": "hunter",
+      "provider": "Hunter",
+      "registryMatches": [
+        "Hunter",
+        "Hunter API",
+        "Hunter Email",
+        "Hunter.io",
+        "Hunter.io API"
+      ],
+      "value": "Email lookup and validation for approved customer workflows",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "50 credits/month shared across search/verification",
+        "sources": [
+          "https://hunter.io/pricing",
+          "https://hunter.io/api-documentation"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "50 credits/month shared across search/verification"
+      },
+      "docsUrl": "https://hunter.io/api-documentation",
+      "signupUrl": "https://hunter.io/users/sign_up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Hunter"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "No email sending requested or authorized. API docs explicitly include Free users; check endpoint credit costs, lawful data use, and shared gateway terms before integration.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 11,
+      "id": "screenshotone",
+      "provider": "ScreenshotOne",
+      "registryMatches": [
+        "ScreenshotOne",
+        "ScreenshotOne API"
+      ],
+      "value": "Screenshot/PDF capture for agent verification",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 screenshots/month free",
+        "sources": [
+          "https://screenshotone.com/pricing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 screenshots/month free"
+      },
+      "docsUrl": "https://screenshotone.com/docs/",
+      "signupUrl": "https://dash.screenshotone.com/sign-up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ScreenshotOne"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "FAQ explicitly says recurring 100/month, not only one-time trial. Disable any paid overage; SSRF/browser target policy needed in an adapter.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 12,
+      "id": "apiflash",
+      "provider": "ApiFlash",
+      "registryMatches": [
+        "ApiFlash",
+        "ApiFlash API"
+      ],
+      "value": "Website screenshots",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 screenshots/month free",
+        "sources": [
+          "https://apiflash.com/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 screenshots/month free"
+      },
+      "docsUrl": "https://apiflash.com/documentation",
+      "signupUrl": "https://apiflash.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ApiFlash"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "No card required. Shared gateway license and allowed screenshot targets remain unreviewed.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 13,
+      "id": "ip2location",
+      "provider": "IP2Location.io",
+      "registryMatches": [
+        "IP2Location",
+        "IP2Location API",
+        "IP2Location IP Geolocation",
+        "IP2Location.io IP Geolocation API"
+      ],
+      "value": "Country/city IP intelligence",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "50,000 IP geolocation + 500 domain WHOIS + 50 hosted-domain queries/month",
+        "sources": [
+          "https://www.ip2location.io/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "50,000 IP geolocation + 500 domain WHOIS + 50 hosted-domain queries/month"
+      },
+      "docsUrl": "https://www.ip2location.io/ip2location-documentation",
+      "signupUrl": "https://www.ip2location.io/sign-up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 3,
+        "products": [
+          "IP Geolocation API",
+          "Domain WHOIS API",
+          "Hosted Domain API"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Pricing explicitly includes three distinct APIs in each plan. IP geolocation also has a 1,000/day keyless rail, so that product may already overlap. Attribute IP2Location; gateway rights need review.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 14,
+      "id": "geocodio",
+      "provider": "Geocodio",
+      "registryMatches": [
+        "Geocodio",
+        "Geocodio API"
+      ],
+      "value": "North American address enrichment",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "2,500 lookups/day; no card until free tier exceeded",
+        "sources": [
+          "https://www.geocod.io/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "2,500 lookups/day; no card until free tier exceeded"
+      },
+      "docsUrl": "https://www.geocod.io/docs/",
+      "signupUrl": "https://dash.geocod.io/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Geocodio"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "US/Canada/Mexico free tier. Keep without payment method and enforce quota. Extra fields can consume additional credits; do not count fields/batch as APIs.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 15,
+      "id": "eia",
+      "provider": "EIA",
+      "registryMatches": [
+        "EIA"
+      ],
+      "value": "Energy prices, electricity and fuel research",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free API key; throttle guidance below ~9,000/hour and 5/second, route limits vary",
+        "sources": [
+          "https://www.eia.gov/opendata/documentation.php",
+          "https://www.eia.gov/opendata/faqs.php"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free API key; throttle guidance below ~9,000/hour and 5/second, route limits vary"
+      },
+      "docsUrl": "https://www.eia.gov/opendata/documentation.php",
+      "signupUrl": "https://www.eia.gov/opendata/register.php",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "EIA"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "public-data-terms-review-required",
+      "notes": "Attribute EIA; public API terms permit building information services. Dataset series are not separate APIs; read route-specific throttles.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 16,
+      "id": "usda-fooddata",
+      "provider": "USDA FoodData Central",
+      "registryMatches": [
+        "FoodData Central",
+        "USDA FoodData",
+        "USDA FoodData API",
+        "USDA FoodData Central",
+        "USDA FoodData Central API"
+      ],
+      "value": "Nutrition and food ingredient research",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Public access; 1,000 requests/hour per IP; data.gov key required",
+        "sources": [
+          "https://fdc.nal.usda.gov/api-guide/",
+          "https://api.data.gov/docs/developer-manual/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Public access; 1,000 requests/hour per IP; data.gov key required"
+      },
+      "docsUrl": "https://fdc.nal.usda.gov/api-guide/",
+      "signupUrl": "https://fdc.nal.usda.gov/api-key-signup/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "USDA FoodData Central"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "public-data-terms-review-required",
+      "notes": "Official guide permits anyone to access API, documents public-domain/CC0 data and key registration. data.gov infrastructure may share quotas; existing NASA key might already work, untested.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 17,
+      "id": "nps",
+      "provider": "National Park Service",
+      "registryMatches": [
+        "National Park Service, US"
+      ],
+      "value": "Travel and national park information",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free key registration; precise quota not established in this audit",
+        "sources": [
+          "https://www.nps.gov/subjects/developer/get-started.htm"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free key registration; precise quota not established in this audit"
+      },
+      "docsUrl": "https://www.nps.gov/subjects/developer/api-documentation.htm",
+      "signupUrl": "https://www.nps.gov/subjects/developer/get-started.htm",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "National Park Service"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "public-data-terms-review-required",
+      "notes": "Official registration explicitly free. Verify content-specific reuse rights and practical quota; no invented count of park/alert endpoints.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 18,
+      "id": "europeana",
+      "provider": "Europeana",
+      "registryMatches": [
+        "Europeana",
+        "Europeana API",
+        "Europeana Search & Record API"
+      ],
+      "value": "Cultural heritage search and records",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free personal API key; quota not established in checked source",
+        "sources": [
+          "https://pro.europeana.eu/page/get-api"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free personal API key; quota not established in checked source"
+      },
+      "docsUrl": "https://api.europeana.eu/en",
+      "signupUrl": "https://www.europeana.eu/en/account",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Europeana"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Metadata and media have different rights statements. One key accesses a suite; count one provider family until distinct product mappings are proven.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 403,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 19,
+      "id": "openaq",
+      "provider": "OpenAQ",
+      "registryMatches": [
+        "OpenAQ",
+        "OpenAQ API"
+      ],
+      "value": "Air quality observations",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "60 requests/minute and 2,000/hour free",
+        "sources": [
+          "https://docs.openaq.org/using-the-api/rate-limits"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "60 requests/minute and 2,000/hour free"
+      },
+      "docsUrl": "https://docs.openaq.org/using-the-api/api-key",
+      "signupUrl": "https://explore.openaq.org/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "OpenAQ"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Source attribution and dataset licenses apply. Do not share the raw credential; shared execution permissions require review.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 20,
+      "id": "resend",
+      "provider": "Resend",
+      "registryMatches": [
+        "Coresender",
+        "Resend",
+        "Resend API"
+      ],
+      "value": "Transactional email for customer-owned domains",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "3,000 emails/month; 100/day; free forever",
+        "sources": [
+          "https://resend.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "3,000 emails/month; 100/day; free forever"
+      },
+      "docsUrl": "https://resend.com/docs/introduction",
+      "signupUrl": "https://resend.com/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Resend"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Read-only research only; no emails sent. Sender verification, per-tenant credential isolation and abuse controls needed. Existing managed provider may already exist; not a guaranteed new API.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 21,
+      "id": "brevo",
+      "provider": "Brevo",
+      "registryMatches": [
+        "Brevo",
+        "Brevo (Sendinblue)",
+        "Brevo API"
+      ],
+      "value": "Transactional email and contacts",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "300 email sends/day; Free has no time limit",
+        "sources": [
+          "https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan",
+          "https://developers.brevo.com/docs/getting-started"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "300 email sends/day; Free has no time limit"
+      },
+      "docsUrl": "https://developers.brevo.com/",
+      "signupUrl": "https://onboarding.brevo.com/account/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Brevo"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "No messages sent. Branding remains; transaction sending may need activation and sender verification. Do not share one sender identity across tenants.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 22,
+      "id": "pixabay",
+      "provider": "Pixabay",
+      "registryMatches": [
+        "Pixabay",
+        "Pixabay API"
+      ],
+      "value": "Royalty-free image/video search",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 requests/60 seconds default",
+        "sources": [
+          "https://pixabay.com/api/docs/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 requests/60 seconds default"
+      },
+      "docsUrl": "https://pixabay.com/api/docs/",
+      "signupUrl": "https://pixabay.com/accounts/register/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Pixabay"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Attribution requested; cache 24 hours. API intended for real human requests, not mass automated queries/downloads. Autonomous shared gateway use needs explicit review.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 403,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 23,
+      "id": "visualcrossing",
+      "provider": "Visual Crossing",
+      "registryMatches": [
+        "Visual Crossing",
+        "Visual Crossing API",
+        "Visual Crossing Weather",
+        "Visual Crossing Weather API"
+      ],
+      "value": "Historical weather for planning and research",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "1,000 weather records/day free",
+        "sources": [
+          "https://www.visualcrossing.com/weather-data-pricing/",
+          "https://www.visualcrossing.com/resources/documentation/visual-crossing-weather-free-plan-free-weather-data-for-analysts-and-api-developers/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "1,000 weather records/day free"
+      },
+      "docsUrl": "https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/",
+      "signupUrl": "https://www.visualcrossing.com/sign-up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Visual Crossing"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "commercial-apps-permitted-redistribution-restricted",
+      "notes": "Commercial applications permitted with attribution; pricing excludes stored shared external use except Enterprise. Record count is not request count. No resale assumption.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 24,
+      "id": "thenewsapi",
+      "provider": "The News API",
+      "registryMatches": [
+        "TheNews",
+        "TheNews API",
+        "TheNewsAPI"
+      ],
+      "value": "News discovery and monitoring",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 requests/day; 3 articles/request",
+        "sources": [
+          "https://www.thenewsapi.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 requests/day; 3 articles/request"
+      },
+      "docsUrl": "https://www.thenewsapi.com/documentation",
+      "signupUrl": "https://www.thenewsapi.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "The News API"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Free plan verified; commercial/redistribution rights not established by pricing. Metadata links do not imply rights to republish article text.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 25,
+      "id": "currencyfreaks",
+      "provider": "CurrencyFreaks",
+      "registryMatches": [
+        "CurrencyFreaks"
+      ],
+      "value": "Daily exchange rates",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "1,000 API calls/month; USD base; daily refresh",
+        "sources": [
+          "https://currencyfreaks.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "1,000 API calls/month; USD base; daily refresh"
+      },
+      "docsUrl": "https://currencyfreaks.com/documentation",
+      "signupUrl": "https://currencyfreaks.com/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "CurrencyFreaks"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "No card for Free. Shared gateway/redistribution rights unreviewed. Prefer existing free Frankfurter unless a feature is missing.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 26,
+      "id": "currencybeacon",
+      "provider": "CurrencyBeacon",
+      "registryMatches": [
+        "CurrencyBeacon API"
+      ],
+      "value": "Currency data with shared REST/MCP quota",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "5,000 requests/month; hourly updates",
+        "sources": [
+          "https://currencybeacon.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "5,000 requests/month; hourly updates"
+      },
+      "docsUrl": "https://currencybeacon.com/api-documentation",
+      "signupUrl": "https://currencybeacon.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "CurrencyBeacon"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Free is labeled developer sandbox. Commercial-use table uses unreadable check marks; not treated as permission. REST/MCP are one API, not two.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 27,
+      "id": "exchangerate-api",
+      "provider": "ExchangeRate-API",
+      "registryMatches": [
+        "ExchangeRate-API"
+      ],
+      "value": "Currency conversion when Frankfurter coverage is insufficient",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free keyed plan; exact keyed quota not established here",
+        "sources": [
+          "https://www.exchangerate-api.com/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free keyed plan; exact keyed quota not established here"
+      },
+      "docsUrl": "https://www.exchangerate-api.com/docs/overview",
+      "signupUrl": "https://app.exchangerate-api.com/sign-up",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ExchangeRate-API"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Free plan and email activation documented. Open-access keyless endpoint already exists; key does not necessarily add a distinct API. Do not invent old 1,500/month quota.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 28,
+      "id": "omdb",
+      "provider": "OMDb",
+      "registryMatches": [
+        "OMDb",
+        "OMDB API"
+      ],
+      "value": "Film metadata lookup",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "1,000 requests/day on FREE key",
+        "sources": [
+          "https://www.omdbapi.com/apikey.aspx",
+          "https://www.omdbapi.com/legal.htm"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "1,000 requests/day on FREE key"
+      },
+      "docsUrl": "https://www.omdbapi.com/",
+      "signupUrl": "https://www.omdbapi.com/apikey.aspx",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "OMDb"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-redistribution-restricted",
+      "notes": "Free key form verified. Site legal terms restrict contributions/materials to personal non-commercial use and prohibit redistribution; resolve API-specific rights before any commercial gateway.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 29,
+      "id": "unsplash",
+      "provider": "Unsplash",
+      "registryMatches": [
+        "Unsplash",
+        "Unsplash API"
+      ],
+      "value": "Photo discovery with attribution",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Demo: 50 requests/hour; production approval: 1,000/hour",
+        "sources": [
+          "https://unsplash.com/documentation"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Demo: 50 requests/hour; production approval: 1,000/hour"
+      },
+      "docsUrl": "https://unsplash.com/documentation",
+      "signupUrl": "https://unsplash.com/developers",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Unsplash"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "approval-and-attribution-required",
+      "notes": "Demo is not time limited but not automatic production approval. Follow hotlink/download/attribution guidelines. Images and API actions are not APIs.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 30,
+      "id": "tomorrow",
+      "provider": "Tomorrow.io",
+      "registryMatches": [
+        "ClimaCell/Tomorrow.io",
+        "Tomorrow",
+        "Tomorrow.io",
+        "Tomorrow.io API",
+        "Tomorrow.io Weather"
+      ],
+      "value": "Weather forecasts and real-time conditions",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free Weather API tier; exact request quota not established",
+        "sources": [
+          "https://www.tomorrow.io/weather-api/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free Weather API tier; exact request quota not established"
+      },
+      "docsUrl": "https://docs.tomorrow.io/reference/welcome",
+      "signupUrl": "https://app.tomorrow.io/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Tomorrow.io"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Free-tier feature list verified; do not reuse outdated 500/day claim. Confirm quota and production/gateway rights before signup is useful.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 31,
+      "id": "alphavantage",
+      "provider": "Alpha Vantage",
+      "registryMatches": [
+        "Alpha Vantage",
+        "Alpha Vantage API"
+      ],
+      "value": "Finance research for the owner",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "25 requests/day on free datasets",
+        "sources": [
+          "https://www.alphavantage.co/support/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "25 requests/day on free datasets"
+      },
+      "docsUrl": "https://www.alphavantage.co/documentation/",
+      "signupUrl": "https://www.alphavantage.co/support/#api-key",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Alpha Vantage"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Some datasets are premium. Market-data display/redistribution rights need review; do not expose as a shared paid rail just because the key is free.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 32,
+      "id": "twelvedata",
+      "provider": "Twelve Data",
+      "registryMatches": [
+        "Twelve Data",
+        "Twelve Data API"
+      ],
+      "value": "Stock/FX analysis for internal experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Basic $0: 8 API credits/minute, 800/day",
+        "sources": [
+          "https://twelvedata.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Basic $0: 8 API credits/minute, 800/day"
+      },
+      "docsUrl": "https://twelvedata.com/docs",
+      "signupUrl": "https://twelvedata.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Twelve Data"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "internal-nondisplay-only",
+      "notes": "Individual Basic specifies internal non-display usage. Commercial distribution requires different permission; indicator endpoints are not separate APIs.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 33,
+      "id": "coingecko",
+      "provider": "CoinGecko",
+      "registryMatches": [
+        "CoinGecko",
+        "CoinGecko API"
+      ],
+      "value": "Crypto data for permitted demos",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Demo: 10,000 credits/month; 100 requests/minute",
+        "sources": [
+          "https://www.coingecko.com/en/api/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Demo: 10,000 credits/month; 100 requests/minute"
+      },
+      "docsUrl": "https://docs.coingecko.com/",
+      "signupUrl": "https://www.coingecko.com/en/developers/dashboard",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "CoinGecko"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "demo-commercial-license-not-established",
+      "notes": "Free Demo is for testing/exploration; commercial license described on higher plans. Existing exclusion must remain until approved permission. Keyless subset also exists.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 403,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 34,
+      "id": "coinmarketcap",
+      "provider": "CoinMarketCap",
+      "registryMatches": [
+        "CoinMarketCap",
+        "CoinMarketCap API"
+      ],
+      "value": "Crypto research inside a licensed product",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Basic Free; pricing table lists 15,000 monthly credits and 50 requests/minute",
+        "sources": [
+          "https://coinmarketcap.com/api/pricing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Basic Free; pricing table lists 15,000 monthly credits and 50 requests/minute"
+      },
+      "docsUrl": "https://coinmarketcap.com/api/documentation/v1/",
+      "signupUrl": "https://pro.coinmarketcap.com/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "CoinMarketCap"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "standalone-api-redistribution-forbidden",
+      "notes": "Current Basic has commercial rights for one product up to 100k users but explicitly forbids standalone API redistribution/resale. Not a free APIClaw shared rail.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 35,
+      "id": "currents",
+      "provider": "Currents",
+      "registryMatches": [
+        "Currents",
+        "Currents API"
+      ],
+      "value": "Small news features and evaluation",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "250 requests/day; up to 20 results/request; 30-day recent history",
+        "sources": [
+          "https://currentsapi.services/en/product/price"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "250 requests/day; up to 20 results/request; 30-day recent history"
+      },
+      "docsUrl": "https://currentsapi.services/en/docs",
+      "signupUrl": "https://currentsapi.services/en/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Currents"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "redistribution-separate-terms",
+      "notes": "Pricing states redistribution, republication, OEM and long-term archives may require separate terms. Free quota does not clear a gateway.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 36,
+      "id": "weatherbit",
+      "provider": "Weatherbit",
+      "registryMatches": [
+        "Weatherbit",
+        "Weatherbit - Interactive Swagger UI Documentation",
+        "Weatherbit API"
+      ],
+      "value": "Non-commercial weather experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 50 requests/day; 1 request/second; 7-day daily forecast",
+        "sources": [
+          "https://cdn.weatherbit.io/pricing",
+          "https://www.weatherbit.io/terms"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 50 requests/day; 1 request/second; 7-day daily forecast"
+      },
+      "docsUrl": "https://www.weatherbit.io/api",
+      "signupUrl": "https://www.weatherbit.io/account/create",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Weatherbit"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Free/Trial/Hobbyist designated non-commercial in terms. Commercial license on paid plans. Do not count as a commercial APIClaw unlock.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 37,
+      "id": "newsapi",
+      "provider": "NewsAPI",
+      "registryMatches": [
+        "NewsAPI"
+      ],
+      "value": "Development-only news prototypes",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Developer: 100 requests/day; 24-hour delay",
+        "sources": [
+          "https://newsapi.org/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Developer: 100 requests/day; 24-hour delay"
+      },
+      "docsUrl": "https://newsapi.org/docs",
+      "signupUrl": "https://newsapi.org/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "NewsAPI"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "development-only",
+      "notes": "Free plan restricted to development/testing. Not production. Paid feature trials excluded.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 38,
+      "id": "gnews",
+      "provider": "GNews",
+      "registryMatches": [
+        "GNews",
+        "GNews API"
+      ],
+      "value": "Non-commercial headline prototypes",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 100 requests/day; 10 articles/request; 12-hour delay",
+        "sources": [
+          "https://gnews.io/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 100 requests/day; 10 articles/request; 12-hour delay"
+      },
+      "docsUrl": "https://docs.gnews.io/",
+      "signupUrl": "https://gnews.io/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "GNews"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Free excludes commercial/public production. Paid 10-day trial is a separate product and excluded from free claims.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 39,
+      "id": "mediastack",
+      "provider": "Mediastack",
+      "registryMatches": [
+        "apilayer mediastack",
+        "MediaStack",
+        "Mediastack API"
+      ],
+      "value": "Non-commercial news experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 calls/month; delayed news; 13 languages",
+        "sources": [
+          "https://mediastack.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 calls/month; delayed news; 13 languages"
+      },
+      "docsUrl": "https://docs.apilayer.com/mediastack/docs/api-documentation",
+      "signupUrl": "https://mediastack.com/signup/free",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Mediastack"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Current Free explicitly non-commercial. Commercial/API redistribution cannot be inferred.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 40,
+      "id": "positionstack",
+      "provider": "Positionstack",
+      "registryMatches": [
+        "positionstack",
+        "PositionStack API"
+      ],
+      "value": "Personal geocoding experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "100 requests/month; forward/reverse; HTTPS",
+        "sources": [
+          "https://positionstack.com/pricing"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "100 requests/month; forward/reverse; HTTPS"
+      },
+      "docsUrl": "https://docs.apilayer.com/positionstack/docs/api-documentation",
+      "signupUrl": "https://positionstack.com/signup/free",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Positionstack"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Current Free explicitly personal/non-commercial. Use Geoapify/LocationIQ for commercial-app candidates instead.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 41,
+      "id": "currencyapi",
+      "provider": "Currency API",
+      "registryMatches": [
+        "Alternative Currency API",
+        "Cryptocurrency API",
+        "Currency API"
+      ],
+      "value": "Private currency experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 300 requests/month; 10/minute; daily updates",
+        "sources": [
+          "https://currencyapi.com/pricing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 300 requests/month; 10/minute; daily updates"
+      },
+      "docsUrl": "https://currencyapi.com/docs",
+      "signupUrl": "https://app.currencyapi.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "Currency API"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "private-only",
+      "notes": "Free specifically private use; commercial use requires upgrade. Different product from FreeCurrencyAPI.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 42,
+      "id": "freecurrencyapi",
+      "provider": "FreeCurrencyAPI",
+      "registryMatches": [
+        "FreeCurrencyAPI"
+      ],
+      "value": "Personal daily exchange-rate lookup",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "1,000 requests/month; 10/minute; 33 currencies",
+        "sources": [
+          "https://freecurrencyapi.com/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "1,000 requests/month; 10/minute; 33 currencies"
+      },
+      "docsUrl": "https://freecurrencyapi.com/docs",
+      "signupUrl": "https://app.freecurrencyapi.com/register",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "FreeCurrencyAPI"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "personal-only",
+      "notes": "Official page says hobby/personal projects; commercial currencyapi is a separate product. Existing Frankfurter is a better public free rail.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 43,
+      "id": "ipdata",
+      "provider": "ipdata",
+      "registryMatches": [
+        "IPdata",
+        "ipdata API"
+      ],
+      "value": "Non-commercial IP intelligence prototypes",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "1,500 requests/day",
+        "sources": [
+          "https://ipdata.co/pricing.html"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "1,500 requests/day"
+      },
+      "docsUrl": "https://docs.ipdata.co/",
+      "signupUrl": "https://dashboard.ipdata.co/sign-up.html",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ipdata"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Free tier explicitly restricted to non-commercial use. Not a commercial shared gateway candidate.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 44,
+      "id": "ipstack",
+      "provider": "ipstack",
+      "registryMatches": [
+        "apilayer ipstack",
+        "ipstack",
+        "ipstack API"
+      ],
+      "value": "Personal IP location tests",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 100 requests/month; HTTPS location module",
+        "sources": [
+          "https://ipstack.com/pricing/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 100 requests/month; HTTPS location module"
+      },
+      "docsUrl": "https://docs.apilayer.com/ipstack/docs/api-documentation",
+      "signupUrl": "https://dashboard.ipstack.com/signup/free/monthly",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ipstack"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Current Free marks commercial use unavailable. Old 10,000/1000 quota claims obsolete.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 45,
+      "id": "ipgeolocation",
+      "provider": "ipgeolocation.io",
+      "registryMatches": [
+        "ipgeolocation",
+        "ipgeolocation API",
+        "ipgeolocation.io"
+      ],
+      "value": "IP/country metadata prototypes",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 1,000 credits/day forever; hard limit; no card",
+        "sources": [
+          "https://ipgeolocation.io/pricing.html"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 1,000 credits/day forever; hard limit; no card"
+      },
+      "docsUrl": "https://ipgeolocation.io/documentation.html",
+      "signupUrl": "https://app.ipgeolocation.io/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "ipgeolocation.io"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "evaluation-only",
+      "notes": "Free explicitly evaluation/testing/prototypes. Additional standalone APIs can have separate plans. Do not assume all are included.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 46,
+      "id": "rawg",
+      "provider": "RAWG",
+      "registryMatches": [
+        "RAWG",
+        "RAWG API",
+        "RAWG Games",
+        "RAWG Video Games API",
+        "RAWG Video Games Database API",
+        "RAWG.io"
+      ],
+      "value": "Game metadata for personal projects",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: up to 20,000 requests/month; backlinks required",
+        "sources": [
+          "https://rawg.io/apidocs"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: up to 20,000 requests/month; backlinks required"
+      },
+      "docsUrl": "https://rawg.io/apidocs",
+      "signupUrl": "https://rawg.io/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "RAWG"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "redistribution-forbidden-conflicting-commercial-copy",
+      "notes": "Pricing says non-commercial while same page legacy paragraph permits small commercial projects. Both forbid redistribution. Resolve conflict with provider before gateway use.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 47,
+      "id": "tmdb",
+      "provider": "TMDB",
+      "registryMatches": [
+        "TMDb",
+        "TMDB API"
+      ],
+      "value": "Film/TV metadata for non-commercial apps",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "API key free for non-commercial use; numeric quota not established",
+        "sources": [
+          "https://developer.themoviedb.org/docs/faq"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "API key free for non-commercial use; numeric quota not established"
+      },
+      "docsUrl": "https://developer.themoviedb.org/docs/getting-started",
+      "signupUrl": "https://www.themoviedb.org/signup",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "TMDB"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Commercial license requires contact; attribution required. One service family, no TV/movie endpoint inflation.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 48,
+      "id": "guardian",
+      "provider": "The Guardian",
+      "registryMatches": [
+        "Guardian",
+        "Guardian API",
+        "The Guardian",
+        "The Guardian API"
+      ],
+      "value": "Non-profit journalism experiments",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Developer: 500 calls/day; 1/second",
+        "sources": [
+          "https://open-platform.theguardian.com/access/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Developer: 500 calls/day; 1/second"
+      },
+      "docsUrl": "https://open-platform.theguardian.com/documentation/",
+      "signupUrl": "https://bonobo.capi.gutools.co.uk/register/developer",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "The Guardian"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "noncommercial-only",
+      "notes": "Commercial enterprise usage, mining/derived services and AI use require commercial access. Not a free commercial gateway rail.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 49,
+      "id": "maptiler",
+      "provider": "MapTiler",
+      "registryMatches": [
+        "MapTiler"
+      ],
+      "value": "Non-commercial maps and R&D",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "Free: 100k API requests/month; 5k map sessions/month; 1k search sessions",
+        "sources": [
+          "https://www.maptiler.com/cloud/pricing/",
+          "https://www.maptiler.com/terms/cloud/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "Free: 100k API requests/month; 5k map sessions/month; 1k search sessions"
+      },
+      "docsUrl": "https://docs.maptiler.com/",
+      "signupUrl": "https://cloud.maptiler.com/auth/widget",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "MapTiler"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "resale-custom-contract-only",
+      "notes": "Free is non-commercial/R&D; pricing explicitly says resale requires Custom. Maps/search/tiles are not counted as multiple APIs here.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    },
+    {
+      "rank": 50,
+      "id": "aqicn",
+      "provider": "AQICN / World Air Quality Index",
+      "registryMatches": [
+        "AQICN",
+        "AQICN API"
+      ],
+      "value": "Air-quality observations",
+      "freePlanEvidence": {
+        "status": "primary-source-verified",
+        "limit": "API free; token required; official default quota says 1,000 requests/second",
+        "sources": [
+          "https://aqicn.org/data-platform/token/"
+        ],
+        "checkedAt": "2026-10-15",
+        "evidence": "API free; token required; official default quota says 1,000 requests/second"
+      },
+      "docsUrl": "https://aqicn.org/api/",
+      "signupUrl": "https://aqicn.org/data-platform/token/",
+      "signupActionTaken": false,
+      "credentialsCreated": false,
+      "apiScope": {
+        "unit": "provider API family; actions and aliases excluded",
+        "potentialDistinctProducts": 1,
+        "products": [
+          "AQICN / World Air Quality Index"
+        ],
+        "actualKeyEntitlementsVerified": false,
+        "incrementalCustomerCallableApisVerified": 0
+      },
+      "sharedGatewayPermission": "license-review-required",
+      "notes": "Reported quota is source-stated, not a promise to consume it. Data/attribution/storage/commercial obligations need terms review; WAQI is same provider alias.",
+      "signupPageCheck": {
+        "method": "GET form/entry page only; no submission",
+        "httpStatus": 200,
+        "checkedAt": "2026-10-15",
+        "accountOrEntitlementVerified": false
+      }
+    }
+  ],
+  "excludedOrUnverified": [
+    {
+      "provider": "Pexels",
+      "reason": "New API key issuance is currently paused; no usable new signup demonstrated.",
+      "source": "https://www.pexels.com/api/",
+      "status": "signup-paused"
+    },
+    {
+      "provider": "Hugging Face Inference Providers",
+      "reason": "Current pricing says Free Users receive no monthly credits; inference needs purchased credits or PRO. Hub read API is different and not counted as inference.",
+      "source": "https://huggingface.co/docs/inference-providers/pricing",
+      "status": "no-recurring-free-inference-credits"
+    },
+    {
+      "provider": "OpenCage",
+      "reason": "2,500/day is a testing-only free trial, even though it may last indefinitely. Production must be paid.",
+      "source": "https://opencagedata.com/pricing",
+      "status": "trial-only"
+    },
+    {
+      "provider": "FRED",
+      "reason": "Official key documentation requires every application user to use their own key. Not a shared operator-key unlock; separate free-price/quotas not verified here.",
+      "source": "https://fred.stlouisfed.org/docs/api/api_key.html",
+      "status": "per-end-user-key-required"
+    },
+    {
+      "provider": "NOAA CDO",
+      "reason": "Token registration and 10,000/day verified, but a current explicit free-price assertion was not established in checked API/token documentation. Keep separate rather than assume.",
+      "source": "https://www.ncdc.noaa.gov/cdo-web/webservices/v2",
+      "status": "price-not-explicitly-verified"
+    },
+    {
+      "provider": "EPA AQS",
+      "reason": "Public email/key signup verified; explicit current no-charge pricing not established. Registration endpoint sends email, so not called.",
+      "source": "https://aqs.epa.gov/aqsweb/documents/data_api.html",
+      "status": "price-not-explicitly-verified"
+    },
+    {
+      "provider": "NYTimes",
+      "reason": "Official developer page not readable in this research session; no current free quota or signup eligibility claimed.",
+      "source": "https://developer.nytimes.com/get-started",
+      "status": "current-source-unavailable"
+    },
+    {
+      "provider": "ScrapingBee / ZenRows / Deepgram / AssemblyAI / Serper / Firecrawl",
+      "reason": "Do not confuse one-time trial credits or trials with recurring free plans. No recurring-free eligibility verified in this shortlist.",
+      "source": "https://www.scrapingbee.com/pricing/",
+      "status": "not-verified-excluded"
+    }
+  ]
+}

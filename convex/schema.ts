@@ -4,6 +4,11 @@ import { v } from "convex/values";
 import { listingMetadata } from "./listingPolicy";
 
 export default defineSchema({
+  // Health overlay for the reviewed free public registry. No credentials or usage.
+  publicApiHealth: defineTable({
+    apiId: v.string(), healthy: v.boolean(), status: v.number(), checkedAt: v.number(),
+  }).index("by_apiId", ["apiId"]),
+
   // Discovery metadata only. Never read by routing, provider keys or billing.
   discoveryListings: defineTable({
     workspaceId: v.id("workspaces"),

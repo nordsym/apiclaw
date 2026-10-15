@@ -3,6 +3,11 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
+// Recheck only reviewed free GET rails. Failure demotes until a healthy recheck.
+crons.weekly("recheck-public-api-health", {
+  dayOfWeek: "monday", hourUTC: 5, minuteUTC: 23,
+}, (internal as any).publicApiHealth.recheck, { offset: 0 });
+
 // Report each successful PAYG managed call from the immutable request ledger.
 // The reporter claims one ledger row at a time and uses its deterministic
 // meter-event identifier for retry safety. Legacy daily usageRecords are never

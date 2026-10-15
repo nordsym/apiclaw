@@ -22,6 +22,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npx tsc --noEmit -p convex/tsconfig.json
       - run: npx tsc --noEmit -p landing/tsconfig.json
+      - run: node --check scripts/audit-callable.mjs
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web-first-call-browser

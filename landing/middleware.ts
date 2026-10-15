@@ -108,6 +108,11 @@ const clerkHandler = clerkMiddleware(async (auth, request) => {
 });
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
+  if (request.nextUrl.pathname === "/SKILL.md") {
+    const target = request.nextUrl.clone();
+    target.pathname = "/api/skill";
+    return NextResponse.rewrite(target);
+  }
   // Health checks must stay available even when browser authentication is
   // missing or degraded. They expose no workspace data.
   if (["/health", "/api/health"].includes(request.nextUrl.pathname)) {
