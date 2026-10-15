@@ -1,0 +1,23 @@
+{
+  "origin": "https://apiclaw-r57u4ygqg-gustavs-projects-0c9f35af.vercel.app",
+  "deploymentId": "dpl_AGrBQYJoadqJXerevKqKQNHLePkS",
+  "sourceCommit": "a43a1f46c3d37ae8bd09fab3c2d893152e9e15e5",
+  "verifiedAt": "2026-10-15T18:26:58.944Z",
+  "count": 233,
+  "serverRenderedWithoutJavaScript": true,
+  "surfaces": [
+    "/",
+    "/catalog",
+    "/docs",
+    "/SKILL.md",
+    "/api/catalog"
+  ],
+  "paginatedCount": 233,
+  "randomSample": [
+    "Cat Facts API",
+    "Digimon Information",
+    "Open Government, Poland"
+  ],
+  "healthDemotionAndRecovery": true,
+  "gatewayDeniedWhileDemoted": true
+}
