@@ -28,7 +28,8 @@ const request = async (url: string | URL | Request, options?: RequestInit) => {
   assert.equal(options?.method, "GET");
   assert.equal(options?.redirect, "manual");
   assert.equal(options?.credentials, "omit");
-  assert.deepEqual(Object.keys(options?.headers ?? {}).sort(), ["Accept", "User-Agent"]);
+  assert.deepEqual(Object.keys(options?.headers ?? {}).sort(), ["Accept", "Accept-Encoding", "User-Agent"]);
+  assert.equal((options?.headers as Record<string, string>)["Accept-Encoding"], "identity");
   if (attempts === 1) return new Response(null, { status: 302, headers: { Location: "https://v2.fixture.org/data" } });
   if (attempts === 2) return new Response("{}", { status: 503, headers: { "Retry-After": "1" } });
   return new Response('{"items":[1]}');

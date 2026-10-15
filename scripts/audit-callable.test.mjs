@@ -114,7 +114,8 @@ test('approved redirect+retry traces use shared bounded transport; unapproved re
   let n = 0;
   const response = await probeCandidate(api, deps(async (_url, options) => {
     assert.equal(options.method, 'GET'); assert.equal(options.redirect, 'manual'); assert.equal(options.credentials, 'omit');
-    assert.deepEqual(Object.keys(options.headers).sort(), ['Accept', 'User-Agent']);
+    assert.deepEqual(Object.keys(options.headers).sort(), ['Accept', 'Accept-Encoding', 'User-Agent']);
+    assert.equal(options.headers['Accept-Encoding'], 'identity');
     n++;
     if (n === 1) return new Response(null, { status: 302, headers: { location: 'https://next.fixture.org/data' } });
     if (n === 2) return new Response('{}', { status: 503, headers: { 'retry-after': '0' } });
@@ -239,4 +240,18 @@ test('original-cohort accounting excludes expanded rows and keeps baseline failu
   assert.equal(summary.formerlyFailingCurrentCauses.needs_key, 0); assert.equal(summary.formerlyFailingCurrentCauses.missing_default_params, 0);
   assert.equal(Object.values(summary.currentCauses).reduce((a,b) => a+b, 0), 3);
   assert.equal(Object.values(summary.formerlyFailingCurrentCauses).reduce((a,b) => a+b, 0), 2);
+});
+
+test('canonical disambiguation is idempotent for same-source rows and repairs repeated historical suffixes', () => {
+  const rows = [
+    { id: 'argentina', name: 'Root', canonicalId: 'argentina', sourceUrl: 'https://datos.gob.ar', cause: 'wrong_base_url_path', verified: false },
+    { id: 'argentinafixed', name: 'API', canonicalId: 'argentina', canonicalExplicit: true, sourceUrl: 'https://datos.gob.ar', cause: 'ok', verified: true },
+  ];
+  disambiguateCanonicalIds(rows);
+  const first = structuredClone(rows);
+  disambiguateCanonicalIds(rows); assert.deepEqual(rows, first);
+  const suffix = rows[0].canonicalId.slice('argentina'.length);
+  rows.forEach(row => { row.canonicalId += suffix + suffix; delete row.canonicalBaseId; });
+  disambiguateCanonicalIds(rows); assert.deepEqual(rows, first);
+  disambiguateCanonicalIds(rows); assert.deepEqual(rows, first);
 });

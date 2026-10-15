@@ -330,6 +330,16 @@ export async function auditCandidates(rows, { previous = [], only, resume = fals
 
 /** Preserve historical IDs but give distinct services with colliding slugs stable runtime IDs. */
 export function disambiguateCanonicalIds(results) {
+  // Repair old repeated suffixes without stripping legitimate recipe IDs. A generated
+  // suffix is recognized only when it matches this row's original source hash.
+  for (const row of results) {
+    const sourceHash = createHash('sha256').update(String(row.sourceUrl ?? row.baseUrl)).digest('hex').slice(0, 8);
+    const suffix = `-${sourceHash}`;
+    let base = row.canonicalBaseId ?? row.canonicalId;
+    while (base.endsWith(suffix)) base = base.slice(0, -suffix.length);
+    row.canonicalBaseId = base;
+    if (row.canonicalId.endsWith(suffix)) row.canonicalId = `${base}${suffix}`;
+  }
   const groups = new Map();
   for (const row of results.filter(row => row.cause !== 'duplicate')) {
     if (!groups.has(row.canonicalId)) groups.set(row.canonicalId, []);
@@ -337,7 +347,7 @@ export function disambiguateCanonicalIds(results) {
   }
   for (const [canonicalId, rows] of groups) {
     if (rows.length < 2) continue;
-    const assignments = rows.map(row => ({ row, original: canonicalId, target: row.finalProbeUrl ?? row.probeUrl ?? endpointKey(row), next: `${canonicalId}-${createHash('sha256').update(String(row.sourceUrl ?? row.baseUrl)).digest('hex').slice(0, 8)}` }));
+    const assignments = rows.map(row => ({ row, original: canonicalId, target: row.finalProbeUrl ?? row.probeUrl ?? endpointKey(row), next: `${row.canonicalBaseId}-${createHash('sha256').update(String(row.sourceUrl ?? row.baseUrl)).digest('hex').slice(0, 8)}` }));
     for (const assignment of assignments) assignment.row.canonicalId = assignment.next;
     for (const alias of results.filter(row => row.cause === 'duplicate' && row.canonicalId === canonicalId)) {
       const owner = assignments.find(value => alias.canonicalProbeUrl && value.target === alias.canonicalProbeUrl)

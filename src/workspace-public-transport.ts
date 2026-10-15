@@ -51,7 +51,9 @@ export async function fetchWorkspacePublicGet(
     if (Date.now() >= deadline) throw new Error("Public API timeout");
     const response = await request(current.toString(), {
       method: "GET", redirect: "manual", credentials: "omit", signal,
-      headers: { Accept: accept, "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud; contact: support_apiclaw@nordsym.com)" },
+      // Convex may expose compressed bytes without a Content-Encoding header.
+      // Request the uncompressed representation so the shared decoder sees text.
+      headers: { Accept: accept, "Accept-Encoding": "identity", "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud; contact: support_apiclaw@nordsym.com)" },
     });
     if (REDIRECT_STATUSES.has(response.status)) {
       const location = response.headers.get("Location");
