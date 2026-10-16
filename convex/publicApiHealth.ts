@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 import { internalAction, internalMutation, internalQuery, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { WORKSPACE_PUBLIC_APIS, buildPinnedPublicApiUrl, type WorkspacePublicApi } from "../src/workspace-public-apis";
@@ -7,6 +8,7 @@ import { fetchWorkspacePublicGet } from "../src/workspace-public-transport";
 
 const APPROVED_IDS = new Set(WORKSPACE_PUBLIC_APIS.map((api) => api.id));
 const BATCH_SIZE = 20;
+const HEALTH_READ_BATCH_SIZE = 100;
 
 export const isHealthy = internalQuery({
   args: { apiId: v.string() }, returns: v.boolean(),
@@ -20,8 +22,12 @@ export const isHealthy = internalQuery({
 export const snapshot = query({
   args: {}, returns: v.object({ approvedIds: v.array(v.string()), disabledIds: v.array(v.string()), checkedAt: v.union(v.number(), v.null()) }),
   handler: async (ctx) => {
-    const rows = await Promise.all(WORKSPACE_PUBLIC_APIS.map((api) =>
-      ctx.db.query("publicApiHealth").withIndex("by_apiId", (q) => q.eq("apiId", api.id)).unique()));
+    const rows: Array<Doc<"publicApiHealth"> | null> = [];
+    // Stay below Convex's concurrent IO limit even with thousands of APIs.
+    for (let offset = 0; offset < WORKSPACE_PUBLIC_APIS.length; offset += HEALTH_READ_BATCH_SIZE) {
+      rows.push(...await Promise.all(WORKSPACE_PUBLIC_APIS.slice(offset, offset + HEALTH_READ_BATCH_SIZE).map((api) =>
+        ctx.db.query("publicApiHealth").withIndex("by_apiId", (q) => q.eq("apiId", api.id)).unique())));
+    }
     return {
       approvedIds: WORKSPACE_PUBLIC_APIS.map((api) => api.id),
       disabledIds: rows.filter((row) => row?.healthy === false).map((row) => row!.apiId),

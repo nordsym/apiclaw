@@ -67,4 +67,20 @@ try {
   assert.equal((await run(snapshot)).disabledIds.length, 0);
   await assert.rejects(run(recheck, { offset: -1 }), /offset/);
 } finally { globalThis.fetch = originalFetch; }
+const inventory = WORKSPACE_PUBLIC_APIS as Array<(typeof WORKSPACE_PUBLIC_APIS)[number]>;
+const originalLength = inventory.length;
+let inFlightReads = 0, maxReads = 0;
+try {
+  while (inventory.length < 1101) inventory.push({ ...frankfurter, id: `capacity-${inventory.length}` });
+  const capacityContext = { db: { query: () => ({ withIndex: () => ({ unique: async () => {
+    inFlightReads++; maxReads = Math.max(maxReads, inFlightReads);
+    assert.ok(inFlightReads <= 1000, "Convex permits at most 1000 concurrent IO operations");
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    inFlightReads--; return null;
+  } }) }) } };
+  const large = await (snapshot as any)._handler(capacityContext, {});
+  assert.equal(large.approvedIds.length, inventory.length);
+  assert.equal(large.checkedAt, null);
+  assert.ok(maxReads <= 100, "health reads stay bounded as the approved inventory grows");
+} finally { inventory.length = originalLength; }
 console.log("Public health overlay: demotion, safe recovery, no promotion, bounded canonical probes, concurrency and snapshot passed");

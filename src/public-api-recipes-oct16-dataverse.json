@@ -1,0 +1,1622 @@
+[
+  {
+    "id": "adpsloveniansocialsciencedataarchivessearchapi",
+    "name": "ADP - Slovenian Social Science Data Archives Search API",
+    "canonicalId": "adpsloveniansocialsciencedataarchivessearchapi",
+    "baseUrl": "https://dataverse.adp.fdv.uni-lj.si",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.adp.fdv.uni-lj.si/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Arhiv družboslovnih podatkov\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "acssdataversesearchapi",
+    "name": "ACSS Dataverse Search API",
+    "canonicalId": "acssdataversesearchapi",
+    "baseUrl": "https://dataverse.theacss.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.theacss.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"ACSS Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "arpresearchdatasearchapi",
+    "name": "ARP Research Data Search API",
+    "canonicalId": "arpresearchdatasearchapi",
+    "baseUrl": "https://repo.researchdata.hu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://researchdata.hu/en/service-map",
+    "freeEvidence": "Owner service map explicitly permits non-logged-in users to search research data packages; restricted data requires separate registration and conditions. Owner primary page identifies this public research-data search service as \"Service map | HUN-REN Data Repository Platform\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "asulibraryresearchdatarepositorysearchapi",
+    "name": "ASU Library Research Data Repository Search API",
+    "canonicalId": "asulibraryresearchdatarepositorysearchapi",
+    "baseUrl": "https://dataverse.asu.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://lib.asu.edu/research/research-data-repository",
+    "freeEvidence": "Owner Library page explicitly describes open discovery and harvesting of public metadata for external research-data discovery services. Owner primary page identifies this public research-data search service as \"ASU Research Data Repository - ASU Library\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "arcadadossearchapi",
+    "name": "Arca Dados Search API",
+    "canonicalId": "arcadadossearchapi",
+    "baseUrl": "https://arcadados.fiocruz.br",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://arcadados.fiocruz.br/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Arca Dados\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "aussdadataversesearchapi",
+    "name": "AUSSDA Dataverse Search API",
+    "canonicalId": "aussdadataversesearchapi",
+    "baseUrl": "https://data.aussda.at",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.aussda.at/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"AUSSDA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "bonndatasearchapi",
+    "name": "bonndata Search API",
+    "canonicalId": "bonndatasearchapi",
+    "baseUrl": "https://bonndata.uni-bonn.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://bonndata.uni-bonn.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"bonndata\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "borealissearchapi",
+    "name": "Borealis Search API",
+    "canonicalId": "borealissearchapi",
+    "baseUrl": "https://borealisdata.ca",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://borealisdata.ca/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Borealis: The Canadian Dataverse Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "biodataptdatamanagementportaldmportalsearchapi",
+    "name": "BioData.pt Data Management Portal (DMPortal) Search API",
+    "canonicalId": "biodataptdatamanagementportaldmportalsearchapi",
+    "baseUrl": "https://dmportal.biodata.pt",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dmportal.biodata.pt/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DMPortal\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "bscdataversesearchapi",
+    "name": "BSC Dataverse Search API",
+    "canonicalId": "bscdataversesearchapi",
+    "baseUrl": "https://dataverse.bsc.es",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.bsc.es/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Barcelona Supercomputing Center\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "brindataversesearchapi",
+    "name": "BRIN Dataverse Search API",
+    "canonicalId": "brindataversesearchapi",
+    "baseUrl": "https://data.brin.go.id",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.brin.go.id/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"RIN Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "cesaresearchdatasearchapi",
+    "name": "CESA Research Data Search API",
+    "canonicalId": "cesaresearchdatasearchapi",
+    "baseUrl": "https://opendata.cesa.edu.co",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataset",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://opendata.cesa.edu.co/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"CESA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "cbpfresearchdatasearchapi",
+    "name": "CBPF Research Data Search API",
+    "canonicalId": "cbpfresearchdatasearchapi",
+    "baseUrl": "https://dataverse.cbpf.br",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.cbpf.br/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositório de Dados de Pesquisa\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "cedapdadossearchapi",
+    "name": "CedapDados Search API",
+    "canonicalId": "cedapdadossearchapi",
+    "baseUrl": "https://cedapdados.ufrgs.br",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataset",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://cedapdados.ufrgs.br/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"CedapDados\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "cidacssearchapi",
+    "name": "CIDACS Search API",
+    "canonicalId": "cidacssearchapi",
+    "baseUrl": "https://dataverse.cidacs.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.cidacs.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Centro de Integração de Dados e Conhecimento para Saúde\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "crossdasearchapi",
+    "name": "CROSSDA Search API",
+    "canonicalId": "crossdasearchapi",
+    "baseUrl": "https://data.crossda.hr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.crossda.hr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"CROSSDA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "csdadataversesearchapi",
+    "name": "CSDA Dataverse Search API",
+    "canonicalId": "csdadataversesearchapi",
+    "baseUrl": "https://archivdv.soc.cas.cz",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://archivdv.soc.cas.cz/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"CSDA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "danebadawczeuwsearchapi",
+    "name": "Dane Badawcze UW Search API",
+    "canonicalId": "danebadawczeuwsearchapi",
+    "baseUrl": "https://danebadawcze.uw.edu.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://danebadawcze.uw.edu.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Dane Badawcze UW\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dadosipbsearchapi",
+    "name": "DADOS IPB Search API",
+    "canonicalId": "dadosipbsearchapi",
+    "baseUrl": "https://dados.ipb.pt",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dados.ipb.pt/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Universidade Politécnica de Bragança\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "daresearchapi",
+    "name": "dare Search API",
+    "canonicalId": "daresearchapi",
+    "baseUrl": "https://dare.uol.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dare.uol.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DARE\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "darussearchapi",
+    "name": "DaRUS Search API",
+    "canonicalId": "darussearchapi",
+    "baseUrl": "https://darus.uni-stuttgart.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://darus.uni-stuttgart.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DaRUS\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dartmouthdataversesearchapi",
+    "name": "Dartmouth Dataverse Search API",
+    "canonicalId": "dartmouthdataversesearchapi",
+    "baseUrl": "https://dataverse.dartmouth.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.dartmouth.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Dartmouth Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "datasudssearchapi",
+    "name": "Data Suds Search API",
+    "canonicalId": "datasudssearchapi",
+    "baseUrl": "https://dataverse.ird.fr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.ird.fr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DataSuds\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "datasciencesposearchapi",
+    "name": "data.sciencespo Search API",
+    "canonicalId": "datasciencesposearchapi",
+    "baseUrl": "https://data.sciencespo.fr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.sciencespo.fr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"data.sciencespo\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "datadoisearchapi",
+    "name": "DATADOI Search API",
+    "canonicalId": "datadoisearchapi",
+    "baseUrl": "https://datadoi.ee",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datadoi.ee/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DATADOI\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataportalingpanplsearchapi",
+    "name": "dataportal.ing.pan.pl Search API",
+    "canonicalId": "dataportalingpanplsearchapi",
+    "baseUrl": "https://dataportal.ing.pan.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataportal.ing.pan.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Institute of Geological Sciences Polish Academy of Sciences\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "datapbsearchapi",
+    "name": "DataPB Search API",
+    "canonicalId": "datapbsearchapi",
+    "baseUrl": "https://dataverse.ideal.ufpb.br",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.ideal.ufpb.br/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DATAPB\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataverseecienciadatossearchapi",
+    "name": "Dataverse e-cienciaDatos Search API",
+    "canonicalId": "dataverseecienciadatossearchapi",
+    "baseUrl": "https://edatos.consorciomadrono.es",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://edatos.consorciomadrono.es/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"e-cienciaDatos\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataverselvsearchapi",
+    "name": "DataverseLV Search API",
+    "canonicalId": "dataverselvsearchapi",
+    "baseUrl": "https://dv.dataverse.lv",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dv.dataverse.lv/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DataverseLV\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataversenlsearchapi",
+    "name": "DataverseNL Search API",
+    "canonicalId": "dataversenlsearchapi",
+    "baseUrl": "https://dataverse.nl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.nl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DataverseNL\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataversenosearchapi",
+    "name": "DataverseNO Search API",
+    "canonicalId": "dataversenosearchapi",
+    "baseUrl": "https://dataverse.no",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://site.uit.no/dataverseno/about/policy-framework/access-and-use-policy/",
+    "freeEvidence": "Owner Access and Use Policy explicitly states published dataset metadata is open and free. Institutional deposit/service fees do not apply to this anonymous metadata read. Owner primary page identifies this public research-data search service as \"DataverseNO Access and Use Policy | info: DataverseNO\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dataverseuasearchapi",
+    "name": "DataverseUA Search API",
+    "canonicalId": "dataverseuasearchapi",
+    "baseUrl": "https://opendata.nas.gov.ua",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://opendata.nas.gov.ua/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DataverseUA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "datospararesilienciasearchapi",
+    "name": "Datos para Resiliencia Search API",
+    "canonicalId": "datospararesilienciasearchapi",
+    "baseUrl": "https://datospararesiliencia.cl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datospararesiliencia.cl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Datos para Resiliencia\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "deicdataversesearchapi",
+    "name": "DeiC Dataverse Search API",
+    "canonicalId": "deicdataversesearchapi",
+    "baseUrl": "https://dataverse.deic.dk",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.deic.dk/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DeiC Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "dunassearchapi",
+    "name": "DUnAs Search API",
+    "canonicalId": "dunassearchapi",
+    "baseUrl": "https://dunas.ua.pt",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dunas.ua.pt/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Dunas\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "drntudatasearchapi",
+    "name": "DR-NTU (Data) Search API",
+    "canonicalId": "drntudatasearchapi",
+    "baseUrl": "https://researchdata.ntu.edu.sg",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://researchdata.ntu.edu.sg/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"DR-NTU (Data)\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "floridainternationaluniversityresearchdataportalsearchapi",
+    "name": "Florida International University Research Data Portal Search API",
+    "canonicalId": "floridainternationaluniversityresearchdataportalsearchapi",
+    "baseUrl": "https://dataverse.fiu.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.fiu.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"FIU Research Data Portal\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "georgemasonuniversitydataversesearchapi",
+    "name": "George Mason University Dataverse Search API",
+    "canonicalId": "georgemasonuniversitydataversesearchapi",
+    "baseUrl": "https://dataverse.orc.gmu.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.orc.gmu.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"George Mason University Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "gttingenresearchonlinesearchapi",
+    "name": "Göttingen Research Online Search API",
+    "canonicalId": "gttingenresearchonlinesearchapi",
+    "baseUrl": "https://data.goettingen-research-online.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://www.sub.uni-goettingen.de/en/research/research-data/research-data-repositories",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"SUB Göttingen: Research Data Repositories\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "harvarddataversesearchapi",
+    "name": "Harvard Dataverse Search API",
+    "canonicalId": "harvarddataversesearchapi",
+    "baseUrl": "https://dataverse.harvard.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datamanagement.hms.harvard.edu/share-publish/data-repositories/harvard-dataverse",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Harvard Dataverse | Data Management\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "heidatasearchapi",
+    "name": "HeiDATA Search API",
+    "canonicalId": "heidatasearchapi",
+    "baseUrl": "https://heidata.uni-heidelberg.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://heidata.uni-heidelberg.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"heiDATA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "idscdataversesearchapi",
+    "name": "IDSC Dataverse Search API",
+    "canonicalId": "idscdataversesearchapi",
+    "baseUrl": "https://dataverse.iza.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.iza.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Research Data Center of IZA (IDSC)\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ibictresearchdatasearchapi",
+    "name": "IBICT Research Data Search API",
+    "canonicalId": "ibictresearchdatasearchapi",
+    "baseUrl": "https://repositoriopesquisas.ibict.br",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://repositoriopesquisas.ibict.br/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"IBICT\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "indatasearchapi",
+    "name": "Indata Search API",
+    "canonicalId": "indatasearchapi",
+    "baseUrl": "https://indata.cedia.edu.ec",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://indata.cedia.edu.ec/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"iNData\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "instituteofrussianliteraturedataversesearchapi",
+    "name": "Institute of Russian Literature Dataverse Search API",
+    "canonicalId": "instituteofrussianliteraturedataversesearchapi",
+    "baseUrl": "https://dataverse.pushdom.ru",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.pushdom.ru/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Репозиторий открытых данных по русской литературе и фольклору\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "internationalpotatocentersearchapi",
+    "name": "International Potato Center Search API",
+    "canonicalId": "internationalpotatocentersearchapi",
+    "baseUrl": "https://data.cipotato.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.cipotato.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"International Potato Center\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ioerdatasearchapi",
+    "name": "ioerDATA Search API",
+    "canonicalId": "ioerdatasearchapi",
+    "baseUrl": "https://data.fdz.ioer.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.fdz.ioer.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"ioerDATA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "issdadataversesearchapi",
+    "name": "ISSDA Dataverse Search API",
+    "canonicalId": "issdadataversesearchapi",
+    "baseUrl": "https://issda.ucd.ie",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://issda.ucd.ie/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"ISSDA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ipgpresearchcollectionsearchapi",
+    "name": "IPGP Research Collection Search API",
+    "canonicalId": "ipgpresearchcollectionsearchapi",
+    "baseUrl": "https://dataverse.ipgp.fr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.ipgp.fr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"IPGP Research Collection\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "iitdataversesearchapi",
+    "name": "IIT Dataverse Search API",
+    "canonicalId": "iitdataversesearchapi",
+    "baseUrl": "https://dataverse.iit.it",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.iit.it/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"IIT Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "jlichdatasearchapi",
+    "name": "Jülich DATA Search API",
+    "canonicalId": "jlichdatasearchapi",
+    "baseUrl": "https://data.fz-juelich.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.fz-juelich.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Jülich DATA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "keendatamanagementplatformsearchapi",
+    "name": "KEEN Data Management Platform Search API",
+    "canonicalId": "keendatamanagementplatformsearchapi",
+    "baseUrl": "https://infraverse.zih.tu-dresden.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://infraverse.zih.tu-dresden.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Main Collection\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "kuleuvenrdrsearchapi",
+    "name": "KU Leuven RDR Search API",
+    "canonicalId": "kuleuvenrdrsearchapi",
+    "baseUrl": "https://rdr.kuleuven.be",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataset",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://rdr.kuleuven.be/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"RDR | KU LEUVEN\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "lithuaniandataarchiveforsocialsciencesandhumanitieslidasearchapi",
+    "name": "Lithuanian Data Archive for Social Sciences and Humanities (LiDA) Search API",
+    "canonicalId": "lithuaniandataarchiveforsocialsciencesandhumanitieslidasearchapi",
+    "baseUrl": "https://lida.dataverse.lt",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://lida.dataverse.lt/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Lithuanian Data Archive for SSH (LiDA)\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "jplopenrepositorysearchapi",
+    "name": "JPL Open Repository Search API",
+    "canonicalId": "jplopenrepositorysearchapi",
+    "baseUrl": "https://dataverse.jpl.nasa.gov",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.jpl.nasa.gov/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"JPL Open Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "libradatasearchapi",
+    "name": "Libra Data Search API",
+    "canonicalId": "libradatasearchapi",
+    "baseUrl": "https://dataverse.lib.virginia.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.lib.virginia.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"University of Virginia Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "lorelistopenrepositorysearchapi",
+    "name": "LORE - LIST Open Repository Search API",
+    "canonicalId": "lorelistopenrepositorysearchapi",
+    "baseUrl": "https://lore.list.lu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataset",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://lore.list.lu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"LIST Open Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "mblwhoilibrarydataversesearchapi",
+    "name": "MBLWHOI Library Dataverse Search API",
+    "canonicalId": "mblwhoilibrarydataversesearchapi",
+    "baseUrl": "https://dataverse.whoi.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.whoi.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"MBLWHOI Library Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "meldatasearchapi",
+    "name": "MELDATA Search API",
+    "canonicalId": "meldatasearchapi",
+    "baseUrl": "https://data.mel.cgiar.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.mel.cgiar.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"MELDATA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ministeriodelasculturaslasartesylossaberessearchapi",
+    "name": "Ministerio de las Culturas, las Artes y los Saberes Search API",
+    "canonicalId": "ministeriodelasculturaslasartesylossaberessearchapi",
+    "baseUrl": "https://investigacionartes.mincultura.gov.co",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://investigacionartes.mincultura.gov.co/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Ministerio de las Culturas, las Artes y Los Saberes\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "niedatarepositorysearchapi",
+    "name": "NIE Data Repository Search API",
+    "canonicalId": "niedatarepositorysearchapi",
+    "baseUrl": "https://researchdata.nie.edu.sg",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://researchdata.nie.edu.sg/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"NIE Data Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "nycudataversesearchapi",
+    "name": "NYCU Dataverse Search API",
+    "canonicalId": "nycudataversesearchapi",
+    "baseUrl": "https://dataverse.lib.nycu.edu.tw",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.lib.nycu.edu.tw/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"NYCU Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "odisseiportalsearchapi",
+    "name": "ODISSEI Portal Search API",
+    "canonicalId": "odisseiportalsearchapi",
+    "baseUrl": "https://portal.odissei.nl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://portal.odissei.nl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"ODISSEI Portal\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "opendatauclouvainsearchapi",
+    "name": "Open Data @ UCLouvain Search API",
+    "canonicalId": "opendatauclouvainsearchapi",
+    "baseUrl": "https://dataverse.uclouvain.be",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.uclouvain.be/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Open Data @ UCLouvain\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "osnadatasearchapi",
+    "name": "osnaData Search API",
+    "canonicalId": "osnadatasearchapi",
+    "baseUrl": "https://osnadata.ub.uni-osnabrueck.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://osnadata.ub.uni-osnabrueck.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"osnaData\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "openforestdatasearchapi",
+    "name": "Open Forest Data Search API",
+    "canonicalId": "openforestdatasearchapi",
+    "baseUrl": "https://dataverse.openforestdata.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.openforestdata.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"openforestdata.pl\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "papyrussearchapi",
+    "name": "PAPYRUS Search API",
+    "canonicalId": "papyrussearchapi",
+    "baseUrl": "https://papyrus-datos.co",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://papyrus-datos.co/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Papyrus\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "polendatahubsearchapi",
+    "name": "POLEN DataHub Search API",
+    "canonicalId": "polendatahubsearchapi",
+    "baseUrl": "https://datahub.polen.fccn.pt",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datahub.polen.fccn.pt/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"POLEN DataHub\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "pekinguniversityopenresearchdatasearchapi",
+    "name": "Peking University Open Research Data Search API",
+    "canonicalId": "pekinguniversityopenresearchdatasearchapi",
+    "baseUrl": "https://opendata.pku.edu.cn",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://lib.pku.edu.cn/portal/en",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Peking University Library\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "polyuresearchdatarepositorysearchapi",
+    "name": "PolyU Research Data Repository Search API",
+    "canonicalId": "polyuresearchdatarepositorysearchapi",
+    "baseUrl": "https://researchdata.lib.polyu.edu.hk",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://researchdata.lib.polyu.edu.hk/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"PolyU Research Data Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "pontificiauniversidadcatolicadelperuresearchdatasearchapi",
+    "name": "Pontificia Universidad Catolica del Peru Research Data Search API",
+    "canonicalId": "pontificiauniversidadcatolicadelperuresearchdatasearchapi",
+    "baseUrl": "https://datos.pucp.edu.pe",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datos.pucp.edu.pe/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Portal de Datos Abiertos de la Pontificia Universidad Católica del Perú\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "recherchedatagouvsearchapi",
+    "name": "Recherche Data Gouv Search API",
+    "canonicalId": "recherchedatagouvsearchapi",
+    "baseUrl": "https://entrepot.recherche.data.gouv.fr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://entrepot.recherche.data.gouv.fr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Recherche Data Gouv\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "qdrmaincollectionsearchapi",
+    "name": "QDR Main Collection Search API",
+    "canonicalId": "qdrmaincollectionsearchapi",
+    "baseUrl": "https://data.qdr.syr.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://qdr.syr.edu/about",
+    "freeEvidence": "Owner About page explicitly describes a publicly available, freely searchable catalog and machine-readable metadata. Owner primary page identifies this public research-data search service as \"About the Qualitative Data Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repodsearchapi",
+    "name": "RepOD Search API",
+    "canonicalId": "repodsearchapi",
+    "baseUrl": "https://repod.icm.edu.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://repod.icm.edu.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"RepOD\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosabiertosdeinvestigacinredatasearchapi",
+    "name": "Repositorio de Datos Abiertos de Investigación (Redata) Search API",
+    "canonicalId": "repositoriodedatosabiertosdeinvestigacinredatasearchapi",
+    "baseUrl": "https://redata.anii.org.uy",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://redata.anii.org.uy/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de datos abiertos de investigación de Uruguay\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosdeinvestigacindelauniversidaddechilesearchapi",
+    "name": "Repositorio de datos de investigación de la Universidad de Chile Search API",
+    "canonicalId": "repositoriodedatosdeinvestigacindelauniversidaddechilesearchapi",
+    "baseUrl": "https://datos.uchile.cl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datos.uchile.cl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de datos de investigación de la Universidad de Chile\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosdeinvestigacindelauniversidadnacionaldelaplatasearchapi",
+    "name": "Repositorio de Datos de Investigación de la Universidad Nacional de La Plata Search API",
+    "canonicalId": "repositoriodedatosdeinvestigacindelauniversidadnacionaldelaplatasearchapi",
+    "baseUrl": "https://datos.unlp.edu.ar",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datos.unlp.edu.ar/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Universidad Nacional de La Plata\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosdeinvestigacinusachsearchapi",
+    "name": "Repositorio de Datos de Investigación USACH Search API",
+    "canonicalId": "repositoriodedatosdeinvestigacinusachsearchapi",
+    "baseUrl": "https://datos.usach.cl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datos.usach.cl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de Datos de Investigación USACH\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosdelauniversidaddelpacficodatasetsupsearchapi",
+    "name": "Repositorio de Datos de la Universidad del Pacífico (DatasetsUP) Search API",
+    "canonicalId": "repositoriodedatosdelauniversidaddelpacficodatasetsupsearchapi",
+    "baseUrl": "https://datasets.up.edu.pe",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datasets.up.edu.pe/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de datos de investigación de la Universidad del Pacífico\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosdelauniversidaddeconcepcinsearchapi",
+    "name": "Repositorio de datos de la Universidad de Concepción Search API",
+    "canonicalId": "repositoriodedatosdelauniversidaddeconcepcinsearchapi",
+    "baseUrl": "https://datav.udec.cl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datav.udec.cl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de Datos - UdeC\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatospontificiauniversidadjaverianasearchapi",
+    "name": "Repositorio de Datos Pontificia Universidad Javeriana Search API",
+    "canonicalId": "repositoriodedatospontificiauniversidadjaverianasearchapi",
+    "baseUrl": "https://dataverse.javeriana.edu.co",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.javeriana.edu.co/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Pontificia Universidad Javeriana\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriodedatosuniversidaddistritalfranciscojosdecaldassearchapi",
+    "name": "Repositorio de Datos Universidad Distrital Francisco José de Caldas Search API",
+    "canonicalId": "repositoriodedatosuniversidaddistritalfranciscojosdecaldassearchapi",
+    "baseUrl": "https://datosinvestigacion.udistrital.edu.co",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datosinvestigacion.udistrital.edu.co/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Repositorio de Datos Universidad Distrital Francisco José de Caldas\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repositoriotecdatossearchapi",
+    "name": "Repositorio TECdatos Search API",
+    "canonicalId": "repositoriotecdatossearchapi",
+    "baseUrl": "https://dataverse.tec.ac.cr",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.tec.ac.cr/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"TECdatos Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "repostoriosoildatasearchapi",
+    "name": "Reposítorio SoilData Search API",
+    "canonicalId": "repostoriosoildatasearchapi",
+    "baseUrl": "https://repositorio.soildata.mapbiomas.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://repositorio.soildata.mapbiomas.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"SoilData\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "universityofthenationaleducationcommissionresearchdatasearchapi",
+    "name": "University of the National Education Commission Research Data Search API",
+    "canonicalId": "universityofthenationaleducationcommissionresearchdatasearchapi",
+    "baseUrl": "https://uken.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://uken.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"University of the National Education Commission, Krakow\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "rodbukaghsearchapi",
+    "name": "RODBUK AGH Search API",
+    "canonicalId": "rodbukaghsearchapi",
+    "baseUrl": "https://agh.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://agh.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"AGH University of Krakow\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "rodbukpksearchapi",
+    "name": "RODBUK PK Search API",
+    "canonicalId": "rodbukpksearchapi",
+    "baseUrl": "https://pk.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://pk.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"PK Krakow University of Technology\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "rodbukueksearchapi",
+    "name": "RODBUK UEK Search API",
+    "canonicalId": "rodbukueksearchapi",
+    "baseUrl": "https://uek.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://uek.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"Krakow University of Economics\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "rodbukujsearchapi",
+    "name": "RODBUK UJ Search API",
+    "canonicalId": "rodbukujsearchapi",
+    "baseUrl": "https://uj.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://uj.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"Jagiellonian University in Kraków\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "rsudataversesearchapi",
+    "name": "RSU Dataverse Search API",
+    "canonicalId": "rsudataversesearchapi",
+    "baseUrl": "https://dataverse.rsu.lv",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.rsu.lv/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Rīga Stradiņš University Institutional Repository Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "sanoresearchdatasearchapi",
+    "name": "Sano Research Data Search API",
+    "canonicalId": "sanoresearchdatasearchapi",
+    "baseUrl": "https://sano.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://sano.rodbuk.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Sano Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "sodhasearchapi",
+    "name": "SODHA Search API",
+    "canonicalId": "sodhasearchapi",
+    "baseUrl": "https://www.sodha.be",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://www.sodha.be/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Social Sciences and Digital Humanities Archive – SODHA\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "tecnolgicodemonterreydatahubsearchapi",
+    "name": "Tecnológico de Monterrey Data Hub Search API",
+    "canonicalId": "tecnolgicodemonterreydatahubsearchapi",
+    "baseUrl": "https://datahub.tec.mx",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datahub.tec.mx/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Tecnológico de Monterrey\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "thehenrykniewodniczaskiinstituteofnuclearphysicspolishacademyofsciencessearchapi",
+    "name": "The Henryk Niewodniczański Institute of Nuclear Physics Polish Academy of Sciences Search API",
+    "canonicalId": "thehenrykniewodniczaskiinstituteofnuclearphysicspolishacademyofsciencessearchapi",
+    "baseUrl": "https://ifj.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://ifj.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"The Henryk Niewodniczański Institute of Nuclear Physics Polish Academy of Sciences\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "trr170dbsearchapi",
+    "name": "TRR170-DB Search API",
+    "canonicalId": "trr170dbsearchapi",
+    "baseUrl": "https://planetary-data-portal.org",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://planetary-data-portal.org/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"TRR170-DB\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "tudodatasearchapi",
+    "name": "TUDOdata Search API",
+    "canonicalId": "tudodatasearchapi",
+    "baseUrl": "https://data.tu-dortmund.de",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://data.tu-dortmund.de/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"TUDOdata\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ucberkeleylibrarydataversesearchapi",
+    "name": "UC Berkeley Library Dataverse Search API",
+    "canonicalId": "ucberkeleylibrarydataversesearchapi",
+    "baseUrl": "https://datasets.lib.berkeley.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datasets.lib.berkeley.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"UC Berkeley Library Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "ucladataversesearchapi",
+    "name": "UCLA Dataverse Search API",
+    "canonicalId": "ucladataversesearchapi",
+    "baseUrl": "https://dataverse.ucla.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.ucla.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"UCLA Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "uddataversesearchapi",
+    "name": "UD Dataverse Search API",
+    "canonicalId": "uddataversesearchapi",
+    "baseUrl": "https://dataverse.udel.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.udel.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"UD Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "uligeopendatarepositorysearchapi",
+    "name": "ULiège Open Data Repository Search API",
+    "canonicalId": "uligeopendatarepositorysearchapi",
+    "baseUrl": "https://dataverse.uliege.be",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.uliege.be/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"ULiège Open Data Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "unblibrariesdataversesearchapi",
+    "name": "UNB Libraries Dataverse Search API",
+    "canonicalId": "unblibrariesdataversesearchapi",
+    "baseUrl": "https://dataverse.lib.unb.ca",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.lib.unb.ca/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"UNB\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "universityofphysicalculturekrakowresearchdatasearchapi",
+    "name": "University of Physical Culture Krakow Research Data Search API",
+    "canonicalId": "universityofphysicalculturekrakowresearchdatasearchapi",
+    "baseUrl": "https://akf.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://akf.rodbuk.pl/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"University of Physical Culture in Krakow\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "universitcafoscariveneziadatarepositorysearchapi",
+    "name": "Università Ca’ Foscari Venezia Datarepository Search API",
+    "canonicalId": "universitcafoscariveneziadatarepositorysearchapi",
+    "baseUrl": "https://datarepository.unive.it",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://datarepository.unive.it/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Datarepository Unive\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "universityofwroclawresearchdatasearchapi",
+    "name": "University of Wroclaw Research Data Search API",
+    "canonicalId": "universityofwroclawresearchdatasearchapi",
+    "baseUrl": "https://uwr.rodbuk.pl",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://uwr.rodbuk.pl/",
+    "freeEvidence": "This institution owner primary page explicitly states repository usage is free and describes publicly sharing research data. Its independently scoped institutional repository is counted once; the shared RODBUK umbrella is withheld. Owner primary page identifies this public research-data search service as \"Uniwersytet Wrocławski\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "universityofmilanresearchdatasearchapi",
+    "name": "University of Milan Research Data Search API",
+    "canonicalId": "universityofmilanresearchdatasearchapi",
+    "baseUrl": "https://dataverse.unimi.it",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.unimi.it/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"UNIMI Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "vttisearchapi",
+    "name": "VTTI Search API",
+    "canonicalId": "vttisearchapi",
+    "baseUrl": "https://dataverse.vtti.vt.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.vtti.vt.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"VTTI\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "yaledataversesearchapi",
+    "name": "Yale Dataverse Search API",
+    "canonicalId": "yaledataversesearchapi",
+    "baseUrl": "https://dataverse.yale.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.yale.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Yale Dataverse\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  },
+  {
+    "id": "wyomingdatarepositorysearchapi",
+    "name": "Wyoming Data Repository Search API",
+    "canonicalId": "wyomingdatarepositorysearchapi",
+    "baseUrl": "https://dataverse.arcc.uwyo.edu",
+    "smokePath": "/api/search?q=%2A&per_page=1&type=dataverse",
+    "docsUrl": "https://guides.dataverse.org/en/latest/api/search.html",
+    "pricing": "free",
+    "pricingSource": "https://dataverse.arcc.uwyo.edu/",
+    "freeEvidence": "Owner primary page identifies this public research-data search service as \"Wyoming Data Repository\" and publishes its discovery/catalog interface. Current official Dataverse Search API documentation supports public search without credentials; only unpublished content needs an API token. A bounded anonymous query returned HTTP 200, status OK and a nonempty metadata item array. Approval is restricted to exact /api/search metadata search, not dataset/file downloads, private/unpublished access or writes. Preserve returned citations, attribution and per-dataset terms; no universal data reuse or resale permission is claimed. One independently owned repository/API is represented, not its collections, datasets, versions or mirrors.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/search"
+    ]
+  }
+]

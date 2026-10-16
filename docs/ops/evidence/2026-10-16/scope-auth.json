@@ -1,0 +1,31 @@
+{
+  "preview": "https://abundant-goldfish-47.eu-west-1.convex.site",
+  "providerId": "ckan-datos-gob-cl",
+  "verifiedAt": "2026-10-16T10:44:28.953Z",
+  "results": [
+    {
+      "test": "unreviewed same-origin path",
+      "status": 400,
+      "errorCode": "unsafe_public_origin",
+      "latencyMs": 428
+    },
+    {
+      "test": "write method blocked",
+      "status": 405,
+      "errorCode": "method_not_allowed",
+      "latencyMs": 188
+    },
+    {
+      "test": "no customer session",
+      "status": 401,
+      "errorCode": "unauth",
+      "latencyMs": 127
+    },
+    {
+      "test": "invalid customer session",
+      "status": 401,
+      "errorCode": "unauth",
+      "latencyMs": 191
+    }
+  ]
+}

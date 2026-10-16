@@ -308,6 +308,16 @@ test('customer proof refuses incomplete, ambiguous or billing-changing batches b
   assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), { ...proof, results: undefined }), /missing/);
 });
 
+test('customer proof preserves source-qualified gateway rejection classifications', () => {
+  const report = customerFixture();
+  const row = report.results.find(row => row.id === 'c');
+  Object.assign(row, { cause: 'gateway_block', outcome: 'redirect_not_approved',
+    errorCause: [{ reason: 'redirect_not_approved' }], trace: [{ redirectTo: 'https://metadata.fixture.org' }] });
+  const result = applyCustomerGatewayEvidence(report, customerProof());
+  assert.equal(result.results.find(row => row.id === 'c').cause, 'gateway_block');
+  assert.equal(result.results.find(row => row.id === 'c').verified, false);
+});
+
 test('health-disabled and discovery responses fail despite HTTP 200 while exact unique names can match', () => {
   const proof = customerProof(); proof.results[0] = { id: 'different', name: 'A', status: 200, success: true }; proof.health.disabledIds = ['a'];
   proof.results[1] = { id: 'b', status: 200, success: true, discovery: true };
@@ -349,4 +359,24 @@ test('reviewed metadata paths are retained in evidence and changing scope invali
   assert.deepEqual(scoped.allowedPaths, ['/api/3/action/package_search']);
   assert.notEqual(scoped.definitionHash, prepared()[0].definitionHash);
   assert.equal(prepared({ previous: [scoped], recipes: [recipe] })[0].allowedPaths, undefined);
+});
+
+test('HTML within a valid JSON metadata field is data rather than a website response', () => {
+  const result = classifyResult({ status: 200, raw: '{"items":[{"description":"<html> content"}]}', decodedValid: true, api: { freeVerified: true } });
+  assert.equal(result.cause, 'ok');
+});
+
+test('registry enrollment invalidates a cached unmatched-recipe rejection', async () => {
+  const unmatched = prepared({ candidates: [], registry: [] })[0];
+  const enrolled = prepared({ candidates: [] })[0];
+  assert.equal(unmatched.recipeRegistryMatched, false);
+  assert.equal(enrolled.recipeRegistryMatched, true);
+  assert.notEqual(unmatched.definitionHash, enrolled.definitionHash);
+  let requests = 0;
+  const result = await auditCandidates([enrolled], {
+    resume: true, previous: [{ ...unmatched, checkedAt: '2026-10-16T00:00:00Z', verified: false }],
+    dependencies: deps(async () => { requests++; return Response.json({ items: [1] }); }),
+  });
+  assert.equal(requests, 1);
+  assert.equal(result[0].verified, true);
 });

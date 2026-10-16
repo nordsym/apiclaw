@@ -72,6 +72,7 @@ for (const body of ['{"Errors":[{"description":"bad query"}]}', '{"errors":["inv
   assert.equal(decodePublicApiResponse({}, body).valid, false, body);
 }
 assert.equal(decodePublicApiResponse({}, '{"errors":[],"results":[1]}').valid, true);
+assert.equal(decodePublicApiResponse({}, '{"results":[{"description":"<html> is a field value, not a login page","id":1}]}').valid, true);
 assert.equal(decodePublicApiResponse({}, '{"code":1234,"message":"Portfolio summary","value":10}').valid, true);
 assert.equal(decodePublicApiResponse({}, '{"response_code":0,"results":[]}').valid, true);
 assert.equal(decodePublicApiResponse({}, '"pong"').valid, true);

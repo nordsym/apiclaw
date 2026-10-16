@@ -1,6 +1,22 @@
 # Callable API customer verification
 
-## Current checkpoint: 2026-10-16
+## Current result: 2026-10-16
+
+**1,140 distinct free APIs passed real authenticated customer calls through `/v1/execute`.** The catalogue adds the three previously approved managed providers for **1,143 callable cards**. The original customer baseline was 13 free APIs and three managed providers, 16 total. The free rail alone now exceeds the 1,000 target. PR #60 remains a draft, unmerged; this is isolated preview evidence, not a production release.
+
+The full customer batch attempted all 1,154 upstream-qualified candidates, with three workers and globally spaced starts below the workspace rate limit. Eleven candidates had failed the independent native health sweep and were denied with a friendly 503. Three further customer calls timed out. All fourteen were removed from the callable manifest and remain discovery. No credentials or paid calls were used upstream. The retained 1,140 defaults have native health records from the same full sweep, with no disabled or unchecked entries after the final isolated backend deployment.
+
+[Full customer evidence](evidence/2026-10-16/customer-gateway-final.json) records every bounded result and its actual date. Before/after workspace usage, managed allowance, costs, billing ledger and Stripe state were identical. A final post-deployment sample chose three APIs by a fixed hash over the surviving IDs: SunriseSunset, NuGet and BioStudies. Those three and Frankfurter all passed again with unchanged billing. [Selected-call evidence](evidence/2026-10-16/customer-sample-final.json) and [native health readback](evidence/2026-10-16/native-health-final.json) contain the receipts. No workspace identifiers, credentials or response bodies are published.
+
+**Scope matters:** 832 of the 1,140 counted services are restricted to their exact reviewed metadata paths. They search independently operated public catalogues, repositories or scheme/operator information. They do not promise access to every dataset, downloads, private records or unrestricted routes on that host. Each independent service counts once; datasets, actions, aliases, versions and mirrors never add capacity. The [qualification and holds](callable-recovery-queue.md) explain source entitlement and identity boundaries.
+
+Actual HTTP negatives against an otherwise working scoped API confirmed unreviewed same-origin paths return 400, writes return 405, and missing or invalid customer sessions return 401. [Scope/auth evidence](evidence/2026-10-16/scope-auth.json) records these checks. SSRF protection, endpoint restrictions, HTTPS pinning, bounded responses and per-workspace rate limiting remain active. A reproduced Convex concurrent-IO limit above 1,000 entries was fixed with bounded health-record reads and a 1,101-entry regression check. Final snapshot responses took 423, 157 and 81 ms, below the frontend's five-second deadline.
+
+Normal manifest compilation now refuses upstream-only or failed customer evidence. The explicitly named preview-candidate option exists only to prepare isolated verification. Scheduled GitHub upstream checks upload evidence without publishing an unproved candidate manifest; native gateway health checks separately demote unhealthy approved services automatically. No keys, provider accounts or paid calls were required to reach the target. The [50 ranked free-key families](free-api-key-signups.md) remain optional research, not additional verified capacity.
+
+Frontend verification and final validation receipts are recorded below when completed.
+
+## Historical checkpoint: 2026-10-16, 285 cards
 
 PR #60 remains a draft and production is unchanged. **282 free APIs passed real authenticated customer gateway calls**, plus the three previously approved managed providers gives **285 compiled catalogue cards**. The 1,000 target remains unmet.
 
@@ -8,7 +24,7 @@ A fresh identity signed up through the actual Clerk form in isolated bundled hea
 
 The upstream sweep covered 1,668 candidate/alias rows with shared HTTPS, redirect, retry, timeout and response limits. Digitraffic now passes native customer execution using explicit gzip negotiation with bounded decompression, CRC/size validation and single-member checks. The other default requests retain identity encoding. Newly reviewed metadata capabilities can be limited to exact endpoint paths, including redirects; unreviewed same-origin downloads are denied before a request. Existing unrestricted reviewed rails retain their behavior.
 
-The source snapshot is compiled from the customer proof. Frontend deployment verification for this checkpoint is pending; the screenshots and frontend deployment proof below describe the historical October 15 checkpoint. Additional scientific, mobility and portal candidates are not included until their entitlement, identity, native health and customer execution are verified. Local full tests, 34 audit tests and focused metadata-path/compression checks pass. No production deployment or npm release has occurred.
+The source snapshot is compiled from the customer proof. Frontend deployment dpl_F3MWULJF48R8sfKGtQrWNUUK83dJ (source 7d423fa) passed all five surfaces without JavaScript at 2026-10-16T10:04:03.073Z, including 285 unique paginated cards. [Web proof](evidence/2026-10-16/web-checkpoint.json) and the October 16 checkpoint screenshots record this count. The older screenshots and frontend proof below describe the historical October 15 checkpoint. Additional scientific, mobility and portal candidates are not included until their entitlement, identity, native health and customer execution are verified. Local full tests, 34 audit tests and focused metadata-path/compression checks pass. No production deployment or npm release has occurred.
 
 ## Historical checkpoint: 2026-10-15
 
@@ -48,6 +64,6 @@ Homepage, catalog, docs, served SKILL.md and `/api/catalog` intersect the fronte
 
 `/v1/discover` defaults to the production catalog. An isolated preview can set server-only `APICLAW_CATALOG_URL` to its HTTPS Vercel `/api/catalog`, with existing `APICLAW_CATALOG_OIDC_TOKEN` for deployment protection. Tokens are never sent to callers, query strings, other hosts or redirects. A preview token can expire and must not become a production dependency; production uses the unchanged public URL.
 
-## Remaining acceptance gap
+## Historical October 15 acceptance gap
 
-233 is 767 below 1,000. The expanded pool is not exhausted and no global impossibility claim is justified. [Gap analysis](callable-gap-analysis.md) identifies remaining endpoint, rights and quota work. [Fifty researched free-key account families](free-api-key-signups.md) establish no new customer-callable capacity: entitlements, overlap and shared gateway rights still need verification. The required signup count remains unknown.
+At that checkpoint, 233 was 767 below 1,000. The expanded pool is not exhausted and no global impossibility claim is justified. [Gap analysis](callable-gap-analysis.md) identifies remaining endpoint, rights and quota work. [Fifty researched free-key account families](free-api-key-signups.md) establish no new customer-callable capacity: entitlements, overlap and shared gateway rights still need verification. The required signup count remains unknown.

@@ -1,0 +1,499 @@
+[
+  {
+    "id": "bark",
+    "name": "Bark",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/suno-ai/bark/main/README.md",
+    "evidence": "Official README identifies an open-source text-to-audio model installed and invoked with Python functions on downloaded model weights. This catalog row represents the model software, not Suno music-generation hosting or a shared Bark HTTP inference service."
+  },
+  {
+    "id": "googlecharts",
+    "name": "Google Charts",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://developers.google.com/chart/interactive/docs/quick_start",
+    "evidence": "Official quick start loads JavaScript in a browser, creates a DataTable and draws charts into DOM elements. The Charts API here is a client-side JavaScript library. Loading its script is not a hosted chart-data execution API."
+  },
+  {
+    "id": "metamasksdk",
+    "name": "MetaMask SDK",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/MetaMask/metamask-sdk/main/README.md",
+    "evidence": "Official SDK README describes npm SDK integration with a user wallet and migration to MetaMask Connect packages. The represented interface is an application SDK, not a standalone hosted public data API. MetaMask/Infura network services must be assessed separately."
+  },
+  {
+    "id": "rayserve",
+    "name": "Ray Serve",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://docs.ray.io/en/latest/serve/index.html",
+    "evidence": "Official Ray Serve guide describes a model-serving library and deployments running in a Ray cluster, with local example URLs at localhost:8000. A customer/operator must run or provision a deployment. This software row is not an already hosted anonymous inference endpoint; Anyscale hosting is a separate service."
+  },
+  {
+    "id": "sportsipy",
+    "name": "Sportsipy",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/roclark/sportsipy/master/README.rst",
+    "evidence": "Official README provides pip installation and Python imports for a sports-reference client library. Calling the library locally is not calling a separately hosted Sportsipy API. The upstream sports sites and their permissions are separate from the software package."
+  },
+  {
+    "id": "sst",
+    "name": "SST",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/sst/sst/dev/README.md",
+    "evidence": "Official README describes building applications on the developer's own infrastructure, installing the SST CLI and deploying application code. SST framework APIs are programming/deployment interfaces, not a shared hosted application-data service. The SST Console is a distinct management product."
+  },
+  {
+    "id": "steamvr",
+    "name": "SteamVR",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/ValveSoftware/steamvr_unity_plugin/master/README.md",
+    "evidence": "Official Valve repository describes a Unity plugin for interfacing SteamVR with VR headsets. This is an SDK used in a Unity project with local VR runtime/hardware, not a hosted HTTP provider endpoint."
+  },
+  {
+    "id": "unityxr",
+    "name": "Unity XR",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://docs.unity3d.com/Packages/com.unity.xr.interaction.toolkit@3.0/manual/index.html",
+    "evidence": "Official Unity package manual describes XR Interaction Toolkit components for Unity scenes and input/interactions. The API is a runtime/package programming interface used in the application, not an external hosted API."
+  },
+  {
+    "id": "pendax",
+    "name": "PENDAX",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/CompendiumFi/PENDAX-SDK/main/README.md",
+    "evidence": "Official README explicitly identifies PENDAX as a software development kit installed from npm and instantiated in JavaScript to connect exchange interfaces. The SDK itself is not an independent hosted exchange/data API; each upstream service retains its own access requirements."
+  },
+  {
+    "id": "instructor",
+    "name": "Instructor",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/567-labs/instructor/main/README.md",
+    "evidence": "Official README describes a Python library built on Pydantic and demonstrates importing instructor and calling a configured LLM client. The represented API is library code; underlying hosted model providers are separate APIs, not an Instructor-operated anonymous endpoint."
+  },
+  {
+    "id": "marvin",
+    "name": "Marvin",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/PrefectHQ/marvin/main/README.md",
+    "evidence": "Official README describes a Python framework for structured outputs and agentic workflows with imported functions and configured models. This is installed application/framework code, not a shared hosted Marvin data API."
+  },
+  {
+    "id": "openwebanalytics",
+    "name": "Open Web Analytics",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/Open-Web-Analytics/Open-Web-Analytics/master/README.md",
+    "evidence": "Official README calls the project Open Web Analytics Server and explains running open-source web analytics software to control collected site data. Its data-access API belongs to an installed server with the operator's analytics data, not a common public hosted dataset service."
+  },
+  {
+    "id": "indrz",
+    "name": "Indrz",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/indrz/indrz/master/README.md",
+    "evidence": "Official repository describes a monorepo containing a Django backend API and Vue/Nuxt frontend. The listing points to deployable indoor-mapping application source, not an operator-hosted public API instance with a reviewed base URL."
+  },
+  {
+    "id": "nodedeliveroo",
+    "name": "Node Deliveroo",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/jzarca01/node-deliveroo/master/README.md",
+    "evidence": "Official README demonstrates require(node-deliveroo), constructing a JavaScript client and signing in with the customer's delivery-service credentials. This entry is a Node.js client package, not a separate Node Deliveroo hosted service. Deliveroo access must be assessed independently."
+  },
+  {
+    "id": "nodeubereats",
+    "name": "Node UberEats",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/jzarca01/node-ubereats/master/README.md",
+    "evidence": "Official README installs node-ubereats with npm and constructs an UberEats client inside JavaScript. This is a client wrapper, not a distinct hosted provider API. Underlying Uber Eats services are separate and no authentication conclusion is inferred for them."
+  },
+  {
+    "id": "nbaapi",
+    "name": "NBA API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/swar/nba_api/master/README.md",
+    "evidence": "Official README identifies nba_api as a Python API client package for NBA.com endpoints and demonstrates local package imports. This row represents client software, not another NBA-operated service. The separate NBA REST API/NBA Stats service listings remain independently assessable."
+  },
+  {
+    "id": "statline",
+    "name": "StatLine",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/amillolive/StatLine/master/README.md",
+    "evidence": "Official README describes an adapter-driven Python scoring toolkit, local scoring and an optional separately deployed SLAPI layer with a localhost example. This software package is not itself a shared hosted scoring service. No claim is made about the access model of a future/operator-deployed SLAPI instance."
+  },
+  {
+    "id": "appriseapi",
+    "name": "Apprise API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/caronc/apprise/master/README.md",
+    "evidence": "Official repository describes Apprise as a notification library, demonstrates installed Python/CLI usage, and links a separate self-hosted apprise-api project. This particular listing points to the library, not an already hosted common notification API; each notification backend is separate."
+  },
+  {
+    "id": "domoticz",
+    "name": "Domoticz",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/domoticz/domoticz/master/README.md",
+    "evidence": "Official README describes a home-automation system installed on Linux, Windows, macOS or Raspberry Pi. Its APIs control the operator's own Domoticz server and devices. The represented software is not an independent public hosted home-automation data provider."
+  },
+  {
+    "id": "gpt4all",
+    "name": "GPT4All",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/nomic-ai/gpt4all/main/README.md",
+    "evidence": "Official README states GPT4All runs language models privately on desktops/laptops without API calls and provides local installation/SDK usage. This model-runtime software is not a hosted anonymous inference service."
+  },
+  {
+    "id": "janai",
+    "name": "Jan AI",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/janhq/jan/main/README.md",
+    "evidence": "Official README describes downloading the Jan desktop application and an OpenAI-compatible local server at localhost:1337. Cloud integration connects separate third-party model providers. This row represents Jan's local runtime, not a distinct shared hosted model endpoint."
+  },
+  {
+    "id": "lmstudio",
+    "name": "LM Studio",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://lmstudio.ai/docs/developer/core/server",
+    "evidence": "Official developer page explicitly documents LM Studio as a Local LLM API Server and instructions for starting a server on the user's machine/network. No shared LM Studio-operated public inference endpoint is represented by this catalog row."
+  },
+  {
+    "id": "joplin",
+    "name": "Joplin",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://joplinapp.org/help/api/references/rest_api/",
+    "evidence": "Official Joplin Data API documentation says the API is available when the local clipper server is running and examples address localhost:41184. Its token authorizes access to the user's notes. This is a local application API, not an external hosted public-data service; Joplin Cloud is separate."
+  },
+  {
+    "id": "umati",
+    "name": "umati",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://umati.org/about/",
+    "evidence": "Official umati page describes an interoperability initiative based on OPC UA companion specifications and requirements implemented by machine builders. The catalog entry names the standardization/interface initiative, not an individual hosted machine-data operator API."
+  },
+  {
+    "id": "zwave",
+    "name": "Z-Wave",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://z-wavealliance.org/what-is-z-wave/",
+    "evidence": "Official Z-Wave Alliance page describes a wireless communication technology/standard used by smart-home devices. It does not define a single shared HTTP service; gateways/devices and their individual APIs are separate providers."
+  },
+  {
+    "id": "thread",
+    "name": "Thread",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.threadgroup.org/What-is-Thread/Overview",
+    "evidence": "Official Thread Group overview describes an IPv6-based low-power mesh networking protocol for device-to-device/device-to-cloud connectivity. A protocol specification is not itself a hosted HTTP API provider."
+  },
+  {
+    "id": "knx",
+    "name": "KNX",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.knx.org/knx-en/for-professionals/What-is-KNX/A-brief-introduction/index.php",
+    "evidence": "Official KNX introduction describes an open building-automation standard connecting equipment across brands. Actual installations and manufacturer services are separate. The KNX standard is not a common hosted API endpoint."
+  },
+  {
+    "id": "lonworks",
+    "name": "LonWorks",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.lonmark.org/technology/",
+    "evidence": "Official LonMark technology documentation describes LON networking technology, standards, resource files and interoperability guidelines. This catalog row identifies the device-networking technology, not a distinct hosted HTTP data service."
+  },
+  {
+    "id": "euromap77",
+    "name": "Euromap 77",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.euromap.org/euromap77",
+    "evidence": "Official EUROMAP page identifies recommendation 77 as the interface between injection-moulding machines and MES, based on OPC UA information models. It is an industrial interface specification to implement in equipment, not a shared hosted API."
+  },
+  {
+    "id": "isa95",
+    "name": "ISA-95",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.isa.org/standards-and-publications/isa-standards/isa-95-standard",
+    "evidence": "Official ISA page identifies ISA-95/IEC 62264 as a set of enterprise/manufacturing-control integration standards and abstract information-exchange models. The standards documentation is not a hosted provider execution API."
+  },
+  {
+    "id": "packml",
+    "name": "PackML",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.omac.org/packml",
+    "evidence": "Official OMAC page describes Packaging Machine Language state models and implementation guidance for machinery. PackML is a standardized machine interface/model, not an independent hosted API service."
+  },
+  {
+    "id": "bacnet",
+    "name": "BACnet",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://bacnet.org/about-bacnet/",
+    "evidence": "Official BACnet committee page describes the building-automation communication protocol standard and its technical development. The standard itself is not a hosted provider; BACnet devices and gateways are separate systems."
+  },
+  {
+    "id": "qnapdevelopmenttoolkit",
+    "name": "QNAP Development Toolkit",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.qnap.com/en/developer/",
+    "evidence": "Official QNAP developer center presents toolkits/SDKs for developing and packaging applications for QNAP NAS systems. This entry represents device development tooling, not a shared public hosted dataset API. myQNAPcloud is a separate service, not inferred to be keyless."
+  },
+  {
+    "id": "qownnotes",
+    "name": "QOwnNotes",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/pbek/QOwnNotes/main/README.md",
+    "evidence": "Official README describes an open-source Markdown note-taking desktop application with local files and installation instructions. Programmatic extensions and optional synchronization target the user's own application/storage, not a shared hosted QOwnNotes API."
+  },
+  {
+    "id": "textmate",
+    "name": "TextMate",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://macromates.com/",
+    "evidence": "Official site identifies TextMate as a downloadable text editor for macOS with editor documentation and bundles. Its programming facilities are local application interfaces, not a public hosted API service."
+  },
+  {
+    "id": "zed",
+    "name": "Zed",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/zed-industries/zed/main/README.md",
+    "evidence": "Official README identifies Zed as a downloadable code editor and gives installation/build instructions. This catalog row represents editor software, not another hosted model API. Zed's separate collaboration/AI services are not classified as keyless or excluded by this evidence."
+  },
+  {
+    "id": "ghostwriter",
+    "name": "Ghostwriter",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://ghostwriter.kde.org/",
+    "evidence": "Official KDE site describes a distraction-free Markdown editor downloaded and run on desktop systems. The catalog row points to editor software, not a provider-hosted HTTP API."
+  },
+  {
+    "id": "silverbullet",
+    "name": "SilverBullet",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/silverbulletmd/silverbullet/main/README.md",
+    "evidence": "Official README describes a self-hosted personal knowledge-management application and Docker/server installation. The application's extension APIs run in the operator's own instance rather than a shared hosted public-data API."
+  },
+  {
+    "id": "kubeflow",
+    "name": "Kubeflow",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/kubeflow/kubeflow/master/README.md",
+    "evidence": "Official repository describes modular open-source projects forming a Kubernetes-native AI stack that users deploy on their infrastructure/cloud. This software platform is not a single Kubeflow-operated public inference/data endpoint; individual managed deployments are separate."
+  },
+  {
+    "id": "notation",
+    "name": "Notation",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/notaryproject/notation/main/README.md",
+    "evidence": "Official Notary Project README describes Notation as a CLI for signing/verifying OCI artifacts and provides installation commands. The programming/CLI interface is not a hosted public API. OCI registry services remain separate."
+  },
+  {
+    "id": "detoxapi",
+    "name": "Detox API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/wix/Detox/master/README.md",
+    "evidence": "Official Wix repository identifies Detox as a gray-box end-to-end test/automation framework for mobile applications, installed and run against the developer's app. This is test software, not a hosted provider execution API."
+  },
+  {
+    "id": "continue",
+    "name": "Continue",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/continuedev/continue/main/README.md",
+    "evidence": "Official README identifies Continue as a CLI, VS Code extension and JetBrains plugin; its final software release removed authentication. This row names the local coding agent/tool, not another hosted LLM provider. Configured remote model services remain separately assessable."
+  },
+  {
+    "id": "focalboard",
+    "name": "Focalboard",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/mattermost-community/focalboard/main/README.md",
+    "evidence": "Official current README explicitly limits the repository to standalone Focalboard and describes a self-hosted project-management tool, personal desktop edition and local personal server. The catalog software row is not a hosted Focalboard data service; Mattermost integrations are separate."
+  },
+  {
+    "id": "svnapi",
+    "name": "SVN API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://subversion.apache.org/docs/api/latest/",
+    "evidence": "Official Apache Subversion API reference states it documents the public APIs provided by Subversion libraries for programmers. These are in-process/client/server software APIs, not an operator-hosted public HTTP data service."
+  },
+  {
+    "id": "web3modal",
+    "name": "Web3Modal",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/reown-com/appkit/main/README.md",
+    "evidence": "Official successor repository identifies Web3Modal/Reown AppKit as SDKs installed in React/Next/Vue/Nuxt applications to build wallet UX. The catalog SDK is not an independently hosted public data provider; Reown relay/network offerings are separate services."
+  },
+  {
+    "id": "foam",
+    "name": "Foam",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://foambubble.github.io/foam/",
+    "evidence": "Official documentation identifies Foam as a personal knowledge-management system built on VS Code/GitHub, with notes stored in local Markdown files. CLI/MCP/editor interfaces operate on that workspace, not a shared hosted Foam API."
+  },
+  {
+    "id": "ultraleaptracking",
+    "name": "Ultraleap Tracking",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://docs.ultraleap.com/api-reference/tracking-api/index.html",
+    "evidence": "Official Tracking API reference documents native tracking functions, bindings and device/runtime integration for Ultraleap hand tracking. This is a hardware/runtime SDK interface, not a shared hosted HTTP tracking service."
+  },
+  {
+    "id": "thingsapi",
+    "name": "Things API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://culturedcode.com/things/support/articles/2803573/",
+    "evidence": "Official Cultured Code page explicitly documents the Things URL Scheme, which sends commands to an installed Things app using things: URLs. This is local application automation, not an HTTPS provider endpoint."
+  },
+  {
+    "id": "gtfs",
+    "name": "GTFS",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://gtfs.org/documentation/overview/",
+    "evidence": "Official GTFS documentation defines a specification for static transit schedule files and realtime feeds. The standard itself is not a hosted transit operator API. Actual feeds/providers, including GTFS Regional, remain independently assessable."
+  },
+  {
+    "id": "ankiapi",
+    "name": "Anki API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://git.sr.ht/~foosoft/anki-connect/blob/master/README.md",
+    "evidence": "Official Anki-Connect README states it accesses notes/cards in a running Anki Desktop collection through a local HTTP API. It is an installed Anki add-on, not a shared hosted public-data provider. AnkiWeb account synchronization is a separate interface."
+  },
+  {
+    "id": "thumbor",
+    "name": "Thumbor",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/thumbor/thumbor/master/README.md",
+    "evidence": "Official README and installation docs describe an HTTP image-processing server installed with pip or Docker and started by its operator. This software distribution does not itself supply a shared Thumbor-operated public API base URL; third-party hosted Thumbor services are separate."
+  },
+  {
+    "id": "trilium",
+    "name": "Trilium",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/TriliumNext/Trilium/master/README.md",
+    "evidence": "Official current README describes local desktop use and synchronization with a self-hosted Trilium server. Its note API belongs to that user/operator instance, not a shared hosted data provider."
+  },
+  {
+    "id": "aframe",
+    "name": "A-Frame",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/aframevr/aframe/master/README.md",
+    "evidence": "Official README describes a browser-based 3D/AR/VR framework embedded in HTML. The API is client-side scene/component programming, not a hosted HTTP provider."
+  },
+  {
+    "id": "babylonjs",
+    "name": "Babylon.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/BabylonJS/Babylon.js/master/readme.md",
+    "evidence": "Official README describes a JavaScript 3D engine installed/imported into applications and browser playgrounds. Playground UI is not a provider execution API."
+  },
+  {
+    "id": "leaflet",
+    "name": "Leaflet",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/Leaflet/Leaflet/main/README.md",
+    "evidence": "Official README describes a JavaScript library for interactive maps with npm/client integration. Data and tile providers are separate APIs."
+  },
+  {
+    "id": "sharp",
+    "name": "Sharp",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/lovell/sharp/main/README.md",
+    "evidence": "Official README describes a Node-API image-processing module invoked from local JavaScript. It is library code, not a hosted image-processing endpoint."
+  },
+  {
+    "id": "dvc",
+    "name": "DVC",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/iterative/dvc/main/README.rst",
+    "evidence": "Official README describes a command-line data/model version-control tool with local installation and Git-style workflows. Remote storage backends are separate services."
+  },
+  {
+    "id": "backstopjsapi",
+    "name": "BackstopJS API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/garris/BackstopJS/master/README.md",
+    "evidence": "Official README describes visual regression tests run through installed Node/CLI tooling. Its API is a test-runner programming interface, not a hosted public API."
+  },
+  {
+    "id": "neovim",
+    "name": "Neovim",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/neovim/neovim/master/README.md",
+    "evidence": "Official README describes the installed Neovim text editor and editor extension interfaces. Its RPC API controls an editor instance, not a shared hosted data service."
+  },
+  {
+    "id": "helix",
+    "name": "Helix",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/helix-editor/helix/master/README.md",
+    "evidence": "Official README identifies a terminal text editor installed and run locally. It is not a hosted HTTP API provider."
+  },
+  {
+    "id": "kakoune",
+    "name": "Kakoune",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/mawww/kakoune/master/README.asciidoc",
+    "evidence": "Official README identifies a modal code editor with local build/install instructions. Its command interfaces are editor automation, not a hosted provider API."
+  },
+  {
+    "id": "marktext",
+    "name": "Mark Text",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/marktext/marktext/develop/README.md",
+    "evidence": "Official README describes a Markdown desktop editor for Linux/macOS/Windows. It is application software, not an external hosted API."
+  },
+  {
+    "id": "brackets",
+    "name": "Brackets",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/brackets-cont/brackets/master/README.md",
+    "evidence": "Official README identifies an open-source HTML/CSS/JavaScript code editor with local installation/development instructions. It is not a hosted execution service."
+  },
+  {
+    "id": "atom",
+    "name": "Atom",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/atom/atom/master/README.md",
+    "evidence": "Official archived README identifies the Atom desktop text editor and its sunset. Its extension APIs are local application interfaces, not a hosted data provider."
+  },
+  {
+    "id": "postgrest",
+    "name": "PostgREST",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/PostgREST/postgrest/main/README.md",
+    "evidence": "Official README describes a standalone web server that turns an operator-owned PostgreSQL database into a REST API. Running software and a database is required; no common hosted PostgREST dataset service is identified."
+  },
+  {
+    "id": "miragejs",
+    "name": "Mirage JS",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/miragejs/miragejs/master/README.md",
+    "evidence": "Official README describes a client-side API mocking library for development/testing, installed into an application. Generated mocks do not establish a distinct provider-hosted API."
+  },
+  {
+    "id": "grype",
+    "name": "Grype",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/anchore/grype/main/README.md",
+    "evidence": "Official README describes an installed vulnerability-scanning CLI for container images/filesystems/SBOMs. Its scanning API is local software, not a shared hosted scan service."
+  },
+  {
+    "id": "atlantis",
+    "name": "Atlantis",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/runatlantis/atlantis/main/README.md",
+    "evidence": "Official README describes a Terraform pull-request automation application deployed by its operator. It is infrastructure automation software, not a hosted public data API."
+  },
+  {
+    "id": "caprover",
+    "name": "CapRover",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/caprover/caprover/master/README.md",
+    "evidence": "Official README describes application/database deployment and webserver software installed on a server. APIs belong to that operator's deployment, not a shared public provider endpoint."
+  },
+  {
+    "id": "msw",
+    "name": "MSW",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/mswjs/msw/main/README.md",
+    "evidence": "Official README describes a JavaScript network-interception/mocking library used in browser/Node tests. It does not provide a shared hosted public API."
+  },
+  {
+    "id": "automerge",
+    "name": "Automerge",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/automerge/automerge/main/README.md",
+    "evidence": "Official README describes a conflict-free replicated data-type library and synchronization software. Its programming interface is installed application code, not a shared hosted data-provider API."
+  }
+]

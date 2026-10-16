@@ -40,7 +40,7 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
 
 assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 3);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
-assert.equal(CANON_STATS.discoverable, 26_618);
+assert.equal(CANON_STATS.discoverable, 27_483);
 assert.equal(CANON_STATS.source_verified, 689);
 assert.equal(CANON_STATS.verification_sweep_passes, 2_895);
 assert.equal(CANON_STATS.managed_provider_adapters, MANAGED_PROVIDER_ADAPTER_COUNT);
@@ -213,7 +213,7 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
 assert.equal(packageMetadata.version, "2.9.13");
 assert.equal(packageLock.version, "2.9.13");
 assert.equal(packageLock.packages[""].version, "2.9.13");
-assert.match(packageMetadata.description, /26,618 API definitions/);
+assert.match(packageMetadata.description, /27,483 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 built-in providers/);

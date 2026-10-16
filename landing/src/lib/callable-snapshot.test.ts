@@ -31,8 +31,8 @@ assert.equal(rows[0].callable, false);
 assert.equal(rows[1].callable, true);
 assert.equal(rows[2].callable, false);
 const template = readFileSync("landing/public/SKILL.md", "utf8");
-assert.ok(renderLiveSkill(template, demoted).includes(`- ${demoted.callableCount} callable`));
-assert.equal(callableLabel(demoted.callableCount), `${demoted.callableCount} callable now`);
+assert.ok(renderLiveSkill(template, demoted).includes(`- ${demoted.callableCount!.toLocaleString("en-US")} callable`));
+assert.equal(callableLabel(demoted.callableCount), `${demoted.callableCount!.toLocaleString("en-US")} callable now`);
 const networkFailure = await loadCallableSnapshot(async () => { throw new Error("network unavailable"); });
 assert.equal(networkFailure.callableCount, null);
 assert.equal(networkFailure.available, false);
@@ -72,7 +72,7 @@ try {
   assert.equal(catalog.items.some((row: any) => row.name.toLowerCase() === approved.name.toLowerCase()), false);
   const skillResponse = await skillGet();
   assert.equal(skillResponse.headers.get("Cache-Control"), "no-store");
-  assert.ok((await skillResponse.text()).includes(`- ${catalog.totalCallable} callable`));
+  assert.ok((await skillResponse.text()).includes(`- ${catalog.totalCallable.toLocaleString("en-US")} callable`));
   disabledIds = [];
   const restored = await catalogGet(new NextRequest("https://preview.example/api/catalog?callable=true&limit=100"));
   const restoredBody = await restored.json();
@@ -85,7 +85,7 @@ try {
   backendApprovedIds = backendApprovedIds.filter((id: string) => id !== approved.id);
   const backendRemoved = await (await catalogGet(new NextRequest("https://preview.example/api/catalog?callable=true"))).json();
   assert.equal(backendRemoved.totalCallable, baseline.callableCount! - 1);
-  assert.ok((await (await skillGet()).text()).includes(`- ${backendRemoved.totalCallable} callable`));
+  assert.ok((await (await skillGet()).text()).includes(`- ${backendRemoved.totalCallable.toLocaleString("en-US")} callable`));
   healthUnavailable = true;
   assert.equal((await catalogGet(new NextRequest("https://preview.example/api/catalog"))).status, 503);
   assert.match(await (await skillGet()).text(), /Callable availability temporarily unavailable/);

@@ -5,8 +5,12 @@ import {execFileSync} from 'node:child_process';
 import {resolve} from 'node:path';
 const root=resolve(import.meta.dirname,'..');
 const report=JSON.parse(readFileSync(resolve(root,'docs/ops/callable-audit.json'),'utf8'));
+if (!process.argv.includes('--preview-candidates') && report.results.some(row => row.verified && row.gatewayVerification?.success !== true)) {
+  throw new Error('Publishing callable APIs requires successful customer gateway proof for every entry; --preview-candidates is only for isolated verification.');
+}
 const selected=report.results.filter(r=>r.verified).map(({id,canonicalId,name,baseUrl,origin,smokePath,docsUrl,responseKind,acceptEncoding,allowedPaths,redirectOrigins})=>({id:canonicalId??id,name,baseUrl,origin,smokePath,...(docsUrl?{docsUrl}:{}),...(responseKind?{responseKind}:{}),...(acceptEncoding?{acceptEncoding}:{}),...(allowedPaths?{allowedPaths}:{}),...(redirectOrigins?.length?{redirectOrigins}:{})}));
 if (new Set(selected.map(row=>row.id)).size !== selected.length) throw new Error('Duplicate canonical runtime IDs in audit');
+if (new Set(selected.map(row=>row.id.toLowerCase().replace(/[^a-z0-9]+/g,''))).size !== selected.length) throw new Error('Ambiguous normalized runtime IDs in audit');
 if (new Set(selected.map(row=>row.name.toLowerCase().trim())).size !== selected.length) throw new Error('Duplicate callable catalog names in audit');
 if (selected.some(row=>!row.baseUrl?.startsWith('https://')||!row.origin?.startsWith('https://'))) throw new Error('Callable snapshot contains a non-HTTPS endpoint');
 for (const api of selected) {

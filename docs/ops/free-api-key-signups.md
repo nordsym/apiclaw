@@ -4,6 +4,8 @@ Checked: 2026-10-15. Research only. No accounts were created, keys issued, email
 
 ## Decision
 
+October 16 update: [the completed keyless customer verification](callable-customer-verification.md) now exceeds 1,000 free APIs without any new accounts or keys. This frozen October 15 shortlist is optional expansion research; no signups are needed to meet that target.
+
 Start with **IPinfo Lite** if another credential is useful. It has the strongest combination of broad utility, an unlimited recurring free allowance, and explicit commercial redistribution rights under CC BY-SA 4.0. Implement attribution/share-alike correctly and verify the actual gateway call before adding it to callable totals. WeatherAPI, Geoapify and LocationIQ are the next commercial-application candidates, subject to reviewing shared gateway rights.
 
 **We cannot establish how many signups would close the gap to 1,000 callable APIs. The verified incremental count from this research is 0.** This is a ranked set of 50 provider account families with documented free access, representing 53 potential API product offers because Abstract documents two and IP2Location.io explicitly includes three distinct APIs. It is not 50 new working gateway integrations. Product scope counts are conservative research groupings, not proof of key entitlements, commercial proxy permission or new coverage.

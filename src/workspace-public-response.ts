@@ -7,12 +7,12 @@ export function decodePublicApiResponse(
   contentType = "",
 ): { valid: boolean; data?: unknown } {
   const text = raw.trim();
-  if (!text || /<!doctype\s+html|<html(?:\s|>)/i.test(text.slice(0, 512))) {
-    return { valid: false };
-  }
+  if (!text) return { valid: false };
   const kind = api.responseKind ?? "json";
   let parsed: unknown;
   try { parsed = JSON.parse(text); } catch { /* Non-JSON is accepted only for a reviewed format. */ }
+  // Catalogue descriptions may contain HTML as data inside valid JSON.
+  if (parsed === undefined && /<!doctype\s+html|<html(?:\s|>)/i.test(text.slice(0, 512))) return { valid: false };
   if (parsed !== null && typeof parsed === "object" && parsed !== undefined) {
     const body = parsed as Record<string, unknown>;
     const meaningfulError = (value: unknown): boolean => {

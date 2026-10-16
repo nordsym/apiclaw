@@ -21,7 +21,7 @@ Your agent calls real APIs. You sign in once. APIClaw is the authenticated execu
 - 689 current catalog entries map to source-verification evidence by exact name. Source verification is not APIClaw execution.
 - 22 built-in providers are inventoried. Provider inventory is not an execution promise.
 - 3 of the 22 built-in providers are customer-executable now. Provider actions without current evidence stay inventory-only.
-- 282 workspace-authenticated public/no-key APIs are executable. Anonymous keyless public execution stays disabled.
+- 1,140 workspace-authenticated public/no-key APIs are executable. Anonymous keyless public execution stays disabled.
 - Signup is required. There is no anonymous execution.
 - Internal NordSym communication infrastructure is not part of the public provider surface.
 
@@ -74,7 +74,7 @@ Use `discover_apis` to search by job-to-be-done. Results distinguish among:
 
 Use `call_api` only with a managed route returned as executable. Unknown-cost customer traffic fails closed. Public registry entries never become an open proxy.
 
-The built-in provider inventory spans model, search, voice, media, developer, and data providers. Of 22 inventoried providers, 3 are customer-executable now. 282 workspace-authenticated public/no-key APIs are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
+The built-in provider inventory spans model, search, voice, media, developer, and data providers. Of 22 inventoried providers, 3 are customer-executable now. 1,140 workspace-authenticated public/no-key APIs are also executable. Subscription-blocked APILayer actions stay inventory-only. Anonymous keyless proxy stays disabled. Runtime output is the authority for provider and action readiness.
 
 ## Model routing
 
@@ -108,7 +108,7 @@ Usage, provider cost, customer charge, and billing state are visible in the work
 
 - Managed provider credentials stay server-side.
 - Workspace ownership is verified before execution.
-- Public/no-key origins execute only after workspace auth, with HTTPS origin pinning and redirect rejection. Anonymous keyless proxy stays disabled.
+- Public/no-key origins execute only after workspace auth, with HTTPS origin pinning and explicitly reviewed redirects. Anonymous keyless proxy stays disabled.
 - Billing requires an active Stripe subscription, payment method, and exact micro-USD meter contract.
 - Usage authorization and finalization are recorded in an immutable workspace-scoped ledger.
 - Internal-only providers are filtered from public catalog and copy.
