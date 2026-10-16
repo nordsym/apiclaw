@@ -1,5 +1,17 @@
 # Callable API customer verification
 
+## Current checkpoint: 2026-10-16
+
+PR #60 remains a draft and production is unchanged. **282 free APIs passed real authenticated customer gateway calls**, plus the three previously approved managed providers gives **285 compiled catalogue cards**. The 1,000 target remains unmet.
+
+A fresh identity signed up through the actual Clerk form in isolated bundled headless Chromium. The full 286-candidate customer batch passed 280 calls; two initially health-disabled APIs subsequently passed real retries. Four native health failures remain discovery: Istanbul, Spaceflight News, Tunisia and Switzerland. No paid managed calls were made. Before/after workspace usage, managed allowances, costs, billing ledger and Stripe state were identical. [Bounded customer proof](evidence/2026-10-16/customer-gateway-checkpoint.json) excludes credentials, workspace identifiers and response bodies.
+
+The upstream sweep covered 1,668 candidate/alias rows with shared HTTPS, redirect, retry, timeout and response limits. Digitraffic now passes native customer execution using explicit gzip negotiation with bounded decompression, CRC/size validation and single-member checks. The other default requests retain identity encoding. Newly reviewed metadata capabilities can be limited to exact endpoint paths, including redirects; unreviewed same-origin downloads are denied before a request. Existing unrestricted reviewed rails retain their behavior.
+
+The source snapshot is compiled from the customer proof. Frontend deployment verification for this checkpoint is pending; the screenshots and frontend deployment proof below describe the historical October 15 checkpoint. Additional scientific, mobility and portal candidates are not included until their entitlement, identity, native health and customer execution are verified. Local full tests, 34 audit tests and focused metadata-path/compression checks pass. No production deployment or npm release has occurred.
+
+## Historical checkpoint: 2026-10-15
+
 Evidence checkpoint: 2026-10-15T18:22:08.067Z. [PR #60](https://github.com/nordsym/apiclaw/pull/60) remains a draft, unmerged. Production is unchanged. The 1,000-callable target is not met.
 
 ## Measured capacity

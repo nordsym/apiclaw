@@ -7,6 +7,16 @@ assert.equal(buildPinnedPublicApiUrl({ ...api, baseUrl: "https://api.fixture.org
 assert.equal(buildPinnedPublicApiUrl({ ...api, baseUrl: "https://api.fixture.org/data?format=json" }, "/")?.href, "https://api.fixture.org/data?format=json");
 assert.equal(buildPinnedPublicApiUrl({ ...api, baseUrl: "https://api.fixture.org/v1?format=json" }, "/child?limit=1")?.href, "https://api.fixture.org/v1/child?limit=1");
 const initial = new URL(`${api.baseUrl}/data?limit=1`);
+const metadata = { ...api, baseUrl: "https://api.fixture.org/catalog", allowedPaths: ["/catalog/api/3/action/package_search"] };
+assert.equal(buildPinnedPublicApiUrl(metadata, "/api/3/action/package_search?rows=1")?.pathname, metadata.allowedPaths[0]);
+assert.equal(buildPinnedPublicApiUrl(metadata, "https://api.fixture.org/catalog/api/3/action/package_search?q=weather")?.search, "?q=weather");
+for (const path of ["/", "/download/data.csv", "/api/3/action/../package_show", "https://api.fixture.org/private", "/api/3/action/package_search%2f..%2fpackage_show"]) {
+  assert.equal(buildPinnedPublicApiUrl(metadata, path), undefined, `metadata capability rejects ${path}`);
+}
+assert.equal(getSafePublicRedirectUrl(metadata, new URL("https://api.fixture.org/catalog/api/3/action/package_search"), "/download/data.csv"), undefined);
+let disallowedRequests = 0;
+await assert.rejects(fetchWorkspacePublicGet(metadata, new URL("https://api.fixture.org/download/data.csv"), { fetch: async () => { disallowedRequests++; return Response.json({ ok: true }); } }), /Unsafe/);
+assert.equal(disallowedRequests, 0, "unreviewed paths are denied before any upstream request");
 for (const url of ["https://127.0.0.2/x", "https://0x7f000001/x", "https://100.64.0.1", "https://[::1]", "https://[::ffff:127.0.0.1]", "https://localhost./x", "https://sub.localhost/x", "https://169.254.169.254/x", "https://user:pass@v2.fixture.org/x", "http://api.fixture.org/x"]) {
   assert.equal(getSafePublicRedirectUrl(api, initial, url), undefined, url);
 }

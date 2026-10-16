@@ -22,6 +22,9 @@ export type WorkspacePublicApi = {
   smokePath?: string;
   redirectOrigins?: readonly string[];
   responseKind?: "json" | "xml" | "csv" | "text" | "image";
+  acceptEncoding?: "gzip";
+  /** When present, only these resolved metadata endpoint paths are reviewed. */
+  allowedPaths?: readonly string[];
 };
 
 export const WORKSPACE_PUBLIC_APIS = JSON.parse(
@@ -203,6 +206,10 @@ export function isWorkspacePublicExecutableAction(
  * Rejects origin changes, credentials, and private/docs hosts. Used by
  * /v1/execute.
  */
+export function isAllowedPublicApiPath(api: WorkspacePublicApi, url: URL): boolean {
+  return api.allowedPaths === undefined || api.allowedPaths.includes(url.pathname);
+}
+
 export function buildPinnedPublicApiUrl(
   api: WorkspacePublicApi,
   path: unknown,
@@ -218,7 +225,7 @@ export function buildPinnedPublicApiUrl(
       return undefined;
     }
     if (absolute.origin !== pinned.origin) return undefined;
-    return isSafePublicApiBaseUrl(absolute.toString());
+    return isAllowedPublicApiPath(api, absolute) ? isSafePublicApiBaseUrl(absolute.toString()) : undefined;
   }
   if (!rawPath.startsWith("/") || rawPath.startsWith("//")) return undefined;
   try {
@@ -227,14 +234,14 @@ export function buildPinnedPublicApiUrl(
     // The default path keeps a configured endpoint and query exactly. For a
     // child path, make the base a directory and force URL-relative parsing:
     // without './', a resource such as 'john+3:16' is read as a URL scheme.
-    if (rawPath === "/") { pinned.hash = ""; return pinned; }
+    if (rawPath === "/") { pinned.hash = ""; return isAllowedPublicApiPath(api, pinned) ? pinned : undefined; }
     const base = new URL(pinned);
     base.pathname = base.pathname.endsWith("/") ? base.pathname : `${base.pathname}/`;
     base.search = "";
     base.hash = "";
     const resolved = new URL(`./${rawPath.slice(1)}`, base);
     if (resolved.origin !== pinned.origin) return undefined;
-    return isSafePublicApiBaseUrl(resolved.toString());
+    return isAllowedPublicApiPath(api, resolved) ? isSafePublicApiBaseUrl(resolved.toString()) : undefined;
   } catch {
     return undefined;
   }

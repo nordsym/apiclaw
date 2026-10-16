@@ -47,7 +47,10 @@ try {
     assert.ok(WORKSPACE_PUBLIC_APIS.some((api) => api.origin === origin), "never probe unapproved APIs");
     await new Promise((resolve) => setTimeout(resolve, 1));
     origins.delete(origin); active--;
-    return Response.json({ ok: true });
+    const api = WORKSPACE_PUBLIC_APIS.find((api) => api.origin === origin)!;
+    return api.responseKind === "xml"
+      ? new Response("<catalog><item>Public data</item></catalog>", { headers: { "Content-Type": "application/xml" } })
+      : Response.json({ ok: true });
   }) as typeof fetch;
   ctx.runMutation = async (reference: any, args: any) => {
     assert.equal(getFunctionName(reference), "publicApiHealth:record", "no usage, billing or secret mutation");

@@ -5,10 +5,17 @@ import {execFileSync} from 'node:child_process';
 import {resolve} from 'node:path';
 const root=resolve(import.meta.dirname,'..');
 const report=JSON.parse(readFileSync(resolve(root,'docs/ops/callable-audit.json'),'utf8'));
-const selected=report.results.filter(r=>r.verified).map(({id,canonicalId,name,baseUrl,origin,smokePath,docsUrl,responseKind,redirectOrigins})=>({id:canonicalId??id,name,baseUrl,origin,smokePath,...(docsUrl?{docsUrl}:{}),...(responseKind?{responseKind}:{}),...(redirectOrigins?.length?{redirectOrigins}:{})}));
+const selected=report.results.filter(r=>r.verified).map(({id,canonicalId,name,baseUrl,origin,smokePath,docsUrl,responseKind,acceptEncoding,allowedPaths,redirectOrigins})=>({id:canonicalId??id,name,baseUrl,origin,smokePath,...(docsUrl?{docsUrl}:{}),...(responseKind?{responseKind}:{}),...(acceptEncoding?{acceptEncoding}:{}),...(allowedPaths?{allowedPaths}:{}),...(redirectOrigins?.length?{redirectOrigins}:{})}));
 if (new Set(selected.map(row=>row.id)).size !== selected.length) throw new Error('Duplicate canonical runtime IDs in audit');
 if (new Set(selected.map(row=>row.name.toLowerCase().trim())).size !== selected.length) throw new Error('Duplicate callable catalog names in audit');
 if (selected.some(row=>!row.baseUrl?.startsWith('https://')||!row.origin?.startsWith('https://'))) throw new Error('Callable snapshot contains a non-HTTPS endpoint');
+for (const api of selected) {
+  if (api.allowedPaths === undefined) continue;
+  const target = new URL('./' + (api.smokePath ?? '/').slice(1), api.baseUrl.replace(/\/?$/, '/'));
+  if (!Array.isArray(api.allowedPaths) || !api.allowedPaths.length ||
+      api.allowedPaths.some(path => typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//') || path.includes('?') || path.includes('#') || new URL(path, api.origin).pathname !== path) ||
+      !api.allowedPaths.includes(target.pathname)) throw new Error(`Invalid reviewed metadata paths: ${api.id}`);
+}
 const compact=JSON.stringify(selected);
 writeFileSync(resolve(root,'src/workspace-public-apis.json'),compact+'\n');
 writeFileSync(resolve(root,'src/workspace-public-apis.data.ts'),`/** Generated from docs/ops/callable-audit.json by scripts/refresh-callable.mjs. */\nexport const WORKSPACE_PUBLIC_APIS_JSON = ${JSON.stringify(compact)};\n`);

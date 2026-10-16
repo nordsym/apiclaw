@@ -128,6 +128,15 @@ const defaults = await executeWorkspacePublicApi({ ...frankfurter, smokePath: "/
 });
 assert.equal(defaults.status, 200);
 assert.equal(successful, 1);
+const metadataOnly = { ...frankfurter, smokePath: "/latest?from=EUR", allowedPaths: ["/v1/latest"] };
+for (const path of ["/download/data.csv", "https://api.frankfurter.dev/v1/private"]) {
+  const rejected = await executeWorkspacePublicApi(metadataOnly, "get", { path }, {
+    fetch: (async () => { throw new Error("Unreviewed metadata paths must never reach upstream"); }) as typeof fetch,
+    readText: (response) => response.text(), recordSuccess: async () => { successful++; },
+  });
+  assert.equal(rejected.status, 400);
+  assert.equal(successful, 1, "blocked metadata paths do not record a successful call");
+}
 
 let bucket: any = null;
 let activeWorkspace = true;

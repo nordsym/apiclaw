@@ -1,0 +1,222 @@
+[
+  {
+    "id": "healthcaregov",
+    "name": "Healthcare.gov",
+    "canonicalId": "healthcaregov",
+    "baseUrl": "https://www.healthcare.gov",
+    "smokePath": "/accessibility.json",
+    "docsUrl": "https://www.healthcare.gov/developers/",
+    "pricing": "free",
+    "pricingSource": "https://www.healthcare.gov/developers/",
+    "freeEvidence": "Official developer page makes educational content openly available for innovators, entrepreneurs and partners to build products and services, documents public GET JSON without credentials, and gives this exact example. Public content only, not Marketplace enrollment/account APIs."
+  },
+  {
+    "id": "refugerestrooms",
+    "name": "REFUGE Restrooms",
+    "canonicalId": "refugerestrooms",
+    "baseUrl": "https://www.refugerestrooms.org/api",
+    "smokePath": "/v1/restrooms?per_page=1",
+    "docsUrl": "https://refugerestrooms.org/api/docs/",
+    "pricing": "free",
+    "pricingSource": "https://github.com/RefugeRestrooms/refugerestrooms",
+    "freeEvidence": "Official project describes a free restroom resource and publishes this read-only API with pagination and no authentication. Limit the default to one public record; no submissions, accounts or writes."
+  },
+  {
+    "id": "colornameapi",
+    "name": "Color Name API",
+    "canonicalId": "colornameapi",
+    "baseUrl": "https://api.color.pizza/v1",
+    "smokePath": "/ff0000",
+    "docsUrl": "https://github.com/meodai/color-names#api-",
+    "pricing": "free",
+    "pricingSource": "https://github.com/meodai/color-names#api-",
+    "freeEvidence": "Official maintainer explicitly provides a free public REST API for color names; the underlying name collection is MIT-licensed with attribution. One hex-color lookup, not a full collection download."
+  },
+  {
+    "id": "chromeversionhistory",
+    "name": "versionhistory.googleapis.com API",
+    "canonicalId": "chromeversionhistory",
+    "baseUrl": "https://versionhistory.googleapis.com/v1",
+    "smokePath": "/chrome/platforms",
+    "docsUrl": "https://developer.chrome.com/docs/web-platform/versionhistory/guide",
+    "pricing": "free",
+    "pricingSource": "https://developer.chrome.com/docs/web-platform/versionhistory/guide",
+    "freeEvidence": "Official Chrome guide documents this public HTTPS JSON GET without API keys, accounts or billing setup. Scope is the public VersionHistory web service only, not authenticated Chrome Management or Chrome Policy APIs."
+  },
+  {
+    "id": "stackexchange",
+    "name": "StackExchange API",
+    "canonicalId": "stackexchange",
+    "baseUrl": "https://api.stackexchange.com/2.3",
+    "smokePath": "/info?site=stackoverflow",
+    "docsUrl": "https://api.stackexchange.com/docs/info",
+    "pricing": "free",
+    "pricingSource": "https://api.stackexchange.com/docs/throttle",
+    "freeEvidence": "Official API documents public site-info GET and unauthenticated/IP-based quotas without an access token. Existing source inventory labels StackExchange API free. Public statistics only; no user tokens, writes or content resale."
+  },
+  {
+    "id": "swaggergenerator",
+    "name": "Swagger Generator",
+    "canonicalId": "swaggergenerator",
+    "baseUrl": "https://generator.swagger.io/api",
+    "smokePath": "/gen/clients",
+    "docsUrl": "https://github.com/swagger-api/swagger-codegen/blob/master/docs/online-generators.md",
+    "pricing": "free",
+    "pricingSource": "https://github.com/swagger-api/swagger-codegen/blob/master/docs/online-generators.md",
+    "freeEvidence": "Official open-source Swagger Codegen docs offer their hosted generator and document keyless GET generator options. This rail reads supported generator languages only and does not submit specifications or launch generation jobs."
+  },
+  {
+    "id": "bitbucket",
+    "name": "Bitbucket API",
+    "canonicalId": "bitbucket",
+    "baseUrl": "https://api.bitbucket.org/2.0",
+    "smokePath": "/repositories/atlassian?pagelen=1",
+    "docsUrl": "https://developer.atlassian.com/cloud/bitbucket/rest/",
+    "pricing": "free",
+    "pricingSource": "https://developer.atlassian.com/cloud/bitbucket/rest/",
+    "freeEvidence": "Official REST documentation allows anonymous reads of public resources; the public-repositories API has no billing/account requirement. This rail reads one public repository metadata record, not private repositories or authenticated capabilities."
+  },
+  {
+    "id": "linodepublic",
+    "name": "Linode API",
+    "canonicalId": "linodepublic",
+    "baseUrl": "https://api.linode.com/v4",
+    "smokePath": "/regions?page_size=25",
+    "docsUrl": "https://techdocs.akamai.com/linode-api/reference/get-regions",
+    "pricing": "free",
+    "pricingSource": "https://techdocs.akamai.com/linode-api/reference/get-regions",
+    "freeEvidence": "Official API describes the public region catalog separately from authenticated account operations; its OpenAPI operation has no security requirement. Reading catalog metadata is keyless and does not provision cloud resources or create usage charges. Public metadata only."
+  },
+  {
+    "id": "groundhogday",
+    "name": "Groundhog Day API",
+    "canonicalId": "groundhogday",
+    "baseUrl": "https://groundhog-day.com",
+    "smokePath": "/api/v1/groundhogs/punxsutawney-phil",
+    "docsUrl": "https://groundhog-day.com/api",
+    "pricing": "free",
+    "pricingSource": "https://groundhog-day.com/api",
+    "freeEvidence": "Official community API publishes three public read-only GET endpoints for groundhog profiles and historical predictions with no key, billing or write interface; its documentation explicitly invites use in products. One animal lookup rather than the entire dataset."
+  },
+  {
+    "id": "zenodo",
+    "name": "Zenodo",
+    "canonicalId": "zenodo",
+    "baseUrl": "https://zenodo.org",
+    "smokePath": "/api/records?size=1",
+    "docsUrl": "https://developers.zenodo.org/",
+    "pricing": "free",
+    "pricingSource": "https://about.zenodo.org/terms/",
+    "freeEvidence": "Official records API supports anonymous search with bounded size; Zenodo terms permit metadata reuse under CC0 unless otherwise specified. Metadata search only, not deposit/private records, file uploads or copyrighted file downloads."
+  },
+  {
+    "id": "dummyjson",
+    "name": "DummyJSON",
+    "canonicalId": "dummyjson",
+    "baseUrl": "https://dummyjson.com",
+    "smokePath": "/products/1",
+    "docsUrl": "https://dummyjson.com/",
+    "pricing": "free",
+    "pricingSource": "https://dummyjson.com/",
+    "freeEvidence": "Official service explicitly offers a free fake REST API for development and testing, with public product endpoints requiring no credentials. One synthetic product lookup; no authentication or writes."
+  },
+  {
+    "id": "restfulapidev",
+    "name": "restful-api.dev",
+    "canonicalId": "restfulapidev",
+    "baseUrl": "https://api.restful-api.dev",
+    "smokePath": "/objects/7",
+    "docsUrl": "https://restful-api.dev/",
+    "pricing": "free",
+    "pricingSource": "https://restful-api.dev/",
+    "freeEvidence": "Official service offers a free public REST API for testing and prototyping and publishes this exact public GET example. Public fixture reads only, not API-key protected collections or persistent writes."
+  },
+  {
+    "id": "archiveorg",
+    "name": "Archive.org",
+    "canonicalId": "archiveorg",
+    "baseUrl": "https://archive.org",
+    "smokePath": "/metadata/opensource_movies?output=json&fields=metadata",
+    "docsUrl": "https://archive.org/developers/md-read.html",
+    "pricing": "free",
+    "pricingSource": "https://archive.org/developers/md-read.html",
+    "freeEvidence": "Official Internet Archive Item Metadata API documents public JSON reads without authentication. Scope is public collection metadata only, not borrowing, copyrighted media downloads or account resources."
+  },
+  {
+    "id": "microlink",
+    "name": "Microlink.io",
+    "canonicalId": "microlink",
+    "baseUrl": "https://api.microlink.io",
+    "smokePath": "/?url=https%3A%2F%2Fexample.com",
+    "docsUrl": "https://microlink.io/skills/microlink",
+    "pricing": "free",
+    "pricingSource": "https://microlink.io/skills/microlink",
+    "freeEvidence": "Current official agent skill explicitly identifies api.microlink.io as the free no-key endpoint with a soft quota, distinct from pro.microlink.io with an API key. Scope is one public page metadata GET; no screenshot generation, paid endpoint or key supplied."
+  },
+  {
+    "id": "nuget",
+    "name": "NuGet",
+    "canonicalId": "nuget",
+    "baseUrl": "https://api.nuget.org",
+    "smokePath": "/v3-flatcontainer/newtonsoft.json/index.json",
+    "docsUrl": "https://learn.microsoft.com/en-us/nuget/api/package-base-address-resource",
+    "pricing": "free",
+    "pricingSource": "https://learn.microsoft.com/en-us/nuget/api/overview",
+    "freeEvidence": "Official Microsoft documentation states that nuget.org only requires an API key for PackagePublish, while public package read resources need no authentication. This GET reads package-version metadata, not package publishing, downloads or paid resources."
+  },
+  {
+    "id": "mozillaaddons",
+    "name": "Mozilla Addons",
+    "canonicalId": "mozillaaddons",
+    "baseUrl": "https://addons.mozilla.org",
+    "smokePath": "/api/v5/addons/addon/ublock-origin/",
+    "docsUrl": "https://mozilla.github.io/addons-server/topics/api/addons",
+    "pricing": "free",
+    "pricingSource": "https://mozilla.github.io/addons-server/topics/api/addons",
+    "freeEvidence": "Official Mozilla API documentation publishes public add-on metadata reads, requiring authentication for non-public/unlisted resources and writes. This rail reads one public add-on record without a key or account; no uploads, signing or private review data."
+  },
+  {
+    "id": "openlibrary",
+    "name": "Open Library",
+    "canonicalId": "openlibrary",
+    "baseUrl": "https://openlibrary.org",
+    "smokePath": "/search.json?q=the+hobbit&limit=1",
+    "docsUrl": "https://openlibrary.org/dev/docs/api/search",
+    "pricing": "free",
+    "pricingSource": "https://openlibrary.org/developers",
+    "freeEvidence": "Official developer center explicitly offers free public low-volume Web APIs for book and author catalog metadata and documents Search API. Scope is one catalog search result, not book content, loans or account actions."
+  },
+  {
+    "id": "mastodon",
+    "name": "Mastodon",
+    "canonicalId": "mastodon",
+    "baseUrl": "https://mastodon.social",
+    "smokePath": "/api/v2/instance",
+    "docsUrl": "https://docs.joinmastodon.org/methods/instance/",
+    "pricing": "free",
+    "pricingSource": "https://docs.joinmastodon.org/methods/instance/",
+    "freeEvidence": "Official Mastodon instance API explicitly marks this endpoint OAuth: Public and documents mastodon.social example metadata. This rail provides the official public instance metadata with no key, account or paid plan; it does not claim other instances, authenticated timelines, messages or account capabilities."
+  },
+  {
+    "id": "wikimediaanalytics",
+    "name": "Wikimedia",
+    "canonicalId": "wikimediaanalytics",
+    "baseUrl": "https://wikimedia.org/api/rest_v1",
+    "smokePath": "/metrics/pageviews/aggregate/en.wikipedia/all-access/all-agents/daily/2026100100/2026100100",
+    "docsUrl": "https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/",
+    "pricing": "free",
+    "pricingSource": "https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/documentation/access-policy.html",
+    "freeEvidence": "Official Wikimedia Analytics API access policy publishes aggregate statistics under CC0, requires an identifying User-Agent and applies public rate limits without API credentials. This is the distinct analytics service, counted once, not a new Wikipedia language/dataset/version."
+  },
+  {
+    "id": "affirmations",
+    "name": "Affirmations",
+    "canonicalId": "affirmations",
+    "baseUrl": "https://www.affirmations.dev",
+    "smokePath": "/",
+    "docsUrl": "https://github.com/annthurium/affirmations",
+    "pricing": "free",
+    "pricingSource": "https://github.com/annthurium/affirmations",
+    "freeEvidence": "Official project supplies the public hosted single-response affirmation API and licenses its service code MIT. Requests need no key, billing account or registration; one API service is counted, not each generated affirmation."
+  }
+]

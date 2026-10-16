@@ -42,6 +42,7 @@ export function errorFacts(error) {
     chain.push({ name: String(item.name ?? 'Error'), ...(code ? { code } : {}),
       reason: /timeout|timed out|aborted/i.test(message) ? 'request_timeout'
         : /redirect/i.test(message) ? 'redirect_not_approved'
+        : /exceeds size limit/i.test(message) ? 'body_limit'
         : /unsafe|unpinned/i.test(message) ? 'unsafe_public_url' : 'transport_error' });
   }
   return chain;
@@ -54,6 +55,7 @@ export function classifyResult({ status = 0, raw = '', decodedValid = false, err
     if (facts.some(x => x.reason === 'request_timeout' || /Timeout|Abort/.test(x.name) || /^(?:ETIMEDOUT|UND_ERR_CONNECT_TIMEOUT|UND_ERR_HEADERS_TIMEOUT|UND_ERR_BODY_TIMEOUT)$/.test(x.code ?? ''))) return { outcome: 'timeout', cause: 'timeout', errorCause: facts };
     if (facts.some(x => /CERT_|TLS_|_SSL_|SELF_SIGNED|UNABLE_TO_VERIFY/.test(x.code ?? ''))) return { outcome: 'tls_error', cause: 'redirect_https', errorCause: facts };
     if (facts.some(x => /^(?:ENOTFOUND|EAI_AGAIN|ECONNREFUSED)$/.test(x.code ?? ''))) return { outcome: 'network_error', cause: 'dead_upstream', errorCause: facts };
+    if (facts.some(x => x.reason === 'body_limit')) return { outcome: 'body_limit', cause: 'gateway_block', errorCause: facts };
     if (facts.some(x => x.reason === 'unsafe_public_url') || unsafeRedirect) return { outcome: 'gateway_block', cause: 'gateway_block', errorCause: facts };
     if (facts.some(x => x.reason === 'redirect_not_approved')) return { outcome: 'redirect_not_approved', cause: 'redirect_https', errorCause: facts };
     return { outcome: 'network_error', cause: 'unresolved', errorCause: facts };
@@ -76,7 +78,7 @@ export function classifyResult({ status = 0, raw = '', decodedValid = false, err
 }
 
 export function definitionHash(row) {
-  return createHash('sha256').update(JSON.stringify([row.canonicalId, row.baseUrl, row.smokePath, row.responseKind, row.redirectOrigins ?? [], row.pricing, row.pricingSource, row.freeEvidence, row.exclusionEvidence ?? null, row.generatedDefaultSource ?? null, row.responseDecoderHash ?? null, row.transportHash ?? null, AUDIT_POLICY])).digest('hex');
+  return createHash('sha256').update(JSON.stringify([row.canonicalId, row.baseUrl, row.smokePath, row.responseKind, row.acceptEncoding ?? null, row.allowedPaths ?? null, row.redirectOrigins ?? [], row.pricing, row.pricingSource, row.freeEvidence, row.exclusionEvidence ?? null, row.generatedDefaultSource ?? null, row.responseDecoderHash ?? null, row.transportHash ?? null, AUDIT_POLICY])).digest('hex');
 }
 
 /** Select only a documented cheap public GET on the exact named provider/source. */
@@ -162,6 +164,8 @@ export function prepareCandidates({ candidates, registry, recipes = [], previous
       freeVerified: reviewedFree || originalFree, reviewedRecipe: !!recipe, baselineVerified, httpsUpgraded, ...(recipe?.notHostedApi ? { notHostedApi: true } : {}),
       ...(generatedDefault ? { generatedDefaultSource: generatedDefault.sourceUrl } : {}),
       responseKind: recipe?.responseKind ?? prior?.responseKind ?? 'json',
+      ...((recipe ? recipe.acceptEncoding : prior?.acceptEncoding) === 'gzip' ? { acceptEncoding: 'gzip' } : {}),
+      ...((recipe ? recipe.allowedPaths : prior?.allowedPaths) ? { allowedPaths: recipe ? recipe.allowedPaths : prior.allowedPaths } : {}),
       ...(recipe?.redirectOrigins?.length ? { redirectOrigins: recipe.redirectOrigins } : prior?.redirectOrigins?.length ? { redirectOrigins: prior.redirectOrigins } : {}),
       baseline: old ? { checkedAt: old.checkedAt, status: old.status, outcome: old.outcome, verified: old.verified } : null,
       repairs: [],
@@ -521,8 +525,8 @@ export async function runAudit(argv = process.argv.slice(2)) {
   }
   const registry = readJson(resolve(ROOT, 'src/registry/apis.json'), {}).apis ?? [];
   const generated = readJson(resolve(ROOT, 'src/registry/generated-providers.json'), {}).providers ?? [];
-  const recipes = ['src/public-api-recipes-am.json', 'src/public-api-recipes-nz.json', 'src/public-api-recipes-reviewed.json', 'src/public-api-recipes-rescue.json', 'src/public-api-recipes-rescue-extra.json', 'src/public-api-recipes-rescue-next.json', 'src/public-api-recipes-rescue-next-extra.json', 'src/public-api-recipes-rescue-next-government.json', 'src/public-api-recipes-rescue-next-registry.json', 'src/public-api-recipes-rescue-final-government.json', 'src/public-api-recipes-rescue-final-other.json', 'src/public-api-recipes-rescue-final-redirects.json'].flatMap(path => readJson(resolve(ROOT, path), []));
-  const exclusions = ['src/public-api-exclusions.json', 'src/public-api-exclusions-next.json', 'src/public-api-exclusions-final.json'].flatMap(path => readJson(resolve(ROOT, path), []));
+  const recipes = ['src/public-api-recipes-am.json', 'src/public-api-recipes-nz.json', 'src/public-api-recipes-reviewed.json', 'src/public-api-recipes-rescue.json', 'src/public-api-recipes-rescue-extra.json', 'src/public-api-recipes-rescue-next.json', 'src/public-api-recipes-rescue-next-extra.json', 'src/public-api-recipes-rescue-next-government.json', 'src/public-api-recipes-rescue-next-registry.json', 'src/public-api-recipes-rescue-final-government.json', 'src/public-api-recipes-rescue-final-other.json', 'src/public-api-recipes-rescue-final-redirects.json', 'src/public-api-recipes-oct16-government.json', 'src/public-api-recipes-oct16-public.json', 'src/public-api-recipes-oct16-specs.json'].flatMap(path => readJson(resolve(ROOT, path), []));
+  const exclusions = ['src/public-api-exclusions.json', 'src/public-api-exclusions-next.json', 'src/public-api-exclusions-final.json', 'src/public-api-exclusions-oct16.json'].flatMap(path => readJson(resolve(ROOT, path), []));
   const responseDecoderHash = createHash('sha256').update(readFileSync(resolve(ROOT, 'src/workspace-public-response.ts'))).digest('hex');
   const transportHash = createHash('sha256').update(readFileSync(resolve(ROOT, 'src/workspace-public-transport.ts'))).digest('hex');
   const candidates = prepareCandidates({ candidates: readJson(resolve(ROOT, 'src/workspace-public-api-candidates.json'), []), registry, recipes, generated, exclusions, responseDecoderHash, transportHash, previous: previousReport.results, baseline: baseline.results });

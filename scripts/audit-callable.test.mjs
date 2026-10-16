@@ -331,3 +331,22 @@ test('merged complete customer proof retains original per-result verification da
   proof.results[0].verifiedAt = 'yesterday';
   assert.throws(() => applyCustomerGatewayEvidence(customerFixture(), proof), /valid ISO verification date/);
 });
+
+test('reviewed gzip policy is explicit, changes evidence identity and can be removed', () => {
+  const plain = prepared()[0];
+  const gzip = prepared({ recipes: [{ ...recipe, acceptEncoding: 'gzip' }] })[0];
+  assert.equal(plain.acceptEncoding, undefined);
+  assert.equal(gzip.acceptEncoding, 'gzip');
+  assert.notEqual(plain.definitionHash, gzip.definitionHash);
+  assert.equal(prepared({ previous: [gzip], recipes: [recipe] })[0].acceptEncoding, undefined);
+  const failure = classifyResult({ error: new Error('Public API decoded response exceeds size limit') });
+  assert.equal(failure.cause, 'gateway_block');
+  assert.equal(failure.outcome, 'body_limit');
+});
+
+test('reviewed metadata paths are retained in evidence and changing scope invalidates it', () => {
+  const scoped = prepared({ recipes: [{ ...recipe, allowedPaths: ['/api/3/action/package_search'] }] })[0];
+  assert.deepEqual(scoped.allowedPaths, ['/api/3/action/package_search']);
+  assert.notEqual(scoped.definitionHash, prepared()[0].definitionHash);
+  assert.equal(prepared({ previous: [scoped], recipes: [recipe] })[0].allowedPaths, undefined);
+});

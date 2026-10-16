@@ -32,7 +32,7 @@ export async function executeWorkspacePublicApi(
   const pinned = buildPinnedPublicApiUrl(api, isKrokiRender
     ? `/${params.type || "mermaid"}/${params.format || "svg"}`
     : params.path ?? api.smokePath ?? "/");
-  if (!pinned) return error(400, "unsafe_public_origin", "Use a path on this API's registered HTTPS address.");
+  if (!pinned) return error(400, "unsafe_public_origin", "Use this API's registered HTTPS address and an approved public read endpoint.");
   try {
     const response = isKrokiRender
       ? await (dependencies.fetch ?? fetch)(pinned.toString(), {
