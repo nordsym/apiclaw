@@ -1,0 +1,21 @@
+{
+  "origin": "https://apiclaw-ljvkx0diu-gustavs-projects-0c9f35af.vercel.app",
+  "deploymentId": "dpl_9aLZ15QQA5KqdpMDUZstvD1AGvXC",
+  "source": "20472509e6698634c9011bfa9ecb18276aacb375",
+  "verifiedAt": "2026-10-16T10:56:57.939Z",
+  "count": 1143,
+  "serverRenderedWithoutJavaScript": true,
+  "surfaces": [
+    "/",
+    "/catalog",
+    "/docs",
+    "/SKILL.md",
+    "/api/catalog"
+  ],
+  "paginatedCount": 1143,
+  "catalogSampleNotExecuted": [
+    "Cat Facts API",
+    "City of Salinas Public Catalog",
+    "Public Data Catalogue (ndotdata.nebraska.gov)"
+  ]
+}
