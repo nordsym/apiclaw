@@ -1,23 +1,23 @@
 {
-  "apiCount": 26619,
+  "apiCount": 27483,
   "sourceVerifiedCount": 689,
   "managedProviderAdapterCount": 22,
   "customerExecutableProviderCount": 3,
-  "customerExecutableCatalogCardCount": 1005,
+  "customerExecutableCatalogCardCount": 1143,
   "npmDownloads": 20058,
   "endpointCount": 0,
   "capabilityCount": 15,
-  "generatedAt": "2026-10-14T11:27:25.560Z",
+  "generatedAt": "2026-10-16T10:49:53.866Z",
   "categoryBreakdown": {
     "AI & ML": 2164,
     "Utilities": 8890,
     "Business": 1024,
     "Development": 2438,
     "Government & Public Data": 1,
-    "Finance": 1341,
+    "Finance": 1340,
     "Customer_Relation": 1,
     "Cloud & Infrastructure": 1687,
-    "Data & Analytics": 2894,
+    "Data & Analytics": 3486,
     "Commerce": 1291,
     "Social & Communication": 1063,
     "Health & Fitness": 759,
@@ -30,14 +30,14 @@
     "Documents & Files": 2,
     "AR/VR": 5,
     "Weather": 4,
-    "Travel & Transport": 5,
+    "Travel & Transport": 15,
     "Email": 1,
     "Storage & Files": 1,
     "Jobs": 1,
     "Anime": 2,
-    "Science": 1,
+    "Science": 27,
     "Animals": 3,
-    "Government": 1,
+    "Government": 238,
     "Sports": 1,
     "Marketing": 1,
     "Storage": 1
@@ -49,5 +49,5 @@
     "needs_ctx": 506,
     "dead": 1131
   },
-  "canonGeneratedAt": "2026-08-21"
+  "canonGeneratedAt": "2026-10-16"
 }

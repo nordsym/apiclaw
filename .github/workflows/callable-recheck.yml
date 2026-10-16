@@ -1,0 +1,42 @@
+name: Recheck free callable APIs
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: callable-recheck
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: node --check scripts/audit-callable.mjs
+      - run: cp src/workspace-public-apis.json /tmp/previous-callable.json
+      - run: npm run audit:callable
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: callable-audit
+          path: |
+            docs/ops/callable-audit.*
+            src/workspace-public-apis.json
+      - name: Flag eligibility changes for review
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const old=JSON.parse(readFileSync('/tmp/previous-callable.json'));
+          const report=JSON.parse(readFileSync('docs/ops/callable-audit.json'));
+          const current=report.results.filter(x=>x.verified).map(x=>({id:x.canonicalId??x.id,name:x.name}));
+          const removed=old.filter(x=>!current.some(y=>x.id===y.id));
+          const added=current.filter(x=>!old.some(y=>x.id===y.id));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY,`## Callable upstream recheck\n${current.length} upstream-verified free API candidates. The customer-approved runtime manifest is unchanged.\nRemoved upstream eligibility: ${removed.map(x=>x.name).join(', ')||'none'}.\nNew upstream candidates: ${added.map(x=>x.name).join(', ')||'none'}.\nFull results are in the callable-audit artifact. Additions require authenticated customer proof before a reviewed snapshot refresh. Native gateway health checks independently demote unhealthy approved APIs.\n`);
+          if(removed.length||added.length){console.error('Callable eligibility changed. Review the audit artifact and update the measured snapshot.');process.exitCode=1;}
+          JS

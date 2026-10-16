@@ -5,6 +5,7 @@ import { useWorkspaceRefresh } from "@/lib/use-workspace-refresh";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import posthog from "posthog-js";
+import { FirstWebCall } from "@/components/FirstWebCall";
 import { CopyLine } from "@/components/home/CopyLine";
 import { Panel, Status, btnQuiet, btnSolid } from "@/app/workspace/views/ui";
 import {
@@ -104,6 +105,9 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
   const firstCallIdempotencyKeyRef = useRef<string | null>(null);
   const settlingRef = useRef(false);
   const liftTimerRef = useRef<number | null>(null);
+  // Backend activation can precede delivery of the local HTTP response. Keep
+  // that result visible until the person explicitly opens their workspace.
+  const localWebCallRef = useRef<"idle" | "running" | "success">("idle");
   const [portalReady, setPortalReady] = useState(false);
 
   useEffect(() => {
@@ -118,6 +122,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
       if (!next) { setStateError("Could not verify setup status. Retry when your connection is restored."); return; }
       setStateError(null);
       const resolved = next;
+      if (localWebCallRef.current !== "idle") { setState(resolved); return; }
       const gate = decideOnboardingGate(resolved);
       if (gate === "complete") {
         if (!(await callMutation("onboarding:complete", { token: sessionToken }))) {
@@ -233,6 +238,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
   }
 
   async function settleActivated(next: OnboardingState) {
+    if (localWebCallRef.current !== "idle") { setState(next); return; }
     if (settlingRef.current) return;
     settlingRef.current = true;
     setState(next);
@@ -254,6 +260,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
       dismissedAt: next.dismissedAt,
       firstCallAt: next.firstCallAt,
     });
+    if (localWebCallRef.current !== "idle") { settlingRef.current = false; return; }
     if (liftTimerRef.current) window.clearTimeout(liftTimerRef.current);
     liftTimerRef.current = window.setTimeout(() => {
       setOpen(false);
@@ -340,10 +347,20 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
           {view === "choose" && (
             <Step
               headingRef={headingRef}
-              title="How will you call APIClaw?"
-              line="Pick one. You can use the others later."
-              action={<button type="button" onClick={() => setView(door === "agent" ? "client" : "launch")} className={btnSolid}>Continue</button>}
+              title="Make your first API call"
+              line="Try it here, or connect your agent below."
+              action={<button type="button" onClick={() => setView(door === "agent" ? "client" : "launch")} disabled={locked} className={btnQuiet}>Continue</button>}
             >
+              <FirstWebCall sessionToken={sessionToken} onRunningChange={(running) => {
+                if (running) {
+                  localWebCallRef.current = "running";
+                  if (liftTimerRef.current) window.clearTimeout(liftTimerRef.current);
+                  setRunStatus("running");
+                } else if (localWebCallRef.current === "running") {
+                  localWebCallRef.current = "idle";
+                  setRunStatus("idle");
+                }
+              }} onSuccess={(title) => { localWebCallRef.current = "success"; setResultLine(`NASA APOD: ${title}`); setRunStatus("success"); setView("success"); }} />
               <div role="radiogroup" aria-label="Choose how to use APIClaw" className="mt-5">
                 {DOORS.map((item) => {
                   const active = door === item.id;
@@ -352,6 +369,7 @@ export function OnboardingWizard({ sessionToken, arrival }: { sessionToken: stri
                       key={item.id}
                       type="button"
                       role="radio"
+                      disabled={locked}
                       aria-checked={active}
                       onClick={() => {
                         setDoor(item.id);

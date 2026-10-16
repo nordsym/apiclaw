@@ -30,17 +30,18 @@ assert.match(http, /synthesizeLegacyIdempotencyKey/);
 assert.match(http, /handleManagedExecute/);
 assert.match(http, /hasCustomerManagedCredential/);
 
+const examples = readFileSync("landing/src/lib/docs-examples.ts", "utf8");
 const installPage = readFileSync("landing/src/app/install/page.tsx", "utf8");
-assert.match(installPage, /api\.apiclaw\.cloud\/v1\/execute/);
-assert.match(installPage, /"provider":"nasa"/);
-assert.match(installPage, /"action":"apod"/);
+assert.match(examples, /api\.apiclaw\.cloud\/v1\/execute/);
+assert.match(examples, /provider: "nasa"/);
+assert.match(examples, /action: "apod"/);
 assert.doesNotMatch(installPage, /replicate|elevenlabs|\/v1\/call/);
 assert.doesNotMatch(installPage, /2\.5\.3/);
 
 const docs = readFileSync("landing/src/app/docs/page.tsx", "utf8");
-assert.match(docs, /fixer_latest/);
+assert.doesNotMatch(docs, /fixer_latest/);
 assert.match(docs, /nasa/);
-assert.match(docs, /26,619/);
+assert.ok(docs.includes("statsData.apiCount"), "docs count comes from measured stats");
 assert.doesNotMatch(docs, /elevenlabs|replicate|5,600|Firecrawl/);
 
 // Homepage design reset (2026-08-23) split page.tsx into landing/src/components/home/*.
@@ -60,6 +61,8 @@ const homepage = [
 assert.doesNotMatch(homepage, /16,?485|2\.5\.3/);
 assert.match(homepage, /set up https:\/\/apiclaw\.cloud\/SKILL\.md/);
 assert.doesNotMatch(homepage, /label: "npm installs"/);
+assert.match(homepage, /X-APIClaw-Session/);
+assert.doesNotMatch(homepage, /Authorization: Bearer|one workspace key/);
 
 assert.match(http, /npx @nordsym\/apiclaw auth login/);
 assert.doesNotMatch(http, /run `apiclaw login`/);

@@ -45,11 +45,11 @@
 
 export const CANON_STATS = {
   /** Updated each time canon refreshes. */
-  generated_at: '2026-08-21',
+  generated_at: '2026-10-16',
 
   /** Public catalog entries, after internal-provider exclusion and adapter
    * alias collapse. Searchable after signup at no usage charge. */
-  discoverable: 26_619,
+  discoverable: 27_483,
 
   /** Current public catalog cards mapped to verification by exact name. */
   source_verified: 689,
@@ -69,19 +69,19 @@ export const CANON_STATS = {
    *  Must stay equal to PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT. */
   customer_executable_providers: 3,
 
-  /** No-key HTTPS origins unlocked for workspace-authenticated execution.
+  /** No-key public APIs unlocked for workspace-authenticated execution.
    *  Not the 26k harvest and not anonymous keyless proxy. */
-  workspace_public_executable: 1_002,
+  workspace_public_executable: 1140,
 
   /** Public catalog cards with callable=true: managed rails + workspace-public
-   *  origins. landing/src/app/api/catalog/route.ts throws if this drifts. */
-  customer_executable_catalog_cards: 1_005,
+   *  APIs. landing/src/app/api/catalog/route.ts throws if this drifts. */
+  customer_executable_catalog_cards: 1143,
 
   /** All-time npm installs (canon as of 2026-08-21 per npmjs dashboard). */
   npm_installs: 20_058,
 
   /** API Surface narrative (used in marketing copy). */
-  hero_line: '26,619 discoverable APIs · 689 source-verified',
+  hero_line: '27,483 discoverable APIs · 689 source-verified',
   hero_line_short: '26.6k discoverable · 689 source-verified',
 } as const;
 

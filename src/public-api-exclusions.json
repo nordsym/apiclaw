@@ -1,0 +1,366 @@
+[
+  {
+    "id": "aframe",
+    "name": "A-Frame",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://aframe.io/docs/1.7.0/introduction/",
+    "evidence": "Official introduction describes an HTML/JavaScript framework for building VR scenes in a browser. The indexed product homepage is not a hosted data API."
+  },
+  {
+    "id": "appiumapi",
+    "name": "Appium API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://appium.io/docs/en/latest/intro/",
+    "evidence": "Official setup requires installing Appium, a device/platform driver and a client library. Its APIs automate connected test devices through an Appium installation; this row supplies documentation rather than a public test-device server."
+  },
+  {
+    "id": "automerge",
+    "name": "Automerge",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://automerge.org/docs/hello/",
+    "evidence": "Official documentation describes a network-independent data-structure library for local application state and offline collaboration, without a required central server. The indexed library homepage is not a public HTTP API endpoint."
+  },
+  {
+    "id": "babylonjs",
+    "name": "Babylon.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://doc.babylonjs.com/setup/frameworkPackages",
+    "evidence": "Official setup distributes Babylon.js as CDN, npm and ES-module packages that applications import to construct scenes. The indexed framework homepage is not a hosted read API."
+  },
+  {
+    "id": "backstage",
+    "name": "Backstage",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://backstage.io/docs/overview/what-is-backstage/",
+    "evidence": "Official overview identifies Backstage as a framework for building developer portals and organization-specific software catalogs. The product homepage does not identify an installed customer portal or public catalog API."
+  },
+  {
+    "id": "devpod",
+    "name": "Devpod",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://devpod.sh/docs/what-is-devpod",
+    "evidence": "Official architecture explicitly describes a client-only tool running on the user computer, without a server backend. The indexed homepage cannot execute DevPod operations as a hosted public API."
+  },
+  {
+    "id": "dokku",
+    "name": "Dokku",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://dokku.com/docs/getting-started/installation/",
+    "evidence": "Official installation describes a platform that runs on a server chosen and configured by its operator. A Dokku installation and its server address are required; the indexed project homepage is not that deployment."
+  },
+  {
+    "id": "driverjs",
+    "name": "Driver.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://driverjs.com/docs/installation",
+    "evidence": "Official installation loads an npm or CDN JavaScript package into the application and invokes driver().highlight on DOM elements. These browser methods are not hosted HTTP data endpoints."
+  },
+  {
+    "id": "joplin",
+    "name": "Joplin",
+    "cause": "needs_key",
+    "docsUrl": "https://joplinapp.org/help/api/references/rest_api/",
+    "evidence": "Official Data API documentation requires a token from the desktop Web Clipper options for every API call and uses localhost:41184. No configured Joplin instance or token exists in this keyless public rail."
+  },
+  {
+    "id": "leaflet",
+    "name": "Leaflet",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://leafletjs.com/",
+    "evidence": "Official project identifies Leaflet as a JavaScript library for interactive maps, embedded into the developer website. The library homepage is not a hosted map-data API."
+  },
+  {
+    "id": "msw",
+    "name": "MSW",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://mswjs.io/docs/",
+    "evidence": "Official introduction describes a request-mocking library for browser and Node.js processes. It intercepts an application network locally instead of supplying a hosted public data service."
+  },
+  {
+    "id": "nodered",
+    "name": "Node-RED",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://nodered.org/docs/getting-started/local",
+    "evidence": "Official local setup runs Node-RED on the operator machine and opens the editor at localhost:1880. This indexed project homepage is not an installed flow server or public API."
+  },
+  {
+    "id": "nagerdate",
+    "name": "Nager Date",
+    "cause": "commercial_permission",
+    "docsUrl": "https://nagerholidays.com/legal/termsofservice",
+    "evidence": "Official Usage Rights permit private or non-profit projects, require active sponsorship for commercial use, and prohibit operating a holiday portal using the data. Sponsorship or explicit commercial gateway permission has not been verified."
+  },
+  {
+    "id": "nagerdateapi",
+    "name": "Nager.Date API",
+    "cause": "commercial_permission",
+    "docsUrl": "https://nagerholidays.com/legal/termsofservice",
+    "evidence": "Official Usage Rights permit private or non-profit projects, require active sponsorship for commercial use, and prohibit operating a holiday portal using the data. Sponsorship or explicit commercial gateway permission has not been verified."
+  },
+  {
+    "id": "nagerdate",
+    "name": "Nager.Date",
+    "cause": "commercial_permission",
+    "docsUrl": "https://nagerholidays.com/legal/termsofservice",
+    "evidence": "Official Usage Rights permit private or non-profit projects, require active sponsorship for commercial use, and prohibit operating a holiday portal using the data. Sponsorship or explicit commercial gateway permission has not been verified."
+  },
+  {
+    "id": "authjs",
+    "name": "Auth.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://authjs.dev/getting-started/installation",
+    "evidence": "Official installation requires adding an Auth.js package and configuring handlers in the developer application. This is authentication software for an application, not a shared hosted public API."
+  },
+  {
+    "id": "drizzleorm",
+    "name": "Drizzle ORM",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://orm.drizzle.team/docs/overview",
+    "evidence": "Official overview identifies Drizzle as a library with SQL and relational query APIs installed into the developer application. The ORM documentation URL is not a public hosted database instance."
+  },
+  {
+    "id": "dvc",
+    "name": "DVC",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://doc.dvc.org/start",
+    "evidence": "Official getting-started guide operates a local Git-based data/model project with dvc commands and operator-configured storage remotes. This software project URL is not a hosted data-processing API."
+  },
+  {
+    "id": "introjs",
+    "name": "Intro.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://introjs.com/docs",
+    "evidence": "Official documentation describes a JavaScript/CSS library embedded into an application to display tours and hints. Its API runs against the application DOM rather than a hosted HTTP service."
+  },
+  {
+    "id": "kakoune",
+    "name": "Kakoune",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://github.com/mawww/kakoune",
+    "evidence": "Official README documents compiling or installing the kak binary and launching an editor session in a local terminal. The indexed editor project is not a hosted read API."
+  },
+  {
+    "id": "helix",
+    "name": "Helix",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://docs.helix-editor.com/install.html",
+    "evidence": "Official installation places the hx binary on the operator machine and exposes command-line editing. The editor documentation is not a public hosted editing API."
+  },
+  {
+    "id": "neovim",
+    "name": "Neovim",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://neovim.io/doc/user/api/",
+    "evidence": "Official API documentation uses MessagePack-RPC clients connected to an Nvim process over sockets or embedding. This is an editor-instance API rather than a public HTTPS service."
+  },
+  {
+    "id": "sharp",
+    "name": "Sharp",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://sharp.pixelplumbing.com/",
+    "evidence": "Official documentation describes an image-processing module powered by libvips and called from the developer program. The package website does not supply a shared hosted image-processing endpoint."
+  },
+  {
+    "id": "yjs",
+    "name": "Y.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://docs.yjs.dev/",
+    "evidence": "Official documentation describes a network-agnostic shared-data model for decentralized and local-first software. Consumers supply persistence and networking; the library website is not a public application-data API."
+  },
+  {
+    "id": "vcrpy",
+    "name": "VCR.py",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://vcrpy.readthedocs.io/en/latest/",
+    "evidence": "Official documentation describes a Python test library that records and replays HTTP interactions. It is installed into a test process rather than providing an upstream hosted public API."
+  },
+  {
+    "id": "notifeeapi",
+    "name": "Notifee API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://notifee.app/react-native/docs/overview",
+    "evidence": "Official overview explicitly describes local notifications in React Native on Android/iOS and says the library does not integrate with third-party messaging services. These device APIs are not hosted HTTP endpoints."
+  },
+  {
+    "id": "mirrornetworking",
+    "name": "Mirror Networking",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://mirror-networking.gitbook.io/docs",
+    "evidence": "Official documentation identifies Mirror as a high-level networking library for Unity games. The developer runs a game server/client; the documentation website is not a public game-data API."
+  },
+  {
+    "id": "openxr",
+    "name": "OpenXR",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.khronos.org/openxr/",
+    "evidence": "Official Khronos architecture requires a host runtime implementing XR functions for the application and device. OpenXR is a native runtime API specification, not a hosted HTTP service."
+  },
+  {
+    "id": "webxr",
+    "name": "WebXR",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.w3.org/TR/webxr/",
+    "evidence": "The W3C specification exposes browser interfaces for XR devices, physical sensors and user sessions. These JavaScript/device interfaces do not define a hosted public HTTP data service."
+  },
+  {
+    "id": "signalprotocol",
+    "name": "Signal Protocol",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://signal.org/docs/",
+    "evidence": "Official documentation specifies cryptographic key agreement and messaging protocols between communicating parties. This protocol entry is not a hosted public Signal messaging API."
+  },
+  {
+    "id": "openvr",
+    "name": "OpenVR",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://github.com/ValveSoftware/openvr",
+    "evidence": "Valve official repository identifies this as the OpenVR SDK for VR runtime and hardware integration. The indexed SDK is native application software, not a hosted HTTPS data endpoint."
+  },
+  {
+    "id": "backstopjsapi",
+    "name": "BackstopJS API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://github.com/garris/BackstopJS",
+    "evidence": "Official README runs visual regression tests as a standalone local package or requires backstopjs inside a Node application. The tool API is not a hosted testing service."
+  },
+  {
+    "id": "jsonserver",
+    "name": "JSON Server",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/typicode/json-server/main/README.md",
+    "evidence": "Official README starts JSON Server locally on localhost:3000 and demonstrates requests against that locally launched mock server. This package needs an operator deployment rather than providing a shared hosted public API."
+  },
+  {
+    "id": "pollyjs",
+    "name": "Polly.JS",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/Netflix/pollyjs/master/README.md",
+    "evidence": "Official README identifies Polly.JS as a JavaScript library that records, replays and stubs HTTP interactions inside Node or browser applications. This library API is not a shared hosted HTTP service."
+  },
+  {
+    "id": "autogen",
+    "name": "AutoGen",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/installation.html",
+    "evidence": "Official installation guide installs the AutoGen AgentChat framework into a local Python virtual environment. The indexed software framework needs a runtime and model-provider configuration rather than exposing a shared public data API."
+  },
+  {
+    "id": "realitykit",
+    "name": "RealityKit",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://developer.apple.com/documentation/realitykit",
+    "evidence": "Apple documents RealityKit as its 3D simulation and rendering framework for applications on Apple operating systems. This native application framework does not identify a shared hosted HTTPS endpoint."
+  },
+  {
+    "id": "applevisionprosdk",
+    "name": "Apple Vision Pro SDK",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://developer.apple.com/visionos/",
+    "evidence": "Apple documents visionOS development with Xcode, the visionOS SDK and a simulator or device target. The indexed SDK is native application tooling rather than a shared hosted HTTP API."
+  },
+  {
+    "id": "microsoftmrtk",
+    "name": "Microsoft MRTK",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://learn.microsoft.com/en-us/windows/mixed-reality/mrtk-unity/mrtk3-overview/",
+    "evidence": "Microsoft identifies MRTK3 as an extensible framework of Unity components for mixed reality applications. These application components require a Unity runtime rather than offering a shared hosted public API."
+  },
+  {
+    "id": "solanaweb3js",
+    "name": "Solana Web3.js",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://solana-foundation.github.io/solana-web3.js/",
+    "evidence": "Official documentation identifies web3.js as a JavaScript SDK installed for Node, browser or React Native applications. The SDK entry is not itself a hosted RPC endpoint; Solana RPC services are separate inventory entries."
+  },
+  {
+    "id": "slsa",
+    "name": "SLSA",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://slsa.dev/spec/v1.2/about",
+    "evidence": "Official specification defines SLSA as a software supply-chain security framework with guidelines and levels of evidence. The indexed specification is not a hosted HTTP data service."
+  },
+  {
+    "id": "kubescape",
+    "name": "Kubescape",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://kubescape.io/docs/install-cli/",
+    "evidence": "Official installation guide installs Kubescape as a CLI binary or kubectl plugin. This locally executed security tool is not a shared hosted public API."
+  },
+  {
+    "id": "syft",
+    "name": "Syft",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://raw.githubusercontent.com/anchore/syft/main/README.md",
+    "evidence": "Official README identifies Syft as a CLI tool and Go library generating software bills of materials from container images and filesystems. This locally executed scanner is not a shared hosted public API."
+  },
+  {
+    "id": "localai",
+    "name": "LocalAI",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://localai.io/basics/getting_started/",
+    "evidence": "Official getting-started guide describes local or on-premises inference on consumer hardware with an OpenAI-compatible API. It requires an operator-run deployment rather than supplying a shared keyless endpoint."
+  },
+  {
+    "id": "openhab",
+    "name": "openHAB",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.openhab.org/docs/configuration/restdocs.html",
+    "evidence": "Official REST documentation exposes the API of an installed openHAB instance, including its own administration and LAN access policy. A user-controlled installation is required; this project entry does not supply a shared public instance."
+  },
+  {
+    "id": "openhabapi",
+    "name": "openHAB API",
+    "cause": "not_hosted_api",
+    "docsUrl": "https://www.openhab.org/docs/configuration/restdocs.html",
+    "evidence": "Official REST documentation exposes the API of an installed openHAB instance, including its own administration and LAN access policy. A user-controlled installation is required; this project entry does not supply a shared public instance."
+  },
+  {
+    "id": "0x",
+    "name": "0x",
+    "cause": "needs_key",
+    "docsUrl": "https://docs.0x.org/api-reference/api-overview",
+    "evidence": "Official API overview states that all 0x API requests require an API key in the 0x-api-key header. These API entries cannot qualify for the credential-free public rail."
+  },
+  {
+    "id": "0xapi",
+    "name": "0x API",
+    "cause": "needs_key",
+    "docsUrl": "https://docs.0x.org/api-reference/api-overview",
+    "evidence": "Official API overview states that all 0x API requests require an API key in the 0x-api-key header. These API entries cannot qualify for the credential-free public rail."
+  },
+  {
+    "id": "0xapiprotocolapi",
+    "name": "0x API Protocol API",
+    "cause": "needs_key",
+    "docsUrl": "https://docs.0x.org/api-reference/api-overview",
+    "evidence": "Official API overview states that all 0x API requests require an API key in the 0x-api-key header. These API entries cannot qualify for the credential-free public rail."
+  },
+  {
+    "id": "1inch",
+    "name": "1inch",
+    "cause": "needs_key",
+    "docsUrl": "https://business.1inch.com/portal/documentation/apis/authentication",
+    "evidence": "Official authentication documentation requires an API key or OAuth access token, with bearer or apiKey authentication in its REST examples. These API entries do not qualify for the credential-free public rail."
+  },
+  {
+    "id": "1inchapi",
+    "name": "1inch API",
+    "cause": "needs_key",
+    "docsUrl": "https://business.1inch.com/portal/documentation/apis/authentication",
+    "evidence": "Official authentication documentation requires an API key or OAuth access token, with bearer or apiKey authentication in its REST examples. These API entries do not qualify for the credential-free public rail."
+  },
+  {
+    "id": "1inchprotocolapi",
+    "name": "1inch Protocol API",
+    "cause": "needs_key",
+    "docsUrl": "https://business.1inch.com/portal/documentation/apis/authentication",
+    "evidence": "Official authentication documentation requires an API key or OAuth access token, with bearer or apiKey authentication in its REST examples. These API entries do not qualify for the credential-free public rail."
+  },
+  {
+    "id": "1forgecom",
+    "name": "1Forge.com",
+    "cause": "needs_key",
+    "docsUrl": "https://1forge.com/api",
+    "evidence": "Official Forex Quote API documentation supplies an api_key parameter for each documented REST endpoint, including symbols and market_status. No credential-free operation is established for this entry."
+  }
+]

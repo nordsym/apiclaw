@@ -97,8 +97,9 @@ assert.equal(
 );
 
 const executeSource = readFileSync("convex/http.ts", "utf8");
-assert.match(executeSource, /workspace_public_/);
-assert.match(executeSource, /redirect:\s*"error"/);
+assert.match(readFileSync("convex/workspacePublicExecute.ts", "utf8"), /workspace_public_/);
+assert.match(readFileSync("src/workspace-public-transport.ts", "utf8"), /redirect:\s*"manual"/);
+assert.match(readFileSync("src/workspace-public-transport.ts", "utf8"), /getSafePublicRedirectUrl/);
 assert.match(executeSource, /public_api_requires_workspace_auth/);
 assert.doesNotMatch(
   executeSource,
@@ -116,5 +117,28 @@ assert.doesNotMatch(
 );
 
 console.log(
-  `workspace-public APIs: ${WORKSPACE_PUBLIC_EXECUTABLE_COUNT} origins, anonymous keyless proxy stays off`,
+  `workspace-public APIs: ${WORKSPACE_PUBLIC_EXECUTABLE_COUNT} reviewed public APIs, anonymous keyless proxy stays off`,
 );
+
+// Every advertised public card must have measured, free, successful evidence.
+const audit = JSON.parse(readFileSync("docs/ops/callable-audit.json", "utf8"));
+const publicRows = JSON.parse(readFileSync("src/workspace-public-apis.json", "utf8"));
+assert.equal(audit.candidateCount, audit.results.length);
+assert.equal(audit.verifiedCount, publicRows.length);
+for (const api of publicRows) {
+  assert.equal(getWorkspacePublicApi(api.id)?.id, api.id, `${api.id} must resolve unambiguously for CLI callers`);
+  const evidence = audit.results.find((row: { id: string; canonicalId?: string; verified?: boolean }) => row.verified && (row.canonicalId ?? row.id) === api.id);
+  assert.ok(evidence?.verified, `${api.id} needs measured evidence`);
+  assert.equal(evidence.gatewayVerification?.success, true, `${api.id} needs successful authenticated customer proof`);
+  assert.ok(evidence.status >= 200 && evidence.status < 300);
+  assert.equal(evidence.outcome, `ok_${api.responseKind ?? "json"}`);
+  assert.equal(evidence.pricing, "free");
+  assert.equal(buildPinnedPublicApiUrl(api, api.smokePath)?.origin, api.origin);
+}
+for (const excluded of ["0x", "1inch", "1forgecom", "frankfurterapi"]) {
+  assert.equal(publicRows.some((row: { id: string }) => row.id === excluded), false);
+}
+assert.equal(publicRows.filter((row: { name: string }) => /frankfurter/i.test(row.name)).length, 1);
+const catalogPage = readFileSync("landing/src/app/catalog/CatalogClient.tsx", "utf8");
+assert.doesNotMatch(catalogPage, /totalCallable\s*\|\|\s*PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT/);
+assert.match(catalogPage, /useState<number \| null>\(initialCallableCount\)/);

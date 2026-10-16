@@ -40,7 +40,7 @@ assert.deepEqual(MANAGED_USAGE_POLICY, {
 
 assert.equal(PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT, 3);
 assert.equal(MANAGED_PROVIDER_ADAPTER_COUNT, 22);
-assert.equal(CANON_STATS.discoverable, 26_619);
+assert.equal(CANON_STATS.discoverable, 27_483);
 assert.equal(CANON_STATS.source_verified, 689);
 assert.equal(CANON_STATS.verification_sweep_passes, 2_895);
 assert.equal(CANON_STATS.managed_provider_adapters, MANAGED_PROVIDER_ADAPTER_COUNT);
@@ -48,8 +48,8 @@ assert.equal(
   CANON_STATS.customer_executable_providers,
   PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
 );
-assert.equal(CANON_STATS.workspace_public_executable, 1_002);
-assert.equal(CANON_STATS.customer_executable_catalog_cards, 1_005);
+assert.equal(CANON_STATS.workspace_public_executable, JSON.parse(readFileSync("src/workspace-public-apis.json", "utf8")).length);
+assert.equal(CANON_STATS.customer_executable_catalog_cards, CANON_STATS.workspace_public_executable + PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT);
 assert.equal(CANON_STATS.npm_installs, 20_058);
 assert.equal(new Set(MANAGED_PROVIDER_ADAPTERS.map(({ id }) => id)).size, 22);
 assert.deepEqual(
@@ -104,11 +104,11 @@ assert.doesNotMatch(
 );
 
 for (const catalogFile of [
-  "landing/src/app/catalog/page.tsx",
+  "landing/src/app/catalog/CatalogClient.tsx",
   "landing/src/app/api/catalog/route.ts",
 ]) {
   const source = readFileSync(catalogFile, "utf8");
-  assert.match(source, /@apiclaw\/product-truth/);
+  assert.match(source, /@apiclaw\/product-truth|@\/lib\/stats\.json/);
   assert.doesNotMatch(
     source,
     /OpenAI[^\n]+callable:\s*true|AssemblyAI[^\n]+callable:\s*true|Replicate[^\n]+callable:\s*true/,
@@ -213,7 +213,7 @@ const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
 assert.equal(packageMetadata.version, "2.9.13");
 assert.equal(packageLock.version, "2.9.13");
 assert.equal(packageLock.packages[""].version, "2.9.13");
-assert.match(packageMetadata.description, /26,619 API definitions/);
+assert.match(packageMetadata.description, /27,483 API definitions/);
 assert.match(packageMetadata.description, /689 exact-name source-verified entries/);
 assert.match(packageMetadata.description, /Source verification is not execution/);
 assert.match(packageMetadata.description, /22 built-in providers/);

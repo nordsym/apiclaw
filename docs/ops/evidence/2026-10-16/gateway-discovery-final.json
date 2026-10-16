@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-10-16T10:57:01.221Z",
+  "previewOnly": true,
+  "frontend": "https://apiclaw-ljvkx0diu-gustavs-projects-0c9f35af.vercel.app",
+  "convex": "abundant-goldfish-47",
+  "status": 200,
+  "totalCallable": 1143,
+  "names": [
+    {
+      "name": "Frankfurter",
+      "callable": true
+    }
+  ],
+  "serverOnlyConfigurationReadback": true
+}

@@ -110,9 +110,10 @@ const server = createServer(async (req, res) => {
       const { path: fn, args } = JSON.parse(Buffer.concat(chunks).toString());
       const [file, method] = fn.split(":");
       assert.ok(
-        ["discoveryListings", "workspaces"].includes(file),
+        ["discoveryListings", "workspaces", "publicApiHealth"].includes(file),
         "Unexpected database module: " + file,
       );
+      if (file === "publicApiHealth") assert.equal(method, "snapshot", "Only public health metadata is exposed");
       assert.ok(
         !["review", "pending"].includes(method),
         "Internal functions must not be callable through HTTP",

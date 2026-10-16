@@ -95,3 +95,7 @@ Live catalog readback: 22 adapters, 3 customer-executable providers and 1,005 ca
 Existing production Stripe credentials remain in Convex production environment variables. `APICLAW_BILLING_ENVIRONMENT=live` was set explicitly and the existing APIClaw webhook gained `checkout.session.async_payment_succeeded`, preserving its other events and unrelated endpoints. No provider plan was upgraded and no existing saved-card workspace was administratively activated.
 
 One final human verification remains: complete hosted sandbox Checkout despite CAPTCHA. The API-created test-card payment above must not be presented as that browser completion or as a first paying customer.
+
+## 2026-10-15 follow-up, preview only
+
+The 1,005 figure above was a catalog metadata count, not a verified public-gateway count. [The complete keyless audit](callable-audit.md) found 13 unique explicit-free candidates returning valid API JSON. PR #60 separates the public rail from managed authorization and verifies all 13 with a real Free customer on preview. This update does not change production or the paid-provider audit findings.

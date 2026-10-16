@@ -1,0 +1,110 @@
+[
+  {
+    "id": "empiar",
+    "name": "Electron Microscopy Public Image Archive",
+    "canonicalId": "empiar",
+    "baseUrl": "https://www.ebi.ac.uk/empiar/api",
+    "smokePath": "/entry/EMPIAR-10050/",
+    "docsUrl": "https://www.ebi.ac.uk/empiar/api/documentation/",
+    "pricing": "free",
+    "pricingSource": "https://www.ebi.ac.uk/empiar/policies/",
+    "freeEvidence": "Official policy explicitly makes all EMPIAR data freely/publicly available globally under CC0. Official REST documentation provides public JSON entry metadata. This reads one published archive entry, not raw microscopy images, private deposition or transfer operations. EMPIAR is the separate raw-image archive; entries, releases and routes are not extra API products.",
+    "responseKind": "json"
+  },
+  {
+    "id": "cellosaurus",
+    "name": "Cellosaurus",
+    "canonicalId": "cellosaurus",
+    "baseUrl": "https://api.cellosaurus.org",
+    "smokePath": "/cell-line/CVCL_VG99?fields=ac,str&format=json",
+    "docsUrl": "https://api.cellosaurus.org/",
+    "pricing": "free",
+    "pricingSource": "https://www.cellosaurus.org/faq",
+    "freeEvidence": "Official API quick-start documents anonymous bounded cell-line JSON retrieval. Official FAQ licenses Cellosaurus under CC-BY 4.0 and expressly permits sharing/adaptation for any purpose including commercial use, with attribution and retained license terms. One public reference STR-profile record; no biological material or clinical/private access. REST/SPARQL representations count as one API.",
+    "responseKind": "json"
+  },
+  {
+    "id": "jaspar",
+    "name": "JASPAR",
+    "canonicalId": "jaspar",
+    "baseUrl": "https://jaspar.elixir.no/api/v1",
+    "smokePath": "/matrix/MA0001.1/?format=json",
+    "docsUrl": "https://jaspar.elixir.no/docs/",
+    "pricing": "free",
+    "pricingSource": "https://jaspar.elixir.no/faq/",
+    "freeEvidence": "Official documentation describes an open-access database with hosted JSON REST retrieval, and official FAQ licenses JASPAR under CC-BY 4.0. This anonymously reads one transcription-factor binding matrix; retain attribution/license notices. Matrix versions, taxa, collections and different output representations are one JASPAR API product.",
+    "responseKind": "json"
+  },
+  {
+    "id": "alliancegenome",
+    "name": "Alliance of Genome Resources",
+    "canonicalId": "alliancegenome",
+    "baseUrl": "https://www.alliancegenome.org/api",
+    "smokePath": "/gene/FB:FBgn0000001",
+    "docsUrl": "https://www.alliancegenome.org/swagger-ui/",
+    "pricing": "free",
+    "pricingSource": "https://github.com/alliance-genome/agr_open_data",
+    "freeEvidence": "Official public API documentation and the maintainer open-data guide provide anonymous gene retrieval. The official guide identifies most Alliance data as CC0, some CC-BY 4.0, and asks for consortium/source attribution and a link in web applications. Preserve source-specific licenses. This reads one integrated gene record; member databases, species and API actions are not separately counted through this gateway product.",
+    "responseKind": "json"
+  },
+  {
+    "id": "complexportal",
+    "name": "Complex Portal",
+    "canonicalId": "complexportal",
+    "baseUrl": "https://www.ebi.ac.uk/intact/complex-ws",
+    "smokePath": "/complex/CPX-2158",
+    "docsUrl": "https://www.ebi.ac.uk/intact/complex-ws/",
+    "pricing": "free",
+    "pricingSource": "https://www.ebi.ac.uk/about/terms-of-use/",
+    "freeEvidence": "Official Complex Portal service exposes public complex-record GET and EMBL-EBI training identifies it as the dedicated curated macromolecular-complex resource. EMBL-EBI makes online services freely available without additional restrictions beyond original owners; preserve source notices and scientific attribution. One published complex metadata read. Count the hosted Complex Portal product once, not each complex or its component proteins.",
+    "responseKind": "json"
+  },
+  {
+    "id": "worldregistermarinespecies",
+    "name": "World Register of Marine Species",
+    "canonicalId": "worldregistermarinespecies",
+    "baseUrl": "https://www.marinespecies.org/rest",
+    "smokePath": "/AphiaRecordByAphiaID/127160",
+    "docsUrl": "https://www.marinespecies.org/rest/",
+    "pricing": "free",
+    "pricingSource": "https://www.marinespecies.org/about.php",
+    "freeEvidence": "Official terms permit unrestricted textual/taxonomic data use under CC-BY with source citation and explicitly encourage online webservices for application integration. Whole-database redistribution is prohibited without agreement. This single-species taxonomy read is not a database harvest and includes no images (whose default license is noncommercial). Retain WoRMS/record attribution. Count WoRMS once, not its thematic registers or species.",
+    "responseKind": "json"
+  },
+  {
+    "id": "lipidmaps",
+    "name": "LIPID MAPS",
+    "canonicalId": "lipidmaps",
+    "baseUrl": "https://www.lipidmaps.org/rest",
+    "smokePath": "/compound/lm_id/LMFA01010001/all/json",
+    "docsUrl": "https://www.lipidmaps.org/resources/rest",
+    "pricing": "free",
+    "pricingSource": "https://www.lipidmaps.org/terms-of-use",
+    "freeEvidence": "Official REST documentation explicitly supports embedding anonymous metadata requests in third-party applications. Official terms license all LIPID MAPS databases under CC-BY 4.0 with attribution. This single-lipid metadata read downloads no structure file or bulk database. LMSD/LMPD and different molecular records count as one hosted product.",
+    "responseKind": "json"
+  },
+  {
+    "id": "rhea",
+    "name": "Rhea",
+    "canonicalId": "rhea",
+    "baseUrl": "https://www.rhea-db.org/rhea",
+    "smokePath": "/?query=&columns=rhea-id,equation&format=tsv&limit=1",
+    "docsUrl": "https://www.rhea-db.org/help/rest-api",
+    "pricing": "free",
+    "pricingSource": "https://www.rhea-db.org/help/license-disclaimer",
+    "freeEvidence": "Official programmatic-access documentation provides public REST TSV queries and explicitly recommends the limit parameter for small tests. Official license permits copying, distribution and commercial database use under CC-BY 4.0 with credit. One reaction ID/equation row with header; no bulk harvest, medical use or job creation. REST/SPARQL and reaction records count once. The shared User-Agent already includes a contact address.",
+    "responseKind": "csv"
+  },
+  {
+    "id": "stringdb",
+    "name": "STRING",
+    "canonicalId": "stringdb",
+    "baseUrl": "https://version-12-5.string-db.org/api",
+    "smokePath": "/json/get_string_ids?identifiers=TP53&species=9606&caller_identity=apiclaw.cloud",
+    "docsUrl": "https://string-db.org/help/api/",
+    "pricing": "free",
+    "pricingSource": "https://en.string-db.org/cgi/access?footer_active_subpage=apis",
+    "freeEvidence": "Official access policy makes all STRING API data freely available under CC-BY 4.0, including commercial use with source attribution; upstream incorporated materials retain their original terms. Official API guide permits small anonymous GETs, asks for at least one second between calls, a stable version host and caller_identity. This recipe supplies the public application identity in its fixed query and maps one protein name. No bulk/network computation; versions and API methods count as one STRING product.",
+    "responseKind": "json"
+  }
+]

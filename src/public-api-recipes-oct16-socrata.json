@@ -1,0 +1,1622 @@
+[
+  {
+    "id": "seattleopendata",
+    "name": "Seattle Open Data",
+    "canonicalId": "seattleopendata",
+    "baseUrl": "https://data.seattle.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.seattle.gov/stories/s/Data-Policy/6ukr-wvup/",
+    "freeEvidence": "Owner portal explicitly links API Documentation; its terms permit use of published data but prohibit commercial use of lists of individuals. This metadata-only collection is not an individual-record dataset rail; preserve that restriction. Owner primary portal https://data.seattle.gov/ declares its public catalog as \"City of Seattle Open Data portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "citynewyorkopendata",
+    "name": "City, New York Open Data",
+    "canonicalId": "citynewyorkopendata",
+    "baseUrl": "https://data.cityofnewyork.us",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cityofnewyork.us/",
+    "freeEvidence": "Owner primary portal https://data.cityofnewyork.us/ declares its public catalog as \"Explore data about NYC - NYC Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "austinopendata",
+    "name": "Austin Open Data",
+    "canonicalId": "austinopendata",
+    "baseUrl": "https://data.austintexas.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.austintexas.gov/stories/s/ranj-cccq",
+    "freeEvidence": "Owner Licensing Summary expressly offers portal data free and without restriction; City-created data is public domain unless metadata states otherwise. Preserve Austin/source attribution. Owner primary portal https://data.austintexas.gov/ declares its public catalog as \"Open Data | City of Austin Texas | Open Data | City of Austin, Texas\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "calgaryopendata",
+    "name": "Calgary Open Data",
+    "canonicalId": "calgaryopendata",
+    "baseUrl": "https://data.calgary.ca",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.calgary.ca/stories/s/u45n-7awa/",
+    "freeEvidence": "Owner current Open Government Licence (September 2026) grants royalty-free use including commercial purposes, with source attribution, non-endorsement and personal/third-party-rights exclusions. This specific open-data licence applies rather than the general Calgary website non-commercial terms. Owner primary portal https://data.calgary.ca/ declares its public catalog as \"Open Calgary | Open Calgary\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "edmontonopendata",
+    "name": "Edmonton Open Data",
+    "canonicalId": "edmontonopendata",
+    "baseUrl": "https://data.edmonton.ca",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.edmonton.ca/stories/s/qcsu-n5wv/",
+    "freeEvidence": "Owner About page expressly states open data can be freely used, reused and redistributed by anyone; retain Edmonton Open Government Licence conditions. Owner primary portal https://data.edmonton.ca/ declares its public catalog as \"Edmonton - Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "winnipegopendata",
+    "name": "Winnipeg Open Data",
+    "canonicalId": "winnipegopendata",
+    "baseUrl": "https://data.winnipeg.ca",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.winnipeg.ca/stories/s/Open-Data-Licence/rwzh-4ijx/",
+    "freeEvidence": "Owner Open Government Licence encourages reuse and grants worldwide royalty-free use subject to attribution, third-party/personal-information exclusions and non-endorsement. Owner primary portal https://data.winnipeg.ca/ declares its public catalog as \"Open Data Portal | Open Data | City of Winnipeg\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "marylandopendata",
+    "name": "Maryland Open Data",
+    "canonicalId": "marylandopendata",
+    "baseUrl": "https://opendata.maryland.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.maryland.gov/",
+    "freeEvidence": "Owner primary portal https://opendata.maryland.gov/ declares its public catalog as \"Open Data | opendata.maryland.gov\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "newyorkstateopendata",
+    "name": "New York State Open Data",
+    "canonicalId": "newyorkstateopendata",
+    "baseUrl": "https://data.ny.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.ny.gov/",
+    "freeEvidence": "Owner primary portal https://data.ny.gov/ declares its public catalog as \"State of New York | Open Data | State of New York\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "vermontopendata",
+    "name": "Vermont Open Data",
+    "canonicalId": "vermontopendata",
+    "baseUrl": "https://data.vermont.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.vermont.gov/",
+    "freeEvidence": "Owner primary portal https://data.vermont.gov/ declares its public catalog as \"Vermont | Open Data | Open Data | State of Vermont\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "connecticutopendata",
+    "name": "Connecticut Open Data",
+    "canonicalId": "connecticutopendata",
+    "baseUrl": "https://data.ct.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.ct.gov/",
+    "freeEvidence": "Owner primary portal https://data.ct.gov/ declares its public catalog as \"Connecticut | Open Data | Connecticut Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "washingtonstateopendata",
+    "name": "Washington State Open Data",
+    "canonicalId": "washingtonstateopendata",
+    "baseUrl": "https://data.wa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.wa.gov/",
+    "freeEvidence": "Owner primary portal https://data.wa.gov/ declares its public catalog as \"Data.WA | State of Washington Open Data Platform | Data.WA | State of Washington\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "oregonopendata",
+    "name": "Oregon Open Data",
+    "canonicalId": "oregonopendata",
+    "baseUrl": "https://data.oregon.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.oregon.gov/",
+    "freeEvidence": "Owner primary portal https://data.oregon.gov/ declares its public catalog as \"Oregon | Open Data | data.oregon.gov | Oregon&#39;s Open Data Portal | Oregon.gov\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "coloradoinformationmarketplace",
+    "name": "Colorado Information Marketplace",
+    "canonicalId": "coloradoinformationmarketplace",
+    "baseUrl": "https://data.colorado.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.colorado.gov/",
+    "freeEvidence": "Owner primary portal https://data.colorado.gov/ declares its public catalog as \"Colorado Information Marketplace | Colorado Information Marketplace | data.colorado.gov\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "pennsylvaniaopendata",
+    "name": "Pennsylvania Open Data",
+    "canonicalId": "pennsylvaniaopendata",
+    "baseUrl": "https://data.pa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.pa.gov/data-policy",
+    "freeEvidence": "Owner data policy expressly says data sets are offered free and without restriction, as a public service. Agency metadata and accuracy limitations remain relevant. Owner primary portal https://data.pa.gov/ declares its public catalog as \"data.pa.gov | PA Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "newjerseyopendata",
+    "name": "New Jersey Open Data",
+    "canonicalId": "newjerseyopendata",
+    "baseUrl": "https://data.nj.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.nj.gov/",
+    "freeEvidence": "Owner primary portal https://data.nj.gov/ declares its public catalog as \"Open Data Portal | NJOIT Open Data Center\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "missouriopendata",
+    "name": "Missouri Open Data",
+    "canonicalId": "missouriopendata",
+    "baseUrl": "https://data.mo.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.mo.gov/",
+    "freeEvidence": "Owner primary portal https://data.mo.gov/ declares its public catalog as \"Catalog | data.mo.gov | State of Missouri Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "michiganopendata",
+    "name": "Michigan Open Data",
+    "canonicalId": "michiganopendata",
+    "baseUrl": "https://data.michigan.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.michigan.gov/",
+    "freeEvidence": "Owner primary portal https://data.michigan.gov/ declares its public catalog as \"Michigan | Open Data | Michigan | Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "montgomerycountymarylandopendata",
+    "name": "Montgomery County Maryland Open Data",
+    "canonicalId": "montgomerycountymarylandopendata",
+    "baseUrl": "https://data.montgomerycountymd.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.montgomerycountymd.gov/",
+    "freeEvidence": "Owner primary portal https://data.montgomerycountymd.gov/ declares its public catalog as \"Montgomery County Data | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "kingcountyopendata",
+    "name": "King County Open Data",
+    "canonicalId": "kingcountyopendata",
+    "baseUrl": "https://data.kingcounty.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.kingcounty.gov/",
+    "freeEvidence": "Owner primary portal https://data.kingcounty.gov/ declares its public catalog as \"King County | Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "sanfranciscoopendata",
+    "name": "San Francisco Open Data",
+    "canonicalId": "sanfranciscoopendata",
+    "baseUrl": "https://data.sf.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.sf.gov/",
+    "freeEvidence": "Owner primary portal https://data.sf.gov/ declares its public catalog as \"SF OpenData | DataSF\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "princegeorgescountyopendata",
+    "name": "Prince George's County Open Data",
+    "canonicalId": "princegeorgescountyopendata",
+    "baseUrl": "https://data.princegeorgescountymd.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.princegeorgescountymd.gov/",
+    "freeEvidence": "Owner primary portal https://data.princegeorgescountymd.gov/ declares its public catalog as \"OpenPGC | Open Data | Tyler Data &amp; Insights\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "sonomacountyopendata",
+    "name": "Sonoma County Open Data",
+    "canonicalId": "sonomacountyopendata",
+    "baseUrl": "https://data.sonomacounty.ca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.sonomacounty.ca.gov/",
+    "freeEvidence": "Owner primary portal https://data.sonomacounty.ca.gov/ declares its public catalog as \"County of Sonoma | Open Data | Open Data | Sonoma County\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "fultoncountygeorgiaopendata",
+    "name": "Fulton County Georgia Open Data",
+    "canonicalId": "fultoncountygeorgiaopendata",
+    "baseUrl": "https://data.fultoncountyga.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.fultoncountyga.gov/",
+    "freeEvidence": "Owner primary portal https://data.fultoncountyga.gov/ declares its public catalog as \"Fulton County Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "sanmateocountyopendata",
+    "name": "San Mateo County Open Data",
+    "canonicalId": "sanmateocountyopendata",
+    "baseUrl": "https://data.smcgov.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.smcgov.org/",
+    "freeEvidence": "Owner primary portal https://data.smcgov.org/ declares its public catalog as \"San Mateo | Open Data | Open San Mateo County\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "honoluluopendata",
+    "name": "Honolulu Open Data",
+    "canonicalId": "honoluluopendata",
+    "baseUrl": "https://data.honolulu.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.honolulu.gov/",
+    "freeEvidence": "Owner primary portal https://data.honolulu.gov/ declares its public catalog as \"Honolulu - Open Data Portal | Honolulu - Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "dallasopendata",
+    "name": "Dallas Open Data",
+    "canonicalId": "dallasopendata",
+    "baseUrl": "https://www.dallasopendata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.dallasopendata.com/",
+    "freeEvidence": "Owner primary portal https://www.dallasopendata.com/ declares its public catalog as \"Dallas OpenData | Dallas OpenData\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "neworleansopendata",
+    "name": "New Orleans Open Data",
+    "canonicalId": "neworleansopendata",
+    "baseUrl": "https://data.nola.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.nola.gov/",
+    "freeEvidence": "Owner primary portal https://data.nola.gov/ declares its public catalog as \"Home - DataDriven - City of New Orleans\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "batonrougeopendata",
+    "name": "Baton Rouge Open Data",
+    "canonicalId": "batonrougeopendata",
+    "baseUrl": "https://data.brla.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.brla.gov/about",
+    "freeEvidence": "Owner About page expressly invites private businesses/developers to freely access its data and incorporate it into applications and processes. Owner primary portal https://data.brla.gov/ declares its public catalog as \"City of Baton Rouge - Open Data Portal | Open Data BR\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "kansascitymissouriopendata",
+    "name": "Kansas City Missouri Open Data",
+    "canonicalId": "kansascitymissouriopendata",
+    "baseUrl": "https://data.kcmo.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.kcmo.org/",
+    "freeEvidence": "Owner primary portal https://data.kcmo.org/ declares its public catalog as \"Open Data KC | data.kcmo.org\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cincinnatiopendata",
+    "name": "Cincinnati Open Data",
+    "canonicalId": "cincinnatiopendata",
+    "baseUrl": "https://data.cincinnati-oh.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cincinnati-oh.gov/",
+    "freeEvidence": "Owner primary portal https://data.cincinnati-oh.gov/ declares its public catalog as \"Cincinnati Open Data Portal | Tyler Data &amp; Insights\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "buffaloopendata",
+    "name": "Buffalo Open Data",
+    "canonicalId": "buffaloopendata",
+    "baseUrl": "https://data.buffalony.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.buffalony.gov/",
+    "freeEvidence": "Owner primary portal https://data.buffalony.gov/ declares its public catalog as \"Open Data Portal | OpenData Buffalo\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "mesaopendata",
+    "name": "Mesa Open Data",
+    "canonicalId": "mesaopendata",
+    "baseUrl": "https://data.mesaaz.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.mesaaz.gov/",
+    "freeEvidence": "Owner primary portal https://data.mesaaz.gov/ declares its public catalog as \"Data Portal | City of Mesa Data Hub\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "providenceopendata",
+    "name": "Providence Open Data",
+    "canonicalId": "providenceopendata",
+    "baseUrl": "https://data.providenceri.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.providenceri.gov/",
+    "freeEvidence": "Owner primary portal https://data.providenceri.gov/ declares its public catalog as \"Open Data | City of Providence | Open Data | City of Providence\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "somervilleopendata",
+    "name": "Somerville Open Data",
+    "canonicalId": "somervilleopendata",
+    "baseUrl": "https://data.somervillema.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.somervillema.gov/",
+    "freeEvidence": "Owner primary portal https://data.somervillema.gov/ declares its public catalog as \"City of Somerville, MA\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cambridgemassachusettsopendata",
+    "name": "Cambridge Massachusetts Open Data",
+    "canonicalId": "cambridgemassachusettsopendata",
+    "baseUrl": "https://data.cambridgema.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cambridgema.gov/",
+    "freeEvidence": "Owner primary portal https://data.cambridgema.gov/ declares its public catalog as \"Open Data | City of Cambridge | Open Data Portal | City of Cambridge\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "norfolkopendata",
+    "name": "Norfolk Open Data",
+    "canonicalId": "norfolkopendata",
+    "baseUrl": "https://data.norfolk.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.norfolk.gov/",
+    "freeEvidence": "Owner primary portal https://data.norfolk.gov/ declares its public catalog as \"City of Norfolk Data | Open Data Portal - City of Norfolk, VA Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "richmondvirginiaopendata",
+    "name": "Richmond Virginia Open Data",
+    "canonicalId": "richmondvirginiaopendata",
+    "baseUrl": "https://data.richmondgov.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.richmondgov.com/",
+    "freeEvidence": "Owner primary portal https://data.richmondgov.com/ declares its public catalog as \"Open Data Portal | City of Richmond, Virginia | Open Data Portal | City of Richmond, Virginia\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "novascotiaopendata",
+    "name": "Nova Scotia Open Data",
+    "canonicalId": "novascotiaopendata",
+    "baseUrl": "https://data.novascotia.ca",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.novascotia.ca/",
+    "freeEvidence": "Owner primary portal https://data.novascotia.ca/ declares its public catalog as \"Nova Scotia Government - Open Data Portal | Open Data | Nova Scotia\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "santaclaracountyopendata",
+    "name": "Santa Clara County Open Data",
+    "canonicalId": "santaclaracountyopendata",
+    "baseUrl": "https://data.sccgov.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.sccgov.org/",
+    "freeEvidence": "Owner primary portal https://data.sccgov.org/ declares its public catalog as \"County of Santa Clara\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "oaklandopendata",
+    "name": "Oakland Open Data",
+    "canonicalId": "oaklandopendata",
+    "baseUrl": "https://data.oaklandca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.oaklandca.gov/",
+    "freeEvidence": "Owner primary portal https://data.oaklandca.gov/ declares its public catalog as \"City of Oakland Open Data Portal | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "marincountyopendata",
+    "name": "Marin County Open Data",
+    "canonicalId": "marincountyopendata",
+    "baseUrl": "https://data.marincounty.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.marincounty.gov/",
+    "freeEvidence": "Owner primary portal https://data.marincounty.gov/ declares its public catalog as \"County of Marin - Open Data Portal | County of Marin Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "piercecountyopendata",
+    "name": "Pierce County Open Data",
+    "canonicalId": "piercecountyopendata",
+    "baseUrl": "https://open.piercecountywa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://open.piercecountywa.gov/",
+    "freeEvidence": "Owner primary portal https://open.piercecountywa.gov/ declares its public catalog as \"Open Pierce County\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "riversidecountyopendata",
+    "name": "Riverside County Open Data",
+    "canonicalId": "riversidecountyopendata",
+    "baseUrl": "https://data.countyofriverside.us",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.countyofriverside.us/",
+    "freeEvidence": "Owner primary portal https://data.countyofriverside.us/ declares its public catalog as \"Riverside County Open Data | Riverside County Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "howardcountymarylandopendata",
+    "name": "Howard County Maryland Open Data",
+    "canonicalId": "howardcountymarylandopendata",
+    "baseUrl": "https://opendata.howardcountymd.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.howardcountymd.gov/about",
+    "freeEvidence": "Owner About page states high-quality freely accessible data is a priority and describes mandated public machine-readable access. Owner primary portal https://opendata.howardcountymd.gov/ declares its public catalog as \"Howard County - Open Data Portal | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "transportationdepartmentopendata",
+    "name": "Transportation Department Open Data",
+    "canonicalId": "transportationdepartmentopendata",
+    "baseUrl": "https://data.transportation.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.transportation.gov/",
+    "freeEvidence": "Owner primary portal https://data.transportation.gov/ declares its public catalog as \"Department of Transportation - Open Data Portal | Department of Transportation - Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cataloniaopendataapi",
+    "name": "Catalonia Open Data API",
+    "canonicalId": "cataloniaopendataapi",
+    "baseUrl": "https://analisi.transparenciacatalunya.cat",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://analisi.transparenciacatalunya.cat/",
+    "freeEvidence": "Owner primary portal https://analisi.transparenciacatalunya.cat/ declares its public catalog as \"Catàleg | Dades obertes de Catalunya\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "healthdatagov",
+    "name": "HealthData.gov",
+    "canonicalId": "healthdatagov",
+    "baseUrl": "https://healthdata.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://healthdata.gov/",
+    "freeEvidence": "Owner primary portal https://healthdata.gov/ declares its public catalog as \"HealthData.gov\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "regionelombardiaopendata",
+    "name": "Regione Lombardia Open Data",
+    "canonicalId": "regionelombardiaopendata",
+    "baseUrl": "https://www.dati.lombardia.it",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.dati.lombardia.it/",
+    "freeEvidence": "Owner primary portal https://www.dati.lombardia.it/ declares its public catalog as \"Open Data Regione Lombardia\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "clermontcountyopendataapi",
+    "name": "Clermont County Open Data API",
+    "canonicalId": "clermontcountyopendataapi",
+    "baseUrl": "https://opendata.clermontauditor.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.clermontauditor.org/",
+    "freeEvidence": "Owner primary portal https://opendata.clermontauditor.org/ declares its public catalog as \"Open Data | Clermont Auditor\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "macoupincountyopendataapi",
+    "name": "Macoupin County Open Data API",
+    "canonicalId": "macoupincountyopendataapi",
+    "baseUrl": "https://data.macoupincountyil.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.macoupincountyil.gov/",
+    "freeEvidence": "Owner primary portal https://data.macoupincountyil.gov/ declares its public catalog as \"Macoupin Open Data Portal | Open Data | Macoupin County\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cookcountyopendatacatalogapi",
+    "name": "Cook County Open Data Catalog API",
+    "canonicalId": "cookcountyopendatacatalogapi",
+    "baseUrl": "https://cookcounty.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://cookcounty.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://cookcounty.data.socrata.com/ declares its public catalog as \"Cook County Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "everettopendataportalapi",
+    "name": "Everett Open Data Portal API",
+    "canonicalId": "everettopendataportalapi",
+    "baseUrl": "https://data.everettwa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.everettwa.gov/",
+    "freeEvidence": "Owner primary portal https://data.everettwa.gov/ declares its public catalog as \"City of Everett Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "auburnopendataapi",
+    "name": "Auburn Open Data API",
+    "canonicalId": "auburnopendataapi",
+    "baseUrl": "https://data.auburnwa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.auburnwa.gov/",
+    "freeEvidence": "Owner primary portal https://data.auburnwa.gov/ declares its public catalog as \"Auburn Open Data | Auburn Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "puertoricoelectoralcomptrolleropendataapi",
+    "name": "Puerto Rico Electoral Comptroller Open Data API",
+    "canonicalId": "puertoricoelectoralcomptrolleropendataapi",
+    "baseUrl": "https://data.oce.pr.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.oce.pr.gov/",
+    "freeEvidence": "Owner primary portal https://data.oce.pr.gov/ declares its public catalog as \"OCEPR - Open Data | OCE Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "fiscalfocuspittsburghapi",
+    "name": "Fiscal Focus Pittsburgh API",
+    "canonicalId": "fiscalfocuspittsburghapi",
+    "baseUrl": "https://fiscalfocus.pittsburghpa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://fiscalfocus.pittsburghpa.gov/",
+    "freeEvidence": "Owner primary portal https://fiscalfocus.pittsburghpa.gov/ declares its public catalog as \"Fiscal Focus Pittsburgh\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "readingpennsylvaniaopendataapi",
+    "name": "Reading Pennsylvania Open Data API",
+    "canonicalId": "readingpennsylvaniaopendataapi",
+    "baseUrl": "https://data.readingpa.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.readingpa.gov/",
+    "freeEvidence": "Owner primary portal https://data.readingpa.gov/ declares its public catalog as \"Open Reading | Open Data Reading\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "zerofatalitiesnvopendataapi",
+    "name": "Zero Fatalities NV Open Data API",
+    "canonicalId": "zerofatalitiesnvopendataapi",
+    "baseUrl": "https://opendata.zerofatalitiesnv.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.zerofatalitiesnv.com/",
+    "freeEvidence": "Owner primary portal https://opendata.zerofatalitiesnv.com/ declares its public catalog as \"NV Office of Traffic Safety Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "newjerseyhealthdataapi",
+    "name": "New Jersey Health Data API",
+    "canonicalId": "newjerseyhealthdataapi",
+    "baseUrl": "https://healthdata.nj.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://healthdata.nj.gov/",
+    "freeEvidence": "Owner primary portal https://healthdata.nj.gov/ declares its public catalog as \"Catalog | Socrata | Making Data Social\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "richmondcaliforniaopendataapi",
+    "name": "Richmond California Open Data API",
+    "canonicalId": "richmondcaliforniaopendataapi",
+    "baseUrl": "https://www.transparentrichmond.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.transparentrichmond.org/",
+    "freeEvidence": "Owner primary portal https://www.transparentrichmond.org/ declares its public catalog as \"Transparent Richmond\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "opennassauapi",
+    "name": "Open Nassau API",
+    "canonicalId": "opennassauapi",
+    "baseUrl": "https://opendata.nassaucountyny.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.nassaucountyny.gov/",
+    "freeEvidence": "Owner primary portal https://opendata.nassaucountyny.gov/ declares its public catalog as \"Open Nassau | Office of the Nassau County Comptroller\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "hawaiicampaignspendingcommissiondataapi",
+    "name": "Hawaii Campaign Spending Commission Data API",
+    "canonicalId": "hawaiicampaignspendingcommissiondataapi",
+    "baseUrl": "https://hicscdata.hawaii.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://hicscdata.hawaii.gov/",
+    "freeEvidence": "Owner primary portal https://hicscdata.hawaii.gov/ declares its public catalog as \"Catalog | Tyler Data &amp; Insights\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "healthdatanyapi",
+    "name": "Health Data NY API",
+    "canonicalId": "healthdatanyapi",
+    "baseUrl": "https://health.data.ny.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://health.data.ny.gov/",
+    "freeEvidence": "Owner primary portal https://health.data.ny.gov/ declares its public catalog as \"State of New York | Open Data Health | State of New York\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "stateofhawaiidepartmentoftransportationapi",
+    "name": "State of Hawaii Department of Transportation API",
+    "canonicalId": "stateofhawaiidepartmentoftransportationapi",
+    "baseUrl": "https://highways.hidot.hawaii.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://highways.hidot.hawaii.gov/",
+    "freeEvidence": "Owner primary portal https://highways.hidot.hawaii.gov/ declares its public catalog as \"State of Hawaii Department of Transportation\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "montgomerycountypublicschoolsdatacatalogapi",
+    "name": "Montgomery County Public Schools data catalog API",
+    "canonicalId": "montgomerycountypublicschoolsdatacatalogapi",
+    "baseUrl": "https://data.montgomeryschoolsmd.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.montgomeryschoolsmd.org/",
+    "freeEvidence": "Owner primary portal https://data.montgomeryschoolsmd.org/ declares its public catalog as \"MCPS - Open Data Portal | MCPS - Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cityofbloomingtonopendataportalapi",
+    "name": "City of Bloomington Open Data Portal API",
+    "canonicalId": "cityofbloomingtonopendataportalapi",
+    "baseUrl": "https://data.bloomington.in.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.bloomington.in.gov/",
+    "freeEvidence": "Owner primary portal https://data.bloomington.in.gov/ declares its public catalog as \"City of Bloomington Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "queenannescountyopendataapi",
+    "name": "Queen Anne's County Open Data API",
+    "canonicalId": "queenannescountyopendataapi",
+    "baseUrl": "https://data.qac.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.qac.org/",
+    "freeEvidence": "Owner primary portal https://data.qac.org/ declares its public catalog as \"Queen Anne&#39;s County - Open Data | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "fortlauderdalepoliceopendataapi",
+    "name": "Fort Lauderdale Police Open Data API",
+    "canonicalId": "fortlauderdalepoliceopendataapi",
+    "baseUrl": "https://fortlauderdale.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://fortlauderdale.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://fortlauderdale.data.socrata.com/ declares its public catalog as \"City of Fort Lauderdale Police Department | Performance Management | City of Fort Lauderdale Police Department\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cityoforlandoopendataportalapi",
+    "name": "City of Orlando Open Data Portal API",
+    "canonicalId": "cityoforlandoopendataportalapi",
+    "baseUrl": "https://data.cityoforlando.net",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cityoforlando.net/",
+    "freeEvidence": "Owner primary portal https://data.cityoforlando.net/ declares its public catalog as \"City of Orlando Open Data Portal | City of Orlando Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cityofdubuqueopendataapi",
+    "name": "City of Dubuque Open Data API",
+    "canonicalId": "cityofdubuqueopendataapi",
+    "baseUrl": "https://dubuque.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://dubuque.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://dubuque.data.socrata.com/ declares its public catalog as \"Open Data Portal | Open Data Portal | Dubuque, IA\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "gainesvilleopendataapi",
+    "name": "Gainesville Open Data API",
+    "canonicalId": "gainesvilleopendataapi",
+    "baseUrl": "https://data.cityofgainesville.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cityofgainesville.org/",
+    "freeEvidence": "Owner primary portal https://data.cityofgainesville.org/ declares its public catalog as \"Open Data Portal | dataGNV | Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cityofwesthollywoodopendatacatalogapi",
+    "name": "City of West Hollywood Open Data Catalog API",
+    "canonicalId": "cityofwesthollywoodopendatacatalogapi",
+    "baseUrl": "https://data.weho.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.weho.org/",
+    "freeEvidence": "Owner primary portal https://data.weho.org/ declares its public catalog as \"Open Data | West Hollywood | Open Data | City of West Hollywood\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "encinitasdatainsightsapi",
+    "name": "Encinitas Data & Insights API",
+    "canonicalId": "encinitasdatainsightsapi",
+    "baseUrl": "https://datainsights.encinitasca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://datainsights.encinitasca.gov/",
+    "freeEvidence": "Owner primary portal https://datainsights.encinitasca.gov/ declares its public catalog as \"Encinitas Data &amp; Insights | City of Encinitas\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "rosevilleopendataapi",
+    "name": "Roseville Open Data API",
+    "canonicalId": "rosevilleopendataapi",
+    "baseUrl": "https://data.roseville.ca.us",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.roseville.ca.us/",
+    "freeEvidence": "Owner primary portal https://data.roseville.ca.us/ declares its public catalog as \"Roseville | Open Data | Open Roseville - City of Roseville\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "morenovalleyopendataapi",
+    "name": "Moreno Valley Open Data API",
+    "canonicalId": "morenovalleyopendataapi",
+    "baseUrl": "https://moreno-valley.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://moreno-valley.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://moreno-valley.data.socrata.com/ declares its public catalog as \"Catalog | Open Data | City of Moreno Valley\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "coronaopenperformanceapi",
+    "name": "Corona Open Performance API",
+    "canonicalId": "coronaopenperformanceapi",
+    "baseUrl": "https://corstat.coronaca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://corstat.coronaca.gov/",
+    "freeEvidence": "Owner primary portal https://corstat.coronaca.gov/ declares its public catalog as \"Open Data Portal | Corona Open Performance\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "modestocityviewapi",
+    "name": "Modesto City View API",
+    "canonicalId": "modestocityviewapi",
+    "baseUrl": "https://data.modestogov.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.modestogov.com/",
+    "freeEvidence": "Owner primary portal https://data.modestogov.com/ declares its public catalog as \"Modesto City View\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "santamonicasustainablecityplanapi",
+    "name": "Santa Monica Sustainable City Plan API",
+    "canonicalId": "santamonicasustainablecityplanapi",
+    "baseUrl": "https://data.sustainablesm.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.sustainablesm.org/",
+    "freeEvidence": "Owner primary portal https://data.sustainablesm.org/ declares its public catalog as \"Santa Monica Sustainable City Plan | Santa Monica Sustainable City\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "californiastatecontrolleropendataapi",
+    "name": "California State Controller Open Data API",
+    "canonicalId": "californiastatecontrolleropendataapi",
+    "baseUrl": "https://www.bythenumbers.sco.ca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.bythenumbers.sco.ca.gov/",
+    "freeEvidence": "Owner primary portal https://www.bythenumbers.sco.ca.gov/ declares its public catalog as \"Government Financial Reports - California State Controller’s Office | CA Local Government Financial Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "stocktoncitydatacatalogapi",
+    "name": "Stockton City Data Catalog API",
+    "canonicalId": "stocktoncitydatacatalogapi",
+    "baseUrl": "https://data.stocktonca.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.stocktonca.gov/",
+    "freeEvidence": "Owner primary portal https://data.stocktonca.gov/ declares its public catalog as \"Stockton Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "napacountyhhsaopendataportalapi",
+    "name": "Napa County HHSA Open Data Portal API",
+    "canonicalId": "napacountyhhsaopendataportalapi",
+    "baseUrl": "https://data.napacounty.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.napacounty.gov/",
+    "freeEvidence": "Owner primary portal https://data.napacounty.gov/ declares its public catalog as \"Napa County HHSA Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "sandiegocountydataportalapi",
+    "name": "San Diego County Data Portal API",
+    "canonicalId": "sandiegocountydataportalapi",
+    "baseUrl": "https://data.sandiegocounty.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.sandiegocounty.gov/",
+    "freeEvidence": "Owner primary portal https://data.sandiegocounty.gov/ declares its public catalog as \"County of San Diego | Open Data Portal | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "bayareametroopendataapi",
+    "name": "Bay Area Metro Open Data API",
+    "canonicalId": "bayareametroopendataapi",
+    "baseUrl": "https://data.bayareametro.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.bayareametro.gov/",
+    "freeEvidence": "Owner primary portal https://data.bayareametro.gov/ declares its public catalog as \"Tyler Data &amp; Insights\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "townofparkeropendataapi",
+    "name": "Town of Parker Open Data API",
+    "canonicalId": "townofparkeropendataapi",
+    "baseUrl": "https://parkeronline.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://parkeronline.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://parkeronline.data.socrata.com/ declares its public catalog as \"Catalog | Town of Parker, CO - Finance Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "mesquitetexasopendataportalapi",
+    "name": "Mesquite Texas Open Data Portal API",
+    "canonicalId": "mesquitetexasopendataportalapi",
+    "baseUrl": "https://opendata.cityofmesquite.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.cityofmesquite.com/",
+    "freeEvidence": "Owner primary portal https://opendata.cityofmesquite.com/ declares its public catalog as \"Mesquite Texas | Open Data Portal | Mesquite Texas | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "collegestationopendataapi",
+    "name": "College Station Open Data API",
+    "canonicalId": "collegestationopendataapi",
+    "baseUrl": "https://data.cstx.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.cstx.gov/",
+    "freeEvidence": "Owner primary portal https://data.cstx.gov/ declares its public catalog as \"College Station - Open Data | CSTX Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "williamsoncentralappraisaldistrictopendataapi",
+    "name": "Williamson Central Appraisal District Open Data API",
+    "canonicalId": "williamsoncentralappraisaldistrictopendataapi",
+    "baseUrl": "https://data.wcad.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.wcad.org/",
+    "freeEvidence": "Owner primary portal https://data.wcad.org/ declares its public catalog as \"WCAD Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "fccopendataapi",
+    "name": "FCC Open Data API",
+    "canonicalId": "fccopendataapi",
+    "baseUrl": "https://opendata.fcc.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.fcc.gov/",
+    "freeEvidence": "Owner primary portal https://opendata.fcc.gov/ declares its public catalog as \"Catalog | Data | Federal Communications Commission\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "nationallibraryofmedicineopendataapi",
+    "name": "National Library of Medicine Open Data API",
+    "canonicalId": "nationallibraryofmedicineopendataapi",
+    "baseUrl": "https://datadiscovery.nlm.nih.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://datadiscovery.nlm.nih.gov/",
+    "freeEvidence": "Owner primary portal https://datadiscovery.nlm.nih.gov/ declares its public catalog as \"Catalog | National Library of Medicine | National Institutes of Health | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "usacopendataapi",
+    "name": "USAC Open Data API",
+    "canonicalId": "usacopendataapi",
+    "baseUrl": "https://opendata.usac.org",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.usac.org/",
+    "freeEvidence": "Owner primary portal https://opendata.usac.org/ declares its public catalog as \"Open Data Portal | USAC | Data Platform\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "americorpsopendataapi",
+    "name": "AmeriCorps Open Data API",
+    "canonicalId": "americorpsopendataapi",
+    "baseUrl": "https://data.americorps.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.americorps.gov/",
+    "freeEvidence": "Owner primary portal https://data.americorps.gov/ declares its public catalog as \"AmeriCorps Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "townofmountpleasantopendataapi",
+    "name": "Town of Mount Pleasant Open Data API",
+    "canonicalId": "townofmountpleasantopendataapi",
+    "baseUrl": "https://data.tompsc.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.tompsc.com/",
+    "freeEvidence": "Owner primary portal https://data.tompsc.com/ declares its public catalog as \"Mount Pleasant, SC | eMPower | Mount Pleasant, SC | eMPower\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "massachusettseducationtocareerresearchanddatahubapi",
+    "name": "Massachusetts Education-to-Career Research and Data Hub API",
+    "canonicalId": "massachusettseducationtocareerresearchanddatahubapi",
+    "baseUrl": "https://educationtocareer.data.mass.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://educationtocareer.data.mass.gov/",
+    "freeEvidence": "Owner primary portal https://educationtocareer.data.mass.gov/ declares its public catalog as \"E2C Hub\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "framinghamopendataapi",
+    "name": "Framingham Open Data API",
+    "canonicalId": "framinghamopendataapi",
+    "baseUrl": "https://data.framinghamma.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.framinghamma.gov/",
+    "freeEvidence": "Owner primary portal https://data.framinghamma.gov/ declares its public catalog as \"Rally | Open Data Portal | Open Data Framingham\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "impactstlcoapi",
+    "name": "Impact STLCO API",
+    "canonicalId": "impactstlcoapi",
+    "baseUrl": "https://impact.stlouisco.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://impact.stlouisco.com/",
+    "freeEvidence": "Owner primary portal https://impact.stlouisco.com/ declares its public catalog as \"Impact STLCO | Rally - Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "springfieldopendataapi",
+    "name": "Springfield Open Data API",
+    "canonicalId": "springfieldopendataapi",
+    "baseUrl": "https://springfield.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://springfield.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://springfield.data.socrata.com/ declares its public catalog as \"Springfield - Open Data | Springfield Publica | Socrata\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "mississippimedicalcannabisprogramdataportalapi",
+    "name": "Mississippi Medical Cannabis Program Data Portal API",
+    "canonicalId": "mississippimedicalcannabisprogramdataportalapi",
+    "baseUrl": "https://data.mmcp.ms.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://data.mmcp.ms.gov/",
+    "freeEvidence": "Owner primary portal https://data.mmcp.ms.gov/ declares its public catalog as \"Mississippi Medical Cannabis Program\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "johnscreekpolicedepartmentapi",
+    "name": "Johns Creek Police Department API",
+    "canonicalId": "johnscreekpolicedepartmentapi",
+    "baseUrl": "https://policeview.johnscreekga.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://policeview.johnscreekga.gov/",
+    "freeEvidence": "Owner primary portal https://policeview.johnscreekga.gov/ declares its public catalog as \"Johns Creek Police Department | Performance Management | Johns Creek Police Department | Performance Management\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cityofalpharettaopendataapi",
+    "name": "City of Alpharetta Open Data API",
+    "canonicalId": "cityofalpharettaopendataapi",
+    "baseUrl": "https://alpharetta.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://alpharetta.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://alpharetta.data.socrata.com/ declares its public catalog as \"Catalog | Tyler Data &amp; Insights\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "metropolitanairportscommissionopendataapi",
+    "name": "Metropolitan Airports Commission Open Data API",
+    "canonicalId": "metropolitanairportscommissionopendataapi",
+    "baseUrl": "https://metroairports.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://metroairports.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://metroairports.data.socrata.com/ declares its public catalog as \"MAC Sustainability | Sustainability - Metro Airports\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "ramseycountyminnesotaopendataapi",
+    "name": "Ramsey County Minnesota Open Data API",
+    "canonicalId": "ramseycountyminnesotaopendataapi",
+    "baseUrl": "https://opendata.ramseycountymn.gov",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.ramseycountymn.gov/",
+    "freeEvidence": "Owner primary portal https://opendata.ramseycountymn.gov/ declares its public catalog as \"Open Data Portal | Ramsey County, Minnesota\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "mischooldataopendataportalapi",
+    "name": "MI School Data Open Data Portal API",
+    "canonicalId": "mischooldataopendataportalapi",
+    "baseUrl": "https://mischooldata.data.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://mischooldata.data.socrata.com/",
+    "freeEvidence": "Owner primary portal https://mischooldata.data.socrata.com/ declares its public catalog as \"Open Data Portal | Rally - Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "opendatanewbrunswickapi",
+    "name": "Open Data New Brunswick API",
+    "canonicalId": "opendatanewbrunswickapi",
+    "baseUrl": "https://gnb.socrata.com",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://gnb.socrata.com/",
+    "freeEvidence": "Owner primary portal https://gnb.socrata.com/ declares its public catalog as \"Open Data Portal | New Brunswick Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "friuliveneziagiuliaopendataapi",
+    "name": "Friuli Venezia Giulia Open Data API",
+    "canonicalId": "friuliveneziagiuliaopendataapi",
+    "baseUrl": "https://www.dati.friuliveneziagiulia.it",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.dati.friuliveneziagiulia.it/",
+    "freeEvidence": "Owner primary portal https://www.dati.friuliveneziagiulia.it/ declares its public catalog as \"Regione Autonoma Friuli Venezia Giulia | Open Data | Open Data | Regione Autonoma Friuli Venezia Giulia\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "novascotiapropertyvaluationopendataapi",
+    "name": "Nova Scotia Property Valuation Open Data API",
+    "canonicalId": "novascotiapropertyvaluationopendataapi",
+    "baseUrl": "https://www.thedatazone.ca",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.thedatazone.ca/",
+    "freeEvidence": "Owner primary portal https://www.thedatazone.ca/ declares its public catalog as \"datazONE | PVSC | DatazONE |\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "australiancapitalterritoryopendataapi",
+    "name": "Australian Capital Territory Open Data API",
+    "canonicalId": "australiancapitalterritoryopendataapi",
+    "baseUrl": "https://www.data.act.gov.au",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://www.data.act.gov.au/",
+    "freeEvidence": "Owner primary portal https://www.data.act.gov.au/ declares its public catalog as \"ACT | Open Data | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "camdenopendataportalapi",
+    "name": "Camden Open Data Portal API",
+    "canonicalId": "camdenopendataportalapi",
+    "baseUrl": "https://opendata.camden.gov.uk",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.camden.gov.uk/",
+    "freeEvidence": "Owner homepage expressly invites access, analysis and sharing; data may be viewed, reused and downloaded under an Open Government Licence. Owner primary portal https://opendata.camden.gov.uk/ declares its public catalog as \"Camden Council | Open Data | Open Data Portal\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "rdwopenmobilitydataapi",
+    "name": "RDW Open Mobility Data API",
+    "canonicalId": "rdwopenmobilitydataapi",
+    "baseUrl": "https://opendata.rdw.nl",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://opendata.rdw.nl/",
+    "freeEvidence": "Owner primary portal https://opendata.rdw.nl/ declares its public catalog as \"Open Data | RDW | Open Data | RDW\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  },
+  {
+    "id": "cohesionopendataapi",
+    "name": "Cohesion Open Data API",
+    "canonicalId": "cohesionopendataapi",
+    "baseUrl": "https://cohesiondata.ec.europa.eu",
+    "smokePath": "/api/views/metadata/v1?limit=1",
+    "docsUrl": "https://dev.socrata.com/docs/other/metadata",
+    "pricing": "free",
+    "pricingSource": "https://cohesiondata.ec.europa.eu/",
+    "freeEvidence": "Owner primary portal https://cohesiondata.ec.europa.eu/ declares its public catalog as \"Open Data Portal for the European Structural Investment Funds - European Commission | Cohesion Open Data\" and offers data/catalog browsing or its API/developer entry point. Current official Metadata OpenAPI (https://dev.socrata.com/apis/metadata.yaml) explicitly permits anonymous read of public metadata and bounded limit/page pagination. This owner-host endpoint returned one valid public metadata record without credentials or payment. Only the reviewed metadata collection pathname is allowed. Preserve source/per-asset licenses; no universal data resale permission, private access, or SODA3 query entitlement is claimed. One owner catalog counts once.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/views/metadata/v1"
+    ]
+  }
+]

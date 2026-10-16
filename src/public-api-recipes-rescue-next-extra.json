@@ -1,0 +1,50 @@
+[
+  {
+    "id": "digidates",
+    "name": "DigiDates",
+    "canonicalId": "digidates",
+    "baseUrl": "https://digidates.de/api/v1",
+    "smokePath": "/unixtime",
+    "docsUrl": "https://digidates.de/en/docs/openapi.yaml",
+    "pricing": "free",
+    "pricingSource": "https://digidates.de/en/",
+    "freeEvidence": "Official site explicitly states API access is free of charge and currently without limitation. Official OpenAPI defines the public date/time routes and Apache 2.0 licence.",
+    "responseKind": "json"
+  },
+  {
+    "id": "iseven",
+    "name": "isEven",
+    "canonicalId": "iseven",
+    "baseUrl": "https://api.isevenapi.xyz/api",
+    "smokePath": "/iseven/6/",
+    "docsUrl": "https://isevenapi.xyz/",
+    "pricing": "free",
+    "pricingSource": "https://isevenapi.xyz/",
+    "freeEvidence": "Official public tier is explicitly free for integers 0 to 999999; keyless public GET may return an advertisement. Premium and Enterprise ranges are excluded.",
+    "responseKind": "json"
+  },
+  {
+    "id": "ukbankholidays",
+    "name": "UK Bank Holidays",
+    "canonicalId": "ukbankholidays",
+    "baseUrl": "https://www.gov.uk",
+    "smokePath": "/bank-holidays.json",
+    "docsUrl": "https://www.api.gov.uk/gds/bank-holidays/",
+    "pricing": "free",
+    "pricingSource": "https://www.gov.uk/bank-holidays",
+    "freeEvidence": "Official government API catalogue documents this public JSON endpoint. GOV.UK content is available under Open Government Licence v3.0 except where otherwise stated; source acknowledgement required.",
+    "responseKind": "json"
+  },
+  {
+    "id": "inspirehepnet",
+    "name": "inspirehep.net",
+    "canonicalId": "inspirehepnet",
+    "baseUrl": "https://inspirehep.net",
+    "smokePath": "/api/literature?fields=titles&q=recid%3A4328&size=1",
+    "docsUrl": "https://github.com/inspirehep/rest-api-doc",
+    "pricing": "free",
+    "pricingSource": "https://github.com/inspirehep/rest-api-doc",
+    "freeEvidence": "Official API documentation allows public read-only GET and explains most metadata is CC0. Only the published title is requested; restricted full text, fields and bulk email-address collection are excluded. Limit 15 requests per 5 seconds per IP.",
+    "responseKind": "json"
+  }
+]

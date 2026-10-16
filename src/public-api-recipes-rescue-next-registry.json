@@ -1,0 +1,26 @@
+[
+  {
+    "id": "npmregistry",
+    "name": "npm Registry",
+    "canonicalId": "npmregistry",
+    "baseUrl": "https://registry.npmjs.org",
+    "smokePath": "/typescript/latest",
+    "docsUrl": "https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md",
+    "pricing": "free",
+    "pricingSource": "https://docs.npmjs.com/policies/terms/",
+    "freeEvidence": "Official npm terms distinguish free use of the public registry from paid private services. Public version metadata is keyless. Respect individual package licences and fair-use/replication policies; no package code is executed.",
+    "responseKind": "json"
+  },
+  {
+    "id": "codeberg",
+    "name": "Codeberg",
+    "canonicalId": "codeberg",
+    "baseUrl": "https://codeberg.org",
+    "smokePath": "/api/v1/repos/forgejo/forgejo",
+    "docsUrl": "https://codeberg.org/api/swagger",
+    "pricing": "free",
+    "pricingSource": "https://docs.codeberg.org/getting-started/what-is-codeberg/",
+    "freeEvidence": "Official Codeberg documentation describes free community platform and public browsing. Hosted Forgejo API publishes public repository metadata without authentication; private repositories and writes are excluded. Respect repository licences.",
+    "responseKind": "json"
+  }
+]

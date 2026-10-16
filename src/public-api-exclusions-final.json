@@ -1,0 +1,58 @@
+[
+  {
+    "id": "cocoapods",
+    "name": "CocoaPods",
+    "cause": "commercial_permission",
+    "docsUrl": "https://cocoapods.org/legal",
+    "evidence": "Official General Conditions section 5 prohibits reproducing, duplicating, copying, selling, reselling or exploiting any portion of the Service or access without express prior written permission. A public metadata GET works, but that does not establish permission for APIClaw to proxy the service. Discovery only pending permission."
+  },
+  {
+    "id": "ssllabsapi",
+    "name": "SSL Labs API",
+    "cause": "commercial_permission",
+    "docsUrl": "https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md",
+    "evidence": "Official API documentation Terms and Conditions states commercial use is generally disallowed without explicit Qualys permission. The documented free availability does not authorize a commercial shared gateway; obtain permission before enabling."
+  },
+  {
+    "id": "mavencentral",
+    "name": "Maven Central",
+    "cause": "commercial_permission",
+    "docsUrl": "https://central.sonatype.org/terms.html",
+    "evidence": "Official Central terms updated March 31, 2026 retain a reasonable-volume Free Consumption Tier but list commercial use without express permission as abuse. Materials include metadata. Working unauthenticated search and a free tier do not establish commercial gateway permission."
+  },
+  {
+    "id": "mockoon",
+    "name": "Mockoon",
+    "cause": "unresolved",
+    "docsUrl": "https://mockoon.com/playground/",
+    "evidence": "Official hosted Playground FAQ limits use to prototyping and states it is not meant for production. This is a real hosted API, so not_hosted_api would be inaccurate. Keep discovery for APIClaw production use pending suitable service permission; no broader commercial-use prohibition is inferred."
+  },
+  {
+    "id": "semanticscholar",
+    "name": "Semantic Scholar",
+    "cause": "commercial_permission",
+    "docsUrl": "https://api.semanticscholar.org/license/",
+    "evidence": "Official API License limits default use to internal non-commercial research/education, requires an expanded licence for commercial purposes, prohibits repackaging/reselling the API and restricts sharing response data. A free or unauthenticated response is not permission for a commercial shared gateway."
+  },
+  {
+    "id": "censusgov",
+    "name": "Census.gov",
+    "cause": "needs_key",
+    "docsUrl": "https://www.census.gov/library/video/2026/adrm/requesting-a-census-data-api-key.html",
+    "evidence": "Official May 11, 2026 announcement requires an API key for every Census Data API query. Current official example pages also require personal API keys for all data queries. Key registration is free, but no account/key was created or supplied. This restriction applies to Census Data API queries, not unrelated Census geocoder/TIGER services."
+  },
+  {
+    "id": "7timer",
+    "name": "7Timer!",
+    "cause": "commercial_permission",
+    "docsUrl": "https://www.7timer.info/doc.php?lang=en",
+    "evidence": "Official documentation section 5 allows free use and redistribution only for non-commercial purposes and asks program developers to notify the operator. Keyless JSON support does not grant commercial gateway rights; leave discovery absent separate permission."
+  },
+  {
+    "id": "gdbrowser",
+    "name": "GDBrowser",
+    "cause": "unresolved",
+    "docsUrl": "https://gdbrowser.com/api",
+    "evidence": "Official operator API page explicitly asks developers not to use the API because it is unreliable and stressful on the servers, and may be removed. Respect this request and leave discovery pending operator permission. This is an operator usage restriction, not evidence of a formal commercial-only licence or proof that no hosted endpoint exists."
+  }
+]

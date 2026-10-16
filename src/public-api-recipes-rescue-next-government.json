@@ -1,0 +1,50 @@
+[
+  {
+    "id": "onsuk",
+    "name": "ONS UK",
+    "canonicalId": "onsuk",
+    "baseUrl": "https://api.beta.ons.gov.uk/v1",
+    "smokePath": "/datasets?limit=1",
+    "docsUrl": "https://developer.ons.gov.uk/",
+    "pricing": "free",
+    "pricingSource": "https://developer.ons.gov.uk/",
+    "freeEvidence": "Official ONS developer hub states API is open and unrestricted with no API keys; content is Open Government Licence v3.0 except where stated. Attribute ONS and preserve dataset-specific restrictions.",
+    "responseKind": "json"
+  },
+  {
+    "id": "secedgar",
+    "name": "SEC EDGAR",
+    "canonicalId": "secedgar",
+    "baseUrl": "https://data.sec.gov",
+    "smokePath": "/submissions/CIK0000320193.json",
+    "docsUrl": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+    "pricing": "free",
+    "pricingSource": "https://www.sec.gov/about/webmaster-frequently-asked-questions",
+    "freeEvidence": "Official SEC FAQ states government-created content and EDGAR public filing content are free to access and reuse; JSON API requires no authentication/key. Identify APIClaw and its public contact in User-Agent and respect fair-access limits.",
+    "responseKind": "json"
+  },
+  {
+    "id": "cdc",
+    "name": "CDC",
+    "canonicalId": "cdc",
+    "baseUrl": "https://data.cdc.gov",
+    "smokePath": "/resource/bi63-dtpu.json?%24limit=1",
+    "docsUrl": "https://dev.socrata.com/foundry/data.cdc.gov/bi63-dtpu",
+    "pricing": "free",
+    "pricingSource": "https://catalog.data.gov/dataset/cdc-open-data-api",
+    "freeEvidence": "Official US data catalog lists CDC Open Data API with CC0 licence. Public SODA JSON read requires no app token. This reads one aggregate mortality statistic; no patient-level or restricted information.",
+    "responseKind": "json"
+  },
+  {
+    "id": "epa",
+    "name": "EPA",
+    "canonicalId": "epa",
+    "baseUrl": "https://data.epa.gov/dmapservice",
+    "smokePath": "/sems.envirofacts_site/0:1/json",
+    "docsUrl": "https://www.epa.gov/enviro/envirofacts-data-service-api",
+    "pricing": "free",
+    "pricingSource": "https://www.epa.gov/web-policies-and-procedures/epa-disclaimers",
+    "freeEvidence": "Official EPA publishes public Envirofacts REST data service for external applications. Government web content is public-domain unless third-party restrictions are stated. One public environmental-site record is requested.",
+    "responseKind": "json"
+  }
+]

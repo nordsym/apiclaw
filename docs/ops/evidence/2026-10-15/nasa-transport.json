@@ -1,0 +1,24 @@
+[
+  {
+    "bytes": 1048,
+    "contentType": "application/json",
+    "encoding": null,
+    "gzip": false,
+    "identity": false,
+    "latencyMs": 2272,
+    "status": 200,
+    "title": true,
+    "validJson": true
+  },
+  {
+    "bytes": 67,
+    "contentType": "application/json",
+    "encoding": null,
+    "gzip": false,
+    "identity": true,
+    "latencyMs": 9389,
+    "status": 500,
+    "title": false,
+    "validJson": true
+  }
+]

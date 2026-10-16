@@ -1,3 +1,5 @@
+import { discoveryCatalogRequest } from "./discoveryCatalog";
+import { executeWorkspacePublicApi } from "./workspacePublicExecute";
 import { managedPaidCallReady, MANAGED_BILLING_UNAVAILABLE_MESSAGE } from "../src/managed-commercial-policy";
 import { bindManagedChatModel, friendlyManagedFailure, normalizeManagedChatParams } from "./managedUserExperience";
 import { httpRouter } from "convex/server";
@@ -2194,8 +2196,8 @@ http.route({
       params.set("page", String(page));
       params.set("limit", String(limit));
 
-      const catalogUrl = `https://apiclaw.cloud/api/catalog?${params.toString()}`;
-      const catalogRes = await fetch(catalogUrl, { signal: AbortSignal.timeout(10_000) });
+      const catalogRequest = discoveryCatalogRequest(params);
+      const catalogRes = await fetch(catalogRequest.url, catalogRequest.init);
 
       if (!catalogRes.ok) {
         return jsonResponse({ error: "Registry unavailable" }, 502);
@@ -5742,6 +5744,21 @@ async function resolveExecuteAuth(
   return { authMethod: "anonymous" };
 }
 
+// Health and anti-abuse checks belong to the free rail, not managed billing.
+async function guardWorkspacePublicRead(ctx: any, workspaceId: string, apiId: string): Promise<Response | null> {
+  const healthy = await ctx.runQuery((internal as any).publicApiHealth.isHealthy, { apiId });
+  if (!healthy) return jsonResponse({ success: false, error: {
+    code: "public_api_temporarily_unavailable",
+    message: "This free API is temporarily unavailable. Please choose another API.",
+  } }, 503);
+  const limit = await ctx.runMutation(internal.ratelimit.checkWorkspacePublic, { workspaceId });
+  if (limit.reason === "workspace_inactive") return unauthResponse("public_api_requires_active_workspace");
+  if (!limit.allowed) return new Response(JSON.stringify({ success: false, error: {
+    code: "rate_limited", message: "Please wait a moment before calling another free API.",
+  } }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(limit.retryAfterSeconds) } });
+  return null;
+}
+
 async function handleManagedExecute(ctx: any, request: Request): Promise<Response> {
     const startTime = Date.now();
 
@@ -5835,11 +5852,26 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
         delete params.max_completion_tokens;
       }
     }
+    // Public keyless reads are a separate, free rail. Never reserve managed
+    // usage or send them through billing, even when the paid trial is exhausted.
     const publicApi = getWorkspacePublicApi(String(provider));
-    if (publicApi && (!workspaceId || authMethod === "anonymous")) {
-      return unauthResponse("public_api_requires_workspace_auth");
+    if (publicApi) {
+      if (!workspaceId || authMethod === "anonymous") {
+        return unauthResponse("public_api_requires_workspace_auth");
+      }
+      const denied = await guardWorkspacePublicRead(ctx, workspaceId, publicApi.id);
+      if (denied) return denied;
+      const result = await executeWorkspacePublicApi(publicApi, action, params, {
+        readText: readUpstreamTextCapped,
+        recordSuccess: async () => {
+          await recordFirstSuccessfulGatewayCall(ctx, {
+            workspaceId, path: "/v1/execute", authMethod, provider: publicApi.id, action,
+          });
+        },
+      });
+      return jsonResponse(result.body, result.status);
     }
-    const isManagedExecution = provider === "auto" || !!PROVIDERS[provider] || action === "chat" || !!publicApi;
+    const isManagedExecution = provider === "auto" || !!PROVIDERS[provider] || action === "chat";
     if (isManagedExecution) {
       // Reserve from the full normalized body. Tool schemas, instructions,
       // system prompts, and other auxiliary input can dwarf messages alone.
@@ -6314,111 +6346,6 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       }
     }
 
-    // Path 3: workspace-authenticated public / no-key origins. Anonymous
-    // keyless proxy stays disabled. Origin is pinned to the cataloged HTTPS
-    // base and redirects are rejected.
-    if (publicApi) {
-      if (!workspaceId || authMethod === "anonymous") {
-        return unauthResponse("public_api_requires_workspace_auth");
-      }
-      if (!quotaGate) {
-        return jsonResponse({
-          success: false,
-          error: { code: "quota_required", message: "Workspace public execution requires a managed quota reservation." },
-        }, 500);
-      }
-      routeDetail = `workspace_public_${publicApi.id}`;
-      const isKroki = publicApi.id === "kroki" && action === "render";
-      const pinned = isKroki
-        ? buildPinnedPublicApiUrl(publicApi, `/${params.type || "mermaid"}/${params.format || "svg"}`)
-        : buildPinnedPublicApiUrl(publicApi, params.path);
-      if (!pinned) {
-        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
-        return jsonResponse({
-          success: false,
-          error: {
-            code: "unsafe_public_origin",
-            message: `Provider "${provider}" path is not pinned to ${publicApi.origin}.`,
-          },
-          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
-        }, 400);
-      }
-      let upstreamDispatchAttempted = false;
-      try {
-        const headers: Record<string, string> = {
-          Accept: "application/json",
-          "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud)",
-        };
-        const fetchOpts: RequestInit = {
-          method: isKroki ? "POST" : "GET",
-          headers,
-          redirect: "error",
-          signal: AbortSignal.timeout(15_000),
-        };
-        if (isKroki) {
-          if (typeof params.diagram !== "string" || !params.diagram) {
-            await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
-            return jsonResponse({
-              success: false,
-              error: { code: "invalid_params", message: "Kroki render requires diagram text." },
-            }, 400);
-          }
-          headers["Content-Type"] = "text/plain";
-          fetchOpts.body = params.diagram;
-        }
-        upstreamDispatchAttempted = true;
-        const response = await fetch(pinned.toString(), fetchOpts);
-        const latencyMs = Date.now() - startTime;
-        const firstCall = response.ok
-          ? await recordFirstSuccessfulGatewayCall(ctx, {
-            workspaceId,
-            path: "/v1/execute",
-            authMethod,
-            provider: publicApi.id,
-            action,
-          })
-          : { firstCallRecorded: false };
-        const raw = await readUpstreamTextCapped(response);
-        let data: any;
-        try {
-          data = JSON.parse(raw);
-        } catch {
-          data = { raw };
-        }
-        await finalizeManagedCall(ctx, quotaGate, {
-          success: response.ok,
-          provider: publicApi.id,
-          ...(response.ok
-            ? successfulManagedCostDetails(quotaGate)
-            : { providerCostUsd: 0, costSource: "zero_cost" as const }),
-        });
-        return jsonExecuteResponse({
-          success: response.ok,
-          provider: publicApi.id,
-          action,
-          data,
-          _apiclaw: { latencyMs, route: routeDetail, gateway: true },
-        }, response.ok ? 200 : response.status, executeRevenueNudge(firstCall, quotaGate));
-      } catch (e: any) {
-        if (upstreamDispatchAttempted) {
-          return ambiguousPostDispatchResponse(
-            ctx,
-            quotaGate,
-            { provider: publicApi.id },
-            502,
-            { provider: publicApi.id, action },
-          );
-        }
-        await finalizeManagedCall(ctx, quotaGate, { success: false, providerCostUsd: 0, costSource: "zero_cost" });
-        return jsonResponse({
-          success: false,
-          provider: publicApi.id,
-          action,
-          error: e.message,
-          _apiclaw: { latencyMs: Date.now() - startTime, route: routeDetail, gateway: true },
-        }, 500);
-      }
-    }
 
     return jsonResponse({
       success: false,
@@ -7798,38 +7725,26 @@ http.route({
           },
         }, 405);
       }
-      try {
-        const forwardRes = await fetch(pinned.toString(), {
-          method: "GET",
-          headers: { Accept: "application/json", "User-Agent": "APIClaw/1.0 (+https://apiclaw.cloud)" },
-          redirect: "error",
-          signal: AbortSignal.timeout(15_000),
-        });
-        if (forwardRes.ok) {
+      const denied = await guardWorkspacePublicRead(ctx, workspaceId, publicApi.id);
+      if (denied) return denied;
+      const result = await executeWorkspacePublicApi(publicApi, "call", { path: userPath }, {
+        readText: readUpstreamTextCapped,
+        recordSuccess: async () => {
           await recordFirstSuccessfulGatewayCall(ctx, {
-            workspaceId,
-            path: "/v1/call",
-            authMethod: auth.authMethod,
-            provider: publicApi.id,
-            action: `${method} ${userPath}`,
+            workspaceId, path: "/v1/call", authMethod: auth.authMethod,
+            provider: publicApi.id, action: `${method} ${userPath}`,
           });
-        }
-        const respText = await forwardRes.text();
-        return new Response(respText, {
-          status: forwardRes.status,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": forwardRes.headers.get("Content-Type") ?? "application/json",
-            "X-APIClaw-Mode": "workspace_public",
-            "X-APIClaw-Provider": publicApi.name,
-          },
-        });
-      } catch (e: any) {
-        return jsonResponse(
-          { error: { code: "public_origin_error", message: e?.message ?? "public origin fetch failed", provider: publicApi.name } },
-          502,
-        );
-      }
+        },
+      });
+      if (result.status !== 200) return jsonResponse(result.body, result.status);
+      const kind = publicApi.responseKind ?? "json";
+      const raw = kind === "json" ? JSON.stringify(result.body.data)
+        : String((result.body.data as { raw: string }).raw);
+      return new Response(raw, { status: 200, headers: {
+        ...corsHeaders,
+        "Content-Type": kind === "xml" ? "application/xml" : kind === "csv" ? "text/csv" : kind === "text" ? "text/plain" : "application/json",
+        "X-APIClaw-Mode": "workspace_public", "X-APIClaw-Provider": publicApi.name,
+      } });
     }
 
     // ---------------- Branch: everything else = discovery_only ----------------

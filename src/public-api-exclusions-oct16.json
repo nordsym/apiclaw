@@ -1,0 +1,23 @@
+[
+  {
+    "id": "dogfacts",
+    "name": "Dog Facts",
+    "cause": "commercial_permission",
+    "docsUrl": "https://dogapi.dog/terms",
+    "evidence": "Current kinduff host dog-api.kinduff.com redirects to dogapi.dog, whose Terms section 2 permits personal non-commercial use only. The homepage describes free access and paid teaching, but that does not override the narrower API licence. Leave discovery pending explicit commercial gateway permission."
+  },
+  {
+    "id": "nekosbest",
+    "name": "NekosBest",
+    "cause": "commercial_permission",
+    "docsUrl": "https://docs.nekos.best/legal/tos",
+    "evidence": "Official Terms updated February 17, 2026 explicitly prohibit commercial use, rehosting/reselling/monetizing content and public redistribution of cached API responses. Fully free/no-key marketing and valid HTTP200 metadata do not grant commercial gateway rights."
+  },
+  {
+    "id": "dicebearavatars",
+    "name": "Dicebear Avatars",
+    "cause": "commercial_permission",
+    "docsUrl": "https://www.dicebear.com/integrations/http-api/",
+    "evidence": "Official hosted HTTP API guide limits free public API use to non-commercial purposes and directs commercial users to self-host. Permissive avatar style/software licences do not grant use of the hosted commercial gateway without permission."
+  }
+]

@@ -1,0 +1,167 @@
+[
+  {
+    "id": "nextbike",
+    "name": "Nextbike",
+    "canonicalId": "nextbike",
+    "baseUrl": "https://gbfs.nextbike.net",
+    "smokePath": "/maps/gbfs/v2/nextbike_al/de/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_al/de/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares CC0-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/maps/gbfs/v2/nextbike_al/de/system_information.json"
+    ]
+  },
+  {
+    "id": "donkeyrepublicgbfs",
+    "name": "Donkey Republic GBFS",
+    "canonicalId": "donkeyrepublicgbfs",
+    "baseUrl": "https://stables.donkey.bike",
+    "smokePath": "/api/public/gbfs/3.0/donkey_antwerp/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://stables.donkey.bike/api/public/gbfs/3.0/donkey_antwerp/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares CC0-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/api/public/gbfs/3.0/donkey_antwerp/system_information.json"
+    ]
+  },
+  {
+    "id": "mobibikesharegbfs",
+    "name": "Mobi Bike Share GBFS",
+    "canonicalId": "mobibikesharegbfs",
+    "baseUrl": "https://gbfs.kappa.fifteen.eu",
+    "smokePath": "/gbfs/2.2/mobi/en/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://gbfs.kappa.fifteen.eu/gbfs/2.2/mobi/en/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares ODbL-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/gbfs/2.2/mobi/en/system_information.json"
+    ]
+  },
+  {
+    "id": "eselacgbfs",
+    "name": "esel.ac GBFS",
+    "canonicalId": "eselacgbfs",
+    "baseUrl": "https://di.esel.ac",
+    "smokePath": "/gbfs/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://di.esel.ac/gbfs/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares https://creativecommons.org/publicdomain/zero/1.0/. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/gbfs/system_information.json"
+    ]
+  },
+  {
+    "id": "swabiaugsburggbfs",
+    "name": "swabi - augsburg GBFS",
+    "canonicalId": "swabiaugsburggbfs",
+    "baseUrl": "https://gbfs.partners.fifteen.eu",
+    "smokePath": "/gbfs/2.2/swabi/en/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://gbfs.partners.fifteen.eu/gbfs/2.2/swabi/en/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares ODbL-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/gbfs/2.2/swabi/en/system_information.json"
+    ]
+  },
+  {
+    "id": "citybikeshelsinkigbfs",
+    "name": "City Bikes Helsinki GBFS",
+    "canonicalId": "citybikeshelsinkigbfs",
+    "baseUrl": "https://gbfs.theta.fifteen.eu",
+    "smokePath": "/gbfs/2.2/helsinki/en/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://gbfs.theta.fifteen.eu/gbfs/2.2/helsinki/en/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares ODbL-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/gbfs/2.2/helsinki/en/system_information.json"
+    ]
+  },
+  {
+    "id": "autoenvelaygbfs",
+    "name": "Auto-en-Velay GBFS",
+    "canonicalId": "autoenvelaygbfs",
+    "baseUrl": "https://backend.citiz.fr",
+    "smokePath": "/public/provider/23/gbfs/v3.0/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://backend.citiz.fr/public/provider/23/gbfs/v3.0/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares CC0-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/public/provider/23/gbfs/v3.0/system_information.json"
+    ]
+  },
+  {
+    "id": "optymobelfortgbfs",
+    "name": "Optymo Belfort GBFS",
+    "canonicalId": "optymobelfortgbfs",
+    "baseUrl": "https://data.optymo.fr",
+    "smokePath": "/vls/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://data.optymo.fr/vls/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares ODbL-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/vls/system_information.json"
+    ]
+  },
+  {
+    "id": "vlivertgbfs",
+    "name": "Vélivert GBFS",
+    "canonicalId": "vlivertgbfs",
+    "baseUrl": "https://api.saint-etienne-metropole.fr",
+    "smokePath": "/velivert/api/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://api.saint-etienne-metropole.fr/velivert/api/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares ODbL-1.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/velivert/api/system_information.json"
+    ]
+  },
+  {
+    "id": "berylgbfs",
+    "name": "Beryl GBFS",
+    "canonicalId": "berylgbfs",
+    "baseUrl": "https://beryl-gbfs-production.web.app",
+    "smokePath": "/v2_2/BCP/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://beryl-gbfs-production.web.app/v2_2/BCP/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares https://cdla.dev/permissive-2-0/. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/v2_2/BCP/system_information.json"
+    ]
+  },
+  {
+    "id": "flamingoaucklandgbfs",
+    "name": "Flamingo Auckland GBFS",
+    "canonicalId": "flamingoaucklandgbfs",
+    "baseUrl": "https://data.rideflamingo.com",
+    "smokePath": "/gbfs/3/auckland/system_information.json",
+    "docsUrl": "https://gbfs.org/documentation/reference/#system_informationjson",
+    "pricing": "free",
+    "pricingSource": "https://data.rideflamingo.com/gbfs/3/auckland/system_information.json",
+    "freeEvidence": "The operator publishes this keyless GBFS system-information endpoint in the official MobilityData systems catalog (https://github.com/MobilityData/gbfs/blob/master/systems.csv). Its response explicitly declares CC-BY-4.0. Public non-personal operator metadata only; preserve attribution and applicable database share-alike obligations. One representative per distinct feed origin, never each station, feed version or city served by the same operator API.",
+    "responseKind": "json",
+    "allowedPaths": [
+      "/gbfs/3/auckland/system_information.json"
+    ]
+  }
+]

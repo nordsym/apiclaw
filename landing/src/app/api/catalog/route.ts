@@ -1,3 +1,4 @@
+import { getCallableSnapshot, applyCallableSnapshot } from "@/lib/callable-snapshot";
 import { loadPublishedListings, mergePublishedListings } from "@/lib/published-listings";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
@@ -20,6 +21,7 @@ interface ApiEntry {
   auth: string;
   pricing: string;
   callable?: boolean;
+  publicReadsOnly?: boolean;
   managedAdapter?: boolean;
   providerId?: string;
   actions?: readonly string[];
@@ -48,30 +50,31 @@ interface VerificationStatus {
 
 let cachedApis: ApiEntry[] | null = null;
 let cachedVerification: VerificationStatus | null = null;
-let cachedWorkspacePublicNames: Set<string> | null = null;
+type PublicCard = { id: string; name: string; baseUrl: string; docsUrl?: string };
+let cachedWorkspacePublicCards: Map<string, PublicCard> | null = null;
 
-function isWorkspacePublicCatalogCard(name: string | undefined): boolean {
-  if (!cachedWorkspacePublicNames) {
+function getWorkspacePublicCatalogCard(name: string | undefined): PublicCard | undefined {
+  if (!cachedWorkspacePublicCards) {
     const paths = [
       path.join(process.cwd(), "src/lib/workspace-public-apis.json"),
       path.join(process.cwd(), "landing/src/lib/workspace-public-apis.json"),
     ];
     for (const filePath of paths) {
       try {
-        const rows = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Array<{ name?: string }>;
-        cachedWorkspacePublicNames = new Set(
-          rows.map((row) => String(row.name || "").toLowerCase().trim()).filter(Boolean),
+        const rows = JSON.parse(fs.readFileSync(filePath, "utf-8")) as PublicCard[];
+        cachedWorkspacePublicCards = new Map(
+          rows.map((row) => [row.name.toLowerCase().trim(), row]),
         );
         break;
       } catch {
         continue;
       }
     }
-    if (!cachedWorkspacePublicNames) {
+    if (!cachedWorkspacePublicCards) {
       throw new Error("workspace-public-apis.json is missing from the landing catalog");
     }
   }
-  return typeof name === "string" && cachedWorkspacePublicNames.has(name.toLowerCase().trim());
+  return typeof name === "string" ? cachedWorkspacePublicCards.get(name.toLowerCase().trim()) : undefined;
 }
 
 function assertPublicCatalogTruth(
@@ -186,7 +189,8 @@ function loadApis(): ApiEntry[] {
 
           let tier: ApiEntry["tier"];
           let verified = false;
-          const workspacePublic = isWorkspacePublicCatalogCard(a.name);
+          const publicCard = getWorkspacePublicCatalogCard(a.name);
+          const workspacePublic = publicCard !== undefined;
           // Harvested apiKey/unknown rows stay discovery-only. Only the
           // workspace-authenticated public/no-key allowlist is callable.
           let callable = workspacePublic;
@@ -202,6 +206,11 @@ function loadApis(): ApiEntry[] {
 
           return {
             ...a,
+            ...(publicCard ? {
+              baseUrl: publicCard.baseUrl, docsUrl: publicCard.docsUrl || a.docsUrl,
+              auth: "none (public reads)", pricing: "free", providerId: publicCard.id,
+              actions: ["get"], publicReadsOnly: true,
+            } : {}),
             callable,
             managedAdapter: false,
             tier,
@@ -255,8 +264,10 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = Math.min(parseInt(searchParams.get("limit") || "60", 10), 100);
 
+  const snapshot = await getCallableSnapshot();
+  if (!snapshot.available) return NextResponse.json({ error: "Callable availability temporarily unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } });
   let apis: ApiEntry[];
-  try { apis = mergePublishedListings(loadApis(), await loadPublishedListings()); }
+  try { apis = applyCallableSnapshot(mergePublishedListings(loadApis(), await loadPublishedListings()), snapshot); }
   catch (error) { console.error("Catalog unavailable", error); return NextResponse.json({ error: "Catalog temporarily unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } }); }
   const tierFilter = searchParams.get("tier") || ""; // callable | adapter | verified | discovery
 
@@ -332,5 +343,6 @@ export async function GET(req: NextRequest) {
     managedProviderAdapterCount: MANAGED_PROVIDER_ADAPTER_COUNT,
     customerExecutableProviderCount: PUBLIC_CUSTOMER_EXECUTABLE_PROVIDER_COUNT,
     canonGeneratedAt: CANON_STATS.generated_at,
+    callableCheckedAt: snapshot.checkedAt,
   }, { headers: { "Cache-Control": "no-store" } });
 }

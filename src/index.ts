@@ -17,6 +17,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { discoverAPIs, getAPIDetails, getCategories, getAllAPIs } from './discovery.js';
+import { loadPublicDiscoveryHealth } from './public-discovery-health.js';
 import { trackStartup, trackSearch, trackExecute, trackDiscovery } from './telemetry.js';
 import { getConnectedProviders } from './execute.js';
 import { isOpenAPI, getOpenAPIActions, getOpenAPIBaseUrl, getAPIClawTotalStats } from './open-apis.js';
@@ -1285,6 +1286,7 @@ Docs: https://apiclaw.cloud
           if (discoverResp.ok) {
             const data: any = await discoverResp.json();
             const publicApis = (data.apis || []).filter((a: any) =>
+              (!callableOnly || a.callable === true) &&
               !isInternalProviderReference({
                 id: a.id || a.providerId,
                 name: a.name,
@@ -1301,7 +1303,7 @@ Docs: https://apiclaw.cloud
                 description: a.description,
                 category: a.category,
                 baseUrl: a.baseUrl,
-                callable: a.callable !== false,
+                callable: a.callable === true,
                 ...(a.listingId ? { docsUrl: a.docsUrl, auth: a.auth, pricing: a.pricing, pricingNotes: a.pricingNotes, operations: a.operations, executionAvailable: false } : {}),
               },
               matchScore: 0.9,
@@ -1311,11 +1313,11 @@ Docs: https://apiclaw.cloud
             results = open.slice(0, requestedMax);
           } else {
             // Gateway 5xx — local sparse fallback so we don't return nothing.
-            results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
+            results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly, publicHealth: await loadPublicDiscoveryHealth() });
           }
         } catch {
           // Network failure — local sparse fallback.
-          results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly });
+          results = discoverAPIs(query, { category, maxResults: requestedMax, region, callableOnly, publicHealth: await loadPublicDiscoveryHealth() });
         }
 
         const responseTimeMs = Date.now() - startTime;
@@ -1569,7 +1571,7 @@ Docs: https://apiclaw.cloud
       case 'list_categories': {
         const withApiIds = args?.with_api_ids === true;
         const categories = getCategories();
-        const allAPIs = getAllAPIs();
+        const allAPIs = getAllAPIs(await loadPublicDiscoveryHealth());
 
         const summary = categories
           .map((cat) => {

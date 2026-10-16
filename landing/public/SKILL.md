@@ -18,11 +18,11 @@ The metric that matters is a successful `POST /v1/execute`, not an install.
 Give an agent this file and it can install, sign in, and land one 200
 without guessing.
 
-Live catalog (2026-08-25). Use `https://apiclaw.cloud/api/catalog` if
+Live catalog (2026-10-16). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
-- 1,005 callable
-- 26,619 discoverable
+- 1,143 callable
+- 27,483 discoverable
 - 22 built-in providers
 
 Identity and product truth live at `https://apiclaw.cloud/llms.txt`.
@@ -186,8 +186,8 @@ If NASA is not 200, fetch today's ECB FX rates. Same whoami gate.
 Same nonempty `$SESSION`. Do not curl if `$SESSION` is empty.
 This is the same last-resort rail the automatic first execute
 uses after Authorize. It is free forever, no card, no key.
-Brave / Serper / Firecrawl have real provider cost and consume the
-bounded managed allowance. Do not use them for first execute.
+Other managed providers can have upstream costs or unavailable actions.
+Use these two free examples for first execute.
 
 ```bash
 npx @nordsym/apiclaw call frankfurter/latest --params '{"path":"/latest"}' --idempotency-key "apiclaw-first-frankfurter-$(date +%s)"

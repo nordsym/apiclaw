@@ -7,18 +7,18 @@ import { PAYG_MARGIN_RATE } from "@apiclaw/product-truth";
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 const PAYG_MARGIN_PERCENT = PAYG_MARGIN_RATE * 100;
 
-const FIGURES = [
+const figures = (callableCount: number | null) => [
   {
     value: statsData.apiCount.toLocaleString("en-US"),
-    label: "discoverable APIs",
+    label: "indexed API definitions",
   },
   {
-    value: (statsData.customerExecutableCatalogCardCount ?? 1005).toLocaleString("en-US"),
+    value: callableCount === null ? "Unavailable" : callableCount.toLocaleString("en-US"),
     label: "callable now",
   },
 ];
 
-export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
+export function Proof({ isLoggedIn, callableCount }: { isLoggedIn: boolean; callableCount: number | null }) {
   return (
     <section id="pricing" className="scroll-mt-14">
       <div className="claw-container">
@@ -29,13 +29,16 @@ export function Proof({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
 
           <dl className="mt-12 grid gap-8 sm:grid-cols-2 sm:gap-8">
-            {FIGURES.map((f) => (
+            {figures(callableCount).map((f) => (
               <div key={f.label} className="border-t border-border-subtle pt-5">
                 <dd className="claw-display text-[2.4rem] sm:text-[2.75rem] text-text-primary">{f.value}</dd>
                 <dt className="mt-1 text-[14px] font-medium text-text-primary">{f.label}</dt>
               </div>
             ))}
           </dl>
+          <p className="mt-5 text-[13px] text-text-muted">
+            <a href="/catalog" className="claw-link underline underline-offset-4">Browse the catalog, including community listings.</a>
+          </p>
 
           <div className="mt-20 grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
             <div>

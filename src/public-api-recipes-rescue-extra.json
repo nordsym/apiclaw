@@ -1,0 +1,62 @@
+[
+  {
+    "id": "citytorontoopendata",
+    "name": "City, Toronto Open Data",
+    "canonicalId": "citytorontoopendata",
+    "baseUrl": "https://ckan0.cf.opendata.inter.prod-toronto.ca",
+    "smokePath": "/api/3/action/package_search?rows=1",
+    "docsUrl": "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action/help_show?name=package_search",
+    "pricing": "free",
+    "pricingSource": "https://open.toronto.ca/open-data-licence/",
+    "freeEvidence": "Official city open-data licence permits royalty-free reuse including commercial purposes. Public catalog metadata API is documented in its own help response. Attribute Open Government Licence - Toronto and retain dataset-specific restrictions.",
+    "responseKind": "json"
+  },
+  {
+    "id": "cityhelsinki",
+    "name": "City, Helsinki",
+    "canonicalId": "cityhelsinki",
+    "baseUrl": "https://hri.fi/data",
+    "smokePath": "/api/3/action/package_search?rows=1",
+    "docsUrl": "https://hri.fi/data/api/3/action/help_show?name=package_search",
+    "pricing": "free",
+    "pricingSource": "https://hri.fi/en_gb/terms-and-conditions/",
+    "freeEvidence": "HRI official terms generally license data and associated metadata CC BY 4.0, permitting commercial and non-commercial reuse with publisher attribution. Exceptions are specified per dataset; official open-data guidance confirms free of charge.",
+    "responseKind": "json"
+  },
+  {
+    "id": "citygdask",
+    "name": "City, Gdańsk",
+    "canonicalId": "citygdask",
+    "baseUrl": "https://ckan.multimediagdansk.pl",
+    "smokePath": "/api/3/action/package_search?rows=1",
+    "docsUrl": "https://ckan.multimediagdansk.pl/api/3/action/help_show?name=package_search",
+    "pricing": "free",
+    "pricingSource": "https://ckan.multimediagdansk.pl/about",
+    "freeEvidence": "Official city service publishes open data from Gdansk city hall and other entities and links CKAN API documentation. Public metadata search is keyless and has no published tariff; underlying resource licences still apply.",
+    "responseKind": "json"
+  },
+  {
+    "id": "brreg",
+    "name": "Brreg",
+    "canonicalId": "brnnysundregistrene",
+    "baseUrl": "https://data.brreg.no/enhetsregisteret",
+    "smokePath": "/api/enheter?size=1",
+    "docsUrl": "https://data.brreg.no/enhetsregisteret/api/dokumentasjon/no/index.html",
+    "pricing": "free",
+    "pricingSource": "https://www.brreg.no/en/use-of-data-from-the-bronnoysund-register-centre/",
+    "freeEvidence": "Official open data API uses Norwegian Licence for Open Government Data (NLOD). It is freely available for reuse with attribution, including economic activities; personal data retain their separate legal protections.",
+    "responseKind": "json"
+  },
+  {
+    "id": "dataparliamentuk",
+    "name": "Data.parliament.uk",
+    "canonicalId": "dataparliamentuk",
+    "baseUrl": "https://members-api.parliament.uk",
+    "smokePath": "/api/Members/Search?skip=0&take=1",
+    "docsUrl": "https://members-api.parliament.uk/index.html",
+    "pricing": "free",
+    "pricingSource": "https://www.parliament.uk/site-information/copyright-parliament/open-parliament-licence/",
+    "freeEvidence": "Official Parliament API publishes keyless JSON reads. Open Parliament Licence grants royalty-free commercial and non-commercial reuse. Attribute Contains Parliamentary information licensed under the Open Parliament Licence v3.0; personal-data and third-party exceptions remain.",
+    "responseKind": "json"
+  }
+]

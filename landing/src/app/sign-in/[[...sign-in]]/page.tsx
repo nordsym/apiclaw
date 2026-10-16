@@ -5,6 +5,7 @@ import { SignIn } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { getClerkAppearance } from "@/lib/clerk-appearance";
 import { getCurrentTheme } from "@/lib/theme";
+import { AuthProgress } from "@/components/AuthProgress";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { clerkCompanionAuthUrl, clerkForcedRedirectUrl } from "@/lib/auth-continuation";
 
@@ -23,12 +24,12 @@ function SignInForm() {
   }, [params]);
 
   return (
-    <SignIn
+    <AuthProgress><SignIn
       signUpUrl={signUpUrl}
       appearance={appearance}
       forceRedirectUrl={redirectUrl}
       fallbackRedirectUrl={redirectUrl}
-    />
+    /></AuthProgress>
   );
 }
 

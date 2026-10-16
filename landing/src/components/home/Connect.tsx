@@ -61,11 +61,11 @@ const PATHS: Path[] = [
     id: "http",
     label: "HTTP",
     title: "For your own runtime.",
-    body: "One endpoint, one workspace key, one call shape.",
+    body: "Sign in with the CLI, then use the same session and call shape.",
     snippet: (
       <pre className="claw-mono whitespace-pre-wrap break-words sm:whitespace-pre sm:overflow-x-auto rounded-[10px] border border-border-subtle bg-surface px-4 py-3.5 text-[12.5px] leading-[1.7] text-text-secondary">
         <span className="text-text-primary">POST</span> {HTTP_EXECUTE_URL}{"\n"}
-        Authorization: Bearer <span className="text-text-muted">&lt;workspace key&gt;</span>{"\n"}
+        X-APIClaw-Session: <span className="text-text-muted">&lt;session from auth login&gt;</span>{"\n"}
         Idempotency-Key: <span className="text-text-muted">&lt;per operation&gt;</span>{"\n"}
         {"\n"}
         {"{"} <span className="text-text-primary">&quot;provider&quot;</span>: &quot;nasa&quot;, <span className="text-text-primary">&quot;action&quot;</span>: &quot;apod&quot;, <span className="text-text-primary">&quot;params&quot;</span>: {"{}"} {"}"}
@@ -77,7 +77,7 @@ const PATHS: Path[] = [
     id: "remote",
     label: "Remote MCP",
     title: "For connected clients. Nothing to install.",
-    body: "OAuth-capable clients connect to the hosted endpoint through your workspace.",
+    body: "OAuth-capable clients connect to the hosted endpoint. Sign in when prompted so the connection belongs to your workspace and your credentials stay private.",
     snippet: <CopyLine text={REMOTE_MCP_URL} prompt="›" />,
     doc: { href: "/docs#remote-mcp", label: "Remote MCP docs" },
   },

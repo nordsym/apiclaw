@@ -32,6 +32,7 @@ import type * as debugFilestackLogs from "../debugFilestackLogs.js";
 import type * as debugGetToken from "../debugGetToken.js";
 import type * as deviceAuth from "../deviceAuth.js";
 import type * as directCall from "../directCall.js";
+import type * as discoveryCatalog from "../discoveryCatalog.js";
 import type * as discoveryListings from "../discoveryListings.js";
 import type * as earnProgress from "../earnProgress.js";
 import type * as email from "../email.js";
@@ -83,6 +84,7 @@ import type * as providerDiscovery from "../providerDiscovery.js";
 import type * as providerHealth from "../providerHealth.js";
 import type * as providerKeys from "../providerKeys.js";
 import type * as providers from "../providers.js";
+import type * as publicApiHealth from "../publicApiHealth.js";
 import type * as purchases from "../purchases.js";
 import type * as quota from "../quota.js";
 import type * as ratelimit from "../ratelimit.js";
@@ -106,6 +108,7 @@ import type * as usageReports from "../usageReports.js";
 import type * as waitlist from "../waitlist.js";
 import type * as webhooks from "../webhooks.js";
 import type * as websiteServicePolicy from "../websiteServicePolicy.js";
+import type * as workspacePublicExecute from "../workspacePublicExecute.js";
 import type * as workspaceSettings from "../workspaceSettings.js";
 import type * as workspaces from "../workspaces.js";
 
@@ -140,6 +143,7 @@ declare const fullApi: ApiFromModules<{
   debugGetToken: typeof debugGetToken;
   deviceAuth: typeof deviceAuth;
   directCall: typeof directCall;
+  discoveryCatalog: typeof discoveryCatalog;
   discoveryListings: typeof discoveryListings;
   earnProgress: typeof earnProgress;
   email: typeof email;
@@ -191,6 +195,7 @@ declare const fullApi: ApiFromModules<{
   providerHealth: typeof providerHealth;
   providerKeys: typeof providerKeys;
   providers: typeof providers;
+  publicApiHealth: typeof publicApiHealth;
   purchases: typeof purchases;
   quota: typeof quota;
   ratelimit: typeof ratelimit;
@@ -214,6 +219,7 @@ declare const fullApi: ApiFromModules<{
   waitlist: typeof waitlist;
   webhooks: typeof webhooks;
   websiteServicePolicy: typeof websiteServicePolicy;
+  workspacePublicExecute: typeof workspacePublicExecute;
   workspaceSettings: typeof workspaceSettings;
   workspaces: typeof workspaces;
 }>;

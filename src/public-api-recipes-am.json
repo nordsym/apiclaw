@@ -1,0 +1,905 @@
+[
+  {
+    "id": "adviceslipapi",
+    "baseUrl": "https://api.adviceslip.com",
+    "smokePath": "/advice",
+    "docsUrl": "https://api.adviceslip.com/",
+    "pricing": "free",
+    "pricingSource": "https://api.adviceslip.com/",
+    "freeEvidence": "Provider states the JSON API is free and documents unauthenticated GET requests.",
+    "name": "Advice Slip API"
+  },
+  {
+    "id": "amiiboapi",
+    "baseUrl": "https://amiiboapi.com",
+    "smokePath": "/api/amiibo?name=mario",
+    "docsUrl": "https://github.com/N3evin/AmiiboAPI",
+    "pricing": "free",
+    "pricingSource": "https://amiiboapi.com/docs/",
+    "freeEvidence": "Read-only API explicitly permits access without authentication; regular callers should cache.",
+    "name": "AmiiboAPI"
+  },
+  {
+    "id": "anapioficeandfire",
+    "baseUrl": "https://anapioficeandfire.com/api",
+    "smokePath": "/books/1",
+    "docsUrl": "https://anapioficeandfire.com/Documentation",
+    "pricing": "free",
+    "pricingSource": "https://anapioficeandfire.com/Documentation",
+    "freeEvidence": "Public read-only API documents book resources without an account or key.",
+    "name": "An API of Ice and Fire"
+  },
+  {
+    "id": "aviationweather",
+    "baseUrl": "https://aviationweather.gov/api/data",
+    "smokePath": "/metar?ids=KMCI&format=json",
+    "docsUrl": "https://aviationweather.gov/data/api/",
+    "pricing": "free",
+    "pricingSource": "https://aviationweather.gov/data/api/",
+    "freeEvidence": "Government machine-readable public weather access; documented GET example, 100 requests/minute ceiling.",
+    "name": "AviationWeather"
+  },
+  {
+    "id": "baconipsum",
+    "baseUrl": "https://baconipsum.com/api",
+    "smokePath": "/?type=all-meat&sentences=1",
+    "docsUrl": "https://baconipsum.com/json-api/",
+    "pricing": "free",
+    "pricingSource": "https://baconipsum.com/json-api/",
+    "freeEvidence": "Provider permits any application to use its public JSON text-generation GET endpoint.",
+    "name": "Bacon Ipsum"
+  },
+  {
+    "id": "bankofcanada",
+    "baseUrl": "https://www.bankofcanada.ca/valet",
+    "smokePath": "/observations/FXUSDCAD/json?recent=1",
+    "docsUrl": "https://www.bankofcanada.ca/valet/docs",
+    "pricing": "free",
+    "pricingSource": "https://www.bankofcanada.ca/valet-api-how-to/",
+    "freeEvidence": "Official guide explicitly states there is no cost, registration or access key.",
+    "name": "Bank of Canada"
+  },
+  {
+    "id": "bible",
+    "baseUrl": "https://bible-api.com",
+    "smokePath": "/john+3:16",
+    "docsUrl": "https://bible-api.com/",
+    "pricing": "free",
+    "pricingSource": "https://bible-api.com/",
+    "freeEvidence": "Open-source service and open database provide public Bible verse GET requests.",
+    "name": "Bible"
+  },
+  {
+    "id": "brazil",
+    "baseUrl": "https://brasilapi.com.br/api",
+    "smokePath": "/feriados/v1/2026",
+    "docsUrl": "https://brasilapi.com.br/docs",
+    "pricing": "free",
+    "pricingSource": "https://brasilapi.com.br/docs",
+    "freeEvidence": "BrasilAPI provides public open-data GET endpoints without user credentials.",
+    "name": "Brazil"
+  },
+  {
+    "id": "brnnysundregistrene",
+    "baseUrl": "https://data.brreg.no/enhetsregisteret/api",
+    "smokePath": "/organisasjonsformer",
+    "docsUrl": "https://data.brreg.no/enhetsregisteret/api/docs/index.html",
+    "pricing": "free",
+    "pricingSource": "https://data.brreg.no/enhetsregisteret/api/docs/index.html",
+    "freeEvidence": "Official open-data API under NLOD; unauthenticated organization-type endpoint differs from authorized personal-data routes.",
+    "name": "Brønnøysundregistrene",
+    "canonicalId": "brnnysundregistrene"
+  },
+  {
+    "id": "catasaservice",
+    "baseUrl": "https://cataas.com",
+    "smokePath": "/api/tags?limit=1",
+    "docsUrl": "https://cataas.com/",
+    "pricing": "free",
+    "pricingSource": "https://cataas.com/",
+    "freeEvidence": "Provider describes free public cat service and documents GET API.",
+    "name": "Cat as a Service"
+  },
+  {
+    "id": "catfactsapi",
+    "baseUrl": "https://catfact.ninja",
+    "smokePath": "/fact",
+    "docsUrl": "https://catfact.ninja/",
+    "pricing": "free",
+    "pricingSource": "https://catfact.ninja/",
+    "freeEvidence": "Provider OpenAPI exposes public GET fact resources without security credentials.",
+    "name": "Cat Facts API"
+  },
+  {
+    "id": "catboy",
+    "baseUrl": "https://api.catboys.com",
+    "smokePath": "/img",
+    "docsUrl": "https://catboys.com/api",
+    "pricing": "free",
+    "pricingSource": "https://catboys.com/api",
+    "freeEvidence": "Public provider documents JSON image resource with no API credential requirement.",
+    "name": "Catboy"
+  },
+  {
+    "id": "cdnjs",
+    "baseUrl": "https://api.cdnjs.com",
+    "smokePath": "/libraries/jquery?fields=name,version",
+    "docsUrl": "https://cdnjs.com/api",
+    "pricing": "free",
+    "pricingSource": "https://cdnjs.com/api",
+    "freeEvidence": "Public CDN library metadata is available through documented JSON API without credentials.",
+    "name": "CDNJS"
+  },
+  {
+    "id": "cheapshark",
+    "baseUrl": "https://www.cheapshark.com/api/1.0",
+    "smokePath": "/stores",
+    "docsUrl": "https://apidocs.cheapshark.com/",
+    "pricing": "free",
+    "pricingSource": "https://apidocs.cheapshark.com/",
+    "freeEvidence": "Provider exposes public game-price API without API keys; attribution applies.",
+    "name": "CheapShark"
+  },
+  {
+    "id": "chesscom",
+    "baseUrl": "https://api.chess.com/pub",
+    "smokePath": "/player/hikaru",
+    "docsUrl": "https://www.chess.com/news/view/published-data-api",
+    "pricing": "free",
+    "pricingSource": "https://www.chess.com/news/view/published-data-api",
+    "freeEvidence": "Published-data API allows public read-only requests without authentication; serialize requests.",
+    "name": "Chess.com"
+  },
+  {
+    "id": "chucknorrisio",
+    "baseUrl": "https://api.chucknorris.io",
+    "smokePath": "/jokes/random",
+    "docsUrl": "https://api.chucknorris.io/",
+    "pricing": "free",
+    "pricingSource": "https://api.chucknorris.io/",
+    "freeEvidence": "Provider explicitly describes its joke JSON API as free.",
+    "name": "chucknorris.io"
+  },
+  {
+    "id": "citybikes",
+    "baseUrl": "https://api.citybik.es/v2",
+    "smokePath": "/networks?fields=id,name",
+    "docsUrl": "https://api.citybik.es/v2/",
+    "pricing": "free",
+    "pricingSource": "https://api.citybik.es/v2/",
+    "freeEvidence": "Terms describe a free service requiring clear attribution to CityBikes.",
+    "name": "City Bikes"
+  },
+  {
+    "id": "clinicaltrialsgov",
+    "baseUrl": "https://clinicaltrials.gov/api/v2",
+    "smokePath": "/studies?pageSize=1&format=json",
+    "docsUrl": "https://clinicaltrials.gov/data-api/api",
+    "pricing": "free",
+    "pricingSource": "https://clinicaltrials.gov/data-api/api",
+    "freeEvidence": "Government clinical-study public REST API documents machine-readable reads without credentials.",
+    "name": "ClinicalTrials.gov"
+  },
+  {
+    "id": "coinlore",
+    "baseUrl": "https://api.coinlore.net/api",
+    "smokePath": "/global/",
+    "docsUrl": "https://www.coinlore.com/cryptocurrency-data-api",
+    "pricing": "free",
+    "pricingSource": "https://www.coinlore.com/cryptocurrency-data-api",
+    "freeEvidence": "Explicitly free public crypto API with no registration/key; recommends about one request/second.",
+    "name": "Coinlore"
+  },
+  {
+    "id": "colorapi",
+    "baseUrl": "https://www.thecolorapi.com",
+    "smokePath": "/id?hex=0047AB",
+    "docsUrl": "https://www.thecolorapi.com/docs",
+    "pricing": "free",
+    "pricingSource": "https://www.thecolorapi.com/docs",
+    "freeEvidence": "Public color API documents plain JSON GET without a credential or paid subscription.",
+    "name": "Color API"
+  },
+  {
+    "id": "countryis",
+    "baseUrl": "https://api.country.is",
+    "smokePath": "/8.8.8.8",
+    "docsUrl": "https://country.is/",
+    "pricing": "free",
+    "pricingSource": "https://country.is/",
+    "freeEvidence": "Open-source free IP country lookup supports public unauthenticated JSON requests.",
+    "name": "Country.is"
+  },
+  {
+    "id": "crossref",
+    "baseUrl": "https://api.crossref.org",
+    "smokePath": "/works?rows=1",
+    "docsUrl": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    "pricing": "free",
+    "pricingSource": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    "freeEvidence": "Crossref public metadata API is available without account; polite contact and rate limits apply.",
+    "name": "CrossRef"
+  },
+  {
+    "id": "danishdataserviceenergi",
+    "baseUrl": "https://api.energidataservice.dk",
+    "smokePath": "/dataset/CO2Emis?start=now-PT15M&limit=1",
+    "docsUrl": "https://www.energidataservice.dk/guides/api-guides",
+    "pricing": "free",
+    "pricingSource": "https://www.energidataservice.dk/guides/api-guides",
+    "freeEvidence": "Official guide says data download is free; obey dataset frequency limits and cache downstream.",
+    "name": "Danish data service Energi"
+  },
+  {
+    "id": "datamuse",
+    "baseUrl": "https://api.datamuse.com",
+    "smokePath": "/words?ml=star&max=1",
+    "docsUrl": "https://www.datamuse.com/api/",
+    "pricing": "free",
+    "pricingSource": "https://www.datamuse.com/api/",
+    "freeEvidence": "Currently free keyless word API; provider announces mandatory keys starting 2027-02-01.",
+    "name": "Datamuse"
+  },
+  {
+    "id": "deckofcardsapi",
+    "baseUrl": "https://deckofcardsapi.com/api/deck",
+    "smokePath": "/new/draw/?count=1",
+    "docsUrl": "https://deckofcardsapi.com/",
+    "pricing": "free",
+    "pricingSource": "https://deckofcardsapi.com/",
+    "freeEvidence": "Public toy-card API documents keyless new-deck and draw GET endpoints.",
+    "name": "Deck of Cards API"
+  },
+  {
+    "id": "digimoninformation",
+    "baseUrl": "https://digimon-api.vercel.app/api",
+    "smokePath": "/digimon/name/agumon",
+    "docsUrl": "https://digimon-api.vercel.app/",
+    "pricing": "free",
+    "pricingSource": "https://digimon-api.vercel.app/",
+    "freeEvidence": "Provider documents public Digimon JSON GET endpoint with no credentials.",
+    "name": "Digimon Information"
+  },
+  {
+    "id": "disify",
+    "baseUrl": "https://www.disify.com/api",
+    "smokePath": "/email/example@example.com",
+    "docsUrl": "https://www.disify.com/",
+    "pricing": "free",
+    "pricingSource": "https://www.disify.com/",
+    "freeEvidence": "Public basic email-validation example is keyless; no personal customer email is submitted.",
+    "name": "Disify"
+  },
+  {
+    "id": "disney",
+    "baseUrl": "https://api.disneyapi.dev",
+    "smokePath": "/character?pageSize=1",
+    "docsUrl": "https://disneyapi.dev/docs/",
+    "pricing": "free",
+    "pricingSource": "https://disneyapi.dev/docs/",
+    "freeEvidence": "Provider documents public read-only Disney character JSON API without keys.",
+    "name": "Disney"
+  },
+  {
+    "id": "dsbstatisticsdenmark",
+    "baseUrl": "https://api.statbank.dk/v1",
+    "smokePath": "/subjects?lang=en&format=JSON",
+    "docsUrl": "https://api.statbank.dk/console",
+    "pricing": "free",
+    "pricingSource": "https://api.statbank.dk/console",
+    "freeEvidence": "Statistics Denmark public statistical API documents keyless subject metadata.",
+    "name": "DSB Statistics Denmark"
+  },
+  {
+    "id": "ensembl",
+    "baseUrl": "https://rest.ensembl.org",
+    "smokePath": "/info/ping?content-type=application/json",
+    "docsUrl": "https://rest.ensembl.org/",
+    "pricing": "free",
+    "pricingSource": "https://rest.ensembl.org/",
+    "freeEvidence": "Public Ensembl scientific REST API documents JSON GET requests without keys.",
+    "name": "Ensembl"
+  },
+  {
+    "id": "environmentagency",
+    "baseUrl": "https://environment.data.gov.uk/flood-monitoring",
+    "smokePath": "/id/stations?_limit=1",
+    "docsUrl": "https://environment.data.gov.uk/flood-monitoring/doc/reference",
+    "pricing": "free",
+    "pricingSource": "https://environment.data.gov.uk/flood-monitoring/doc/reference",
+    "freeEvidence": "Government flood-monitoring open-data API provides public limited JSON reads.",
+    "name": "Environment Agency"
+  },
+  {
+    "id": "fakestoreapi",
+    "baseUrl": "https://fakestoreapi.com",
+    "smokePath": "/products?limit=1",
+    "docsUrl": "https://fakestoreapi.com/docs",
+    "pricing": "free",
+    "pricingSource": "https://fakestoreapi.com/docs",
+    "freeEvidence": "Provider offers public dummy-store JSON resources for prototyping without credentials.",
+    "name": "FakeStoreAPI"
+  },
+  {
+    "id": "fbiwanted",
+    "baseUrl": "https://api.fbi.gov/wanted",
+    "smokePath": "/v1/list?pageSize=1",
+    "docsUrl": "https://www.fbi.gov/wanted/api",
+    "pricing": "free",
+    "pricingSource": "https://www.fbi.gov/wanted/api",
+    "freeEvidence": "Official public wanted-person API documents keyless JSON requests.",
+    "name": "FBI Wanted"
+  },
+  {
+    "id": "fda",
+    "canonicalId": "fda",
+    "baseUrl": "https://api.fda.gov",
+    "smokePath": "/food/enforcement.json?limit=1",
+    "docsUrl": "https://open.fda.gov/apis/authentication/",
+    "pricing": "free",
+    "pricingSource": "https://open.fda.gov/apis/authentication/",
+    "freeEvidence": "Public openFDA API supports lower unauthenticated request limits; no premium or key features.",
+    "name": "FDA"
+  },
+  {
+    "id": "frankfurter",
+    "baseUrl": "https://api.frankfurter.dev/v1",
+    "smokePath": "/latest",
+    "docsUrl": "https://frankfurter.dev/",
+    "pricing": "free",
+    "pricingSource": "https://frankfurter.dev/",
+    "freeEvidence": "Official currency-data API is free and needs no API keys.",
+    "name": "Frankfurter"
+  },
+  {
+    "id": "freedictionary",
+    "baseUrl": "https://api.dictionaryapi.dev/api/v2",
+    "smokePath": "/entries/en/hello",
+    "docsUrl": "https://dictionaryapi.dev/",
+    "pricing": "free",
+    "pricingSource": "https://dictionaryapi.dev/",
+    "freeEvidence": "Provider explicitly promises a permanently free dictionary API and gives keyless GET example.",
+    "name": "Free Dictionary"
+  },
+  {
+    "id": "freetogame",
+    "baseUrl": "https://www.freetogame.com/api",
+    "smokePath": "/game?id=452",
+    "docsUrl": "https://www.freetogame.com/api-doc",
+    "pricing": "free",
+    "pricingSource": "https://www.freetogame.com/api-doc",
+    "freeEvidence": "Free personal/commercial API needs no key/account; active source attribution required.",
+    "name": "FreeToGame"
+  },
+  {
+    "id": "fruityvice",
+    "baseUrl": "https://www.fruityvice.com/api",
+    "smokePath": "/fruit/apple",
+    "docsUrl": "https://www.fruityvice.com/",
+    "pricing": "free",
+    "pricingSource": "https://www.fruityvice.com/",
+    "freeEvidence": "Provider documents public fruit-data GET endpoints; no account/key in read API.",
+    "name": "Fruityvice"
+  },
+  {
+    "id": "gamerpower",
+    "baseUrl": "https://www.gamerpower.com/api",
+    "smokePath": "/giveaways?platform=steam",
+    "docsUrl": "https://www.gamerpower.com/api-read",
+    "pricing": "free",
+    "pricingSource": "https://www.gamerpower.com/api-read",
+    "freeEvidence": "Provider explicitly offers free-forever unauthenticated API with attribution.",
+    "name": "GamerPower"
+  },
+  {
+    "id": "gbif",
+    "baseUrl": "https://api.gbif.org/v1",
+    "smokePath": "/species/match?name=Puma%20concolor",
+    "docsUrl": "https://www.gbif.org/developer/summary",
+    "pricing": "free",
+    "pricingSource": "https://www.gbif.org/developer/summary",
+    "freeEvidence": "Public GBIF biodiversity REST read endpoints require no user credentials.",
+    "name": "GBIF"
+  },
+  {
+    "id": "geojs",
+    "baseUrl": "https://get.geojs.io/v1",
+    "smokePath": "/ip/geo/8.8.8.8.json",
+    "docsUrl": "https://www.geojs.io/docs/v1/endpoints/ip/",
+    "pricing": "free",
+    "pricingSource": "https://www.geojs.io/docs/v1/endpoints/ip/",
+    "freeEvidence": "Provider documents public free IP geolocation JSON endpoint without key.",
+    "name": "GeoJS"
+  },
+  {
+    "id": "gutendex",
+    "baseUrl": "https://gutendex.com",
+    "smokePath": "/books/?ids=1342",
+    "docsUrl": "https://gutendex.com/",
+    "pricing": "free",
+    "pricingSource": "https://gutendex.com/",
+    "freeEvidence": "Open-source public Project Gutenberg metadata JSON server documents public GET examples.",
+    "name": "Gutendex"
+  },
+  {
+    "id": "harrypotterapi",
+    "baseUrl": "https://hp-api.onrender.com/api",
+    "smokePath": "/characters/staff",
+    "docsUrl": "https://hp-api.onrender.com/",
+    "pricing": "free",
+    "pricingSource": "https://hp-api.onrender.com/",
+    "freeEvidence": "Provider documents public Harry Potter character JSON API with no key.",
+    "name": "Harry Potter API"
+  },
+  {
+    "id": "hebrewcalendar",
+    "baseUrl": "https://www.hebcal.com",
+    "smokePath": "/converter?cfg=json&gy=2026&gm=10&gd=15&g2h=1",
+    "docsUrl": "https://www.hebcal.com/home/developer-apis",
+    "pricing": "free",
+    "pricingSource": "https://www.hebcal.com/home/developer-apis",
+    "freeEvidence": "Free keyless API under CC BY 4.0; Hebcal attribution required.",
+    "name": "Hebrew Calendar"
+  },
+  {
+    "id": "hipsteripsum",
+    "baseUrl": "https://hipsum.co/api",
+    "smokePath": "/?type=hipster-centric&sentences=1",
+    "docsUrl": "https://hipsum.co/the-api/",
+    "pricing": "free",
+    "pricingSource": "https://hipsum.co/the-api/",
+    "freeEvidence": "Provider welcomes anyone to use JSON generator; abuse restrictions apply.",
+    "name": "Hipster Ipsum"
+  },
+  {
+    "id": "homebrew",
+    "baseUrl": "https://formulae.brew.sh/api",
+    "smokePath": "/formula/git.json",
+    "docsUrl": "https://formulae.brew.sh/docs/api/",
+    "pricing": "free",
+    "pricingSource": "https://formulae.brew.sh/docs/api/",
+    "freeEvidence": "Official public package metadata JSON API documents unauthenticated curl examples.",
+    "name": "Homebrew"
+  },
+  {
+    "id": "httpbin",
+    "baseUrl": "https://httpbin.org",
+    "smokePath": "/get",
+    "docsUrl": "https://httpbin.org/",
+    "pricing": "free",
+    "pricingSource": "https://httpbin.org/",
+    "freeEvidence": "Public open-source HTTP request/response testing service with unauthenticated GET operation.",
+    "name": "Httpbin"
+  },
+  {
+    "id": "icanhazdadjoke",
+    "baseUrl": "https://icanhazdadjoke.com",
+    "smokePath": "/",
+    "docsUrl": "https://icanhazdadjoke.com/api",
+    "pricing": "free",
+    "pricingSource": "https://icanhazdadjoke.com/api",
+    "freeEvidence": "Provider explicitly requires no authentication; JSON Accept and descriptive User-Agent apply.",
+    "name": "icanhazdadjoke"
+  },
+  {
+    "id": "indianmutualfund",
+    "baseUrl": "https://api.mfapi.in",
+    "smokePath": "/mf/100027/latest",
+    "docsUrl": "https://www.mfapi.in/",
+    "pricing": "free",
+    "pricingSource": "https://www.mfapi.in/",
+    "freeEvidence": "Official site describes a free mutual-fund API with public JSON examples.",
+    "name": "Indian Mutual Fund"
+  },
+  {
+    "id": "ipify",
+    "baseUrl": "https://api.ipify.org",
+    "smokePath": "/?format=json",
+    "docsUrl": "https://www.ipify.org/",
+    "pricing": "free",
+    "pricingSource": "https://www.ipify.org/",
+    "freeEvidence": "Provider publishes free public IP JSON API requiring no keys.",
+    "name": "IPify"
+  },
+  {
+    "id": "jikan",
+    "baseUrl": "https://api.jikan.moe/v4",
+    "smokePath": "/anime/1",
+    "docsUrl": "https://docs.api.jikan.moe/",
+    "pricing": "free",
+    "pricingSource": "https://docs.api.jikan.moe/",
+    "freeEvidence": "Official open-source read-only public anime API; no API key, rate limits apply.",
+    "name": "Jikan"
+  },
+  {
+    "id": "jokeapi",
+    "baseUrl": "https://v2.jokeapi.dev",
+    "smokePath": "/joke/Programming?safe-mode",
+    "docsUrl": "https://sv443.net/jokeapi/v2/",
+    "pricing": "free",
+    "pricingSource": "https://sv443.net/jokeapi/v2/",
+    "freeEvidence": "Free public joke API supports unauthenticated safe-mode GET requests.",
+    "name": "JokeAPI"
+  },
+  {
+    "id": "jsonplaceholder",
+    "baseUrl": "https://jsonplaceholder.typicode.com",
+    "smokePath": "/todos/1",
+    "docsUrl": "https://jsonplaceholder.typicode.com/guide/",
+    "pricing": "free",
+    "pricingSource": "https://jsonplaceholder.typicode.com/guide/",
+    "freeEvidence": "Public free fake REST API documents unauthenticated read examples.",
+    "name": "JSON Placeholder"
+  },
+  {
+    "id": "kanyerest",
+    "baseUrl": "https://api.kanye.rest",
+    "smokePath": "/",
+    "docsUrl": "https://kanye.rest/",
+    "pricing": "free",
+    "pricingSource": "https://kanye.rest/",
+    "freeEvidence": "Provider describes free public JSON quote API without credentials.",
+    "name": "kanye.rest"
+  },
+  {
+    "id": "loremipsumapi",
+    "baseUrl": "https://loripsum.net/api",
+    "smokePath": "/1/short/plaintext",
+    "docsUrl": "https://loripsum.net/",
+    "pricing": "free",
+    "pricingSource": "https://loripsum.net/",
+    "freeEvidence": "Public generator documents API without credentials; returns text rather than JSON.",
+    "responseKind": "text",
+    "name": "Lorem Ipsum API"
+  },
+  {
+    "id": "lorempicsum",
+    "baseUrl": "https://picsum.photos",
+    "smokePath": "/v2/list?page=1&limit=1",
+    "docsUrl": "https://picsum.photos/",
+    "pricing": "free",
+    "pricingSource": "https://picsum.photos/",
+    "freeEvidence": "Public image service documents keyless JSON image metadata listing.",
+    "name": "Lorem Picsum"
+  },
+  {
+    "id": "mempool",
+    "baseUrl": "https://mempool.space/api",
+    "smokePath": "/v1/fees/recommended",
+    "docsUrl": "https://mempool.space/docs/api/rest",
+    "pricing": "free",
+    "pricingSource": "https://mempool.space/docs/api/rest",
+    "freeEvidence": "Open-source public mempool REST API documents fee JSON reads without keys.",
+    "name": "Mempool"
+  },
+  {
+    "id": "metnorway",
+    "baseUrl": "https://api.met.no",
+    "smokePath": "/weatherapi/locationforecast/2.0/compact?lat=59.91&lon=10.75",
+    "docsUrl": "https://api.met.no/doc/TermsOfService",
+    "pricing": "free",
+    "pricingSource": "https://api.met.no/doc/TermsOfService",
+    "freeEvidence": "Open meteorological API under CC BY 4.0; cache, attribution and identifying User-Agent required.",
+    "name": "MET Norway"
+  },
+  {
+    "id": "minecraftserverstatus",
+    "baseUrl": "https://api.mcsrvstat.us",
+    "smokePath": "/3/mc.hypixel.net",
+    "docsUrl": "https://api.mcsrvstat.us/",
+    "pricing": "free",
+    "pricingSource": "https://api.mcsrvstat.us/",
+    "freeEvidence": "Donation-funded public Minecraft JSON status endpoint requires descriptive User-Agent, not a key.",
+    "name": "Minecraft Server Status"
+  },
+  {
+    "id": "dogceo",
+    "baseUrl": "https://dog.ceo/api",
+    "smokePath": "/breeds/image/random",
+    "docsUrl": "https://dog.ceo/dog-api/",
+    "pricing": "free",
+    "pricingSource": "https://dog.ceo/dog-api/",
+    "freeEvidence": "Public open-source dog-picture service documents keyless JSON image requests.",
+    "name": "Dog CEO"
+  },
+  {
+    "id": "dungeonsanddragonsalternate",
+    "baseUrl": "https://api.open5e.com/v2",
+    "smokePath": "/creatures/?limit=1&fields=key,name",
+    "docsUrl": "https://open5e.com/api-docs",
+    "pricing": "free",
+    "pricingSource": "https://open5e.com/api-docs",
+    "freeEvidence": "Official open-source public rules API documents uncredentialed data retrieval; content licenses vary by source.",
+    "name": "Dungeons and Dragons (Alternate)"
+  },
+  {
+    "id": "federalregister",
+    "baseUrl": "https://www.federalregister.gov/api/v1",
+    "smokePath": "/documents.json?per_page=1",
+    "docsUrl": "https://www.federalregister.gov/developers/documentation/api/v1",
+    "pricing": "free",
+    "pricingSource": "https://www.federalregister.gov/developers/documentation/api/v1",
+    "freeEvidence": "Official documentation explicitly permits public API access without API keys.",
+    "name": "Federal Register"
+  },
+  {
+    "id": "malaysiaopendataapi",
+    "baseUrl": "https://api.data.gov.my",
+    "smokePath": "/data-catalogue?id=fuelprice&limit=1",
+    "docsUrl": "https://developer.data.gov.my/quickstart",
+    "pricing": "free",
+    "pricingSource": "https://developer.data.gov.my/quickstart",
+    "freeEvidence": "Official government quickstart explicitly says no API token; public data access has rate limits.",
+    "name": "Malaysia Open Data API"
+  },
+  {
+    "id": "ibgebrazilstats",
+    "baseUrl": "https://servicodados.ibge.gov.br/api/v1/localidades",
+    "smokePath": "/estados/33",
+    "docsUrl": "https://servicodados.ibge.gov.br/api/docs/localidades",
+    "pricing": "free",
+    "pricingSource": "https://servicodados.ibge.gov.br/api/docs/localidades",
+    "freeEvidence": "Government reference-location API publishes open administrative geography with public GET access.",
+    "name": "IBGE Brazil Stats"
+  },
+  {
+    "id": "codewarsapi",
+    "baseUrl": "https://www.codewars.com/api/v1",
+    "smokePath": "/code-challenges/valid-braces",
+    "docsUrl": "https://dev.codewars.com/",
+    "pricing": "free",
+    "pricingSource": "https://dev.codewars.com/",
+    "freeEvidence": "Official documentation explicitly makes every v1 endpoint public without authentication.",
+    "name": "Codewars API"
+  },
+  {
+    "id": "coffee",
+    "baseUrl": "https://coffee.alexflipnote.dev",
+    "smokePath": "/random.json",
+    "docsUrl": "https://coffee.alexflipnote.dev/",
+    "pricing": "free",
+    "pricingSource": "https://coffee.alexflipnote.dev/",
+    "freeEvidence": "Provider offers public coffee-image JSON resource without a key or account.",
+    "name": "Coffee"
+  },
+  {
+    "id": "fueleconomygov",
+    "baseUrl": "https://www.fueleconomy.gov/ws/rest",
+    "smokePath": "/vehicle/31873",
+    "docsUrl": "https://www.fueleconomy.gov/feg/ws/",
+    "pricing": "free",
+    "pricingSource": "https://www.fueleconomy.gov/feg/ws/",
+    "freeEvidence": "Government vehicle-data service documents public JSON/XML read resources without credentials.",
+    "name": "FuelEconomy.gov"
+  },
+  {
+    "id": "gameofthronesquotes",
+    "baseUrl": "https://api.gameofthronesquotes.xyz/v1",
+    "smokePath": "/random",
+    "docsUrl": "https://gameofthronesquotes.xyz/",
+    "pricing": "free",
+    "pricingSource": "https://gameofthronesquotes.xyz/",
+    "freeEvidence": "Provider explicitly describes a free quote API and documents keyless GET.",
+    "name": "Game of Thrones Quotes"
+  },
+  {
+    "id": "genrenator",
+    "baseUrl": "https://binaryjazz.us/wp-json/genrenator/v1",
+    "smokePath": "/genre/",
+    "docsUrl": "https://binaryjazz.us/genrenator-api/",
+    "pricing": "free",
+    "pricingSource": "https://binaryjazz.us/genrenator-api/",
+    "freeEvidence": "Provider invites public use of documented random-genre API; response is a JSON string.",
+    "name": "Genrenator"
+  },
+  {
+    "id": "countriesgraphql",
+    "baseUrl": "https://countries.trevorblades.com",
+    "smokePath": "/?query=%7Bcountry(code%3A%22SE%22)%7Bname%7D%7D",
+    "docsUrl": "https://github.com/trevorblades/countries",
+    "pricing": "free",
+    "pricingSource": "https://github.com/trevorblades/countries",
+    "freeEvidence": "Provider publishes a public open-source GraphQL country endpoint without authentication.",
+    "name": "Countries GraphQL"
+  },
+  {
+    "id": "datausa",
+    "baseUrl": "https://api.datausa.io/tesseract",
+    "smokePath": "/data.jsonrecords?cube=acs_yg_total_population_5&drilldowns=State,Year&measures=Population&include=Year:2023&limit=1,0",
+    "docsUrl": "https://datausa.io/about/api/",
+    "pricing": "free",
+    "pricingSource": "https://datausa.io/about/api/",
+    "freeEvidence": "Official public data guide documents Tesseract GET requests without API credentials.",
+    "name": "Data USA"
+  },
+  {
+    "id": "artinstituteofchicagoapi",
+    "baseUrl": "https://api.artic.edu/api/v1",
+    "smokePath": "/artworks?limit=1&fields=id,title",
+    "docsUrl": "https://api.artic.edu/docs/",
+    "pricing": "free",
+    "pricingSource": "https://api.artic.edu/docs/",
+    "freeEvidence": "Museum public-data API permits website/application integration and does not need authentication.",
+    "name": "Art Institute of Chicago API"
+  },
+  {
+    "id": "bobsburgersapi",
+    "baseUrl": "https://bobsburgers-api.herokuapp.com",
+    "smokePath": "/characters?limit=1",
+    "docsUrl": "https://www.bobsburgersapi.com/documentation",
+    "pricing": "free",
+    "pricingSource": "https://www.bobsburgersapi.com/documentation",
+    "freeEvidence": "Provider publishes public read-only character API without authentication; respect fair-use rate limits.",
+    "name": "Bob's Burgers API"
+  },
+  {
+    "id": "chemblapi",
+    "baseUrl": "https://www.ebi.ac.uk/chembl/api/data",
+    "smokePath": "/molecule.json?limit=1",
+    "docsUrl": "https://www.ebi.ac.uk/chembl/api/data/docs",
+    "pricing": "free",
+    "pricingSource": "https://www.ebi.ac.uk/chembl/api/data/docs",
+    "freeEvidence": "Official EMBL-EBI open scientific-data API supports public JSON reads without keys.",
+    "name": "ChEMBL API"
+  },
+  {
+    "id": "currencyapi",
+    "baseUrl": "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1",
+    "smokePath": "/currencies/eur.json",
+    "docsUrl": "https://github.com/fawazahmed0/exchange-api",
+    "pricing": "free",
+    "pricingSource": "https://github.com/fawazahmed0/exchange-api",
+    "freeEvidence": "Provider explicitly offers free exchange-rate API with no API-key requirement.",
+    "name": "Currency-api"
+  },
+  {
+    "id": "aviationapi",
+    "baseUrl": "https://api.aviationapi.com/v1",
+    "smokePath": "/airports?apt=JFK",
+    "docsUrl": "https://docs.aviationapi.com/",
+    "pricing": "free",
+    "pricingSource": "https://docs.aviationapi.com/",
+    "freeEvidence": "Official public aviation API documents airport GET lookup without credentials.",
+    "name": "AviationAPI"
+  },
+  {
+    "id": "hackernewsapi",
+    "baseUrl": "https://hacker-news.firebaseio.com/v0",
+    "smokePath": "/item/8863.json",
+    "docsUrl": "https://github.com/HackerNews/API",
+    "pricing": "free",
+    "pricingSource": "https://github.com/HackerNews/API",
+    "freeEvidence": "Official Hacker News API provides public data through Firebase without credentials.",
+    "name": "Hacker News API"
+  },
+  {
+    "id": "finalspaceapi",
+    "baseUrl": "https://finalspaceapi.com/api/v0",
+    "smokePath": "/character/1",
+    "docsUrl": "https://finalspaceapi.com/docs/",
+    "pricing": "free",
+    "pricingSource": "https://finalspaceapi.com/docs/",
+    "freeEvidence": "Provider documents free public JSON character resources without credentials.",
+    "name": "Final Space API"
+  },
+  {
+    "id": "magicthegatheringapi",
+    "baseUrl": "https://api.magicthegathering.io/v1",
+    "smokePath": "/cards?pageSize=1",
+    "docsUrl": "https://docs.magicthegathering.io/",
+    "pricing": "free",
+    "pricingSource": "https://docs.magicthegathering.io/",
+    "freeEvidence": "Provider exposes public card-data API with no authentication; rate limits apply. Provider announces shutdown after 2027-03-01.",
+    "name": "Magic: The Gathering API"
+  },
+  {
+    "id": "fakerapi",
+    "baseUrl": "https://fakerapi.it/api/v2",
+    "smokePath": "/persons?_quantity=1",
+    "docsUrl": "https://fakerapi.it/en",
+    "pricing": "free",
+    "pricingSource": "https://fakerapi.it/en",
+    "freeEvidence": "Provider offers free fake-data JSON API with public keyless quantity-limited GET requests.",
+    "name": "Faker API"
+  },
+  {
+    "id": "ffxivcollect",
+    "baseUrl": "https://ffxivcollect.com/api",
+    "smokePath": "/mounts/186",
+    "docsUrl": "https://ffxivcollect.com/",
+    "pricing": "free",
+    "pricingSource": "https://ffxivcollect.com/",
+    "freeEvidence": "Provider explicitly makes all site data available through its public JSON API.",
+    "name": "FFXIV Collect"
+  },
+  {
+    "id": "diseasesh",
+    "baseUrl": "https://disease.sh/v3/covid-19",
+    "smokePath": "/countries/Sweden?strict=true",
+    "docsUrl": "https://disease.sh/docs/",
+    "pricing": "free",
+    "pricingSource": "https://disease.sh/docs/",
+    "freeEvidence": "Open public disease-data API documents unauthenticated JSON statistics.",
+    "name": "Disease.sh"
+  },
+  {
+    "id": "arbetsfrmedlingenapi",
+    "baseUrl": "https://jobsearch.api.jobtechdev.se",
+    "smokePath": "/search?q=developer&limit=1",
+    "docsUrl": "https://jobsearch.api.jobtechdev.se/",
+    "pricing": "free",
+    "pricingSource": "https://jobsearch.api.jobtechdev.se/",
+    "freeEvidence": "Swedish government public job-search API exposes open job-ad reads without credentials.",
+    "name": "Arbetsförmedlingen API"
+  },
+  {
+    "id": "bluesky",
+    "baseUrl": "https://public.api.bsky.app/xrpc",
+    "smokePath": "/app.bsky.actor.getProfile?actor=bsky.app",
+    "docsUrl": "https://docs.bsky.app/docs/advanced-guides/api-directory",
+    "pricing": "free",
+    "pricingSource": "https://docs.bsky.app/docs/advanced-guides/api-directory",
+    "freeEvidence": "Official public AppView supports unauthenticated profile reads; excludes authenticated private operations.",
+    "name": "Bluesky"
+  },
+  {
+    "id": "cratesio",
+    "baseUrl": "https://crates.io/api/v1",
+    "smokePath": "/crates/serde/1.0.228",
+    "docsUrl": "https://crates.io/data-access",
+    "pricing": "free",
+    "pricingSource": "https://crates.io/data-access",
+    "freeEvidence": "Public Rust package metadata API supports unauthenticated reads with descriptive User-Agent.",
+    "name": "Crates.io"
+  },
+  {
+    "id": "devtoapi",
+    "baseUrl": "https://dev.to/api",
+    "smokePath": "/articles?per_page=1",
+    "docsUrl": "https://developers.forem.com/api/v1",
+    "pricing": "free",
+    "pricingSource": "https://developers.forem.com/api/v1",
+    "freeEvidence": "Published-article reads are public; authenticated publishing/account endpoints are excluded.",
+    "name": "Dev.to API"
+  },
+  {
+    "id": "guildwars2api",
+    "baseUrl": "https://api.guildwars2.com/v2",
+    "smokePath": "/build",
+    "docsUrl": "https://wiki.guildwars2.com/wiki/API:Main",
+    "pricing": "free",
+    "pricingSource": "https://wiki.guildwars2.com/wiki/API:Main",
+    "freeEvidence": "Public game-data API needs no key for build endpoint; private account APIs excluded.",
+    "name": "Guild Wars 2 API"
+  },
+  {
+    "id": "huggingfacehubapi",
+    "baseUrl": "https://huggingface.co/api",
+    "smokePath": "/models?limit=1",
+    "docsUrl": "https://huggingface.co/docs/hub/api",
+    "pricing": "free",
+    "pricingSource": "https://huggingface.co/docs/hub/api",
+    "freeEvidence": "Public Hub model metadata is readable without tokens; excludes inference and private model access.",
+    "name": "Hugging Face Hub API"
+  },
+  {
+    "id": "inaturalistapi",
+    "baseUrl": "https://api.inaturalist.org/v1",
+    "smokePath": "/taxa?per_page=1",
+    "docsUrl": "https://api.inaturalist.org/v1/docs/",
+    "pricing": "free",
+    "pricingSource": "https://api.inaturalist.org/v1/docs/",
+    "freeEvidence": "Public biodiversity taxon metadata is available through documented unauthenticated read endpoints.",
+    "name": "iNaturalist API"
+  },
+  {
+    "id": "lichessorgapireference",
+    "baseUrl": "https://lichess.org/api",
+    "smokePath": "/puzzle/daily",
+    "docsUrl": "https://lichess.org/api",
+    "pricing": "free",
+    "pricingSource": "https://lichess.org/api",
+    "freeEvidence": "Public daily puzzle endpoint requires no OAuth token; excludes account/write APIs.",
+    "name": "Lichess.org API reference"
+  }
+]

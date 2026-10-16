@@ -1,0 +1,16 @@
+{
+  "previewOnly": true,
+  "verifiedAt": "2026-10-16T10:51:57.662Z",
+  "freeApproved": 1140,
+  "retainedNativeHealthy": 1140,
+  "nativeSweepCandidates": 1154,
+  "nativeSweepFailed": 11,
+  "customerAdditionalFailures": 3,
+  "disabledIds": [],
+  "oldestRetainedCheck": 1792146331000,
+  "snapshotLatencyMs": [
+    423,
+    157,
+    81
+  ]
+}
