@@ -18,7 +18,7 @@ type ReviewDecision = "approved" | "changes_requested";
 export function decisionRecipientAllowed(
   email: string,
   tier?: string,
-  env: Pick<NodeJS.ProcessEnv, "LISTING_DECISION_TEST_RECIPIENT"> = process.env,
+  env: { LISTING_DECISION_TEST_RECIPIENT?: string } = process.env,
 ) {
   const normalized = email.trim().toLowerCase();
   if (
