@@ -141,6 +141,14 @@ await t.mutation(api.review, {
   reviewer: "test operator",
   note: "Confirm pricing",
 });
+assert.equal(
+  await t.run(async (ctx) =>
+    (await ctx.db
+      .query("discoveryListingReviews")
+      .withIndex("by_listing", (q) => q.eq("listingId", id))
+      .first())?.notificationState),
+  "queued",
+);
 assert.equal((await page()).page.length, 0);
 await t.mutation(api.saveDraft, {
   token: "owner",

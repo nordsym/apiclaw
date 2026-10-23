@@ -37,10 +37,21 @@ export default defineSchema({
     listingId: v.id("discoveryListings"),
     workspaceId: v.id("workspaces"),
     revision: v.number(),
+    listingName: v.optional(v.string()),
     reviewer: v.string(),
     decision: v.union(v.literal("approved"), v.literal("changes_requested")),
     note: v.string(),
     reviewedAt: v.number(),
+    notificationState: v.optional(v.union(
+      v.literal("queued"),
+      v.literal("sent"),
+      v.literal("failed"),
+      v.literal("skipped"),
+    )),
+    notificationAttempts: v.optional(v.number()),
+    notificationId: v.optional(v.string()),
+    notificationError: v.optional(v.string()),
+    notificationSentAt: v.optional(v.number()),
   }).index("by_listing", ["listingId"]),
   // Credits per agent
   agentCredits: defineTable({
