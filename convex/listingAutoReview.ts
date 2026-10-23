@@ -195,7 +195,6 @@ function judgmentPrompt(input: {
   metadata: ListingMetadata;
   submitterDomain: string;
   docsText: string;
-  targetText: string;
 }) {
   return JSON.stringify({
     listing: {
@@ -205,7 +204,6 @@ function judgmentPrompt(input: {
     },
     submitterDomain: input.submitterDomain,
     documentationExcerpt: input.docsText.slice(0, 24_000),
-    targetExcerpt: input.targetText.slice(0, 4_000),
   });
 }
 
@@ -213,7 +211,6 @@ async function judgeContent(input: {
   metadata: ListingMetadata;
   submitterDomain: string;
   docsText: string;
-  targetText: string;
 }) {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw Error("Content judgment provider is unavailable");
@@ -349,7 +346,6 @@ export const run = internalAction({
         metadata: candidate.draft,
         submitterDomain: contactDomain(candidate.submitterEmail) ?? "unknown",
         docsText,
-        targetText,
       });
       if (verdict.decision === "escalate") {
         await ctx.runMutation(
