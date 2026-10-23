@@ -14,7 +14,7 @@ import {
   parseModelVerdict,
 } from "./listingAutoReviewPolicy";
 
-const DOC_LIMIT = 512 * 1024;
+export const DOC_LIMIT = 768 * 1024;
 const TARGET_LIMIT = 1024 * 1024;
 const FETCH_TIMEOUT_MS = 8_000;
 const JUDGMENT_MODEL = "openai/gpt-5.4-nano";
