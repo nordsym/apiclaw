@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { Readable } from "node:stream";
 import {
+  DOC_LIMIT,
   fetchPublicResource,
   isPublicAddress,
   pinnedLookup,
@@ -175,6 +176,18 @@ assert.equal(
   ).text,
   "public docs",
 );
+assert.equal(
+  (
+    await fetchPublicResource(
+      "https://docs.example/api",
+      DOC_LIMIT,
+      "text/plain",
+      network(undefined, "x".repeat(600 * 1024)) as any,
+    )
+  ).text.length,
+  600 * 1024,
+);
+const socketsBeforeMixedDns = sockets;
 await assert.rejects(
   fetchPublicResource(
     "https://docs.example/api",
@@ -187,7 +200,11 @@ await assert.rejects(
   ),
   /public IP/,
 );
-assert.equal(sockets, 1, "mixed public/private DNS must not open a socket");
+assert.equal(
+  sockets,
+  socketsBeforeMixedDns,
+  "mixed public/private DNS must not open a socket",
+);
 await assert.rejects(
   fetchPublicResource(
     "https://docs.example/api",
