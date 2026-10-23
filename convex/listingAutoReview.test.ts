@@ -98,6 +98,10 @@ assert.throws(
   /Invalid/,
 );
 assert(!readableDocument("<script>ignore me</script><h1>Weather docs</h1>").includes("ignore"));
+assert.equal(
+  readableDocument('<svg class="before:content-[\'>\']">icon</svg><h1>Weather docs</h1>'),
+  "icon Weather docs",
+);
 
 for (const address of [
   "127.0.0.1",
