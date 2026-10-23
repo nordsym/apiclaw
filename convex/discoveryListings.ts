@@ -258,14 +258,17 @@ async function reviewListing(
       throw Error("Duplicate listing name requires review");
   }
   const reviewedAt = Date.now();
-  await ctx.db.insert("discoveryListingReviews", {
+  const reviewId = await ctx.db.insert("discoveryListingReviews", {
     listingId: row._id,
     workspaceId: row.workspaceId,
     revision: row.revision,
+    listingName: row.draft.name,
     reviewer: args.reviewer,
     decision: args.approve ? "approved" : "changes_requested",
     note: args.note.trim(),
     reviewedAt,
+    notificationState: "queued",
+    notificationAttempts: 0,
   });
   await ctx.db.patch(row._id, {
     reviewState: args.approve ? "approved" : "changes_requested",
@@ -276,6 +279,24 @@ async function reviewListing(
     updatedAt: reviewedAt,
     ...(args.approve ? { published: row.draft, isPublished: true } : {}),
   });
+  try {
+    await ctx.scheduler.runAfter(
+      0,
+      internal.listingNotifications.sendDecision,
+      { reviewId },
+    );
+  } catch (error) {
+    console.error("listing decision email scheduling failed", {
+      listingId: row._id,
+      revision: row.revision,
+      decision: args.approve ? "approved" : "changes_requested",
+      error: error instanceof Error ? error.message : "unknown_error",
+    });
+    await ctx.db.patch(reviewId, {
+      notificationState: "failed",
+      notificationError: "schedule_failed",
+    });
+  }
   return null;
 }
 export const review = internalMutation({
