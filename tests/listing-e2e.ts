@@ -240,16 +240,16 @@ try {
       .length,
     0,
   );
-  await t.action(anyApi.listingNotifications.send, {
-    id: row._id,
-    revision: 1,
-  });
+  row = (await t.query(api.mine, { token }))[0];
+  assert.equal(row.reviewState, "pending");
+  assert.equal(row.autoReviewState, "escalated");
+  for (let attempt = 0; attempt < 100 && notifications.length === 0; attempt++)
+    await new Promise((resolve) => setTimeout(resolve, 10));
   assert.equal(notifications.length, 1);
-  assert.equal(alerts.length, 1);
-  assert.equal(alerts[0].listingId, row._id);
+  assert.equal(alerts.length, 0);
   assert.equal(notifications[0].to, "gustav@nordsym.com");
   assert(
-    notifications[0].html.includes(
+    notifications[0].text.includes(
       "workspace/review-listings?listing=" + row._id,
     ),
   );
@@ -390,7 +390,7 @@ try {
   });
   assert.deepEqual(errors, []);
   console.log(
-    "PASS: new free workspace -> browser file import -> preview -> draft -> submit -> notification -> operator review UI -> catalog -> discover_apis -> execution denied -> unpublish; no keys, execution or payment records",
+    "PASS: new free workspace -> browser file import -> preview -> draft -> submit -> safe auto-review escalation -> operator notice and review UI -> catalog -> discover_apis -> execution denied -> unpublish; no keys, execution or payment records",
   );
 } catch (e) {
   console.error(await page?.locator("body").innerText());

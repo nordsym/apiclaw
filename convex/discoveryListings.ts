@@ -92,6 +92,13 @@ export const saveDraft = mutation({
         revision: row.revision + 1,
         reviewState: "draft",
         reviewNote: undefined,
+        autoReviewState: undefined,
+        autoReviewReason: undefined,
+        autoReviewNotificationState: undefined,
+        autoReviewNotificationAttempts: undefined,
+        autoReviewNotificationId: undefined,
+        autoReviewNotificationError: undefined,
+        autoReviewNotificationSentAt: undefined,
         updatedAt: Date.now(),
       });
       return row._id;
@@ -167,14 +174,18 @@ export const submit = mutation({
     await ctx.db.patch(row._id, {
       reviewState: "pending",
       submittedAt: Date.now(),
-      notificationState: "queued",
-      notificationAttempts: 0,
-      notificationId: undefined,
-      notificationAlertSent: false,
+      autoReviewRevision: row.revision,
+      autoReviewState: "queued",
+      autoReviewReason: undefined,
+      autoReviewNotificationState: undefined,
+      autoReviewNotificationAttempts: undefined,
+      autoReviewNotificationId: undefined,
+      autoReviewNotificationError: undefined,
+      autoReviewNotificationSentAt: undefined,
       reviewNote: undefined,
       updatedAt: Date.now(),
     });
-    await ctx.scheduler.runAfter(0, internal.listingNotifications.send, {
+    await ctx.scheduler.runAfter(0, (internal as any).listingAutoReview.run, {
       id: row._id,
       revision: row.revision,
     });
@@ -276,6 +287,8 @@ async function reviewListing(
     reviewedBy: args.reviewer,
     reviewNote: args.note,
     reviewedAt,
+    autoReviewState: "decided",
+    autoReviewReason: args.note.trim(),
     updatedAt: reviewedAt,
     ...(args.approve ? { published: row.draft, isPublished: true } : {}),
   });
@@ -309,6 +322,80 @@ export const review = internalMutation({
   },
   returns: v.null(),
   handler: reviewListing,
+});
+
+export const autoReviewCandidate = internalQuery({
+  args: { id: v.id("discoveryListings"), revision: v.number() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.id);
+    if (
+      !row ||
+      row.revision !== args.revision ||
+      row.reviewState !== "pending" ||
+      row.autoReviewRevision !== args.revision ||
+      row.autoReviewState !== "queued"
+    )
+      return null;
+    const workspace = await ctx.db.get(row.workspaceId);
+    if (!workspace?.email) return null;
+    const publishedRows = await ctx.db
+      .query("discoveryListings")
+      .withIndex("by_published", (q) => q.eq("isPublished", true))
+      .take(501);
+    return {
+      draft: row.draft,
+      submitterEmail: workspace.email,
+      publishedScanComplete: publishedRows.length <= 500,
+      published: publishedRows.slice(0, 500).flatMap((published) =>
+        published.published
+          ? [
+              {
+                id: published._id,
+                name: published.published.name,
+                docsUrl: published.published.docsUrl,
+                baseUrl: published.published.baseUrl,
+              },
+            ]
+          : [],
+      ),
+    };
+  },
+});
+
+export const escalateAutoReview = internalMutation({
+  args: {
+    id: v.id("discoveryListings"),
+    revision: v.number(),
+    reason: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.id);
+    if (
+      !row ||
+      row.revision !== args.revision ||
+      row.reviewState !== "pending" ||
+      row.autoReviewRevision !== args.revision ||
+      row.autoReviewState === "decided"
+    )
+      return null;
+    if (row.autoReviewState === "escalated") return null;
+    const reason = args.reason.trim().slice(0, 240);
+    await ctx.db.patch(row._id, {
+      autoReviewState: "escalated",
+      autoReviewReason: reason,
+      autoReviewNotificationState: "queued",
+      autoReviewNotificationAttempts: 0,
+      updatedAt: Date.now(),
+    });
+    await ctx.scheduler.runAfter(
+      0,
+      internal.listingNotifications.sendEscalation,
+      { id: row._id, revision: row.revision },
+    );
+    return null;
+  },
 });
 // Deliberately projects only the approved snapshot. No drafts, workspace IDs or review notes.
 export const published = query({

@@ -22,6 +22,22 @@ export default defineSchema({
     notificationAttempts: v.optional(v.number()),
     notificationId: v.optional(v.string()),
     notificationAlertSent: v.optional(v.boolean()),
+    autoReviewRevision: v.optional(v.number()),
+    autoReviewState: v.optional(v.union(
+      v.literal("queued"),
+      v.literal("decided"),
+      v.literal("escalated"),
+    )),
+    autoReviewReason: v.optional(v.string()),
+    autoReviewNotificationState: v.optional(v.union(
+      v.literal("queued"),
+      v.literal("sent"),
+      v.literal("failed"),
+    )),
+    autoReviewNotificationAttempts: v.optional(v.number()),
+    autoReviewNotificationId: v.optional(v.string()),
+    autoReviewNotificationError: v.optional(v.string()),
+    autoReviewNotificationSentAt: v.optional(v.number()),
     reviewedRevision: v.optional(v.number()),
     reviewNote: v.optional(v.string()),
     reviewedBy: v.optional(v.string()),
@@ -52,6 +68,9 @@ export default defineSchema({
     notificationId: v.optional(v.string()),
     notificationError: v.optional(v.string()),
     notificationSentAt: v.optional(v.number()),
+    operatorNotificationId: v.optional(v.string()),
+    operatorNotificationError: v.optional(v.string()),
+    operatorNotificationSentAt: v.optional(v.number()),
   }).index("by_listing", ["listingId"]),
   // Credits per agent
   agentCredits: defineTable({

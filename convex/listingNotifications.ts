@@ -51,7 +51,7 @@ export function decisionEmail(input: {
       text: [
         "Hi,",
         "",
-        `I approved ${name}, and it's now published in the APIClaw catalog:`,
+        `APIClaw approved ${name}, and it's now published in the catalog:`,
         CATALOG_URL,
         "",
         "You can edit it from My APIs in your workspace:",
@@ -60,7 +60,7 @@ export function decisionEmail(input: {
         "Any changes will come back through review before they go live.",
         "",
         "Thanks for contributing,",
-        "Gustav",
+        "APIClaw",
       ].join("\n"),
     };
   }
@@ -72,14 +72,40 @@ export function decisionEmail(input: {
     text: [
       "Hi,",
       "",
-      `Thanks for submitting ${name}. I need one change before I can publish it:`,
+      `APIClaw reviewed ${name} and needs one change before it can be published:`,
       "",
       input.note.trim(),
       "",
       "Open My APIs in your workspace to update and resubmit:",
       WORKSPACE_LISTINGS_URL,
       "",
-      "Gustav",
+      "APIClaw",
+    ].join("\n"),
+  };
+}
+
+export function operatorDecisionEmail(input: {
+  name: string;
+  submitter: string;
+  decision: ReviewDecision | "escalated";
+  note: string;
+  listingId: string;
+}) {
+  const name = input.name.replace(/[\r\n]+/g, " ").trim().slice(0, 160);
+  const reviewUrl = `https://apiclaw.cloud/workspace/review-listings?listing=${encodeURIComponent(input.listingId)}`;
+  return {
+    from: DECISION_FROM,
+    reply_to: DECISION_REPLY_TO,
+    to: "gustav@nordsym.com",
+    subject: `APIClaw listing ${input.decision}: ${name}`,
+    text: [
+      `Listing: ${name}`,
+      `Submitter: ${input.submitter}`,
+      `Decision: ${input.decision}`,
+      `Reason: ${input.note.trim()}`,
+      "",
+      `Catalog: ${CATALOG_URL}`,
+      ...(input.decision === "escalated" ? [`Pending review: ${reviewUrl}`] : []),
     ].join("\n"),
   };
 }
@@ -245,6 +271,8 @@ export const decisionCandidate = internalQuery({
       name: review.listingName ?? "your API listing",
       email: workspace?.email,
       tier: workspace?.tier,
+      submitterMessageId: review.notificationId,
+      operatorMessageId: review.operatorNotificationId,
     };
   },
 });
@@ -252,40 +280,38 @@ export const decisionCandidate = internalQuery({
 export const recordDecision = internalMutation({
   args: {
     ...decisionIdentity,
-    outcome: v.union(
+    submitterOutcome: v.union(
       v.literal("sent"),
       v.literal("failed"),
       v.literal("skipped"),
     ),
-    messageId: v.optional(v.string()),
-    error: v.optional(v.string()),
+    submitterMessageId: v.optional(v.string()),
+    submitterError: v.optional(v.string()),
+    operatorOutcome: v.union(v.literal("sent"), v.literal("failed")),
+    operatorMessageId: v.optional(v.string()),
+    operatorError: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const review = await ctx.db.get(args.reviewId);
     if (!review || review.notificationState !== "queued") return;
-    if (args.outcome === "skipped") {
-      await ctx.db.patch(review._id, {
-        notificationState: "skipped",
-        notificationError: args.error,
-      });
-      return;
-    }
     const attempts = (review.notificationAttempts ?? 0) + 1;
-    if (args.outcome === "sent") {
-      await ctx.db.patch(review._id, {
-        notificationState: "sent",
-        notificationAttempts: attempts,
-        notificationId: args.messageId,
-        notificationError: undefined,
-        notificationSentAt: Date.now(),
-      });
-      return;
-    }
-    const retry = attempts < 3;
+    const submitterComplete =
+      args.submitterOutcome === "sent" || args.submitterOutcome === "skipped";
+    const operatorComplete = args.operatorOutcome === "sent";
+    const complete = submitterComplete && operatorComplete;
+    const retry = !complete && attempts < 3;
     await ctx.db.patch(review._id, {
-      notificationState: retry ? "queued" : "failed",
+      notificationState: complete ? "sent" : retry ? "queued" : "failed",
       notificationAttempts: attempts,
-      notificationError: args.error,
+      notificationId: args.submitterMessageId ?? review.notificationId,
+      notificationError: args.submitterError,
+      ...(args.submitterOutcome === "sent" ? { notificationSentAt: Date.now() } : {}),
+      operatorNotificationId:
+        args.operatorMessageId ?? review.operatorNotificationId,
+      operatorNotificationError: args.operatorError,
+      ...(args.operatorOutcome === "sent"
+        ? { operatorNotificationSentAt: Date.now() }
+        : {}),
     });
     if (retry) {
       await ctx.scheduler.runAfter(
@@ -305,60 +331,171 @@ export const sendDecision = internalAction({
       args,
     );
     if (!candidate) return;
-    if (!candidate.email) {
-      console.error("listing decision email skipped", {
-        listingId: candidate.listingId,
-        revision: candidate.revision,
-        decision: candidate.decision,
-        error: "workspace_email_missing",
-      });
-      await ctx.runMutation(internal.listingNotifications.recordDecision, {
-        ...args,
-        outcome: "skipped",
-        error: "workspace_email_missing",
-      });
-      return;
-    }
-    const recipient = decisionRecipientAllowed(
-      candidate.email,
-      candidate.tier,
-    );
-    if (!recipient.allowed) {
-      console.info("listing decision email skipped", {
-        listingId: candidate.listingId,
-        revision: candidate.revision,
-        decision: candidate.decision,
-        reason: recipient.reason,
-      });
-      await ctx.runMutation(internal.listingNotifications.recordDecision, {
-        ...args,
-        outcome: "skipped",
-        error: recipient.reason,
-      });
-      return;
-    }
-
-    let messageId: string | undefined;
-    let error = "unknown_error";
     const key = process.env.RESEND_API_KEY;
-    try {
-      if (!key) {
-        error = "missing_resend_api_key";
-      } else {
+    const send = async (body: object, idempotencyKey: string) => {
+      if (!key) return { error: "missing_resend_api_key" };
+      try {
         const response = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${key}`,
             "Content-Type": "application/json",
-            "Idempotency-Key":
-              `listing-decision-${candidate.listingId}-${candidate.revision}-${candidate.decision}`,
+            "Idempotency-Key": idempotencyKey,
+          },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(10_000),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (typeof data.id === "string") return { messageId: data.id };
+          return { error: "resend_missing_message_id" };
+        }
+        return { error: `resend_${response.status}` };
+      } catch {
+        return { error: "resend_transport_error" };
+      }
+    };
+
+    let submitterOutcome: "sent" | "failed" | "skipped" = "skipped";
+    let submitterMessageId = candidate.submitterMessageId;
+    let submitterError: string | undefined;
+    if (!candidate.email) submitterError = "workspace_email_missing";
+    else {
+      const recipient = decisionRecipientAllowed(candidate.email, candidate.tier);
+      if (!recipient.allowed) submitterError = recipient.reason;
+      else if (submitterMessageId) submitterOutcome = "sent";
+      else {
+        const result = await send(
+          decisionEmail({
+            name: candidate.name,
+            decision: candidate.decision,
+            note: candidate.note,
+            to: candidate.email,
+          }),
+          `listing-decision-${candidate.listingId}-${candidate.revision}-${candidate.decision}`,
+        );
+        submitterMessageId = result.messageId;
+        submitterError = result.error;
+        submitterOutcome = result.messageId ? "sent" : "failed";
+      }
+    }
+
+    let operatorMessageId = candidate.operatorMessageId;
+    let operatorError: string | undefined;
+    if (!operatorMessageId) {
+      const result = await send(
+        operatorDecisionEmail({
+          name: candidate.name,
+          submitter: candidate.email ?? "Unknown",
+          decision: candidate.decision,
+          note: candidate.note,
+          listingId: candidate.listingId,
+        }),
+        `listing-operator-decision-${candidate.listingId}-${candidate.revision}-${candidate.decision}`,
+      );
+      operatorMessageId = result.messageId;
+      operatorError = result.error;
+    }
+    await ctx.runMutation(internal.listingNotifications.recordDecision, {
+      ...args,
+      submitterOutcome,
+      ...(submitterMessageId ? { submitterMessageId } : {}),
+      ...(submitterError ? { submitterError } : {}),
+      operatorOutcome: operatorMessageId ? "sent" : "failed",
+      ...(operatorMessageId ? { operatorMessageId } : {}),
+      ...(operatorError ? { operatorError } : {}),
+    });
+  },
+});
+
+export const escalationCandidate = internalQuery({
+  args: identity,
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.id);
+    if (
+      !row ||
+      row.revision !== args.revision ||
+      row.reviewState !== "pending" ||
+      row.autoReviewState !== "escalated" ||
+      row.autoReviewNotificationState !== "queued"
+    )
+      return null;
+    const workspace = await ctx.db.get(row.workspaceId);
+    return {
+      name: row.draft.name,
+      submitter: workspace?.email ?? "Unknown",
+      reason: row.autoReviewReason ?? "Automatic review was uncertain.",
+      messageId: row.autoReviewNotificationId,
+    };
+  },
+});
+
+export const recordEscalation = internalMutation({
+  args: {
+    ...identity,
+    messageId: v.optional(v.string()),
+    error: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.id);
+    if (
+      !row ||
+      row.revision !== args.revision ||
+      row.reviewState !== "pending" ||
+      row.autoReviewState !== "escalated" ||
+      row.autoReviewNotificationState !== "queued"
+    )
+      return;
+    const attempts = (row.autoReviewNotificationAttempts ?? 0) + 1;
+    const retry = !args.messageId && attempts < 3;
+    await ctx.db.patch(row._id, {
+      autoReviewNotificationState: args.messageId
+        ? "sent"
+        : retry
+          ? "queued"
+          : "failed",
+      autoReviewNotificationAttempts: attempts,
+      autoReviewNotificationId: args.messageId ?? row.autoReviewNotificationId,
+      autoReviewNotificationError: args.error,
+      ...(args.messageId ? { autoReviewNotificationSentAt: Date.now() } : {}),
+    });
+    if (retry)
+      await ctx.scheduler.runAfter(
+        attempts * 60_000,
+        internal.listingNotifications.sendEscalation,
+        { id: row._id, revision: row.revision },
+      );
+  },
+});
+
+export const sendEscalation = internalAction({
+  args: identity,
+  handler: async (ctx, args): Promise<void> => {
+    const candidate = await ctx.runQuery(
+      internal.listingNotifications.escalationCandidate,
+      args,
+    );
+    if (!candidate) return;
+    let messageId = candidate.messageId;
+    let error: string | undefined;
+    const key = process.env.RESEND_API_KEY;
+    if (!messageId && !key) error = "missing_resend_api_key";
+    else if (!messageId) {
+      try {
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json",
+            "Idempotency-Key": `listing-auto-review-escalation-${args.id}-${args.revision}`,
           },
           body: JSON.stringify(
-            decisionEmail({
+            operatorDecisionEmail({
               name: candidate.name,
-              decision: candidate.decision,
-              note: candidate.note,
-              to: candidate.email,
+              submitter: candidate.submitter,
+              decision: "escalated",
+              note: candidate.reason,
+              listingId: args.id,
             }),
           ),
           signal: AbortSignal.timeout(10_000),
@@ -367,26 +504,14 @@ export const sendDecision = internalAction({
           const data = await response.json();
           if (typeof data.id === "string") messageId = data.id;
           else error = "resend_missing_message_id";
-        } else {
-          error = `resend_${response.status}`;
-        }
+        } else error = `resend_${response.status}`;
+      } catch {
+        error = "resend_transport_error";
       }
-    } catch {
-      error = "resend_transport_error";
     }
-
-    if (!messageId) {
-      console.error("listing decision email failed", {
-        listingId: candidate.listingId,
-        revision: candidate.revision,
-        decision: candidate.decision,
-        error,
-      });
-    }
-    await ctx.runMutation(internal.listingNotifications.recordDecision, {
+    await ctx.runMutation(internal.listingNotifications.recordEscalation, {
       ...args,
-      outcome: messageId ? "sent" : "failed",
-      ...(messageId ? { messageId } : { error }),
+      ...(messageId ? { messageId } : { error: error ?? "unknown_error" }),
     });
   },
 });
