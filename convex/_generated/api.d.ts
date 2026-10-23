@@ -50,6 +50,7 @@ import type * as listingAutoReview from "../listingAutoReview.js";
 import type * as listingAutoReviewPolicy from "../listingAutoReviewPolicy.js";
 import type * as listingNotifications from "../listingNotifications.js";
 import type * as listingPolicy from "../listingPolicy.js";
+import type * as listingSpec from "../listingSpec.js";
 import type * as logs from "../logs.js";
 import type * as managedChatRouting from "../managedChatRouting.js";
 import type * as managedCostPolicy from "../managedCostPolicy.js";
@@ -163,6 +164,7 @@ declare const fullApi: ApiFromModules<{
   listingAutoReviewPolicy: typeof listingAutoReviewPolicy;
   listingNotifications: typeof listingNotifications;
   listingPolicy: typeof listingPolicy;
+  listingSpec: typeof listingSpec;
   logs: typeof logs;
   managedChatRouting: typeof managedChatRouting;
   managedCostPolicy: typeof managedCostPolicy;

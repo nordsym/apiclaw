@@ -33,6 +33,13 @@ export function isPublicAddress(address: string) {
   return parsed.range() === "unicast";
 }
 
+export function pinnedLookup(pinned: ResolvedAddress) {
+  return (_hostname: string, options: { all?: boolean }, callback: Function) => {
+    if (options?.all) callback(null, [pinned]);
+    else callback(null, pinned.address, pinned.family);
+  };
+}
+
 export function publicReviewUrl(value: string) {
   if (value.length > 2048) throw Error("URL exceeds 2048 characters");
   const url = new URL(value);
@@ -99,8 +106,7 @@ export async function fetchPublicResource(
             "Accept-Encoding": "identity",
             "User-Agent": "APIClaw-Auto-Review/1.0",
           },
-          lookup: ((_hostname: string, _options: unknown, callback: Function) =>
-            callback(null, pinned.address, pinned.family)) as any,
+          lookup: pinnedLookup(pinned) as any,
         },
         (response) => {
           const status = response.statusCode ?? 0;
