@@ -46,6 +46,8 @@ import type * as http from "../http.js";
 import type * as httpTrust from "../httpTrust.js";
 import type * as idempotencyBinding from "../idempotencyBinding.js";
 import type * as inbound from "../inbound.js";
+import type * as listingAutoReview from "../listingAutoReview.js";
+import type * as listingAutoReviewPolicy from "../listingAutoReviewPolicy.js";
 import type * as listingNotifications from "../listingNotifications.js";
 import type * as listingPolicy from "../listingPolicy.js";
 import type * as logs from "../logs.js";
@@ -157,6 +159,8 @@ declare const fullApi: ApiFromModules<{
   httpTrust: typeof httpTrust;
   idempotencyBinding: typeof idempotencyBinding;
   inbound: typeof inbound;
+  listingAutoReview: typeof listingAutoReview;
+  listingAutoReviewPolicy: typeof listingAutoReviewPolicy;
   listingNotifications: typeof listingNotifications;
   listingPolicy: typeof listingPolicy;
   logs: typeof logs;

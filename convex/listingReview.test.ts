@@ -4,9 +4,11 @@ import assert from "node:assert/strict";
 import { convexTest } from "convex-test";
 import { anyApi } from "convex/server";
 import schema from "./schema";
+import type { Id } from "./_generated/dataModel";
 import {
   decisionEmail,
   decisionRecipientAllowed,
+  operatorDecisionEmail,
   reviewEmail,
 } from "./listingNotifications";
 import { createRequire } from "node:module";
@@ -54,8 +56,16 @@ const id = await t.mutation(api.saveDraft, { token: "owner-review", metadata });
 await t.mutation(api.submit, { token: "owner-review", id, revision: 1 });
 await t.mutation(api.submit, { token: "owner-review", id, revision: 1 });
 assert.equal(
-  (await t.query(n.candidate, { id, revision: 1 })).notificationAttempts,
-  0,
+  await t.run(async (ctx) =>
+    (await ctx.db.system.query("_scheduled_functions").collect()).filter(
+      (task) => task.state.kind === "pending" && /listingAutoReview.*run/.test(task.name),
+    ).length),
+  1,
+  "submission must queue one automatic review for the revision",
+);
+assert.equal(
+  (await t.query(api.autoReviewCandidate, { id, revision: 1 })).submitterEmail,
+  "test@example.test",
 );
 await assert.rejects(
   t.query(api.operatorPending, {
@@ -78,51 +88,13 @@ await assert.rejects(
   /Unauthorized/,
 );
 const nativeFetch = globalThis.fetch;
-process.env.RESEND_API_KEY = "synthetic-no-network";
-process.env.APICLAW_INBOUND_WEBHOOK_SECRET = "synthetic-alert-secret";
-let deliveries = 0;
-let alerts = 0;
-globalThis.fetch = async (_url, init) => {
-  if (String(_url).includes("/webhook/inbound/apiclaw")) {
-    alerts++;
-    const alert = JSON.parse(String(init?.body));
-    assert.equal(alert.listingId, id);
-    assert.equal(alert.revision, 1);
-    assert.equal(alert.event, "listing_review");
-    assert(!JSON.stringify(alert).includes("test@example.test"));
-    return new Response(null, { status: alerts === 1 ? 503 : 200 });
-  }
-  deliveries++;
-  const body = JSON.parse(String(init?.body));
-  assert.equal(body.to, "gustav@nordsym.com");
-  assert.equal(
-    (init?.headers as any)["Idempotency-Key"],
-    `listing-review-${id}-1`,
-  );
-  return Response.json({ id: "synthetic-receipt" });
-};
-try {
-  await t.action(n.send, { id, revision: 1 });
-  assert.equal(
-    (await t.query(n.candidate, { id, revision: 1 })).notificationId,
-    "synthetic-receipt",
-  );
-  await t.action(n.send, { id, revision: 1 });
-  await t.action(n.send, { id, revision: 1 });
-  assert.equal(deliveries, 1);
-  assert.equal(alerts, 2);
-} finally {
-  globalThis.fetch = nativeFetch;
-  delete process.env.RESEND_API_KEY;
-  delete process.env.APICLAW_INBOUND_WEBHOOK_SECRET;
-}
 const queue = await t.query(api.operatorPending, {
   internalSecret: "synthetic-review-secret",
   reviewer: "gustav@nordsym.com",
   paginationOpts: { numItems: 25, cursor: null },
 });
-assert.equal(queue.page[0].notificationState, "sent");
-assert.equal(queue.page[0].notificationAlertSent, true);
+assert.equal(queue.page[0].autoReviewState, "queued");
+assert.equal(queue.page[0].notificationState, undefined);
 assert.equal(queue.page[0].submitter, "test@example.test");
 await assert.rejects(
   t.mutation(api.operatorReview, {
@@ -158,15 +130,19 @@ globalThis.fetch = async (_url, init) => {
   const body = JSON.parse(String(init?.body));
   assert.equal(body.from, "APIClaw <hello@apiclaw.cloud>");
   assert.equal(body.reply_to, "gustav@nordsym.com");
-  assert.equal(body.to, "test@example.test");
-  assert.match(body.subject, /Changes requested/);
-  assert.match(body.text, /Provide ownership evidence/);
-  assert.match(body.text, /workspace\?tab=api-catalog&view=my-apis/);
-  assert.equal(
-    (init?.headers as any)["Idempotency-Key"],
-    `listing-decision-${id}-1-changes_requested`,
-  );
-  return Response.json({ id: "decision-changes-receipt" });
+  const key = (init?.headers as any)["Idempotency-Key"];
+  if (body.to === "test@example.test") {
+    assert.match(body.subject, /Changes requested/);
+    assert.match(body.text, /Provide ownership evidence/);
+    assert.match(body.text, /workspace\?tab=api-catalog&view=my-apis/);
+    assert.equal(key, `listing-decision-${id}-1-changes_requested`);
+    return Response.json({ id: "decision-changes-receipt" });
+  }
+  assert.equal(body.to, "gustav@nordsym.com");
+  assert.match(body.text, /Submitter: test@example\.test/);
+  assert.match(body.text, /Decision: changes_requested/);
+  assert.equal(key, `listing-operator-decision-${id}-1-changes_requested`);
+  return Response.json({ id: "operator-changes-receipt" });
 };
 process.env.RESEND_API_KEY = "synthetic-decision-key";
 try {
@@ -176,7 +152,7 @@ try {
   globalThis.fetch = nativeFetch;
   delete process.env.RESEND_API_KEY;
 }
-assert.equal(decisionDeliveries, 1);
+assert.equal(decisionDeliveries, 2);
 assert.deepEqual(
   await t.run(async (ctx) => {
     const row = await ctx.db.get(changesReview._id);
@@ -184,9 +160,15 @@ assert.deepEqual(
       state: row?.notificationState,
       attempts: row?.notificationAttempts,
       id: row?.notificationId,
+      operatorId: row?.operatorNotificationId,
     };
   }),
-  { state: "sent", attempts: 1, id: "decision-changes-receipt" },
+  {
+    state: "sent",
+    attempts: 1,
+    id: "decision-changes-receipt",
+    operatorId: "operator-changes-receipt",
+  },
 );
 assert.equal(
   (
@@ -203,11 +185,9 @@ await t.mutation(api.saveDraft, {
   metadata,
 });
 await t.mutation(api.submit, { token: "owner-review", id, revision: 2 });
-for (let i = 0; i < 3; i++)
-  await t.mutation(n.record, { id, revision: 2, sent: false });
 assert.equal(
-  (await t.query(api.mine, { token: "owner-review" }))[0].notificationState,
-  "failed",
+  (await t.query(api.mine, { token: "owner-review" }))[0].autoReviewState,
+  "queued",
 );
 await t.mutation(api.operatorReview, {
   internalSecret: "synthetic-review-secret",
@@ -243,9 +223,15 @@ assert.deepEqual(
       state: row?.notificationState,
       attempts: row?.notificationAttempts,
       error: row?.notificationError,
+      operatorError: row?.operatorNotificationError,
     };
   }),
-  { state: "failed", attempts: 3, error: "resend_503" },
+  {
+    state: "failed",
+    attempts: 3,
+    error: "resend_503",
+    operatorError: "resend_503",
+  },
 );
 assert.equal(
   (
@@ -259,7 +245,7 @@ await assert.rejects(
   t.mutation(api.submit, { token: "owner-review", id, revision: 2 }),
   /Edit/,
 );
-assert.equal(await t.query(n.candidate, { id, revision: 2 }), null);
+assert.equal(await t.query(api.autoReviewCandidate, { id, revision: 2 }), null);
 await t.mutation(api.unpublish, { token: "owner-review", id });
 assert.equal(
   (
@@ -313,6 +299,16 @@ const approvedMail = decisionEmail({
 assert(!approvedMail.subject.includes("\n"));
 assert.match(approvedMail.text, /https:\/\/apiclaw\.cloud\/catalog/);
 assert.match(approvedMail.text, /changes will come back through review/i);
+const operatorMail = operatorDecisionEmail({
+  name: "Synthetic review fixture\nInjected",
+  submitter: "owner@example.test",
+  decision: "approved",
+  note: "Automated approval",
+  listingId: "id",
+});
+assert(!operatorMail.subject.includes("\n"));
+assert.match(operatorMail.text, /Submitter: owner@example\.test/);
+assert.match(operatorMail.text, /Catalog: https:\/\/apiclaw\.cloud\/catalog/);
 assert.equal(decisionRecipientAllowed("gustav@nordsym.com").allowed, false);
 assert.equal(
   decisionRecipientAllowed(
@@ -365,25 +361,34 @@ for (const tier of ["partner", "enterprise"] as const) {
   );
   assert(blockedReview);
   let blockedFetches = 0;
-  globalThis.fetch = async () => {
+  globalThis.fetch = async (_url, init) => {
     blockedFetches++;
-    throw new Error("Resend must not be called for no-email tiers");
+    const body = JSON.parse(String(init?.body));
+    assert.equal(body.to, "gustav@nordsym.com");
+    return Response.json({ id: `${tier}-operator-receipt` });
   };
+  process.env.RESEND_API_KEY = "synthetic-decision-key";
   try {
     await t.action(n.sendDecision, { reviewId: blockedReview._id });
   } finally {
     globalThis.fetch = nativeFetch;
+    delete process.env.RESEND_API_KEY;
   }
-  assert.equal(blockedFetches, 0);
+  assert.equal(blockedFetches, 1);
   assert.deepEqual(
     await t.run(async (ctx) => {
       const row = await ctx.db.get(blockedReview._id);
       return {
         state: row?.notificationState,
         error: row?.notificationError,
+        operatorId: row?.operatorNotificationId,
       };
     }),
-    { state: "skipped", error: `tier:${tier}` },
+    {
+      state: "sent",
+      error: `tier:${tier}`,
+      operatorId: `${tier}-operator-receipt`,
+    },
   );
 }
 await t.run(async (ctx) => {
@@ -394,6 +399,60 @@ await t.run(async (ctx) => {
   assert(workspace);
   await ctx.db.patch(workspace._id, { tier: "free" });
 });
+const escalatedId = await t.mutation(api.saveDraft, {
+  token: "owner-review",
+  metadata: { ...metadata, name: "Escalation notification fixture" },
+});
+await t.mutation(api.submit, {
+  token: "owner-review",
+  id: escalatedId,
+  revision: 1,
+});
+await t.mutation(api.escalateAutoReview, {
+  id: escalatedId,
+  revision: 1,
+  reason: "Automatic evidence remained uncertain.",
+});
+let escalationFetches = 0;
+globalThis.fetch = async (_url, init) => {
+  escalationFetches++;
+  const body = JSON.parse(String(init?.body));
+  assert.equal(body.to, "gustav@nordsym.com");
+  assert.match(body.text, /Decision: escalated/);
+  assert.match(body.text, /Submitter: test@example\.test/);
+  assert.equal(
+    (init?.headers as any)["Idempotency-Key"],
+    `listing-auto-review-escalation-${escalatedId}-1`,
+  );
+  return Response.json({ id: "escalation-operator-receipt" });
+};
+process.env.RESEND_API_KEY = "synthetic-escalation-key";
+try {
+  await t.action(n.sendEscalation, { id: escalatedId, revision: 1 });
+  await t.action(n.sendEscalation, { id: escalatedId, revision: 1 });
+} finally {
+  globalThis.fetch = nativeFetch;
+  delete process.env.RESEND_API_KEY;
+}
+assert.equal(escalationFetches, 1);
+assert.deepEqual(
+  await t.run(async (ctx) => {
+    const row = await ctx.db.get(escalatedId as Id<"discoveryListings">);
+    return {
+      reviewState: row?.reviewState,
+      autoReviewState: row?.autoReviewState,
+      notificationState: row?.autoReviewNotificationState,
+      notificationId: row?.autoReviewNotificationId,
+    };
+  }),
+  {
+    reviewState: "pending",
+    autoReviewState: "escalated",
+    notificationState: "sent",
+    notificationId: "escalation-operator-receipt",
+  },
+);
+await t.mutation(api.unpublish, { token: "owner-review", id: escalatedId });
 await t.run(async (ctx) => {
   const row = (await ctx.db.query("rateLimits").collect()).find(
     (x) => x.action === "listing-submit",
