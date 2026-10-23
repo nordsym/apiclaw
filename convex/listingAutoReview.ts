@@ -6,7 +6,7 @@ import ipaddr from "ipaddr.js";
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { parseListingSpec } from "../src/listing-spec.js";
+import { parseListingSpec } from "./listingSpec.js";
 import type { ListingMetadata } from "../src/listing-metadata";
 import {
   contactDomain,

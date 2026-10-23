@@ -1,17 +1,15 @@
-import { parseDocument } from "yaml";
 import type { ListingMetadata } from "./listing-metadata.js";
 
 export const SPEC_LIMIT = 1024 * 1024;
 
-export function parseListingSpec(
+export function parseListingSpecWithDecoder(
   text: string,
-  sourceUrl?: string,
+  sourceUrl: string | undefined,
+  decode: (source: string) => any,
 ): ListingMetadata {
   if (Buffer.byteLength(text) > SPEC_LIMIT)
     throw Error("Specification exceeds 1 MB");
-  const doc = parseDocument(text, { uniqueKeys: true });
-  if (doc.errors.length) throw Error("Invalid JSON/YAML specification");
-  const spec = doc.toJS({ maxAliasCount: 0 });
+  const spec = decode(text);
   let count = 0;
   const walk = (value: unknown, depth: number) => {
     if (depth > 40 || ++count > 50_000)
