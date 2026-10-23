@@ -4,6 +4,7 @@ import { Readable } from "node:stream";
 import {
   fetchPublicResource,
   isPublicAddress,
+  pinnedLookup,
   publicReviewUrl,
   readableDocument,
 } from "./listingAutoReview";
@@ -121,6 +122,17 @@ for (const url of [
   "https://docs.example/api?token=secret",
 ])
   assert.throws(() => publicReviewUrl(url));
+
+let allAddresses: unknown;
+pinnedLookup({ address: "8.8.8.8", family: 4 })(
+  "docs.example",
+  { all: true },
+  (error: unknown, addresses: unknown) => {
+    assert.equal(error, null);
+    allAddresses = addresses;
+  },
+);
+assert.deepEqual(allAddresses, [{ address: "8.8.8.8", family: 4 }]);
 
 let sockets = 0;
 const network = (

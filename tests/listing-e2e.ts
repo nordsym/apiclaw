@@ -217,6 +217,12 @@ try {
     .click();
   await page.getByRole("heading", { name: "Preview listing" }).waitFor();
   await page
+    .getByLabel("API base URL", { exact: true })
+    .fill("https://api.fixture.invalid");
+  await page
+    .getByLabel("Documentation URL", { exact: true })
+    .fill("https://docs.fixture.invalid");
+  await page
     .getByLabel("Provider pricing", { exact: true })
     .fill("Free and paid plans");
   await page.getByRole("button", { name: "Save draft", exact: true }).click();
@@ -240,7 +246,11 @@ try {
       .length,
     0,
   );
-  row = (await t.query(api.mine, { token }))[0];
+  for (let attempt = 0; attempt < 100; attempt++) {
+    row = (await t.query(api.mine, { token }))[0];
+    if (row.autoReviewState !== "queued") break;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
   assert.equal(row.reviewState, "pending");
   assert.equal(row.autoReviewState, "escalated");
   for (let attempt = 0; attempt < 100 && notifications.length === 0; attempt++)
@@ -289,7 +299,7 @@ try {
     await page
       .getByRole("link", { name: "Docs", exact: true })
       .getAttribute("href"),
-    "https://arcmira.com/docs",
+    "https://docs.fixture.invalid",
   );
   const discover: any = await dispatchCanonicalTool(
     "discover_apis",
