@@ -82,6 +82,10 @@ assert.equal(
   deterministicListingReview({ ...baseline, contactDomainReachable: false }).outcome,
   "changes_requested",
 );
+assert.equal(
+  deterministicListingReview({ ...baseline, publishedScanComplete: false }).outcome,
+  "escalate",
+);
 
 assert.deepEqual(
   parseModelVerdict('{"decision":"approve","reason":"Evidence matches."}'),
