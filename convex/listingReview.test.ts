@@ -321,6 +321,7 @@ assert.match(brief.text, /Auth \/ Prissättning:/);
 assert.match(brief.text, /Antal operationer: 1/);
 assert.match(brief.text, /Beslut: Ändringar begärda/);
 assert.match(brief.text, /Skäl: Keep <reason> & evidence as-is\. Second line\./);
+assert(!brief.text.includes("Second line.."));
 assert.match(brief.text, /Runda: 7/);
 assert.match(brief.text, /listing=id%2F%3Cunsafe%3E/);
 assert(!brief.text.includes("TAIL"));
