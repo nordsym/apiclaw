@@ -69,10 +69,11 @@ export function listingNotificationBrief(input: ListingBriefInput) {
     ? `${truncate(input.workspaceName, 120)} (${input.workspaceId})`
     : input.workspaceId;
   const reason = compact(input.note);
+  const punctuatedReason = /[.!?…]$/.test(reason) ? reason : `${reason}.`;
   const decision = DECISION_LABELS[input.decision];
   const reviewUrl = `https://apiclaw.cloud/workspace/review-listings?listing=${encodeURIComponent(input.listingId)}`;
   const pricing = `${compact(input.draft.auth)} / ${compact(input.draft.pricing)}${pricingNotes ? ` (${pricingNotes})` : ""}`;
-  const finalLine = `Beslut: ${decision}. Skäl: ${reason}. Runda: ${input.revision}. Granska: ${reviewUrl}`;
+  const finalLine = `Beslut: ${decision}. Skäl: ${punctuatedReason} Runda: ${input.revision}. Granska: ${reviewUrl}`;
   return {
     name,
     reviewUrl,
@@ -94,7 +95,7 @@ export function listingNotificationBrief(input: ListingBriefInput) {
       `<p><strong>Docs-URL:</strong> <a href="${escapeHtml(compact(input.draft.docsUrl))}">${escapeHtml(compact(input.draft.docsUrl))}</a></p>`,
       `<p><strong>Auth / Prissättning:</strong> ${escapeHtml(pricing)}</p>`,
       `<p><strong>Antal operationer:</strong> ${input.draft.operations.length}</p>`,
-      `<p><strong>Beslut:</strong> ${escapeHtml(decision)}. <strong>Skäl:</strong> ${escapeHtml(reason)}. <strong>Runda:</strong> ${input.revision}. <a href="${escapeHtml(reviewUrl)}">Granska listningen</a></p>`,
+      `<p><strong>Beslut:</strong> ${escapeHtml(decision)}. <strong>Skäl:</strong> ${escapeHtml(punctuatedReason)} <strong>Runda:</strong> ${input.revision}. <a href="${escapeHtml(reviewUrl)}">Granska listningen</a></p>`,
     ].join(""),
   };
 }
