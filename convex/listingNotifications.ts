@@ -6,6 +6,7 @@ import {
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { checkEmailAllowedSync } from "./emailGuards";
+import type { ListingMetadata } from "../src/listing-metadata";
 
 const DECISION_FROM = "APIClaw <hello@apiclaw.cloud>";
 const DECISION_REPLY_TO = "gustav@nordsym.com";
@@ -14,6 +15,89 @@ const WORKSPACE_LISTINGS_URL =
   "https://apiclaw.cloud/workspace?tab=api-catalog&view=my-apis";
 
 type ReviewDecision = "approved" | "changes_requested";
+type ListingNoticeDecision = ReviewDecision | "escalated" | "awaiting_review";
+
+export type ListingBriefInput = {
+  draft: ListingMetadata;
+  submitter: string;
+  workspaceId: string;
+  workspaceName?: string;
+  decision: ListingNoticeDecision;
+  note: string;
+  listingId: string;
+  revision: number;
+};
+
+const DECISION_LABELS: Record<ListingNoticeDecision, string> = {
+  approved: "Godkänd",
+  changes_requested: "Ändringar begärda",
+  escalated: "Eskalerad till manuell granskning",
+  awaiting_review: "Väntar på granskning",
+};
+
+function compact(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function truncate(value: string, maxLength: number) {
+  const normalized = compact(value);
+  return normalized.length <= maxLength
+    ? normalized
+    : `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character]!,
+  );
+}
+
+export function listingNotificationBrief(input: ListingBriefInput) {
+  const name = truncate(input.draft.name, 160);
+  const description = truncate(input.draft.description, 300);
+  const pricingNotes = truncate(input.draft.pricingNotes, 180);
+  const submitter = compact(input.submitter);
+  const workspace = input.workspaceName
+    ? `${truncate(input.workspaceName, 120)} (${input.workspaceId})`
+    : input.workspaceId;
+  const reason = compact(input.note);
+  const decision = DECISION_LABELS[input.decision];
+  const reviewUrl = `https://apiclaw.cloud/workspace/review-listings?listing=${encodeURIComponent(input.listingId)}`;
+  const pricing = `${compact(input.draft.auth)} / ${compact(input.draft.pricing)}${pricingNotes ? ` (${pricingNotes})` : ""}`;
+  const finalLine = `Beslut: ${decision}. Skäl: ${reason}. Runda: ${input.revision}. Granska: ${reviewUrl}`;
+  return {
+    name,
+    reviewUrl,
+    text: [
+      `Vad: ${description}`,
+      `Inskickad av: ${submitter} (arbetsyta: ${workspace})`,
+      `Kategori: ${compact(input.draft.category)}`,
+      `Bas-URL: ${compact(input.draft.baseUrl)}`,
+      `Docs-URL: ${compact(input.draft.docsUrl)}`,
+      `Auth / Prissättning: ${pricing}`,
+      `Antal operationer: ${input.draft.operations.length}`,
+      finalLine,
+    ].join("\n"),
+    html: [
+      `<p><strong>Vad:</strong> ${escapeHtml(description)}</p>`,
+      `<p><strong>Inskickad av:</strong> ${escapeHtml(submitter)} (arbetsyta: ${escapeHtml(workspace)})</p>`,
+      `<p><strong>Kategori:</strong> ${escapeHtml(compact(input.draft.category))}</p>`,
+      `<p><strong>Bas-URL:</strong> ${escapeHtml(compact(input.draft.baseUrl))}</p>`,
+      `<p><strong>Docs-URL:</strong> <a href="${escapeHtml(compact(input.draft.docsUrl))}">${escapeHtml(compact(input.draft.docsUrl))}</a></p>`,
+      `<p><strong>Auth / Prissättning:</strong> ${escapeHtml(pricing)}</p>`,
+      `<p><strong>Antal operationer:</strong> ${input.draft.operations.length}</p>`,
+      `<p><strong>Beslut:</strong> ${escapeHtml(decision)}. <strong>Skäl:</strong> ${escapeHtml(reason)}. <strong>Runda:</strong> ${input.revision}. <a href="${escapeHtml(reviewUrl)}">Granska listningen</a></p>`,
+    ].join(""),
+  };
+}
 
 export function decisionRecipientAllowed(
   email: string,
@@ -85,51 +169,40 @@ export function decisionEmail(input: {
 }
 
 export function operatorDecisionEmail(input: {
-  name: string;
+  draft: ListingMetadata;
   submitter: string;
+  workspaceId: string;
+  workspaceName?: string;
   decision: ReviewDecision | "escalated";
   note: string;
   listingId: string;
+  revision: number;
 }) {
-  const name = input.name.replace(/[\r\n]+/g, " ").trim().slice(0, 160);
-  const reviewUrl = `https://apiclaw.cloud/workspace/review-listings?listing=${encodeURIComponent(input.listingId)}`;
+  const brief = listingNotificationBrief(input);
   return {
     from: DECISION_FROM,
     reply_to: DECISION_REPLY_TO,
     to: "gustav@nordsym.com",
-    subject: `APIClaw listing ${input.decision}: ${name}`,
-    text: [
-      `Listing: ${name}`,
-      `Submitter: ${input.submitter}`,
-      `Decision: ${input.decision}`,
-      `Reason: ${input.note.trim()}`,
-      "",
-      `Catalog: ${CATALOG_URL}`,
-      ...(input.decision === "escalated" ? [`Pending review: ${reviewUrl}`] : []),
-    ].join("\n"),
+    subject: `APIClaw listing ${input.decision}: ${brief.name}`,
+    text: brief.text,
+    html: brief.html,
   };
 }
 
-export function reviewEmail(name: string, id: string, revision: number) {
-  const escape = (s: string) =>
-    s.replace(
-      /[&<>"']/g,
-      (c) =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;",
-        })[c]!,
-    );
-  const url = `https://apiclaw.cloud/workspace/review-listings?listing=${encodeURIComponent(id)}`;
+export function reviewEmail(
+  input: Omit<ListingBriefInput, "decision" | "note">,
+) {
+  const brief = listingNotificationBrief({
+    ...input,
+    decision: "awaiting_review",
+    note: "Ny eller uppdaterad listning inskickad för granskning.",
+  });
   return {
     from: "APIClaw <noreply@apiclaw.cloud>",
     to: "gustav@nordsym.com",
-    subject: `APIClaw: API listing awaiting review - ${name.replace(/[\r\n]/g, " ").slice(0, 120)}`,
-    text: `API listing awaiting review: ${name}\nListing ID: ${id}\nRevision: ${revision}\n${url}\nAgents: use the operator API with this exact revision and a review note. Approval publishes discovery metadata only.`,
-    html: `<p>A workspace submitted <strong>${escape(name)}</strong>, revision ${revision}, for discovery review.</p><p>Listing ID: <code>${escape(id)}</code><br>Revision: ${revision}</p><p><a href="${url}">Review listing</a></p><p>Sign in as gustav@nordsym.com. Check ownership and metadata before approving. Approval only publishes discovery metadata; no gateway execution, provider keys or payments are enabled.</p>`,
+    subject: `APIClaw: API listing awaiting review - ${brief.name}`,
+    text: brief.text,
+    html: brief.html,
   };
 }
 const identity = { id: v.id("discoveryListings"), revision: v.number() };
@@ -137,12 +210,19 @@ export const candidate = internalQuery({
   args: identity,
   handler: async (ctx, args) => {
     const row = await ctx.db.get(args.id);
-    return row &&
-      row.revision === args.revision &&
-      row.reviewState === "pending" &&
-      row.notificationState === "queued"
-      ? row
-      : null;
+    if (
+      !row ||
+      row.revision !== args.revision ||
+      row.reviewState !== "pending" ||
+      row.notificationState !== "queued"
+    )
+      return null;
+    const workspace = await ctx.db.get(row.workspaceId);
+    return {
+      ...row,
+      submitter: workspace?.email ?? "Unknown",
+      workspaceName: workspace?.workspaceName,
+    };
   },
 });
 export const record = internalMutation({
@@ -201,7 +281,14 @@ export const send = internalAction({
             "Idempotency-Key": `listing-review-${args.id}-${args.revision}`,
           },
           body: JSON.stringify(
-            reviewEmail(row.draft.name, args.id, args.revision),
+            reviewEmail({
+              draft: row.draft,
+              submitter: row.submitter,
+              workspaceId: row.workspaceId,
+              workspaceName: row.workspaceName,
+              listingId: args.id,
+              revision: args.revision,
+            }),
           ),
           signal: AbortSignal.timeout(10000),
         });
@@ -263,17 +350,40 @@ export const decisionCandidate = internalQuery({
     const review = await ctx.db.get(args.reviewId);
     if (!review || review.notificationState !== "queued") return null;
     const workspace = await ctx.db.get(review.workspaceId);
+    const listing = await ctx.db.get(review.listingId);
+    const draft =
+      review.listingSnapshot ??
+      (listing?.revision === review.revision ? listing.draft : undefined);
+    if (!draft) return { unrenderable: true as const };
     return {
       listingId: review.listingId,
       revision: review.revision,
       decision: review.decision,
       note: review.note,
-      name: review.listingName ?? "your API listing",
+      draft,
+      name: review.listingName ?? draft.name,
       email: workspace?.email,
+      workspaceId: review.workspaceId,
+      workspaceName: workspace?.workspaceName,
       tier: workspace?.tier,
       submitterMessageId: review.notificationId,
       operatorMessageId: review.operatorNotificationId,
     };
+  },
+});
+
+export const recordUnrenderableDecision = internalMutation({
+  args: decisionIdentity,
+  handler: async (ctx, args) => {
+    const review = await ctx.db.get(args.reviewId);
+    if (!review || review.notificationState !== "queued") return;
+    const error = "listing_snapshot_unavailable";
+    await ctx.db.patch(review._id, {
+      notificationState: "failed",
+      notificationAttempts: (review.notificationAttempts ?? 0) + 1,
+      notificationError: error,
+      operatorNotificationError: error,
+    });
   },
 });
 
@@ -331,6 +441,13 @@ export const sendDecision = internalAction({
       args,
     );
     if (!candidate) return;
+    if (candidate.unrenderable) {
+      await ctx.runMutation(
+        internal.listingNotifications.recordUnrenderableDecision,
+        args,
+      );
+      return;
+    }
     const key = process.env.RESEND_API_KEY;
     const send = async (body: object, idempotencyKey: string) => {
       if (!key) return { error: "missing_resend_api_key" };
@@ -385,11 +502,14 @@ export const sendDecision = internalAction({
     if (!operatorMessageId) {
       const result = await send(
         operatorDecisionEmail({
-          name: candidate.name,
+          draft: candidate.draft,
           submitter: candidate.email ?? "Unknown",
+          workspaceId: candidate.workspaceId,
+          workspaceName: candidate.workspaceName,
           decision: candidate.decision,
           note: candidate.note,
           listingId: candidate.listingId,
+          revision: candidate.revision,
         }),
         `listing-operator-decision-${candidate.listingId}-${candidate.revision}-${candidate.decision}`,
       );
@@ -422,8 +542,10 @@ export const escalationCandidate = internalQuery({
       return null;
     const workspace = await ctx.db.get(row.workspaceId);
     return {
-      name: row.draft.name,
+      draft: row.draft,
       submitter: workspace?.email ?? "Unknown",
+      workspaceId: row.workspaceId,
+      workspaceName: workspace?.workspaceName,
       reason: row.autoReviewReason ?? "Automatic review was uncertain.",
       messageId: row.autoReviewNotificationId,
     };
@@ -491,11 +613,14 @@ export const sendEscalation = internalAction({
           },
           body: JSON.stringify(
             operatorDecisionEmail({
-              name: candidate.name,
+              draft: candidate.draft,
               submitter: candidate.submitter,
+              workspaceId: candidate.workspaceId,
+              workspaceName: candidate.workspaceName,
               decision: "escalated",
               note: candidate.reason,
               listingId: args.id,
+              revision: args.revision,
             }),
           ),
           signal: AbortSignal.timeout(10_000),

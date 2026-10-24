@@ -220,6 +220,40 @@ export const pending = internalQuery({
       .withIndex("by_review", (q) => q.eq("reviewState", "pending"))
       .paginate(args.paginationOpts),
 });
+
+function compactIssue(value: string, maxLength = 96) {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length <= maxLength
+    ? compact
+    : `${compact.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+export function repeatedAutoReviewReason(previous: string, current: string) {
+  return `Repeated auto-review. Previous: ${compactIssue(previous)} Current: ${compactIssue(current)}`;
+}
+
+async function queueAutoReviewEscalation(
+  ctx: MutationCtx,
+  row: {
+    _id: Id<"discoveryListings">;
+    revision: number;
+  },
+  reason: string,
+) {
+  await ctx.db.patch(row._id, {
+    autoReviewState: "escalated",
+    autoReviewReason: reason.trim().slice(0, 240),
+    autoReviewNotificationState: "queued",
+    autoReviewNotificationAttempts: 0,
+    updatedAt: Date.now(),
+  });
+  await ctx.scheduler.runAfter(
+    0,
+    internal.listingNotifications.sendEscalation,
+    { id: row._id, revision: row.revision },
+  );
+}
+
 async function reviewListing(
   ctx: MutationCtx,
   args: {
@@ -244,6 +278,26 @@ async function reviewListing(
       message: "Review is stale or listing is not pending. Refresh the queue.",
     });
   validateListing(row.draft);
+  if (!args.approve && args.reviewer === "apiclaw-auto-review") {
+    const previous = await ctx.db
+      .query("discoveryListingReviews")
+      .withIndex("by_listing_reviewer_decision", (q) =>
+        q
+          .eq("listingId", row._id)
+          .eq("reviewer", "apiclaw-auto-review")
+          .eq("decision", "changes_requested"),
+      )
+      .order("desc")
+      .first();
+    if (previous) {
+      await queueAutoReviewEscalation(
+        ctx,
+        row,
+        repeatedAutoReviewReason(previous.note, args.note),
+      );
+      return null;
+    }
+  }
   if (args.approve) {
     if (
       getManagedProviderAdapter(row.draft.name) ||
@@ -274,6 +328,7 @@ async function reviewListing(
     workspaceId: row.workspaceId,
     revision: row.revision,
     listingName: row.draft.name,
+    listingSnapshot: row.draft,
     reviewer: args.reviewer,
     decision: args.approve ? "approved" : "changes_requested",
     note: args.note.trim(),
@@ -381,19 +436,7 @@ export const escalateAutoReview = internalMutation({
     )
       return null;
     if (row.autoReviewState === "escalated") return null;
-    const reason = args.reason.trim().slice(0, 240);
-    await ctx.db.patch(row._id, {
-      autoReviewState: "escalated",
-      autoReviewReason: reason,
-      autoReviewNotificationState: "queued",
-      autoReviewNotificationAttempts: 0,
-      updatedAt: Date.now(),
-    });
-    await ctx.scheduler.runAfter(
-      0,
-      internal.listingNotifications.sendEscalation,
-      { id: row._id, revision: row.revision },
-    );
+    await queueAutoReviewEscalation(ctx, row, args.reason);
     return null;
   },
 });
