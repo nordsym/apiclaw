@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: callable-recheck
   cancel-in-progress: false
@@ -19,24 +20,28 @@ jobs:
           node-version: '24'
       - run: npm ci
       - run: node --check scripts/audit-callable.mjs
+      - run: node --check scripts/callable-recheck-flag.mjs
       - run: cp src/workspace-public-apis.json /tmp/previous-callable.json
       - run: npm run audit:callable
+      - name: Download previous recheck evidence
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prev=$(gh run list --workflow callable-recheck.yml --limit 20 --json databaseId,status \
+            --jq "[.[] | select(.databaseId != ${{ github.run_id }} and .status == \"completed\")][0].databaseId")
+          if [ -z "$prev" ] || [ "$prev" = "null" ]; then
+            echo "No previous completed recheck to compare."
+            exit 0
+          fi
+          gh run download "$prev" --name callable-audit --dir /tmp/prior-callable-audit
+      - name: Flag eligibility changes for review
+        run: node scripts/callable-recheck-flag.mjs --snapshot=/tmp/previous-callable.json --report=docs/ops/callable-audit.json --prior-confirm=/tmp/prior-callable-audit/docs/ops/callable-recheck-confirm.json --confirm-output=docs/ops/callable-recheck-confirm.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: callable-audit
           path: |
             docs/ops/callable-audit.*
+            docs/ops/callable-recheck-confirm.json
             src/workspace-public-apis.json
-      - name: Flag eligibility changes for review
-        run: |
-          node --input-type=module <<'JS'
-          import {readFileSync,appendFileSync} from 'node:fs';
-          const old=JSON.parse(readFileSync('/tmp/previous-callable.json'));
-          const report=JSON.parse(readFileSync('docs/ops/callable-audit.json'));
-          const current=report.results.filter(x=>x.verified).map(x=>({id:x.canonicalId??x.id,name:x.name}));
-          const removed=old.filter(x=>!current.some(y=>x.id===y.id));
-          const added=current.filter(x=>!old.some(y=>x.id===y.id));
-          appendFileSync(process.env.GITHUB_STEP_SUMMARY,`## Callable upstream recheck\n${current.length} upstream-verified free API candidates. The customer-approved runtime manifest is unchanged.\nRemoved upstream eligibility: ${removed.map(x=>x.name).join(', ')||'none'}.\nNew upstream candidates: ${added.map(x=>x.name).join(', ')||'none'}.\nFull results are in the callable-audit artifact. Additions require authenticated customer proof before a reviewed snapshot refresh. Native gateway health checks independently demote unhealthy approved APIs.\n`);
-          if(removed.length||added.length){console.error('Callable eligibility changed. Review the audit artifact and update the measured snapshot.');process.exitCode=1;}
-          JS

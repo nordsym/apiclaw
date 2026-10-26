@@ -45,7 +45,7 @@
 
 export const CANON_STATS = {
   /** Updated each time canon refreshes. */
-  generated_at: '2026-10-16',
+  generated_at: '2026-10-26',
 
   /** Public catalog entries, after internal-provider exclusion and adapter
    * alias collapse. Searchable after signup at no usage charge. */
@@ -71,11 +71,11 @@ export const CANON_STATS = {
 
   /** No-key public APIs unlocked for workspace-authenticated execution.
    *  Not the 26k harvest and not anonymous keyless proxy. */
-  workspace_public_executable: 1140,
+  workspace_public_executable: 1133,
 
   /** Public catalog cards with callable=true: managed rails + workspace-public
    *  APIs. landing/src/app/api/catalog/route.ts throws if this drifts. */
-  customer_executable_catalog_cards: 1143,
+  customer_executable_catalog_cards: 1136,
 
   /** All-time npm installs (canon as of 2026-08-21 per npmjs dashboard). */
   npm_installs: 20_058,
