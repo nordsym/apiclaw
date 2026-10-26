@@ -2,15 +2,17 @@
 
 Checked: 2026-10-16T10:22:43.388Z. Mode: full-sweep. Complete sweep: yes.
 
-**1140 canonical free APIs verified from 2537 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
+**1133 canonical free APIs verified from 2537 candidate/alias rows.** The site separately adds its existing approved managed providers; this sweep makes no managed or credentialed calls. The managed-only `customerExecutableProviderCount` is not the full `totalCallable`. Unknown pricing remains discovery even after HTTP 200.
 
 Customer gateway verification: 2026-10-16T10:49:03.509Z, preview https://abundant-goldfish-47.eu-west-1.convex.site. 1140/1154 authenticated customer calls passed; 14 were demoted. Billing snapshots were identical. 0 newly upstream-verified APIs still await customer gateway verification. Upstream checkedAt/HTTP/latency remain the original upstream evidence; bounded per-row gatewayVerification records the separate customer result.
 
-Catalog arithmetic: 1140 measured free APIs + 3 existing approved managed providers = **1143 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 0 additional distinct verified APIs. No additional key signups are needed for the 1,000 target. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
+Catalog arithmetic: 1133 measured free APIs + 3 existing approved managed providers = **1136 catalog-callable APIs**. This keyless audit does not retest paid managed providers. Reaching 1,000 requires 0 additional distinct verified APIs. No additional key signups are needed for the 1,000 target. Remaining wrong endpoints/unresolved services may still provide additional APIs; this is not proof of a global maximum.
+
+Eligibility recheck: On 2026-10-26 the scheduled sweep reported 64 snapshot removals and 19 additions. Independent retries with the shared gateway transport recovered 27 removals, including FakeStoreAPI, Free Dictionary, Open Brewery DB, Ensembl, RNAcentral, ToS;DR, Final Space and several catalogues that had timed out or returned 403/5xx once. Seven endpoints stayed unverified for a stable reason and were demoted: Denpasar open data no longer resolves (ENOTFOUND); UFS, UFPB, eThekwini Edge, La Vega Innova and USACH Dataverse present an expired certificate; Aragón open data fails TLS chain verification (UNABLE_TO_VERIFY_LEAF_SIGNATURE). Timeouts, HTTP 401/403, rate limits and single-run 5xx stays were kept. UUID Generator was kept by approving its www-to-apex redirect. The 19 newly upstream-verified candidates stay out of this manifest until an authenticated customer batch proves them. October 16 customer-gateway receipts remain on demoted rows and do not keep a broken endpoint callable.
 
 Policy: Keyless HTTPS GET only; shared 20-second gateway transport; one retry at most; reviewed redirects only; 256 KiB body; eight workers; at least one second between requests per origin. A callable API needs a valid reviewed response, explicit free evidence and one canonical identity.
 
-Verified scope: 832 counted API products are restricted to their reviewed metadata endpoint paths. Their useful calls search public catalogues or read scheme/operator information. Each independent service is counted once; aliases, datasets, versions and operations do not add extra APIs. Dataset downloads and reuse require separate source entitlements.
+Verified scope: 825 counted API products are restricted to their reviewed metadata endpoint paths. Their useful calls search public catalogues or read scheme/operator information. Each independent service is counted once; aliases, datasets, versions and operations do not add extra APIs. Dataset downloads and reuse require separate source entitlements.
 
 CORS is a browser rule and does not block server-to-server gateway execution. HTTP 401/403 alone does not establish a key requirement. Documentation/spec URLs are not hosted API endpoints. HTML, malformed/unsupported responses and oversized bodies do not qualify.
 
@@ -59,12 +61,12 @@ The following table covers all 2537 expanded candidate/alias rows. It must not b
 
 | Current cause | Expanded rows |
 | --- | ---: |
-| ok | 1140 |
+| ok | 1133 |
 | wrong_base_url_path | 672 |
 | duplicate | 171 |
-| redirect_https | 159 |
+| redirect_https | 165 |
 | not_hosted_api | 115 |
-| dead_upstream | 96 |
+| dead_upstream | 97 |
 | unresolved | 82 |
 | timeout | 38 |
 | gateway_block | 28 |
@@ -378,7 +380,6 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | ckan-satudata-landakkab-go-id | missing_default_params |
 | ckan-datos-gob-do | missing_default_params |
 | ckan-data-nt-gov-au | missing_default_params |
-| ckan-satudata-denpasarkota-go-id | missing_default_params |
 | ckan-dataset-jogjakota-go-id | missing_default_params |
 | ckan-opendata-hawaii-gov | missing_default_params |
 | ckan-data-gov-me | missing_default_params |
@@ -586,7 +587,6 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | ckan-cryptodata-center | missing_default_params |
 | ckan-dati-emilia-romagna-it | missing_default_params |
 | ckan-ecosystem-ckan-org | missing_default_params |
-| ckan-opendata-aragon-es | missing_default_params |
 | ckan-kozadatportal-hu | missing_default_params |
 | ckan-opendata-nhsbsa-net | missing_default_params |
 | ckan-detroitdata-org | missing_default_params |
@@ -722,17 +722,13 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | ckan-data-cityofdenton-com | missing_default_params |
 | ckan-opendata-alcoi-org | missing_default_params |
 | ckan-opendata-gera-de | missing_default_params |
-| ckan-dados-ufs-br | missing_default_params |
 | ckan-open-scayle-es | missing_default_params |
 | ckan-dados-cefet-rj-br | missing_default_params |
-| ckan-opendata-lavegainnova-es | missing_default_params |
 | ckan-datos-chduero-es | missing_default_params |
 | ckan-dados-ifrr-edu-br | missing_default_params |
-| ckan-datasets-edge-durban | missing_default_params |
 | ckan-open-data-musterstadt-ckan-de | missing_default_params |
 | ckan-centroservizi-opendata-arionline-cloud | missing_default_params |
 | ckan-dados-uffs-edu-br | missing_default_params |
-| ckan-dadosabertos-ufpb-br | missing_default_params |
 | ckan-data-tokyo-omy-w-jp | missing_default_params |
 | ckan-datahub-openscience-eu | missing_default_params |
 | ckan-dados-ifro-edu-br | missing_default_params |
@@ -1120,7 +1116,6 @@ A targeted check uses `--only=frankfurter,nagerdate --output-dir=/tmp/apiclaw-ta
 | repositoriodedatosabiertosdeinvestigacinredatasearchapi | missing_default_params |
 | repositoriodedatosdeinvestigacindelauniversidaddechilesearchapi | missing_default_params |
 | repositoriodedatosdeinvestigacindelauniversidadnacionaldelaplatasearchapi | missing_default_params |
-| repositoriodedatosdeinvestigacinusachsearchapi | missing_default_params |
 | repositoriodedatosdelauniversidaddelpacficodatasetsupsearchapi | missing_default_params |
 | repositoriodedatosdelauniversidaddeconcepcinsearchapi | missing_default_params |
 | repositoriodedatospontificiauniversidadjaverianasearchapi | missing_default_params |
@@ -2908,7 +2903,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Public Data Catalogue (satudata.landakkab.go.id) / ckan-satudata-landakkab-go-id | [GET](https://satudata.landakkab.go.id/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://satudata.landakkab.go.id/) | 998 | callable |
 | Public Data Catalogue (datos.gob.do) / ckan-datos-gob-do | [GET](https://datos.gob.do/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://datos.gob.do/) | 732 | callable |
 | Public Data Catalogue (data.nt.gov.au) / ckan-data-nt-gov-au | [GET](https://data.nt.gov.au/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://data.nt.gov.au/) | 1404 | callable |
-| Public Data Catalogue (satudata.denpasarkota.go.id) / ckan-satudata-denpasarkota-go-id | [GET](https://satudata.denpasarkota.go.id/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://satudata.denpasarkota.go.id/) | 1043 | callable |
+| Public Data Catalogue (satudata.denpasarkota.go.id) / ckan-satudata-denpasarkota-go-id | [GET](https://satudata.denpasarkota.go.id/api/3/action/package_search?rows=1) | 0 | dead_upstream / network_error | [free](https://satudata.denpasarkota.go.id/) | 115 | discovery |
 | Public Data Catalogue (dataset.jogjakota.go.id) / ckan-dataset-jogjakota-go-id | [GET](https://dataset.jogjakota.go.id/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dataset.jogjakota.go.id/) | 2026 | callable |
 | Public Data Catalogue (opendata.hawaii.gov) / ckan-opendata-hawaii-gov | [GET](https://opendata.hawaii.gov/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.hawaii.gov/) | 614 | callable |
 | Public Data Catalogue (data.gov.me) / ckan-data-gov-me | [GET](https://data.gov.me/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://data.gov.me/about) | 1153 | callable |
@@ -3120,7 +3115,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Public Data Catalogue (cryptodata.center) / ckan-cryptodata-center | [GET](https://cryptodata.center/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://cryptodata.center/) | 331 | callable |
 | Public Data Catalogue (dati.emilia-romagna.it) / ckan-dati-emilia-romagna-it | [GET](https://dati.emilia-romagna.it/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dati.emilia-romagna.it/) | 399 | callable |
 | Public Data Catalogue (ecosystem.ckan.org) / ckan-ecosystem-ckan-org | [GET](https://ecosystem.ckan.org/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://ecosystem.ckan.org/) | 693 | callable |
-| Public Data Catalogue (opendata.aragon.es) / ckan-opendata-aragon-es | [GET](https://opendata.aragon.es/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.aragon.es/) | 666 | callable |
+| Public Data Catalogue (opendata.aragon.es) / ckan-opendata-aragon-es | [GET](https://opendata.aragon.es/api/3/action/package_search?rows=1) | 0 | redirect_https / tls_error | [free](https://opendata.aragon.es/) | 361 | discovery |
 | Public Data Catalogue (kozadatportal.hu) / ckan-kozadatportal-hu | [GET](https://kozadatportal.hu/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://kozadatportal.hu/about) | 648 | callable |
 | Public Data Catalogue (opendata.nhsbsa.net) / ckan-opendata-nhsbsa-net | [GET](https://opendata.nhsbsa.net/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.nhsbsa.net/) | 512 | callable |
 | Public Data Catalogue (detroitdata.org) / ckan-detroitdata-org | [GET](https://detroitdata.org/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://detroitdata.org/) | 664 | callable |
@@ -3260,18 +3255,18 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Public Data Catalogue (data.cityofdenton.com) / ckan-data-cityofdenton-com | [GET](https://data.cityofdenton.com/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://data.cityofdenton.com/) | 822 | callable |
 | Public Data Catalogue (opendata.alcoi.org) / ckan-opendata-alcoi-org | [GET](https://opendata.alcoi.org/data/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.alcoi.org/data/about) | 784 | callable |
 | Public Data Catalogue (opendata.gera.de) / ckan-opendata-gera-de | [GET](https://opendata.gera.de/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.gera.de/) | 646 | callable |
-| Public Data Catalogue (dados.ufs.br) / ckan-dados-ufs-br | [GET](https://dados.ufs.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dados.ufs.br/) | 1560 | callable |
+| Public Data Catalogue (dados.ufs.br) / ckan-dados-ufs-br | [GET](https://dados.ufs.br/api/3/action/package_search?rows=1) | 0 | redirect_https / tls_error | [free](https://dados.ufs.br/) | 529 | discovery |
 | Public Data Catalogue (open.scayle.es) / ckan-open-scayle-es | [GET](https://open.scayle.es/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://open.scayle.es/) | 694 | callable |
 | Public Data Catalogue (dados.cefet-rj.br) / ckan-dados-cefet-rj-br | [GET](https://dados.cefet-rj.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dados.cefet-rj.br/) | 1981 | callable |
-| Public Data Catalogue (opendata.lavegainnova.es) / ckan-opendata-lavegainnova-es | [GET](https://opendata.lavegainnova.es/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://opendata.lavegainnova.es/) | 387 | callable |
+| Public Data Catalogue (opendata.lavegainnova.es) / ckan-opendata-lavegainnova-es | [GET](https://opendata.lavegainnova.es/api/3/action/package_search?rows=1) | 0 | redirect_https / tls_error | [free](https://opendata.lavegainnova.es/) | 340 | discovery |
 | Public Data Catalogue (datos.chduero.es) / ckan-datos-chduero-es | [GET](https://datos.chduero.es/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://datos.chduero.es/) | 468 | callable |
 | Public Data Catalogue (dados.ifrr.edu.br) / ckan-dados-ifrr-edu-br | [GET](https://dados.ifrr.edu.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dados.ifrr.edu.br/) | 1245 | callable |
-| Public Data Catalogue (datasets.edge.durban) / ckan-datasets-edge-durban | [GET](https://datasets.edge.durban/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://datasets.edge.durban/) | 721 | callable |
+| Public Data Catalogue (datasets.edge.durban) / ckan-datasets-edge-durban | [GET](https://datasets.edge.durban/api/3/action/package_search?rows=1) | 0 | redirect_https / tls_error | [free](https://datasets.edge.durban/) | 232 | discovery |
 | Public Data Catalogue (open-data-musterstadt.ckan.de) / ckan-open-data-musterstadt-ckan-de | [GET](https://open-data-musterstadt.ckan.de/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://open-data-musterstadt.ckan.de/) | 323 | callable |
 | Public Data Catalogue (centroservizi-opendata.arionline.cloud) / ckan-centroservizi-opendata-arionline-cloud | [GET](https://centroservizi-opendata.arionline.cloud/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://centroservizi-opendata.arionline.cloud/) | 616 | callable |
 | Public Data Catalogue (dados.uffs.edu.br) / ckan-dados-uffs-edu-br | [GET](https://dados.uffs.edu.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dados.uffs.edu.br/) | 1058 | callable |
 | Public Data Catalogue (dados.uff.br) / ckan-dados-uff-br | [GET](https://dados.uff.br/api/3/action/package_search?rows=1) | 0 | timeout / timeout | [free](https://dados.uff.br/) | 20015 | discovery |
-| Public Data Catalogue (dadosabertos.ufpb.br) / ckan-dadosabertos-ufpb-br | [GET](https://dadosabertos.ufpb.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dadosabertos.ufpb.br/) | 1146 | callable |
+| Public Data Catalogue (dadosabertos.ufpb.br) / ckan-dadosabertos-ufpb-br | [GET](https://dadosabertos.ufpb.br/api/3/action/package_search?rows=1) | 0 | redirect_https / tls_error | [free](https://dadosabertos.ufpb.br/) | 411 | discovery |
 | Public Data Catalogue (data.tokyo-omy-w.jp) / ckan-data-tokyo-omy-w-jp | [GET](https://data.tokyo-omy-w.jp/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://data.tokyo-omy-w.jp/) | 1249 | callable |
 | Public Data Catalogue (datahub.openscience.eu) / ckan-datahub-openscience-eu | [GET](https://datahub.openscience.eu/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://datahub.openscience.eu/) | 335 | callable |
 | Public Data Catalogue (dados.ifro.edu.br) / ckan-dados-ifro-edu-br | [GET](https://dados.ifro.edu.br/api/3/action/package_search?rows=1) | 200 | ok / ok_json | [free](https://dados.ifro.edu.br/) | 1586 | callable |
@@ -3663,7 +3658,7 @@ Per-hop redirects/retries, original baseline outcomes and bounded error-cause ch
 | Repositorio de Datos Abiertos de Investigación (Redata) Search API / repositoriodedatosabiertosdeinvestigacinredatasearchapi | [GET](https://redata.anii.org.uy/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://redata.anii.org.uy/) | 986 | callable |
 | Repositorio de datos de investigación de la Universidad de Chile Search API / repositoriodedatosdeinvestigacindelauniversidaddechilesearchapi | [GET](https://datos.uchile.cl/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://datos.uchile.cl/) | 3084 | callable |
 | Repositorio de Datos de Investigación de la Universidad Nacional de La Plata Search API / repositoriodedatosdeinvestigacindelauniversidadnacionaldelaplatasearchapi | [GET](https://datos.unlp.edu.ar/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://datos.unlp.edu.ar/) | 2534 | callable |
-| Repositorio de Datos de Investigación USACH Search API / repositoriodedatosdeinvestigacinusachsearchapi | [GET](https://datos.usach.cl/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://datos.usach.cl/) | 2425 | callable |
+| Repositorio de Datos de Investigación USACH Search API / repositoriodedatosdeinvestigacinusachsearchapi | [GET](https://datos.usach.cl/api/search?q=%2A&per_page=1&type=dataverse) | 0 | redirect_https / tls_error | [free](https://datos.usach.cl/) | 386 | discovery |
 | Repositorio de Datos de la Universidad del Pacífico (DatasetsUP) Search API / repositoriodedatosdelauniversidaddelpacficodatasetsupsearchapi | [GET](https://datasets.up.edu.pe/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://datasets.up.edu.pe/) | 2162 | callable |
 | Repositorio de datos de la Universidad de Concepción Search API / repositoriodedatosdelauniversidaddeconcepcinsearchapi | [GET](https://datav.udec.cl/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://datav.udec.cl/) | 2597 | callable |
 | Repositorio de Datos Pontificia Universidad Javeriana Search API / repositoriodedatospontificiauniversidadjaverianasearchapi | [GET](https://dataverse.javeriana.edu.co/api/search?q=%2A&per_page=1&type=dataverse) | 200 | ok / ok_json | [free](https://dataverse.javeriana.edu.co/) | 2335 | callable |

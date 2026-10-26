@@ -18,10 +18,10 @@ The metric that matters is a successful `POST /v1/execute`, not an install.
 Give an agent this file and it can install, sign in, and land one 200
 without guessing.
 
-Live catalog (2026-10-16). Use `https://apiclaw.cloud/api/catalog` if
+Live catalog (2026-10-26). Use `https://apiclaw.cloud/api/catalog` if
 counts must be current. Do not invent metrics.
 
-- 1,143 callable
+- 1,136 callable
 - 27,483 discoverable
 - 22 built-in providers
 

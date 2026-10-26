@@ -5,14 +5,14 @@
   "mode": "full-sweep",
   "lastFullSweepAt": "2026-10-16T10:22:43.388Z",
   "candidateCount": 2537,
-  "verifiedCount": 1140,
+  "verifiedCount": 1133,
   "causes": {
-    "ok": 1140,
+    "ok": 1133,
     "wrong_base_url_path": 672,
     "duplicate": 171,
-    "redirect_https": 159,
+    "redirect_https": 165,
     "not_hosted_api": 115,
-    "dead_upstream": 96,
+    "dead_upstream": 97,
     "unresolved": 82,
     "timeout": 38,
     "gateway_block": 28,
@@ -23,17 +23,17 @@
     "missing_default_params": 0
   },
   "outcomes": {
-    "ok_json": 1130,
+    "ok_json": 1123,
     "html_instead_of_api": 333,
     "documentation_url": 235,
     "duplicate": 171,
     "http_error": 147,
     "reviewed_exclusion": 137,
     "redirect_not_approved": 129,
-    "network_error": 78,
+    "network_error": 79,
     "timeout": 38,
     "access_denied": 30,
-    "tls_error": 30,
+    "tls_error": 36,
     "customer_gateway_failed": 14,
     "gateway_block": 13,
     "unsafe_url": 13,
@@ -1907,12 +1907,6 @@
       ]
     },
     {
-      "id": "ckan-satudata-denpasarkota-go-id",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-dataset-jogjakota-go-id",
       "causes": [
         "missing_default_params"
@@ -3155,12 +3149,6 @@
       ]
     },
     {
-      "id": "ckan-opendata-aragon-es",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-kozadatportal-hu",
       "causes": [
         "missing_default_params"
@@ -3971,12 +3959,6 @@
       ]
     },
     {
-      "id": "ckan-dados-ufs-br",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-open-scayle-es",
       "causes": [
         "missing_default_params"
@@ -3989,12 +3971,6 @@
       ]
     },
     {
-      "id": "ckan-opendata-lavegainnova-es",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-datos-chduero-es",
       "causes": [
         "missing_default_params"
@@ -4002,12 +3978,6 @@
     },
     {
       "id": "ckan-dados-ifrr-edu-br",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
-      "id": "ckan-datasets-edge-durban",
       "causes": [
         "missing_default_params"
       ]
@@ -4026,12 +3996,6 @@
     },
     {
       "id": "ckan-dados-uffs-edu-br",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
-      "id": "ckan-dadosabertos-ufpb-br",
       "causes": [
         "missing_default_params"
       ]
@@ -6359,12 +6323,6 @@
       ]
     },
     {
-      "id": "repositoriodedatosdeinvestigacinusachsearchapi",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "repositoriodedatosdelauniversidaddelpacficodatasetsupsearchapi",
       "causes": [
         "missing_default_params"
@@ -6540,7 +6498,7 @@
     }
   ],
   "managedApprovedCount": 3,
-  "customerExecutableCatalogCount": 1143,
+  "customerExecutableCatalogCount": 1136,
   "additionalVerifiedApisNeededFor1000": 0,
   "signupsNeededFor1000": 0,
   "originalCohortSummary": {
@@ -99667,7 +99625,7 @@
           "source": "https://www.uuidtools.com/docs"
         }
       ],
-      "definitionHash": "02144230eb220d72a7971ca4a3b2dbe3bd57d5fa4c80e6aff0e17c8c49d90de2",
+      "definitionHash": "7c878e81fb1fcad2e57f5073dc56a4c6111109a1ebf1d9df662742186c598cfe",
       "checkedAt": "2026-10-16T10:17:53.709Z",
       "status": 200,
       "verified": true,
@@ -99699,7 +99657,11 @@
         "latencyMs": 413,
         "route": "customer-gateway",
         "errorCode": null
-      }
+      },
+      "redirectOrigins": [
+        "https://uuidtools.com"
+      ],
+      "detail": "Reviewed redirect: www.uuidtools.com permanently redirects this GET to https://uuidtools.com, which returned JSON on 2026-10-26. The apex origin is an approved same-API redirect."
     },
     {
       "id": "valhallarouting",
@@ -109264,24 +109226,28 @@
         }
       ],
       "definitionHash": "c0298fffcf13705a76b1a7ab09f1bfad0fb38754b959af9dec8fc989f3ca0f93",
-      "checkedAt": "2026-10-16T10:20:48.280Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://satudata.denpasarkota.go.id/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:20:48.281Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "ENOTFOUND",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://satudata.denpasarkota.go.id/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://satudata.denpasarkota.go.id/api/3/action/package_search?rows=1",
       "responseBytes": 5343,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1043,
+      "outcome": "network_error",
+      "cause": "dead_upstream",
+      "latencyMs": 115,
       "canonicalBaseId": "ckan-satudata-denpasarkota-go-id",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -109294,6 +109260,20 @@
         "latencyMs": 1047,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. DNS returned ENOTFOUND on both confirmation attempts, so the reviewed host is not callable.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "ENOTFOUND",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 2,
+        "code": "ENOTFOUND",
+        "classification": "dead_upstream"
       }
     },
     {
@@ -123262,24 +123242,28 @@
         }
       ],
       "definitionHash": "0d59046be5bdbfb2cff239fa275098709f0b15a106df81e6b100b2d68342908e",
-      "checkedAt": "2026-10-16T10:21:26.096Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://opendata.aragon.es/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:26.096Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://opendata.aragon.es/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://opendata.aragon.es/api/3/action/package_search?rows=1",
       "responseBytes": 7756,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 666,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 361,
       "canonicalBaseId": "ckan-opendata-aragon-es",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -123292,6 +123276,20 @@
         "latencyMs": 336,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. TLS chain verification failed with UNABLE_TO_VERIFY_LEAF_SIGNATURE on all three attempts, so the gateway cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "classification": "redirect_https"
       }
     },
     {
@@ -132497,24 +132495,28 @@
         }
       ],
       "definitionHash": "aeda87c9c9ffedfd6f66ae51e3dacc8a83b7ee06f0baace25cb873ad5fc7d7c0",
-      "checkedAt": "2026-10-16T10:21:42.309Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://dados.ufs.br/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:42.309Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://dados.ufs.br/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://dados.ufs.br/api/3/action/package_search?rows=1",
       "responseBytes": 4215,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1560,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 529,
       "canonicalBaseId": "ckan-dados-ufs-br",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -132527,6 +132529,20 @@
         "latencyMs": 1060,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. The TLS certificate was expired on all three attempts, so customers cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -132695,24 +132711,28 @@
         }
       ],
       "definitionHash": "5219fafd61d30be43a2e08b189c052b3f1e07fbbcf2e8b56f781b41c2477cfd6",
-      "checkedAt": "2026-10-16T10:21:42.946Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://opendata.lavegainnova.es/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:42.946Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://opendata.lavegainnova.es/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://opendata.lavegainnova.es/api/3/action/package_search?rows=1",
       "responseBytes": 4471,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 387,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 340,
       "canonicalBaseId": "ckan-opendata-lavegainnova-es",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -132725,6 +132745,20 @@
         "latencyMs": 530,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. The TLS certificate was expired on all three attempts, so customers cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -132893,24 +132927,28 @@
         }
       ],
       "definitionHash": "585351c3dfc1b8d8b9758a752c26950aa3599d996418c29b92d916294bb461f5",
-      "checkedAt": "2026-10-16T10:21:43.333Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://datasets.edge.durban/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:43.333Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://datasets.edge.durban/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://datasets.edge.durban/api/3/action/package_search?rows=1",
       "responseBytes": 2844,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 721,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 232,
       "canonicalBaseId": "ckan-datasets-edge-durban",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -132923,6 +132961,20 @@
         "latencyMs": 585,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. The TLS certificate was expired on all three attempts, so customers cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -133218,24 +133270,28 @@
         }
       ],
       "definitionHash": "10f162fc8852ef4f61b9b6401702d9a9cabe06728f3564854b2ff044c3317532",
-      "checkedAt": "2026-10-16T10:21:44.054Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://dadosabertos.ufpb.br/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:44.054Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://dadosabertos.ufpb.br/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://dadosabertos.ufpb.br/api/3/action/package_search?rows=1",
       "responseBytes": 4934,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1146,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 411,
       "canonicalBaseId": "ckan-dadosabertos-ufpb-br",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -133248,6 +133304,20 @@
         "latencyMs": 1234,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. The TLS certificate was expired on all three attempts, so customers cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -159091,24 +159161,28 @@
         }
       ],
       "definitionHash": "c1ac1a39ad363b84a673bda2b715789cdb74c7fc67a1b7c2e5e6b49205321886",
-      "checkedAt": "2026-10-16T10:22:37.872Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-10-26T11:40:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://datos.usach.cl/api/search?q=%2A&per_page=1&type=dataverse",
-          "startedAt": "2026-10-16T10:22:37.873Z",
-          "status": 200,
-          "contentType": "application/json;charset=UTF-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://datos.usach.cl/api/search?q=%2A&per_page=1&type=dataverse",
       "finalProbeUrl": "https://datos.usach.cl/api/search?q=%2A&per_page=1&type=dataverse",
       "responseBytes": 324,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 2425,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 386,
       "canonicalBaseId": "repositoriodedatosdeinvestigacinusachsearchapi",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -159121,6 +159195,20 @@
         "latencyMs": 951,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-10-26 with the shared gateway transport. The TLS certificate was expired on all three attempts, so customers cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-10-26T11:40:00.000Z",
+        "attempts": 3,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -161114,5 +161202,6 @@
     "passedCanonicalCount": 1140,
     "demotedCanonicalCount": 14,
     "note": "Complete customer gateway batch supplied by the operator. Billing snapshots were compared in memory; workspace identifiers, credentials and raw snapshots are not persisted. This proof never promotes discovery rows."
-  }
+  },
+  "eligibilityRecheck": "On 2026-10-26 the scheduled sweep reported 64 snapshot removals and 19 additions. Independent retries with the shared gateway transport recovered 27 removals, including FakeStoreAPI, Free Dictionary, Open Brewery DB, Ensembl, RNAcentral, ToS;DR, Final Space and several catalogues that had timed out or returned 403/5xx once. Seven endpoints stayed unverified for a stable reason and were demoted: Denpasar open data no longer resolves (ENOTFOUND); UFS, UFPB, eThekwini Edge, La Vega Innova and USACH Dataverse present an expired certificate; Aragón open data fails TLS chain verification (UNABLE_TO_VERIFY_LEAF_SIGNATURE). Timeouts, HTTP 401/403, rate limits and single-run 5xx stays were kept. UUID Generator was kept by approving its www-to-apex redirect. The 19 newly upstream-verified candidates stay out of this manifest until an authenticated customer batch proves them. October 16 customer-gateway receipts remain on demoted rows and do not keep a broken endpoint callable."
 }

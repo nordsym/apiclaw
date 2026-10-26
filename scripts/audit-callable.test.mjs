@@ -176,6 +176,7 @@ test('report separates original outcomes, current causes, partial coverage and c
   assert.equal(report.sweepComplete, false); assert.equal(report.verifiedCount, 1);
   const markdown = renderMarkdown(report);
   assert.match(markdown, /CORS is a browser rule/); assert.match(markdown, /partial-recheck/); assert.match(markdown, /node --check scripts\/audit-callable.mjs/);
+  assert.match(renderMarkdown({ ...report, eligibilityRecheck: 'Seven endpoints demoted after confirmed DNS or TLS failure.' }), /Eligibility recheck: Seven endpoints demoted/);
 });
 
 test('malformed and unsafe rows are recorded while other candidates complete', async () => {

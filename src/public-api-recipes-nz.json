@@ -993,7 +993,10 @@
     "pricingSource": "https://www.uuidtools.com/docs",
     "freeEvidence": "Public free UUID generation GET.",
     "responseKind": "json",
-    "name": "UUID Generator"
+    "name": "UUID Generator",
+    "redirectOrigins": [
+      "https://uuidtools.com"
+    ]
   },
   {
     "id": "vatcomply",
