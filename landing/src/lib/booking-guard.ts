@@ -1,4 +1,8 @@
-const DEFAULT_BLOCKED_IPS = ["2607:5300:205:300::/64"];
+const DEFAULT_BLOCKED_IPS = [
+  "2607:5300:205:300::/64",
+  "51.79.89.20",
+  "45.14.111.126",
+];
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
