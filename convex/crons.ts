@@ -129,13 +129,7 @@ crons.interval(
   {}
 );
 
-// Daily operator mail. 07:00 UTC = 09:00 Europe/Stockholm summer.
-// The old Monday operator mail is off so this is not a double send.
-crons.daily(
-  "daily-scorecard-email",
-  { hourUTC: 7, minuteUTC: 0 },
-  internal.scorecardEmail.sendDailyScorecard,
-);
+// The daily report now goes to Gustav as a chat Page instead.
 
 // Fallback for Gustav's plaintext founder signup note. The honest send is
 // getOrCreateForClerk first mint. This cron covers a temporary Resend miss.
