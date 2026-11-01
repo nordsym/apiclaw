@@ -215,15 +215,12 @@ assert.match(daily, /sent:\s*false/);
 assert.doesNotMatch(daily, /fetch\([\s\S]*process\.env/);
 
 const crons = readFileSync(fileURLToPath(new URL("./crons.ts", import.meta.url)), "utf8");
-assert.match(
-  crons,
-  /crons\.daily\(\s*"daily-scorecard-email",\s*\{\s*hourUTC:\s*7,\s*minuteUTC:\s*0/,
-);
-assert.match(crons, /internal\.scorecardEmail\.sendDailyScorecard/);
+assert.doesNotMatch(crons, /"daily-scorecard-email"/);
+assert.doesNotMatch(crons, /internal\.scorecardEmail\.sendDailyScorecard/);
 assert.doesNotMatch(crons, /"weekly-scorecard-email"/);
 assert.doesNotMatch(crons, /sendWeeklyScorecard/);
 assert.match(crons, /weekly-usage-report/);
 assert.match(crons, /nurture-classify/);
 assert.match(crons, /nurture-send/);
 
-console.log("daily operator mail is APIClaw HTML + unchanged Swedish plaintext");
+console.log("daily operator mail remains implemented but unscheduled");
