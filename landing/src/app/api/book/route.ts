@@ -9,6 +9,7 @@ import {
 } from "@/lib/booking-guard";
 
 export const runtime = "nodejs";
+const BOOKING_KILL_SWITCHED = true;
 
 const WEBHOOKS: Record<BookingSource, string> = {
   [BOOKING_SOURCES.enterprise]: "https://nordsym.app.n8n.cloud/webhook/aeo-booking",
@@ -34,6 +35,11 @@ function reject(ip: string, reason: string) {
 
 export async function POST(req: NextRequest) {
   const ip = clientIpFromHeaders(req.headers);
+  if (BOOKING_KILL_SWITCHED) {
+    reject(ip || "unknown", "security_kill_switch");
+    return json({ success: false, error: "service_unavailable" }, 503);
+  }
+
   if (!ip) {
     reject("unknown", "missing_client_ip");
     return json({ success: false, error: "service_unavailable" }, 503);

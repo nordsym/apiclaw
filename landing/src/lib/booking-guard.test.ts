@@ -30,6 +30,8 @@ assert.equal(normalizeIp("2607:05300::1"), null);
 assert.equal(isBlockedIp("2607:5300:205:300::295b"), true);
 assert.equal(isBlockedIp("2607:5300:0205:0300:0:0:0:1"), true);
 assert.equal(isBlockedIp("2607:5300:205:301::295b"), false);
+assert.equal(isBlockedIp("51.79.89.20"), true);
+assert.equal(isBlockedIp("45.14.111.126"), true);
 assert.equal(isBlockedIp("2001:db8::2", "192.0.2.4, 2001:db8::/64"), true);
 assert.equal(isBlockedIp("192.0.2.4", "192.0.2.4, 2001:db8::/64"), true);
 assert.equal(
