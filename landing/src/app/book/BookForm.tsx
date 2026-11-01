@@ -65,6 +65,7 @@ export default function BookForm({ initialEmail, initialDate }: { initialEmail: 
   const [calMonth, setCalMonth] = useState(defaultDate.getMonth());
   const [calYear, setCalYear] = useState(defaultDate.getFullYear());
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -90,8 +91,9 @@ export default function BookForm({ initialEmail, initialDate }: { initialEmail: 
   const handleSubmit = async () => {
     if (!name || !email || !selectedDate || !selectedTime) return;
     setStatus("loading");
+    setErrorMessage("");
     try {
-      const res = await fetch("https://nordsym.app.n8n.cloud/webhook/aeo-booking", {
+      const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,9 +111,20 @@ export default function BookForm({ initialEmail, initialDate }: { initialEmail: 
           timestamp: new Date().toISOString(),
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        if (res.status === 429) {
+          setErrorMessage("You’ve reached the booking limit. Please try again later or email us directly.");
+        } else if (res.status === 400) {
+          setErrorMessage("Please check your details. Links, markup, and template expressions aren’t accepted.");
+        } else {
+          setErrorMessage("Something went wrong. Please email us directly.");
+        }
+        setStatus("error");
+        return;
+      }
       setStatus("done");
     } catch {
+      setErrorMessage("Something went wrong. Please email us directly.");
       setStatus("error");
     }
   };
@@ -245,7 +258,7 @@ export default function BookForm({ initialEmail, initialDate }: { initialEmail: 
 
             {status === "error" && (
               <p className="border-t border-border-subtle pt-4 text-[14px] leading-[1.6] text-text-secondary">
-                Something went wrong. Email <a href="mailto:gustav@nordsym.com" className="claw-link underline">gustav@nordsym.com</a> directly.
+                {errorMessage} Email <a href="mailto:gustav@nordsym.com" className="claw-link underline">gustav@nordsym.com</a>.
               </p>
             )}
 

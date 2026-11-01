@@ -21,6 +21,7 @@ import type * as apiKeys from "../apiKeys.js";
 import type * as backfillAnalytics from "../backfillAnalytics.js";
 import type * as backfillSearchLogs from "../backfillSearchLogs.js";
 import type * as billing from "../billing.js";
+import type * as bookingGuard from "../bookingGuard.js";
 import type * as capabilities from "../capabilities.js";
 import type * as catalogSweep from "../catalogSweep.js";
 import type * as chains from "../chains.js";
@@ -135,6 +136,7 @@ declare const fullApi: ApiFromModules<{
   backfillAnalytics: typeof backfillAnalytics;
   backfillSearchLogs: typeof backfillSearchLogs;
   billing: typeof billing;
+  bookingGuard: typeof bookingGuard;
   capabilities: typeof capabilities;
   catalogSweep: typeof catalogSweep;
   chains: typeof chains;

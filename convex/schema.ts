@@ -4,6 +4,16 @@ import { v } from "convex/values";
 import { listingMetadata } from "./listingPolicy";
 
 export default defineSchema({
+  // Accepted booking attempts. The booking route fails closed if this durable
+  // limiter cannot be reached, so n8n is never called without a decision.
+  bookingAttempts: defineTable({
+    key: v.string(),
+    kind: v.union(v.literal("ip"), v.literal("email")),
+    createdAt: v.number(),
+  })
+    .index("by_key_createdAt", ["key", "createdAt"])
+    .index("by_createdAt", ["createdAt"]),
+
   // Health overlay for the reviewed free public registry. No credentials or usage.
   publicApiHealth: defineTable({
     apiId: v.string(), healthy: v.boolean(), status: v.number(), checkedAt: v.number(),

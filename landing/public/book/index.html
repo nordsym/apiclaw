@@ -337,18 +337,28 @@
       
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData);
+      data.source = 'apiclaw-public-book';
       
       try {
-        await fetch('https://nordsym.app.n8n.cloud/webhook/apiclaw-booking', {
+        const response = await fetch('/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('You have reached the booking limit. Please try again later.');
+          }
+          if (response.status === 400) {
+            throw new Error('Please check your details and remove any links or markup.');
+          }
+          throw new Error('Something went wrong.');
+        }
         
         document.getElementById('form-card').style.display = 'none';
         document.getElementById('success-card').style.display = 'block';
       } catch (err) {
-        alert('Something went wrong. Please email symbot@nordsym.com directly.');
+        alert(`${err.message || 'Something went wrong.'} Please email symbot@nordsym.com directly.`);
         btn.disabled = false;
         btn.textContent = '🦞 Book Meeting';
       }
