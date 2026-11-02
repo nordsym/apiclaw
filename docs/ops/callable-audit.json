@@ -5,14 +5,14 @@
   "mode": "full-sweep",
   "lastFullSweepAt": "2026-10-16T10:22:43.388Z",
   "candidateCount": 2537,
-  "verifiedCount": 1133,
+  "verifiedCount": 1127,
   "causes": {
-    "ok": 1133,
+    "ok": 1127,
     "wrong_base_url_path": 672,
     "duplicate": 171,
-    "redirect_https": 165,
+    "redirect_https": 170,
     "not_hosted_api": 115,
-    "dead_upstream": 97,
+    "dead_upstream": 98,
     "unresolved": 82,
     "timeout": 38,
     "gateway_block": 28,
@@ -23,17 +23,17 @@
     "missing_default_params": 0
   },
   "outcomes": {
-    "ok_json": 1123,
+    "ok_json": 1117,
     "html_instead_of_api": 333,
     "documentation_url": 235,
     "duplicate": 171,
     "http_error": 147,
     "reviewed_exclusion": 137,
-    "redirect_not_approved": 129,
-    "network_error": 79,
+    "redirect_not_approved": 131,
+    "network_error": 80,
     "timeout": 38,
     "access_denied": 30,
-    "tls_error": 36,
+    "tls_error": 39,
     "customer_gateway_failed": 14,
     "gateway_block": 13,
     "unsafe_url": 13,
@@ -2573,12 +2573,6 @@
       ]
     },
     {
-      "id": "ckan-gdcatalog-energy-go-th",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-data-pesisirselatankab-go-id",
       "causes": [
         "missing_default_params"
@@ -2705,12 +2699,6 @@
       ]
     },
     {
-      "id": "ckan-dados-sc-gov-br",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-catalogo-datos-gba-gob-ar",
       "causes": [
         "missing_default_params"
@@ -2742,12 +2730,6 @@
     },
     {
       "id": "ckan-opendata-obec-go-th",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
-      "id": "ckan-datos-ciudaddecorrientes-gov-ar",
       "causes": [
         "missing_default_params"
       ]
@@ -2970,12 +2952,6 @@
     },
     {
       "id": "ckan-data-rd-go-th",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
-      "id": "ckan-datos-yvera-gob-ar",
       "causes": [
         "missing_default_params"
       ]
@@ -4019,12 +3995,6 @@
       ]
     },
     {
-      "id": "ckan-opendatacomunideimessapi-it",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
       "id": "ckan-gdcatalog-codi-or-th",
       "causes": [
         "missing_default_params"
@@ -4128,12 +4098,6 @@
     },
     {
       "id": "ckan-dadosabertos-ufersa-edu-br",
-      "causes": [
-        "missing_default_params"
-      ]
-    },
-    {
-      "id": "ckan-dados-ifpb-edu-br",
       "causes": [
         "missing_default_params"
       ]
@@ -6498,7 +6462,7 @@
     }
   ],
   "managedApprovedCount": 3,
-  "customerExecutableCatalogCount": 1136,
+  "customerExecutableCatalogCount": 1130,
   "additionalVerifiedApisNeededFor1000": 0,
   "signupsNeededFor1000": 0,
   "originalCohortSummary": {
@@ -116769,24 +116733,24 @@
         }
       ],
       "definitionHash": "83b2e530ef782265a1ef960d7760ddedc6bbe9e3cd2cd94cf4852be41621406a",
-      "checkedAt": "2026-10-16T10:21:04.767Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 303,
+      "verified": false,
       "trace": [
         {
           "url": "https://gdcatalog.energy.go.th/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:04.767Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "status": 303,
+          "contentType": "text/html",
+          "redirectTo": "https://pds-cwaf.pttdigital.com/pds-cwaf-moen.html?_event_transid=306ae29f9152a5a2ed4b2581fdf8aa4947ccefd2aa06733e1e0470f922d72eab"
         }
       ],
       "probeUrl": "https://gdcatalog.energy.go.th/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://gdcatalog.energy.go.th/api/3/action/package_search?rows=1",
       "responseBytes": 17007,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 2684,
+      "outcome": "redirect_not_approved",
+      "cause": "redirect_https",
+      "latencyMs": 748,
       "canonicalBaseId": "ckan-gdcatalog-energy-go-th",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -116799,6 +116763,19 @@
         "latencyMs": 2580,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. The reviewed endpoint returned 303 to an unapproved WAF challenge on pds-cwaf.pttdigital.com on both attempts, so the reviewed host is not callable.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "reason": "redirect_not_approved"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "redirect_not_approved",
+        "classification": "redirect_https"
       }
     },
     {
@@ -118221,24 +118198,28 @@
         }
       ],
       "definitionHash": "0f7c39f33a9fb6fe096f308dd852d84021949ea11fe64de31d79840cc42eb90d",
-      "checkedAt": "2026-10-16T10:21:08.391Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://dados.sc.gov.br/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:08.391Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://dados.sc.gov.br/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://dados.sc.gov.br/api/3/action/package_search?rows=1",
       "responseBytes": 6296,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1380,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 632,
       "canonicalBaseId": "ckan-dados-sc-gov-br",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -118251,6 +118232,24 @@
         "latencyMs": 1166,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. TLS verification failed with CERT_HAS_EXPIRED on both confirmation attempts, so the gateway cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "TypeError",
+          "reason": "transport_error"
+        },
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -118683,24 +118682,28 @@
         }
       ],
       "definitionHash": "9aa0a9cfbc8e9a9b5bc67d53c8f451e0246ce7380c3f827b6fc94e622e74ed27",
-      "checkedAt": "2026-10-16T10:21:10.324Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://datos.ciudaddecorrientes.gov.ar/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:10.324Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://datos.ciudaddecorrientes.gov.ar/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://datos.ciudaddecorrientes.gov.ar/api/3/action/package_search?rows=1",
       "responseBytes": 7702,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1226,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 498,
       "canonicalBaseId": "ckan-datos-ciudaddecorrientes-gov-ar",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -118713,6 +118716,24 @@
         "latencyMs": 1257,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. TLS chain verification failed with UNABLE_TO_VERIFY_LEAF_SIGNATURE on both confirmation attempts, so the gateway cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "TypeError",
+          "reason": "transport_error"
+        },
+        {
+          "name": "Error",
+          "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        "classification": "redirect_https"
       }
     },
     {
@@ -121328,24 +121349,24 @@
         }
       ],
       "definitionHash": "e095a6543fc80baada0b76179552d3e8fd6256d1b472d91a02d1877d1b9b6068",
-      "checkedAt": "2026-10-16T10:21:19.456Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 301,
+      "verified": false,
       "trace": [
         {
           "url": "https://datos.yvera.gob.ar/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:19.457Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "status": 301,
+          "contentType": "text/html",
+          "redirectTo": "https://data-turismo.jefatura.gob.ar/api/3/action/package_search?rows=1"
         }
       ],
       "probeUrl": "https://datos.yvera.gob.ar/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://datos.yvera.gob.ar/api/3/action/package_search?rows=1",
       "responseBytes": 31434,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1639,
+      "outcome": "redirect_not_approved",
+      "cause": "redirect_https",
+      "latencyMs": 749,
       "canonicalBaseId": "ckan-datos-yvera-gob-ar",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -121358,6 +121379,19 @@
         "latencyMs": 1769,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. The reviewed endpoint returned 301 to https://data-turismo.jefatura.gob.ar/api/3/action/package_search?rows=1 on both attempts. That destination is not an approved redirect, so the reviewed host is not callable.",
+      "errorCause": [
+        {
+          "name": "Error",
+          "reason": "redirect_not_approved"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "redirect_not_approved",
+        "classification": "redirect_https"
       }
     },
     {
@@ -133552,24 +133586,28 @@
         }
       ],
       "definitionHash": "2e00fa657840f029df6ff46e3f6f2e6bc608368213e89231fa893977f559df67",
-      "checkedAt": "2026-10-16T10:21:44.561Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://opendatacomunideimessapi.it/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:44.562Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "CERT_HAS_EXPIRED",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://opendatacomunideimessapi.it/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://opendatacomunideimessapi.it/api/3/action/package_search?rows=1",
       "responseBytes": 10885,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 451,
+      "outcome": "tls_error",
+      "cause": "redirect_https",
+      "latencyMs": 517,
       "canonicalBaseId": "ckan-opendatacomunideimessapi-it",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -133582,6 +133620,24 @@
         "latencyMs": 315,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. TLS verification failed with CERT_HAS_EXPIRED on both confirmation attempts, so the gateway cannot call the reviewed endpoint.",
+      "errorCause": [
+        {
+          "name": "TypeError",
+          "reason": "transport_error"
+        },
+        {
+          "name": "Error",
+          "code": "CERT_HAS_EXPIRED",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "CERT_HAS_EXPIRED",
+        "classification": "redirect_https"
       }
     },
     {
@@ -134806,24 +134862,28 @@
         }
       ],
       "definitionHash": "981540f72ee1605d232c9f50b29dd75252dee9791f612a0c115133232562a085",
-      "checkedAt": "2026-10-16T10:21:47.329Z",
-      "status": 200,
-      "verified": true,
+      "checkedAt": "2026-11-02T14:05:00.000Z",
+      "status": 0,
+      "verified": false,
       "trace": [
         {
           "url": "https://dados.ifpb.edu.br/api/3/action/package_search?rows=1",
-          "startedAt": "2026-10-16T10:21:47.329Z",
-          "status": 200,
-          "contentType": "application/json;charset=utf-8"
+          "errorCause": [
+            {
+              "name": "Error",
+              "code": "ENOTFOUND",
+              "reason": "transport_error"
+            }
+          ]
         }
       ],
       "probeUrl": "https://dados.ifpb.edu.br/api/3/action/package_search?rows=1",
       "finalProbeUrl": "https://dados.ifpb.edu.br/api/3/action/package_search?rows=1",
       "responseBytes": 3276,
       "bodyTruncated": false,
-      "outcome": "ok_json",
-      "cause": "ok",
-      "latencyMs": 1765,
+      "outcome": "network_error",
+      "cause": "dead_upstream",
+      "latencyMs": 274,
       "canonicalBaseId": "ckan-dados-ifpb-edu-br",
       "upstreamVerified": true,
       "upstreamOutcome": "ok_json",
@@ -134836,6 +134896,24 @@
         "latencyMs": 1374,
         "route": "customer-gateway",
         "errorCode": null
+      },
+      "detail": "Rechecked 2026-11-02 with the shared gateway transport. DNS returned ENOTFOUND on both confirmation attempts, so the reviewed host is not callable.",
+      "errorCause": [
+        {
+          "name": "TypeError",
+          "reason": "transport_error"
+        },
+        {
+          "name": "Error",
+          "code": "ENOTFOUND",
+          "reason": "transport_error"
+        }
+      ],
+      "recheck": {
+        "checkedAt": "2026-11-02T14:05:00.000Z",
+        "attempts": 2,
+        "code": "ENOTFOUND",
+        "classification": "dead_upstream"
       }
     },
     {
@@ -161203,5 +161281,5 @@
     "demotedCanonicalCount": 14,
     "note": "Complete customer gateway batch supplied by the operator. Billing snapshots were compared in memory; workspace identifiers, credentials and raw snapshots are not persisted. This proof never promotes discovery rows."
   },
-  "eligibilityRecheck": "On 2026-10-26 the scheduled sweep reported 64 snapshot removals and 19 additions. Independent retries with the shared gateway transport recovered 27 removals, including FakeStoreAPI, Free Dictionary, Open Brewery DB, Ensembl, RNAcentral, ToS;DR, Final Space and several catalogues that had timed out or returned 403/5xx once. Seven endpoints stayed unverified for a stable reason and were demoted: Denpasar open data no longer resolves (ENOTFOUND); UFS, UFPB, eThekwini Edge, La Vega Innova and USACH Dataverse present an expired certificate; Aragón open data fails TLS chain verification (UNABLE_TO_VERIFY_LEAF_SIGNATURE). Timeouts, HTTP 401/403, rate limits and single-run 5xx stays were kept. UUID Generator was kept by approving its www-to-apex redirect. The 19 newly upstream-verified candidates stay out of this manifest until an authenticated customer batch proves them. October 16 customer-gateway receipts remain on demoted rows and do not keep a broken endpoint callable."
+  "eligibilityRecheck": "On 2026-10-26 the scheduled sweep reported 64 snapshot removals and 19 additions. Independent retries with the shared gateway transport recovered 27 removals, including FakeStoreAPI, Free Dictionary, Open Brewery DB, Ensembl, RNAcentral, ToS;DR, Final Space and several catalogues that had timed out or returned 403/5xx once. Seven endpoints stayed unverified for a stable reason and were demoted: Denpasar open data no longer resolves (ENOTFOUND); UFS, UFPB, eThekwini Edge, La Vega Innova and USACH Dataverse present an expired certificate; Aragón open data fails TLS chain verification (UNABLE_TO_VERIFY_LEAF_SIGNATURE). Timeouts, HTTP 401/403, rate limits and single-run 5xx stays were kept. UUID Generator was kept by approving its www-to-apex redirect. The 19 newly upstream-verified candidates stay out of this manifest until an authenticated customer batch proves them. October 16 customer-gateway receipts remain on demoted rows and do not keep a broken endpoint callable. On 2026-11-02 the scheduled sweep confirmed six more hard removals. Independent retries with the shared gateway transport demoted them: dados.ifpb.edu.br no longer resolves (ENOTFOUND); dados.sc.gov.br and opendatacomunideimessapi.it present an expired certificate (CERT_HAS_EXPIRED); datos.ciudaddecorrientes.gov.ar fails TLS chain verification (UNABLE_TO_VERIFY_LEAF_SIGNATURE); datos.yvera.gob.ar returns 301 to the unapproved host data-turismo.jefatura.gob.ar; gdcatalog.energy.go.th returns 303 to an unapproved WAF challenge. Timeouts, HTTP 401/403, rate limits and single-run misses were kept. Newly upstream-verified candidates stay out of this manifest."
 }
