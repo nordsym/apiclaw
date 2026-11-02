@@ -31,7 +31,7 @@
     "test:listings": "tsx convex/discoveryListings.test.ts && tsx tests/listing-fetch.test.ts && tsx convex/listingAutoReview.test.ts && tsx convex/listingReview.test.ts && tsx tests/listing-review-route.test.ts && tsx tests/listing-operator-api.test.ts && tsx src/cli/commands/admin-listings.test.ts && tsx tests/listing-convex-envelope.test.ts",
     "test:listings-browser": "TSX_TSCONFIG_PATH=landing/tsconfig.json tsx tests/listing-e2e.ts",
     "test:booking": "tsx landing/src/lib/booking-guard.test.ts && tsx convex/bookingGuard.test.ts",
-    "pretest": "TSX_TSCONFIG_PATH=landing/tsconfig.json tsx landing/src/lib/public-pricing-health.test.ts",
+    "pretest": "TSX_TSCONFIG_PATH=landing/tsconfig.json tsx landing/src/lib/public-pricing-health.test.ts && tsx convex/adminSuspend.test.ts",
     "audit:callable": "tsx scripts/audit-callable.mjs",
     "test:web-first-call-browser": "node tests/web-first-call-browser.cjs",
     "test:onboarding-race-browser": "node tests/onboarding-web-call-race-browser.cjs"

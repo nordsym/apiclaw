@@ -134,6 +134,8 @@ export default defineSchema({
     firstName: v.optional(v.string()), // Clerk given name for the founder signup note
     passwordHash: v.optional(v.string()),
     status: v.string(), // "pending" | "active" | "suspended"
+    suspendedAt: v.optional(v.number()),
+    suspensionReason: v.optional(v.string()),
     tier: v.string(), // "free" | "pro" | "scale" | "usage_based" | "enterprise" | "partner"
     usageCount: v.number(), // total API calls made (lifetime)
     usageLimit: v.number(), // max API calls for tier
