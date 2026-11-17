@@ -77,7 +77,7 @@ async function convexQuery<T>(path: string, args: Record<string, unknown>): Prom
     const res = await fetch(`${CONVEX_URL}/api/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, args }),
+      body: JSON.stringify({ path, args: path.startsWith("usage:") ? { ...args, internalSecret: process.env.APICLAW_INTERNAL_SECRET } : args }),
     });
     if (!res.ok) {
       console.error(`Convex query failed: ${res.status}`);
@@ -96,7 +96,7 @@ async function convexMutation(path: string, args: Record<string, unknown>): Prom
     const res = await fetch(`${CONVEX_URL}/api/mutation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, args }),
+      body: JSON.stringify({ path, args: path.startsWith("usage:") ? { ...args, internalSecret: process.env.APICLAW_INTERNAL_SECRET } : args }),
     });
     return res.ok;
   } catch (error) {

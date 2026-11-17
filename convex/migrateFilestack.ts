@@ -1,6 +1,6 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
-export const run = mutation({
+export const run = internalMutation({
   args: {},
   handler: async (ctx) => {
     const FILESTACK_PROVIDER_ID = "k97e1wy6vr1j6jxch1hwzz6fkn81w344";

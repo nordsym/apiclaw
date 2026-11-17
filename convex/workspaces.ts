@@ -1287,10 +1287,13 @@ export const adminGetFullWorkspace = internalQuery({
  */
 export const claimAnonymousUsage = mutation({
   args: {
+    token: v.string(),
     workspaceId: v.id("workspaces"),
     machineFingerprint: v.string(),
   },
-  handler: async (ctx, { workspaceId, machineFingerprint }) => {
+  handler: async (ctx, { token, workspaceId, machineFingerprint }) => {
+    const session = await findUsableAgentSession(ctx.db, token);
+    if (!session || session.workspaceId !== workspaceId) throw new Error("Invalid session");
     // Verify workspace exists
     const workspace = await ctx.db.get(workspaceId);
     if (!workspace) {

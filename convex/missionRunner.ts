@@ -1680,7 +1680,6 @@ export const smokePRDTemplate = internalAction({
 // useful for verifying the OpenRouter wiring + structured-output parsing
 // after a Convex deploy. Not part of the production execution path.
 //
-// Run: npx convex run missionRunner:smokeTransform --prod '{"topic":"test"}'
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Smoke harness for the execute primitive against a real managed

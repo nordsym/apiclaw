@@ -1,4 +1,4 @@
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { resolveVerifiedOwnerByWorkspaceId } from "./guards";
 
@@ -19,7 +19,7 @@ const LIMITS = {
 };
 
 // Check and increment rate limit
-export const checkLimit = mutation({
+export const checkLimit = internalMutation({
   args: {
     identifier: v.string(),  // IP or agentId
     action: v.union(v.literal("discovery"), v.literal("instant")),
@@ -60,7 +60,7 @@ export const checkLimit = mutation({
 });
 
 // Get current usage stats
-export const getUsage = query({
+export const getUsage = internalQuery({
   args: {
     identifier: v.string(),
   },
@@ -86,7 +86,7 @@ export const getUsage = query({
 });
 
 // Cleanup old rate limit entries (run via cron)
-export const cleanup = mutation({
+export const cleanup = internalMutation({
   args: {},
   handler: async (ctx) => {
     const hourAgo = Math.floor(Date.now() / 3600000) - 2; // Keep 2 hours

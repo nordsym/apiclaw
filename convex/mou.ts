@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, internalMutation, internalQuery } from "./_generated/server";
 
 // Get MOU by partnerId
-export const getByPartnerId = query({
+export const getByPartnerId = internalQuery({
   args: { partnerId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -13,7 +13,7 @@ export const getByPartnerId = query({
 });
 
 // Create new MOU document
-export const create = mutation({
+export const create = internalMutation({
   args: {
     partnerId: v.string(),
     partnerName: v.string(),
@@ -30,7 +30,7 @@ export const create = mutation({
 });
 
 // Sign MOU
-export const sign = mutation({
+export const sign = internalMutation({
   args: {
     partnerId: v.string(),
     signatureDataUrl: v.string(),
@@ -66,7 +66,7 @@ export const sign = mutation({
 });
 
 // List all MOUs (admin)
-export const list = query({
+export const list = internalQuery({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("mouDocuments").collect();
@@ -74,7 +74,7 @@ export const list = query({
 });
 
 // Delete MOU (admin)
-export const remove = mutation({
+export const remove = internalMutation({
   args: { partnerId: v.string() },
   handler: async (ctx, args) => {
     const mou = await ctx.db

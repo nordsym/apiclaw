@@ -2,7 +2,6 @@
  * Seed: GenPRD as a managed provider under Gustav's workspace
  *
  * Run once against production:
- *   npx convex run seedGenPRD:seedGenPRD --prod
  *
  * What this creates:
  *  - providers record for GenPRD (owned by gustav@nordsym.com workspace)
@@ -11,9 +10,9 @@
  *
  * Idempotent: skips creation if records already exist.
  */
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
-export const seedGenPRD = mutation({
+export const seedGenPRD = internalMutation({
   args: {},
   handler: async (ctx) => {
     const OWNER_EMAIL = "gustav@nordsym.com";
@@ -182,9 +181,8 @@ export const seedGenPRD = mutation({
 
 /**
  * Verify seed result — read-only check.
- * Run: npx convex run seedGenPRD:verifyGenPRD --prod
  */
-export const verifyGenPRD = mutation({
+export const verifyGenPRD = internalMutation({
   args: {},
   handler: async (ctx) => {
     const OWNER_EMAIL = "gustav@nordsym.com";

@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 export const track = mutation({
@@ -30,7 +30,7 @@ export const track = mutation({
   },
 });
 
-export const getStats = query({
+export const getStats = internalQuery({
   args: {},
   handler: async (ctx) => {
     const events = await ctx.db.query("telemetry").collect();
@@ -70,7 +70,7 @@ export const getStats = query({
   },
 });
 
-export const getRecent = query({
+export const getRecent = internalQuery({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit = 50 }) => {
     return await ctx.db

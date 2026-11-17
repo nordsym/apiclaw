@@ -1,5 +1,6 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 
 // ============================================
 // MUTATIONS
@@ -10,6 +11,7 @@ import { mutation, query } from "./_generated/server";
  */
 export const logUsage = mutation({
   args: {
+    internalSecret: v.string(),
     userId: v.string(),
     providerId: v.id("providers"),
     directCallId: v.id("providerDirectCall"),
@@ -20,6 +22,7 @@ export const logUsage = mutation({
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     return await ctx.db.insert("usageLog", {
       userId: args.userId,
       providerId: args.providerId,
@@ -44,10 +47,12 @@ export const logUsage = mutation({
  */
 export const getUserUsage = query({
   args: {
+    internalSecret: v.string(),
     userId: v.string(),
     providerId: v.id("providers"),
   },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     const now = Date.now();
     const oneMinuteAgo = now - 60 * 1000;
     const oneDayAgo = now - 24 * 60 * 60 * 1000;
@@ -77,7 +82,7 @@ export const getUserUsage = query({
 /**
  * Get provider usage stats for analytics
  */
-export const getProviderUsage = query({
+export const getProviderUsage = internalQuery({
   args: {
     providerId: v.id("providers"),
     periodDays: v.optional(v.number()), // default 30
@@ -143,7 +148,7 @@ export const getProviderUsage = query({
 /**
  * Get managed-provider specific usage stats
  */
-export const getDirectCallUsage = query({
+export const getDirectCallUsage = internalQuery({
   args: {
     directCallId: v.id("providerDirectCall"),
     periodDays: v.optional(v.number()),
@@ -180,7 +185,7 @@ export const getDirectCallUsage = query({
 /**
  * Get recent usage logs (for dashboard/debugging)
  */
-export const getRecentLogs = query({
+export const getRecentLogs = internalQuery({
   args: {
     providerId: v.optional(v.id("providers")),
     directCallId: v.optional(v.id("providerDirectCall")),
@@ -218,7 +223,7 @@ export const getRecentLogs = query({
  * Check if user is within rate limits
  * Returns { allowed: boolean, reason?: string }
  */
-export const checkRateLimit = query({
+export const checkRateLimit = internalQuery({
   args: {
     userId: v.string(),
     providerId: v.id("providers"),

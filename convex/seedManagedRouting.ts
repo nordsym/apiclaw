@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
@@ -256,7 +256,7 @@ const API_CONFIGS: Record<string, {
  * Seed managed routing configs for any provider by ID.
  * Run: npx convex run seedManagedRouting:seedForProvider '{"providerId":"<id>"}'
  */
-export const seedForProvider = mutation({
+export const seedForProvider = internalMutation({
   args: { providerId: v.string() },
   handler: async (ctx, args) => {
     const providerId = args.providerId as any;
@@ -340,7 +340,7 @@ export const seedForProvider = mutation({
  * Used for APIs that don't belong to a provider batch (NASA, Filestack, etc.)
  * Run via HTTP: POST /api/mutation {"path":"seedManagedRouting:seedByApiIds","args":{...}}
  */
-export const seedByApiIds = mutation({
+export const seedByApiIds = internalMutation({
   args: {
     configs: v.array(v.object({
       apiId: v.string(),
@@ -384,7 +384,7 @@ export const seedByApiIds = mutation({
   },
 });
 
-export const seed = mutation({
+export const seed = internalMutation({
   args: {},
   handler: async (ctx) => {
     const providerId = "k97cvcvadnyz8x8m4we7xqmh1s83p0ph" as any; // APILayer provider ID

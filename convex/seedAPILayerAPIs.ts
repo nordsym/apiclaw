@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 /**
  * Seed all 27 APILayer APIs for a workspace
@@ -21,7 +21,7 @@ function statusForApiName(name: string): "approved" | "blocked" | "rate_limited"
   return "approved";
 }
 
-export const cleanAndReseed = mutation({
+export const cleanAndReseed = internalMutation({
   args: {},
   handler: async (ctx) => {
     const email = "gustav_hemmingsson@hotmail.com";
@@ -94,7 +94,7 @@ export const cleanAndReseed = mutation({
   },
 });
 
-export const seedAll = mutation({
+export const seedAll = internalMutation({
   args: {},
   handler: async (ctx) => {
     const email = "gustav_hemmingsson@hotmail.com";

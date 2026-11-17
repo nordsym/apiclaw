@@ -1,3 +1,4 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
@@ -14,6 +15,7 @@ import { mutation, query } from "./_generated/server";
  */
 export const upsertBatch = mutation({
   args: {
+    internalSecret: v.string(),
     entries: v.array(
       v.object({
         name: v.string(),
@@ -23,7 +25,8 @@ export const upsertBatch = mutation({
       })
     ),
   },
-  handler: async (ctx, { entries }) => {
+  handler: async (ctx, { internalSecret, entries }) => {
+    requireInternalSecret(internalSecret);
     const now = Date.now();
     let inserted = 0;
     let skipped = 0;
@@ -63,8 +66,9 @@ export const upsertBatch = mutation({
  * "20k indexed → 1.5k callable pipeline → 46 live".
  */
 export const pipelineCounts = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { internalSecret: v.string() },
+  handler: async (ctx, { internalSecret }) => {
+    requireInternalSecret(internalSecret);
     const all = await ctx.db.query("providerAPIs").collect();
     const counts: Record<string, number> = { indexed: 0, callable: 0, live: 0, unclassified: 0 };
     for (const api of all) {

@@ -3,6 +3,7 @@
  * Both managed and Open API calls are logged here
  */
 
+import { readSession } from './session.js';
 import { appendFileSync, existsSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
@@ -66,20 +67,23 @@ export function logAPICall(log: APICallLog): void {
     console.error('[APIClaw Analytics] Failed to log to file:', e);
   }
   
-  // 2. Send to Convex (new - includes anonymous usage)
+  // 2. Send authenticated analytics to Convex; local logging also works before login.
   sendToConvex(log).catch(() => {}); // Fire and forget
 }
 
 /**
  * Send analytics event to Convex
- * Works for both authenticated and anonymous users
+ * Requires a verified local session; never sends an internal server credential
  */
 async function sendToConvex(log: APICallLog): Promise<void> {
+  const token = readSession()?.sessionToken;
+  if (!token) return;
   const client = getConvexClient();
   if (!client) return;
   
   try {
     await client.mutation(api.analytics.log, {
+      token,
       event: 'api_call',
       provider: log.provider,
       query: log.action, // Store action as query field

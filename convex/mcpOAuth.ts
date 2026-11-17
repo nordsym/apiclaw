@@ -1,3 +1,5 @@
+import { internal } from "./_generated/api";
+import { requireInternalSecret } from "./functionAuth";
 /**
  * Remote MCP — OAuth 2.1 (RFC 6749 + 7591 + 7636 PKCE) state layer.
  *
@@ -660,7 +662,7 @@ export const resolveBearerToken = query({
   },
 });
 
-export const touchToken = mutation({
+export const touchToken = internalMutation({
   args: { tokenId: v.id("mcpOAuthTokens") },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.tokenId, { lastUsedAt: Date.now() });
@@ -698,6 +700,7 @@ export const revokeToken = mutation({
 
 export const logToolCall = mutation({
   args: {
+    internalSecret: v.string(),
     workspaceId: v.id("workspaces"),
     clientId: v.string(),
     tool: v.string(),
@@ -706,6 +709,7 @@ export const logToolCall = mutation({
     errorCode: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     await ctx.db.insert("analytics", {
       event: "mcp_tool_call",
       provider: undefined,

@@ -3,13 +3,15 @@
  * Run with: npx ts-node scripts/seed-capabilities.ts
  */
 
+if (!process.env.APICLAW_INTERNAL_SECRET) throw new Error("APICLAW_INTERNAL_SECRET is required for maintenance");
+
 const CONVEX_URL = 'https://adventurous-avocet-799.convex.cloud';
 
 async function mutation(path: string, args: Record<string, unknown>) {
   const res = await fetch(`${CONVEX_URL}/api/mutation`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, args }),
+    body: JSON.stringify({ path, args: { ...args, internalSecret: process.env.APICLAW_INTERNAL_SECRET } }),
   });
   if (!res.ok) {
     const err = await res.text();

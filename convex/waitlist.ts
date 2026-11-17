@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 export const join = mutation({
@@ -39,7 +39,7 @@ export const count = query({
   },
 });
 
-export const list = query({
+export const list = internalQuery({
   args: {
     type: v.optional(v.string()),
   },

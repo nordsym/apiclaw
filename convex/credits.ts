@@ -1,5 +1,6 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 
 // Credit packages
 export const CREDIT_PACKAGES = {
@@ -9,7 +10,7 @@ export const CREDIT_PACKAGES = {
 } as const;
 
 // Get or create agent credits account
-export const getOrCreateAgent = mutation({
+export const getOrCreateAgent = internalMutation({
   args: { agentId: v.string() },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -34,8 +35,9 @@ export const getOrCreateAgent = mutation({
 
 // Get agent credits
 export const getAgentCredits = query({
-  args: { agentId: v.string() },
+  args: { internalSecret: v.string(), agentId: v.string() },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     return await ctx.db
       .query("agentCredits")
       .withIndex("by_agentId", (q) => q.eq("agentId", args.agentId))
@@ -46,11 +48,13 @@ export const getAgentCredits = query({
 // Add credits to agent account (called by webhook or admin)
 export const addCredits = mutation({
   args: {
+    internalSecret: v.string(),
     agentId: v.string(),
     amountUsd: v.number(),
     source: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     const credits = await ctx.db
       .query("agentCredits")
       .withIndex("by_agentId", (q) => q.eq("agentId", args.agentId))
@@ -78,7 +82,7 @@ export const addCredits = mutation({
 });
 
 // Deduct credits (internal use)
-export const deductCredits = mutation({
+export const deductCredits = internalMutation({
   args: {
     agentId: v.string(),
     amountUsd: v.number(),
@@ -109,7 +113,7 @@ export const deductCredits = mutation({
 });
 
 // Record credit top-up from Stripe
-export const recordTopup = mutation({
+export const recordTopup = internalMutation({
   args: {
     agentId: v.string(),
     stripeSessionId: v.optional(v.string()),
@@ -136,7 +140,7 @@ export const recordTopup = mutation({
 });
 
 // Complete a pending top-up
-export const completeTopup = mutation({
+export const completeTopup = internalMutation({
   args: {
     stripeSessionId: v.optional(v.string()),
     stripePaymentIntentId: v.optional(v.string()),
@@ -200,7 +204,7 @@ export const completeTopup = mutation({
 });
 
 // Get all top-ups for an agent
-export const getTopups = query({
+export const getTopups = internalQuery({
   args: { agentId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db

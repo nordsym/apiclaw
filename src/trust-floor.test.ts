@@ -1,3 +1,4 @@
+import { checkPublicInventory, inventoryPublicFunctions } from "./convex-public-inventory.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
@@ -179,3 +180,8 @@ for (const secretQuery of [
 }
 
 console.log("trust floor: legacy auth, provider ownership, admin, and managed credentials are closed");
+
+const publicFunctions = inventoryPublicFunctions();
+assert.ok(publicFunctions.length > 100, "the complete Convex public surface must be enumerated");
+assert.deepEqual(checkPublicInventory(publicFunctions), []);
+console.log(`trust floor: reviewed ${publicFunctions.length} public Convex exports, including aliases and re-exports`);

@@ -1,10 +1,10 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 /**
  * Update providerAPIs status to reflect actual managed-provider status
  * Run: npx convex run updateAPIStatus:update
  */
-export const update = mutation({
+export const update = internalMutation({
   args: {},
   handler: async (ctx) => {
     // APIs that are blocked by subscription tier (HTTP 403 "cannot consume" against unified key,

@@ -178,6 +178,7 @@ function logToolCallFireAndForget(
 ) {
   // Don't await — keeps the tool-call latency unaffected.
   convexMutation("mcpOAuth:logToolCall", {
+    internalSecret: process.env.APICLAW_INTERNAL_SECRET,
     workspaceId: ctx.workspaceId,
     clientId: ctx.clientId,
     tool,

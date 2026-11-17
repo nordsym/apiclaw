@@ -142,7 +142,6 @@ http.route({
 
 const CANON_DISCOVERABLE_APIS = 26_701;
 const CANON_CALLABLE_APIS = 2_906;
-const legacyMagicLinkRetired = (): boolean => true;
 
 const SAFE_PROVIDER_PATH_SEGMENT = /^[A-Za-z0-9._~-]+$/;
 
@@ -1280,7 +1279,7 @@ async function resolveWorkspaceFromRequest(
       const resolved = await ctx.runQuery(internal.apiKeys.resolveKey, { rawKey: credential.rawKey });
       if (resolved) {
         if (resolved.serviceScope && !websiteServiceEndpointAllowed(resolved.workspaceId, resolved.serviceScope, request)) return jsonResponse({ error: { code: "service_key_scope_denied", message: "This service key is restricted to the NordSym website model endpoint." } }, 403);
-        ctx.runMutation(api.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
+        ctx.runMutation(internal.apiKeys.touchKey, { keyId: resolved.keyId }).catch(() => {});
         return { workspaceId: resolved.workspaceId, keyId: resolved.keyId, authMethod: "api-key", ...(resolved.serviceScope ? { serviceScope: resolved.serviceScope } : {}) };
       }
     } catch (e: any) {
@@ -1293,7 +1292,7 @@ async function resolveWorkspaceFromRequest(
     try {
       const resolved = await ctx.runQuery(api.mcpOAuth.resolveBearerToken, { token: credential.token });
       if (resolved?.ok) {
-        ctx.runMutation(api.mcpOAuth.touchToken, { tokenId: resolved.tokenId }).catch(() => {});
+        ctx.runMutation(internal.mcpOAuth.touchToken, { tokenId: resolved.tokenId }).catch(() => {});
         return { workspaceId: resolved.workspaceId, authMethod: "mcp-oauth", mcpScope: resolved.scope };
       }
     } catch (e: any) {
@@ -2081,7 +2080,7 @@ async function validateAndLogProxyCall(
 
   // ALWAYS log to analytics (mirrors existing behavior for dashboard continuity)
   try {
-    await ctx.runMutation(api.analytics.log, {
+    await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
       event: "api_call",
       provider,
       identifier: identifier,
@@ -2233,7 +2232,7 @@ http.route({
         for (const [provider, keywords] of Object.entries(PROVIDER_KEYWORDS)) {
           if (keywords.some((kw) => queryLower.includes(kw))) {
             try {
-              await ctx.runMutation(api.providers.logDiscovery, {
+              await ctx.runMutation(api.providers.logDiscovery, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
                 provider,
                 query: String(query).substring(0, 100),
                 latencyMs: 0,
@@ -3593,79 +3592,11 @@ http.route({
 http.route({
   path: "/workspace/magic-link",
   method: "POST",
-  handler: httpAction(async (ctx, request) => {
-    if (legacyMagicLinkRetired()) return jsonResponse({
-      error: "legacy_auth_retired",
-      message: "Use APIClaw browser auth to verify workspace ownership.",
-      command: "npx @nordsym/apiclaw auth login",
-    }, 410);
-
-    try {
-      const body = await readManagedJsonBodyCapped(request);
-      const { email, fingerprint } = body;
-
-      if (!email || !email.includes("@")) {
-        return jsonResponse({ error: "Valid email required" }, 400);
-      }
-
-      // Create magic link
-      const result = await ctx.runMutation(internal.workspaces.createMagicLink, {
-        email: email.toLowerCase(),
-        fingerprint,
-      });
-
-      // Send email directly - SIMPLE HTML (complex tables get stripped by Gmail)
-      const verifyUrl = `https://apiclaw.cloud/auth/verify?token=${result.token}`;
-      const html = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:20px;">
-<h1>🦞 APIClaw</h1>
-<h2>An AI Agent Wants to Connect</h2>
-<p>Click below to verify your email and activate your workspace.</p>
-<p><a href="${verifyUrl}" style="background:#ef4444;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;display:inline-block;">Verify Email</a></p>
-<p style="color:#666;font-size:13px;">Free APIs are free forever, no card. Paid APIs bill provider cost plus 15 percent after you add a card. This link expires in 1 hour.</p>
-<p style="color:#999;font-size:11px;">Or copy this link: ${verifyUrl}</p>
-</div>`;
-      
-      const RESEND_KEY = process.env.RESEND_API_KEY;
-      if (!RESEND_KEY) {
-        console.error("RESEND_API_KEY not configured");
-        return jsonResponse({ error: "Email service not configured" }, 500);
-      }
-      
-      const emailResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RESEND_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "APIClaw <noreply@apiclaw.cloud>",
-          to: email.toLowerCase(),
-          subject: "🦞 Verify Your Email — APIClaw",
-          html: html,
-        }),
-      });
-      
-      if (!emailResponse.ok) {
-        const errorText = await emailResponse.text();
-        console.error("Resend error:", emailResponse.status, errorText);
-        return jsonResponse({ error: "Failed to send email", details: errorText }, 500);
-      }
-      
-      const emailResult = await emailResponse.json();
-      console.log("Email sent successfully:", emailResult.id);
-
-      return jsonResponse({
-        success: true,
-        token: result.token,
-        expiresAt: result.expiresAt,
-        message: "Magic link sent! Check your email.",
-        emailId: emailResult.id,
-      });
-    } catch (e: any) {
-      console.error("Magic link error:", e);
-      return jsonResponse({ error: e.message || "Failed to create magic link" }, 500);
-    }
-  }),
+  handler: httpAction(async () => jsonResponse({
+    error: "legacy_auth_retired",
+    message: "Use APIClaw browser auth to verify workspace ownership.",
+    command: "npx @nordsym/apiclaw auth login",
+  }, 410)),
 });
 
 http.route({
@@ -3678,25 +3609,7 @@ http.route({
 http.route({
   path: "/workspace/by-email",
   method: "GET",
-  handler: httpAction(async (ctx, request) => {
-    if (legacyMagicLinkRetired()) {
-      return jsonResponse({ error: "legacy_workspace_lookup_retired" }, 410);
-    }
-    const url = new URL(request.url);
-    const email = url.searchParams.get("email");
-
-    if (!email) {
-      return jsonResponse({ error: "email required" }, 400);
-    }
-
-    const result = await ctx.runQuery(internal.workspaces.getByEmail, { email });
-    
-    if (!result) {
-      return jsonResponse({ exists: false });
-    }
-
-    return jsonResponse({ exists: true, workspace: result });
-  }),
+  handler: httpAction(async () => jsonResponse({ error: "legacy_workspace_lookup_retired" }, 410)),
 });
 
 http.route({
@@ -4018,7 +3931,7 @@ http.route({
       delete codexBody.max_output_tokens;
 
       try {
-        await ctx.runMutation(api.analytics.log, {
+        await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
           event: "api_call",
           provider: "openai-codex",
           identifier: workspaceId,
@@ -4367,7 +4280,7 @@ http.route({
 
     // Log usage
     try {
-      await ctx.runMutation(api.analytics.log, {
+      await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
         event: "api_call",
         provider: "gateway",
         identifier: workspaceId,
@@ -4787,7 +4700,7 @@ http.route({
 
     // Log usage
     try {
-      await ctx.runMutation(api.analytics.log, {
+      await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
         event: "api_call",
         provider: "gateway",
         identifier: workspaceId,
@@ -5977,7 +5890,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       let executeLlmUsageResult: { quotaWarning?: any } | null = null;
       if (workspaceId) {
         try {
-          await ctx.runMutation(api.analytics.log, {
+          await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
             event: "api_call", provider: "gateway", identifier: workspaceId,
             workspaceId: workspaceId as any,
             metadata: { action: "execute_chat", model: effectiveModel, routedTo: route.provider, routeReason: route.reason, authMethod },
@@ -6158,7 +6071,7 @@ async function handleManagedExecute(ctx: any, request: Request): Promise<Respons
       // Log usage
       if (workspaceId) {
         try {
-          await ctx.runMutation(api.analytics.log, {
+          await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
             event: "api_call", provider, identifier: workspaceId,
             workspaceId: workspaceId as any,
             metadata: { action, subagentId, authMethod, via: "execute" },
@@ -6818,7 +6731,7 @@ http.route({
     }
 
     try {
-      await ctx.runMutation(api.analytics.log, {
+      await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
         event: "api_call",
         provider: useCodex ? "openai-codex" : "openai",
         identifier: workspaceId,
@@ -7244,7 +7157,7 @@ http.route({
 
     // Log call (fire-and-forget)
     try {
-      await ctx.runMutation(api.analytics.log, {
+      await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
         event: "api_call",
         provider: "anthropic",
         identifier: workspaceId,
@@ -7664,10 +7577,10 @@ http.route({
         }
         const respText = await forwardRes.text();
         const ok = forwardRes.status >= 200 && forwardRes.status < 500;
-        if (ok) await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: row.id });
-        else await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: forwardRes.status });
+        if (ok) await ctx.runMutation(internal.pipelineAlign.reportSuccess, { apiId: row.id });
+        else await ctx.runMutation(internal.pipelineAlign.reportFailure, { apiId: row.id, statusCode: forwardRes.status });
         try {
-          await ctx.runMutation(api.analytics.log, {
+          await ctx.runMutation(api.analytics.log, { internalSecret: process.env.APICLAW_INTERNAL_SECRET!,
             ...analyticsBase,
             provider: row.name,
             metadata: { route: "v1_call", mode: "managed", status: forwardRes.status, latencyMs: Date.now() - t0 },
@@ -7683,7 +7596,7 @@ http.route({
           },
         });
       } catch (e: any) {
-        await ctx.runMutation(api.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 0 });
+        await ctx.runMutation(internal.pipelineAlign.reportFailure, { apiId: row.id, statusCode: 0 });
         return jsonResponse(
           { error: { code: "managed_adapter_error", message: e?.message ?? "managed adapter failed", provider: row.name } },
           502

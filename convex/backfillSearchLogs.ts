@@ -1,7 +1,7 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 // Backfill searchLogs from apiLogs that have action starting with "discovery:"
-export const run = mutation({
+export const run = internalMutation({
   args: {},
   handler: async (ctx) => {
     const APILAYER_WORKSPACE_ID = "n17bf4raa01r0d4na0bsgg117x83y551";
