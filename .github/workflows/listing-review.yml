@@ -30,3 +30,18 @@ jobs:
       - run: npm run test:listings-browser
       - run: npm run build
       - run: npm run build --prefix landing
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: ESLint changed and new code
+        run: npm run lint
+        env:
+          LINT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}

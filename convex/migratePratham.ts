@@ -1,7 +1,7 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
-export const run = mutation({
+export const run = internalMutation({
   args: {},
   handler: async (ctx) => {
     // 1. Create or find Pratham's workspace

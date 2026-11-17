@@ -435,12 +435,14 @@ async function trackEarnProgress(workspaceId: string, provider: string, action: 
   try {
     // Track first managed-provider call
     await convex.mutation("earnProgress:markFirstDirectCall" as any, {
+      token: workspaceContext?.sessionToken,
       workspaceId: workspaceId as any,
     });
 
     // Track unique API usage
     const apiId = `${provider}:${action}`;
     await convex.mutation("earnProgress:trackApiUsed" as any, {
+      token: workspaceContext?.sessionToken,
       workspaceId: workspaceId as any,
       apiId,
     });
@@ -1339,6 +1341,7 @@ Docs: https://apiclaw.cloud
             body: JSON.stringify({
               path: 'analytics:log',
               args: {
+                token: workspaceContext?.sessionToken,
                 event: 'search_query',
                 provider: undefined,
                 query,
@@ -1391,6 +1394,7 @@ Docs: https://apiclaw.cloud
                 body: JSON.stringify({
                   path: 'providers:logDiscovery',
                   args: {
+                    token: workspaceContext?.sessionToken,
                     provider,
                     query: query.substring(0, 100),
                     latencyMs: responseTimeMs,
@@ -2257,6 +2261,7 @@ Docs: https://apiclaw.cloud
 
               try {
                 const claimResult = await convex.mutation("workspaces:claimAnonymousUsage" as any, {
+                  token: readSession()?.sessionToken,
                   workspaceId: existing.id,
                   machineFingerprint: fingerprint,
                 }) as { success: boolean; claimedCount?: number };
@@ -2459,6 +2464,7 @@ Docs: https://apiclaw.cloud
           // Claim anonymous usage
           try {
             const claimResult = await convex.mutation("workspaces:claimAnonymousUsage" as any, {
+              token: readSession()?.sessionToken,
               workspaceId: result.workspace!.id,
               machineFingerprint: fingerprint,
             }) as { success: boolean; claimedCount?: number };

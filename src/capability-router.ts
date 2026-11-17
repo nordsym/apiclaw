@@ -131,7 +131,7 @@ async function logCapabilityUsage(params: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         path: 'capabilities:logUsage',
-        args: params,
+        args: { ...params, internalSecret: process.env.APICLAW_INTERNAL_SECRET },
       }),
     });
   } catch (e) {

@@ -1,3 +1,4 @@
+import { requireInternalSecret, requireWorkspaceCaller } from "./functionAuth";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { findUsableAgentSession } from "./sessionSecurity";
@@ -214,8 +215,9 @@ export const getCategories = query({
 
 // Increment discovery count when an agent finds an API
 export const trackDiscovery = mutation({
-  args: { apiId: v.id("providerAPIs") },
+  args: { internalSecret: v.string(), apiId: v.id("providerAPIs") },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     const api = await ctx.db.get(args.apiId);
     if (!api) return;
 
@@ -230,12 +232,15 @@ export const trackDiscovery = mutation({
 // Single source of truth: apiLogs. discoveryCount on My APIs is derived from apiLogs.
 export const logDiscovery = mutation({
   args: {
+    internalSecret: v.optional(v.string()),
+    token: v.optional(v.string()),
     provider: v.string(),
     query: v.string(),
     latencyMs: v.number(),
     callerWorkspaceId: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireWorkspaceCaller(ctx, args, args.callerWorkspaceId);
     // Resolve provider → workspace dynamically (no hardcoded email maps)
     const providerNameLower = args.provider.toLowerCase();
     const allProviders = await ctx.db.query("providers").collect();
@@ -285,7 +290,7 @@ export const logDiscovery = mutation({
 });
 
 // Legacy: Track discovery by provider name (kept for backwards compat)
-export const trackDiscoveryByProvider = mutation({
+export const trackDiscoveryByProvider = internalMutation({
   args: { provider: v.string(), query: v.string() },
   handler: async (ctx, args) => {
     // Resolve provider dynamically by name (no hardcoded email maps)
@@ -534,7 +539,8 @@ export const getApiById = query({
   handler: async (ctx, args) => {
     // Try to get by document ID
     try {
-      const api = await ctx.db.get(args.apiId as any);
+      const apiId = ctx.db.normalizeId("providerAPIs", args.apiId);
+      const api = apiId ? await ctx.db.get(apiId) : null;
       if (api) {
         // Check if it has managed routing configured
         const directCall = await ctx.db
@@ -676,7 +682,8 @@ export const deleteAPI = mutation({
     if (!providerId) throw new Error("Invalid or expired session");
 
     // Get the API and verify ownership
-    const api = await ctx.db.get(args.apiId as any);
+    const apiId = ctx.db.normalizeId("providerAPIs", args.apiId);
+      const api = apiId ? await ctx.db.get(apiId) : null;
     if (!api || (api as any).providerId !== providerId) {
       throw new Error("API not found or unauthorized");
     }

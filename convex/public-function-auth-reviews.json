@@ -1,0 +1,50 @@
+{
+  "cliAuth:exchange": {
+    "reason": "Requires a one-time claimed code and matching PKCE verifier before minting a session.",
+    "registrationSha256": "7b1f9abf6105d0a48a6eaa319430a4ca53026b3fd2bb65c054a0c121b86f5e56"
+  },
+  "cliAuth:logout": {
+    "reason": "revokeCliCredentials validates and revokes only the presented session and its bound API key.",
+    "registrationSha256": "d7e14b8b636dffd90fa32bb27440c1d1c88a83cfbe322ed21a0f471e44e5dc28"
+  },
+  "cliAuth:poll": {
+    "reason": "Requires the matching authId and PKCE challenge; only the initiating client can poll its pending login.",
+    "registrationSha256": "7441c7757fc48f00d9c25389d799436252bb0003fa5887e2ef06e84bc0ee1a92"
+  },
+  "mcpOAuth:exchangeAuthCode": {
+    "reason": "Validates one-time authorization code, redirect URI, client authentication and PKCE before issuing tokens.",
+    "registrationSha256": "5abfc9b6d4b08274f45174879105bd3d50ae51f03913b941f7c016e112729a35"
+  },
+  "mcpOAuth:exchangeRefreshToken": {
+    "reason": "Validates a stored unrevoked refresh-token hash and its client before rotating credentials.",
+    "registrationSha256": "91d9fcd98cc54fd3322ef313cb1aae21009fb7937d5d46fcc61cbe24ba19380a"
+  },
+  "mcpOAuth:registerDynamicClient": {
+    "reason": "assertCanRegisterDynamicClient checks the configured initial access token and redirect allowlist.",
+    "registrationSha256": "2035daec4db9732dae4c69989dbd2dc676647968aaa4c41d2386e7a60feb3ea2"
+  },
+  "mcpOAuth:resolveBearerToken": {
+    "reason": "Validates the bearer hash, expiry, revocation and active workspace before returning scoped context.",
+    "registrationSha256": "4e26cdc868d8029017e5ae7e07a45661bec22f0603a08f901ebdefaf994b020f"
+  },
+  "mcpOAuth:revokeToken": {
+    "reason": "Revokes only the record matching the supplied bearer token hash.",
+    "registrationSha256": "a06088e60ce730753613713dc79f44a2c54d633f4832bf3f37dfe6713cf9a2d1"
+  },
+  "teams:acceptInvite": {
+    "reason": "Requires an existing pending invitation token and accepts only that invitation.",
+    "registrationSha256": "298885e5a096ac7565fe6a847934d56c8bb0fa05d3f2dd23f75a1f57b50ddee0"
+  },
+  "teams:getInviteDetails": {
+    "reason": "Requires an existing pending invitation token and returns only that invitation context.",
+    "registrationSha256": "d9d97e77c4695c71711cb35528cb8588c98a439eaa038d89339198cc3c3dcd60"
+  },
+  "webhooks:testWebhook": {
+    "reason": "Delegates session and tenant validation to internal.webhooks.getWebhookInternal; delivery is disabled.",
+    "registrationSha256": "0bff9bf25d7b3b888d5cb5981a1b44ce361cfd3b24ccf89ee0839c80de93c1cc"
+  },
+  "workspaces:verifyMagicLink": {
+    "reason": "Validates the stored one-time magic-link token and expiry before creating a session.",
+    "registrationSha256": "4052d1405bb37f254c9e0530359d2fd110eaf5ba75f22ef8ab031f522f7c2767"
+  }
+}

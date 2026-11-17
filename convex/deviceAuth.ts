@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 /**
  * The legacy browser-link flow returned a long-lived workspace bearer to a
@@ -43,7 +43,7 @@ export const complete = mutation({
  * Garbage-collect expired pending codes. Called by a cron, or one-shot from
  * an admin panel. Keeps the table from growing.
  */
-export const gcExpired = mutation({
+export const gcExpired = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();

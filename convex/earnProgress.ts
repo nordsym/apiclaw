@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "./_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 import { findUsableAgentSession } from "./sessionSecurity";
 
 // ============================================
@@ -144,7 +144,7 @@ export const getEarnProgress = query({
 /**
  * Get earn progress by workspace ID (internal use)
  */
-export const getByWorkspaceId = query({
+export const getByWorkspaceId = internalQuery({
   args: {
     workspaceId: v.id("workspaces"),
   },
@@ -318,9 +318,12 @@ function calculateMaxEarnable(): number {
  */
 export const markFirstDirectCall = mutation({
   args: {
+    token: v.string(),
     workspaceId: v.id("workspaces"),
   },
   handler: async (ctx, args) => {
+    const session = await findUsableAgentSession(ctx.db, args.token);
+    if (!session || session.workspaceId !== args.workspaceId) throw new Error("Invalid session");
     const progress = await getOrCreateProgress(ctx, args.workspaceId);
 
     if (progress.firstDirectCall) {
@@ -357,10 +360,13 @@ export const markFirstDirectCall = mutation({
  */
 export const trackApiUsed = mutation({
   args: {
+    token: v.string(),
     workspaceId: v.id("workspaces"),
     apiId: v.string(), // Format: "provider:action" or just "provider"
   },
   handler: async (ctx, args) => {
+    const session = await findUsableAgentSession(ctx.db, args.token);
+    if (!session || session.workspaceId !== args.workspaceId) throw new Error("Invalid session");
     const progress = await getOrCreateProgress(ctx, args.workspaceId);
 
     // If already complete, no need to track
@@ -418,7 +424,7 @@ export const trackApiUsed = mutation({
 /**
  * Mark agent listed
  */
-export const markAgentListed = mutation({
+export const markAgentListed = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
   },
@@ -456,7 +462,7 @@ export const markAgentListed = mutation({
 /**
  * Mark API listed
  */
-export const markApiListed = mutation({
+export const markApiListed = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
   },
@@ -494,7 +500,7 @@ export const markApiListed = mutation({
 /**
  * Mark BYOK setup complete
  */
-export const markByokSetup = mutation({
+export const markByokSetup = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
   },
@@ -626,7 +632,7 @@ export const claimTwitter = mutation({
 /**
  * Increment referral count (called when someone signs up with referral code)
  */
-export const incrementReferral = mutation({
+export const incrementReferral = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
   },

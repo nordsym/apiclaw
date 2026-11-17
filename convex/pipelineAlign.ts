@@ -1,5 +1,6 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 /**
  * GTM alignment: binary funnel.
@@ -18,7 +19,7 @@ import { mutation, query } from "./_generated/server";
 // Step 1 — Flag the existing 46 managed managed providers.
 // Identifies them by presence of providerId (the 1,660 registry seed has none).
 // ---------------------------------------------------------------------------
-export const classifyManaged = mutation({
+export const classifyManaged = internalMutation({
   args: {},
   handler: async (ctx) => {
     const all = await ctx.db.query("providerAPIs").collect();
@@ -49,7 +50,7 @@ export const classifyManaged = mutation({
 // writers already emit "managed"; readers accept both during the transition
 // so this can run any time without coordination.
 // ---------------------------------------------------------------------------
-export const backfillProxyModeToManaged = mutation({
+export const backfillProxyModeToManaged = internalMutation({
   args: {},
   handler: async (ctx) => {
     const rows = await ctx.db.query("providerAPIs").collect();
@@ -69,7 +70,7 @@ export const backfillProxyModeToManaged = mutation({
 // the binary-funnel "discovery" lane. Keyless entries get upgraded to "live"
 // in classifyOpenByNames (step 3). Everything else lands in discovery.
 // ---------------------------------------------------------------------------
-export const reclassifyIndexed = mutation({
+export const reclassifyIndexed = internalMutation({
   args: {},
   handler: async (ctx) => {
     const rows = await ctx.db
@@ -100,6 +101,7 @@ export const reclassifyIndexed = mutation({
 // ---------------------------------------------------------------------------
 export const upsertOpenAPIs = mutation({
   args: {
+    internalSecret: v.string(),
     entries: v.array(
       v.object({
         name: v.string(),
@@ -110,7 +112,8 @@ export const upsertOpenAPIs = mutation({
       })
     ),
   },
-  handler: async (ctx, { entries }) => {
+  handler: async (ctx, { internalSecret, entries }) => {
+    requireInternalSecret(internalSecret);
     const now = Date.now();
     let inserted = 0;
     let patched = 0;
@@ -179,7 +182,7 @@ export const upsertOpenAPIs = mutation({
 // Circuit-breaker helpers — used inline by /v1/call in http.ts.
 // Public mutations so the HTTP layer can report health without a full refactor.
 // ---------------------------------------------------------------------------
-export const reportSuccess = mutation({
+export const reportSuccess = internalMutation({
   args: { apiId: v.id("providerAPIs") },
   handler: async (ctx, { apiId }) => {
     const row = await ctx.db.get(apiId);
@@ -194,7 +197,7 @@ export const reportSuccess = mutation({
   },
 });
 
-export const reportFailure = mutation({
+export const reportFailure = internalMutation({
   args: {
     apiId: v.id("providerAPIs"),
     statusCode: v.optional(v.number()),
@@ -218,8 +221,9 @@ export const reportFailure = mutation({
 // Reporting — canon for Hero, MCP discover, and ops dashboards.
 // ---------------------------------------------------------------------------
 export const funnelCounts = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { internalSecret: v.string() },
+  handler: async (ctx, { internalSecret }) => {
+    requireInternalSecret(internalSecret);
     const all = await ctx.db.query("providerAPIs").collect();
     const byStatus: Record<string, number> = { live: 0, discovery: 0, indexed: 0, unclassified: 0 };
     const byAuth: Record<string, number> = { managed: 0, none: 0, unknown: 0, unclassified: 0 };
@@ -299,7 +303,7 @@ export const searchDiscovery = query({
 // Used when APIClaw acquires a key for a public API (e.g. NASA) and the
 // adapter is registered in MANAGED_PROXY_ROUTES. Patch-only, idempotent.
 // ---------------------------------------------------------------------------
-export const promoteToManaged = mutation({
+export const promoteToManaged = internalMutation({
   args: {
     apiId: v.id("providerAPIs"),
     baseUrl: v.optional(v.string()),
@@ -337,7 +341,7 @@ export const promoteToManaged = mutation({
 // without touching classification fields. Used for demo-hygiene adjustments
 // (e.g. steering agents away from retired upstream endpoints).
 // ---------------------------------------------------------------------------
-export const patchApiMetadata = mutation({
+export const patchApiMetadata = internalMutation({
   args: {
     apiId: v.id("providerAPIs"),
     description: v.optional(v.string()),

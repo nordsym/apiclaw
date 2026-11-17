@@ -245,7 +245,7 @@ export const resolveKey = internalQuery({
 //
 // If sub-minute freshness on lastUsedAt becomes a UI requirement, swap to
 // an append-only apiKeyTouchEvents table + cron aggregate.
-export const touchKey = mutation({
+export const touchKey = internalMutation({
   args: {
     keyId: v.id("workspaceApiKeys"),
   },

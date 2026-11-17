@@ -1,0 +1,150 @@
+{
+  "capabilities:getById": {
+    "reason": "Public capability metadata supports anonymous discovery before login.",
+    "registrationSha256": "aab5a9b1c1200ce2dc9201dd492f1b2f5dc8deca369832713340bcfe8c682e76"
+  },
+  "capabilities:getProviders": {
+    "reason": "Public capability routing metadata is needed by discovery clients; it contains no provider credentials.",
+    "registrationSha256": "d1bdf9eca2cf2840cb13814dbc0401a9db2d15833eb88537d3dc1eb796e11537"
+  },
+  "capabilities:list": {
+    "reason": "Public capability catalog supports discovery before login.",
+    "registrationSha256": "8322451da8595d904bdac499394bfa5426da069fa854389253d15058302a9729"
+  },
+  "capabilities:listByCategory": {
+    "reason": "Public capability categories support discovery before login.",
+    "registrationSha256": "c3b85691c5a09e2d7a64f8bf2ea821eb663085986c645d0bd74a81dde6a92b35"
+  },
+  "cliAuth:start": {
+    "reason": "Login must start before a workspace session exists; this only creates a pending state and PKCE challenge.",
+    "registrationSha256": "dd7c48b599268fcb2238cc47a8b8a2d3cce5a29fe185de0694cd9fff6708ea5c"
+  },
+  "deviceAuth:complete": {
+    "reason": "Retired compatibility endpoint always rejects and cannot link a device.",
+    "registrationSha256": "72f3c40add78fee128ac224f324deb0b10596540498973465604afc815dea19d"
+  },
+  "deviceAuth:poll": {
+    "reason": "Retired compatibility endpoint returns only retired status.",
+    "registrationSha256": "ceff4787ef3bc800ddf1c41ae4edfce5ec69ca123f8c13ed44a18eebc8b2e5ed"
+  },
+  "deviceAuth:start": {
+    "reason": "Retired compatibility endpoint returns login instructions without creating identity.",
+    "registrationSha256": "6da82e584a0687173ae549e9ca0d637dd2db80e92bc51951ea585cf756d360fc"
+  },
+  "directCall:getActionById": {
+    "reason": "Public action definitions describe parameters and paths without provider credentials.",
+    "registrationSha256": "93a87c7436cb30ad357889a3af59b9a10cd79480a75ccf6e06f8ab1cd04c46e2"
+  },
+  "directCall:getActionByName": {
+    "reason": "Public action definitions describe parameters and paths without provider credentials.",
+    "registrationSha256": "8de0bb4ebd7b0b5db673fc4e5492be3dfcae25926092e1fb65345e87cd0aa016"
+  },
+  "directCall:getActions": {
+    "reason": "Public action definitions support catalog and client discovery without provider credentials.",
+    "registrationSha256": "a9fa139cf6785bebac74995be461e3b7d03aeeded1518c0c7dfeec3d87b06bee"
+  },
+  "directCall:getByApiSlug": {
+    "reason": "Public API discovery returns a redacted routing config without stored credentials.",
+    "registrationSha256": "b7f4d80c252d4d73ec1929e7dc4d37f94df2b3c18f090124ff2acf703fe362c2"
+  },
+  "directCall:getDirectCallConfig": {
+    "reason": "Public routing metadata uses redactedConfig to omit provider credentials.",
+    "registrationSha256": "963d9ab5cc60ac6dab1a0e1ca29b3a46b32b797ea2f140848c4961fc37b42afa"
+  },
+  "directCall:getLiveConfigs": {
+    "reason": "Public live-provider discovery uses redactedConfig to omit provider credentials.",
+    "registrationSha256": "bdb5c1bbe2c34b64407b3a4264f10352ad803df28906e69785bfe634f569dd27"
+  },
+  "discoveryListings:published": {
+    "reason": "Public listing catalog returns only published, reviewed metadata.",
+    "registrationSha256": "c3e595a8f6d8ae2d17cec77b63472dd74ea776c527c3b08f843803f60f575717"
+  },
+  "funnel:recordEvent": {
+    "reason": "Pre-login install and diagnostic intake is public; canonical authentication and execution events are rejected.",
+    "registrationSha256": "dab3c06c509865a71f9c117bd208ce673712636be65acd62c17b82c47ffc0107"
+  },
+  "managedRouting:getActionById": {
+    "reason": "Public action definitions describe parameters and paths without provider credentials.",
+    "registrationSha256": "93a87c7436cb30ad357889a3af59b9a10cd79480a75ccf6e06f8ab1cd04c46e2"
+  },
+  "managedRouting:getActionByName": {
+    "reason": "Public action definitions describe parameters and paths without provider credentials.",
+    "registrationSha256": "8de0bb4ebd7b0b5db673fc4e5492be3dfcae25926092e1fb65345e87cd0aa016"
+  },
+  "managedRouting:getActions": {
+    "reason": "Public action definitions support catalog and client discovery without provider credentials.",
+    "registrationSha256": "a9fa139cf6785bebac74995be461e3b7d03aeeded1518c0c7dfeec3d87b06bee"
+  },
+  "managedRouting:getByApiSlug": {
+    "reason": "Public API discovery returns a redacted routing config without stored credentials.",
+    "registrationSha256": "b7f4d80c252d4d73ec1929e7dc4d37f94df2b3c18f090124ff2acf703fe362c2"
+  },
+  "managedRouting:getDirectCallConfig": {
+    "reason": "Public routing metadata uses redactedConfig to omit provider credentials.",
+    "registrationSha256": "963d9ab5cc60ac6dab1a0e1ca29b3a46b32b797ea2f140848c4961fc37b42afa"
+  },
+  "managedRouting:getLiveConfigs": {
+    "reason": "Public live-provider discovery uses redactedConfig to omit provider credentials.",
+    "registrationSha256": "bdb5c1bbe2c34b64407b3a4264f10352ad803df28906e69785bfe634f569dd27"
+  },
+  "mcpOAuth:getClientForAuthorize": {
+    "reason": "Pre-login consent UI validates the redirect URI and returns public client metadata without client secrets.",
+    "registrationSha256": "b621205dcc9b7b259a3cf996377a239174ebaa9a002d96b0d71be6736d2c39a3"
+  },
+  "missions:discover": {
+    "reason": "Public mission capability discovery returns template metadata; mission execution remains internal.",
+    "registrationSha256": "bf4cc7e111dd6bf67c48287a6270bb2e61b8670cb665e5240939ca3ef93d9295"
+  },
+  "missions:listTemplates": {
+    "reason": "Public mission template catalog contains no customer missions or workspace data.",
+    "registrationSha256": "496be2b3f215b7e0df14959f2fb025b4883bdac5b661fe16a32c223484e4772d"
+  },
+  "pipelineAlign:searchDiscovery": {
+    "reason": "Public API catalog search exposes discovery metadata, not execution or credentials.",
+    "registrationSha256": "425d6d4dfe3f97984a809fb2a824979ca2fb25384c0e5e5c0aa407d0b4539641"
+  },
+  "providerDiscovery:listForDiscovery": {
+    "reason": "Public discovery lists live managed API metadata without provider credentials.",
+    "registrationSha256": "9e0158e6e3ef84b736dc1aaff51b301ec6032e8cd548a376b1b1f5efa317d359"
+  },
+  "providerHealth:getAllPublic": {
+    "reason": "Public provider health aggregates support status displays without workspace logs or identities.",
+    "registrationSha256": "95e40934507d12e63a80f52b174102e15d8a6bf9b01e275ac4df9dfe3d5adbf5"
+  },
+  "providers:getApiById": {
+    "reason": "Public API details are restricted to providerAPIs IDs, preventing arbitrary document reads.",
+    "registrationSha256": "00c12850b5ea58ac2ac161d946a22fb61de3604aec3710dfd3d4ad490ea939d5"
+  },
+  "providers:getApprovedAPIs": {
+    "reason": "Public discovery lists approved API metadata.",
+    "registrationSha256": "60e3d85c58211d9d5ad05dd93a9e54a9f0314c55eda3f13217b69d40b32f94ed"
+  },
+  "providers:getCategories": {
+    "reason": "Public discovery category counts are computed from approved APIs.",
+    "registrationSha256": "d575d1be7d325154f366740df9ad02a7ebef0a589c8b7e04ba3096ac9be7e08b"
+  },
+  "providers:getProviderAPIs": {
+    "reason": "Public provider catalog contains API definitions without stored credentials.",
+    "registrationSha256": "11a48a563d68067b74c94965905a9c229fd3d2345b061934e4c16215e4c45d3a"
+  },
+  "providers:getProviderAPIsWithStatus": {
+    "reason": "Public provider catalog adds managed-routing availability without stored credentials.",
+    "registrationSha256": "d97ce8c57960e927df2b605d407d67c754b96bd427c7263fa86befc215e04bdd"
+  },
+  "publicApiHealth:snapshot": {
+    "reason": "Public callable status snapshot contains only API IDs and health-check time.",
+    "registrationSha256": "ce4d884a90168ef4ad4167083646716ea32422e4785b7f087499e2634f8ae1eb"
+  },
+  "telemetry:track": {
+    "reason": "Pre-login CLI diagnostic intake is public and returns no stored telemetry or identity.",
+    "registrationSha256": "825b1644eb6da8f7c9c074f81a98dfff390b93ecec561a4e0d112ec3ae65d4f7"
+  },
+  "waitlist:count": {
+    "reason": "Public waitlist count supports the landing page without exposing email addresses.",
+    "registrationSha256": "8bc59d657515fd0488cb9a922815065798686bcd95cacc93361d91de515f4d0e"
+  },
+  "waitlist:join": {
+    "reason": "Visitors must be able to submit a waitlist email before a workspace exists; stored entries are never listed publicly.",
+    "registrationSha256": "a23997a81b441f5ad542c0844c18fd3ef9888fee0ae9b970143f8cf8781843ad"
+  }
+}

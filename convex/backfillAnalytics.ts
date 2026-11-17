@@ -1,11 +1,11 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 /**
  * Restore provider analytics lost during deployment migration
  * (brilliant-puffin-712 -> adventurous-avocet-799).
  */
-export const restoreProviderAnalytics = mutation({
+export const restoreProviderAnalytics = internalMutation({
   args: {},
   handler: async (ctx) => {
     const prathamWorkspaceId = "n17bf4raa01r0d4na0bsgg117x83y551" as Id<"workspaces">;
@@ -182,7 +182,7 @@ export const restoreProviderAnalytics = mutation({
 /**
  * Restore Filestack discovery analytics (discovery-only, not callable).
  */
-export const restoreFilestackAnalytics = mutation({
+export const restoreFilestackAnalytics = internalMutation({
   args: {},
   handler: async (ctx) => {
     const filestackWorkspaceId = "n175gprvbbvygmhtg8cfk8jzbd83m0p8" as Id<"workspaces">;

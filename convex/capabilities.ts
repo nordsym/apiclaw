@@ -1,5 +1,6 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 
 // Get a capability by ID
 export const getById = query({
@@ -64,6 +65,7 @@ export const getProviders = query({
 // Create a capability
 export const create = mutation({
   args: {
+    internalSecret: v.string(),
     id: v.string(),
     name: v.string(),
     description: v.string(),
@@ -77,9 +79,11 @@ export const create = mutation({
     })),
   },
   handler: async (ctx, args) => {
+    const { internalSecret, ...data } = args;
+    requireInternalSecret(internalSecret);
     const now = Date.now();
     return await ctx.db.insert("capabilities", {
-      ...args,
+      ...data,
       createdAt: now,
       updatedAt: now,
     });
@@ -89,6 +93,7 @@ export const create = mutation({
 // Add provider to capability
 export const addProvider = mutation({
   args: {
+    internalSecret: v.string(),
     providerId: v.string(),
     capabilityId: v.string(),
     priority: v.number(),
@@ -99,9 +104,11 @@ export const addProvider = mutation({
     paramMapping: v.any(),
   },
   handler: async (ctx, args) => {
+    const { internalSecret, ...data } = args;
+    requireInternalSecret(internalSecret);
     const now = Date.now();
     return await ctx.db.insert("providerCapabilities", {
-      ...args,
+      ...data,
       enabled: true,
       healthStatus: "healthy",
       createdAt: now,
@@ -111,7 +118,7 @@ export const addProvider = mutation({
 });
 
 // Update provider health status
-export const updateHealth = mutation({
+export const updateHealth = internalMutation({
   args: {
     providerId: v.string(),
     capabilityId: v.string(),
@@ -137,6 +144,7 @@ export const updateHealth = mutation({
 // Log capability usage
 export const logUsage = mutation({
   args: {
+    internalSecret: v.string(),
     capabilityId: v.string(),
     providerId: v.string(),
     userId: v.string(),
@@ -149,8 +157,10 @@ export const logUsage = mutation({
     currency: v.string(),
   },
   handler: async (ctx, args) => {
+    const { internalSecret, ...data } = args;
+    requireInternalSecret(internalSecret);
     return await ctx.db.insert("capabilityLogs", {
-      ...args,
+      ...data,
       timestamp: Date.now(),
     });
   },

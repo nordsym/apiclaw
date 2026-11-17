@@ -1,19 +1,18 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { query, internalMutation, internalQuery } from "./_generated/server";
 
 /**
  * Admin whitelist helpers used to guarantee partner/provider workspaces
  * never get surprised by the shadow-auth gate when it flips to enforce.
  *
- * These are standalone utilities — no auth gate on the mutation itself.
- * Deploy behind IP allowlist or revoke after the partner call if concerned.
+ * These utilities are internal and cannot be invoked through the public API.
  */
 
 /**
  * Return the canonical state of a workspace + whether any other workspace
  * shares the same email (the "old test email link" sanity check).
  */
-export const inspectByEmail = query({
+export const inspectByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
     const normalized = email.toLowerCase().trim();
@@ -48,7 +47,7 @@ export const inspectByEmail = query({
  * Whitelist a workspace by email: sets gatingEnabled=false so the shadow/enforce
  * gate always lets this workspace through, and upgrades tier if requested.
  */
-export const whitelistByEmail = mutation({
+export const whitelistByEmail = internalMutation({
   args: {
     email: v.string(),
     tier: v.optional(v.string()), // e.g. "partner", "enterprise"

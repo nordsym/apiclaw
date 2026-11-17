@@ -5,7 +5,7 @@
  * requireVerifiedOwner. Free paths (discover_apis, catalog, docs) do NOT
  * call this. See Apiclaw-TOOLS.md for the enforcement matrix.
  */
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { findUsableAgentSession } from "./sessionSecurity";
@@ -144,9 +144,9 @@ export async function resolveVerifiedOwnerByWorkspaceId(
   };
 }
 
-// Public query wrapper so HTTP handlers (which can only call queries/mutations)
-// can invoke the guard. Returns a JSON-safe shape.
-export const checkVerifiedOwnerByWorkspaceId = query({
+// Internal query wrapper for trusted HTTP handlers. A workspace ID alone
+// must never authorize a public caller. Returns a JSON-safe shape.
+export const checkVerifiedOwnerByWorkspaceId = internalQuery({
   args: {
     workspaceId: v.optional(v.id("workspaces")),
     allowQuotaExceeded: v.optional(v.boolean()),

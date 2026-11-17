@@ -1,23 +1,21 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 /**
  * Seed Pratham's workspace with all 27 APILayer APIs
- * Run with: npx convex run seedPratham:seedPrathamWorkspace
  */
 
-export const seedPrathamWorkspace = mutation({
+export const seedPrathamWorkspace = internalMutation({
   args: {},
   handler: async (ctx) => {
     const email = "pratham@apilayer.com";
 
-    // 1. Get existing workspace (already created + activated on prod)
     let workspace = await ctx.db
       .query("workspaces")
       .withIndex("by_email", (q) => q.eq("email", email))
       .first();
 
     if (!workspace) {
-      throw new Error(`Workspace for ${email} not found on prod. Create it first.`);
+      throw new Error(`Workspace for ${email} not found.`);
     }
 
     console.log(`✓ Workspace exists: ${workspace._id} (${workspace.tier}, ${workspace.status})`);

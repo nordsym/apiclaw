@@ -11,7 +11,7 @@ type StorageBackend = 'memory' | 'convex';
 // Configuration
 const BACKEND: StorageBackend = process.env.APICLAW_BACKEND === 'convex' ? 'convex' : 'memory';
 const CONVEX_URL = process.env.CONVEX_URL || '';
-const CONVEX_DEPLOY_KEY = process.env.CONVEX_DEPLOY_KEY || '';
+const INTERNAL_SECRET = process.env.APICLAW_INTERNAL_SECRET || '';
 
 // In-memory stores (for local development)
 const agentCreditsStore: Map<string, AgentCredits> = new Map();
@@ -232,8 +232,8 @@ interface ConvexResponse<T> {
 }
 
 async function convexQuery<T>(path: string, args: Record<string, unknown>): Promise<ConvexResponse<T>> {
-  if (!CONVEX_URL) {
-    return { error: 'Convex URL not configured' };
+  if (!CONVEX_URL || !INTERNAL_SECRET) {
+    return { error: 'Convex server credentials not configured' };
   }
 
   try {
@@ -241,9 +241,8 @@ async function convexQuery<T>(path: string, args: Record<string, unknown>): Prom
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(CONVEX_DEPLOY_KEY ? { 'Authorization': `Convex ${CONVEX_DEPLOY_KEY}` } : {}),
       },
-      body: JSON.stringify({ path, args }),
+      body: JSON.stringify({ path, args: { ...args, internalSecret: INTERNAL_SECRET } }),
     });
 
     const result = await response.json() as T;
@@ -254,8 +253,8 @@ async function convexQuery<T>(path: string, args: Record<string, unknown>): Prom
 }
 
 async function convexMutation<T>(path: string, args: Record<string, unknown>): Promise<ConvexResponse<T>> {
-  if (!CONVEX_URL) {
-    return { error: 'Convex URL not configured' };
+  if (!CONVEX_URL || !INTERNAL_SECRET) {
+    return { error: 'Convex server credentials not configured' };
   }
 
   try {
@@ -263,9 +262,8 @@ async function convexMutation<T>(path: string, args: Record<string, unknown>): P
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(CONVEX_DEPLOY_KEY ? { 'Authorization': `Convex ${CONVEX_DEPLOY_KEY}` } : {}),
       },
-      body: JSON.stringify({ path, args }),
+      body: JSON.stringify({ path, args: { ...args, internalSecret: INTERNAL_SECRET } }),
     });
 
     const result = await response.json() as T;

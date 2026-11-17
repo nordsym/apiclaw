@@ -1,5 +1,5 @@
 import { internalAction, internalQuery } from "./_generated/server";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 
 /**
  * Catalog Sweep — rotating reachability probe over the Open (keyless, free)
@@ -70,10 +70,10 @@ export const sweep = internalAction({
       for (const r of results) {
         if (r.ok) {
           healthy++;
-          await ctx.runMutation(api.pipelineAlign.reportSuccess, { apiId: r.apiId });
+          await ctx.runMutation(internal.pipelineAlign.reportSuccess, { apiId: r.apiId });
         } else {
           failed++;
-          await ctx.runMutation(api.pipelineAlign.reportFailure, {
+          await ctx.runMutation(internal.pipelineAlign.reportFailure, {
             apiId: r.apiId,
             statusCode: r.statusCode,
           });

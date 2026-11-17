@@ -17,6 +17,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
+if (!process.env.APICLAW_INTERNAL_SECRET) throw new Error("APICLAW_INTERNAL_SECRET is required for maintenance");
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
@@ -57,7 +59,7 @@ async function postBatch(entries) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       path: "pipelineAlign:upsertOpenAPIs",
-      args: { entries },
+      args: { entries, internalSecret: process.env.APICLAW_INTERNAL_SECRET },
     }),
   });
   const data = await res.json();
@@ -84,7 +86,7 @@ for (let i = 0; i < picked.length; i += CHUNK) {
 const statsRes = await fetch(`${CONVEX_URL}/api/query`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ path: "pipelineAlign:funnelCounts", args: {} }),
+  body: JSON.stringify({ path: "pipelineAlign:funnelCounts", args: { internalSecret: process.env.APICLAW_INTERNAL_SECRET } }),
 });
 const snap = (await statsRes.json()).value;
 console.log(`[seed-open] done. inserted=${inserted} patched=${patched} unchanged=${unchanged}`);

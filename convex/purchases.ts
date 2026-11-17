@@ -1,5 +1,6 @@
+import { requireInternalSecret } from "./functionAuth";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 
 // Provider pricing (credits per dollar)
 const CREDITS_PER_DOLLAR: Record<string, number> = {
@@ -20,12 +21,14 @@ function calculateCredits(providerId: string, amountUsd: number): number {
 // Purchase API access
 export const purchaseAccess = mutation({
   args: {
+    internalSecret: v.string(),
     agentId: v.string(),
     providerId: v.string(),
     amountUsd: v.number(),
     credentials: v.any(), // Credentials passed from server side
   },
   handler: async (ctx, args) => {
+    requireInternalSecret(args.internalSecret);
     // Check balance
     const credits = await ctx.db
       .query("agentCredits")
@@ -73,7 +76,7 @@ export const purchaseAccess = mutation({
 });
 
 // Get all purchases for an agent
-export const getAgentPurchases = query({
+export const getAgentPurchases = internalQuery({
   args: { agentId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -84,7 +87,7 @@ export const getAgentPurchases = query({
 });
 
 // Get active purchase for a provider
-export const getActivePurchase = query({
+export const getActivePurchase = internalQuery({
   args: {
     agentId: v.string(),
     providerId: v.string(),
@@ -102,7 +105,7 @@ export const getActivePurchase = query({
 });
 
 // Get usage for a purchase
-export const getUsage = query({
+export const getUsage = internalQuery({
   args: { purchaseId: v.id("purchases") },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -113,7 +116,7 @@ export const getUsage = query({
 });
 
 // Record usage
-export const recordUsage = mutation({
+export const recordUsage = internalMutation({
   args: {
     purchaseId: v.id("purchases"),
     unitsUsed: v.number(),
@@ -154,7 +157,7 @@ export const recordUsage = mutation({
 });
 
 // Get balance summary for an agent
-export const getBalanceSummary = query({
+export const getBalanceSummary = internalQuery({
   args: { agentId: v.string() },
   handler: async (ctx, args) => {
     const credits = await ctx.db

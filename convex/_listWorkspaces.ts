@@ -1,5 +1,5 @@
-import { query } from "./_generated/server";
-export const run = query({
+import { query, internalQuery } from "./_generated/server";
+export const run = internalQuery({
   args: {},
   handler: async (ctx) => {
     const ws = await ctx.db.query("workspaces").collect();

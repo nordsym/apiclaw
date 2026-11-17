@@ -1,3 +1,4 @@
+import { requireWorkspaceCaller } from "./functionAuth";
 import { internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { findUsableAgentSession } from "./sessionSecurity";
@@ -5,6 +6,8 @@ import { findUsableAgentSession } from "./sessionSecurity";
 // Log an analytics event
 export const log = mutation({
   args: {
+    internalSecret: v.optional(v.string()),
+    token: v.optional(v.string()),
     event: v.string(),
     provider: v.optional(v.string()),
     query: v.optional(v.string()),
@@ -13,8 +16,10 @@ export const log = mutation({
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    const { internalSecret, token, ...data } = args;
+    await requireWorkspaceCaller(ctx, { internalSecret, token }, args.workspaceId);
     return await ctx.db.insert("analytics", {
-      ...args,
+      ...data,
       timestamp: Date.now(),
     });
   },

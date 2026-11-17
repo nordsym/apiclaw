@@ -148,7 +148,7 @@ export const renameMainAgent = mutation({
  * Initialize main agent (auto-generate name and ID if not set)
  * Called on first API call
  */
-export const ensureMainAgent = mutation({
+export const ensureMainAgent = internalMutation({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, { workspaceId }) => {
     const workspace = await ctx.db.get(workspaceId);
@@ -327,7 +327,7 @@ export const renameSubagent = mutation({
  * Track a subagent call (upsert subagent record)
  * Called when X-APIClaw-Subagent header is present
  */
-export const trackSubagentCall = mutation({
+export const trackSubagentCall = internalMutation({
   args: {
     workspaceId: v.id("workspaces"),
     subagentId: v.string(),
@@ -440,11 +440,14 @@ export const registerTaskAgent = mutation({
  */
 export const updateAIBackend = mutation({
   args: {
-    workspaceId: v.id("workspaces"),
+    token: v.string(),
     subagentId: v.optional(v.string()),
     aiBackend: v.string(),
   },
-  handler: async (ctx, { workspaceId, subagentId, aiBackend }) => {
+  handler: async (ctx, { token, subagentId, aiBackend }) => {
+    const session = await findUsableAgentSession(ctx.db, token);
+    if (!session) throw new Error("Invalid session");
+    const workspaceId = session.workspaceId;
     const now = Date.now();
 
     if (subagentId) {
@@ -697,7 +700,7 @@ export const ensureAgent = mutation({
 /**
  * Link email to an existing workspace (called by register_owner + verifyMagicLink)
  */
-export const linkEmailToWorkspace = mutation({
+export const linkEmailToWorkspace = internalMutation({
   args: {
     fingerprint: v.string(),
     email: v.string(),
@@ -729,7 +732,7 @@ export const linkEmailToWorkspace = mutation({
 /**
  * Increment call count for an agent
  */
-export const incrementAgentCalls = mutation({
+export const incrementAgentCalls = internalMutation({
   args: { agentId: v.id("agents") },
   handler: async (ctx, { agentId }) => {
     const agent = await ctx.db.get(agentId);
@@ -860,7 +863,7 @@ export const backfillNameSetByUser = internalMutation({
 /**
  * Delete an agent record from the agents table (admin / cleanup)
  */
-export const adminDeleteAgent = mutation({
+export const adminDeleteAgent = internalMutation({
   args: { agentId: v.id("agents") },
   handler: async (ctx, { agentId }) => {
     await ctx.db.delete(agentId);
@@ -871,7 +874,7 @@ export const adminDeleteAgent = mutation({
 /**
  * Get total agent count (for landing page / admin)
  */
-export const getTotalAgentCount = query({
+export const getTotalAgentCount = internalQuery({
   args: {},
   handler: async (ctx) => {
     const agents = await ctx.db.query("agents").collect();

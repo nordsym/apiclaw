@@ -1,12 +1,11 @@
-import { mutation } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 
 /**
- * Seed both partner providers (Filestack + APILayer) in PROD with:
+ * Internal partner provider migration:
  * - Provider record
  * - All providerAPIs
- * Run on prod: npx convex run migratePartnersProd:run --prod
  */
-export const run = mutation({
+export const run = internalMutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
