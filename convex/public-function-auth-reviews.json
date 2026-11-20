@@ -20,8 +20,8 @@
     "registrationSha256": "91d9fcd98cc54fd3322ef313cb1aae21009fb7937d5d46fcc61cbe24ba19380a"
   },
   "mcpOAuth:registerDynamicClient": {
-    "reason": "assertCanRegisterDynamicClient checks the configured initial access token and redirect allowlist.",
-    "registrationSha256": "2035daec4db9732dae4c69989dbd2dc676647968aaa4c41d2386e7a60feb3ea2"
+    "reason": "Anonymous DCR requires every callback to match the exact built-in or operator allowlist, or the existing narrowly scoped ChatGPT callback prefix. An initial access token additionally permits safe loopback redirects. The shared gate runs before a durable global 60/minute limit and client insert. Registration grants no workspace or tokens; Clerk-backed consent, workspace binding, PKCE S256 and existing MCP scope policy still apply.",
+    "registrationSha256": "b56b43de9a2023c5166aedf3aa3b7438c8f8d19581ece9096330c05206e621fa"
   },
   "mcpOAuth:resolveBearerToken": {
     "reason": "Validates the bearer hash, expiry, revocation and active workspace before returning scoped context.",

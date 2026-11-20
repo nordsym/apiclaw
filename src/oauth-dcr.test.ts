@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   assertCanRegisterDynamicClient,
+  BUILTIN_DCR_REDIRECT_URIS,
+  CURSOR_DESKTOP_REDIRECT_URI,
+  isAllowlistedPublicDynamicRedirect,
   initialAccessTokenMatches,
   isAllowlistedDynamicRedirect,
   MIN_INITIAL_ACCESS_TOKEN_LENGTH,
@@ -131,7 +134,7 @@ const registerRoute = readFileSync("landing/src/app/api/oauth/register/route.ts"
 assert.match(registerRoute, /registrationDecision\(/);
 assert.ok(
   registerRoute.indexOf("registrationDecision(") < registerRoute.indexOf("await convexMutation"),
-  "the route must reject unauthenticated registration before calling Convex",
+  "the route must check registration policy before calling Convex",
 );
 assert.match(registerRoute, /status:\s*401/);
 assert.match(registerRoute, /initialAccessToken:\s*decision\.initialAccessToken/);
@@ -140,8 +143,8 @@ assert.doesNotMatch(registerRoute, /Open per spec/);
 const oauthState = readFileSync("convex/mcpOAuth.ts", "utf8");
 assert.match(
   oauthState,
-  /export const registerDynamicClient = mutation\(\{[\s\S]*?initialAccessToken: v\.string\(\)[\s\S]*?assertCanRegisterDynamicClient\([\s\S]*?ctx\.db\.insert\("mcpOAuthClients"/,
-  "Convex registration must check the initial access token before inserting a client",
+  /export const registerDynamicClient = mutation\(\{[\s\S]*?initialAccessToken: v\.optional\(v\.string\(\)\)[\s\S]*?assertCanRegisterDynamicClient\([\s\S]*?ctx\.db\.insert\("mcpOAuthClients"/,
+  "Convex registration must enforce the shared policy before inserting a client",
 );
 assert.match(
   oauthState,
@@ -160,8 +163,57 @@ const authorizePage = readFileSync("landing/src/app/oauth/authorize/page.tsx", "
 assert.match(authorizePage, /codeChallengeMethod !== "S256"/);
 
 const metadata = readFileSync("landing/src/app/.well-known/oauth-authorization-server/route.ts", "utf8");
-assert.doesNotMatch(metadata, /registration_endpoint/);
+assert.ok(metadata.includes("registration_endpoint: `${ISSUER}/api/oauth/register`"));
 const mcpMetadata = readFileSync("landing/src/app/.well-known/mcp/route.ts", "utf8");
-assert.match(mcpMetadata, /dynamic_client_registration:\s*false/);
+assert.match(mcpMetadata, /dynamic_client_registration:\s*true/);
 
-console.log("Unauthenticated OAuth dynamic client registration is rejected");
+for (const allowed of [...BUILTIN_DCR_REDIRECT_URIS, "https://chatgpt.com/connector/oauth/abc_123"]) {
+  assert.equal(unauthenticated([allowed]).ok, true, `${allowed} permits anonymous registration`);
+  assert.equal(registrationDecision({
+    authorizationHeader: null, configuredToken: TOKEN, redirectUris: [allowed],
+  }).ok, true, "configuring an operator token must not disable allowlisted public clients");
+}
+assert.equal(unauthenticated([
+  "https://www.cursor.com/agents/mcp/oauth/callback",
+  "http://localhost:8787/callback",
+  CURSOR_DESKTOP_REDIRECT_URI,
+]).ok, true, "Cursor can register its callbacks together");
+for (const blocked of [
+  "http://localhost:8788/callback",
+  "http://127.0.0.1:8787/callback",
+  "http://localhost:8787/other",
+  "https://www.cursor.com.evil.example/agents/mcp/oauth/callback",
+  "https://cursor.com/agents/mcp/oauth/callback",
+  "https://www.cursor.com/agents/mcp/oauth/callback/extra",
+  "https://www.cursor.com/agents/mcp/oauth/callback?next=https://evil.example",
+  "https://www.cursor.com/agents/mcp/oauth/callback#fragment",
+  "https://www.cursor.com/agents/mcp/oauth/../oauth/callback",
+  "https://www.cursor.com:443/agents/mcp/oauth/callback",
+  "https://user:password@www.cursor.com/agents/mcp/oauth/callback",
+  "https://chatgpt.com/connector/oauth/abc/extra",
+  "https://chatgpt.com/connector/oauth/abc?next=evil",
+  "cursor://anysphere.cursor-mcp/oauth/callback/extra",
+  "cursor://anysphere.cursor-mcp/oauth/callback?next=evil",
+  "cursor://anysphere.cursor-mcp.evil.example/oauth/callback",
+  "cursor://other/oauth/callback",
+  "cursor-nightly://anysphere.cursor-mcp/oauth/callback",
+]) {
+  assert.equal(isAllowlistedPublicDynamicRedirect(blocked, undefined), false, blocked);
+  assert.equal(unauthenticated([blocked]).ok, false, blocked);
+}
+for (const redirects of [[], [CURSOR_DESKTOP_REDIRECT_URI, ...EVIL], [CURSOR_DESKTOP_REDIRECT_URI, 42] as unknown as string[]]) {
+  assert.equal(unauthenticated(redirects).ok, false, "every redirect must be on the exact allowlist");
+}
+assert.equal(registrationDecision({
+  authorizationHeader: null, configuredToken: undefined,
+  redirectUris: ["https://client.example/callback"],
+  extraAllowlistRaw: "https://client.example/callback, javascript:alert(1)",
+}).ok, true, "operators can extend public DCR with one exact safe callback");
+assert.equal(registrationDecision({
+  authorizationHeader: "Basic invalid", configuredToken: TOKEN,
+  redirectUris: [CURSOR_DESKTOP_REDIRECT_URI],
+}).ok, false, "explicit invalid authentication must fail closed");
+const anonymousCursor = unauthenticated([CURSOR_DESKTOP_REDIRECT_URI]);
+assert.equal(anonymousCursor.ok, true);
+if (anonymousCursor.ok) assert.equal(anonymousCursor.initialAccessToken, undefined);
+console.log("OAuth DCR permits exact allowlisted anonymous callbacks and keeps open registration closed");

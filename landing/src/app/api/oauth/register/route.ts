@@ -1,8 +1,7 @@
 // RFC 7591 Dynamic Client Registration.
-// Public registration is closed. Callers must present an initial access
-// token (Authorization: Bearer) that matches OAUTH_DCR_INITIAL_ACCESS_TOKEN
-// on this server and on Convex. Redirect URIs must be loopback or on the
-// hosted-client allowlist. This route does not mint credentials otherwise.
+// Anonymous callers must use explicitly allowlisted callbacks. An initial
+// access token also permits safe loopback callbacks. Convex repeats the gate
+// and applies a durable rate limit before minting any credentials.
 //
 // First-party clients keep working without this endpoint:
 // - already-registered clients continue through /oauth/authorize + PKCE S256
@@ -49,7 +48,7 @@ function unauthorized() {
   return NextResponse.json(
     {
       error: "invalid_token",
-      error_description: "Dynamic client registration requires an initial access token.",
+      error_description: "Dynamic client registration requires allowlisted redirects or an initial access token for loopback redirects.",
     },
     {
       status: 401,
@@ -70,9 +69,11 @@ export async function POST(req: NextRequest) {
     return badRequest("invalid_client_metadata", "request body must be valid JSON");
   }
 
-  const redirectUris = Array.isArray(body.redirect_uris)
-    ? body.redirect_uris.filter((u): u is string => typeof u === "string")
-    : [];
+  if (!body || typeof body !== "object" || !Array.isArray(body.redirect_uris)
+    || body.redirect_uris.length === 0 || body.redirect_uris.some((u) => typeof u !== "string")) {
+    return badRequest("invalid_redirect_uri", "redirect_uris must be a non-empty array of strings");
+  }
+  const redirectUris = body.redirect_uris as string[];
 
   const decision = registrationDecision({
     authorizationHeader: req.headers.get("authorization"),
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
         tokenEndpointAuthMethod: authMethod,
         ...(scope === undefined ? {} : { scope }),
         publicClient: isPublic,
-        initialAccessToken: decision.initialAccessToken,
+        ...(decision.initialAccessToken ? { initialAccessToken: decision.initialAccessToken } : {}),
       }
     );
     return NextResponse.json(result, {
@@ -121,6 +122,12 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (e) {
+    if (e instanceof ConvexCallError && e.message.includes("dynamic_client_registration_rate_limited")) {
+      return NextResponse.json({ error: "temporarily_unavailable", error_description: "Too many registrations. Try again in one minute." }, {
+        status: 429,
+        headers: { "Cache-Control": "no-store", "Retry-After": "60", "Access-Control-Allow-Origin": "*" },
+      });
+    }
     if (e instanceof ConvexCallError && e.message.includes("dynamic_client_registration_closed")) {
       return unauthorized();
     }

@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 
-// RFC 8414 — Authorization Server Metadata.
+// RFC 8414: Authorization Server Metadata.
 // Public, no auth required. Tells MCP clients (Grok, Cursor, ChatGPT,
 // Claude Desktop) how to talk OAuth to APIClaw.
-// Public dynamic client registration is closed, so it is not advertised.
+// Registration is discoverable but restricted to explicitly allowlisted callbacks.
 const ISSUER = "https://apiclaw.cloud";
 
 export async function GET() {
   const meta = {
     issuer: ISSUER,
     authorization_endpoint: `${ISSUER}/oauth/authorize`,
+    registration_endpoint: `${ISSUER}/api/oauth/register`,
     token_endpoint: `${ISSUER}/api/oauth/token`,
     revocation_endpoint: `${ISSUER}/api/oauth/revoke`,
     response_types_supported: ["code"],
