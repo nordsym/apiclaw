@@ -1,17 +1,25 @@
 /**
  * Gate for RFC 7591 Dynamic Client Registration.
  *
- * Public registration is closed. A caller must present an initial access
- * token (RFC 7591 §3) that matches OAUTH_DCR_INITIAL_ACCESS_TOKEN, and every
- * redirect URI must be loopback or on the hosted-client allowlist.
+ * Anonymous registration requires every redirect URI to be explicitly
+ * allowlisted. Other loopback redirects additionally require an initial
+ * access token (RFC 7591 §3) matching OAUTH_DCR_INITIAL_ACCESS_TOKEN.
  * Workspace-issued connectors do not use this gate; they are minted by an
  * authenticated dashboard session and bound to that workspace.
  */
 
 export const MIN_INITIAL_ACCESS_TOKEN_LENGTH = 32;
 
-/** Exact redirect URIs already used by first-party connector presets. */
+// Legacy desktop callback confirmed by Cursor support:
+// https://forum.cursor.com/t/linear-mcp-auth-fails-with-invalid-redirect-uri-cursor-anysphere-cursor-mcp-oauth-callback/158845/5
+export const CURSOR_DESKTOP_REDIRECT_URI = "cursor://anysphere.cursor-mcp/oauth/callback";
+
+/** Exact connector callbacks. Do not allow entire client domains or schemes. */
 export const BUILTIN_DCR_REDIRECT_URIS = [
+  // Current web/Agents and desktop callbacks: https://cursor.com/docs/mcp
+  "https://www.cursor.com/agents/mcp/oauth/callback",
+  "http://localhost:8787/callback",
+  CURSOR_DESKTOP_REDIRECT_URI,
   "https://grok.com/connectors-oauth/callback",
   "https://chat.openai.com/connector_callback",
   "https://chatgpt.com/connector_platform_oauth_redirect",
@@ -27,7 +35,7 @@ const CHATGPT_CONNECTOR_REDIRECT_PREFIX = "https://chatgpt.com/connector/oauth/"
 export type RegistrationDecision =
   | {
       ok: true;
-      initialAccessToken: string;
+      initialAccessToken?: string;
       redirectUris: string[];
     }
   | {
@@ -69,7 +77,7 @@ function isLoopbackHostname(hostname: string): boolean {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
 }
 
-/** HTTPS, or HTTP only on a loopback host. No credentials, no fragment. */
+/** HTTPS, loopback HTTP, or the exact legacy Cursor callback. No credentials or fragment. */
 export function normalizeSafeRedirectUri(uri: string): string | null {
   if (typeof uri !== "string" || uri.length === 0 || uri.length > 2000) return null;
   let parsed: URL;
@@ -79,7 +87,7 @@ export function normalizeSafeRedirectUri(uri: string): string | null {
     return null;
   }
   const isLoopbackHttp = parsed.protocol === "http:" && isLoopbackHostname(parsed.hostname);
-  if (parsed.protocol !== "https:" && !isLoopbackHttp) return null;
+  if (parsed.protocol !== "https:" && !isLoopbackHttp && uri !== CURSOR_DESKTOP_REDIRECT_URI) return null;
   if (parsed.username || parsed.password || parsed.hash) return null;
   return parsed.toString();
 }
@@ -98,6 +106,18 @@ function isChatGptConnectorRedirect(normalized: string): boolean {
   if (!normalized.startsWith(CHATGPT_CONNECTOR_REDIRECT_PREFIX)) return false;
   const rest = normalized.slice(CHATGPT_CONNECTOR_REDIRECT_PREFIX.length);
   return /^[A-Za-z0-9_-]+$/.test(rest);
+}
+
+/** Anonymous DCR never inherits the general loopback exception. */
+export function isAllowlistedPublicDynamicRedirect(
+  uri: string,
+  extraAllowlistRaw: string | undefined,
+): boolean {
+  const normalized = normalizeSafeRedirectUri(uri);
+  if (!normalized || normalized !== uri) return false;
+  return (BUILTIN_DCR_REDIRECT_URIS as readonly string[]).includes(uri)
+    || isChatGptConnectorRedirect(uri)
+    || parseExtraAllowlist(extraAllowlistRaw).has(uri);
 }
 
 export function isAllowlistedDynamicRedirect(
@@ -122,13 +142,13 @@ const CLOSED: RegistrationDecision = {
   ok: false,
   status: 401,
   error: "invalid_token",
-  error_description: "Dynamic client registration requires an initial access token.",
+  error_description: "Dynamic client registration requires allowlisted redirects or an initial access token for loopback redirects.",
 };
 
 /**
  * Decide whether a dynamic registration request may mint credentials.
- * Unauthenticated callers are rejected before redirect policy is applied,
- * so a missing token never becomes a client_id.
+ * Anonymous callers may register only explicitly allowlisted callbacks.
+ * A valid initial access token also permits other safe loopback callbacks.
  */
 export function registrationDecision(input: {
   authorizationHeader: string | null;
@@ -137,10 +157,10 @@ export function registrationDecision(input: {
   extraAllowlistRaw?: string | undefined;
 }): RegistrationDecision {
   const presented = parseBearerToken(input.authorizationHeader) ?? undefined;
-  if (!initialAccessTokenMatches(presented, input.configuredToken)) {
-    return CLOSED;
-  }
+  const authenticated = initialAccessTokenMatches(presented, input.configuredToken);
+  if (input.authorizationHeader !== null && !authenticated) return CLOSED;
   if (!Array.isArray(input.redirectUris) || input.redirectUris.length === 0) {
+    if (!authenticated) return CLOSED;
     return {
       ok: false,
       status: 400,
@@ -150,6 +170,7 @@ export function registrationDecision(input: {
   }
   const normalized: string[] = [];
   for (const uri of input.redirectUris) {
+    if (!authenticated && !isAllowlistedPublicDynamicRedirect(uri, input.extraAllowlistRaw)) return CLOSED;
     if (!isAllowlistedDynamicRedirect(uri, input.extraAllowlistRaw)) {
       return {
         ok: false,
@@ -171,14 +192,14 @@ export function registrationDecision(input: {
   }
   return {
     ok: true,
-    initialAccessToken: presented as string,
+    ...(authenticated ? { initialAccessToken: presented } : {}),
     redirectUris: normalized,
   };
 }
 
 /**
  * Shared Convex-side gate. Throws before any client row is written when the
- * caller is unauthenticated or the redirect URI is not allowlisted.
+ * caller fails the same allowlist/initial-access-token policy as the route.
  */
 export function assertCanRegisterDynamicClient(input: {
   presentedToken: string | undefined;
@@ -187,7 +208,7 @@ export function assertCanRegisterDynamicClient(input: {
   extraAllowlistRaw?: string | undefined;
 }): { redirectUris: string[] } {
   const decision = registrationDecision({
-    authorizationHeader: input.presentedToken ? `Bearer ${input.presentedToken}` : null,
+    authorizationHeader: input.presentedToken !== undefined ? `Bearer ${input.presentedToken}` : null,
     configuredToken: input.configuredToken,
     redirectUris: input.redirectUris,
     extraAllowlistRaw: input.extraAllowlistRaw,

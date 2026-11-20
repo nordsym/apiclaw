@@ -1,20 +1,20 @@
 import { internal } from "./_generated/api";
 import { requireInternalSecret } from "./functionAuth";
 /**
- * Remote MCP — OAuth 2.1 (RFC 6749 + 7591 + 7636 PKCE) state layer.
+ * Remote MCP: OAuth 2.1 (RFC 6749 + 7591 + 7636 PKCE) state layer.
  *
  * Three flows:
- *   1. Dynamic Client Registration (RFC 7591) — closed to the public.
- *      POST /api/oauth/register and `registerDynamicClient` mint a client
- *      only when the caller presents OAUTH_DCR_INITIAL_ACCESS_TOKEN and
- *      every redirect URI is loopback or allowlisted. Registration alone
- *      grants nothing.
- *   2. Authorization Code + PKCE — the user signs in via Clerk, lands on
+ *   1. Dynamic Client Registration (RFC 7591): allowlisted callbacks only
+ *      for anonymous callers. OAUTH_DCR_INITIAL_ACCESS_TOKEN also permits
+ *      safe loopback callbacks. Both entry points enforce the same gate;
+ *      Convex rate limits registration before writing client credentials.
+ *      Registration alone grants nothing.
+ *   2. Authorization Code + PKCE: the user signs in via Clerk, lands on
  *      /oauth/authorize, approves consent, and the consent handler calls
  *      `mintAuthCode`. The client then exchanges the code at /api/oauth/token.
  *      PKCE S256 is mandatory. Unbound dynamic clients with a non-allowlisted
  *      redirect cannot complete consent.
- *   3. Dashboard-issued connector — the workspace owner generates a connector
+ *   3. Dashboard-issued connector: the workspace owner generates a connector
  *      and gets a one-shot client_id+secret pre-bound to their workspace.
  *
  * Tokens are SHA-256 hashed for lookup, never stored raw.
@@ -30,6 +30,7 @@ import {
 import {
   assertCanRegisterDynamicClient,
   isAllowlistedDynamicRedirect,
+  normalizeSafeRedirectUri,
 } from "../src/oauth-dcr";
 
 // ============================================
@@ -107,24 +108,9 @@ export function validateRedirectUris(uris: string[]): { ok: true; uris: string[]
   }
   const normalized: string[] = [];
   for (const u of uris) {
-    if (typeof u !== "string" || u.length === 0 || u.length > 2000) {
-      return { ok: false, error: "invalid redirect_uri entry" };
-    }
-    let parsed: URL;
-    try {
-      parsed = new URL(u);
-    } catch {
-      return { ok: false, error: `invalid redirect_uri: ${u}` };
-    }
-    const isLoopbackHttp = parsed.protocol === "http:" &&
-      (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1" || parsed.hostname === "[::1]");
-    if (parsed.protocol !== "https:" && !isLoopbackHttp) {
-      return { ok: false, error: `redirect_uri must use https or loopback http: ${u}` };
-    }
-    if (parsed.username || parsed.password || parsed.hash) {
-      return { ok: false, error: `redirect_uri must not contain credentials or a fragment: ${u}` };
-    }
-    normalized.push(parsed.toString());
+    const safe = normalizeSafeRedirectUri(u);
+    if (!safe) return { ok: false, error: "invalid redirect_uri" };
+    normalized.push(safe);
   }
   return { ok: true, uris: normalized };
 }
@@ -132,9 +118,8 @@ export function validateRedirectUris(uris: string[]): { ok: true; uris: string[]
 // ============================================
 // PUBLIC: DYNAMIC CLIENT REGISTRATION (RFC 7591)
 // ============================================
-// Closed unless the caller presents the server-side initial access token.
-// The Next.js route enforces the same check. This mutation stays closed on
-// its own so a direct call to the public Convex API cannot mint a client.
+// Enforce the same allowlist gate here as in Next.js so direct public Convex
+// calls cannot bypass the redirect policy. General open DCR stays closed.
 
 function unboundDynamicRedirectRejected(
   client: { registrationKind: string; workspaceId?: string },
@@ -152,7 +137,7 @@ export const registerDynamicClient = mutation({
     tokenEndpointAuthMethod: v.optional(v.string()),
     scope: v.optional(v.string()),
     publicClient: v.optional(v.boolean()), // PKCE-only, no client_secret
-    initialAccessToken: v.string(),
+    initialAccessToken: v.optional(v.string()),
   },
   returns: v.object({
     client_id: v.string(),
@@ -182,6 +167,20 @@ export const registerDynamicClient = mutation({
     const isPublic = args.publicClient === true || args.tokenEndpointAuthMethod === "none";
     const tokenAuthMethod = isPublic ? "none" : "client_secret_basic";
 
+    // A global durable bucket also covers direct Convex calls. Client names,
+    // callback IDs and caller-supplied IPs cannot bypass this limit.
+    const now = Date.now();
+    const minute = Math.floor(now / 60_000);
+    const key = `oauth_dcr:${minute}`;
+    const bucket = await ctx.db.query("rateLimits")
+      .withIndex("by_key", (q) => q.eq("key", key)).first();
+    if (bucket && bucket.count >= 60) throw new Error("dynamic_client_registration_rate_limited");
+    if (bucket) await ctx.db.patch(bucket._id, { count: bucket.count + 1 });
+    else await ctx.db.insert("rateLimits", {
+      key, identifier: "oauth_dcr", action: "oauth_dcr", count: 1,
+      hourBucket: Math.floor(now / 3_600_000), createdAt: now,
+    });
+
     const clientId = generateClientId();
     let clientSecret: string | undefined;
     let clientSecretHash: string | undefined;
@@ -192,7 +191,6 @@ export const registerDynamicClient = mutation({
       clientSecretPrefix = `${clientSecret.slice(0, 16)}...${clientSecret.slice(-4)}`;
     }
 
-    const now = Date.now();
     await ctx.db.insert("mcpOAuthClients", {
       clientId,
       clientSecretHash,
